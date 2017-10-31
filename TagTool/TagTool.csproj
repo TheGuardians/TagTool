@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{42814DEE-5A94-4901-BDA9-28AFD2D4F5AC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TagTool</RootNamespace>
+    <AssemblyName>TagTool</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>TagTool.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Analysis\DataReferenceGuess.cs" />
+    <Compile Include="Analysis\ITagElementGuess.cs" />
+    <Compile Include="Analysis\ITagElementGuessVisitor.cs" />
+    <Compile Include="Analysis\LayoutGuessFinalizer.cs" />
+    <Compile Include="Analysis\MemoryMap.cs" />
+    <Compile Include="Analysis\ResourceReferenceGuess.cs" />
+    <Compile Include="Analysis\TagAnalyzer.cs" />
+    <Compile Include="Analysis\TagBlockGuess.cs" />
+    <Compile Include="Analysis\TagLayoutGuess.cs" />
+    <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Commands\ArgumentParser.cs" />
+    <Compile Include="Commands\Bitmaps\BitmapContextFactory.cs" />
+    <Compile Include="Commands\Bitmaps\ExtractBitmapCommand.cs" />
+    <Compile Include="Commands\Bitmaps\ExtractBitmapsCommand.cs" />
+    <Compile Include="Commands\Bitmaps\ImportBitmapCommand.cs" />
+    <Compile Include="Commands\CollisionModels\CollisionModelTestCommand.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandContext.cs" />
+    <Compile Include="Commands\CommandContextStack.cs" />
+    <Compile Include="Commands\Core\ClearCommand.cs" />
+    <Compile Include="Commands\Core\DumpLogCommand.cs" />
+    <Compile Include="Commands\Core\EchoCommand.cs" />
+    <Compile Include="Commands\Core\HelpCommand.cs" />
+    <Compile Include="Commands\Core\SetLocaleCommand.cs" />
+    <Compile Include="Commands\Definitions\ConvertPluginsCommand.cs" />
+    <Compile Include="Commands\Definitions\GenerateTagStructuresCommand.cs" />
+    <Compile Include="Commands\Editing\AddBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\CopyBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\EditBlockCommand.cs" />
+    <Compile Include="Commands\Editing\EditTagContextFactory.cs" />
+    <Compile Include="Commands\Editing\ExitToCommand.cs" />
+    <Compile Include="Commands\Editing\ForEachCommand.cs" />
+    <Compile Include="Commands\Editing\ListFieldsCommand.cs" />
+    <Compile Include="Commands\Editing\PasteBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\PokeTagChangesCommand.cs" />
+    <Compile Include="Commands\Editing\RemoveBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\SaveTagChangesCommand.cs" />
+    <Compile Include="Commands\Editing\SetFieldCommand.cs" />
+    <Compile Include="Commands\Files\AddFileCommand.cs" />
+    <Compile Include="Commands\Files\CleanCacheFilesCommand.cs" />
+    <Compile Include="Commands\Files\CleanCsvFileCommand.cs" />
+    <Compile Include="Commands\Files\ExtractFileCommand.cs" />
+    <Compile Include="Commands\Files\ExtractFilesCommand.cs" />
+    <Compile Include="Commands\Files\ListFilesCommand.cs" />
+    <Compile Include="Commands\Files\ReplaceAllFilesCommand.cs" />
+    <Compile Include="Commands\Files\ReplaceFileCommand.cs" />
+    <Compile Include="Commands\Files\TestCommand.cs" />
+    <Compile Include="Commands\Files\UpdateMapFilesCommand.cs" />
+    <Compile Include="Commands\Files\VFilesContextFactory.cs" />
+    <Compile Include="Commands\LocalizedStringPrinter.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\AnimationContextFactory.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\GetResourceInfoCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ImportCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ExtractCommand.cs" />
+    <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
+    <Compile Include="Commands\Models\ExtractModelCommand.cs" />
+    <Compile Include="Commands\Models\ListVariantsCommand.cs" />
+    <Compile Include="Commands\Models\ModelContextFactory.cs" />
+    <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
+    <Compile Include="Commands\PixelShaders\CompileCommand.cs" />
+    <Compile Include="Commands\PixelShaders\DisassembleCommand.cs" />
+    <Compile Include="Commands\PixelShaders\PixelShaderContextFactory.cs" />
+    <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
+    <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
+    <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
+    <Compile Include="Commands\RenderMethods\SpecifyBitmapsCommand.cs" />
+    <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
+    <Compile Include="Commands\RenderModels\GetResourceInfoCommand.cs" />
+    <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
+    <Compile Include="Commands\RenderModels\RenderModelTestCommand.cs" />
+    <Compile Include="Commands\RenderModels\ReplaceRenderGeometryCommand.cs" />
+    <Compile Include="Commands\RenderModels\ResourceDataCommand.cs" />
+    <Compile Include="Commands\RenderModels\SpecifyShadersCommand.cs" />
+    <Compile Include="Commands\ScenarioLightmaps\LightmapContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\CollisionTestCommand.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\DumpMoppCommand.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\ResourceDataCommand.cs" />
+    <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
+    <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
+    <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
+    <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
+    <Compile Include="Commands\Strings\ListAllStringsCommand.cs" />
+    <Compile Include="Commands\Strings\StringIdCommand.cs" />
+    <Compile Include="Commands\StringUtils.cs" />
+    <Compile Include="Commands\TagPrinter.cs" />
+    <Compile Include="Commands\Tags\ConvertTagCommand.cs" />
+    <Compile Include="Commands\Tags\CreateTagCommand.cs" />
+    <Compile Include="Commands\Tags\DeleteTagCommand.cs" />
+    <Compile Include="Commands\Tags\DuplicateTagCommand.cs" />
+    <Compile Include="Commands\Editing\EditTagCommand.cs" />
+    <Compile Include="Commands\Tags\ExportTagDefinitionsCommand.cs" />
+    <Compile Include="Commands\Tags\ExtractAllTagsCommand.cs" />
+    <Compile Include="Commands\Tags\ExtractTagCommand.cs" />
+    <Compile Include="Commands\Tags\GenerateTagNamesCommand.cs" />
+    <Compile Include="Commands\Tags\GetMapInfoCommand.cs" />
+    <Compile Include="Commands\Tags\GetTagAddressCommand.cs" />
+    <Compile Include="Commands\Tags\GetTagInfoCommand.cs" />
+    <Compile Include="Commands\Tags\ImportTagCommand.cs" />
+    <Compile Include="Commands\Tags\ListNullTagsCommand.cs" />
+    <Compile Include="Commands\Tags\ListTagsCommand.cs" />
+    <Compile Include="Commands\Tags\ListUnusedTagsCommand.cs" />
+    <Compile Include="Commands\Tags\MatchTagsCommand.cs" />
+    <Compile Include="Commands\Tags\NameTagCommand.cs" />
+    <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
+    <Compile Include="Commands\Tags\TagCacheContextFactory.cs" />
+    <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
+    <Compile Include="Commands\Tags\TagResourceCommand.cs" />
+    <Compile Include="Commands\Geometry\DumpRenderGeometryCommand.cs" />
+    <Compile Include="Commands\Unicode\GetStringCommand.cs" />
+    <Compile Include="Commands\Unicode\ListStringsCommand.cs" />
+    <Compile Include="Commands\Unicode\RemoveStringCommand.cs" />
+    <Compile Include="Commands\Unicode\SetStringCommand.cs" />
+    <Compile Include="Commands\Unicode\UnicodeContextFactory.cs" />
+    <Compile Include="Commands\VertexShaders\CompileCommand.cs" />
+    <Compile Include="Commands\VertexShaders\DisassembleCommand.cs" />
+    <Compile Include="Commands\VertexShaders\VertexShaderContextFactory.cs" />
+    <Compile Include="Commands\Video\ExtractBinkFileCommand.cs" />
+    <Compile Include="Commands\Video\VideoContextFactory.cs" />
+    <Compile Include="Layouts\ArrayTagLayoutfield.cs" />
+    <Compile Include="Layouts\AssemblyPluginLoader.cs" />
+    <Compile Include="Layouts\BasicTagLayoutField.cs" />
+    <Compile Include="Layouts\CppLayoutWriter.cs" />
+    <Compile Include="Layouts\CSharpLayoutWriter.cs" />
+    <Compile Include="Layouts\EnumTagLayoutField.cs" />
+    <Compile Include="Layouts\ITagLayoutFieldVisitor.cs" />
+    <Compile Include="Layouts\NamingConvention.cs" />
+    <Compile Include="Layouts\StringTagLayoutField.cs" />
+    <Compile Include="Layouts\TagBlockTagLayoutField.cs" />
+    <Compile Include="Layouts\TagLayout.cs" />
+    <Compile Include="Layouts\TagLayoutField.cs" />
+    <Compile Include="Layouts\TagLayoutWriter.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TagTool.ico" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlamCore\BlamCore.csproj">
+      <Project>{b8d17e37-08ad-4ebb-8382-7a27f7d223f8}</Project>
+      <Name>BlamCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="AssimpNet, Version=3.3.2.0, Culture=neutral, PublicKeyToken=3edc10cb77b1bca2, processorArchitecture=MSIL">
+      <HintPath>..\packages\AssimpNet.3.3.2\lib\net45\AssimpNet.dll</HintPath>
+    </Reference>
+    <Reference Include="JsonMoppNet, Version=1.0.6331.34855, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\JsonToMopp.1.0.1\lib\JsonToMopp\JsonMoppNet.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.3.3.2\build\AssimpNet.targets'))" />
+    <Error Condition="!Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets'))" />
+  </Target>
+  <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
+  <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
+xcopy $(SolutionDir)Tools $(ProjectDir)$(OutDir)Tools /e /i /h /Y</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
