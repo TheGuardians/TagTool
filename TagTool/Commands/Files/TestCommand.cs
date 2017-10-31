@@ -27,7 +27,7 @@ namespace TagTool.Commands.Files
                 "Test",
                 
                 "A test command. Used for various testing and temporary functionality.\n" +
-                "Example restoreshaders: 'Test restoreshaders <pathToMapFile> <blamFilename> <edTag>'. Restore Halo 3 or ODST shaders to a mode or sbsp tag.\n\n")
+                "Example setinvalidmaterials: 'Test setinvalidmaterials <ED mode or sbsp tag>'. Set all materials to 0x101F shaders\\invalid. \n\n")
         {
             CacheContext = cacheContext;
         }
