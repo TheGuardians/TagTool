@@ -111,7 +111,17 @@ namespace TagTool.Commands.RenderModels
                         {
                             var position = mesh.Vertices[i];
                             var normal = mesh.Normals[i];
-                            var uv = mesh.TextureCoordinateChannels[0][i];
+
+                            Vector3D uv;
+
+                            try
+                            {
+                                uv = mesh.TextureCoordinateChannels[0][i];
+                            }
+                            catch
+                            {
+                                uv = new Vector3D();
+                            }
 
                             var tangent = mesh.Tangents.Count != 0 ? mesh.Tangents[i] : new Vector3D();
                             var bitangent = mesh.BiTangents.Count != 0 ? mesh.BiTangents[i] : new Vector3D();
@@ -150,7 +160,7 @@ namespace TagTool.Commands.RenderModels
 
                                 skinnedVertices.Add(new SkinnedVertex
                                 {
-                                    Position = new RealQuaternion(position.X * 0.1f, position.Y * 0.1f, position.Z * 0.1f, 1),
+                                    Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
                                     Texcoord = new RealVector2d(uv.X, -uv.Y),
                                     Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
                                     Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
@@ -163,7 +173,7 @@ namespace TagTool.Commands.RenderModels
                             {
                                 rigidVertices.Add(new RigidVertex
                                 {
-                                    Position = new RealQuaternion(position.X * 0.1f, position.Y * 0.1f, position.Z * 0.1f, 1),
+                                    Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
                                     Texcoord = new RealVector2d(uv.X, -uv.Y),
                                     Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
                                     Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
