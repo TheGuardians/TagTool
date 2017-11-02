@@ -1,4 +1,0 @@
-[submodule "BlamCore"]
-	path = BlamCore
-	url = git@gitlab.com:TheGuardians/BlamCore.git
-	branch = master
