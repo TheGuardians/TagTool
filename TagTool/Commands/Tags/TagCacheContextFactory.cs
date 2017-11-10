@@ -54,6 +54,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ConvertTagCommand(cacheContext));
             context.AddCommand(new UpdateMapFilesCommand(cacheContext));
             context.AddCommand(new ExtractBitmapsCommand(cacheContext));
+            context.AddCommand(new GenerateAssemblyPluginsCommand());
 
             return context;
         }

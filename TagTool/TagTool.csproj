@@ -78,6 +78,7 @@
     <Compile Include="Commands\Files\CleanCsvFileCommand.cs" />
     <Compile Include="Commands\Files\ExtractFileCommand.cs" />
     <Compile Include="Commands\Files\ExtractFilesCommand.cs" />
+    <Compile Include="Commands\Files\GenerateAssemblyPluginsCommand.cs" />
     <Compile Include="Commands\Files\ListFilesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceAllFilesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceFileCommand.cs" />
