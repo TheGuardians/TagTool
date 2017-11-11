@@ -295,7 +295,7 @@ namespace TagTool.Commands.RenderModels
                     else
                         builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
 
-                    builder.BindIndexBuffer(indices, PrimitiveType.TriangleList);
+                    builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
                     builder.EndMesh();
                     builder.EndPermutation();
                     builder.EndRegion();

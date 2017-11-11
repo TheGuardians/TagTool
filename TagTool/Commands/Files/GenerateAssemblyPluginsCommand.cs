@@ -47,7 +47,7 @@ namespace TagTool.Commands.Files
                         {
                             ConvertTagDefinition(tagType.Key, tagType.Value, assemblyVersion.Key, path);
                         }
-                        catch (ArgumentException ae)
+                        catch (ArgumentException)
                         {
                             Console.WriteLine("Invalid path argument.");
                             return false;
