@@ -177,7 +177,7 @@ namespace TagTool.Commands.Files
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
                 {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
                 {typeof(RgbColor), AssemblyPluginFieldTypes.color24},
-                {typeof(ArgbColor), AssemblyPluginFieldTypes.colorf},
+                {typeof(ArgbColor), AssemblyPluginFieldTypes.color},
                 {typeof(CachedTagData), AssemblyPluginFieldTypes.dataRef},
                 {typeof(TagFunction), AssemblyPluginFieldTypes.dataRef },
                 {typeof(VertexShaderReference), AssemblyPluginFieldTypes.shader},
@@ -454,6 +454,21 @@ namespace TagTool.Commands.Files
                     };
                 }
 
+                /// <summary>
+                /// Returns the assembly plugin fields that represent a Argb Color.
+                /// </summary>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
+                /// <param name="offset">The tag field offset.</param>
+                /// <returns>A list of AssemblyPluginFields that represent RgbaColor, an uint representing alpha and a rgb format color24</returns>
+                public static List<AssemblyPluginField> ArgbColor(string fieldName, ref int offset)
+                {
+                    return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.uint8, fieldName + "Alpha", ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.color24, fieldName, ref offset, new Dictionary<string, string>() { { "format", "rgb" } })
+                    };
+                }
+
 
 
                 /// <summary>
@@ -543,12 +558,14 @@ namespace TagTool.Commands.Files
                 {
                     if (fieldType == typeof(RgbaColor))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RgbaColor(fieldName, ref offset));
+                    else if (fieldType == typeof(ArgbColor))
+                        assemblyPluginFields.AddRange(CommonFieldTypes.ArgbColor(fieldName, ref offset));
                     else
                         throw new NotImplementedException("This color needs implementing to the converter!");
                 }
                 else if (assemblyPluginFieldType == AssemblyPluginFieldTypes.colorf || assemblyPluginFieldType == AssemblyPluginFieldTypes.colourf)
                 {
-                    if (fieldType == typeof(ArgbColor) || fieldType == typeof(RealArgbColor))
+                    if (fieldType == typeof(RealArgbColor))
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(assemblyPluginFieldType, fieldName, ref offset, new Dictionary<string, string>() { { "format", "argb" } }));
                     }
