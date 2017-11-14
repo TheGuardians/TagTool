@@ -41,6 +41,9 @@ namespace TagTool.Commands.Strings
                 case "get":
                     return ExecuteGet(args);
 
+                case "getset":
+                    return ExecuteGetSet(args);
+
                 case "list":
                     return ExecuteList(args);
             }
@@ -82,6 +85,41 @@ namespace TagTool.Commands.Strings
                 Console.WriteLine(str);
             else
                 Console.Error.WriteLine("Unable to find a string with ID 0x{0:X}.", stringId);
+
+            return true;
+        }
+
+        private bool ExecuteGetSet(List<string> args)
+        {
+            if (args.Count != 1)
+                return false;
+            
+            var setStrings = new Dictionary<int, List<StringId>>();
+
+            for (var i = 0; i < CacheContext.StringIdCache.Strings.Count; i++)
+            {
+                if (CacheContext.StringIdCache.Strings[i] == null)
+                    continue;
+                
+                var id = CacheContext.GetStringId(i);
+
+                if (!setStrings.ContainsKey(id.Set))
+                    setStrings[id.Set] = new List<StringId>();
+
+                setStrings[id.Set].Add(id);
+            }
+
+            foreach (var entry in setStrings)
+            {
+                Console.WriteLine($"Set 0x{entry.Key:X}");
+                Console.WriteLine("============================");
+                Console.WriteLine();
+
+                foreach (var id in entry.Value)
+                    Console.WriteLine($"{CacheContext.GetString(id)} - 0x{id.Value:X} (set 0x{id.Set:X}, index 0x{id.Index:X})");
+
+                Console.WriteLine();
+            }
 
             return true;
         }

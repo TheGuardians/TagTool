@@ -6,7 +6,6 @@ using System.Text;
 using BlamCore.Cache;
 using BlamCore.Common;
 using BlamCore.TagDefinitions;
-using BlamCore;
 
 namespace TagTool.Commands
 {

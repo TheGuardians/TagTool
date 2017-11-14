@@ -7,10 +7,7 @@ using BlamCore.Cache;
 using BlamCore.Common;
 using BlamCore.Geometry;
 using BlamCore.TagDefinitions;
-using PrimitiveType = BlamCore.Geometry.PrimitiveType;
 using BlamCore.Serialization;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace TagTool.Commands.RenderModels
 {

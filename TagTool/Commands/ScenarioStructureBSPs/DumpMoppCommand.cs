@@ -1,17 +1,8 @@
 ﻿using BlamCore.Cache;
-using BlamCore.Common;
-using BlamCore.Geometry;
-using BlamCore.IO;
-using BlamCore.Legacy.Base;
-using BlamCore.Serialization;
 using BlamCore.TagDefinitions;
-using BlamCore.TagResources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {

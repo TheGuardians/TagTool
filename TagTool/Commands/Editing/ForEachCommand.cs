@@ -1,5 +1,4 @@
-﻿using BlamCore;
-using BlamCore.Cache;
+﻿using BlamCore.Cache;
 using BlamCore.Serialization;
 using System;
 using System.Collections;

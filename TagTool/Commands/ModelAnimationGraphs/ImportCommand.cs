@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using BlamCore.Cache;
 using BlamCore.TagDefinitions;
 using System.IO;
-using BlamCore.Common;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {

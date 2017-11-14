@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using BlamCore.Cache;
 using BlamCore.Serialization;
-using BlamCore;
 
 namespace TagTool.Commands.Editing
 {

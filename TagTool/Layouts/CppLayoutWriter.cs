@@ -9,15 +9,15 @@ namespace TagTool.Layouts
     {
         public override string GetSuggestedFileName(TagLayout layout)
         {
-            return string.Format("{0}.hpp", NamingConvention.ToPascalCase(layout.Name));
+            return string.Format("{0}.hpp", layout.Name.ToSnakeCase());
         }
 
         public override void WriteLayout(TagLayout layout, TextWriter writer)
         {
             WriteHeader(writer);
 
-            var name = NamingConvention.ToPascalCase(layout.Name);
-            var builder = new ClassBuilder(writer, 2);
+            var name = layout.Name.ToSnakeCase();
+            var builder = new ClassBuilder(writer, 1);
             builder.Begin(name, layout.Size, layout.GroupTag);
             layout.Accept(builder);
             builder.End();
@@ -29,17 +29,14 @@ namespace TagTool.Layouts
         {
             // Write the C++ header
             writer.WriteLine("#pragma once");
-            writer.WriteLine("#include \"..\\Tags.hpp\"");
+            writer.WriteLine("#include \"blam\\tags\\tags.hpp\"");
             writer.WriteLine();
-            writer.WriteLine("namespace Blam");
+            writer.WriteLine("namespace blam::tags");
             writer.WriteLine("{");
-            writer.WriteLine("\tnamespace Tags");
-            writer.WriteLine("\t{");
         }
 
         private static void WriteFooter(TextWriter writer)
         {
-            writer.WriteLine("\t}");
             writer.WriteLine("}");
         }
 
@@ -65,11 +62,8 @@ namespace TagTool.Layouts
             {
                 _name = name;
                 _size = size;
-                if (groupTag.Value != 0)
-                    _writer.WriteLine("{0}struct {1} : TagGroup<'{2}'>", _indent, name, groupTag);
-                else
-                    _writer.WriteLine("{0}struct {1}", _indent, name);
-                _writer.WriteLine("{0}{{", _indent);
+                _writer.WriteLine($"{_indent}struct {name}");
+                _writer.WriteLine($"{_indent}{{");
                 SetIndent(_indentLevel + 1);
             }
 
@@ -101,7 +95,7 @@ namespace TagTool.Layouts
             public void Visit(TagBlockTagLayoutField field)
             {
                 var className = MakeName(field.ElementLayout.Name);
-                _writer.WriteLine("{0}struct {1};", _indent, className);
+                _writer.WriteLine($"{_indent}struct {className}");
                 using (var blockWriter = new StringWriter())
                 {
                     var blockBuilder = new ClassBuilder(blockWriter, _indentLevel);
@@ -189,7 +183,8 @@ namespace TagTool.Layouts
             {
                 // Convert the name to pascal case, and if it's unique, then return it
                 // Otherwise, increment the name's use count, append it to the name, and try again
-                var result = NamingConvention.ToPascalCase(name);
+                var result = name.ToSnakeCase();
+
                 while (true)
                 {
                     if (!_nameCounts.TryGetValue(result, out int count))

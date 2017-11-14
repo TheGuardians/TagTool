@@ -122,7 +122,6 @@
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
     <Compile Include="Commands\Strings\ListAllStringsCommand.cs" />
     <Compile Include="Commands\Strings\StringIdCommand.cs" />
-    <Compile Include="Commands\StringUtils.cs" />
     <Compile Include="Commands\TagPrinter.cs" />
     <Compile Include="Commands\Tags\ConvertTagCommand.cs" />
     <Compile Include="Commands\Tags\CreateTagCommand.cs" />
@@ -164,7 +163,6 @@
     <Compile Include="Layouts\CSharpLayoutWriter.cs" />
     <Compile Include="Layouts\EnumTagLayoutField.cs" />
     <Compile Include="Layouts\ITagLayoutFieldVisitor.cs" />
-    <Compile Include="Layouts\NamingConvention.cs" />
     <Compile Include="Layouts\StringTagLayoutField.cs" />
     <Compile Include="Layouts\TagBlockTagLayoutField.cs" />
     <Compile Include="Layouts\TagLayout.cs" />

@@ -1,5 +1,4 @@
-﻿using BlamCore;
-using BlamCore.Cache;
+﻿using BlamCore.Cache;
 using BlamCore.Common;
 using BlamCore.Scripting;
 using BlamCore.TagDefinitions;

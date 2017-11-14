@@ -9,14 +9,14 @@ namespace TagTool.Layouts
     {
         public override string GetSuggestedFileName(TagLayout layout)
         {
-            return string.Format("{0}.cs", NamingConvention.ToPascalCase(layout.Name));
+            return string.Format("{0}.cs", layout.Name.ToPascalCase());
         }
 
         public override void WriteLayout(TagLayout layout, TextWriter writer)
         {
             WriteHeader(writer);
 
-            var name = NamingConvention.ToPascalCase(layout.Name);
+            var name = layout.Name.ToPascalCase();
             var builder = new ClassBuilder(writer, 1);
             builder.Begin(name, layout.Size, 0, layout.GroupTag);
             layout.Accept(builder);
@@ -227,7 +227,8 @@ namespace TagTool.Layouts
             {
                 // Convert the name to pascal case, and if it's unique, then return it
                 // Otherwise, increment the name's use count, append it to the name, and try again
-                var result = NamingConvention.ToPascalCase(name);
+                var result = name.ToPascalCase();
+
                 while (true)
                 {
                     if (!nameCounts.TryGetValue(result, out int count))
