@@ -36,7 +36,7 @@ namespace TagTool.Commands.Unicode
             var newDefinition = new MultilingualUnicodeStringList
             {
                 Data = new byte[0],
-                Strings = new List<LocalizedStringBlock>()
+                Strings = new List<LocalizedString>()
             };
 
             foreach (var oldString in Definition.Strings)
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Unicode
                 if (oldString.StringID == stringID)
                     continue;
 
-                var newString = new LocalizedStringBlock
+                var newString = new LocalizedString
                 {
                     Offsets = new int[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
                     StringID = oldString.StringID,

@@ -62,7 +62,7 @@ namespace TagTool.Commands.Unicode
             if (localizedStr == null)
             {
                 // Add a new string
-                localizedStr = new LocalizedStringBlock { StringID = stringId, StringIDStr = stringIdStr };
+                localizedStr = new LocalizedString { StringID = stringId, StringIDStr = stringIdStr };
                 Definition.Strings.Add(localizedStr);
                 added = true;
             }

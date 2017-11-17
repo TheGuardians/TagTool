@@ -18,7 +18,7 @@ namespace TagTool.Commands
         /// <param name="language">The language to display strings from.</param>
         /// <param name="filter">The filter to match strings and stringIDs against. Can be <c>null</c> to display everything.</param>
         /// <returns>The strings to print.</returns>
-        public static List<DisplayString> PrepareForDisplay(MultilingualUnicodeStringList unic, StringIdCache stringIds, IEnumerable<LocalizedStringBlock> strings, GameLanguage language, string filter)
+        public static List<DisplayString> PrepareForDisplay(MultilingualUnicodeStringList unic, StringIdCache stringIds, IEnumerable<LocalizedString> strings, GameLanguage language, string filter)
         {
             // Filter the input strings
             var display = new List<DisplayString>();
