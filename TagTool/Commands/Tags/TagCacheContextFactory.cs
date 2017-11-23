@@ -33,7 +33,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new GetTagAddressCommand());
             context.AddCommand(new TagResourceCommand());
             context.AddCommand(new DeleteTagCommand(cacheContext));
-            context.AddCommand(new CleanCacheFilesCommand(cacheContext));
+            context.AddCommand(new RebuildCacheFilesCommand(cacheContext));
             context.AddCommand(new TestCommand(cacheContext));
             context.AddCommand(new ListUnusedTagsCommand(cacheContext));
             context.AddCommand(new ListNullTagsCommand(cacheContext));

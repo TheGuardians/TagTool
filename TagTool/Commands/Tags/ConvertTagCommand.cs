@@ -502,10 +502,7 @@ namespace TagTool.Commands.Tags
             if (data is GlobalVertexShader glvs)
                 FixGlobalVertexShader(glvs);
             if (data is PixelShader ps)
-            {
                 FixPixelShader(ps);
-            }
-
             if (data is VertexShader vs)
                 FixVertexShader(vs);
             if (data is RenderMethod.ShaderProperty property)

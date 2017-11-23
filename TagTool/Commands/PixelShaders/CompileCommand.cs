@@ -91,8 +91,9 @@ namespace TagTool.Commands.PixelShaders
 						var split = line.Split(' ');
                         var param = new PixelShader.ShaderBlock.ParameterBlock
                         {
+                            
                             ParameterName = CacheContext.GetStringId(split[0]),
-                            RegisterType = (RType)Enum.Parse(typeof(RType), split[1][0].ToString()),
+                            RegisterType = (PixelShader.ShaderBlock.ParameterBlock.RegisterTypeValue)Enum.Parse(typeof(PixelShader.ShaderBlock.ParameterBlock.RegisterTypeValue), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])
                         };

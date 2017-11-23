@@ -74,7 +74,7 @@
     <Compile Include="Commands\Editing\SaveTagChangesCommand.cs" />
     <Compile Include="Commands\Editing\SetFieldCommand.cs" />
     <Compile Include="Commands\Files\AddFileCommand.cs" />
-    <Compile Include="Commands\Files\CleanCacheFilesCommand.cs" />
+    <Compile Include="Commands\Files\RebuildCacheFilesCommand.cs" />
     <Compile Include="Commands\Files\CleanCsvFileCommand.cs" />
     <Compile Include="Commands\Files\ExtractFileCommand.cs" />
     <Compile Include="Commands\Files\ExtractFilesCommand.cs" />
