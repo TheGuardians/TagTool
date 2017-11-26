@@ -37,7 +37,7 @@ namespace TagTool.Commands.Files
                 foreach (var scnrTag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
                 {
                     var tagContext = new TagSerializationContext(cacheStream, CacheContext, scnrTag);
-                    var scnr = CacheContext.Deserializer.Deserialize<Scenario>(tagContext);
+                    var scnr = CacheContext.Deserializer.Deserialize<Scenario_mapId>(tagContext);
                     mapIndices[scnr.MapId] = scnrTag.Index;
                 }
             }
@@ -79,6 +79,22 @@ namespace TagTool.Commands.Files
             Console.WriteLine("Done!");
 
             return true;
+        }
+                
+        [TagStructure(Name = "scenario", Tag = "scnr", MinVersion = CacheVersion.Halo3Retail)]
+        public class Scenario_mapId
+        {
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+            public byte MapTypePadding;
+
+            public MapTypeValue MapType;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public MapSubTypeValue MapSubType;
+
+            public ScenarioFlags Flags;
+            public int CampaignId;
+            public int MapId;
         }
     }
 }
