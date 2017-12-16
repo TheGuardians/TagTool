@@ -5,6 +5,7 @@ using BlamCore.Cache;
 using BlamCore.Common;
 using BlamCore.TagDefinitions;
 using BlamCore.Serialization;
+using BlamCore.IO;
 
 namespace TagTool.Commands.Files
 {
@@ -47,8 +48,8 @@ namespace TagTool.Commands.Files
                 try
                 {
                     using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                    using (var reader = new BinaryReader(stream))
-                    using (var writer = new BinaryWriter(stream))
+                    using (var reader = new EndianReader(stream))
+                    using (var writer = new EndianWriter(stream))
                     {
                         if (reader.ReadInt32() != new Tag("head").Value)
                         {
@@ -82,19 +83,19 @@ namespace TagTool.Commands.Files
         }
                 
         [TagStructure(Name = "scenario", Tag = "scnr", MinVersion = CacheVersion.Halo3Retail)]
-        public class Scenario_mapId
+        private class Scenario_mapId
         {
             [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-            public byte MapTypePadding;
+            public byte MapTypePadding = 0;
 
-            public MapTypeValue MapType;
+            public MapTypeValue MapType = MapTypeValue.Multiplayer;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public MapSubTypeValue MapSubType;
+            public MapSubTypeValue MapSubType = MapSubTypeValue.None;
 
-            public ScenarioFlags Flags;
-            public int CampaignId;
-            public int MapId;
+            public ScenarioFlags Flags = ScenarioFlags.None;
+            public int CampaignId = 1;
+            public int MapId = 0;
         }
     }
 }

@@ -16,6 +16,9 @@ namespace TagTool.Commands.Files
         public GameCacheContext CacheContext { get; }
         private Dictionary<int, CachedTagInstance> ConvertedTags { get; } = new Dictionary<int, CachedTagInstance>();
         private Dictionary<ResourceLocation, Dictionary<int, PageableResource>> ConvertedResources { get; } = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
+        private MultiplayerGlobals MulgDefinition { get; set; } = null;
+        private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
+        private bool NoVariants { get; set; } = false;
 
         public RebuildCacheFilesCommand(GameCacheContext cacheContext)
             : base(CommandFlags.None,
@@ -23,7 +26,7 @@ namespace TagTool.Commands.Files
                   "RebuildCacheFiles",
                   "Rebuilds the cache files into the specified output directory.",
 
-                  "RebuildCacheFiles <Output Directory>",
+                  "RebuildCacheFiles [NoVariants] <Output Directory>",
 
                   "Rebuilds the cache files into the specified directory.")
         {
@@ -32,8 +35,23 @@ namespace TagTool.Commands.Files
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count < 1 || args.Count > 2)
                 return false;
+            
+            while (args.Count > 1)
+            {
+                switch (args[0].ToLower())
+                {
+                    case "novariants":
+                        NoVariants = true;
+                        break;
+
+                    default:
+                        throw new NotImplementedException(args[0]);
+                }
+
+                args.RemoveAt(0);
+            }
 
             ConvertedTags.Clear();
             ConvertedResources.Clear();
@@ -82,6 +100,54 @@ namespace TagTool.Commands.Files
 
             destCacheContext.SaveTagNames();
 
+            foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
+            {
+                try
+                {
+                    using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                    using (var reader = new EndianReader(stream))
+                    using (var writer = new EndianWriter(stream))
+                    {
+                        if (reader.ReadInt32() != new Tag("head").Value)
+                        {
+                            Console.Error.WriteLine("Invalid map file");
+                            return true;
+                        }
+
+                        reader.BaseStream.Position = 0x2DEC;
+                        var mapId = reader.ReadInt32();
+
+                        if (MapScenarios.ContainsKey(mapId))
+                        {
+                            var mapIndex = MapScenarios[mapId];
+
+                            writer.BaseStream.Position = 0x2DF0;
+                            writer.Write(mapIndex);
+
+                            Console.WriteLine($"Scenario tag index for {mapFile.Name}: {mapIndex:X8}");
+
+                            var dataContext = new DataSerializationContext(reader, writer);
+
+                            stream.Seek(0xBD80, SeekOrigin.Begin);
+                            var mapVariant = CacheContext.Deserializer.Deserialize<MapVariant>(dataContext);
+
+                            foreach (var entry in mapVariant.BudgetEntries)
+                                if (ConvertedTags.ContainsKey(entry.TagIndex))
+                                    entry.TagIndex = ConvertedTags[entry.TagIndex].Index;
+
+                            stream.Seek(0xBD80, SeekOrigin.Begin);
+                            CacheContext.Serializer.Serialize(dataContext, mapVariant);
+
+                            stream.SetLength(stream.Position);
+                        }
+                    }
+                }
+                catch (IOException)
+                {
+                    Console.Error.WriteLine($"Unable to open \"{mapFile.Name}.{mapFile.Extension}\" for reading.");
+                }
+            }
+
             return true;
         }
 
@@ -116,6 +182,20 @@ namespace TagTool.Commands.Files
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index))
                 destCacheContext.TagNames[destTag.Index] = srcCacheContext.TagNames[srcTag.Index];
 
+            if (NoVariants && srcTag.IsInGroup("mulg"))
+                CleanMultiplayerGlobals((MultiplayerGlobals)tagData);
+
+            if (structureType == typeof(Scenario))
+            {
+                var scenario = (Scenario)tagData;
+
+                if (!MapScenarios.ContainsKey(scenario.MapId))
+                    MapScenarios[scenario.MapId] = destTag.Index;
+
+                if (NoVariants)
+                    CleanScenario(srcStream, scenario);
+            }
+
             tagData = ConvertData(tagData, srcCacheContext, srcStream, destCacheContext, destStream);
 
             if (structureType == typeof(Scenario))
@@ -141,9 +221,6 @@ namespace TagTool.Commands.Files
             if (type.IsPrimitive)
                 return data;
 
-            //if (type == typeof(MultiplayerGlobals))
-                //ConvertMultiplayerGlobals((MultiplayerGlobals)data);
-            
             if (type == typeof(CachedTagInstance))
                 return ConvertTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream);
 
@@ -264,43 +341,11 @@ namespace TagTool.Commands.Files
             expr.Data = newData;
         }
 
-        private void ConvertScenario(Scenario scnrDefinition)
+        private void CleanMultiplayerGlobals(MultiplayerGlobals mulgDefinition)
         {
-            foreach (var expr in scnrDefinition.ScriptExpressions)
-            {
-                if (!ScriptExpressionIsValue(expr))
-                    continue;
+            if (MulgDefinition == null)
+                MulgDefinition = mulgDefinition;
 
-                switch (expr.ValueType.HaloOnline)
-                {
-                    case ScriptValueType.HaloOnlineValue.Sound:
-                    case ScriptValueType.HaloOnlineValue.Effect:
-                    case ScriptValueType.HaloOnlineValue.Damage:
-                    case ScriptValueType.HaloOnlineValue.LoopingSound:
-                    case ScriptValueType.HaloOnlineValue.AnimationGraph:
-                    case ScriptValueType.HaloOnlineValue.DamageEffect:
-                    case ScriptValueType.HaloOnlineValue.ObjectDefinition:
-                    case ScriptValueType.HaloOnlineValue.Bitmap:
-                    case ScriptValueType.HaloOnlineValue.Shader:
-                    case ScriptValueType.HaloOnlineValue.RenderModel:
-                    case ScriptValueType.HaloOnlineValue.StructureDefinition:
-                    case ScriptValueType.HaloOnlineValue.LightmapDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicSceneDefinition:
-                    case ScriptValueType.HaloOnlineValue.BinkDefinition:
-                    case ScriptValueType.HaloOnlineValue.AnyTag:
-                    case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
-                        ConvertScriptTagReferenceExpressionData(expr);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private void ConvertMultiplayerGlobals(MultiplayerGlobals mulgDefinition)
-        {
             mulgDefinition.Universal[0].GameVariantWeapons = new List<MultiplayerGlobals.UniversalBlock.GameVariantWeapon>
             {
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
@@ -436,7 +481,7 @@ namespace TagTool.Commands.Files
                     Weapon = CacheContext.TagCache.Index[0x1A54]
                 }
             };
-            
+
             mulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons = new List<MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon>
             {
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
@@ -584,6 +629,73 @@ namespace TagTool.Commands.Files
                     Unknown4 = -10.0f
                 }
             };
+        }
+
+        private void CleanScenario(Stream srcStream, Scenario scnrDefinition)
+        {
+            if (scnrDefinition.MapType != MapTypeValue.Multiplayer)
+                return;
+
+            if (MulgDefinition == null)
+            {
+                var context = new TagSerializationContext(srcStream, CacheContext, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
+                MulgDefinition = CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(context);
+            }
+
+            var weaponPalette = new List<Scenario.ScenarioPaletteEntry>();
+
+            foreach (var entry in scnrDefinition.WeaponPalette)
+                if ((MulgDefinition.Universal[0].GameVariantWeapons.Find(i => i.Weapon == entry.Object) != null) ||
+                    (MulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons.Find(i => i.Weapon2 == entry.Object) != null))
+                    weaponPalette.Add(entry);
+                else
+                    weaponPalette.Add(new Scenario.ScenarioPaletteEntry());
+
+            scnrDefinition.WeaponPalette = weaponPalette;
+
+            var sandboxWeapons = new List<Scenario.SandboxObject>();
+
+            foreach (var entry in scnrDefinition.SandboxWeapons)
+                if ((MulgDefinition.Universal[0].GameVariantWeapons.Find(i => i.Weapon == entry.Object) != null) ||
+                    (MulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons.Find(i => i.Weapon2 == entry.Object) != null))
+                    sandboxWeapons.Add(entry);
+
+            scnrDefinition.SandboxWeapons = sandboxWeapons;
+        }
+
+        private void ConvertScenario(Scenario scnrDefinition)
+        {
+            foreach (var expr in scnrDefinition.ScriptExpressions)
+            {
+                if (!ScriptExpressionIsValue(expr))
+                    continue;
+
+                switch (expr.ValueType.HaloOnline)
+                {
+                    case ScriptValueType.HaloOnlineValue.Sound:
+                    case ScriptValueType.HaloOnlineValue.Effect:
+                    case ScriptValueType.HaloOnlineValue.Damage:
+                    case ScriptValueType.HaloOnlineValue.LoopingSound:
+                    case ScriptValueType.HaloOnlineValue.AnimationGraph:
+                    case ScriptValueType.HaloOnlineValue.DamageEffect:
+                    case ScriptValueType.HaloOnlineValue.ObjectDefinition:
+                    case ScriptValueType.HaloOnlineValue.Bitmap:
+                    case ScriptValueType.HaloOnlineValue.Shader:
+                    case ScriptValueType.HaloOnlineValue.RenderModel:
+                    case ScriptValueType.HaloOnlineValue.StructureDefinition:
+                    case ScriptValueType.HaloOnlineValue.LightmapDefinition:
+                    case ScriptValueType.HaloOnlineValue.CinematicDefinition:
+                    case ScriptValueType.HaloOnlineValue.CinematicSceneDefinition:
+                    case ScriptValueType.HaloOnlineValue.BinkDefinition:
+                    case ScriptValueType.HaloOnlineValue.AnyTag:
+                    case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
+                        ConvertScriptTagReferenceExpressionData(expr);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
         }
     }
 }
