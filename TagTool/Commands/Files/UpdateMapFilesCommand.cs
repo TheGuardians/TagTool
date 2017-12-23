@@ -32,6 +32,7 @@ namespace TagTool.Commands.Files
                 return false;
 
             var mapIndices = new Dictionary<int, int>();
+            var mapScenarios = new Dictionary<int, Scenario_mapId>();
 
             using (var cacheStream = CacheContext.OpenTagCacheRead())
             {
@@ -40,6 +41,7 @@ namespace TagTool.Commands.Files
                     var tagContext = new TagSerializationContext(cacheStream, CacheContext, scnrTag);
                     var scnr = CacheContext.Deserializer.Deserialize<Scenario_mapId>(tagContext);
                     mapIndices[scnr.MapId] = scnrTag.Index;
+                    mapScenarios[scnr.MapId] = scnr;
                 }
             }
 
@@ -68,6 +70,29 @@ namespace TagTool.Commands.Files
                             writer.Write(mapIndex);
 
                             Console.WriteLine($"Scenario tag index for {mapFile.Name}: {mapIndex:X8}");
+
+                            if (mapScenarios.ContainsKey(mapId) &&
+                                mapScenarios[mapId].MapType == MapTypeValue.Multiplayer)
+                            {
+                                var dataContext = new DataSerializationContext(reader, writer);
+
+                                stream.Seek(0xBD80, SeekOrigin.Begin);
+                                var mapVariant = CacheContext.Deserializer.Deserialize<MapVariant>(dataContext);
+
+                                foreach (var entry in mapVariant.BudgetEntries)
+                                    if ((entry.TagIndex != -1) &&
+                                        (CacheContext.GetTag(entry.TagIndex) == null))
+                                        entry.TagIndex = -1;
+
+                                stream.Seek(0xBD80, SeekOrigin.Begin);
+                                CacheContext.Serializer.Serialize(dataContext, mapVariant);
+                            }
+                            else
+                            {
+                                stream.Seek(0x3390, SeekOrigin.Begin);
+                            }
+
+                            stream.SetLength(stream.Position);
                         }
                     }
                 }

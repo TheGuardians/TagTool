@@ -80,8 +80,6 @@ namespace TagTool.Commands.Files
                                     resourceIndices[resourceLocation].Add(resourceDefinition.Page.Index);
                             }
                         }
-
-                        continue;
                     }
 
                     var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ? CacheContext.TagNames[tag.Index] : $"0x{tag.Index}";

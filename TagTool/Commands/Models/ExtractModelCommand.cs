@@ -200,9 +200,6 @@ namespace TagTool.Commands.Models
             {
                 var dupeDic = new Dictionary<int, int>();
                 
-                var vertAddressList = new List<int>();
-                var vertValueList = new List<int>();
-
                 var indxAddressList = new List<int>();
                 var indxValueList = new List<int>();
 
@@ -218,15 +215,17 @@ namespace TagTool.Commands.Models
                         continue;
 
                     var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
-                    var permutation = region.Permutations.Find(i => i.Name == modelVariant.Name);
+                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
 
-                    if (permutation == null)
+                    if (variantPermutations.Count == 0)
                         continue;
 
                     if (!regions.Contains(region))
                         regions.Add(region);
 
-                    permutations.Add(permutation);
+                    foreach (var variantPermutation in variantPermutations)
+                        if (!permutations.Contains(variantPermutation))
+                            permutations.Add(variantPermutation);
                 }
 
                 var headerAddressList = new List<int>();
@@ -234,7 +233,7 @@ namespace TagTool.Commands.Models
                 
                 amfWriter.Write("AMF!".ToCharArray());
                 amfWriter.Write(2.0f); //format version
-                amfWriter.Write((renderModel.Name + "\0").ToCharArray());
+                amfWriter.Write((CacheContext.GetString(renderModel.Name) + "\0").ToCharArray());
 
                 amfWriter.Write(renderModel.Nodes.Count);
                 headerAddressList.Add((int)amfWriter.BaseStream.Position);
@@ -256,7 +255,7 @@ namespace TagTool.Commands.Models
 
                 foreach (var node in renderModel.Nodes)
                 {
-                    amfWriter.Write((node.Name + "\0").ToCharArray());
+                    amfWriter.Write((CacheContext.GetString(node.Name) + "\0").ToCharArray());
                     amfWriter.Write(node.ParentNode);
                     amfWriter.Write(node.FirstChildNode);
                     amfWriter.Write(node.NextSiblingNode);
@@ -276,7 +275,7 @@ namespace TagTool.Commands.Models
 
                 foreach (var group in renderModel.MarkerGroups)
                 {
-                    amfWriter.Write((group.Name + "\0").ToCharArray());
+                    amfWriter.Write((CacheContext.GetString(group.Name) + "\0").ToCharArray());
                     amfWriter.Write(group.Markers.Count);
                     markerAddressList.Add((int)amfWriter.BaseStream.Position);
                     amfWriter.Write(0);
@@ -300,63 +299,172 @@ namespace TagTool.Commands.Models
                     }
                 }
 
-                /*headerValueList.Add((int)amfWriter.BaseStream.Position);
-                foreach (var region in regions)
-                {
-                    amfWriter.Write((region.Name + "\0").ToCharArray());
-
-                    int count = 0;
-                    foreach (var perm in region.Permutations)
-                        if (PartIndices.Contains(perm.PieceIndex)) count++;
-
-                    amfWriter.Write(count);
-                    permAddressList.Add((int)amfWriter.BaseStream.Position);
-                    amfWriter.Write(0);
-                }
-                #endregion
-
                 var permAddressList = new List<int>();
                 var permValueList = new List<int>();
 
-                #region Permutations
-                foreach (var region in regions)
+                headerValueList.Add((int)amfWriter.BaseStream.Position);
+
+                foreach (var variantRegion in modelVariant.Regions)
                 {
+                    if (variantRegion.RenderModelRegionIndex == -1)
+                        continue;
+
+                    var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
+                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
+
+                    if (variantPermutations.Count == 0)
+                        continue;
+
+                    amfWriter.Write((CacheContext.GetString(region.Name) + "\0").ToCharArray());
+                    amfWriter.Write(variantPermutations.Count);
+                    permAddressList.Add((int)amfWriter.BaseStream.Position);
+                    amfWriter.Write(0);
+                }
+
+                var vertAddressList = new List<int>();
+                var vertValueList = new List<int>();
+                /*
+                foreach (var variantRegion in modelVariant.Regions)
+                {
+                    if (variantRegion.RenderModelRegionIndex == -1)
+                        continue;
+
+                    var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
+                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
+
+                    if (variantPermutations.Count == 0)
+                        continue;
+
                     permValueList.Add((int)amfWriter.BaseStream.Position);
-                    foreach (var perm in region.Permutations)
+
+                    foreach (var permutation in variantPermutations)
                     {
-                        if (!PartIndices.Contains(perm.PieceIndex)) continue;
+                        if (permutation.MeshIndex == -1)
+                            continue;
 
-                        var part = renderModel.ModelSections[perm.PieceIndex];
-                        VertexValue v;
-                        bool hasNodes = part.Vertices[0].TryGetValue("blendindices", 0, out v) && part.NodeIndex == 255;
-                        bool isBoned = part.Vertices[0].FormatName.Contains("rigid_boned");
+                        var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex];
 
-                        amfWriter.Write((perm.Name + "\0").ToCharArray());
-                        if (isBoned) amfWriter.Write((byte)2);
-                        else amfWriter.Write(hasNodes ? (byte)1 : (byte)0);
-                        amfWriter.Write((byte)part.NodeIndex);
+                        amfWriter.Write((CacheContext.GetString(permutation.Name) + "\0").ToCharArray());
+                        amfWriter.Write((byte)(mesh.RigidNodeIndex == -1 ? 1 : 0));
+                        amfWriter.Write((byte)mesh.RigidNodeIndex);
 
-                        amfWriter.Write(part.Vertices.Length);
+                        var vertexCount = 0;
+                        var indexCount = 0;
+                        foreach (var part in mesh.Parts)
+                        {
+                            vertexCount += part.VertexCount;
+                            indexCount += part.IndexCount;
+                        }
+
+                        amfWriter.Write(vertexCount);
                         vertAddressList.Add((int)amfWriter.BaseStream.Position);
                         amfWriter.Write(0);
 
-                        int count = 0;
-                        foreach (var submesh in part.Submeshes)
-                            count += GetTriangleList(part.Indices, submesh.FaceIndex, submesh.FaceCount, renderModel.IndexInfoList[part.FacesIndex].FaceFormat).Count / 3;
-
-                        amfWriter.Write(count);
+                        amfWriter.Write(indexCount);
                         indxAddressList.Add((int)amfWriter.BaseStream.Position);
                         amfWriter.Write(0);
 
-                        amfWriter.Write(part.Submeshes.Count);
+                        amfWriter.Write(mesh.SubParts.Count);
                         meshAddressList.Add((int)amfWriter.BaseStream.Position);
                         amfWriter.Write(0);
 
-                        amfWriter.Write(float.NaN); //no transforms (RenderModels are pre-transformed)
+                        amfWriter.Write(float.NaN);
                     }
                 }
-                #endregion
-                #region Vertices
+
+                foreach (var variantRegion in modelVariant.Regions)
+                {
+                    if (variantRegion.RenderModelRegionIndex == -1)
+                        continue;
+
+                    var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
+                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
+
+                    if (variantPermutations.Count == 0)
+                        continue;
+
+                    foreach (var permutation in variantPermutations)
+                    {
+                        if (permutation.MeshIndex == -1)
+                            continue;
+
+                        var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex];
+                        
+                        if (dupeDic.TryGetValue(mesh.VertexBuffers[0], out int address))
+                        {
+                            vertValueList.Add(address);
+                            continue;
+                        }
+                        else
+                            dupeDic.Add(mesh.VertexBuffers[0], (int)amfWriter.BaseStream.Position);
+
+                        var hasNodes = mesh.RigidNodeIndex == -1;
+
+                        vertValueList.Add((int)amfWriter.BaseStream.Position);
+
+                        foreach (Vertex vert in part.Vertices)
+                        {
+                            vert.TryGetValue("position", 0, out v);
+                            amfWriter.Write(v.Data.x * 100);
+                            amfWriter.Write(v.Data.y * 100);
+                            amfWriter.Write(v.Data.z * 100);
+
+                            vert.TryGetValue("normal", 0, out v);
+                            amfWriter.Write(v.Data.i);
+                            amfWriter.Write(v.Data.j);
+                            amfWriter.Write(v.Data.k);
+
+                            vert.TryGetValue("texcoords", 0, out v);
+                            amfWriter.Write(v.Data.x);
+                            amfWriter.Write(v.Data.y);
+
+                            if (hasNodes)
+                            {
+                                VertexValue i, w;
+                                vert.TryGetValue("blendindices", 0, out i);
+                                vert.TryGetValue("blendweight", 0, out w);
+                                int count = 0;
+                                if (w.Data.a > 0)
+                                {
+                                    amfWriter.Write((byte)i.Data.a);
+                                    count++;
+                                }
+                                if (w.Data.b > 0)
+                                {
+                                    amfWriter.Write((byte)i.Data.b);
+                                    count++;
+                                }
+                                if (w.Data.c > 0)
+                                {
+                                    amfWriter.Write((byte)i.Data.c);
+                                    count++;
+                                }
+                                if (w.Data.d > 0)
+                                {
+                                    amfWriter.Write((byte)i.Data.d);
+                                    count++;
+                                }
+
+                                if (count == 0)
+                                {
+                                    amfWriter.Write((byte)0);
+                                    amfWriter.Write((byte)255);
+                                    amfWriter.Write(0);
+                                    continue;
+                                    //throw new Exception("no weights on a weighted node. report this.");
+                                }
+
+                                if (count != 4) amfWriter.Write((byte)255);
+
+                                if (w.Data.a > 0) amfWriter.Write(w.Data.a);
+                                if (w.Data.b > 0) amfWriter.Write(w.Data.b);
+                                if (w.Data.c > 0) amfWriter.Write(w.Data.c);
+                                if (w.Data.d > 0) amfWriter.Write(w.Data.d);
+                            }
+                        }
+                    }
+                }
+
                 foreach (var perm in permutations)
                 {
                     var part = renderModel.ModelSections[perm.PieceIndex];
@@ -372,8 +480,7 @@ namespace TagTool.Commands.Models
 
                     VertexValue v;
                     bool hasNodes = part.Vertices[0].TryGetValue("blendindices", 0, out v) && part.NodeIndex == 255;
-                    bool isBoned = part.Vertices[0].FormatName.Contains("rigid_boned");
-
+                    
                     vertValueList.Add((int)amfWriter.BaseStream.Position);
 
                     foreach (Vertex vert in part.Vertices)
@@ -391,27 +498,7 @@ namespace TagTool.Commands.Models
                         vert.TryGetValue("texcoords", 0, out v);
                         amfWriter.Write(v.Data.x);
                         amfWriter.Write(v.Data.y);
-
-                        if (isBoned)
-                        {
-                            VertexValue i;
-                            var indices = new List<int>();
-                            vert.TryGetValue("blendindices", 0, out i);
-
-                            if (!indices.Contains((int)i.Data.a) && i.Data.a != 0) indices.Add((int)i.Data.a);
-                            if (!indices.Contains((int)i.Data.b) && i.Data.a != 0) indices.Add((int)i.Data.b);
-                            if (!indices.Contains((int)i.Data.c) && i.Data.a != 0) indices.Add((int)i.Data.c);
-                            if (!indices.Contains((int)i.Data.d) && i.Data.a != 0) indices.Add((int)i.Data.d);
-
-                            if (indices.Count == 0) indices.Add(0);
-
-                            foreach (int index in indices) amfWriter.Write((byte)index);
-
-                            if (indices.Count < 4) amfWriter.Write((byte)255);
-
-                            continue;
-                        }
-
+                        
                         if (hasNodes)
                         {
                             VertexValue i, w;

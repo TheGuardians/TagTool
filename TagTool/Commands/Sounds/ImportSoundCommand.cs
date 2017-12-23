@@ -67,7 +67,7 @@ namespace TagTool.Commands.Sounds
                     Page = new RawPage(),
                     Resource = new TagResource
                     {
-                        ResourceTypeIndex = 3,
+                        Type = TagResourceType.Sound,
                         DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 536870912),
                         ResourceFixups = new List<TagResource.ResourceFixup>(),
                         ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
