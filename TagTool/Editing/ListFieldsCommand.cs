@@ -82,6 +82,13 @@ namespace TagTool.Editing
 
                         valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
                     }
+                    else if (fieldType == typeof(TagFunction))
+                    {
+                        var function = (TagFunction)fieldValue;
+                        valueString = "";
+                        foreach (var datum in function.Data)
+                            valueString += datum.ToString("X2");
+                    }
                     else
                         valueString = fieldValue.ToString();
             #if !DEBUG

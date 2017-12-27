@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using BlamCore.Cache;
 using BlamCore.Commands;
 using BlamCore.Common;
 using BlamCore.Serialization;
+using ResourceLocation = BlamCore.Common.ResourceLocation;
 
 namespace TagTool.Editing
 {
@@ -107,7 +110,18 @@ namespace TagTool.Editing
                 return false;
             }
 
-            field.SetValue(Owner, fieldValue);
+            if (field.FieldType == typeof(PageableResource))
+            {
+                var pageable = (PageableResource)field.GetValue(Owner);
+                var file = (FileInfo)fieldValue;
+
+                if (pageable != null)
+                    pageable = SetResourceData(pageable, file);
+            }
+            else
+            {
+                field.SetValue(Owner, fieldValue);
+            }
 
             var typeString =
                 fieldType.IsGenericType ?
@@ -496,10 +510,23 @@ namespace TagTool.Editing
             }
             else if (type == typeof(PageableResource))
             {
-                if (args.Count != 1 && args[0].ToLower() != "null")
+                if (args.Count != 1)
                     return false;
 
-                output = null;
+                var value = args[0].ToLower();
+
+                switch (value)
+                {
+                    case "null":
+                        output = null;
+                        break;
+
+                    default:
+                        output = new FileInfo(args[0]);
+                        if (!((FileInfo)output).Exists)
+                            throw new FileNotFoundException(args[0]);
+                        break;
+                }
             }
             else
             {
@@ -509,6 +536,32 @@ namespace TagTool.Editing
             }
 
             return output;
+        }
+
+        private PageableResource SetResourceData(PageableResource pageable, FileInfo file)
+        {
+            if (!file.Exists)
+                throw new FileNotFoundException(file.FullName);
+
+            var location = pageable?.GetLocation() ?? ResourceLocation.ResourcesB;
+            var cache = CacheContext.GetResourceCache(location);
+            var data = File.ReadAllBytes(file.FullName);
+            var index = pageable?.Page.Index ?? -1;
+
+            using (var cacheStream = CacheContext.OpenResourceCacheReadWrite(location))
+            {
+                if (index != -1)
+                {
+                    cache.ImportRaw(cacheStream, index, data);
+                    return pageable;
+                }
+
+                pageable.Page.Index = cache.Add(cacheStream, data, out uint compressedSize);
+                pageable.Page.CompressedBlockSize = compressedSize;
+                pageable.Page.UncompressedBlockSize = (uint)data.Length;
+            }
+
+            return pageable;
         }
 
         private int RangeArgCount(Type type)
