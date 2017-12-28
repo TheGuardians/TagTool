@@ -1,10 +1,13 @@
 using BlamCore.Cache;
 using BlamCore.Commands;
+using BlamCore.Common;
+using BlamCore.Geometry;
 using BlamCore.IO;
 using BlamCore.Legacy.Base;
 using BlamCore.Scripting;
 using BlamCore.Serialization;
 using BlamCore.TagDefinitions;
+using BlamCore.TagResources;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -49,7 +52,8 @@ namespace TagTool.Files
                 { "dumpforgepalettecommands", "Read a scnr tag's forge palettes and dump as a tagtool commands script." },
                 { "nametag", "Name all dependencies of a named tag using the same nameUsage: test nametag all shaders\\invalid." },
                 { "listtags", "Listtags with a simplified output." },
-                { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" }
+                { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
+                { "shadowfixtest", "Hack/fix a weapon or forge object's shadow mehs." }
             };
 
             switch (name)
@@ -62,6 +66,7 @@ namespace TagTool.Files
                 case "listtags": return ListTags(args);
                 case "dumpcommandsscript": return DumpCommandsScript(args);
                 case "temp": return Temp(args);
+                case "shadowfixtest": return ShadowFixTest(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -720,5 +725,140 @@ namespace TagTool.Files
 
             return true;
         }
+        
+        public bool ShadowFixTest(List<string> args)
+        {
+            var instance1 = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
+
+            Model tag1;
+
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, instance1);
+                tag1 = CacheContext.Deserializer.Deserialize<Model>(edContext);
+            }
+
+            tag1.CollisionRegions.Add(new Model.CollisionRegion { Permutations = new List<Model.CollisionRegion.Permutation> { new Model.CollisionRegion.Permutation() } });
+
+            Console.WriteLine("Serializing...");
+            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var context1 = new TagSerializationContext(stream, CacheContext, instance1);
+                CacheContext.Serializer.Serialize(context1, tag1);
+            }
+
+            RenderModel tag2;
+
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, tag1.RenderModel);
+                tag2 = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
+            }
+
+            var resourceContext2 = new ResourceSerializationContext(tag2.Geometry.Resource);
+
+            var def2 = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext2);
+
+            def2.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+            {
+                Address = 0,
+                UnusedC = 0,
+                Definition = new IndexBufferDefinition
+                {
+                    Format = IndexBufferFormat.TriangleStrip,
+                    Data = new TagData
+                    {
+                        Size = 0x6,
+                        Address = def2.IndexBuffers[0].Definition.Data.Address
+                    }
+                }
+            });
+
+            def2.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+            {
+                Definition = new VertexBufferDefinition
+                {
+                    Count = 3,
+                    VertexSize = 0x38,
+                    Data = new TagData
+                    {
+                        Size = 0xA8,
+                        Address = def2.VertexBuffers[0].Definition.Data.Address
+                    }
+                }
+            });
+
+            def2.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+            {
+                Definition = new VertexBufferDefinition
+                {
+                    Count = 3,
+                    VertexSize = 0x38,
+                    Data = new TagData
+                    {
+                        Size = 0xA8,
+                        Address = def2.VertexBuffers[1].Definition.Data.Address
+                    }
+                }
+            });
+
+            var context = new ResourceSerializationContext(tag2.Geometry.Resource);
+            CacheContext.Serializer.Serialize(context, def2);
+
+            tag2.Geometry.Meshes.Add(new Mesh
+            {
+                VertexBuffers = new ushort[] { (ushort)(def2.VertexBuffers.Count - 2), 0xFFFF, 0xFFFF, (ushort)(def2.VertexBuffers.Count - 1), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
+                IndexBuffers = new ushort[] { (ushort)(def2.IndexBuffers.Count - 1), 0xFFFF },
+                Type = VertexType.Rigid,
+                PrtType = PrtType.Ambient,
+                IndexBufferType = PrimitiveType.TriangleStrip,
+                RigidNodeIndex = 0,
+                Parts = new List<Mesh.Part>
+                {
+                    new Mesh.Part
+                    {
+                        TransparentSortingIndex = -1,
+                        SubPartCount = 1,
+                        Type = 2,
+                        Flags = Mesh.Part.PartFlags.PerVertexLightmapPart,
+                        VertexCount = 3
+                    },
+                },
+
+                SubParts = new List<Mesh.SubPart>
+                {
+                    new Mesh.SubPart
+                    {
+                        FirstIndex = 0,
+                        IndexCount = 3,
+                        PartIndex = 0,
+                        VertexCount = 0,
+                    }
+                }
+            });
+
+            tag2.Regions.Add(new RenderModel.Region { Permutations = new List<RenderModel.Region.Permutation> { new RenderModel.Region.Permutation { MeshIndex = (short)(tag2.Geometry.Meshes.Count - 1) } } });
+
+            // def2.IndexBuffers.Add(def1.IndexBuffers[0]);
+            // def2.IndexBuffers.Last().Definition.Data.Address = def2.IndexBuffers[0].Definition.Data.Address;
+
+            // def2.VertexBuffers.Add(def1.VertexBuffers[0]);
+            // def2.VertexBuffers[2].Definition.Data.Address = def2.VertexBuffers[0].Definition.Data.Address;
+            // def2.VertexBuffers.Add(def1.VertexBuffers[1]);
+            // def2.VertexBuffers[3].Definition.Data.Address = def2.VertexBuffers[1].Definition.Data.Address;
+
+
+            Console.WriteLine("Serializing...");
+            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var context2 = new TagSerializationContext(stream, CacheContext, tag1.RenderModel);
+                CacheContext.Serializer.Serialize(context2, tag2);
+            }
+
+            Console.WriteLine("Done.");
+
+            return true;
+        }
+
     }
 }
