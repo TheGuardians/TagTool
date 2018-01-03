@@ -137,6 +137,7 @@
     <Compile Include="Tags\ListNullTagsCommand.cs" />
     <Compile Include="Tags\ListTagsCommand.cs" />
     <Compile Include="Files\RelocateResourcesCommand.cs" />
+    <Compile Include="Tags\ListUnnamedTagsCommand.cs" />
     <Compile Include="Tags\ListUnusedTagsCommand.cs" />
     <Compile Include="Tags\MatchTagsCommand.cs" />
     <Compile Include="Tags\NameTagCommand.cs" />
