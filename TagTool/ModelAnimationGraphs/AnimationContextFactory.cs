@@ -21,8 +21,7 @@ namespace TagTool.ModelAnimationGraphs
         public static void Populate(CommandContext context, GameCacheContext info, CachedTagInstance tag, ModelAnimationGraph animation)
         {
             context.AddCommand(new GetResourceInfoCommand(info, tag, animation));
-            context.AddCommand(new ExtractCommand(info, tag, animation));
-            context.AddCommand(new ImportCommand(info, tag, animation));
+            context.AddCommand(new ResourceDataCommand(info, tag, animation));
         }
     }
 }
