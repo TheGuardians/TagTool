@@ -115,6 +115,7 @@
     <Compile Include="Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Sounds\ResourceDataCommand.cs" />
     <Compile Include="Sounds\ImportSoundCommand.cs" />
     <Compile Include="Sounds\SoundContextFactory.cs" />
     <Compile Include="Strings\ListAllStringsCommand.cs" />

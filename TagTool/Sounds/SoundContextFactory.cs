@@ -19,6 +19,7 @@ namespace TagTool.Sounds
         public static void Populate(CommandContext commandContext, GameCacheContext cacheContext, CachedTagInstance tag, Sound sound)
         {
             commandContext.AddCommand(new ImportSoundCommand(cacheContext, tag, sound));
+            commandContext.AddCommand(new ResourceDataCommand(cacheContext, tag, sound));
         }
     }
 }
