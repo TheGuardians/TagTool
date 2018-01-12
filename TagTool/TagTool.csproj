@@ -86,8 +86,7 @@
     <Compile Include="Common\LocalizedStringPrinter.cs" />
     <Compile Include="ModelAnimationGraphs\AnimationContextFactory.cs" />
     <Compile Include="ModelAnimationGraphs\GetResourceInfoCommand.cs" />
-    <Compile Include="ModelAnimationGraphs\ImportCommand.cs" />
-    <Compile Include="ModelAnimationGraphs\ExtractCommand.cs" />
+    <Compile Include="ModelAnimationGraphs\ResourceData.cs" />
     <Compile Include="Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Models\ExtractModelCommand.cs" />
     <Compile Include="Models\ListVariantsCommand.cs" />
