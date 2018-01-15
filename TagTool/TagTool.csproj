@@ -78,6 +78,7 @@
     <Compile Include="Files\ExtractFilesCommand.cs" />
     <Compile Include="Files\GenerateAssemblyPluginsCommand.cs" />
     <Compile Include="Files\ListFilesCommand.cs" />
+    <Compile Include="Files\RebuildStringIdsCommand.cs" />
     <Compile Include="Files\ReplaceAllFilesCommand.cs" />
     <Compile Include="Files\ReplaceFileCommand.cs" />
     <Compile Include="Files\TestCommand.cs" />

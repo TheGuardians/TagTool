@@ -62,6 +62,7 @@ namespace TagTool.Tags
             context.AddCommand(new GenerateAssemblyPluginsCommand());
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
             context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
+            context.AddCommand(new RebuildStringIdsCommand(cacheContext));
 
             var exeFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
             var dllFile = new FileInfo(Path.Combine(exeFile.Directory.FullName, "Porting.dll"));
