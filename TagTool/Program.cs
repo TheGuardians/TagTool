@@ -38,12 +38,12 @@ namespace TagTool
 
             GameCacheContext cacheContext = null;
 
-        #if !DEBUG
+#if !DEBUG
             try
             {
-        #endif
+#endif
                 cacheContext = new GameCacheContext(new FileInfo(filePath).Directory);
-        #if !DEBUG
+#if !DEBUG
             }
             catch (Exception e)
             {
@@ -51,7 +51,7 @@ namespace TagTool
                 ConsoleHistory.Dump("hott_*_init.log");
                 return;
             }
-        #endif
+#endif
 
             // Create command context
             var contextStack = new CommandContextStack();
@@ -128,19 +128,19 @@ namespace TagTool
             // Execute it
             commandAndArgs.RemoveAt(0);
 
-        #if !DEBUG
+#if !DEBUG
             try
             {
-        #endif
+#endif
                 ExecuteCommand(command, commandAndArgs);
-        #if !DEBUG
+#if !DEBUG
             }
             catch (Exception e)
             {
                 Console.WriteLine("ERROR: " + e.Message);
                 ConsoleHistory.Dump("hott_*_crash.log");
             }
-        #endif
+#endif
 
             return true;
         }

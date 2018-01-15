@@ -113,10 +113,10 @@ namespace TagTool.Editing
             if (field.FieldType == typeof(PageableResource))
             {
                 var pageable = (PageableResource)field.GetValue(Owner);
-                var file = (FileInfo)fieldValue;
 
                 if (pageable != null)
-                    pageable = SetResourceData(pageable, file);
+                    field.SetValue(Owner, fieldValue != null ?
+                        SetResourceData(pageable, (FileInfo)fieldValue) : null);
             }
             else
             {

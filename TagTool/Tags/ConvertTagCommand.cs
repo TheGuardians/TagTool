@@ -94,6 +94,9 @@ namespace TagTool.Tags
             Console.WriteLine();
             Console.WriteLine("All done! The converted tag is:");
             TagPrinter.PrintTagShort(resultTag);
+
+            destCacheContext.SaveTagNames();
+
             return true;
         }
 
@@ -135,17 +138,38 @@ namespace TagTool.Tags
 
             CachedTagInstance instance = null;
 
-            for (var i = 0; i < destCacheContext.TagCache.Index.Count; i++)
+            if (srcCacheContext.Version != destCacheContext.Version)
             {
-                if (destCacheContext.TagCache.Index[i] == null)
+                for (var i = 0; i < destCacheContext.TagCache.Index.Count; i++)
                 {
-                    destCacheContext.TagCache.Index[i] = instance = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag]);
-                    break;
+                    if (destCacheContext.TagCache.Index[i] == null)
+                    {
+                        destCacheContext.TagCache.Index[i] = instance = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag]);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if (destCacheContext.TagCache.Index[srcTag.Index] != null)
+                {
+                    if (!destCacheContext.TagCache.Index[srcTag.Index].IsInGroup(srcTag.Group))
+                        throw new Exception();
+
+                    return destCacheContext.TagCache.Index[srcTag.Index];
+                }
+                else
+                {
+                    if (srcCacheContext.TagNames.ContainsKey(srcTag.Index))
+                        destCacheContext.TagNames[srcTag.Index] = srcCacheContext.TagNames[srcTag.Index];
+                    
+                    destCacheContext.TagCache.Index[srcTag.Index] = instance = new CachedTagInstance(srcTag.Index, TagGroup.Instances[srcTag.Group.Tag]);
                 }
             }
 
             if (instance == null)
                 instance = destCacheContext.TagCache.AllocateTag(srcTag.Group);
+
             tagMap.Add(srcCacheContext.Version, srcTag.Index, destCacheContext.Version, instance.Index);
 
             if (srcTag.IsInGroup("decs") || srcTag.IsInGroup("rmd "))
@@ -265,6 +289,7 @@ namespace TagTool.Tags
 
         private ResourceLocation FixResourceLocation(ResourceLocation location, CacheVersion srcVersion, CacheVersion destVersion)
         {
+            return ResourceLocation.ResourcesB;
             if (CacheVersionDetection.Compare(destVersion, CacheVersion.HaloOnline235640) >= 0)
                 return location;
             switch (location)

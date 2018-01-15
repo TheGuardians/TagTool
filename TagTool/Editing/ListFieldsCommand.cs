@@ -89,6 +89,11 @@ namespace TagTool.Editing
                         foreach (var datum in function.Data)
                             valueString += datum.ToString("X2");
                     }
+                    else if (fieldType == typeof(PageableResource))
+                    {
+                        var pageable = (PageableResource)fieldValue;
+                        valueString = pageable == null ? "null" : $"{{ Location: {pageable.GetLocation()}, Index: 0x{pageable.Page.Index:X}, CompressedSize: 0x{pageable.Page.CompressedBlockSize} }}";
+                    }
                     else
                         valueString = fieldValue.ToString();
             #if !DEBUG
