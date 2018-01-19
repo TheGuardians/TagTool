@@ -33,7 +33,7 @@ namespace TagTool.VertexShaders
 			if (args.Count != 1)
 				return false;
 
-			Console.WriteLine(ShaderCompiler.Disassemble(Definition.Shaders[int.Parse(args[0])].ByteCode));
+			Console.WriteLine(ShaderCompiler.Disassemble(Definition.Shaders[int.Parse(args[0])].PcCompiledShader));
 
 			return true;
 		}

@@ -2,6 +2,7 @@
 using BlamCore.Commands;
 using BlamCore.Geometry;
 using BlamCore.Serialization;
+using BlamCore.Shaders;
 using BlamCore.TagDefinitions;
 using System;
 using System.Collections.Generic;
@@ -47,11 +48,11 @@ namespace TagTool.PixelShaders
 
 			var disassembly = ShaderCompiler.Disassemble(bytecode);
 
-            var pixlblck = new PixelShader.ShaderBlock
+            var pixlblck = new ShaderData
             {
-                ByteCode = bytecode,
-                Parameters = GetParamInfo(disassembly),
-                Unknown4 = 1
+                PcCompiledShader = bytecode,
+                PcParameters = GetParamInfo(disassembly),
+                Unknown3 = CacheContext.GetStringId("default")
             };
 
             Definition.Shaders[int.Parse(args[0])] = pixlblck;
@@ -65,9 +66,9 @@ namespace TagTool.PixelShaders
 			return true;
 		}
 
-		public List<PixelShader.ShaderBlock.ParameterBlock> GetParamInfo(string assembly)
+		public List<ShaderParameter> GetParamInfo(string assembly)
 		{
-			var parameters = new List<PixelShader.ShaderBlock.ParameterBlock> { };
+			var parameters = new List<ShaderParameter> { };
 
 			using (StringReader reader = new StringReader(assembly))
 			{
@@ -89,18 +90,17 @@ namespace TagTool.PixelShaders
 					if (!string.IsNullOrEmpty(line))
 					{
 						var split = line.Split(' ');
-                        var param = new PixelShader.ShaderBlock.ParameterBlock
+                        parameters.Add(new ShaderParameter
                         {
-                            
                             ParameterName = CacheContext.GetStringId(split[0]),
-                            RegisterType = (PixelShader.ShaderBlock.ParameterBlock.RegisterTypeValue)Enum.Parse(typeof(PixelShader.ShaderBlock.ParameterBlock.RegisterTypeValue), split[1][0].ToString()),
+                            RegisterType = (ShaderParameterRegisterType)Enum.Parse(typeof(ShaderParameterRegisterType), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])
-                        };
-                        parameters.Add(param);
+                        });
 					}
 				}
 			}
+
 			return parameters;
 		}
 	}

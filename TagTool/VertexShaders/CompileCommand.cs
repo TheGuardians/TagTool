@@ -2,11 +2,11 @@
 using BlamCore.Commands;
 using BlamCore.Geometry;
 using BlamCore.Serialization;
+using BlamCore.Shaders;
 using BlamCore.TagDefinitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static BlamCore.TagDefinitions.VertexShader.ShaderBlock.ParameterBlock;
 
 namespace TagTool.VertexShaders
 {
@@ -48,11 +48,11 @@ namespace TagTool.VertexShaders
 
 			var disassembly = ShaderCompiler.Disassemble(bytecode);
 
-            var vtshblck = new VertexShader.ShaderBlock
+            var vtshblck = new ShaderData
             {
-                ByteCode = bytecode,
-                Parameters = GetParamInfo(disassembly),
-                Unknown8 = 1
+                PcCompiledShader = bytecode,
+                PcParameters = GetParamInfo(disassembly),
+                Unknown3 = CacheContext.GetStringId("default")
             };
 
             Definition.Shaders[int.Parse(args[0])] = vtshblck;
@@ -66,9 +66,9 @@ namespace TagTool.VertexShaders
 			return true;
 		}
 
-		public List<VertexShader.ShaderBlock.ParameterBlock> GetParamInfo(string assembly)
+		public List<ShaderParameter> GetParamInfo(string assembly)
 		{
-			var parameters = new List<VertexShader.ShaderBlock.ParameterBlock> { };
+			var parameters = new List<ShaderParameter> { };
 
 			using (StringReader reader = new StringReader(assembly))
 			{
@@ -90,17 +90,17 @@ namespace TagTool.VertexShaders
 					if (!string.IsNullOrEmpty(line))
 					{
 						var split = line.Split(' ');
-                        var param = new VertexShader.ShaderBlock.ParameterBlock
+                        parameters.Add(new ShaderParameter
                         {
                             ParameterName = CacheContext.GetStringId(split[0]),
-                            RegisterType = (RType)Enum.Parse(typeof(RType), split[1][0].ToString()),
+                            RegisterType = (ShaderParameterRegisterType)Enum.Parse(typeof(ShaderParameterRegisterType), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])
-                        };
-                        parameters.Add(param);
+                        });
 					}
 				}
 			}
+
 			return parameters;
 		}
 	}

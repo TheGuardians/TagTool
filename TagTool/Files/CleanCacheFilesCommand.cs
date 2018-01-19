@@ -34,14 +34,14 @@ namespace TagTool.Files
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                CleanMultiplayerGlobals(stream);
+                //CleanMultiplayerGlobals(stream);
 
                 var retainedTags = new HashSet<int>();
                 LoadTagDependencies(CacheContext.TagCache.Index.FindFirstInGroup("cfgt").Index, ref retainedTags);
 
                 foreach (var scnr in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
                 {
-                    CleanScenario(stream, scnr);
+                    //CleanScenario(stream, scnr);
                     LoadTagDependencies(scnr.Index, ref retainedTags);
                 }
 
@@ -90,7 +90,7 @@ namespace TagTool.Files
                     }
                     else
                     {
-                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ? CacheContext.TagNames[tag.Index] : $"0x{tag.Index}";
+                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ? CacheContext.TagNames[tag.Index] : $"0x{tag.Index:X4}";
                         var tagGroupName = CacheContext.GetString(tag.Group.Name);
 
                         Console.Write($"Nulling {tagName}.{tagGroupName}...");
@@ -123,8 +123,6 @@ namespace TagTool.Files
                             resourceCache.NullResource(resourceStream, i);
                             Console.WriteLine("done.");
                         }
-
-                        resourceCache.UpdateResourceTable(resourceStream);
                     }
                 }
             }

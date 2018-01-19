@@ -623,9 +623,9 @@ namespace TagTool.Tags
                     {
                         Console.WriteLine("- Recompiling pixel shader {0}...", mode.Index + j);
                         var shader = ps.Shaders[mode.Index + j];
-                        var newBytecode = ShaderConverter.ConvertNewPixelShaderToOld(shader.ByteCode, i);
+                        var newBytecode = ShaderConverter.ConvertNewPixelShaderToOld(shader.PcCompiledShader, i);
                         if (newBytecode != null)
-                            shader.ByteCode = newBytecode;
+                            shader.PcCompiledShader = newBytecode;
                     }
                     usedShaders[mode.Index + j] = true;
                 }
@@ -635,14 +635,14 @@ namespace TagTool.Tags
             for (var i = 0; i < ps.Shaders.Count; i++)
             {
                 if (!usedShaders[i])
-                    ps.Shaders[i].ByteCode = null;
+                    ps.Shaders[i].PcCompiledShader = null;
             }
         }
 
         private void FixVertexShader(VertexShader vs)
         {
-            foreach (var unk in vs.Unknown2)
-                FixDrawModeList(unk.DrawModes);
+            foreach (var list in vs.DrawModeLists)
+                FixDrawModeList(list.DrawModes);
             // We don't need to recompile these because vtsh tags will never actually be used in a ported map
         }
 

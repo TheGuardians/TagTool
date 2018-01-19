@@ -33,7 +33,7 @@ namespace TagTool.RenderModels
             Tag = tag;
             Definition = definition;
         }
-
+        
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
@@ -64,9 +64,13 @@ namespace TagTool.RenderModels
             var nodes = new Dictionary<string, sbyte>();
             var materialIndices = new Dictionary<string, short>();
 
-            foreach (var node in Definition.Nodes)
-                nodes[CacheContext.GetString(node.Name)] = builder.AddNode(node);
-            
+            foreach (var oldNode in Definition.Nodes)
+            {
+                var name = CacheContext.GetString(oldNode.Name);
+
+                nodes[name] = builder.AddNode(oldNode);
+            }
+
             foreach (var region in Definition.Regions)
             {
                 builder.BeginRegion(region.Name);
@@ -119,6 +123,7 @@ namespace TagTool.RenderModels
                             }
                             catch
                             {
+                                Console.WriteLine($"WARNING: Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
                                 uv = new Vector3D();
                             }
 
@@ -136,6 +141,13 @@ namespace TagTool.RenderModels
                                     {
                                         if (vertexInfo.VertexID == i)
                                         {
+                                            // HAX BELOW
+                                            //if (bone.Name.StartsWith("_"))
+                                                //bone.Name = bone.Name.Substring(4);
+                                            //if (bone.Name.EndsWith("2"))
+                                                //bone.Name = bone.Name.Replace("2", "_tip");
+                                            //else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
+                                                //bone.Name = bone.Name.Replace("1", "_low");
                                             blendIndicesList.Add((byte)nodes[bone.Name]);
                                             blendWeightsList.Add(vertexInfo.Weight);
                                         }
