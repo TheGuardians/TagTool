@@ -1,9 +1,7 @@
 ﻿using BlamCore.Cache;
 using BlamCore.Commands;
 using BlamCore.Common;
-using BlamCore.Serialization;
 using BlamCore.TagDefinitions;
-using BlamCore.TagResources;
 using System;
 using System.Collections.Generic;
 using System.IO;

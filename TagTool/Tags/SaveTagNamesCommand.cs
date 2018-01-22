@@ -1,8 +1,6 @@
 ﻿using BlamCore.Cache;
 using BlamCore.Commands;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace TagTool.Tags
 {
