@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using BlamCore.Cache;
 using BlamCore.Commands;
 using TagTool.Common;
@@ -29,24 +28,43 @@ namespace TagTool.Tags
             if (args.Count != 0)
                 return false;
 
-            var nonNullTags = CacheContext.TagCache.Index.NonNull();
+            var depCounts = new Dictionary<int, int>();
 
             foreach (var tag in CacheContext.TagCache.Index)
             {
+                if (tag == null)
+                    continue;
+
+                foreach (var dep in tag.Dependencies)
+                {
+                    var depTag = CacheContext.GetTag(dep);
+
+                    if (depTag == null)
+                        continue;
+
+                    if (!depCounts.ContainsKey(dep))
+                        depCounts[dep] = 0;
+
+                    depCounts[dep]++;
+                }
+            }
+
+            for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
+            {
+                var tag = CacheContext.GetTag(i);
+
                 if (tag == null || tag.IsInGroup("cfgt") || tag.IsInGroup("scnr"))
                     continue;
-                
-                var dependsOn = nonNullTags.Where(t => t.Dependencies.Contains(tag.Index));
 
-                if (dependsOn.Count() == 0)
-                {
-                    var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
-                        CacheContext.TagNames[tag.Index] :
-                        "<unnamed>";
+                if (depCounts.ContainsKey(i))
+                    continue;
 
-                    Console.Write($"{tagName} ");
-                    TagPrinter.PrintTagShort(tag);
-                }
+                var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
+                    CacheContext.TagNames[tag.Index] :
+                    "<unnamed>";
+
+                Console.Write($"{tagName} ");
+                TagPrinter.PrintTagShort(tag);
             }
 
             return true;
