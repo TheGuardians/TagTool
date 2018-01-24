@@ -31,6 +31,9 @@ namespace TagTool.Tags
             var instance = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
             var path = args[1];
 
+            if (!File.Exists(path))
+                return false;
+                
             if (instance == null)
                 return false;
 
