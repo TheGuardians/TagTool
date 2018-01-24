@@ -92,7 +92,7 @@ namespace TagTool.Editing
                     else if (fieldType == typeof(PageableResource))
                     {
                         var pageable = (PageableResource)fieldValue;
-                        valueString = pageable == null ? "null" : $"{{ Location: {pageable.GetLocation()}, Index: 0x{pageable.Page.Index:X}, CompressedSize: 0x{pageable.Page.CompressedBlockSize} }}";
+                        valueString = pageable == null ? "null" : $"{{ Location: {pageable.GetLocation()}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
                     }
                     else
                         valueString = fieldValue.ToString();
