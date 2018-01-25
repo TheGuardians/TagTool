@@ -50,7 +50,9 @@
     <Compile Include="Bitmaps\ExtractBitmapCommand.cs" />
     <Compile Include="Bitmaps\ExtractBitmapsCommand.cs" />
     <Compile Include="Bitmaps\ImportBitmapCommand.cs" />
+    <Compile Include="CollisionModels\CollisionModelContextFactory.cs" />
     <Compile Include="CollisionModels\CollisionModelTestCommand.cs" />
+    <Compile Include="CollisionModels\ExtractModelCommand.cs" />
     <Compile Include="Common\ClearCommand.cs" />
     <Compile Include="Common\DumpLogCommand.cs" />
     <Compile Include="Common\EchoCommand.cs" />

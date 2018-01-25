@@ -19,6 +19,7 @@ using TagTool.PixelShaders;
 using TagTool.VertexShaders;
 using TagTool.ScenarioLightmaps;
 using BlamCore.Commands;
+using TagTool.CollisionModels;
 
 namespace TagTool.Editing
 {
@@ -52,36 +53,40 @@ namespace TagTool.Editing
 
             switch (tag.Group.Tag.ToString())
             {
-                case "vfsl": // vfiles_list
-                    VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
-                    break;
-
                 case "bink":
                     VideoContextFactory.Populate(commandContext, cacheContext, tag, (Bink)definition);
-                    break;
-
-                case "unic": // multilingual_unicode_string_list
-                    UnicodeContextFactory.Populate(commandContext, cacheContext, tag, (MultilingualUnicodeStringList)definition);
                     break;
 
                 case "bitm": // bitmap
                     BitmapContextFactory.Populate(commandContext, cacheContext, tag, (Bitmap)definition);
                     break;
 
+                case "coll":
+                    CollisionModelContextFactory.Populate(commandContext, cacheContext, tag, (CollisionModel)definition);
+                    break;
+
                 case "hlmt": // model
                     ModelContextFactory.Populate(commandContext, cacheContext, tag, (Model)definition);
+                    break;
+
+                case "jmad":
+                    AnimationContextFactory.Populate(commandContext, cacheContext, tag, (ModelAnimationGraph)definition);
+                    break;
+
+                case "Lbsp":
+                    LightmapContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioLightmapBspData)definition);
                     break;
 
                 case "mode": // render_model
                     RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
                     break;
 
-                case "pmdf":
-                    ParticleModelContextFactory.Populate(commandContext, cacheContext, tag, (ParticleModel)definition);
+                case "pixl":
+                    PixelShaderContextFactory.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
                     break;
 
-                case "jmad":
-                    AnimationContextFactory.Populate(commandContext, cacheContext, tag, (ModelAnimationGraph)definition);
+                case "pmdf":
+                    ParticleModelContextFactory.Populate(commandContext, cacheContext, tag, (ParticleModel)definition);
                     break;
 
                 case "rm  ": // render_method
@@ -97,23 +102,24 @@ namespace TagTool.Editing
                     RenderMethodContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethod)definition);
                     break;
 
-                case "pixl":
-                    PixelShaderContextFactory.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
+                case "sbsp":
+                    BSPContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioStructureBsp)definition);
                     break;
 
                 case "scnr":
                     ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
                     break;
 
-                case "sbsp":
-                    BSPContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioStructureBsp)definition);
-                    break;
-                case "Lbsp":
-                    LightmapContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioLightmapBspData)definition);
-                    break;
-
                 case "snd!":
                     SoundContextFactory.Populate(commandContext, cacheContext, tag, (Sound)definition);
+                    break;
+
+                case "unic": // multilingual_unicode_string_list
+                    UnicodeContextFactory.Populate(commandContext, cacheContext, tag, (MultilingualUnicodeStringList)definition);
+                    break;
+
+                case "vfsl": // vfiles_list
+                    VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
                     break;
 
 				case "vtsh":
