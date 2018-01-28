@@ -527,6 +527,21 @@ namespace TagTool.Editing
                         break;
                 }
             }
+            else if (type == typeof(Tag))
+            {
+                if (args.Count != 1)
+                    return false;
+
+                if (args[0] == "null")
+                    return null;
+
+                var group = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
+
+                if (group.Value == 0x3F3F3F3F)
+                    return false;
+
+                output = group;
+            }
             else
             {
                 Console.WriteLine($"ERROR: Not Implemented.");
