@@ -87,9 +87,7 @@ namespace TagTool.Models
                                 var outPath = Path.Combine(ddsOutDir, CacheContext.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
 
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                                {
-                                    extractor.ExtractDds(CacheContext.Deserializer, bitmap, j, outStream);
-                                }
+                                    extractor.ExtractDds(bitmap, j, outStream);
 
                                 Console.WriteLine($"Bitmap {i} ({CacheContext.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
                             }

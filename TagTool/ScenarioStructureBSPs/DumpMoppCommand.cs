@@ -1,5 +1,6 @@
 ﻿using BlamCore.Cache;
 using BlamCore.Commands;
+using BlamCore.Havok;
 using BlamCore.TagDefinitions;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace TagTool.ScenarioStructureBSPs
                 var print = false;
                 for (var i = 0; i < moppData.Count; i++)
                 {
-                    var moppOperator = moppData[i];
+                    var moppOperator = moppData[i].Value;
                     print = false;
                     
                     var count = 0;
@@ -276,11 +277,11 @@ namespace TagTool.ScenarioStructureBSPs
             return true;
         }
 
-        public void ReadArguments(int count,int offset, List<Byte> moppData, StreamWriter fileWriter)
+        public void ReadArguments(int count,int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
         {
             for(int i = 0; i < count; i++)
             {
-                fileWriter.Write($":{moppData[offset+i+1].ToString("X2")}");
+                fileWriter.Write($":{moppData[offset+i+1].Value.ToString("X2")}");
             }
             return;
         }
