@@ -3,7 +3,6 @@ using BlamCore.Commands;
 using System;
 using System.IO;
 using System.Reflection;
-using TagTool.Bitmaps;
 using TagTool.CollisionModels;
 using TagTool.Common;
 using TagTool.Definitions;
@@ -58,7 +57,7 @@ namespace TagTool.Tags
             context.AddCommand(new MatchTagsCommand(cacheContext));
             context.AddCommand(new ConvertTagCommand(cacheContext));
             context.AddCommand(new UpdateMapFilesCommand(cacheContext));
-            context.AddCommand(new ExtractBitmapsCommand(cacheContext));
+            context.AddCommand(new Bitmaps.ExtractBitmapsCommand(cacheContext));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
             context.AddCommand(new ListUnnamedTagsCommand(cacheContext));

@@ -120,9 +120,7 @@ namespace TagTool.Tags
             var structureType = TagDefinition.Find(srcTag.Group.Tag);
             var srcContext = new TagSerializationContext(srcStream, srcCacheContext, srcTag);
             var tagData = srcCacheContext.Deserializer.Deserialize(srcContext, structureType);
-
-
-
+            
             // Uncomment this to use 0x101F in place of shaders that need conversion
             /*if (tagData is RenderMethod)
             {
@@ -153,10 +151,8 @@ namespace TagTool.Tags
             {
                 if (destCacheContext.TagCache.Index[srcTag.Index] != null)
                 {
-                    if (!destCacheContext.TagCache.Index[srcTag.Index].IsInGroup(srcTag.Group))
-                        throw new Exception();
-
-                    return destCacheContext.TagCache.Index[srcTag.Index];
+                    if (destCacheContext.TagCache.Index[srcTag.Index].IsInGroup(srcTag.Group))
+                        return destCacheContext.TagCache.Index[srcTag.Index];
                 }
                 else
                 {

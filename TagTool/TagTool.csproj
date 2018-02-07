@@ -103,6 +103,8 @@
     <Compile Include="RenderMethods\RenderMethodContextFactory.cs" />
     <Compile Include="RenderMethods\SpecifyBitmapsCommand.cs" />
     <Compile Include="ParticleModels\ParticleModelContextFactory.cs" />
+    <Compile Include="RenderModels\ExtractBitmapsCommand.cs" />
+    <Compile Include="RenderModels\ExtractModelCommand.cs" />
     <Compile Include="RenderModels\GetResourceInfoCommand.cs" />
     <Compile Include="RenderModels\RenderModelContextFactory.cs" />
     <Compile Include="RenderModels\RenderModelTestCommand.cs" />
