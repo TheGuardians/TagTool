@@ -1,0 +1,36 @@
+namespace TagTool.Ai
+{
+    public enum CharacterMetagameUnit : sbyte
+    {
+        Brute,
+        Grunt,
+        Jackal,
+        Marine,
+        Bugger,
+        Hunter,
+        FloodInfection,
+        FloodCarrier,
+        FloodCombat,
+        FloodPureform,
+        Sentinel,
+        Elite,
+        Turret,
+        Mongoose,
+        Warthog,
+        Scorpion,
+        Hornet,
+        Pelican,
+        Shade,
+        Watchtower,
+        Ghost,
+        Chopper,
+        Mauler,
+        Wraith,
+        Banshee,
+        Phantom,
+        Scarab,
+        Guntower,
+        Engineer,
+        EngineerRechargeStation
+    }
+}

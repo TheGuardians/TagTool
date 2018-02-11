@@ -1,4 +1,4 @@
-﻿using BlamCore.Common;
+﻿using TagTool.Common;
 using TagTool.Layouts;
 
 namespace TagTool.Analysis

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BlamCore.Cache;
-using BlamCore.Common;
+using TagTool.Cache;
+using TagTool.Common;
 
 namespace TagTool.Analysis
 {

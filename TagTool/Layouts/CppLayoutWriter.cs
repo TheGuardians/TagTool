@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using BlamCore.Common;
+using TagTool.Common;
 
 namespace TagTool.Layouts
 {

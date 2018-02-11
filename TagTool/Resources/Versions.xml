@@ -1,0 +1,126 @@
+<versions>
+  <version name="Halo1">
+    <header />
+    <indexheader />
+  </version>
+  <version name="Halo2Xbox">
+    <header
+      fileSize="8"
+      indexOffset="16"
+      tagDataAddress="20"
+      stringCount="356"
+      stringTableSize="360"
+      stringTableIndexOffset="364"
+      stringTableOffset="368"
+      scenarioName="444"
+      fileCount="704"
+      fileTableOffset="708"
+      fileTableSize="712"
+      fileTableIndexOffset="716" />
+    <indexheader
+      tagClassCount="4"
+      tagInfoOffset="8" />
+  </version>
+  <version name="Halo2Vista">
+    <header
+      fileSize="8"
+      indexOffset="16"
+      tagDataAddress="20"
+      stringCount="356"
+      stringTableSize="360"
+      stringTableIndexOffset="364"
+      stringTableOffset="368"
+      scenarioName="456"
+      fileCount="716"
+      fileTableOffset="720"
+      fileTableSize="724"
+      fileTableIndexOffset="728" />
+    <indexheader
+      tagClassCount="4"
+      tagInfoOffset="8" />
+  </version>
+  <version name="Halo3Beta">
+    <header
+      fileSize="8"
+      indexOffset="16"
+      tagDataAddress="20"
+      stringCount="352"
+      stringTableSize="356"
+      stringTableIndexOffset="360"
+      stringTableOffset="364"
+      scenarioName="440"
+      fileCount="700"
+      fileTableOffset="704"
+      fileTableSize="708"
+      fileTableIndexOffset="712"
+      virtualBaseAddress="752"
+      rawTableOffset="0"
+      localeModifier="0"
+      rawTableSize="0" />
+    <indexheader
+      tagClassCount="0"
+      tagClassIndexOffset="4"
+      tagCount="8"
+      tagInfoOffset="12"
+      tagInfoHeaderCount="16"
+      tagInfoHeaderOffset="20"
+      tagInfoHeaderCount2="24"
+      tagInfoHeaderOffset2="28" />
+  </version>
+  <version name="Halo3">
+    <header
+      fileSize="8"
+      indexOffset="16"
+      stringCount="344"
+      stringTableSize="348"
+      stringTableIndexOffset="352"
+      stringTableOffset="356"
+      scenarioName="432"
+      fileCount="692"
+      fileTableOffset="696"
+      fileTableSize="700"
+      fileTableIndexOffset="704"
+      virtualBaseAddress="744"
+      rawTableOffset="1136"
+      localeModifier="1144"
+      rawTableSize="1160"
+      tagDataAddress="0" />
+    <indexheader
+      tagClassCount="0"
+      tagClassIndexOffset="4"
+      tagCount="8"
+      tagInfoOffset="12"
+      tagInfoHeaderCount="16"
+      tagInfoHeaderOffset="20"
+      tagInfoHeaderCount2="24"
+      tagInfoHeaderOffset2="28" />
+  </version>
+  <version name="Halo4">
+    <header
+      fileSize="8"
+      indexOffset="16"
+      stringCount="344"
+      stringTableSize="348"
+      stringTableIndexOffset="352"
+      stringTableOffset="356"
+      scenarioName="432"
+      fileCount="692"
+      fileTableOffset="696"
+      fileTableSize="700"
+      fileTableIndexOffset="704"
+      virtualBaseAddress="760"
+      rawTableOffset="1152"
+      localeModifier="1160"
+      rawTableSize="1176"
+      tagDataAddress="1180" />
+    <indexheader
+      tagClassCount="0"
+      tagClassIndexOffset="4"
+      tagCount="8"
+      tagInfoOffset="12"
+      tagInfoHeaderCount="16"
+      tagInfoHeaderOffset="20"
+      tagInfoHeaderCount2="24"
+      tagInfoHeaderOffset2="28" />
+  </version>
+</versions>

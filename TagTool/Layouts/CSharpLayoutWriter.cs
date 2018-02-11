@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using BlamCore.Common;
+using TagTool.Common;
 
 namespace TagTool.Layouts
 {
@@ -33,9 +33,9 @@ namespace TagTool.Layouts
             writer.WriteLine("using System.Linq;");
             writer.WriteLine("using System.Text;");
             writer.WriteLine("using System.Threading.Tasks;");
-            writer.WriteLine("using HaloOnlineBlamCore.Common;");
+            writer.WriteLine("using HaloOnlineTagTool.Common;");
             writer.WriteLine("using HaloOnlineTagTool.Resources;");
-            writer.WriteLine("using HaloOnlineBlamCore.Serialization;");
+            writer.WriteLine("using HaloOnlineTagTool.Serialization;");
             writer.WriteLine();
             writer.WriteLine("namespace HaloOnlineTagTool.TagStructures");
             writer.WriteLine("{");

@@ -1,15 +1,14 @@
-﻿using BlamCore.Cache;
-using BlamCore.Commands;
-using BlamCore.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using TagTool.Tags;
+using TagTool.Cache;
+using TagTool.Commands.Tags;
+using TagTool.IO;
 
-namespace TagTool
+namespace TagTool.Commands
 {
     public static class Program
     {
