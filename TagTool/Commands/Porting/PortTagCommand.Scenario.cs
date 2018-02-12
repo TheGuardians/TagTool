@@ -350,6 +350,7 @@ namespace TagTool.Commands.Porting
                         ConvertScriptTagReferenceExpressionData(expr);
                         return;
 
+                    case ScriptValueType.HaloOnlineValue.AiLine:
                     case ScriptValueType.HaloOnlineValue.StringId:
                         ConvertScriptStringIdExpressionData(expr);
                         return;
