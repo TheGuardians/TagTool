@@ -16,20 +16,31 @@ namespace TagTool.TagDefinitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public short Version;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public H3ValuesBlock H3Values;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public ShieldIntensityBlock ShieldIntensity;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public ShieldEdgeBlock ShieldEdge;
 
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public PlasmaBlock Plasma;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public ExtrusionOscillationBlock ExtrusionOscillation;
-        
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public HitResponseBlock HitResponse;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public RealQuaternion EdgeScales;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public RealQuaternion EdgeOffsets;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public RealQuaternion PlasmaScales;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public RealQuaternion DepthFadeParameters;
 
         /// <summary>
@@ -72,92 +83,57 @@ namespace TagTool.TagDefinitions
         /// Scroll speed controls how fast the textures scroll on the surface.
         /// You can specify separate sharpness values for the edge and the center.
         /// </summary>
-        [TagStructure(Size = 0x64, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnline106708)]
         public class PlasmaBlock
         {
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float PlasmaDepthFadeRange;      //In world units
-
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTagInstance PlasmaNoiseBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTagInstance PlasmaNoiseBitmap2;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float TilingScale;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float ScrollSpeed;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float EdgeSharpness;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float CenterSharpness;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float PlasmaOuterFadeRadius;     //Within [0,1]
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float PlasmaCenterRadius;        //Within [0,1]
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float PlasmaInnerFadeRadius;     //Within [0,1]
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public ShieldImpactFunction PlasmaCenterColor;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public ShieldImpactFunction PlasmaCenterIntensity;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public ShieldImpactFunction PlasmaEdgeColor;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public ShieldImpactFunction PlasmaEdgeIntensity;
-
-            //
-            // Values for H3/ODST.  Needs more reversing
-            //
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        }
+        //
+        // Values for H3/ODST.  Needs more reversing
+        //
+        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        public class H3ValuesBlock
+        {
             public float Unknown1;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown2;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown3;
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown4;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown5;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown6;
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown7;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown8;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown9;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown10;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown11;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown12;
-
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown13;
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown14;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown15;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown16;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown17;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown18;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown19;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown20;
+            public float Unknown9;
+            public RealRgbColor Color1;
+            public float Magnitude1;
+            public RealRgbColor Color2;
+            public float Magnitude2;
+            public RealRgbColor Color3;
+            public float Magnitude3;
+            public RealRgbColor Color4;
+            public float Magnitude4;
+            public RealRgbColor Color5;
+            public float Magnitude5;
+            public RealRgbColor Color6;
+            public float Magnitude6;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public float Unknown10;
         }
 
         /// <summary>
@@ -167,7 +143,7 @@ namespace TagTool.TagDefinitions
         /// Scroll speed controls how fast the textures scroll on the surface.
         /// You can specify separate sharpness values for the edge and the center.
         /// </summary>
-        [TagStructure(Size = 0x9C)]
+        [TagStructure(Size = 0x60)]
         public class ExtrusionOscillationBlock
         {
             [TagField(ValidTags = new[] { "bitm" })]
@@ -179,7 +155,6 @@ namespace TagTool.TagDefinitions
             public float OscillationScrollSpeed;
             public ShieldImpactFunction ExtrusionAmount;
             public ShieldImpactFunction OscillationAmplitude;
-            public HitResponseBlock HitResponse;
 
             //HO is missing hit blob bitmap and either it's HitIntensity or HitRadius ShieldFunction, to be determined
 
@@ -188,17 +163,18 @@ namespace TagTool.TagDefinitions
             /// You can control the color, and the size of the colored area.
             /// The default input is time since impact.
             /// </summary>
-            [TagStructure(Size = 0x3C)]
-            public class HitResponseBlock
-            {
-                /// <summary>
-                /// The hit time of the hit response in seconds.
-                /// </summary>
-                public float HitTime;
-                public ShieldImpactFunction HitColor;
-				public ShieldImpactFunction HitIntensity;
-            }
         }
+        [TagStructure(Size = 0x3C)]
+        public class HitResponseBlock
+        {
+            /// <summary>
+            /// The hit time of the hit response in seconds.
+            /// </summary>
+            public float HitTime;
+            public ShieldImpactFunction HitColor;
+	        public ShieldImpactFunction HitIntensity;
+        }
+        
     }
 
     /// <summary>
