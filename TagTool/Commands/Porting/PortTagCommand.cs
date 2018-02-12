@@ -492,7 +492,8 @@ namespace TagTool.Commands.Porting
             switch (data)
             {
                 case CollisionMoppCode collisionMopp:
-                    return ConvertCollisionMoppData(collisionMopp.Data);
+                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
+                    return collisionMopp;
 
                 case StringId stringId:
                     return ConvertStringId(stringId);
