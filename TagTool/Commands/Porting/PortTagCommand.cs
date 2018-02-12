@@ -31,8 +31,6 @@ namespace TagTool.Commands.Porting
         private bool UseNull { get; set; } = false;
         private bool NoAudio { get; set; } = false;
 
-        private List<RenderMaterial> RenderMaterials { get; set; } = null;
-
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
@@ -98,8 +96,6 @@ namespace TagTool.Commands.Porting
 
                 args.RemoveAt(0);
             }
-
-            RenderMaterials = null;
 
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
@@ -313,7 +309,7 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            blamDefinition = ConvertData(cacheStream, blamDefinition);
+            blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -483,7 +479,7 @@ namespace TagTool.Commands.Porting
             return edTag;
         }
 
-        private object ConvertData(Stream cacheStream, object data)
+        private object ConvertData(Stream cacheStream, object data, object definition)
         {
             if (data == null)
                 return null;
@@ -505,7 +501,7 @@ namespace TagTool.Commands.Porting
                     if (IsRecursive == false)
                         return null;
                     tag = PortTagReference(CacheContext, BlamCache, tag.Index);
-                    if (tag != null && !IsNew && !IsReplacing)
+                    if (tag != null && !(IsNew || IsReplacing))
                         return tag;
                     return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
@@ -513,7 +509,11 @@ namespace TagTool.Commands.Porting
                     return ConvertTagFunction(tagFunction);
 
                 case RenderGeometry renderGeometry:
-                    return GeometryConverter.Convert(cacheStream, renderGeometry, RenderMaterials);
+                    if (definition is ScenarioStructureBsp sbsp)
+                        return GeometryConverter.Convert(cacheStream, renderGeometry, sbsp.Materials);
+                    if (definition is RenderModel mode)
+                        return GeometryConverter.Convert(cacheStream, renderGeometry, mode.Materials);
+                    return GeometryConverter.Convert(cacheStream, renderGeometry, null);
 
                 case GameObjectType gameObjectType:
                     return ConvertGameObjectType(gameObjectType);
@@ -523,13 +523,13 @@ namespace TagTool.Commands.Porting
             }
             
             if (type.IsArray)
-                return ConvertArray(cacheStream, (Array)data);
+                return ConvertArray(cacheStream, (Array)data, definition);
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(cacheStream, data, type);
+                return ConvertList(cacheStream, data, type, definition);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(cacheStream, data, type);
+                return ConvertStructure(cacheStream, data, type, definition);
 
             return data;
         }
@@ -548,7 +548,7 @@ namespace TagTool.Commands.Porting
             return CacheContext.GetStringId(value);
         }
 
-        private Array ConvertArray(Stream cacheStream, Array array)
+        private Array ConvertArray(Stream cacheStream, Array array, object definition)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -556,14 +556,14 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < array.Length; i++)
             {
                 var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, oldValue);
+                var newValue = ConvertData(cacheStream, oldValue, definition);
                 array.SetValue(newValue, i);
             }
 
             return array;
         }
 
-        private object ConvertList(Stream cacheStream, object list, Type type)
+        private object ConvertList(Stream cacheStream, object list, Type type, object definition)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -576,21 +576,21 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < count; i++)
             {
                 var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, oldValue);
+                var newValue = ConvertData(cacheStream, oldValue, definition);
                 setItem.Invoke(list, new object[] { i, newValue });
             }
 
             return list;
         }
 
-        private object ConvertStructure(Stream cacheStream, object data, Type type)
+        private object ConvertStructure(Stream cacheStream, object data, Type type, object definition)
         {
             var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {
                 var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(cacheStream, oldValue);
+                var newValue = ConvertData(cacheStream, oldValue, definition);
                 enumerator.Field.SetValue(data, newValue);
             }
             
