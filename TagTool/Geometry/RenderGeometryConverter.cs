@@ -176,9 +176,9 @@ namespace TagTool.Geometry
             //
             // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
             //
-
+            
             var ms30Vertices = new Dictionary<int, List<int>>();
-
+            
             if (materials != null)
             {
                 var ms30Materials = new List<bool>();
@@ -201,9 +201,13 @@ namespace TagTool.Geometry
 
                     foreach (var part in mesh.Parts)
                     {
-                        if (ms30Materials[part.MaterialIndex])
-                            for (var i = partStartVertex; i < part.VertexCount; i++)
-                                ms30Indices.Add(i);
+                        if (part.IndexCount > 0)
+                        {
+                            if (part.MaterialIndex > 0 && part.MaterialIndex< ms30Materials.Count && ms30Materials[part.MaterialIndex])
+                                for (var i = partStartVertex; i < part.VertexCount; i++)
+                                    ms30Indices.Add(i);
+                        }
+                            
 
                         partStartVertex += part.VertexCount;
                     }
@@ -211,7 +215,7 @@ namespace TagTool.Geometry
                     ms30Vertices[mesh.VertexBuffers[0]] = ms30Indices;
                 }
             }
-
+            
             //
             // Convert byte[] of UnknownBlock
             //
