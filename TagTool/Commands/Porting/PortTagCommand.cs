@@ -1,5 +1,4 @@
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
@@ -26,6 +25,14 @@ namespace TagTool.Commands.Porting
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("shit"), new Tag("prt3")}; //, new Tag("effe") 
         private List<Tag> OtherTagGroups = new List<Tag> { new Tag("foot") };
 
+        private bool IsReplacing { get; set; } = false;
+        private bool IsRecursive { get; set; } = true;
+        private bool IsNew { get; set; } = false;
+        private bool UseNull { get; set; } = false;
+        private bool NoAudio { get; set; } = false;
+
+        private List<RenderMaterial> RenderMaterials { get; set; } = null;
+
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
@@ -34,7 +41,7 @@ namespace TagTool.Commands.Porting
                 "Replace: Use existing matching tag names if available." + Environment.NewLine +
                 "New: Create a new tag after the last index." + Environment.NewLine +
                 "Single: Port a new tag without any reference." + Environment.NewLine +
-                "Non-null: Port a tag without using nulled out tags." + Environment.NewLine +
+                "UseNull: Port a tag using nulled tag indices where available." + Environment.NewLine +
                 "No option: Ports a tag if its name is not present in the tag names.",
 
                 "PortTag [Options] <Tag Group> <Tag Name>",
@@ -52,12 +59,6 @@ namespace TagTool.Commands.Porting
             if (args.Count < 2)
                 return false;
 
-            var isReplacing = false;
-            var isRecursive = true;
-            var isNew = false;
-            var useNull = false;            //false by default, turn on when needed.
-            var noAudio = false;            //Doesn't port snd! tag.
-
             while (args.Count > 2)
             {
                 var arg = args[0].ToLower();
@@ -65,30 +66,30 @@ namespace TagTool.Commands.Porting
                 switch (arg)
                 {
                     case "noaudio":
-                        noAudio = true;
+                        NoAudio = true;
                         break;
 
                     case "noreplace":
-                        isReplacing = false;
+                        IsReplacing = false;
                         break;
 
                     case "replace":
-                        isReplacing = true;
+                        IsReplacing = true;
                         break;
 
                     case "new":
-                        isNew = true;
-                        useNull = false;
+                        IsNew = true;
+                        UseNull = false;
                         break;
 
                     case "single":
-                        isRecursive = false;
-                        useNull = false;
-                        isNew = true;
+                        IsRecursive = false;
+                        UseNull = false;
+                        IsNew = true;
                         break;
 
-                    case "nonnull":
-                        useNull = false;
+                    case "usenull":
+                        UseNull = true;
                         break;
 
                     default:
@@ -97,6 +98,8 @@ namespace TagTool.Commands.Porting
 
                 args.RemoveAt(0);
             }
+
+            RenderMaterials = null;
 
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
@@ -161,7 +164,7 @@ namespace TagTool.Commands.Porting
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                ConvertTag(cacheStream, blamTag, isReplacing, isNew, isRecursive, useNull, noAudio);
+                ConvertTag(cacheStream, blamTag);
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
@@ -172,7 +175,7 @@ namespace TagTool.Commands.Porting
             return true;
         }
         
-        private CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag, bool isReplacing = false, bool isNew = false, bool isRecursive = true, bool useNull = true, bool noAudio = false)
+        private CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
         {
             if (blamTag == null)
                 return null;
@@ -189,11 +192,11 @@ namespace TagTool.Commands.Porting
 
             CachedTagInstance edTag = null;
 
-            if( (groupTag == "snd!") && noAudio)
+            if( (groupTag == "snd!") && NoAudio)
                 return null;
             
 
-            if (!isNew)
+            if (!IsNew)
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -202,7 +205,7 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
                     {
-                        if (isReplacing)
+                        if (IsReplacing)
                             edTag = instance;
                         else
                             return instance;
@@ -284,7 +287,7 @@ namespace TagTool.Commands.Porting
             // Allocate Eldorado Tag
             //
             
-            if (edTag == null && useNull)
+            if (edTag == null && UseNull)
             {
                 for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
                 {
@@ -310,7 +313,7 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            blamDefinition = ConvertData(cacheStream, blamDefinition, isReplacing, isNew, isRecursive, useNull, noAudio);
+            blamDefinition = ConvertData(cacheStream, blamDefinition);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -475,12 +478,12 @@ namespace TagTool.Commands.Porting
             CacheContext.Serializer.Serialize(edContext, blamDefinition);
             CacheContext.SaveTagNames(); // Always save new tagnames in case of a crash
 
-            Console.WriteLine($"Ported {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)} [0x{edTag.Index:X4}]");
+            Console.WriteLine($"[{edTag.Group.Tag} 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)} [0x{edTag.Index:X4}]");
 
             return edTag;
         }
 
-        private object ConvertData(Stream cacheStream, object data, bool replace, bool isNew = false, bool isRecursive = true, bool useNull = true, bool noAudio = false)
+        private object ConvertData(Stream cacheStream, object data)
         {
             if (data == null)
                 return null;
@@ -490,55 +493,43 @@ namespace TagTool.Commands.Porting
             if (type.IsPrimitive)
                 return data;
 
-            if (type == typeof(CollisionMoppCode))
+            switch (data)
             {
-                var collisionMopp = (CollisionMoppCode)data;
-                collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-                return collisionMopp;
-            }
+                case CollisionMoppCode collisionMopp:
+                    return ConvertCollisionMoppData(collisionMopp.Data);
 
-            if (type == typeof(StringId))
-                return ConvertStringId((StringId)data);
+                case StringId stringId:
+                    return ConvertStringId(stringId);
 
-            if (type == typeof(CachedTagInstance))
-            {
-                if(isRecursive == false)
-                    return null;
-                else
-                {
-                    var tag = PortTagReference(CacheContext, BlamCache, ((CachedTagInstance)data).Index);
-
-                    if (tag != null && !isNew && !replace)
-                    {
-                        Console.WriteLine($"[Using existing] [{tag.Group}] {CacheContext.TagNames[tag.Index]}");
+                case CachedTagInstance tag:
+                    if (IsRecursive == false)
+                        return null;
+                    tag = PortTagReference(CacheContext, BlamCache, tag.Index);
+                    if (tag != null && !IsNew && !IsReplacing)
                         return tag;
-                    }
+                    return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
-                    return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index), replace, isNew, isRecursive, useNull, noAudio);
-                }
+                case TagFunction tagFunction:
+                    return ConvertTagFunction(tagFunction);
+
+                case RenderGeometry renderGeometry:
+                    return GeometryConverter.Convert(cacheStream, renderGeometry, RenderMaterials);
+
+                case GameObjectType gameObjectType:
+                    return ConvertGameObjectType(gameObjectType);
+
+                case ScenarioObjectType scenarioObjectType:
+                    return ConvertScenarioObjectType(scenarioObjectType);
             }
-                
-
-            if (type == typeof(TagFunction))
-                return ConvertTagFunction((TagFunction)data);
             
-            if (type == typeof(RenderGeometry))
-                return GeometryConverter.Convert((RenderGeometry)data);
-
-            if (type == typeof(GameObjectType))
-                return ConvertGameObjectType((GameObjectType)data);
-
-            if (type == typeof(ScenarioObjectType))
-                return ConvertScenarioObjectType((ScenarioObjectType)data);
-
             if (type.IsArray)
-                return ConvertArray(cacheStream, (Array)data, replace, isNew, isRecursive, useNull, noAudio);
+                return ConvertArray(cacheStream, (Array)data);
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(cacheStream, data, type, replace, isNew, isRecursive ,useNull, noAudio);
+                return ConvertList(cacheStream, data, type);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(cacheStream, data, type, replace, isNew, isRecursive, useNull, noAudio);
+                return ConvertStructure(cacheStream, data, type);
 
             return data;
         }
@@ -557,7 +548,7 @@ namespace TagTool.Commands.Porting
             return CacheContext.GetStringId(value);
         }
 
-        private Array ConvertArray(Stream cacheStream, Array array, bool replace, bool isNew, bool isRecursive, bool useNull, bool noAudio)
+        private Array ConvertArray(Stream cacheStream, Array array)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -565,14 +556,14 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < array.Length; i++)
             {
                 var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, oldValue, replace, isNew, isRecursive, useNull, noAudio);
+                var newValue = ConvertData(cacheStream, oldValue);
                 array.SetValue(newValue, i);
             }
 
             return array;
         }
 
-        private object ConvertList(Stream cacheStream, object list, Type type, bool replace, bool isNew, bool isRecursive, bool useNull, bool noAudio)
+        private object ConvertList(Stream cacheStream, object list, Type type)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -585,21 +576,21 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < count; i++)
             {
                 var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, oldValue, replace, isNew, isRecursive, useNull, noAudio);
+                var newValue = ConvertData(cacheStream, oldValue);
                 setItem.Invoke(list, new object[] { i, newValue });
             }
 
             return list;
         }
 
-        private object ConvertStructure(Stream cacheStream, object data, Type type, bool replace, bool isNew, bool isRecursive, bool useNull, bool noAudio)
+        private object ConvertStructure(Stream cacheStream, object data, Type type)
         {
             var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {
                 var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(cacheStream, oldValue, replace, isNew, isRecursive, useNull, noAudio);
+                var newValue = ConvertData(cacheStream, oldValue);
                 enumerator.Field.SetValue(data, newValue);
             }
             

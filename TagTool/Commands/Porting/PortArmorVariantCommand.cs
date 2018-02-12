@@ -381,7 +381,7 @@ namespace TagTool.Commands.Porting
                         blamResourceStream.Position = definitionEntry.Fixups[i].Offset;
                         if (i > 0)
                             previousVertexBufferCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count;
-                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount);
+                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount, new List<int>());
                     }
 
                     Console.WriteLine("done.");

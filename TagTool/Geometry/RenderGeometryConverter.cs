@@ -22,13 +22,13 @@ namespace TagTool.Geometry
             BlamCache = blamCache;
         }
 
-        private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T> writeVertex)
+        private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
         {
             for (var i = 0; i < count; i++)
-                writeVertex(readVertex());
+                writeVertex(readVertex(), i);
         }
 
-        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount)
+        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount, List<int> ms30Indices)
         {
             var vertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
 
@@ -43,58 +43,61 @@ namespace TagTool.Geometry
             switch (vertexBuffer.Format)
             {
                 case VertexBufferFormat.World:
-                    ConvertVertices(count, inVertexStream.ReadWorldVertex, v =>
+                    ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
                     {
-                        //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        if (ms30Indices.Contains(i))
+                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
                         outVertexStream.WriteWorldVertex(v);
                     });
                     break;
 
                 case VertexBufferFormat.Rigid:
-                    ConvertVertices(count, inVertexStream.ReadRigidVertex, v =>
+                    ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
                     {
-                        //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        if (ms30Indices.Contains(i))
+                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
                         outVertexStream.WriteRigidVertex(v);
                     });
                     break;
 
                 case VertexBufferFormat.Skinned:
-                    ConvertVertices(count, inVertexStream.ReadSkinnedVertex, v =>
+                    ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
                     {
-                        //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        if (ms30Indices.Contains(i))
+                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
                         outVertexStream.WriteSkinnedVertex(v);
                     });
                     break;
 
                 case VertexBufferFormat.StaticPerPixel:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerPixelData, outVertexStream.WriteStaticPerPixelData);
+                    ConvertVertices(count, inVertexStream.ReadStaticPerPixelData, (v, i) => outVertexStream.WriteStaticPerPixelData(v));
                     break;
 
                 case VertexBufferFormat.StaticPerVertex:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, outVertexStream.WriteStaticPerVertexData);
+                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) => outVertexStream.WriteStaticPerVertexData(v));
                     break;
 
                 case VertexBufferFormat.AmbientPrt:
-                    ConvertVertices(vertexBuffer.Count = previousVertexBufferCount, inVertexStream.ReadAmbientPrtData, outVertexStream.WriteAmbientPrtData);
+                    ConvertVertices(vertexBuffer.Count = previousVertexBufferCount, inVertexStream.ReadAmbientPrtData, (v, i) => outVertexStream.WriteAmbientPrtData(v));
                     break;
 
                 case VertexBufferFormat.LinearPrt:
-                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, outVertexStream.WriteLinearPrtData);
+                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) => outVertexStream.WriteLinearPrtData(v));
                     break;
 
                 case VertexBufferFormat.QuadraticPrt:
-                    ConvertVertices(count, inVertexStream.ReadQuadraticPrtData, outVertexStream.WriteQuadraticPrtData);
+                    ConvertVertices(count, inVertexStream.ReadQuadraticPrtData, (v, i) => outVertexStream.WriteQuadraticPrtData(v));
                     break;
 
                 case VertexBufferFormat.StaticPerVertexColor:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexColorData, outVertexStream.WriteStaticPerVertexColorData);
+                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexColorData, (v, i) => outVertexStream.WriteStaticPerVertexColorData(v));
                     break;
 
                 case VertexBufferFormat.Decorator:
-                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, outVertexStream.WriteDecoratorVertex);
+                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) => outVertexStream.WriteDecoratorVertex(v));
                     break;
 
                 case VertexBufferFormat.World2:
@@ -102,19 +105,19 @@ namespace TagTool.Geometry
                     goto case VertexBufferFormat.World;
 
                 case VertexBufferFormat.Unknown1A:
-                    ConvertVertices(count, inVertexStream.ReadUnknown1A, outVertexStream.WriteUnknown1A);
+                    ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) => outVertexStream.WriteUnknown1A(v));
                     break;
 
                 case VertexBufferFormat.Unknown1B:
-                    ConvertVertices(count, inVertexStream.ReadUnknown1B, outVertexStream.WriteUnknown1B);
+                    ConvertVertices(count, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
                     break;
 
                 case VertexBufferFormat.ParticleModel:
-                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, outVertexStream.WriteParticleModelVertex);
+                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) => outVertexStream.WriteParticleModelVertex(v));
                     break;
 
                 case VertexBufferFormat.TinyPosition:
-                    ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, v => 
+                    ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) => 
                     {
                         v.Position = new RealQuaternion(((ushort)((ushort)(v.Position.I * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.J * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.K * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.W * 65535) + 0x8001)) / 65535.0f);
                         outVertexStream.WriteTinyPositionVertex(v);
@@ -168,8 +171,47 @@ namespace TagTool.Geometry
                 outIndexStream.Write((short)j);
         }
 
-        public RenderGeometry Convert(RenderGeometry geometry)
+        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, List<RenderMaterial> materials)
         {
+            //
+            // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
+            //
+
+            var ms30Vertices = new Dictionary<int, List<int>>();
+
+            if (materials != null)
+            {
+                var ms30Materials = new List<bool>();
+
+                foreach (var material in materials)
+                {
+                    if (material.RenderMethod == null)
+                        continue;
+
+                    var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
+                    var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
+
+                    ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
+                }
+
+                foreach (var mesh in geometry.Meshes)
+                {
+                    var ms30Indices = new List<int>();
+                    var partStartVertex = 0;
+
+                    foreach (var part in mesh.Parts)
+                    {
+                        if (ms30Materials[part.MaterialIndex])
+                            for (var i = partStartVertex; i < part.VertexCount; i++)
+                                ms30Indices.Add(i);
+
+                        partStartVertex += part.VertexCount;
+                    }
+
+                    ms30Vertices[mesh.VertexBuffers[0]] = ms30Indices;
+                }
+            }
+
             //
             // Convert byte[] of UnknownBlock
             //
@@ -293,9 +335,9 @@ namespace TagTool.Geometry
             // Load Blam resource data
             //
 
-            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+            var rsrcData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
 
-            if (resourceData == null)
+            if (rsrcData == null)
             {
                 Console.WriteLine("Blam render_geometry resource contains no data. Created empty resource.");
                 return geometry;
@@ -307,67 +349,67 @@ namespace TagTool.Geometry
 
             Console.Write("Loading Blam render_geometry resource definition...");
 
-            var definitionEntry = BlamCache.ResourceGestalt.DefinitionEntries[geometry.ZoneAssetHandle & ushort.MaxValue];
+            var rsrcDefEntry = BlamCache.ResourceGestalt.DefinitionEntries[geometry.ZoneAssetHandle & ushort.MaxValue];
 
-            var resourceDefinition = new RenderGeometryApiResourceDefinition
+            var rsrcDef = new RenderGeometryApiResourceDefinition
             {
                 VertexBuffers = new List<D3DPointer<VertexBufferDefinition>>(),
                 IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
             };
 
-            var vertexCount = 0;     //For render geometry without index buffer only (dctr related mode)
+            var vertexCount = 0; // For render geometry without index buffer only (dctr related mode)
             var containsDecorators = false;
             var createIndexBuffer = false;
 
-            using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.DefinitionData))
-            using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
+            using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.DefinitionData))
+            using (var rsrcDefReader = new EndianReader(rsrcDefStream, EndianFormat.BigEndian))
             {
-                var dataContext = new DataSerializationContext(definitionReader, null, CacheAddressType.Definition);
+                var dataContext = new DataSerializationContext(rsrcDefReader, null, CacheAddressType.Definition);
 
-                definitionReader.SeekTo(definitionEntry.Offset + (definitionEntry.Size - 24));
+                rsrcDefReader.SeekTo(rsrcDefEntry.Offset + (rsrcDefEntry.Size - 24));
 
-                var vertexBufferCount = definitionReader.ReadInt32();
-                definitionReader.Skip(8);
-                var indexBufferCount = definitionReader.ReadInt32();
+                var vertexBufferCount = rsrcDefReader.ReadInt32();
+                rsrcDefReader.Skip(8);
+                var indexBufferCount = rsrcDefReader.ReadInt32();
 
-                definitionReader.SeekTo(definitionEntry.Offset);
+                rsrcDefReader.SeekTo(rsrcDefEntry.Offset);
 
                 for (var i = 0; i < vertexBufferCount; i++)
                 {
-                    resourceDefinition.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                    rsrcDef.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
                     {
                         Definition = new VertexBufferDefinition
                         {
-                            Count = definitionReader.ReadInt32(),
-                            Format = (VertexBufferFormat)definitionReader.ReadInt16(),
-                            VertexSize = definitionReader.ReadInt16(),
+                            Count = rsrcDefReader.ReadInt32(),
+                            Format = (VertexBufferFormat)rsrcDefReader.ReadInt16(),
+                            VertexSize = rsrcDefReader.ReadInt16(),
                             Data = new TagData
                             {
-                                Size = definitionReader.ReadInt32(),
-                                Unused4 = definitionReader.ReadInt32(),
-                                Unused8 = definitionReader.ReadInt32(),
-                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
-                                Unused10 = definitionReader.ReadInt32()
+                                Size = rsrcDefReader.ReadInt32(),
+                                Unused4 = rsrcDefReader.ReadInt32(),
+                                Unused8 = rsrcDefReader.ReadInt32(),
+                                Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
+                                Unused10 = rsrcDefReader.ReadInt32()
                             }
                         }
                     });
-                    containsDecorators = containsDecorators || resourceDefinition.VertexBuffers[i].Definition.Format == VertexBufferFormat.Decorator ? true : false;
-                    vertexCount = resourceDefinition.VertexBuffers[i].Definition.Count;
+                    containsDecorators = containsDecorators || rsrcDef.VertexBuffers[i].Definition.Format == VertexBufferFormat.Decorator ? true : false;
+                    vertexCount = rsrcDef.VertexBuffers[i].Definition.Count;
                 }
 
-                definitionReader.Skip(vertexBufferCount * 12);
+                rsrcDefReader.Skip(vertexBufferCount * 12);
 
-                if(indexBufferCount == 0 && containsDecorators)
+                if (indexBufferCount == 0 && containsDecorators)
                 {
                     createIndexBuffer = true;
-                    resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                    rsrcDef.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
                     {
                         Definition = new IndexBufferDefinition
                         {
                             Format = IndexBufferFormat.TriangleStrip,
                             Data = new TagData
                             {
-                                Size = vertexCount*2,
+                                Size = vertexCount * 2,
                                 Unused4 = 0,
                                 Unused8 = 0,
                                 Address = new CacheAddress(),
@@ -377,24 +419,26 @@ namespace TagTool.Geometry
                     });
                 }
                 else
+                {
                     for (var i = 0; i < indexBufferCount; i++)
                     {
-                        resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                        rsrcDef.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
                         {
                             Definition = new IndexBufferDefinition
                             {
-                                Format = (IndexBufferFormat)definitionReader.ReadInt32(),
+                                Format = (IndexBufferFormat)rsrcDefReader.ReadInt32(),
                                 Data = new TagData
                                 {
-                                    Size = definitionReader.ReadInt32(),
-                                    Unused4 = definitionReader.ReadInt32(),
-                                    Unused8 = definitionReader.ReadInt32(),
-                                    Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
-                                    Unused10 = definitionReader.ReadInt32()
+                                    Size = rsrcDefReader.ReadInt32(),
+                                    Unused4 = rsrcDefReader.ReadInt32(),
+                                    Unused8 = rsrcDefReader.ReadInt32(),
+                                    Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
+                                    Unused10 = rsrcDefReader.ReadInt32()
                                 }
                             }
                         });
                     }
+                }
             }
 
             Console.WriteLine("done.");
@@ -409,23 +453,18 @@ namespace TagTool.Geometry
                 // Convert Blam render_geometry_api_resource_definition
                 //
 
-                using (var blamResourceStream = new MemoryStream(resourceData))
+                using (var blamResourceStream = new MemoryStream(rsrcData))
                 {
                     //
                     // Convert Blam vertex buffers
                     //
 
                     Console.Write("Converting vertex buffers...");
-
-                    var previousVertexBufferCount = -1;
-
-                    for (var i = 0; i < resourceDefinition.VertexBuffers.Count; i++)
+                    
+                    for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                     {
-                        blamResourceStream.Position = definitionEntry.Fixups[i].Offset;
-                        if (i > 0)
-                            previousVertexBufferCount = resourceDefinition.VertexBuffers[i-1].Definition.Count;
-  
-                        ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount);
+                        blamResourceStream.Position = rsrcDefEntry.Fixups[i].Offset;
+                        ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
                     }
 
                     Console.WriteLine("done.");
@@ -435,17 +474,20 @@ namespace TagTool.Geometry
                     //
 
                     Console.Write("Converting index buffers...");
+
                     if (createIndexBuffer)
                     {
-                        geometry.Meshes[0].IndexBuffers[0] = 0;                 //Fix valid index buffer
-                        CreateIndexBuffer(resourceDefinition,edResourceStream);
+                        geometry.Meshes[0].IndexBuffers[0] = 0; // Fix valid index buffer
+                        CreateIndexBuffer(rsrcDef, edResourceStream);
                     }
                     else
-                        for (var i = 0; i < resourceDefinition.IndexBuffers.Count; i++)
+                    {
+                        for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
                         {
-                            blamResourceStream.Position = definitionEntry.Fixups[resourceDefinition.VertexBuffers.Count * 2 + i].Offset;
-                            ConvertIndexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i);
+                            blamResourceStream.Position = rsrcDefEntry.Fixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
+                            ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
                         }
+                    }
 
                     Console.WriteLine("done.");
                 }
@@ -474,7 +516,7 @@ namespace TagTool.Geometry
                 edResourceStream.Position = 0;
 
                 var resourceContext = new ResourceSerializationContext(geometry.Resource);
-                CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
+                CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
                 CacheContext.AddResource(geometry.Resource, ResourceLocation.ResourcesB, edResourceStream);
 
                 Console.WriteLine("done.");
