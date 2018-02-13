@@ -4,7 +4,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Geometry;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Serialization;
 
 namespace TagTool.Commands.CollisionModels

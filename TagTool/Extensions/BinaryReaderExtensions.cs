@@ -36,8 +36,8 @@ namespace System.IO
         public static RgbColor ReadRgbColor(this BinaryReader reader) =>
             new RgbColor(reader.ReadBytes(2)[1], reader.ReadByte(), reader.ReadByte());
 
-        public static RgbaColor ReadRgbaColor(this BinaryReader reader) =>
-            new RgbaColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+        public static ArgbColor ReadRgbaColor(this BinaryReader reader) =>
+            new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 
         public static ArgbColor ReadArgbColor(this BinaryReader reader) =>
             new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());

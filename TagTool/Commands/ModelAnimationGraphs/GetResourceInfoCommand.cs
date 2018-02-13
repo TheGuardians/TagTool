@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Commands;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {

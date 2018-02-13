@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Serialization;
 using TagTool.Commands;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Tags
 {
@@ -335,7 +336,7 @@ namespace TagTool.Commands.Tags
             }
             else if (tag.Group.Tag == new Tag("eqip"))
             {
-                var equipment = (TagDefinitions.Equipment)definition;
+                var equipment = (Equipment)definition;
 
                 var equipmentClassName =
                     (objectName.StartsWith("health_pack") || objectName.EndsWith("ammo")) ?

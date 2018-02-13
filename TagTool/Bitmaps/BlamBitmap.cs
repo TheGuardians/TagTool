@@ -1,5 +1,5 @@
 using TagTool.Bitmaps;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

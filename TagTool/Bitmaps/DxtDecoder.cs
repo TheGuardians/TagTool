@@ -930,7 +930,7 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        public static Bitmap DecodeCubeMap(byte[] data, TagDefinitions.Bitmap.Image image, int virtualWidth, int virtualHeight, System.Drawing.Imaging.PixelFormat PF, CacheVersion version)
+        public static Bitmap DecodeCubeMap(byte[] data, Tags.Definitions.Bitmap.Image image, int virtualWidth, int virtualHeight, System.Drawing.Imaging.PixelFormat PF, CacheVersion version)
         {
             List<Bitmap> images = new List<Bitmap>();
             int imageSize = virtualWidth * virtualHeight * 4;
@@ -1011,7 +1011,7 @@ namespace TagTool.Bitmaps
             return finalImage;
         }
 
-        public static byte[] DecodeBitmap(byte[] bitmRaw, TagDefinitions.Bitmap.Image image, int virtualWidth, int virtualHeight, CacheVersion Version)
+        public static byte[] DecodeBitmap(byte[] bitmRaw, Tags.Definitions.Bitmap.Image image, int virtualWidth, int virtualHeight, CacheVersion Version)
         {
             if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
                 bitmRaw = ConvertToLinearTexture(bitmRaw, virtualWidth, virtualHeight, image.Format);

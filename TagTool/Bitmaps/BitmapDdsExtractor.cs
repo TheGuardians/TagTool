@@ -1,8 +1,8 @@
 using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
-using TagTool.TagResources;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;

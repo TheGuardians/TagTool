@@ -2,10 +2,11 @@ using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Unicode

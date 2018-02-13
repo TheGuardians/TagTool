@@ -5,6 +5,7 @@ using TagTool.Serialization;
 using TagTool.Common;
 using TagTool.Cache;
 using TagTool.Commands;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.IO;
-using TagTool.TagResources;
+using TagTool.Tags.Resources;
 using TagTool.Serialization;
 using TagTool.Commands;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using TagTool.Commands;

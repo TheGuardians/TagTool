@@ -1,6 +1,6 @@
 using TagTool.Ai;
 using TagTool.Cache;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System.Collections.Generic;
 
 namespace TagTool.Commands.Porting

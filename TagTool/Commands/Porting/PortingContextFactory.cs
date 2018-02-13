@@ -2,7 +2,7 @@
 using TagTool.Commands;
 using TagTool.Legacy.Base;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {

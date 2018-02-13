@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.TagResources;
+using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;

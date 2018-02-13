@@ -1,6 +1,6 @@
 ﻿using TagTool.Cache;
 using TagTool.Commands;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Geometry;
 using TagTool.Commands.Geometry;
 

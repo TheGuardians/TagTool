@@ -4,10 +4,11 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Scripting;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Files
 {

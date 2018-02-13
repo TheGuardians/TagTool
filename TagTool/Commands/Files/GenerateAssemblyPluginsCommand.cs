@@ -3,12 +3,13 @@ using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Shaders;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Files
 {
@@ -174,7 +175,7 @@ namespace TagTool.Commands.Files
                 {typeof(StringId), AssemblyPluginFieldTypes.stringId},
                 {typeof(CachedTagInstance), AssemblyPluginFieldTypes.tagref},
                 //{typeof(RealVector2d), AssemblyPluginFieldTypes.range},
-                {typeof(RgbaColor), AssemblyPluginFieldTypes.color },
+                {typeof(ArgbColor), AssemblyPluginFieldTypes.color },
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
                 {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
                 {typeof(RgbColor), AssemblyPluginFieldTypes.color24},
@@ -557,7 +558,7 @@ namespace TagTool.Commands.Files
                 }
                 else if (assemblyPluginFieldType == AssemblyPluginFieldTypes.color || assemblyPluginFieldType == AssemblyPluginFieldTypes.colour)
                 {
-                    if (fieldType == typeof(RgbaColor))
+                    if (fieldType == typeof(ArgbColor))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RgbaColor(fieldName, ref offset));
                     else if (fieldType == typeof(ArgbColor))
                         assemblyPluginFields.AddRange(CommonFieldTypes.ArgbColor(fieldName, ref offset));

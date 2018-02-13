@@ -1,5 +1,5 @@
 ﻿using TagTool.Serialization;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using System.Reflection;
 using System.IO;
@@ -19,6 +19,7 @@ using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
 using TagTool.Commands.VertexShaders;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {

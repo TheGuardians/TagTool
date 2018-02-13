@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Bitmaps;
 using TagTool.Cache;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Serialization;
 using TagTool.Commands;
 

@@ -4,12 +4,44 @@ namespace TagTool.Common
 {
     public struct RgbColor : IEquatable<RgbColor>
     {
-        public byte Red { get; set; }
-        public byte Green { get; set; }
-        public byte Blue { get; set; }
+        public uint Value;
+        
+        public byte Red
+        {
+            get => (byte)((Value >> 16) & 0xFF);
+            set
+            {
+                var allBytes = BitConverter.GetBytes(Value);
+                allBytes[2] = value;
+                Value = BitConverter.ToUInt32(allBytes, 0);
+            }
+        }
+
+        public byte Green
+        {
+            get => (byte)((Value >> 8) & 0xFF);
+            set
+            {
+                var allBytes = BitConverter.GetBytes(Value);
+                allBytes[1] = value;
+                Value = BitConverter.ToUInt32(allBytes, 0);
+            }
+        }
+
+        public byte Blue
+        {
+            get => (byte)(Value & 0xFF);
+            set
+            {
+                var allBytes = BitConverter.GetBytes(Value);
+                allBytes[0] = value;
+                Value = BitConverter.ToUInt32(allBytes, 0);
+            }
+        }
 
         public RgbColor(byte red, byte green, byte blue)
         {
+            Value = 0;
             Red = red;
             Green = green;
             Blue = blue;

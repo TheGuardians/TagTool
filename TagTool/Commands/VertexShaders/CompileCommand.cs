@@ -3,7 +3,7 @@ using TagTool.Commands;
 using TagTool.Geometry;
 using TagTool.Serialization;
 using TagTool.Shaders;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;

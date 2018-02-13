@@ -4,7 +4,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands;
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Unicode
 {

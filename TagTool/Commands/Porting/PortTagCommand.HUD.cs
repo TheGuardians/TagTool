@@ -1,6 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +46,7 @@ namespace TagTool.Commands.Porting
                 FieldInfo halo3FieldInfo;
                 object halo3FieldValue;
 
-                if (haloOnlineFieldValue is RgbaColor && haloOnlineFieldInfo.Name.Contains("_HO"))
+                if (haloOnlineFieldValue is ArgbColor && haloOnlineFieldInfo.Name.Contains("_HO"))
                 {
                     halo3FieldInfo = typeof(ChudDefinition.HudWidget.RenderDatum).GetField(haloOnlineFieldInfo.Name.Replace("_HO", ""));
 
@@ -57,7 +57,7 @@ namespace TagTool.Commands.Porting
 
                     if (halo3FieldValue is ArgbColor)
                     {
-                        var newColor = new RgbaColor()
+                        var newColor = new ArgbColor()
                         {
                             Alpha = ((ArgbColor)halo3FieldValue).Alpha,
                             Red = ((ArgbColor)halo3FieldValue).Blue,
@@ -169,7 +169,7 @@ namespace TagTool.Commands.Porting
                     FieldInfo halo3FieldInfo;
                     object halo3FieldValue;
 
-                    if (haloOnlineFieldValue is RgbaColor)
+                    if (haloOnlineFieldValue is ArgbColor)
                     {
                         if (haloOnlineFieldInfo.Name.Contains("_HO"))
                         {
@@ -182,7 +182,7 @@ namespace TagTool.Commands.Porting
 
                             if (halo3FieldValue is ArgbColor)
                             {
-                                var newColor = new RgbaColor()
+                                var newColor = new ArgbColor()
                                 {
                                     Alpha = ((ArgbColor)halo3FieldValue).Alpha,
                                     Red = ((ArgbColor)halo3FieldValue).Blue,
@@ -196,14 +196,14 @@ namespace TagTool.Commands.Porting
                 }
 
                 //chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic27_HO = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic29_HO = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DefaultItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].MAGItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DMGItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ACCItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ROFItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].RNGItemOutline = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].PWRItemOutline = new RgbaColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic29_HO = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DefaultItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].MAGItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DMGItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ACCItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ROFItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].RNGItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].PWRItemOutline = new ArgbColor();
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {

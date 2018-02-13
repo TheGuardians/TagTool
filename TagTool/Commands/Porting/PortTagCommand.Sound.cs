@@ -3,13 +3,14 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Legacy.Base;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
-using TagTool.TagResources;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {

@@ -7,10 +7,11 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Geometry;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
-using TagTool.TagResources;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 using TagTool.Scripting;
 using TagTool.Commands.Common;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Tags
 {

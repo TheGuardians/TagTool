@@ -1,6 +1,6 @@
 ﻿using TagTool.Cache;
 using TagTool.Commands;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
 {

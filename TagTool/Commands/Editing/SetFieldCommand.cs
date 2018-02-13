@@ -485,7 +485,7 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = new RealRgbColor(i, j, k);
             }
-            else if (type == typeof(RgbaColor))
+            else if (type == typeof(ArgbColor))
             {
                 if (args.Count != 4)
                     return false;
@@ -494,7 +494,7 @@ namespace TagTool.Commands.Editing
                     !byte.TryParse(args[2], out byte k) ||
                     !byte.TryParse(args[3], out byte l))
                     return false;
-                output = new RgbaColor(i, j, k, l);
+                output = new ArgbColor(i, j, k, l);
             }  
             else if (type == typeof(Bounds<Angle>))
             {

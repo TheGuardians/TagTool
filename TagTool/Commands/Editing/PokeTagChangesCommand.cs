@@ -6,8 +6,9 @@ using System.IO;
 using TagTool.IO;
 using TagTool.Runtime;
 using TagTool.Cache;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Commands;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {

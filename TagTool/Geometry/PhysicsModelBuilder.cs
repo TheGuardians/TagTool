@@ -1,6 +1,6 @@
 using TagTool.Common;
 using TagTool.Havok;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;

@@ -1,11 +1,11 @@
 using TagTool.Common;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using BSP = TagTool.TagDefinitions.CollisionModel.Region.Permutation.Bsp;
+using BSP = TagTool.Tags.Definitions.CollisionModel.Region.Permutation.Bsp;
 namespace TagTool.Geometry
 {
     public class CollisionGeometryBuilder

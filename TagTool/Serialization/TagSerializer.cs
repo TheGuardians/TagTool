@@ -210,8 +210,8 @@ namespace TagTool.Serialization
                 SerializeColor(block, (RealRgbColor)value);
             else if (valueType == typeof(RealArgbColor))
                 SerializeColor(block, (RealArgbColor)value);
-            else if (valueType == typeof(RgbaColor))
-                SerializeColor(block, (RgbaColor)value);
+            else if (valueType == typeof(ArgbColor))
+                SerializeColor(block, (ArgbColor)value);
             else if (valueType == typeof(ArgbColor))
                 SerializeColor(block, (ArgbColor)value);
             else if (valueType == typeof(RealEulerAngles2d))
@@ -447,14 +447,6 @@ namespace TagTool.Serialization
             block.Writer.Write(color.Red);
             block.Writer.Write(color.Green);
             block.Writer.Write(color.Blue);
-        }
-
-        private void SerializeColor(IDataBlock block, RgbaColor color)
-        {
-            block.Writer.Write(color.Red);
-            block.Writer.Write(color.Green);
-            block.Writer.Write(color.Blue);
-            block.Writer.Write(color.Alpha);
         }
 
         private void SerializeColor(IDataBlock block, RealArgbColor color)

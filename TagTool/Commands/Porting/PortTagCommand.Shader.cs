@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {

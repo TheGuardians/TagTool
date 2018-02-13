@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Commands;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
 {

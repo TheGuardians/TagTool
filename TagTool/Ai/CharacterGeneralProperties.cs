@@ -1,4 +1,4 @@
-using TagTool.Equipment;
+using TagTool.Ai;
 using TagTool.Serialization;
 
 namespace TagTool.Ai
@@ -38,7 +38,7 @@ namespace TagTool.Ai
         /// </summary>
         public float Scariness;
 
-        public GrenadeType DefaultGrenadeType;
+        public CharacterDefaultGrenadeType DefaultGrenadeType;
         public CharacterBehaviorTreeRoot BehaviorTreeRoot;
     }
 }

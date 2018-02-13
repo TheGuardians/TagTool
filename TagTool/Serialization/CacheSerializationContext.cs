@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Legacy.Base;
 using System;
+using TagTool.Tags;
 
 namespace TagTool.Serialization
 {

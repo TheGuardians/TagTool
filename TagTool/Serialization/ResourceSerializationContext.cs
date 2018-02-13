@@ -1,7 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.TagResources;
+using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -4,7 +4,7 @@ using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;

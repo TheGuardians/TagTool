@@ -6,7 +6,7 @@ using Assimp;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using TagTool.Serialization;
 using TagTool.Commands;
 

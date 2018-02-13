@@ -1,7 +1,7 @@
 ﻿using TagTool.Cache;
 using TagTool.Commands;
 using TagTool.Geometry;
-using TagTool.TagDefinitions;
+using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 

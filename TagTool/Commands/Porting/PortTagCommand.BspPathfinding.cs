@@ -2,12 +2,13 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
-using TagTool.TagDefinitions;
-using TagTool.TagResources;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
