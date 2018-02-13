@@ -39,7 +39,11 @@ namespace TagTool.Tags
 
         public enum TagFunctionOutputType : sbyte
         {
-            Scalar
+            Scalar,
+            OneColor,
+            TwoColor,
+            ThreeColor,
+            FourColor
         }
 
         [TagStructure(Size = 0x20)]
@@ -89,6 +93,12 @@ namespace TagTool.Tags
             public RealPoint2d Point;
         }
 
+        [TagStructure(Size = 0x8)]
+        public struct PeriodicData
+        {
+            public RealPoint2d Point;
+        }
+
         [TagStructure(Size = 0xC)]
         public struct LinearData
         {
@@ -107,6 +117,20 @@ namespace TagTool.Tags
         public struct SplineData
         {
             public float Unknown;
+            public RealPoint2d Point1;
+            public RealPoint2d Point2;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public struct MultiSplineData
+        {
+            public RealPoint2d Point1;
+            public RealPoint2d Point2;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public struct ExponentData
+        {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
