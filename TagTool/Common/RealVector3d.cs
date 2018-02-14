@@ -40,6 +40,11 @@ namespace TagTool.Common
         public static bool operator !=(RealVector3d a, RealVector3d b) =>
             !a.Equals(b);
 
+        public static RealVector3d operator *(float k, RealVector3d a)
+        {
+            return new RealVector3d(k * a.I, k * a.J, k * a.K);
+        }
+
         public override int GetHashCode() =>
             13 * 17 + I.GetHashCode()
                * 17 + J.GetHashCode()
@@ -47,5 +52,26 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ I: {I}, J: {J}, K: {K} }}";
+
+        public static RealVector3d CrossProduct(RealVector3d a, RealVector3d b)
+        {
+            RealVector3d result = new RealVector3d()
+            {
+                I = a.J * b.K - a.K * b.J,
+                J = a.K * b.I - a.I * b.K,
+                K = a.I * b.J - a.J * b.I
+            };
+            return Normalize(result);
+        }
+
+        public static float Norm(RealVector3d a)
+        {
+            return (float)Math.Sqrt(a.I*a.I + a.J*a.J + a.K*a.K);
+        }
+
+        public static RealVector3d Normalize(RealVector3d a)
+        {
+            return 1 / Norm(a) * a;
+        }
     }
 }

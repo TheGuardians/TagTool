@@ -59,6 +59,13 @@ namespace TagTool.Commands.Porting
         {
             proj.InitialVelocity = 7.5f * proj.InitialVelocity;
             proj.FinalVelocity = 7.5f * proj.FinalVelocity;
+
+            //Seems to fix projectile speed
+
+            var temp = proj.AiGuidedAngularVelocityScale;
+            proj.AiGuidedAngularVelocityScale = proj.AiVelocityScale;
+            proj.AiVelocityScale = temp;
+
             return proj;
         }
     }

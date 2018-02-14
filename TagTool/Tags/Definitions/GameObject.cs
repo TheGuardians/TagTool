@@ -222,9 +222,12 @@ namespace TagTool.Tags.Definitions
                 public StringId VariantName;
             }
 
-            [TagStructure(Size = 0x20)]
+            [TagStructure(Size = 0x28)]
             public class Function
             {
+                [TagField(Padding = true, Length = 4)]
+                public byte[] Unused = new byte[4];
+
                 public ScaleFlagsValue ScaleFlags;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
