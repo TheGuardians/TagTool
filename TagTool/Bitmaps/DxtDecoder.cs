@@ -1177,6 +1177,7 @@ namespace TagTool.Bitmaps
 
                 case BitmapFormat.AY8:
                 case BitmapFormat.Y8:
+                case BitmapFormat.A8:
                     blockSizeX = 1;
                     blockSizeY = 1;
                     texPitch = 1;
