@@ -287,8 +287,6 @@ namespace TagTool.Commands.Porting
             // Convert Blam data to ElDorado data
             //
             
-            Console.Write("Converting Halo 3/Halo 3 ODST Sound Data...");
-
             sound.SoundClass = ((int)sound.SoundClass < 50) ? sound.SoundClass : (sound.SoundClass + 1);
             if (sound.SoundClass == Sound.SoundClassValue.FirstPersonInside)
                 sound.SoundClass = Sound.SoundClassValue.InsideSurroundTail;
@@ -706,7 +704,7 @@ namespace TagTool.Commands.Porting
                     sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
                 }
 
-                Console.WriteLine("done.");
+                //Console.WriteLine("done.");
             }
             
             if (File.Exists(soundMP3))

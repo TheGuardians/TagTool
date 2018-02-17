@@ -23,8 +23,6 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
-        private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("shit"), new Tag("prt3")}; //, new Tag("effe") 
-        private List<Tag> OtherTagGroups = new List<Tag> { new Tag("foot") };
 
         private bool IsReplacing { get; set; } = false;
         private bool IsRecursive { get; set; } = true;
@@ -104,7 +102,6 @@ namespace TagTool.Commands.Porting
             // Verify Blam group tag
             //
 
-            Console.Write("Verifying Blam group tag...");
             String groupName = "";
             var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
 
@@ -126,15 +123,11 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine($"ERROR: Invalid tag group \"{args[0]}\"");
                 return true;
             }
-
-            Console.WriteLine("done.");
-
+            
             //
             // Verify Blam tag instance
             //
-
-            Console.Write($"Verifying Blam {groupName} tag...");
-
+            
             var blamTagName = args[1];
 
             CacheFile.IndexItem blamTag = null;
@@ -154,8 +147,6 @@ namespace TagTool.Commands.Porting
                 return true;
             }
 
-            Console.WriteLine("done.");
-
             //
             // Convert Blam data to ElDorado data
             //
@@ -172,7 +163,7 @@ namespace TagTool.Commands.Porting
             return true;
         }
         
-        private CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
+        public CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
         {
             if (blamTag == null)
                 return null;
@@ -192,7 +183,6 @@ namespace TagTool.Commands.Porting
             if( (groupTag == "snd!") && NoAudio)
                 return null;
             
-
             if (!IsNew)
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
@@ -202,10 +192,14 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
                     {
-                        if (IsReplacing)
+                        if (IsReplacing && !instance.IsInGroup("rm  "))
                             edTag = instance;
                         else
-                            return instance;
+                        {
+                            edTag = instance;
+                            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                            return edTag;
+                        }
                     }
                 }
             }
@@ -223,7 +217,11 @@ namespace TagTool.Commands.Porting
                     var tagInstance = CacheContext.GetTag(entry.Key);
 
                     if (tagInstance.Group.Tag == groupTag)
-                        return tagInstance;
+                    {
+                        edTag = tagInstance;
+                        Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                        return edTag;
+                    }
                 }
             }
 
@@ -237,48 +235,6 @@ namespace TagTool.Commands.Porting
             //
             // Return engine default tags for any unsupported tag groups
             //
-
-            if (RenderMethodTagGroups.Contains(groupTag))
-            {
-                if(groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if(groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if(groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if(groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if(groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if(groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if(groupTag == "rmct")
-                    return null;
-                else
-                    return CacheContext.GetTag(0x101F);
-            }
-            else if (EffectTagGroups.Contains(groupTag))
-            {
-                if (groupTag == "beam")
-                    return CacheContext.GetTag(0x18B5);
-                else if (groupTag == "cntl")
-                    return CacheContext.GetTag(0x528);
-                else if (groupTag == "ltvl")
-                    return CacheContext.GetTag(0x594);
-                else if (groupTag == "decs")
-                    return CacheContext.GetTag(0x3A4);
-                else if (groupTag == "shit")
-                    return CacheContext.GetTag(0x139C);
-                else if (groupTag == "effe")
-                    return CacheContext.GetTag(0x12FE);
-                else
-                    return CacheContext.GetTag(0x29E);
-            }
-            else if (OtherTagGroups.Contains(groupTag))
-            {
-                if (groupTag == "foot")
-                    return CacheContext.GetTag(0xc0d);
-            }
             
             //
             // Allocate Eldorado Tag
@@ -305,7 +261,33 @@ namespace TagTool.Commands.Porting
             // Load the Blam tag definition and convert Blam data to ElDorado data
             //
 
-            Console.WriteLine($"Converting Blam {groupTag.ToString()} {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))} tag...");
+            if (RenderMethodTagGroups.Contains(groupTag))
+            {
+                if (groupTag == "rmw ")
+                    return CacheContext.GetTag(0x400F);
+                else if (groupTag == "rmhg")
+                    return CacheContext.GetTag(0x2647);
+                else if (groupTag == "rmtr")
+                    return CacheContext.GetTag(0x3AAD);
+                else if (groupTag == "rmcs")
+                    return CacheContext.GetTag(0x101F);
+                else if (groupTag == "rmd ")
+                    return CacheContext.GetTag(0x1BA2);
+                else if (groupTag == "rmfl")
+                    return CacheContext.GetTag(0x4CA9);
+                else if (groupTag == "rmct")
+                    return null;
+                else
+                    return CacheContext.GetTag(0x101F);
+            }
+
+            if (groupTag == "prt3" || groupTag == "ltvl" || groupTag == "decs" || groupTag == "beam" || groupTag == "cntl")
+            {
+                edTag = MatchShadersCommand.PortShaderTag(cacheStream, CacheContext, BlamCache, blamTag);
+                if (edTag != null)
+                    Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                return edTag;
+            }
 
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
@@ -475,7 +457,7 @@ namespace TagTool.Commands.Porting
             CacheContext.Serializer.Serialize(edContext, blamDefinition);
             CacheContext.SaveTagNames(); // Always save new tagnames in case of a crash
 
-            Console.WriteLine($"[{edTag.Group.Tag} 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)} [0x{edTag.Index:X4}]");
+            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
         }

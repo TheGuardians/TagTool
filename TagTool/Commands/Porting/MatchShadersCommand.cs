@@ -15,25 +15,25 @@ namespace TagTool.Commands.Porting
 {
     public class MatchShadersCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
-        private static int rmPreset = 0x0;
-        private static int rmt2Preset = 0x0;
-        private static bool newOnly = false;
-        private static bool existingOnly = false;
-        private static bool rmt2MatchOnly = false;
-        private static bool ms23Only = false;
-        private static bool ms30Only = false;
-        private static bool noBumpMaps = false;
-        private static bool forceFunctions = false;
-        private static bool debugMode = false;
-        private static string tagNameShort = "";
-        private static List<string> csvQueue = new List<string>();
-        private static List<string> edBitmaps = new List<string>();
-        private static List<string> h3Bitmaps = new List<string>();
-        private static List<string> edArguments = new List<string>();
-        private static List<string> h3Arguments = new List<string>();
-        private static Dictionary<string, float[]> edArgPreset;
+        public GameCacheContext CacheContext { get; }
+        public CacheFile BlamCache { get; }
+        public static int rmPreset = 0x0;
+        public static int rmt2Preset = 0x0;
+        public static bool newOnly = false;
+        public static bool existingOnly = false;
+        public static bool rmt2MatchOnly = false;
+        public static bool ms23Only = false;
+        public static bool ms30Only = false;
+        public static bool noBumpMaps = false;
+        public static bool forceFunctions = false;
+        public static bool debugMode = false;
+        public static string tagNameShort = "";
+        public static List<string> csvQueue = new List<string>();
+        public static List<string> edBitmaps = new List<string>();
+        public static List<string> h3Bitmaps = new List<string>();
+        public static List<string> edArguments = new List<string>();
+        public static List<string> h3Arguments = new List<string>();
+        public static Dictionary<string, float[]> edArgPreset;
 
         public MatchShadersCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -52,42 +52,19 @@ namespace TagTool.Commands.Porting
             BlamCache = blamCache;
         }
 
-        private static bool PortShaderTag(GameCacheContext CacheContext, CacheFile BlamCache, List<string> args)
+        public static CachedTagInstance PortShaderTag(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, CacheFile.IndexItem h3Tag)
         {
-            args.RemoveAt(0);
-            if (args.Count != 2)
-                return false;
-
-            CacheFile.IndexItem h3Tag = null;
-
-            foreach (var instance in BlamCache.IndexItems)
-            {
-                if (instance.ClassCode == args[0] && instance.Filename == args[1])
-                {
-                    h3Tag = instance;
-                    break;
-                }
-            }
-
-            if (h3Tag == null)
-                return false;
-
-            WriteLine("");
             WriteLine($"[{h3Tag.ClassCode}] {h3Tag.Filename} processing...");
-            var a = PortTagReference(CacheContext, BlamCache, h3Tag.ID);
 
-            if (a != null)
+            var tag = PortTagReference(cacheContext, blamCache, h3Tag.ID);
+
+            if (tag != null)
             {
                 WriteLine($"Found existing for {h3Tag.Filename}");
-                return true;
+                return tag;
             }
-
-            rmPreset = 0;
-            rmt2Preset = 0;
-            edArgPreset = new Dictionary<string, float[]>();
-            MatchShader7(CacheContext, BlamCache, h3Tag);
-
-            return true;
+            
+            return MatchShader7(stream, cacheContext, blamCache, h3Tag);
         }
 
         public override object Execute(List<string> args)
@@ -106,7 +83,27 @@ namespace TagTool.Commands.Porting
 
             // Redirect if only one shader needs to be ported
             if (args[0].ToLower() == "porttag")
-                return PortShaderTag(CacheContext, BlamCache, args);
+            {
+                if (args.Count != 3)
+                    return false;
+
+                args.RemoveAt(0);
+
+                foreach (var instance in BlamCache.IndexItems)
+                {
+                    if (instance.ClassCode == args[0] && instance.Filename == args[1])
+                    {
+                        h3Tag = instance;
+                        break;
+                    }
+                }
+
+                if (h3Tag == null)
+                    return false;
+
+                using (var stream = CacheContext.OpenTagCacheReadWrite())
+                    return PortShaderTag(stream, CacheContext, BlamCache, h3Tag);
+            }
 
             foreach (var a in args)
             {
@@ -204,23 +201,23 @@ namespace TagTool.Commands.Porting
 
             var renderMaterials = new List<RenderMaterial>();
 
-            if (tag.Group.Tag.ToString() == "sbsp")
+            using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                var blamDefinition = BlamDeserializer.Deserialize<ScenarioStructureBspMaterials>(blamContext);
+                if (tag.Group.Tag.ToString() == "sbsp")
+                {
+                    var blamDefinition = BlamDeserializer.Deserialize<ScenarioStructureBspMaterials>(blamContext);
 
-                RestoreH3Shaders(CacheContext, BlamCache, blamDefinition.Materials);
-                renderMaterials = blamDefinition.Materials;
-            }
-            else if (tag.Group.Tag.ToString() == "mode")
-            {
-                var blamDefinition = BlamDeserializer.Deserialize<RenderModel>(blamContext);
+                    RestoreH3Shaders(stream, CacheContext, BlamCache, blamDefinition.Materials);
+                    renderMaterials = blamDefinition.Materials;
+                }
+                else if (tag.Group.Tag.ToString() == "mode")
+                {
+                    var blamDefinition = BlamDeserializer.Deserialize<RenderModel>(blamContext);
 
-                RestoreH3Shaders(CacheContext, BlamCache, blamDefinition.Materials);
-                renderMaterials = blamDefinition.Materials;
-            }
-
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
+                    RestoreH3Shaders(stream, CacheContext, BlamCache, blamDefinition.Materials);
+                    renderMaterials = blamDefinition.Materials;
+                }
+                
                 var context = new TagSerializationContext(stream, CacheContext, tag);
                 if (tag.Group.Tag.ToString() == "sbsp")
                 {
@@ -258,7 +255,7 @@ namespace TagTool.Commands.Porting
             return true;
         }
 
-        public static List<RenderMaterial> RestoreH3Shaders(GameCacheContext CacheContext, CacheFile BlamCache, List<RenderMaterial> materials)
+        public static List<RenderMaterial> RestoreH3Shaders(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, List<RenderMaterial> materials)
         {
             int i = -1;
             WriteLine("Default shaders:");
@@ -268,7 +265,7 @@ namespace TagTool.Commands.Porting
                 if ((uint)material.RenderMethod.Index != 0xFFFFFFFF)
                 {
 
-                    var h3RenderMethod = BlamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
+                    var h3RenderMethod = blamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
                     WriteLine($"[{i:D3}] [{h3RenderMethod.ClassCode}] {h3RenderMethod.Filename}");
                 }
                 else
@@ -290,19 +287,19 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 var renderMethodGroup = material.RenderMethod.Group.ToString();
-                var h3RenderMethod = BlamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
+                var h3RenderMethod = blamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
 
                 WriteLine("");
                 WriteLine($"[{i:D3}] [{h3RenderMethod.ClassCode}] {h3RenderMethod.Filename}");
 
                 // Hardcoded tag indexes or rmt2 tags, called presets
-                GetShaderPresets(CacheContext, h3RenderMethod.Filename);
+                GetShaderPresets(cacheContext, h3RenderMethod.Filename);
 
                 // Disable rmbk and rmw for now
                 switch (renderMethodGroup)
                 {
                     case "rmbk":
-                        material.RenderMethod = CacheContext.GetTag(0x3AB0);
+                        material.RenderMethod = cacheContext.GetTag(0x3AB0);
                         continue;
 
                     case "rmw ":
@@ -317,8 +314,8 @@ namespace TagTool.Commands.Porting
                 // rmPreset and rmt2Preset possibly have a value now.
                 if (rmPreset != 0x0)
                 {
-                    WriteLine($"[{i:D3}] [Using [{CacheContext.GetTag(rmPreset).Group}] 0x{rmPreset:X4}] {h3RenderMethod.Filename}");
-                    material.RenderMethod = CacheContext.GetTag(rmPreset);
+                    WriteLine($"[{i:D3}] [Using [{cacheContext.GetTag(rmPreset).Group}] 0x{rmPreset:X4}] {h3RenderMethod.Filename}");
+                    material.RenderMethod = cacheContext.GetTag(rmPreset);
                     continue;
                 }
 
@@ -329,7 +326,7 @@ namespace TagTool.Commands.Porting
                     goto label1;
                 }
 
-                material.RenderMethod = PortTagReference(CacheContext, BlamCache, material.RenderMethod.Index);
+                material.RenderMethod = PortTagReference(cacheContext, blamCache, material.RenderMethod.Index);
 
                 if (newOnly)
                     material.RenderMethod = null;
@@ -338,7 +335,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (material.RenderMethod == null)
                     {
-                        material.RenderMethod = CacheContext.GetTag(0x3AB0);
+                        material.RenderMethod = cacheContext.GetTag(0x3AB0);
                         WriteLine($"[{i:D3}] [{"No matches. Using 0x3AB0",-26}] {h3RenderMethod.Filename}");
                     }
                     continue;
@@ -347,28 +344,28 @@ namespace TagTool.Commands.Porting
                 label1:
                 if (material.RenderMethod == null)
                 {
-                    material.RenderMethod = MatchShader7(CacheContext, BlamCache, h3RenderMethod);
+                    material.RenderMethod = MatchShader7(stream, cacheContext, blamCache, h3RenderMethod);
 
                     if (material.RenderMethod == null)
                     {
-                        material.RenderMethod = CacheContext.GetTag(0x3AB0);
+                        material.RenderMethod = cacheContext.GetTag(0x3AB0);
                         WriteLine($"[{i:D3}] [{"Port failed. Using 0x3AB0",-26}] {h3RenderMethod.Filename}");
                     }
                     else
                     {
-                        WriteLine($"[{i:D3}] [{"Using a new ported shader",-26}] {CacheContext.TagNames[material.RenderMethod.Index]}.{material.RenderMethod.Group.Tag}", true);
+                        WriteLine($"[{i:D3}] [{"Using a new ported shader",-26}] {cacheContext.TagNames[material.RenderMethod.Index]}.{material.RenderMethod.Group.Tag}", true);
                     }
                 }
                 else
                 {
-                    WriteLine($"[{i:D3}] [{"Using existing shader",-26}] {CacheContext.TagNames[material.RenderMethod.Index]}.{material.RenderMethod.Group.Tag}", true);
+                    WriteLine($"[{i:D3}] [{"Using existing shader",-26}] {cacheContext.TagNames[material.RenderMethod.Index]}.{material.RenderMethod.Group.Tag}", true);
                 }
             }
 
             return materials;
         }
 
-        private static RenderMethod ConvertDefinition(string tagClass, object h3Definition)
+        public static RenderMethod ConvertDefinition(string tagClass, object h3Definition)
         {
             switch (tagClass)
             {
@@ -425,7 +422,7 @@ namespace TagTool.Commands.Porting
 
         }
 
-        public static CachedTagInstance MatchShader7(GameCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
+        public static CachedTagInstance MatchShader7(Stream stream, GameCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
             var blamDeserializer = new TagDeserializer(BlamCache.Version);
@@ -526,21 +523,20 @@ namespace TagTool.Commands.Porting
             // Check for errors
             if (rmPreset == 0)
             {
-                WriteLine($"ERROR: Failed to find a shader with rmt2 0x{rmt2Preset:X4}", true);
+                WriteLine($"WARNING: Failed to find a shader with rmt2 0x{rmt2Preset:X4}", true);
                 return CacheContext.GetTag(0x3AB0);
             }
 
             var edTag = CacheContext.GetTag(rmPreset);
 
             object edDefinition = null;
-
-            using (var stream = CacheContext.OpenTagCacheRead())
-                edDefinition = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, edTag), TagDefinition.Find(edTag.Group.Tag));
+            
+            edDefinition = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, edTag), TagDefinition.Find(edTag.Group.Tag));
 
             // Check for errors
             if (edDefinition == null)
             {
-                WriteLine($"ERROR: This tag could not be deserialized: 0x{rmPreset:X4}", true);
+                WriteLine($"WARNING: This tag could not be deserialized: 0x{rmPreset:X4}", true);
                 return CacheContext.GetTag(0x3AB0);
             }
 
@@ -557,11 +553,8 @@ namespace TagTool.Commands.Porting
             // Deserialize ED rmt2.
             RenderMethodTemplate edRmt2;
 
-            using (var stream = CacheContext.OpenTagCacheRead())
-            {
-                var edContext = new TagSerializationContext(stream, CacheContext, edShader.ShaderProperties[0].Template);
-                edRmt2 = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
-            }
+            var edContext = new TagSerializationContext(stream, CacheContext, edShader.ShaderProperties[0].Template);
+            edRmt2 = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
 
             // Check for errors
             if (edRmt2 == null)
@@ -585,7 +578,7 @@ namespace TagTool.Commands.Porting
                 if (a.Bitmap == null)
                     ;*/
 
-            edShader.ShaderProperties[0] = PortShaderProperty(CacheContext, BlamCache, h3Shader.ShaderProperties[0], edShader.ShaderProperties[0]);
+            edShader.ShaderProperties[0] = PortShaderProperty(stream, CacheContext, BlamCache, h3Shader.ShaderProperties[0], edShader.ShaderProperties[0]);
 
             /*foreach (var a in edShader.ShaderProperties[0].ShaderMaps)
                 if (a.Bitmap == null)
@@ -642,11 +635,8 @@ namespace TagTool.Commands.Porting
             if (newTag == null)
                 newTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[edTag.Group.Tag]);
 
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context = new TagSerializationContext(stream, CacheContext, newTag);
-                CacheContext.Serializer.Serialize(context, edShader);
-            }
+            var context = new TagSerializationContext(stream, CacheContext, newTag);
+            CacheContext.Serializer.Serialize(context, edDefinition);
 
             if (CacheContext.TagNames.ContainsKey(newTag.Index))
                 CacheContext.TagNames[newTag.Index] = h3Tag.Filename;
@@ -656,7 +646,7 @@ namespace TagTool.Commands.Porting
             return newTag;
         }
 
-        private static int MatchRenderMethodTemplateByName(GameCacheContext CacheContext, CacheFile BlamCache, CachedTagInstance blamRmt2)
+        public static int MatchRenderMethodTemplateByName(GameCacheContext CacheContext, CacheFile BlamCache, CachedTagInstance blamRmt2)
         {
             // Get blamrmt2 name
             // Loop trough all ED tags till the ed filename contains blam rmt2 filename
@@ -672,6 +662,9 @@ namespace TagTool.Commands.Porting
             // 0x263A shaders\shader_templates\_0_0_0_1_0_0_1_3_0_0_0
             foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
             {
+                if (!CacheContext.TagNames.ContainsKey(instance.Index))
+                    continue;
+
                 var edTagname = CacheContext.TagNames[instance.Index];
 
                 if (blamTagname == edTagname)
@@ -693,6 +686,9 @@ namespace TagTool.Commands.Porting
 
             foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
             {
+                if (!CacheContext.TagNames.ContainsKey(instance.Index))
+                    continue;
+
                 var edTagname = CacheContext.TagNames[instance.Index];
 
                 if (blamTagname == edTagname.Substring(0, edTagname.Length - 2))
@@ -711,6 +707,9 @@ namespace TagTool.Commands.Porting
             label1:
             foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
             {
+                if (!CacheContext.TagNames.ContainsKey(instance.Index))
+                    continue;
+
                 var edTagname = CacheContext.TagNames.ContainsKey(instance.Index) ? CacheContext.TagNames[instance.Index] : throw new Exception("ERROR: Rmt2 tags are not named.");
 
                 if (blamTagname == edTagname.Substring(0, edTagname.Length - 4))
@@ -726,7 +725,7 @@ namespace TagTool.Commands.Porting
             return edRmt2index;
         }
 
-        private static void GetRmt2Info(GameCacheContext cacheContext)
+        public static void GetRmt2Info(GameCacheContext cacheContext)
         {
             if (cacheContext.Rmt2TagsInfo.Count == 0)
             {
@@ -753,7 +752,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private static int MatchRenderMethodTemplate2(GameCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
+        public static int MatchRenderMethodTemplate2(GameCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
         {
             // Make a new dictionary with rmt2 of the same shader type
             List<ShaderTemplateItem> edRmt2SameType = new List<ShaderTemplateItem>();
@@ -1063,7 +1062,7 @@ namespace TagTool.Commands.Porting
             return _0.ShaderTemplateTagIndex;
         }
 
-        private static Shader.ShaderProperty PortShaderProperty(GameCacheContext cacheContext, CacheFile blamCache, Shader.ShaderProperty h3Property, Shader.ShaderProperty edProperty)
+        public static Shader.ShaderProperty PortShaderProperty(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, Shader.ShaderProperty h3Property, Shader.ShaderProperty edProperty)
         {
             // Loop trough all the common bitmaps, match or port
             int blamBitmI2 = -1;
@@ -1107,7 +1106,18 @@ namespace TagTool.Commands.Porting
                             var porttag = new PortTagCommand(cacheContext, blamCache);
                             try
                             {
-                                porttag.Execute(new List<string> { "new", "bitm", tagname });
+                                CacheFile.IndexItem blamTag = null;
+
+                                foreach (var tag in blamCache.IndexItems)
+                                {
+                                    if ((tag.ClassCode == "bitm") && (tag.Filename == tagname))
+                                    {
+                                        blamTag = tag;
+                                        break;
+                                    }
+                                }
+
+                                edProperty.ShaderMaps[edBitmI].Bitmap = new PortTagCommand(cacheContext, blamCache).ConvertTag(stream, blamTag);
                             }
                             catch
                             {
@@ -1224,6 +1234,9 @@ namespace TagTool.Commands.Porting
                 edProperty.Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
             }
 
+            if (edArgPreset == null)
+                edArgPreset = new Dictionary<string, float[]>();
+
             //  edArgPreset.Add("env_roughness_scale", new float[] { 0.1f, 0, 0, 0 });
             foreach (var a in edArgPreset)
             {
@@ -1249,7 +1262,7 @@ namespace TagTool.Commands.Porting
             return edProperty;
         }
 
-        private static CachedTagInstance PortTagReference(GameCacheContext cacheContext, CacheFile blamCache, int index, int maxIndex = 0xFFFF)
+        public static CachedTagInstance PortTagReference(GameCacheContext cacheContext, CacheFile blamCache, int index, int maxIndex = 0xFFFF)
         {
             if (index == -1)
                 return null;
@@ -1780,7 +1793,7 @@ namespace TagTool.Commands.Porting
             Parameter = 1
         }
 
-        private class ArgumentItem
+        public class ArgumentItem
         {
             public float Arg1 = 0.0f;
             public float Arg2 = 0.0f;
@@ -1789,7 +1802,7 @@ namespace TagTool.Commands.Porting
         }
 
         [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp")]
-        private class ScenarioStructureBspMaterials // used to deserialize as fast as possible
+        public class ScenarioStructureBspMaterials // used to deserialize as fast as possible
         {
             [TagField(Padding = true, Length = 0xC0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
             public byte[] Padding = new byte[0xC0];

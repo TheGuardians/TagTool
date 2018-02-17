@@ -222,50 +222,53 @@ namespace TagTool.Commands.Porting
 
             blamMaterials = blamMaterials.Where(i => variantMaterials.Contains(blamMaterials.IndexOf(i))).ToList();
 
-            for (var i = 0; i < blamMaterials.Count; i++)
+            using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                var material = blamMaterials[i];
-
-                if (material.RenderMethod.Index == -1)
-                    continue;
-
-                var blamRenderMethod = blamMaterials[i].RenderMethod;
-                var blamRenderMethodTag = BlamCache.IndexItems.GetItemByID(blamRenderMethod.Index);
-
-                var renderMethodExists = false;
-
-                foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rm  "))
+                for (var i = 0; i < blamMaterials.Count; i++)
                 {
-                    if (CacheContext.TagNames.ContainsKey(instance.Index) && CacheContext.TagNames[instance.Index] == blamRenderMethodTag.Filename)
+                    var material = blamMaterials[i];
+
+                    if (material.RenderMethod.Index == -1)
+                        continue;
+
+                    var blamRenderMethod = blamMaterials[i].RenderMethod;
+                    var blamRenderMethodTag = BlamCache.IndexItems.GetItemByID(blamRenderMethod.Index);
+
+                    var renderMethodExists = false;
+
+                    foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rm  "))
                     {
-                        renderMethodExists = true;
-                        material.RenderMethod = instance;
-                        break;
+                        if (CacheContext.TagNames.ContainsKey(instance.Index) && CacheContext.TagNames[instance.Index] == blamRenderMethodTag.Filename)
+                        {
+                            renderMethodExists = true;
+                            material.RenderMethod = instance;
+                            break;
+                        }
                     }
+
+                    if (renderMethodExists)
+                        continue;
+
+                    switch (blamRenderMethodTag.Filename)
+                    {
+                        case @"levels\dlc\bunkerworld\shaders\z_invisible_quads":
+                        case @"levels\dlc\midship\shaders\z_invis_lightquad":
+                        case @"levels\multi\snowbound\shaders\z_invis_lightquad": // ToDo: see why it crashes as a shader
+                            material.RenderMethod = null;
+                            break;
+                    }
+
+                    if (material.RenderMethod != null && material.RenderMethod.Index != -1)
+                        material.RenderMethod = MatchShadersCommand.MatchShader7(stream, CacheContext, BlamCache, blamRenderMethodTag);
+
+                    if (material.RenderMethod != null)
+                    {
+                        var tagName = CacheContext.TagNames.ContainsKey(material.RenderMethod.Index) ? CacheContext.TagNames[material.RenderMethod.Index] : $"0x{material.RenderMethod.Index:X4}";
+                        Console.WriteLine($"[{i:D3}] [{material.RenderMethod.Group}] 0x{material.RenderMethod.Index:X4} {tagName}");
+                    }
+                    else
+                        Console.WriteLine($"[{i:D3}] [NULL]");
                 }
-
-                if (renderMethodExists)
-                    continue;
-
-                switch (blamRenderMethodTag.Filename)
-                {
-                    case @"levels\dlc\bunkerworld\shaders\z_invisible_quads":
-                    case @"levels\dlc\midship\shaders\z_invis_lightquad":
-                    case @"levels\multi\snowbound\shaders\z_invis_lightquad": // ToDo: see why it crashes as a shader
-                        material.RenderMethod = null;
-                        break;
-                }
-
-                if (material.RenderMethod != null && material.RenderMethod.Index != -1)
-                    material.RenderMethod = MatchShadersCommand.MatchShader7(CacheContext, BlamCache, blamRenderMethodTag);
-
-                if (material.RenderMethod != null)
-                {
-                    var tagName = CacheContext.TagNames.ContainsKey(material.RenderMethod.Index) ? CacheContext.TagNames[material.RenderMethod.Index] : $"0x{material.RenderMethod.Index:X4}";
-                    Console.WriteLine($"[{i:D3}] [{material.RenderMethod.Group}] 0x{material.RenderMethod.Index:X4} {tagName}");
-                }
-                else
-                    Console.WriteLine($"[{i:D3}] [NULL]");
             }
 
             edModeDefinition.Materials = blamMaterials;
