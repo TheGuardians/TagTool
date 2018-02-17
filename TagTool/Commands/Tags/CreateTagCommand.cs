@@ -89,8 +89,12 @@ namespace TagTool.Commands.Tags
             {
                 if (args.Count == 2)
                 {
-                    if (!int.TryParse(args[1].Replace("0x", ""), NumberStyles.HexNumber, null, out int tagIndex))
+                    var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
+
+                    if (tag == null)
                         return false;
+
+                    var tagIndex = tag.Index;
 
                     if (tagIndex > CacheContext.TagCache.Index.Count)
                         return false;
