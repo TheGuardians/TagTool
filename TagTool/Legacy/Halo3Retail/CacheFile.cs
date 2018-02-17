@@ -441,7 +441,12 @@ namespace TagTool.Legacy.Halo3Retail
             var Entry = ResourceGestalt.DefinitionEntries[ID & ushort.MaxValue];
 
             if (Entry.SegmentIndex == -1)
-                throw new InvalidDataException("Raw data not found.");
+            {
+                Console.WriteLine($"Segment index = -1 at definition entry {ID & ushort.MaxValue} ");
+                return null;
+            }
+                
+            
 
             var segment = ResourceLayoutTable.Segments[Entry.SegmentIndex];
 
