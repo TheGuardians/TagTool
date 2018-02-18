@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
-        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("pixl"), new Tag("vtsh"), new Tag("rmdf"), new Tag("rmt2"), new Tag("glps"), new Tag("glps"), new Tag("rmop") };
 
         private bool IsReplacing { get; set; } = false;
         private bool IsRecursive { get; set; } = true;
@@ -261,38 +261,13 @@ namespace TagTool.Commands.Porting
             // Load the Blam tag definition and convert Blam data to ElDorado data
             //
 
-            if (RenderMethodTagGroups.Contains(groupTag))
-            {
-                if (groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if (groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if (groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if (groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if (groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if (groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if (groupTag == "rmct")
-                    return null;
-                else
-                    return CacheContext.GetTag(0x101F);
-            }
-
-            if (groupTag == "prt3" || groupTag == "ltvl" || groupTag == "decs" || groupTag == "beam" || groupTag == "cntl")
-            {
-                edTag = MatchShadersCommand.PortShaderTag(cacheStream, CacheContext, BlamCache, blamTag);
-                if (edTag != null)
-                    Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                return edTag;
-            }
+            if (groupTag == "rmw ")
+                return null;
 
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition);
+            blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -462,7 +437,7 @@ namespace TagTool.Commands.Porting
             return edTag;
         }
 
-        private object ConvertData(Stream cacheStream, object data, object definition)
+        private object ConvertData(Stream cacheStream, object data, object definition, CacheFile.IndexItem blamTag = null)
         {
             if (data == null)
                 return null;
@@ -474,6 +449,11 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
+                case RenderMethod renderMethod:
+                    var rm = (RenderMethod)data;
+                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTag);
+                    return ConvertRenderMethod(cacheStream, rm, blamTag);
+
                 case CollisionMoppCode collisionMopp:
                     collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
                     return collisionMopp;
