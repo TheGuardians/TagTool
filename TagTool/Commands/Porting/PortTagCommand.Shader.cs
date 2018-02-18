@@ -58,7 +58,7 @@ namespace TagTool.Commands.Porting
         private static List<string> csvQ = new List<string>();
         private static CachedTagInstance parentShader;
 
-        private RenderMethod ConvertRenderMethod(Stream cacheStream, RenderMethod bmRm, CacheFile.IndexItem bmRmTag)
+        private RenderMethod ConvertRenderMethod(Stream cacheStream, RenderMethod bmRm, string blamTagName)
         {
             debugUseEDFunctions = false;
             pRmt2 = 0;
@@ -125,7 +125,7 @@ namespace TagTool.Commands.Porting
             Console.WriteLine($"{edRmt2Tagname} (Found rmt2 0x{edRmt2Instance.Index:X4})");
 
             // To prevent a billion lines of bad code, let it find the rmt2 tag, and only replace it with a preset now
-            GetShaderPresets(CacheContext, bmRmTag.Filename);
+            GetShaderPresets(CacheContext, blamTagName);
 
             // pRmsh pRmt2 now potentially have a new value
             if (pRmt2 != 0)

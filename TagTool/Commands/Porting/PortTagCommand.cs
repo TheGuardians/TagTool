@@ -267,7 +267,7 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag);
+            blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag.Filename);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -437,7 +437,7 @@ namespace TagTool.Commands.Porting
             return edTag;
         }
 
-        private object ConvertData(Stream cacheStream, object data, object definition, CacheFile.IndexItem blamTag = null)
+        private object ConvertData(Stream cacheStream, object data, object definition, string blamTagName)
         {
             if (data == null)
                 return null;
@@ -451,8 +451,8 @@ namespace TagTool.Commands.Porting
             {
                 case RenderMethod renderMethod:
                     var rm = (RenderMethod)data;
-                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTag);
-                    return ConvertRenderMethod(cacheStream, rm, blamTag);
+                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
+                    return ConvertRenderMethod(cacheStream, rm, blamTagName);
 
                 case CollisionMoppCode collisionMopp:
                     collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
@@ -487,13 +487,13 @@ namespace TagTool.Commands.Porting
             }
             
             if (type.IsArray)
-                return ConvertArray(cacheStream, (Array)data, definition);
+                return ConvertArray(cacheStream, (Array)data, definition, blamTagName);
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(cacheStream, data, type, definition);
+                return ConvertList(cacheStream, data, type, definition, blamTagName);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(cacheStream, data, type, definition);
+                return ConvertStructure(cacheStream, data, type, definition, blamTagName);
 
             return data;
         }
@@ -512,7 +512,7 @@ namespace TagTool.Commands.Porting
             return CacheContext.GetStringId(value);
         }
 
-        private Array ConvertArray(Stream cacheStream, Array array, object definition)
+        private Array ConvertArray(Stream cacheStream, Array array, object definition, string blamTagName)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -520,14 +520,14 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < array.Length; i++)
             {
                 var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, oldValue, definition);
+                var newValue = ConvertData(cacheStream, oldValue, definition, blamTagName);
                 array.SetValue(newValue, i);
             }
 
             return array;
         }
 
-        private object ConvertList(Stream cacheStream, object list, Type type, object definition)
+        private object ConvertList(Stream cacheStream, object list, Type type, object definition, string blamTagName)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -540,21 +540,21 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < count; i++)
             {
                 var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, oldValue, definition);
+                var newValue = ConvertData(cacheStream, oldValue, definition, blamTagName);
                 setItem.Invoke(list, new object[] { i, newValue });
             }
 
             return list;
         }
 
-        private object ConvertStructure(Stream cacheStream, object data, Type type, object definition)
+        private object ConvertStructure(Stream cacheStream, object data, Type type, object definition, string blamTagName)
         {
             var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {
                 var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(cacheStream, oldValue, definition);
+                var newValue = ConvertData(cacheStream, oldValue, definition, blamTagName);
                 enumerator.Field.SetValue(data, newValue);
             }
             
