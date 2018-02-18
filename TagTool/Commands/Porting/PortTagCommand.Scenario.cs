@@ -53,6 +53,96 @@ namespace TagTool.Commands.Porting
             scnr.SimulationDefinitionTable = new List<Scenario.SimulationDefinitionTableBlock>();
 
             //
+            // Convert Squads
+            //
+
+            if(BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                foreach(var squad in scnr.Squads)
+                {
+                    //First section is correct. From base squad, create spawn points and designer cell  blocks. The rest is null
+
+                    squad.SpawnFormations = new List<Scenario.Squad.SpawnFormation>();
+                    squad.SpawnPoints = new List<Scenario.Squad.SpawnPoint>();
+                    squad.SquadTemplate = null;
+                    squad.TemplatedCells = new List<Scenario.Squad.Cell>();
+                    squad.DesignerCells = new List<Scenario.Squad.Cell>();
+
+                    foreach(var baseSquad in squad.BaseSquad)
+                    {
+                        //Append all starting locations from all baseSquads into Spawnpoints
+                        foreach (var spawnpoint in baseSquad.StartingLocations)
+                            squad.SpawnPoints.Add(spawnpoint);
+
+                        Scenario.Squad.Cell designer = new Scenario.Squad.Cell
+                        {
+                            Name = new StringId(0),
+                            DifficultyFlags = baseSquad.DifficultyFlags,
+                            Count = baseSquad.Count,
+
+                            InitialWeapon = new List<Scenario.Squad.Cell.ItemBlock>(),
+                            InitialSecondaryWeapon = new List<Scenario.Squad.Cell.ItemBlock>(),
+                            InitialEquipment = new List<Scenario.Squad.Cell.ItemBlock>(),
+                            CharacterType = new List<Scenario.Squad.Cell.CharacterTypeBlock>()
+                        };
+
+                        //Add character type
+                        if(baseSquad.CharacterType != -1)
+                        {
+                            designer.CharacterType.Add(new Scenario.Squad.Cell.CharacterTypeBlock
+                            {
+                                CharacterTypeIndex = baseSquad.CharacterType,
+                                Chance = 1
+                            });
+                        }
+                        
+                        //Add initial weapon
+                        if(baseSquad.InitialPrimaryWeapon != -1)
+                        {
+                            designer.InitialWeapon.Add(new Scenario.Squad.Cell.ItemBlock
+                            {
+                                Weapon2 = baseSquad.InitialPrimaryWeapon,
+                                Probability = 1
+                            });
+                        }
+
+                        //Add secondary initial weapon
+                        if (baseSquad.InitialSecondaryWeapon != -1)
+                        {
+                            designer.InitialSecondaryWeapon.Add(new Scenario.Squad.Cell.ItemBlock
+                            {
+                                Weapon2 = baseSquad.InitialSecondaryWeapon,
+                                Probability = 1
+                            });
+                        }
+
+                        //Add equipment
+                        if (baseSquad.Equipment != -1)
+                        {
+                            designer.InitialEquipment.Add(new Scenario.Squad.Cell.ItemBlock
+                            {
+                                Weapon2 = baseSquad.Equipment,
+                                Probability = 1
+                            });
+                        }
+
+                        //Add grenade type
+                        designer.GrenadeType = baseSquad.GrenadeType;
+
+                        designer.VehicleVariant = new StringId( baseSquad.VehicleVariant.Value);
+                        designer.VehicleTypeIndex = baseSquad.Vehicle;
+
+                        designer.Unknown14 = -1;
+                        designer.Unknown17 = -1;
+
+                        //Add new cell to the list
+                        squad.DesignerCells.Add(designer);
+                    }
+                }
+            }
+
+
+            //
             // Convert scripts
             //
 

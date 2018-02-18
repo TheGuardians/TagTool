@@ -1733,8 +1733,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x60)]
             public class BaseSquadBlock
             {
-                public short Unknown;
-                public short Unknown2;
+                public SquadDifficultyFlags DifficultyFlags;
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused;
                 public short Count;
                 public short Unknown3;
                 public short CharacterType;
