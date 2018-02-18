@@ -139,9 +139,11 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in scenarioLightmap.Lightmaps)
             {
+                var wasReplacing = IsReplacing;
+
                 IsReplacing = false;
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, entry, scenarioLightmap, blamTagName);
-                IsReplacing = true;
+                IsReplacing = wasReplacing;
 
                 Console.Write("Allocating new scenario_lightmap_bsp_data tag...");
 
