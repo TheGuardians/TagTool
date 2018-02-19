@@ -95,7 +95,9 @@ namespace TagTool.Commands.Geometry
                                 case VertexBufferFormat.TinyPosition:
                                     for (var j = 0; j < vertexBuffer.Count; j++)
                                     {
-                                        fileWriter.WriteLine($"(I,J,K,W) = ({edResourceReader.ReadUInt32().ToString("X4")},{edResourceReader.ReadUInt32().ToString("X4")},{edResourceReader.ReadUInt32().ToString("X4")},{edResourceReader.ReadUInt32().ToString("X4")})");
+                                        fileWriter.WriteLine($"(I,J,K,W) = ({edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")})");
+                                        fileWriter.WriteLine($"(U,V,W,Z) = ({edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")})");
+                                        fileWriter.WriteLine($"Color = {edResourceReader.ReadUInt32().ToString("X8")}");
                                     }
                                     break;
                                     /*
