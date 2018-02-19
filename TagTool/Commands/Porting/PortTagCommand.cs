@@ -22,13 +22,16 @@ namespace TagTool.Commands.Porting
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
-        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("pixl"), new Tag("vtsh"), new Tag("rmdf"), new Tag("rmt2"), new Tag("glps"), new Tag("glps"), new Tag("rmop") };
 
-        private bool IsReplacing { get; set; } = false;
-        private bool IsRecursive { get; set; } = true;
-        private bool IsNew { get; set; } = false;
-        private bool UseNull { get; set; } = false;
-        private bool NoAudio { get; set; } = false;
+        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+        private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("shit"), new Tag("prt3"), new Tag("effe") };
+        private List<Tag> OtherTagGroups = new List<Tag> { new Tag("foot") };
+
+        private bool IsReplacing = false;
+        private bool IsRecursive = true;
+        private bool IsNew = false;
+        private bool UseNull = false;
+        private bool NoAudio = false;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -231,15 +234,57 @@ namespace TagTool.Commands.Porting
 
             replacedTags.Add(blamTag.Filename);
             ReplacedTags[groupTag] = replacedTags;
-            
+
             //
             // Return engine default tags for any unsupported tag groups
             //
-            
+
+            if (RenderMethodTagGroups.Contains(groupTag))
+            {
+                if (groupTag == "rmw ")
+                    return CacheContext.GetTag(0x400F);
+                else if (groupTag == "rmhg")
+                    return CacheContext.GetTag(0x2647);
+                else if (groupTag == "rmtr")
+                    return CacheContext.GetTag(0x3AAD);
+                else if (groupTag == "rmcs")
+                    return CacheContext.GetTag(0x101F);
+                else if (groupTag == "rmd ")
+                    return CacheContext.GetTag(0x1BA2);
+                else if (groupTag == "rmfl")
+                    return CacheContext.GetTag(0x4CA9);
+                else if (groupTag == "rmct")
+                    return null;
+                else
+                    return CacheContext.GetTag(0x101F);
+            }
+            else if (EffectTagGroups.Contains(groupTag))
+            {
+                if (groupTag == "beam")
+                    return CacheContext.GetTag(0x18B5);
+                else if (groupTag == "cntl")
+                    return CacheContext.GetTag(0x528);
+                else if (groupTag == "ltvl")
+                    return CacheContext.GetTag(0x594);
+                else if (groupTag == "decs")
+                    return CacheContext.GetTag(0x3A4);
+                else if (groupTag == "shit")
+                    return CacheContext.GetTag(0x139C);
+                else if (groupTag == "effe")
+                    return CacheContext.GetTag(0x12FE);
+                else
+                    return CacheContext.GetTag(0x29E);
+            }
+            else if (OtherTagGroups.Contains(groupTag))
+            {
+                if (groupTag == "foot")
+                    return CacheContext.GetTag(0xc0d);
+            }
+
             //
             // Allocate Eldorado Tag
             //
-            
+
             if (edTag == null && UseNull)
             {
                 for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
@@ -260,9 +305,6 @@ namespace TagTool.Commands.Porting
             //
             // Load the Blam tag definition and convert Blam data to ElDorado data
             //
-
-            if (groupTag == "rmw ")
-                return null;
 
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
@@ -334,6 +376,8 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "matg")
                 blamDefinition = ConvertGlobals((Globals)blamDefinition, cacheStream);
+
+            if (groupTag == "mode")
 
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
@@ -471,7 +515,7 @@ namespace TagTool.Commands.Porting
 
                 case TagFunction tagFunction:
                     return ConvertTagFunction(tagFunction);
-
+                    
                 case RenderGeometry renderGeometry:
                     if (definition is ScenarioStructureBsp sbsp)
                         return GeometryConverter.Convert(cacheStream, renderGeometry, sbsp.Materials);

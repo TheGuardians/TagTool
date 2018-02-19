@@ -253,7 +253,12 @@ namespace TagTool.Serialization
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
                 SerializeRange(version, context, tagStream, block, value);
             else
-                SerializeStruct(context, tagStream, block, new TagStructureInfo(value.GetType(), version), value);
+            {
+                if (value == null)
+                    value = Activator.CreateInstance(valueType);
+
+                SerializeStruct(context, tagStream, block, new TagStructureInfo(valueType, version), value);
+            }
         }
 
         /// <summary>
