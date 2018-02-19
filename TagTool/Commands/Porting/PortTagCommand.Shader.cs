@@ -130,9 +130,12 @@ namespace TagTool.Commands.Porting
             // pRmsh pRmt2 now potentially have a new value
             if (pRmt2 != 0)
             {
-                var a = CacheContext.GetTag(pRmt2);
-                if (a != null)
-                    edRmt2Instance = a;
+                if (CacheContext.TagCache.Index.Contains(pRmt2))
+                {
+                    var a = CacheContext.GetTag(pRmt2);
+                    if (a != null)
+                        edRmt2Instance = a;
+                }
             }
 
             // Get a simple list of bitmaps and arguments names
@@ -147,7 +150,17 @@ namespace TagTool.Commands.Porting
             // The bitmaps are default textures.
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
             foreach (var a in edMaps)
-                newShaderProperty.ShaderMaps.Add(new RenderMethod.ShaderProperty.ShaderMap { Bitmap = CacheContext.GetTag(DefaultBitmapsTags(a)) });
+            {
+                var newBitmap = DefaultBitmapsTags(a);
+                if (!CacheContext.TagCache.Index.Contains(pRmt2))
+                    newBitmap = 0x0343; // would only happen for removed shaders
+
+                newShaderProperty.ShaderMaps.Add(new RenderMethod.ShaderProperty.ShaderMap
+                {
+                    Bitmap = CacheContext.GetTag(newBitmap)
+                });
+            }
+            
             foreach (var a in edArgs)
                 newShaderProperty.Arguments.Add(DefaultArgumentsValues(a));
 
