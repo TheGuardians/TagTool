@@ -902,12 +902,15 @@ namespace TagTool.Commands.Porting
                 case "rmcs": renderMethod = (ShaderCustom)parentShaderDef; break;
                 case "rmd ": renderMethod = (ShaderDecal)parentShaderDef; break;
                 case "rmfl": renderMethod = (ShaderFoliage)parentShaderDef; break;
-                case "rmhg": renderMethod = (ShaderHalogram)parentShaderDef; break;
                 case "rmss": renderMethod = (ShaderScreen)parentShaderDef; break;
                 case "rmtr": renderMethod = (ShaderTerrain)parentShaderDef; break;
                 case "rmw ": renderMethod = (ShaderWater)parentShaderDef; break;
                 case "rmzo": renderMethod = (ShaderZonly)parentShaderDef; break;
-
+                case "rmhg":
+                    renderMethod = (ShaderHalogram)parentShaderDef; 
+                    debugUseEDFunctions = true;// rmhg seems to crash if it doesn't have functions
+                    break;
+                    
                 case "beam": var a = (BeamSystem)parentShaderDef; foreach (var f in a.Beam) renderMethod = f.RenderMethod; break; // any would do
                 case "cntl": var b = (ContrailSystem)parentShaderDef; foreach (var f in b.Contrail) renderMethod = f.RenderMethod; break;
                 case "decs": var c = (DecalSystem)parentShaderDef; foreach (var f in c.DecalSystem2) renderMethod = f.RenderMethod; break;
