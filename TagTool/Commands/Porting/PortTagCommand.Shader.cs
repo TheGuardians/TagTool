@@ -234,7 +234,7 @@ namespace TagTool.Commands.Porting
                 if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
                     continue;
 
-                label1:
+                label1: // WARNING dangerous, it will most likely end up with a rmt2 from a different type
 
                 int mapsCommon = 0;
                 int argsCommon = 0;
@@ -242,6 +242,7 @@ namespace TagTool.Commands.Porting
                 int argsUncommon = 0;
                 int mapsMissing = 0;
                 int argsMissing = 0;
+                int matchingRmdfValues = 0;
 
                 var edMaps_ = new List<string>();
                 var edArgs_ = new List<string>();
@@ -882,12 +883,19 @@ namespace TagTool.Commands.Porting
 
             var validShaders = new List<string> { "beam", "decs", "ltvl", "prt3", "rmcs", "rmd ", "rmfl", "rmhg", "rmsh", "rmss", "rmtr", "rmw ", "rmzo", "cntl" };
 
-            if (dependsOn.ToArray().Length == 0)
+            if (dependsOn.ToArray().Length == 0) // will not work with rmt2 tags that don't have a parent renderMethod. Can be avoided.
                 throw new Exception();
 
-            foreach (var dependency in dependsOn)
+            var orderedDependsOn = dependsOn.OrderBy(x => x.Index);
+
+            foreach (var dependency in orderedDependsOn)
+            {
                 if (validShaders.Contains(dependency.Group.Tag.ToString()))
+                {
                     parentShader = dependency;
+                    break;
+                }
+            }
 
             // Fix tagblock at the top
             var parentShaderDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, parentShader), TagDefinition.Find(parentShader.Group.Tag));
