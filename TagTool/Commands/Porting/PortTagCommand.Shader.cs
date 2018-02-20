@@ -117,13 +117,6 @@ namespace TagTool.Commands.Porting
                 return CacheContext.Deserializer.Deserialize<Shader>(edContext2);
             }
 
-            var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ?
-            CacheContext.TagNames[edRmt2Instance.Index] :
-            $"0x{edRmt2Instance.Index:X4}";
-
-            Console.WriteLine($"{bmRmt2Instance.Filename} (Required H3 rmt2)");
-            Console.WriteLine($"{edRmt2Tagname} (Found rmt2 0x{edRmt2Instance.Index:X4})");
-
             // To prevent a billion lines of bad code, let it find the rmt2 tag, and only replace it with a preset now
             GetShaderPresets(CacheContext, blamTagName);
 

@@ -343,16 +343,11 @@ namespace TagTool.Geometry
             var rsrcData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
 
             if (rsrcData == null)
-            {
-                Console.WriteLine("Blam render_geometry resource contains no data. Created empty resource.");
                 return geometry;
-            }
 
             //
             // Load Blam resource definition
             //
-
-            Console.Write("Loading Blam render_geometry resource definition...");
 
             var rsrcDefEntry = BlamCache.ResourceGestalt.DefinitionEntries[geometry.ZoneAssetHandle & ushort.MaxValue];
 
@@ -446,8 +441,6 @@ namespace TagTool.Geometry
                 }
             }
 
-            Console.WriteLine("done.");
-
             //
             // Convert Blam data to ElDorado data
             //
@@ -464,21 +457,15 @@ namespace TagTool.Geometry
                     // Convert Blam vertex buffers
                     //
 
-                    Console.Write("Converting vertex buffers...");
-                    
                     for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                     {
                         blamResourceStream.Position = rsrcDefEntry.Fixups[i].Offset;
                         ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
                     }
 
-                    Console.WriteLine("done.");
-
                     //
                     // Convert Blam index buffers
                     //
-
-                    Console.Write("Converting index buffers...");
 
                     if (createIndexBuffer)
                     {
@@ -493,15 +480,11 @@ namespace TagTool.Geometry
                             ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
                         }
                     }
-
-                    Console.WriteLine("done.");
                 }
 
                 //
                 // Finalize the new ElDorado geometry resource
                 //
-
-                Console.Write("Writing resource data...");
 
                 geometry.Resource = new PageableResource
                 {
@@ -523,8 +506,6 @@ namespace TagTool.Geometry
                 var resourceContext = new ResourceSerializationContext(geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
                 CacheContext.AddResource(geometry.Resource, ResourceLocation.ResourcesB, edResourceStream);
-
-                Console.WriteLine("done.");
             }
 
             return geometry;

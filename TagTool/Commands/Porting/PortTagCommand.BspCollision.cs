@@ -273,17 +273,12 @@ namespace TagTool.Commands.Porting
             var resourceData = BlamCache.GetRawFromID(bsp.ZoneAssetIndex3);
 
             if (resourceData == null)
-            {
-                Console.WriteLine("Blam structure_bsp_tag_resources contains no resource data. Created empty resource.");
                 return bsp.CollisionBspResource;
-            }
 
             //
             // Port Blam resource definition
             //
-
-            Console.Write("Porting Blam structure_bsp_tag_resources resource definition...");
-
+            
             var blamDeserializer = new TagDeserializer(BlamCache.Version);
 
             var resourceEntry = BlamCache.ResourceGestalt.DefinitionEntries[bsp.ZoneAssetIndex3 & ushort.MaxValue];
@@ -334,14 +329,10 @@ namespace TagTool.Commands.Porting
                     instance.Unknown5 = new TagBlock<StructureBspTagResources.InstancedGeometryBlock.Unknown4Block>();
             }
 
-            Console.WriteLine("done.");
-
             //
             // Port Blam resource to ElDorado resource cache
             //
             
-            Console.Write("Porting Blam structure_bsp_tag_resources resource data...");
-
             using (var blamResourceStream = new MemoryStream(resourceData))
             using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
             using (var edResourceStream = new MemoryStream())
@@ -607,9 +598,7 @@ namespace TagTool.Commands.Porting
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
                 CacheContext.AddResource(bsp.CollisionBspResource, ResourceLocation.ResourcesB, edResourceStream);
             }
-
-            Console.WriteLine("done.");
-
+            
             return bsp.CollisionBspResource;
         }
     }

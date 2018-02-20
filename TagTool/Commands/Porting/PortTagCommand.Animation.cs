@@ -20,9 +20,6 @@ namespace TagTool.Commands.Porting
 
             var blamDeserializer = new TagDeserializer(BlamCache.Version);
 
-            Console.WriteLine("");
-            Console.Write("Converting");
-
             // loop trough every resourcegroup
 
             // convert resource definition
@@ -89,7 +86,6 @@ namespace TagTool.Commands.Porting
             int resDefIndex = -1;
             foreach (var group in definition.ResourceGroups)
             {
-                Console.Write("."); // loading "bar"
                 resDefIndex++;
 
                 var resourceData = BlamCache.GetRawFromID(group.ZoneAssetDatumIndex);

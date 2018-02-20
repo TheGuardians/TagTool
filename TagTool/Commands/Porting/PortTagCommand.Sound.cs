@@ -681,8 +681,6 @@ namespace TagTool.Commands.Porting
 
             using (var dataStream = File.OpenRead(soundMP3))
             {
-                //Console.Write($"Serializing \"{blamTagName}.sound\" tag data...");
-
                 var resourceContext = new ResourceSerializationContext(sound.Resource);
                 CacheContext.Serializer.Serialize(resourceContext,
                     new SoundResourceDefinition
@@ -703,8 +701,6 @@ namespace TagTool.Commands.Porting
                 {
                     sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
                 }
-
-                //Console.WriteLine("done.");
             }
             
             if (File.Exists(soundMP3))

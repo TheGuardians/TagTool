@@ -145,8 +145,6 @@ namespace TagTool.Commands.Porting
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, entry, scenarioLightmap, blamTagName);
                 IsReplacing = wasReplacing;
 
-                Console.Write("Allocating new scenario_lightmap_bsp_data tag...");
-
                 var edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("Lbsp")]);
                 CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
 
@@ -157,8 +155,6 @@ namespace TagTool.Commands.Porting
                 {
                     LightmapData = edTag
                 });
-
-                Console.WriteLine("done.");
             }
 
             return scenarioLightmap;

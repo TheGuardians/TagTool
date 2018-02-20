@@ -196,13 +196,12 @@ namespace TagTool.Commands.Porting
 
             object definition = null;
 
-            using (var stream = CacheContext.OpenTagCacheRead())
-                definition = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, tag), TagDefinition.Find(tag.Group.Tag));
-
             var renderMaterials = new List<RenderMaterial>();
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
+                definition = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, tag), TagDefinition.Find(tag.Group.Tag));
+
                 if (tag.Group.Tag.ToString() == "sbsp")
                 {
                     var blamDefinition = BlamDeserializer.Deserialize<ScenarioStructureBspMaterials>(blamContext);
@@ -501,7 +500,7 @@ namespace TagTool.Commands.Porting
             // Search for rmt2 tags with same or similar bitmaps count
             // no matches found returns 0
             if (rmt2Preset == 0 && rmPreset == 0)
-                rmt2Preset = MatchRenderMethodTemplate2(CacheContext, BlamCache, h3Bitmaps, h3Arguments, h3Rmt2Instance.Filename, h3Tag.Filename);
+                rmt2Preset = MatchRenderMethodTemplate2(stream, CacheContext, BlamCache, h3Bitmaps, h3Arguments, h3Rmt2Instance.Filename, h3Tag.Filename);
 
             // If this fails, return null which gets turned to 0x3AB0
             if (rmt2Preset == 0 && rmPreset == 0)
@@ -725,18 +724,14 @@ namespace TagTool.Commands.Porting
             return edRmt2index;
         }
 
-        public static void GetRmt2Info(GameCacheContext cacheContext)
+        public static void GetRmt2Info(Stream stream, GameCacheContext cacheContext)
         {
             if (cacheContext.Rmt2TagsInfo.Count == 0)
             {
                 foreach (var instance in cacheContext.TagCache.Index.FindAllInGroup("rmt2"))
                 {
-                    RenderMethodTemplateEssentials edRmt2;
-                    using (var stream = cacheContext.OpenTagCacheRead())
-                    {
-                        var edContext = new TagSerializationContext(stream, cacheContext, instance);
-                        edRmt2 = cacheContext.Deserializer.Deserialize<RenderMethodTemplateEssentials>(edContext);
-                    }
+                    var edContext = new TagSerializationContext(stream, cacheContext, instance);
+                    var edRmt2 = cacheContext.Deserializer.Deserialize<RenderMethodTemplateEssentials>(edContext);
 
                     List<string> edBitmaps = new List<string>();
                     List<string> edArgs = new List<string>();
@@ -752,7 +747,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public static int MatchRenderMethodTemplate2(GameCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
+        public static int MatchRenderMethodTemplate2(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
         {
             // Make a new dictionary with rmt2 of the same shader type
             List<ShaderTemplateItem> edRmt2SameType = new List<ShaderTemplateItem>();
@@ -766,10 +761,13 @@ namespace TagTool.Commands.Porting
                 blamRmt2Name.LastIndexOf("\\") - 8);
 
             // Loop only once trough all ED rmt2 tags and store them globally, + their bitmaps and arguments lists
-            GetRmt2Info(cacheContext);
+            GetRmt2Info(stream, cacheContext);
 
             foreach (var instance in cacheContext.Rmt2TagsInfo)
             {
+                if (!cacheContext.TagNames.ContainsKey(instance.Key))
+                    continue;
+
                 if (!cacheContext.TagNames[instance.Key].Contains(blamRmt2Type))
                     continue;
 

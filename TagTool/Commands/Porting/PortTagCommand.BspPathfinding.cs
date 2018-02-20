@@ -45,8 +45,6 @@ namespace TagTool.Commands.Porting
 
             if (resourceData == null)
             {
-                Console.WriteLine("Blam structure_bsp_cache_file_tag_resources contains no resource data. Created empty resource.");
-
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
                     return bsp.PathfindingResource;
 
@@ -56,8 +54,6 @@ namespace TagTool.Commands.Porting
             //
             // Port Blam resource definition
             //
-
-            Console.Write("Porting Blam structure_bsp_cache_file_tag_resources resource definition...");
 
             var blamDeserializer = new TagDeserializer(BlamCache.Version);
 
@@ -109,13 +105,9 @@ namespace TagTool.Commands.Porting
                 };
             }
 
-            Console.WriteLine("done.");
-
             //
             // Port Blam resource to ElDorado resource cache
             //
-
-            Console.Write("Porting Blam structure_bsp_cache_file_tag_resources resource data...");
 
             using (var blamResourceStream = new MemoryStream(resourceData))
             using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
@@ -392,8 +384,6 @@ namespace TagTool.Commands.Porting
                 bsp.UnknownRaw7ths.Clear();
                 bsp.PathfindingData.Clear();
             }
-
-            Console.WriteLine("done.");
 
             return bsp.PathfindingResource;
         }

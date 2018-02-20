@@ -200,11 +200,24 @@ namespace TagTool.Commands.Porting
                         else
                         {
                             edTag = instance;
-                            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
                             return edTag;
                         }
                     }
                 }
+            }
+
+            //
+            // Replacing dlc teleporter hacks (nasty)
+            //
+
+            if (groupTag == "bloc")
+            {
+                if (blamTag.Filename.EndsWith("teleporter_2way"))
+                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_2way\teleporter_2way.crate");
+                else if (blamTag.Filename.EndsWith("teleporter_reciever"))
+                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_reciever\teleporter_reciever.crate");
+                else if (blamTag.Filename.EndsWith("teleporter_sender"))
+                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_sender\teleporter_sender.crate");
             }
 
             //
@@ -220,11 +233,7 @@ namespace TagTool.Commands.Porting
                     var tagInstance = CacheContext.GetTag(entry.Key);
 
                     if (tagInstance.Group.Tag == groupTag)
-                    {
-                        edTag = tagInstance;
-                        Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                        return edTag;
-                    }
+                        return tagInstance;
                 }
             }
 
