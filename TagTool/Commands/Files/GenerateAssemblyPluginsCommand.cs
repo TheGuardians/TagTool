@@ -1,9 +1,7 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Shaders;
-using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +18,7 @@ namespace TagTool.Commands.Files
             : base(CommandFlags.None,
 
                   "GenerateAssemblyPlugins",
-                  "Converts TagTool tag definitions to Assembly Plugin files..",
+                  "Converts BlamCore tag definitions to Assembly Plugin files..",
 
                   "GenerateAssemblyPlugins [path]",
 
@@ -66,7 +64,7 @@ namespace TagTool.Commands.Files
         }
 
         /// <summary>
-        /// Stores data for a field in an assembly plugin and contains various functions to convert fields from TagTool tag definitions.
+        /// Stores data for a field in an assembly plugin and contains various functions to convert fields from BlamCore tag definitions.
         /// </summary>
         public class AssemblyPluginField
         {
@@ -154,7 +152,7 @@ namespace TagTool.Commands.Files
             }
 
             /// <summary>
-            /// Contains AssemblyPluginType values for equevelant structure types available in TagTool.
+            /// Contains AssemblyPluginType values for equevelant structure types available in BlamCore.
             /// Some assembly types are more complicated, such as bitfields which are enums with flags attribute or reflexives.
             /// </summary>
             static Dictionary<Type, AssemblyPluginFieldTypes> assemblyPluginTypeEquivalent = new Dictionary<Type, AssemblyPluginFieldTypes>()
@@ -175,7 +173,6 @@ namespace TagTool.Commands.Files
                 {typeof(StringId), AssemblyPluginFieldTypes.stringId},
                 {typeof(CachedTagInstance), AssemblyPluginFieldTypes.tagref},
                 //{typeof(RealVector2d), AssemblyPluginFieldTypes.range},
-                {typeof(ArgbColor), AssemblyPluginFieldTypes.color },
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
                 {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
                 {typeof(RgbColor), AssemblyPluginFieldTypes.color24},
@@ -297,7 +294,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a RealMatrix4x4
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent RealMatrix4x3.</returns>
                 public static List<AssemblyPluginField> RealMatrix4x3(string fieldName, ref int offset)
@@ -322,7 +319,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a Rectangle2d
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Rectangle2d, top left bottom right.</returns>
                 public static List<AssemblyPluginField> Rectangle2d(string fieldName, ref int offset)
@@ -340,7 +337,7 @@ namespace TagTool.Commands.Files
                 /// Returns the assembly plugin fields that represent Bounds.
                 /// </summary>
                 /// <param name="type">The boundry value type.</param>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Bounds, min and max.</returns>
                 public static List<AssemblyPluginField> Bounds(AssemblyPluginFieldTypes type, string fieldName, ref int offset)
@@ -355,7 +352,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a RealBoundingBox
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent RealBoundingBox, bounds x y z.</returns>
                 /// <seealso cref="Bounds(AssemblyPluginFieldTypes, string, ref int)"/>
@@ -372,7 +369,7 @@ namespace TagTool.Commands.Files
                 /// Returns the assembly plugin fields that represent a Vector2.
                 /// </summary>
                 /// <param name="format">The names of the two fields. Eg x and y, i and j.</param>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Vector2, two floats.</returns>
                 public static List<AssemblyPluginField> Vector2(string[] format, string fieldName, ref int offset)
@@ -391,7 +388,7 @@ namespace TagTool.Commands.Files
                 /// Returns the assembly plugin fields that represent a Vector3.
                 /// </summary>
                 /// <param name="format">The names of the three fields. Eg x, y and z, i j and k.</param>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Vector3, three floats.</returns>
                 public static List<AssemblyPluginField> Vector3(string[] format, string fieldName, ref int offset)
@@ -410,7 +407,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a RealPlane3d.
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent RealPlane3d, I J K and Distance floats.</returns>
                 public static List<AssemblyPluginField> RealPlane3d(string fieldName, ref int offset)
@@ -427,7 +424,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a Quaternion.
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Quaternion, four floats, I J K and W.</returns>
                 public static List<AssemblyPluginField> RealQuaternion(string fieldName, ref int offset)
@@ -444,7 +441,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a RgbaColor.
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent RgbaColor, an rgb format color24 and a uint representing Alpha.</returns>
                 public static List<AssemblyPluginField> RgbaColor(string fieldName, ref int offset)
@@ -459,7 +456,7 @@ namespace TagTool.Commands.Files
                 /// <summary>
                 /// Returns the assembly plugin fields that represent a Argb Color.
                 /// </summary>
-                /// <param name="fieldName">The name of the field in TagTool.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent RgbaColor, an uint representing alpha and a rgb format color24</returns>
                 public static List<AssemblyPluginField> ArgbColor(string fieldName, ref int offset)
@@ -529,13 +526,13 @@ namespace TagTool.Commands.Files
 
 
             /// <summary>
-            /// Returns a list of assemblt plugin fields representing the TagTool tag definition field type provided.
+            /// Returns a list of assemblt plugin fields representing the BlamCore tag definition field type provided.
             /// </summary>
             /// <param name="fieldType">The type of field to convert to assembly fields.</param>
             /// <param name="tagFieldAttribute">The tag field attribute attached to the field, or null.</param>
             /// <param name="offset">The offset of the tag field.</param>
             /// <param name="cacheVersion">The cache version to return fields for.</param>
-            /// <param name="fieldName">The name of the field in the TagTool tag definition.</param>
+            /// <param name="fieldName">The name of the field in the BlamCore tag definition.</param>
             /// <returns>A list of AssemblyPluginFields representing the given field type.</returns>
             public static List<AssemblyPluginField> GetAssemblyPluginFields(Type fieldType, TagFieldAttribute tagFieldAttribute, ref int offset, CacheVersion cacheVersion, string fieldName)
             {
@@ -559,8 +556,6 @@ namespace TagTool.Commands.Files
                 else if (assemblyPluginFieldType == AssemblyPluginFieldTypes.color || assemblyPluginFieldType == AssemblyPluginFieldTypes.colour)
                 {
                     if (fieldType == typeof(ArgbColor))
-                        assemblyPluginFields.AddRange(CommonFieldTypes.RgbaColor(fieldName, ref offset));
-                    else if (fieldType == typeof(ArgbColor))
                         assemblyPluginFields.AddRange(CommonFieldTypes.ArgbColor(fieldName, ref offset));
                     else
                         throw new NotImplementedException("This color needs implementing to the converter!");
@@ -717,10 +712,10 @@ namespace TagTool.Commands.Files
 
             /// <summary>
             /// Returns the assembly field type equivalent of a given type, or undefined if there isn't one.
-            /// If the TagTool field converts to multiple assembly fields this will return undefined.
+            /// If the BlamCore field converts to multiple assembly fields this will return undefined.
             /// If the type cannot be resolved this will return undefined.
             /// </summary>
-            /// <param name="fieldType">The field type in TagTool.</param>
+            /// <param name="fieldType">The field type in BlamCore.</param>
             /// <returns>The field type in Assembly.</returns>
             private static AssemblyPluginFieldTypes GetAssemblyPluginFieldType(Type fieldType)
             {
@@ -895,7 +890,7 @@ namespace TagTool.Commands.Files
         }
 
         /// <summary>
-        /// A list of assembly plugin game names for cache versions in TagTool.
+        /// A list of assembly plugin game names for cache versions in BlamCore.
         /// If it's not here, it's not supported.
         /// </summary>
         static Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
@@ -961,7 +956,7 @@ namespace TagTool.Commands.Files
                 "<plugin game=\"" + gameName + "\" baseSize=\"0x" + size.ToString("X") + "\">",
                 "	<!-- Automatically generated plugin -->",
                 "	<revisions>",
-                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from TagTool definitions.</revision>",
+                "		<revision author=\"TagTool\" version=\"1\">Generated plugin from BlamCore definitions.</revision>",
                 "	</revisions>"
             };
 

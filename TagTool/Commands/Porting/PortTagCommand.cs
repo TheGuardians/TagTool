@@ -376,9 +376,7 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "matg")
                 blamDefinition = ConvertGlobals((Globals)blamDefinition, cacheStream);
-
-            if (groupTag == "mode")
-
+            
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
 

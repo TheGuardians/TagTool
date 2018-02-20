@@ -73,7 +73,9 @@ namespace TagTool.Commands.Tags
 
             Console.WriteLine();
             Console.WriteLine("Repairing decal systems...");
-            FixDecalSystems(destCacheContext, resultTag.Index);
+
+            if (CacheContext.Version != destCacheContext.Version)
+                FixDecalSystems(destCacheContext, resultTag.Index);
 
             Console.WriteLine();
             Console.WriteLine("Saving stringIDs...");
