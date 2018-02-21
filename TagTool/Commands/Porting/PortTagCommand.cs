@@ -392,6 +392,9 @@ namespace TagTool.Commands.Porting
             if (groupTag == "pixl")
                 blamDefinition = ConvertPixelShader((PixelShader)blamDefinition);
 
+            if (groupTag == "vtsh")
+                blamDefinition = ConvertVertexShader((VertexShader)blamDefinition);
+
             if (groupTag == "proj")
                 blamDefinition = ConvertProjectile((Projectile)blamDefinition);
 
