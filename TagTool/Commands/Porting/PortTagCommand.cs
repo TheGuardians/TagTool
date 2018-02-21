@@ -29,6 +29,7 @@ namespace TagTool.Commands.Porting
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
+        private bool IsWildcard = false;
         private bool IsNew = false;
         private bool UseNull = false;
         private bool NoAudio = false;
@@ -59,7 +60,7 @@ namespace TagTool.Commands.Porting
             if (args.Count < 2)
                 return false;
 
-            while (args.Count > 2)
+            while (args.Count > 2 || args.Count >= 2 && args[0] == "*")
             {
                 var arg = args[0].ToLower();
 
@@ -88,6 +89,12 @@ namespace TagTool.Commands.Porting
                         IsNew = true;
                         break;
 
+                    case "*":
+                        IsWildcard = true;
+                        UseNull = false;
+                        IsNew = true;
+                        break;
+
                     case "usenull":
                         UseNull = true;
                         break;
@@ -112,7 +119,7 @@ namespace TagTool.Commands.Porting
             try
             {
 #endif
-                groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
+            groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
 #if !DEBUG
             }
             catch (Exception)
@@ -126,25 +133,26 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine($"ERROR: Invalid tag group \"{args[0]}\"");
                 return true;
             }
-            
+
             //
             // Verify Blam tag instance
             //
-            
-            var blamTagName = args[1];
 
-            CacheFile.IndexItem blamTag = null;
+            var blamTagName = IsWildcard ? null : args[1];
+
+            List<CacheFile.IndexItem> blamTags = new List<CacheFile.IndexItem>();
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if ((tag.ClassCode == groupTag.ToString()) && (tag.Filename == blamTagName))
+                if ((tag.ClassCode == groupTag.ToString()) && (IsWildcard || tag.Filename == blamTagName))
                 {
-                    blamTag = tag;
-                    break;
+                    blamTags.Add(tag);
+                    if (!IsWildcard) break;
+
                 }
             }
 
-            if (blamTag == null)
+            if (blamTags.Count == 0)
             {
                 Console.WriteLine($"ERROR: Blam {groupName} tag does not exist: " + blamTagName);
                 return true;
@@ -155,7 +163,14 @@ namespace TagTool.Commands.Porting
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                ConvertTag(cacheStream, blamTag);
+            {
+                foreach (var blamTag in blamTags)
+                {
+                    ConvertTag(cacheStream, blamTag);
+                }
+            }
+
+
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
@@ -165,7 +180,7 @@ namespace TagTool.Commands.Porting
 
             return true;
         }
-        
+
         public CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
         {
             if (blamTag == null)
@@ -183,9 +198,9 @@ namespace TagTool.Commands.Porting
 
             CachedTagInstance edTag = null;
 
-            if( (groupTag == "snd!") && NoAudio)
+            if ((groupTag == "snd!") && NoAudio)
                 return null;
-            
+
             if (!IsNew)
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
@@ -200,24 +215,11 @@ namespace TagTool.Commands.Porting
                         else
                         {
                             edTag = instance;
+                            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
                             return edTag;
                         }
                     }
                 }
-            }
-
-            //
-            // Replacing dlc teleporter hacks (nasty)
-            //
-
-            if (groupTag == "bloc")
-            {
-                if (blamTag.Filename.EndsWith("teleporter_2way"))
-                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_2way\teleporter_2way.crate");
-                else if (blamTag.Filename.EndsWith("teleporter_reciever"))
-                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_reciever\teleporter_reciever.crate");
-                else if (blamTag.Filename.EndsWith("teleporter_sender"))
-                    return ArgumentParser.ParseTagName(CacheContext, @"objects\multi\teleporter_sender\teleporter_sender.crate");
             }
 
             //
@@ -233,7 +235,11 @@ namespace TagTool.Commands.Porting
                     var tagInstance = CacheContext.GetTag(entry.Key);
 
                     if (tagInstance.Group.Tag == groupTag)
-                        return tagInstance;
+                    {
+                        edTag = tagInstance;
+                        Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                        return edTag;
+                    }
                 }
             }
 
@@ -248,25 +254,26 @@ namespace TagTool.Commands.Porting
             // Return engine default tags for any unsupported tag groups
             //
 
-            if (RenderMethodTagGroups.Contains(groupTag))
-            {
-                if (groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if (groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if (groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if (groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if (groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if (groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if (groupTag == "rmct")
-                    return null;
-                else
-                    return CacheContext.GetTag(0x101F);
-            }
+            //if (RenderMethodTagGroups.Contains(groupTag))
+            //{
+            //    if (groupTag == "rmw ")
+            //        return CacheContext.GetTag(0x400F);
+            //    else if (groupTag == "rmhg")
+            //        return CacheContext.GetTag(0x2647);
+            //    else if (groupTag == "rmtr")
+            //        return CacheContext.GetTag(0x3AAD);
+            //    else if (groupTag == "rmcs")
+            //        return CacheContext.GetTag(0x101F);
+            //    else if (groupTag == "rmd ")
+            //        return CacheContext.GetTag(0x1BA2);
+            //    else if (groupTag == "rmfl")
+            //        return CacheContext.GetTag(0x4CA9);
+            //    else if (groupTag == "rmct")
+            //        return null;
+            //    else
+            //        return CacheContext.GetTag(0x101F);
+            //}
+            if (false) { }
             else if (EffectTagGroups.Contains(groupTag))
             {
                 if (groupTag == "beam")
@@ -308,7 +315,7 @@ namespace TagTool.Commands.Porting
 
             if (edTag == null)
                 edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
-            
+
             CacheContext.TagNames[edTag.Index] = blamTag.Filename;
 
             //
@@ -323,13 +330,13 @@ namespace TagTool.Commands.Porting
             //
             // Perform post-conversion fixups to Blam data
             //
-            
-            if(groupTag == "bitm")
+
+            if (groupTag == "bitm")
                 blamDefinition = ConvertBitmap((Bitmap)blamDefinition);
 
-            if(groupTag == "bipd")
+            if (groupTag == "bipd")
             {
-                var biped = (Biped) blamDefinition;
+                var biped = (Biped)blamDefinition;
                 biped.PhysicsFlags = (Biped.PhysicsFlagBits)(((int)biped.PhysicsFlags & 0x7) + (((int)biped.PhysicsFlags & 0x7FFFFFF8) << 1));
             }
 
@@ -341,7 +348,7 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "cisc")
                 blamDefinition = ConvertCinematicScene((CinematicScene)blamDefinition);
-            
+
             if (groupTag == "effe")
             {
                 var effect = (Effect)blamDefinition;
@@ -361,7 +368,7 @@ namespace TagTool.Commands.Porting
             {
                 var hlmt = (Model)blamDefinition;
 
-                foreach(var damage in hlmt.NewDamageInfo)
+                foreach (var damage in hlmt.NewDamageInfo)
                 {
                     damage.CollisionDamageReportingType++;
                     damage.ResponseDamageReportingType++;
@@ -385,7 +392,7 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "matg")
                 blamDefinition = ConvertGlobals((Globals)blamDefinition, cacheStream);
-            
+
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
 
@@ -411,7 +418,7 @@ namespace TagTool.Commands.Porting
             {
                 var sefc = (AreaScreenEffect)blamDefinition;
 
-                if(blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui")
+                if (blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui")
                 {
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
@@ -429,7 +436,7 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "Lbsp")
                 blamDefinition = ConvertScenarionLightmapBspData((ScenarioLightmapBspData)blamDefinition);
-            
+
             if (groupTag == "snd!")
                 blamDefinition = ConvertSound((Sound)blamDefinition);
 
@@ -459,7 +466,7 @@ namespace TagTool.Commands.Porting
                 if (weapon.MeleeDamageReportingType >= Weapon.MeleeDamageReportingTypeValue.ArmorLockCrush)
                     weapon.MeleeDamageReportingType++;
 
-                foreach(var barrel in weapon.Barrels)
+                foreach (var barrel in weapon.Barrels)
                 {
                     barrel.DamageReportingType++;
 
@@ -467,7 +474,7 @@ namespace TagTool.Commands.Porting
                         barrel.DamageReportingType++;
                 }
 
-                foreach(var attach in weapon.Attachments)
+                foreach (var attach in weapon.Attachments)
                     if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
                         attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
             }
@@ -476,7 +483,7 @@ namespace TagTool.Commands.Porting
             // Serialize new ElDorado tag definition
             //
 
-            if(blamDefinition == null) //If blamDefinition is null, return null tag.
+            if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 Console.WriteLine($"Something happened when converting  {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))}, returning null tag reference.");
                 return null;
@@ -497,7 +504,7 @@ namespace TagTool.Commands.Porting
                 return null;
 
             var type = data.GetType();
-            
+
             if (type.IsPrimitive)
                 return data;
 
@@ -525,7 +532,7 @@ namespace TagTool.Commands.Porting
 
                 case TagFunction tagFunction:
                     return ConvertTagFunction(tagFunction);
-                    
+
                 case RenderGeometry renderGeometry:
                     if (definition is ScenarioStructureBsp sbsp)
                         return GeometryConverter.Convert(cacheStream, renderGeometry, sbsp.Materials);
@@ -539,7 +546,7 @@ namespace TagTool.Commands.Porting
                 case ScenarioObjectType scenarioObjectType:
                     return ConvertScenarioObjectType(scenarioObjectType);
             }
-            
+
             if (type.IsArray)
                 return ConvertArray(cacheStream, (Array)data, definition, blamTagName);
 
@@ -611,7 +618,7 @@ namespace TagTool.Commands.Porting
                 var newValue = ConvertData(cacheStream, oldValue, definition, blamTagName);
                 enumerator.Field.SetValue(data, newValue);
             }
-            
+
             return data;
         }
 
@@ -670,23 +677,23 @@ namespace TagTool.Commands.Porting
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
                 if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3Retail.ToString(), out var result))
-                objectType.Halo3ODST = result;
-            else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
-                objectType.Halo3ODST = result2;            
+                    objectType.Halo3ODST = result;
+                else if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
+                        objectType.Halo3ODST = result2;
 
             return objectType;
-  
+
         }
 
         private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType)
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
                 if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3Retail.ToString(), out var result))
-                objectType.Halo3ODST = result;
-            else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
-                objectType.Halo3ODST = result2;
+                    objectType.Halo3ODST = result;
+                else if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
+                        objectType.Halo3ODST = result2;
 
             return objectType;
         }
