@@ -34,7 +34,13 @@ namespace TagTool.Commands.Porting
             //add conversion code when ready
             return pixl;
         }
-        
+
+        private VertexShader ConvertVertexShader(VertexShader vtsh)
+        {
+            //add conversion code when ready
+            return vtsh;
+        }
+
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
