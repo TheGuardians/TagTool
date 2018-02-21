@@ -5,7 +5,8 @@ namespace TagTool.Shaders
 		public string UpdbName;
 		public VertexShaderHeader Header;
 		public ShaderDebugHeader DebugHeader;
-		public byte[] DebugData;
+        public XboxShaderInfo Info;
+        public byte[] DebugData;
 		public byte[] ShaderData;
-	}
+    }
 }

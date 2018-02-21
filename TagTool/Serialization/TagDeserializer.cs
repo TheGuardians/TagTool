@@ -512,22 +512,35 @@ namespace TagTool.Serialization
 				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
 				constantSize = reader.ReadUInt32();
 				codeSize = reader.ReadUInt32();
-			}
+            }
 
-			var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
-			reader.SeekTo(dataOffset);
-			var shaderData = reader.ReadBytes((int)debugHeader.ShaderDataSize);
+            var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress) + constantSize;
+            reader.SeekTo(dataOffset);
+            var shaderData = reader.ReadBytes((int)codeSize);
 
-			reader.SeekTo(endPosition);
-			return new PixelShaderReference
-			{
-				UpdbName = updbName,
-				Header = header,
-				DebugHeader = debugHeader,
-				DebugData = debugData,
-				ShaderData = shaderData
-			};
-		}
+            reader.SeekTo(endPosition);
+
+            var info = new XboxShaderInfo
+            {
+                DataAddress = dataOffset,
+                DebugInfoOffset = (uint)debugHeaderOffset,
+                DebugInfoSize = debugHeader.StructureSize,
+                DatabasePath = updbName,
+                DataSize = totalSize,
+                ConstantDataSize = constantSize,
+                CodeDataSize = codeSize
+            };
+
+            return new PixelShaderReference
+            {
+                Info = info,
+                UpdbName = updbName,
+                Header = header,
+                DebugHeader = debugHeader,
+                DebugData = debugData,
+                ShaderData = shaderData
+            };
+        }
 
 		public VertexShaderReference DeserializeVertexShaderReference(EndianReader reader, ISerializationContext context)
 		{
@@ -582,15 +595,28 @@ namespace TagTool.Serialization
 				constantSize = reader.ReadUInt32();
 				codeSize = reader.ReadUInt32();
 			}
-
-			var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+            
+            var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress) + constantSize;
 			reader.SeekTo(dataOffset);
-			var shaderData = reader.ReadBytes((int)debugHeader.ShaderDataSize);
+			var shaderData = reader.ReadBytes((int)codeSize);
 
 			reader.SeekTo(endPosition);
-			return new VertexShaderReference
-			{
-				UpdbName = updbName,
+
+            var info = new XboxShaderInfo
+            {
+                DataAddress = dataOffset,
+                DebugInfoOffset = (uint)debugHeaderOffset,
+                DebugInfoSize = debugHeader.StructureSize,
+                DatabasePath = updbName,
+                DataSize = totalSize,
+                ConstantDataSize = constantSize,
+                CodeDataSize = codeSize
+            };
+
+            return new VertexShaderReference
+            {
+                Info = info,
+                UpdbName = updbName,
 				Header = header,
 				DebugHeader = debugHeader,
 				DebugData = debugData,
