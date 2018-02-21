@@ -249,9 +249,6 @@
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
     <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
-    <Compile Include="Commands\PixelShaders\CompileCommand.cs" />
-    <Compile Include="Commands\PixelShaders\DisassembleCommand.cs" />
-    <Compile Include="Commands\PixelShaders\PixelShaderContextFactory.cs" />
     <Compile Include="Commands\Porting\ConvertBitmapCommand.cs" />
     <Compile Include="Commands\Porting\DumpBspGeometryCommand.cs" />
     <Compile Include="Commands\Porting\DumpScriptInfoCommand.cs" />
@@ -301,6 +298,9 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\CompileCommand.cs" />
+    <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
+    <Compile Include="Commands\Shaders\DisassembleCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
@@ -333,9 +333,6 @@
     <Compile Include="Commands\Unicode\RemoveStringCommand.cs" />
     <Compile Include="Commands\Unicode\SetStringCommand.cs" />
     <Compile Include="Commands\Unicode\UnicodeContextFactory.cs" />
-    <Compile Include="Commands\VertexShaders\CompileCommand.cs" />
-    <Compile Include="Commands\VertexShaders\DisassembleCommand.cs" />
-    <Compile Include="Commands\VertexShaders\VertexShaderContextFactory.cs" />
     <Compile Include="Commands\Video\ExtractBinkFileCommand.cs" />
     <Compile Include="Commands\Video\VideoContextFactory.cs" />
     <Compile Include="Common\Angle.cs" />
@@ -371,6 +368,10 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Shaders\ShaderDrawMode.cs" />
+    <Compile Include="Shaders\ShaderParameter.cs" />
+    <Compile Include="Shaders\PixelShaderBlock.cs" />
+    <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
@@ -498,9 +499,6 @@
     <Compile Include="Shaders\ShaderCodeHeader.cs" />
     <Compile Include="Shaders\ShaderData.cs" />
     <Compile Include="Shaders\ShaderDebugHeader.cs" />
-    <Compile Include="Shaders\ShaderDrawMode.cs" />
-    <Compile Include="Shaders\ShaderParameter.cs" />
-    <Compile Include="Shaders\ShaderParameterRegisterType.cs" />
     <Compile Include="Shaders\VertexShaderHeader.cs" />
     <Compile Include="Shaders\VertexShaderReference.cs" />
     <Compile Include="Tags\Definitions\Achievements.cs" />

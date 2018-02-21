@@ -11,14 +11,12 @@ using TagTool.Commands.Models;
 using TagTool.Commands.ModelAnimationGraphs;
 using TagTool.Commands.ScenarioLightmaps;
 using TagTool.Commands.RenderModels;
-using TagTool.Commands.PixelShaders;
 using TagTool.Commands.RenderMethods;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Scenarios;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
-using TagTool.Commands.VertexShaders;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
@@ -81,10 +79,6 @@ namespace TagTool.Commands.Editing
                     RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
                     break;
 
-                case "pixl":
-                    PixelShaderContextFactory.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
-                    break;
-
                 case "pmdf":
                     ParticleModelContextFactory.Populate(commandContext, cacheContext, tag, (ParticleModel)definition);
                     break;
@@ -122,10 +116,22 @@ namespace TagTool.Commands.Editing
                     VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
                     break;
 
-				case "vtsh":
-					VertexShaderContextFactory.Populate(commandContext, cacheContext, tag, (VertexShader)definition);
-					break;
-			}
+                case "pixl":
+                    Shaders.ShaderContextFactory<PixelShader>.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
+                    break;
+
+                case "vtsh":
+                    Shaders.ShaderContextFactory<VertexShader>.Populate(commandContext, cacheContext, tag, (VertexShader)definition);
+                    break;
+
+                case "glps":
+                    Shaders.ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cacheContext, tag, (GlobalPixelShader)definition);
+                    break;
+
+                case "glvs":
+                    Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cacheContext, tag, (GlobalVertexShader)definition);
+                    break;
+            }
 
             var structure = new TagStructureInfo(TagDefinition.Find(tag.Group.Tag));
 

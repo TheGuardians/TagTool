@@ -10,6 +10,6 @@ namespace TagTool.Tags.Definitions
         public uint Unknown;
         public List<ShaderDrawMode> DrawModes;
         public uint Unknown3;
-        public List<ShaderData> Shaders;
+        public List<PixelShaderBlock> Shaders;
     }
 }

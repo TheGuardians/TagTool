@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     {
         public List<VertexTypeShaders> VertexTypes;
         public uint Unknown2;
-        public List<Shader> Shaders;
+        public List<VertexShaderBlock> Shaders;
 
         [TagStructure(Size = 0xC)]
         public class VertexTypeShaders
@@ -26,37 +26,5 @@ namespace TagTool.Tags.Definitions
                 public int ShaderIndex;
             }
         }
-
-        [TagStructure(Size = 0x50)]
-        public class Shader
-        {
-            public byte[] Unknown;
-            public byte[] Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public List<ParameterBlock> Parameters;
-            public uint Unknown8;
-            public uint Unknown9;
-            public VertexShaderReference ShaderReference;
-
-            [TagStructure(Size = 0x8)]
-            public class ParameterBlock
-			{
-				public StringId ParameterName;
-				public short RegisterIndex;
-				public byte RegisterCount;
-				public RType RegisterType;
-
-				public enum RType : byte
-				{
-					Boolean = 0,
-					Integer = 1,
-					Float = 2,
-					Sampler = 3
-				}
-			}
-		}
     }
 }

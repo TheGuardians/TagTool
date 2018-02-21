@@ -585,9 +585,9 @@ namespace TagTool.Commands.Tags
                         continue;
                     Console.WriteLine("- Recompiling vertex shader {0}...", mode.ShaderIndex);
                     var shader = glvs.Shaders[mode.ShaderIndex];
-                    var newBytecode = ShaderConverter.ConvertNewVertexShaderToOld(shader.Unknown2, j, type);
+                    var newBytecode = ShaderConverter.ConvertNewVertexShaderToOld(shader.PCShaderBytecode, j, type);
                     if (newBytecode != null)
-                        shader.Unknown2 = newBytecode;
+                        shader.PCShaderBytecode = newBytecode;
                     usedShaders[mode.ShaderIndex] = true;
                 }
             }
@@ -596,7 +596,7 @@ namespace TagTool.Commands.Tags
             for (var i = 0; i < glvs.Shaders.Count; i++)
             {
                 if (!usedShaders[i])
-                    glvs.Shaders[i].Unknown2 = null;
+                    glvs.Shaders[i].PCShaderBytecode = null;
             }
         }
 
@@ -621,9 +621,9 @@ namespace TagTool.Commands.Tags
                     {
                         Console.WriteLine("- Recompiling pixel shader {0}...", mode.Index + j);
                         var shader = ps.Shaders[mode.Index + j];
-                        var newBytecode = ShaderConverter.ConvertNewPixelShaderToOld(shader.PcCompiledShader, i);
+                        var newBytecode = ShaderConverter.ConvertNewPixelShaderToOld(shader.PCShaderBytecode, i);
                         if (newBytecode != null)
-                            shader.PcCompiledShader = newBytecode;
+                            shader.PCShaderBytecode = newBytecode;
                     }
                     usedShaders[mode.Index + j] = true;
                 }
@@ -633,7 +633,7 @@ namespace TagTool.Commands.Tags
             for (var i = 0; i < ps.Shaders.Count; i++)
             {
                 if (!usedShaders[i])
-                    ps.Shaders[i].PcCompiledShader = null;
+                    ps.Shaders[i].PCShaderBytecode = null;
             }
         }
 
