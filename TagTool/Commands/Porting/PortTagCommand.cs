@@ -33,6 +33,7 @@ namespace TagTool.Commands.Porting
         private bool IsNew = false;
         private bool UseNull = false;
         private bool NoAudio = false;
+        private bool UseShaderTest = false;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -97,6 +98,10 @@ namespace TagTool.Commands.Porting
 
                     case "usenull":
                         UseNull = true;
+                        break;
+
+                    case "shadertest":
+                        UseShaderTest = true;
                         break;
 
                     default:
@@ -254,26 +259,25 @@ namespace TagTool.Commands.Porting
             // Return engine default tags for any unsupported tag groups
             //
 
-            //if (RenderMethodTagGroups.Contains(groupTag))
-            //{
-            //    if (groupTag == "rmw ")
-            //        return CacheContext.GetTag(0x400F);
-            //    else if (groupTag == "rmhg")
-            //        return CacheContext.GetTag(0x2647);
-            //    else if (groupTag == "rmtr")
-            //        return CacheContext.GetTag(0x3AAD);
-            //    else if (groupTag == "rmcs")
-            //        return CacheContext.GetTag(0x101F);
-            //    else if (groupTag == "rmd ")
-            //        return CacheContext.GetTag(0x1BA2);
-            //    else if (groupTag == "rmfl")
-            //        return CacheContext.GetTag(0x4CA9);
-            //    else if (groupTag == "rmct")
-            //        return null;
-            //    else
-            //        return CacheContext.GetTag(0x101F);
-            //}
-            if (false) { }
+            if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest)
+            {
+                if (groupTag == "rmw ")
+                    return CacheContext.GetTag(0x400F);
+                else if (groupTag == "rmhg")
+                    return CacheContext.GetTag(0x2647);
+                else if (groupTag == "rmtr")
+                    return CacheContext.GetTag(0x3AAD);
+                else if (groupTag == "rmcs")
+                    return CacheContext.GetTag(0x101F);
+                else if (groupTag == "rmd ")
+                    return CacheContext.GetTag(0x1BA2);
+                else if (groupTag == "rmfl")
+                    return CacheContext.GetTag(0x4CA9);
+                else if (groupTag == "rmct")
+                    return null;
+                else
+                    return CacheContext.GetTag(0x101F);
+            }
             else if (EffectTagGroups.Contains(groupTag))
             {
                 if (groupTag == "beam")
@@ -358,10 +362,10 @@ namespace TagTool.Commands.Porting
                         particle.Unknown7 = 1.0f / particle.Unknown7;
             }
 
-            if (groupTag == "glps")
+            if (groupTag == "glps" && UseShaderTest)
                 blamDefinition = ConvertGlobalPixelShader((GlobalPixelShader)blamDefinition);
 
-            if (groupTag == "glvs")
+            if (groupTag == "glvs" && UseShaderTest)
                 blamDefinition = ConvertGlobalVertexShader((GlobalVertexShader)blamDefinition);
 
             if (groupTag == "hlmt")
@@ -396,10 +400,10 @@ namespace TagTool.Commands.Porting
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
 
-            if (groupTag == "pixl")
+            if (groupTag == "pixl" && UseShaderTest)
                 blamDefinition = ConvertPixelShader((PixelShader)blamDefinition);
 
-            if (groupTag == "vtsh")
+            if (groupTag == "vtsh" && UseShaderTest)
                 blamDefinition = ConvertVertexShader((VertexShader)blamDefinition);
 
             if (groupTag == "proj")
