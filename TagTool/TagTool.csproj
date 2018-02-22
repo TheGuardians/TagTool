@@ -371,6 +371,7 @@
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
+    <Compile Include="Shaders\UPDBParser.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
     <Compile Include="Tags\TagBlock.cs" />
