@@ -278,7 +278,6 @@ namespace TagTool.Commands.Porting
                 else
                     return CacheContext.GetTag(0x101F);
             }
-            if (false) { }
             else if (EffectTagGroups.Contains(groupTag))
             {
                 if (groupTag == "beam")
