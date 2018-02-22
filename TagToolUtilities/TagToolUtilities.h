@@ -4,10 +4,15 @@
 
 using namespace System;
 
-namespace TagToolUtilities {
 
-	public ref class Class1
+
+namespace TagTool {
+
+	namespace Utilities
 	{
-		// TODO: Add your methods for this class here.
-	};
+		public ref class DirectXUtilities {
+		public:
+			static array<Byte>^ AssembleShader(String^ source);
+		};
+	}
 }
