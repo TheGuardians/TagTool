@@ -74,19 +74,25 @@ namespace TagTool.Commands.Shaders
                 var shader_data_block = new PixelShaderBlock
                 {
                     PCShaderBytecode = bytecode,
-                    PCParameters = GetParamInfo(disassembly),
+                    //PCParameters = GetParamInfo(disassembly),
                     //Unknown3 = CacheContext.GetStringId("default") // No evidence to suggest this is actually a stringid
                 };
 
                 if (typeof(T) == typeof(PixelShader))
                 {
                     var _definition = Definition as PixelShader;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
                     _definition.Shaders[index] = shader_data_block;
                 }
 
                 if (typeof(T) == typeof(GlobalPixelShader))
                 {
                     var _definition = Definition as GlobalPixelShader;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
                     _definition.Shaders[index] = shader_data_block;
                 }
             }
