@@ -514,15 +514,19 @@ namespace TagTool.Serialization
 				codeSize = reader.ReadUInt32();
             }
 
-            var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress) + constantSize;
-            reader.SeekTo(dataOffset);
+            var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+            reader.SeekTo(constant_block_offset);
+            var constantData = reader.ReadBytes((int)constantSize);
+
+            var shader_data_block_offset = constant_block_offset + constantSize;
+            reader.SeekTo(shader_data_block_offset);
             var shaderData = reader.ReadBytes((int)codeSize);
 
             reader.SeekTo(endPosition);
 
             var info = new XboxShaderInfo
             {
-                DataAddress = dataOffset,
+                DataAddress = shader_data_block_offset,
                 DebugInfoOffset = (uint)debugHeaderOffset,
                 DebugInfoSize = debugHeader.StructureSize,
                 DatabasePath = updbName,
@@ -538,7 +542,8 @@ namespace TagTool.Serialization
                 Header = header,
                 DebugHeader = debugHeader,
                 DebugData = debugData,
-                ShaderData = shaderData
+                ShaderData = shaderData,
+                ConstantData = constantData
             };
         }
 
@@ -594,17 +599,21 @@ namespace TagTool.Serialization
 				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
 				constantSize = reader.ReadUInt32();
 				codeSize = reader.ReadUInt32();
-			}
-            
-            var dataOffset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress) + constantSize;
-			reader.SeekTo(dataOffset);
-			var shaderData = reader.ReadBytes((int)codeSize);
+            }
 
-			reader.SeekTo(endPosition);
+            var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+            reader.SeekTo(constant_block_offset);
+            var constantData = reader.ReadBytes((int)constantSize);
+
+            var shader_data_block_offset = constant_block_offset + constantSize;
+            reader.SeekTo(shader_data_block_offset);
+            var shaderData = reader.ReadBytes((int)codeSize);
+
+            reader.SeekTo(endPosition);
 
             var info = new XboxShaderInfo
             {
-                DataAddress = dataOffset,
+                DataAddress = shader_data_block_offset,
                 DebugInfoOffset = (uint)debugHeaderOffset,
                 DebugInfoSize = debugHeader.StructureSize,
                 DatabasePath = updbName,
@@ -617,11 +626,12 @@ namespace TagTool.Serialization
             {
                 Info = info,
                 UpdbName = updbName,
-				Header = header,
-				DebugHeader = debugHeader,
-				DebugData = debugData,
-				ShaderData = shaderData
-			};
-		}
+                Header = header,
+                DebugHeader = debugHeader,
+                DebugData = debugData,
+                ShaderData = shaderData,
+                ConstantData = constantData
+            };
+        }
 	}
 }

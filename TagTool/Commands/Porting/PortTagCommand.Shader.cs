@@ -106,19 +106,30 @@ namespace TagTool.Commands.Porting
 
                 string tempSHADER = @"Temp\permutation.shader";
                 string tempSHADERUPDB = @"Temp\permutation.shader.updb";
+                string tempSHADERCBIN = @"Temp\permutation.shader.cbin";
 
                 if (File.Exists(tempSHADER)) File.Delete(tempSHADER);
                 if (File.Exists(tempSHADERUPDB)) File.Delete(tempSHADERUPDB);
+                if (File.Exists(tempSHADERCBIN)) File.Delete(tempSHADERUPDB);
 
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
-                {
-                    output.WriteBlock(shader_data);
-                }
+                if (shader_data.Length > 0)
+                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
+                    {
+                        output.WriteBlock(shader_data);
+                    }
 
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
-                {
-                    output.WriteBlock(xbox_shader_reference.DebugData);
-                }
+                if (xbox_shader_reference.DebugData.Length > 0)
+                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
+                    {
+                        output.WriteBlock(xbox_shader_reference.DebugData);
+                        var x = new UPDBParser(xbox_shader_reference.DebugData);
+                    }
+
+                if (xbox_shader_reference.ConstantData.Length > 0)
+                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERCBIN), EndianFormat.BigEndian))
+                    {
+                        output.WriteBlock(xbox_shader_reference.ConstantData);
+                    }
 
                 var process = new Process
                 {

@@ -8,5 +8,6 @@ namespace TagTool.Shaders
         public XboxShaderInfo Info;
         public byte[] DebugData;
         public byte[] ShaderData;
+        public byte[] ConstantData;
     }
 }
