@@ -12,19 +12,146 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using System.Diagnostics;
+using System.Text;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
+
         private GlobalPixelShader ConvertGlobalPixelShader(GlobalPixelShader glps)
         {
+            Directory.CreateDirectory(@"Temp");
+
+            if (!File.Exists(@"Tools\xsd.exe"))
+            {
+                Console.WriteLine("Missing tools, please install xsd.exe before porting shaders.");
+                return glps;
+            }
+
+            foreach (var shader in glps.Shaders)
+            {
+                var xbox_shader_reference = shader?.XboxShaderReference;
+                var shader_data = xbox_shader_reference?.ShaderData;
+                if (shader_data == null || shader_data.Length == 0) continue;
+
+                string tempSHADER = @"Temp\permutation.shader";
+                string tempSHADERUPDB = @"Temp\permutation.shader.updb";
+
+                if (File.Exists(tempSHADER)) File.Delete(tempSHADER);
+                if (File.Exists(tempSHADERUPDB)) File.Delete(tempSHADERUPDB);
+
+                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
+                {
+                    output.WriteBlock(shader_data);
+                }
+
+                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
+                {
+                    output.WriteBlock(xbox_shader_reference.DebugData);
+                }
+
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = @"Tools\xsd.exe",
+                        Arguments = "/rawps permutation.shader",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true,
+                        WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "temp")
+                    }
+                };
+                process.Start();
+
+                //* Read the output (or the error)
+                string proc_output = process.StandardOutput.ReadToEnd();
+                Console.WriteLine(proc_output);
+                string err = process.StandardError.ReadToEnd();
+                Console.WriteLine(err);
+
+                process.WaitForExit();
+
+                if (!String.IsNullOrWhiteSpace(err))
+                {
+                    continue;
+                }
+
+                Console.WriteLine("written shader binary for glps");
+
+            }
+
             //add conversion code when ready
             return glps;
         }
 
         private GlobalVertexShader ConvertGlobalVertexShader(GlobalVertexShader glvs)
         {
+            Directory.CreateDirectory(@"Temp");
+
+            if (!File.Exists(@"Tools\xsd.exe"))
+            {
+                Console.WriteLine("Missing tools, please install xsd.exe before porting shaders.");
+                return glvs;
+            }
+
+            foreach (var shader in glvs.Shaders)
+            {
+                var xbox_shader_reference = shader?.XboxShaderReference;
+                var shader_data = xbox_shader_reference?.ShaderData;
+                if (shader_data == null || shader_data.Length == 0) continue;
+
+                string tempSHADER = @"Temp\permutation.shader";
+                string tempSHADERUPDB = @"Temp\permutation.shader.updb";
+
+                if (File.Exists(tempSHADER)) File.Delete(tempSHADER);
+                if (File.Exists(tempSHADERUPDB)) File.Delete(tempSHADERUPDB);
+
+                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
+                {
+                    output.WriteBlock(shader_data);
+                }
+
+                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
+                {
+                    output.WriteBlock(xbox_shader_reference.DebugData);
+                }
+
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = @"Tools\xsd.exe",
+                        Arguments = "/rawvs permutation.shader",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true,
+                        WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "temp")
+                    }
+                };
+                process.Start();
+
+                //* Read the output (or the error)
+                string proc_output = process.StandardOutput.ReadToEnd();
+                Console.WriteLine(proc_output);
+                string err = process.StandardError.ReadToEnd();
+                Console.WriteLine(err);
+
+                process.WaitForExit();
+
+                if (!String.IsNullOrWhiteSpace(err))
+                {
+                    continue;
+                }
+
+                Console.WriteLine("written shader binary for glps");
+
+            }
+
             //add conversion code when ready
             return glvs;
         }
@@ -123,6 +250,13 @@ namespace TagTool.Commands.Porting
                 return CacheContext.Deserializer.Deserialize<Shader>(edContext2);
             }
 
+            var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ?
+            CacheContext.TagNames[edRmt2Instance.Index] :
+            $"0x{edRmt2Instance.Index:X4}";
+
+            Console.WriteLine($"{bmRmt2Instance.Filename} (Required H3 rmt2)");
+            Console.WriteLine($"{edRmt2Tagname} (Found rmt2 0x{edRmt2Instance.Index:X4})");
+
             // To prevent a billion lines of bad code, let it find the rmt2 tag, and only replace it with a preset now
             GetShaderPresets(CacheContext, blamTagName);
 
@@ -159,7 +293,7 @@ namespace TagTool.Commands.Porting
                     Bitmap = CacheContext.GetTag(newBitmap)
                 });
             }
-            
+
             foreach (var a in edArgs)
                 newShaderProperty.Arguments.Add(DefaultArgumentsValues(a));
 
@@ -914,10 +1048,10 @@ namespace TagTool.Commands.Porting
                 case "rmw ": renderMethod = (ShaderWater)parentShaderDef; break;
                 case "rmzo": renderMethod = (ShaderZonly)parentShaderDef; break;
                 case "rmhg":
-                    renderMethod = (ShaderHalogram)parentShaderDef; 
+                    renderMethod = (ShaderHalogram)parentShaderDef;
                     debugUseEDFunctions = true;// rmhg seems to crash if it doesn't have functions
                     break;
-                    
+
                 case "beam": var a = (BeamSystem)parentShaderDef; foreach (var f in a.Beam) renderMethod = f.RenderMethod; break; // any would do
                 case "cntl": var b = (ContrailSystem)parentShaderDef; foreach (var f in b.Contrail) renderMethod = f.RenderMethod; break;
                 case "decs": var c = (DecalSystem)parentShaderDef; foreach (var f in c.DecalSystem2) renderMethod = f.RenderMethod; break;
