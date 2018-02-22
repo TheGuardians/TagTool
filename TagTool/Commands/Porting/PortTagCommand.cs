@@ -33,6 +33,7 @@ namespace TagTool.Commands.Porting
         private bool IsNew = false;
         private bool UseNull = false;
         private bool NoAudio = false;
+        private bool UseShaderTest = false;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -97,6 +98,10 @@ namespace TagTool.Commands.Porting
 
                     case "usenull":
                         UseNull = true;
+                        break;
+
+                    case "shadertest":
+                        UseShaderTest = true;
                         break;
 
                     default:
@@ -254,25 +259,25 @@ namespace TagTool.Commands.Porting
             // Return engine default tags for any unsupported tag groups
             //
 
-            //if (RenderMethodTagGroups.Contains(groupTag))
-            //{
-            //    if (groupTag == "rmw ")
-            //        return CacheContext.GetTag(0x400F);
-            //    else if (groupTag == "rmhg")
-            //        return CacheContext.GetTag(0x2647);
-            //    else if (groupTag == "rmtr")
-            //        return CacheContext.GetTag(0x3AAD);
-            //    else if (groupTag == "rmcs")
-            //        return CacheContext.GetTag(0x101F);
-            //    else if (groupTag == "rmd ")
-            //        return CacheContext.GetTag(0x1BA2);
-            //    else if (groupTag == "rmfl")
-            //        return CacheContext.GetTag(0x4CA9);
-            //    else if (groupTag == "rmct")
-            //        return null;
-            //    else
-            //        return CacheContext.GetTag(0x101F);
-            //}
+            if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest)
+            {
+                if (groupTag == "rmw ")
+                    return CacheContext.GetTag(0x400F);
+                else if (groupTag == "rmhg")
+                    return CacheContext.GetTag(0x2647);
+                else if (groupTag == "rmtr")
+                    return CacheContext.GetTag(0x3AAD);
+                else if (groupTag == "rmcs")
+                    return CacheContext.GetTag(0x101F);
+                else if (groupTag == "rmd ")
+                    return CacheContext.GetTag(0x1BA2);
+                else if (groupTag == "rmfl")
+                    return CacheContext.GetTag(0x4CA9);
+                else if (groupTag == "rmct")
+                    return null;
+                else
+                    return CacheContext.GetTag(0x101F);
+            }
             if (false) { }
             else if (EffectTagGroups.Contains(groupTag))
             {
