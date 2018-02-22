@@ -374,6 +374,7 @@
     <Compile Include="Shaders\UPDBParser.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
+    <Compile Include="Shaders\XboxShaderParser.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
