@@ -362,10 +362,10 @@ namespace TagTool.Commands.Porting
                         particle.Unknown7 = 1.0f / particle.Unknown7;
             }
 
-            if (groupTag == "glps")
+            if (groupTag == "glps" && UseShaderTest)
                 blamDefinition = ConvertGlobalPixelShader((GlobalPixelShader)blamDefinition);
 
-            if (groupTag == "glvs")
+            if (groupTag == "glvs" && UseShaderTest)
                 blamDefinition = ConvertGlobalVertexShader((GlobalVertexShader)blamDefinition);
 
             if (groupTag == "hlmt")
@@ -400,10 +400,10 @@ namespace TagTool.Commands.Porting
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
 
-            if (groupTag == "pixl")
+            if (groupTag == "pixl" && UseShaderTest)
                 blamDefinition = ConvertPixelShader((PixelShader)blamDefinition);
 
-            if (groupTag == "vtsh")
+            if (groupTag == "vtsh" && UseShaderTest)
                 blamDefinition = ConvertVertexShader((VertexShader)blamDefinition);
 
             if (groupTag == "proj")
