@@ -91,13 +91,9 @@ namespace TagTool.Commands.Porting
 
         private GlobalVertexShader ConvertGlobalVertexShader(GlobalVertexShader glvs)
         {
-            Directory.CreateDirectory(@"Temp");
+            
 
-            if (!File.Exists(@"Tools\xsd.exe"))
-            {
-                Console.WriteLine("Missing tools, please install xsd.exe before porting shaders.");
-                return glvs;
-            }
+
 
             foreach (var shader in glvs.Shaders)
             {
@@ -137,33 +133,7 @@ namespace TagTool.Commands.Porting
                         output.WriteBlock(xbox_shader_reference.ConstantData);
                     }
 
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = @"Tools\xsd.exe",
-                        Arguments = "/rawvs permutation.shader",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true,
-                        WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "temp")
-                    }
-                };
-                process.Start();
-
-                //* Read the output (or the error)
-                string proc_output = process.StandardOutput.ReadToEnd();
-                Console.WriteLine(proc_output);
-                string err = process.StandardError.ReadToEnd();
-                Console.WriteLine(err);
-
-                process.WaitForExit();
-
-                if (!String.IsNullOrWhiteSpace(err))
-                {
-                    continue;
-                }
+                var shader_parser = new XboxShaderParser<GlobalVertexShader, VertexShaderBlock>(glvs, shader, shader_data, updb_parser);
 
                 Console.WriteLine("written shader binary for glps");
 

@@ -38,11 +38,11 @@ namespace TagTool.Commands.Shaders
                 var _definition = Definition as VertexShader;
                 var shader = _definition.Shaders[int.Parse(args[0])];
                 var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
+                var xbox_shader = shader.XboxShaderReference?.ShaderData;
                 Console.WriteLine("PC Shader");
                 Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                //Console.WriteLine("Xbox Shader");
+                //Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
             }
 
             if (typeof(T) == typeof(PixelShader))
@@ -50,11 +50,11 @@ namespace TagTool.Commands.Shaders
                 var _definition = Definition as PixelShader;
                 var shader = _definition.Shaders[int.Parse(args[0])];
                 var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
+                var xbox_shader = shader.XboxShaderReference?.ShaderData;
                 Console.WriteLine("PC Shader");
                 Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                //Console.WriteLine("Xbox Shader");
+                //Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
             }
 
             if (typeof(T) == typeof(GlobalPixelShader))
@@ -65,8 +65,8 @@ namespace TagTool.Commands.Shaders
                 var xbox_shader = shader.XboxShaderReference.ShaderData;
                 Console.WriteLine("PC Shader");
                 Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                //Console.WriteLine("Xbox Shader");
+                //Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
             }
 
             if (typeof(T) == typeof(GlobalVertexShader))
@@ -74,11 +74,11 @@ namespace TagTool.Commands.Shaders
                 var _definition = Definition as GlobalVertexShader;
                 var shader = _definition.Shaders[int.Parse(args[0])];
                 var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
+                var xbox_shader = shader.XboxShaderReference?.ShaderData;
                 Console.WriteLine("PC Shader");
                 Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                //Console.WriteLine("Xbox Shader");
+                //Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
             }
 
 
