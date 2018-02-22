@@ -71,6 +71,28 @@ namespace TagTool.Shaders
 
         void ProcessShader(GlobalVertexShader Tag, VertexShaderBlock Block)
         {
+            var shader_code = File.ReadAllBytes(@"Tools/shader.asm");
+            var shader_code_str = Encoding.UTF8.GetString(shader_code);
+            var shader_bytecode = Utilities.DirectXUtilities.AssembleShader(shader_code_str);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             var instructions = ShaderCode.Split(new[] { "\r\n", "\r", "\n", Environment.NewLine }, StringSplitOptions.None).ToList();
             for (var i = instructions.Count - 1; i >= 0; i--)
             {
