@@ -67,8 +67,7 @@ namespace TagTool.Shaders
                     stream.Seek(UnknownBlockOffset, SeekOrigin.Begin);
                     // Do stuff but I have no idea what to do with this data
                 }
-
-
+                
                 stream.Seek(GroupBlockOffset, SeekOrigin.Begin);
                 ConstantBlockSize = reader.ReadInt32();
                 ShaderFileSize = reader.ReadInt32();

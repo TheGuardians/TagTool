@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using TagTool.Shaders;
 using System.Diagnostics;
 using System.Text;
 
@@ -104,6 +105,8 @@ namespace TagTool.Commands.Porting
                 var shader_data = xbox_shader_reference?.ShaderData;
                 if (shader_data == null || shader_data.Length == 0) continue;
 
+                UPDBParser updb_parser = null;
+
                 string tempSHADER = @"Temp\permutation.shader";
                 string tempSHADERUPDB = @"Temp\permutation.shader.updb";
                 string tempSHADERCBIN = @"Temp\permutation.shader.cbin";
@@ -119,11 +122,14 @@ namespace TagTool.Commands.Porting
                     }
 
                 if (xbox_shader_reference.DebugData.Length > 0)
+                {
                     using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
                     {
                         output.WriteBlock(xbox_shader_reference.DebugData);
-                        var x = new UPDBParser(xbox_shader_reference.DebugData);
                     }
+                    updb_parser = new UPDBParser(xbox_shader_reference.DebugData);
+                }
+                   
 
                 if (xbox_shader_reference.ConstantData.Length > 0)
                     using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERCBIN), EndianFormat.BigEndian))
