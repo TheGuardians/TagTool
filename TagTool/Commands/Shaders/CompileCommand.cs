@@ -73,9 +73,7 @@ namespace TagTool.Commands.Shaders
             {
                 var shader_data_block = new PixelShaderBlock
                 {
-                    PCShaderBytecode = bytecode,
-                    //PCParameters = GetParamInfo(disassembly),
-                    //Unknown3 = CacheContext.GetStringId("default") // No evidence to suggest this is actually a stringid
+                    PCShaderBytecode = bytecode
                 };
 
                 if (typeof(T) == typeof(PixelShader))
@@ -102,9 +100,7 @@ namespace TagTool.Commands.Shaders
                 
                 var shader_data_block = new VertexShaderBlock
                 {
-                    PCShaderBytecode = bytecode,
-                    //PCParameters = GetParamInfo(disassembly),
-                    //Unknown3 = CacheContext.GetStringId("default") // No evidence to suggest this is actually a stringid
+                    PCShaderBytecode = bytecode
                 };
 
                 if (typeof(T) == typeof(VertexShader))

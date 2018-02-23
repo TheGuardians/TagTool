@@ -91,49 +91,13 @@ namespace TagTool.Commands.Porting
 
         private GlobalVertexShader ConvertGlobalVertexShader(GlobalVertexShader glvs)
         {
-            
-
-
+            throw new NotImplementedException();
 
             foreach (var shader in glvs.Shaders)
             {
-                var xbox_shader_reference = shader?.XboxShaderReference;
-                var shader_data = xbox_shader_reference?.ShaderData;
-                if (shader_data == null || shader_data.Length == 0) continue;
+                var shader_parser = new XboxShaderParser(glvs, shader, CacheContext);
 
-                UPDBParser updb_parser = null;
-
-                string tempSHADER = @"Temp\permutation.shader";
-                string tempSHADERUPDB = @"Temp\permutation.shader.updb";
-                string tempSHADERCBIN = @"Temp\permutation.shader.cbin";
-
-                if (File.Exists(tempSHADER)) File.Delete(tempSHADER);
-                if (File.Exists(tempSHADERUPDB)) File.Delete(tempSHADERUPDB);
-                if (File.Exists(tempSHADERCBIN)) File.Delete(tempSHADERUPDB);
-
-                if (shader_data.Length > 0)
-                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
-                    {
-                        output.WriteBlock(shader_data);
-                    }
-
-                if (xbox_shader_reference.DebugData.Length > 0)
-                {
-                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
-                    {
-                        output.WriteBlock(xbox_shader_reference.DebugData);
-                    }
-                    updb_parser = new UPDBParser(xbox_shader_reference.DebugData);
-                }
-                   
-
-                if (xbox_shader_reference.ConstantData.Length > 0)
-                    using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERCBIN), EndianFormat.BigEndian))
-                    {
-                        output.WriteBlock(xbox_shader_reference.ConstantData);
-                    }
-
-                var shader_parser = new XboxShaderParser<GlobalVertexShader, VertexShaderBlock>(glvs, shader, shader_data, updb_parser);
+                if (!shader_parser.IsValid) continue;
 
                 Console.WriteLine("written shader binary for glps");
 
@@ -145,7 +109,20 @@ namespace TagTool.Commands.Porting
 
         private PixelShader ConvertPixelShader(PixelShader pixl)
         {
-            //add conversion code when ready
+            foreach (var shader in pixl.Shaders)
+            {
+                var shader_parser = new XboxShaderParser(pixl, shader, CacheContext);
+
+                if (!shader_parser.IsValid) continue;
+
+                Console.WriteLine(shader_parser.Disassemble());
+
+                    shader.PCShaderBytecode = shader_parser.ProcessShader();
+
+                Console.WriteLine("written shader binary for glps");
+
+            }
+
             return pixl;
         }
 

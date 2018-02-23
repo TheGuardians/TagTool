@@ -43,6 +43,7 @@ namespace TagTool.Shaders
 
         public UPDBParser(IEnumerable<byte> _data)
         {
+            if (_data == null) return;
             var data = _data.GetType() == typeof(byte[]) ? _data as byte[] : _data.ToArray();
             using (MemoryStream stream = new MemoryStream(data, false))
             using (EndianReader reader = new EndianReader(stream, EndianFormat.BigEndian))
