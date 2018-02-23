@@ -105,7 +105,7 @@ namespace TagTool.Shaders
             string size_col = $"{new String(' ', size_length - _size.Length)}{_size}";
             return name_col + reg_col + size_col;
         }
-        
+
         public string GetRegistersBlock()
         {
             int max_name_length = 14;
@@ -153,12 +153,12 @@ namespace TagTool.Shaders
             sb.AppendLine("//");
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("// Raw Xbox 360 Shader Assembly");
-            sb.AppendLine(formatted_raw_block);
-            sb.AppendLine();
-            sb.AppendLine();
             sb.AppendLine("// Converted PC Shader Assembly");
             sb.AppendLine(converted_shader_code);
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("// Raw Xbox 360 Shader Assembly");
+            sb.AppendLine(formatted_raw_block);
             sb.AppendLine();
             sb.AppendLine();
 
@@ -170,26 +170,191 @@ namespace TagTool.Shaders
             if (IsVertexShader) throw new NotImplementedException();
 
             var instructions = raw_shader_code.Split(new[] { "\r\n", "\r", "\n", Environment.NewLine }, StringSplitOptions.None).ToList();
-            for (var i = instructions.Count - 1; i >= 0; i--)
+            for (var instruction_index = instructions.Count - 1; instruction_index >= 0; instruction_index--)
             {
-                var instruction = instructions[i].Trim();
+                var instruction = instructions[instruction_index];
+                instruction = instruction.Replace(" + ", "");
+                instruction = instruction.Trim();
+
+                var original_instruction = instruction;
 
                 // Take the left side of any comments
                 instruction = instruction.Split(new[] { "//" }, StringSplitOptions.None)[0];
 
                 if (String.IsNullOrWhiteSpace(instruction))
                 {
-                    instructions.RemoveAt(i);
+                    instructions.RemoveAt(instruction_index);
                     continue;
                 }
 
                 var assembly_codes = instruction.Split(new string[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (assembly_codes[0] == "exec") instruction = "//" + instruction;
-                if (assembly_codes[0] == "exece") instruction = "//" + instruction;
-                if (assembly_codes[0] == "alloc") instruction = "//" + instruction;
+                var assembly_code = assembly_codes.Length > 0 ? assembly_codes[0] : null;
+                if (assembly_code != null)
+                {
+                    if (
+                        assembly_code == "exec" ||
+                        assembly_code == "exece" ||
+                        assembly_code == "alloc" ||
+                        assembly_code == "kill_eq" ||
+                        assembly_code == "kill_ge" ||
+                        assembly_code == "kill_gt" ||
+                        assembly_code == "kill_ne" ||
+                        assembly_code == "sqrt"
+                        )
+                    {
+                        instruction = "//" + instruction;
 
-                instructions[i] = instruction;
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+                    if (assembly_code == "sqrt")
+                    {
+                        instruction = "";
+                        instruction = $"rsq {assembly_codes[1]}, {assembly_codes[2]} // {original_instruction}";
+                        instruction += $"\nrcp {assembly_codes[1]}, {assembly_codes[1]} // 1/(1/sqrt)";
+
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+                    if (assembly_code == "movs")
+                    {
+                        instruction = $"mov {assembly_codes[1]}, {assembly_codes[2]} // {original_instruction}";
+
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+                    if (assembly_code == "mulsc")
+                    {
+                        instruction = $"mul {assembly_codes[1]}, {assembly_codes[2]}, {assembly_codes[3]} // {original_instruction}";
+
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+                    if (assembly_code == "addsc")
+                    {
+                        instruction = $"add {assembly_codes[1]}, {assembly_codes[2]}, {assembly_codes[3]} // {original_instruction}";
+
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+                    if (assembly_code == "tfetch2D")
+                    {
+                        // TODO: Find the highest register number and allocate a new one for this fix instead of defaulting to 31
+                        instruction = $"texld r31.xyzw, {assembly_codes[2]}, {assembly_codes[3].Replace("tf", "s")} // {original_instruction} (copy to register)";
+                        instruction += "\n";
+
+                        var destination = assembly_codes[1];
+                        if (destination.Contains(".") && destination.Contains("_")) // Has a mask
+                        {
+                            var destinationA = assembly_codes[1].Split('.')[0];
+                            var destinationB = assembly_codes[1].Split('.')[1];
+                            const string coords = "xyzw";
+
+                            //TODO: Bunching up these commands would speed it up a bit
+                            for (var destination_index = 0; destination_index < 4; destination_index++)
+                            {
+                                var destination_coordinate_char = destinationB[destination_index];
+                                if (destination_coordinate_char == '_') continue;
+                                if (destination_coordinate_char == '1') throw new NotImplementedException();
+
+                                var destination_coordinate = new String(destination_coordinate_char, 1);
+                                var source_coordinate = new String(coords[destination_index], 1);
+
+                                instruction += $"mov {destinationA}.{destination_coordinate}, r31.{source_coordinate} // {original_instruction} (masking {destination_coordinate})\n";
+                            }
+
+
+
+
+
+                        }
+                        else instruction += $"mov {assembly_codes[1]}, r31.xyzw // {original_instruction} (default masking)";
+
+                        instructions[instruction_index] = instruction.Trim();
+                        continue;
+                    }
+
+                }
+
+                instructions[instruction_index] = instruction.Trim();
+            }
+
+            // Register Fixups
+            for (var instruction_index = instructions.Count - 1; instruction_index >= 0; instruction_index--)
+            {
+                var instruction = instructions[instruction_index];
+                instruction = instruction.Replace(" + ", "");
+                instruction = instruction.Trim();
+
+                var original_instruction = instruction;
+
+                // Take the left side of any comments
+                instruction = instruction.Split(new[] { "//" }, StringSplitOptions.None)[0];
+
+                if (String.IsNullOrWhiteSpace(instruction))
+                {
+                    instructions.RemoveAt(instruction_index);
+                    continue;
+                }
+
+                var assembly_codes = instruction.Split(new string[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                var assembly_code = assembly_codes.Length > 0 ? assembly_codes[0] : null;
+                if (assembly_code != null)
+                {
+
+                    // : Anti Fuck Cheatcodes for 1337 kids :
+                    if (IsPixelShader) // Pixel Shader 
+                    {
+                        // Fixup Output Colors
+                        if (assembly_codes.Length >= 2)
+                            for (var assembly_code_index = 1; assembly_code_index < assembly_codes.Length; assembly_code_index++)
+                                if (assembly_codes[assembly_code_index][0] == 'o')
+                                {
+                                    var index_str = assembly_codes[assembly_code_index].Substring(1);
+                                    var arr = index_str.Split('.');
+                                    index_str = arr[0];
+                                    var args_str = arr.Length > 1 ? arr[1] : null;
+
+                                    if (Int32.TryParse(index_str, out Int32 index))
+                                    {
+                                        if (args_str == null) assembly_codes[assembly_code_index] = $"oC{index}";
+                                        else assembly_codes[assembly_code_index] = $"oC{index}.{args_str}";
+                                        var assembly_code_args = assembly_codes.Skip(1);
+                                        instruction = $"{assembly_code} " + string.Join(", ", assembly_code_args);
+                                    }
+                                }
+
+                    }
+
+                    if (IsVertexShader) // Vertex Shader
+                    {
+
+                    }
+
+                    // Fixup Register Differences Top Down
+                    if (assembly_codes.Length >= 2)
+                        for (var assembly_code_index = 1; assembly_code_index < assembly_codes.Length; assembly_code_index++)
+                            if (assembly_codes[assembly_code_index][0] == 'c')
+                            {
+                                var index_str = assembly_codes[assembly_code_index].Substring(1);
+                                var arr = index_str.Split('.');
+                                index_str = arr[0];
+                                var args_str = arr.Length > 1 ? arr[1] : null;
+
+                                if (Int32.TryParse(index_str, out Int32 index) && index >= (255 - 32))
+                                {
+                                    if (args_str == null) assembly_codes[assembly_code_index] = $"c{index - 32}";
+                                    else assembly_codes[assembly_code_index] = $"c{index - 32}.{args_str}";
+                                    var assembly_code_args = assembly_codes.Skip(1);
+                                    instruction = $"{assembly_code} " + string.Join(", ", assembly_code_args);
+                                }
+                            }
+
+                }
+
+                instructions[instruction_index] = instruction.Trim();
             }
 
             List<string> header = new List<string>();
@@ -217,7 +382,7 @@ namespace TagTool.Shaders
 
         private byte[] ProcessPixelShader(PixelShaderBlock Block)
         {
-            var raw_shader_code = Disassemble();
+            var raw_shader_code = XSDDisassemble();
             var converted_shader_code = ConvertXboxShader(raw_shader_code);
 
             var shader_bytecode = Utilities.DirectXUtilities.AssembleShader(converted_shader_code);

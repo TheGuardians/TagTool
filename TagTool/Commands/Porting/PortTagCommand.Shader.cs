@@ -117,9 +117,19 @@ namespace TagTool.Commands.Porting
 
                 Console.WriteLine(shader_parser.Disassemble());
 
+                try
+                {
                     shader.PCShaderBytecode = shader_parser.ProcessShader();
+                    shader.PCParameters = shader.XboxParameters;
+                    shader.XboxShaderReference = null;
 
-                Console.WriteLine("written shader binary for glps");
+                    Console.WriteLine("written shader binary for glps");
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("ConvertPixelShader Errors:");
+                    Console.WriteLine(e.Message);
+                }
 
             }
 
