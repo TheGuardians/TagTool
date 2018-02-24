@@ -133,7 +133,7 @@ namespace TagTool.Geometry
     {
         public RealQuaternion Position { get; set; }
         public RealQuaternion Texcoord { get; set; }
-        public uint Unknown { get; set; }
+        public uint Color { get; set; }
     }
 
     public class PatchyFogVertex

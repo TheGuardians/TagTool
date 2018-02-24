@@ -252,10 +252,10 @@ namespace TagTool.Geometry
         public TinyPositionVertex ReadTinyPositionVertex()
         {
             return new TinyPositionVertex
-            {
-                Position = Stream.ReadUShort4N(),
-                Texcoord = Stream.ReadSByte4NToUByte4N(),
-                Unknown = Stream.ReadColor()
+            {   
+                Position = Stream.ReadUShort4NInv(),
+                Texcoord = Stream.ReadTinyPositionData(),
+                Color = Stream.ReadColor()
             };
         }
 

@@ -120,7 +120,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.TinyPosition:
                     ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) => 
                     {
-                        v.Position = new RealQuaternion(((ushort)((ushort)(v.Position.I * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.J * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.K * 65535) + 0x8001)) / 65535.0f, ((ushort)((ushort)(v.Position.W * 65535) + 0x8001)) / 65535.0f);
+                        
                         outVertexStream.WriteTinyPositionVertex(v);
                     });
                     
