@@ -165,6 +165,84 @@ namespace TagTool.Shaders
             return sb.ToString();
         }
 
+        
+
+        class SM3ExtInstruction
+        {
+            bool IsConcurrent { get; }
+            string OriginalInstructionString { get; }
+
+            SM3ExtOperationCodes.SM3OperationInformation Operation { get; }
+
+
+
+
+
+
+
+            private bool IsScalar(string args)
+            {
+                var arg_components = args.Split('.');
+                if (arg_components.Length < 2) return false;
+                if (arg_components.Length > 2) throw new Exception("what the fuck?");
+                if (arg_components[1].Length == 1) return true;
+                return false;
+            }
+
+            private bool IsScalar(IEnumerable<string> args, int max_index = Int32.MaxValue)
+            {
+                var args_count = args.Count();
+                for (var i=0;i< args_count; i++)
+                {
+                    if (i >= max_index) continue;
+                    var arg = args.ElementAt(i);
+                    if (!IsScalar(arg)) return false;
+                }
+                return true;
+            }
+
+            public SM3ExtInstruction(string instruction)
+            {
+                OriginalInstructionString = instruction;
+                IsConcurrent = instruction.Contains(" + ");
+                instruction = instruction.Replace(" + ", "");
+                instruction = instruction.Split(new[] { "//" }, StringSplitOptions.None)[0]; // Take the left side of any comments
+                instruction = instruction.Trim();
+
+                if (String.IsNullOrWhiteSpace(instruction)) return;
+                if (instruction.StartsWith("//")) return; // Is a comment
+
+                var op_codes = instruction.Split(new string[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                var args = op_codes.Skip(1);
+
+                var vector_op_code = SM3ExtOperationCodes.GetSM3ExtVectorOPCode(op_codes[0]);
+                var scalar_op_code = SM3ExtOperationCodes.GetSM3ExtScalarOPCode(op_codes[0]);
+
+                var is_scalar = vector_op_code == null || IsScalar(args);
+
+                Operation = is_scalar ? scalar_op_code : vector_op_code;
+            }
+
+            public SM3Instruction ConvertToSM3()
+            {
+                return null;
+            }
+        }
+
+        class SM3Instruction
+        {
+            public SM3Instruction(string instruction)
+            {
+
+            }
+
+            public SM3ExtInstruction ConvertToSM3Ext()
+            {
+                // Maybe someday niggas <3 Haydn
+                throw new NotImplementedException();
+            }
+        }
+
         private string ConvertXboxShader(string raw_shader_code)
         {
             if (IsVertexShader) throw new NotImplementedException();
