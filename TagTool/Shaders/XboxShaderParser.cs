@@ -199,8 +199,7 @@ namespace TagTool.Shaders
                         assembly_code == "kill_eq" ||
                         assembly_code == "kill_ge" ||
                         assembly_code == "kill_gt" ||
-                        assembly_code == "kill_ne" ||
-                        assembly_code == "sqrt"
+                        assembly_code == "kill_ne"
                         )
                     {
                         instruction = "//" + instruction;
@@ -279,6 +278,18 @@ namespace TagTool.Shaders
 
                 instructions[instruction_index] = instruction.Trim();
             }
+
+            List<string> new_instructions = new List<string>();
+            for (var instruction_index = 0; instruction_index < instructions.Count; instruction_index++)
+            {
+                var instruction = instructions[instruction_index];
+                var instruction_instructions = instruction.Split(new string[] { Environment.NewLine, "\n", "\r" }, StringSplitOptions.None);
+                for (var instruction_instructions_index = 0; instruction_instructions_index < instruction_instructions.Length; instruction_instructions_index++)
+                {
+                    new_instructions.Add(instruction_instructions[instruction_instructions_index]);
+                }
+            }
+            instructions = new_instructions;
 
             // Register Fixups
             for (var instruction_index = instructions.Count - 1; instruction_index >= 0; instruction_index--)
