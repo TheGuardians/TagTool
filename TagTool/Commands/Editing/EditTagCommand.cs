@@ -31,7 +31,15 @@ namespace TagTool.Commands.Editing
             if (args.Count != 1)
                 return false;
 
-            var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
+            CachedTagInstance tag = null;
+
+            try
+            {
+                tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
+            } catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             if (tag == null)
                 return false;

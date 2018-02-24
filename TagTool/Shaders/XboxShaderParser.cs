@@ -171,6 +171,13 @@ namespace TagTool.Shaders
         {
             bool IsConcurrent { get; }
             string OriginalInstructionString { get; }
+            
+            enum SM3ExtInstructionType
+            {
+                Vector,
+                Scalar,
+                Other
+            }
 
             SM3ExtOperationCodes.SM3OperationInformation Operation { get; }
 
@@ -198,7 +205,7 @@ namespace TagTool.Shaders
                     var arg = args.ElementAt(i);
                     if (!IsScalar(arg)) return false;
                 }
-                return true;
+                return args_count > 0;
             }
 
             public SM3ExtInstruction(string instruction)
@@ -555,6 +562,9 @@ namespace TagTool.Shaders
             process.WaitForExit();
 
             if (!String.IsNullOrWhiteSpace(err)) throw new Exception(err);
+
+            var shader_instructionset = IsVertexShader ? "xvs_3_0" : "xps_3_0";
+            shader_code = $"	{shader_instructionset}\n{shader_code}";
 
             return shader_code;
         }
