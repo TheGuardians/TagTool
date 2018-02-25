@@ -298,11 +298,11 @@ namespace TagTool.Geometry
         public RealQuaternion ReadTinyPositionData()
         {
             RealQuaternion result;
-            byte rotation2 = ConvertByte(Reader.ReadByte(), -1);
-            byte rotation1 = ConvertByte(Reader.ReadByte(), 0);
+            byte rotation2 = ConvertByte(Reader.ReadByte());
+            byte rotation1 = ConvertByte(Reader.ReadByte());
 
-            byte scale2 = ConvertByte(Reader.ReadByte(), -1);
-            byte scale1 = ConvertByte(Reader.ReadByte(), 0);
+            byte scale2 = ConvertByte(Reader.ReadByte());
+            byte scale1 = ConvertByte(Reader.ReadByte());
 
             result = new RealQuaternion(scale1/255.0f, scale2/255.0f, rotation1/255.0f, rotation2 / 255.0f);
 
@@ -322,16 +322,15 @@ namespace TagTool.Geometry
             return result;
         }
 
-        private static byte ConvertByte(byte value, sbyte fixup)
+        private static byte ConvertByte(byte value)
         {
             byte result = 0;
             bool lastBit = ((value >> 7) & 1) == 1;
-            if (lastBit)
-                result = (byte)(value & 0x7F);
+            if (value <= 0x7F)
+                result = (byte)(value + 0x7F);
             else
-                result = (byte)(value + 0x80);
+                result = (byte)((0x7F - (0xFF - value)) - 1);
 
-            result = (byte)(result + fixup); //adjust if it cause problems
             return result;
         }
     }
