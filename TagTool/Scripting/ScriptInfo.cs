@@ -9786,7 +9786,6 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                 },
                 [0x0B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_on"),
-                [0x0B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown2"),
                 [0x0B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_off"),
                 [0x0B9] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_aspect_ratio")
                 {
