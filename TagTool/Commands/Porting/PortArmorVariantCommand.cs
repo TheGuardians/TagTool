@@ -27,7 +27,7 @@ namespace TagTool.Commands.Porting
                 "PortArmorVariant",
                 "Ports an mp_masterchief armor variant.",
 
-                "PortArmorVariant <Variant Name> [Scenery] [Regions: <Region 1> <Region 2> ... <Region N>]",
+                "PortArmorVariant <Spartan | Elite> <Variant Name> [Scenery] [Replace: <Tag>] [Regions: <Region 1> <Region 2> ... <Region N>]",
 
                 "Ports an mp_masterchief armor variant.")
         {
@@ -38,14 +38,26 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1)
+            if (args.Count < 2)
                 return false;
 
             //
             // Verify Blam tag instance
             //
 
-            var blamTagName = @"objects\characters\masterchief\mp_masterchief\mp_masterchief";
+            var unitName = args[0].ToLower();
+
+            if (unitName != "spartan" || unitName != "elite")
+            {
+                Console.WriteLine("ERROR: Only 'spartan' and 'elite' armor variants are allowed.");
+                return false;
+            }
+
+            args.RemoveAt(0);
+
+            var blamTagName = unitName == "spartan" ?
+                @"objects\characters\masterchief\mp_masterchief\mp_masterchief" :
+                @"objects\characters\elite\mp_elite\mp_elite";
 
             Console.Write($"Verifying {blamTagName}.render_model...");
 
@@ -620,16 +632,20 @@ namespace TagTool.Commands.Porting
             {
                 CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edModeTag), edModeDefinition);
                 CacheContext.TagNames[edModeTag.Index] = isScenery ?
-                    $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
-                    @"objects\characters\masterchief\mp_masterchief\mp_masterchief";
+                    (unitName == "spartan" ?
+                        $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
+                        $@"objects\characters\elite\mp_elite\armor\{variantName}") :
+                    (unitName == "spartan" ?
+                        @"objects\characters\masterchief\mp_masterchief\mp_masterchief" :
+                        @"objects\characters\elite\mp_elite\mp_elite");
 
                 if (isScenery)
                 {
                     CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edHlmtTag), edHlmtDefinition);
-                    CacheContext.TagNames[edHlmtTag.Index] = $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}";
-
                     CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edScenTag), edScenDefinition);
-                    CacheContext.TagNames[edScenTag.Index] = $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}";
+                    CacheContext.TagNames[edHlmtTag.Index] = CacheContext.TagNames[edScenTag.Index] = unitName == "spartan" ?
+                        $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
+                        $@"objects\characters\elite\mp_elite\armor\{variantName}";
                 }
             }
 
