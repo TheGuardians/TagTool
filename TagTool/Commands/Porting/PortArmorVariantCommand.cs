@@ -47,7 +47,7 @@ namespace TagTool.Commands.Porting
 
             var unitName = args[0].ToLower();
 
-            if (unitName != "spartan" || unitName != "elite")
+            if (unitName != "spartan" && unitName != "elite")
             {
                 Console.WriteLine("ERROR: Only 'spartan' and 'elite' armor variants are allowed.");
                 return false;
