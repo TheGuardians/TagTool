@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Geometry;
 using TagTool.IO;
+using TagTool.Shaders.SM3;
+using TagTool.Shaders.SM3Ext;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Shaders
@@ -27,13 +29,6 @@ namespace TagTool.Shaders
 
         public object Block { get; set; }
         public object Tag { get; set; }
-
-        public enum OutputFile
-        {
-            ShaderData,
-            DebugData,
-            ConstantData
-        }
 
         public XboxShaderParser(VertexShader tag, VertexShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
         public XboxShaderParser(PixelShader tag, PixelShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
@@ -135,7 +130,7 @@ namespace TagTool.Shaders
 
         public string Disassemble(string _raw_shader_code = null)
         {
-            var raw_shader_code = _raw_shader_code == null ? XSDDisassemble() : _raw_shader_code;
+            var raw_shader_code = _raw_shader_code == null ? SM3Ext.SM3ExtShaderParser.XSDDisassemble(IsVertexShader ? SM3ExtShaderParser.ShaderType.Vertex : SM3ExtShaderParser.ShaderType.Pixel, ShaderData) : _raw_shader_code;
             var formatted_raw_block = CommentStringBlock(raw_shader_code, true);
             var converted_shader_code = ConvertXboxShader(raw_shader_code);
 
@@ -165,88 +160,93 @@ namespace TagTool.Shaders
             return sb.ToString();
         }
 
-        
-
-        class SM3ExtInstruction
+        class ShaderConstant
         {
-            bool IsConcurrent { get; }
-            string OriginalInstructionString { get; }
-            
-            enum SM3ExtInstructionType
+            public string Name { get; set; } = null;
+            public int Index { get; }
+            public float[] Data { get; } = new float[4];
+            public float X { get => Data[0]; set => Data[0] = value; }
+            public float Y { get => Data[1]; set => Data[1] = value; }
+            public float Z { get => Data[2]; set => Data[2] = value; }
+            public float W { get => Data[3]; set => Data[3] = value; }
+
+
+            public ShaderConstant(int index, string name = null)
             {
-                Vector,
-                Scalar,
-                Other
+                Name = name;
+                Index = index;
+                X = 0;
+                Y = 0;
+                Z = 0;
+                W = 0;
             }
 
-            SM3ExtOperationCodes.SM3OperationInformation Operation { get; }
-
-
-
-
-
-
-
-            private bool IsScalar(string args)
+            public ShaderConstant(int index, float value, string name = null)
             {
-                var arg_components = args.Split('.');
-                if (arg_components.Length < 2) return false;
-                if (arg_components.Length > 2) throw new Exception("what the fuck?");
-                if (arg_components[1].Length == 1) return true;
-                return false;
+                Name = name;
+                Index = index;
+                X = value;
+                Y = value;
+                Z = value;
+                W = value;
             }
 
-            private bool IsScalar(IEnumerable<string> args, int max_index = Int32.MaxValue)
+            public ShaderConstant(int index, float x, float y, float z, float w, string name = null)
             {
-                var args_count = args.Count();
-                for (var i=0;i< args_count; i++)
-                {
-                    if (i >= max_index) continue;
-                    var arg = args.ElementAt(i);
-                    if (!IsScalar(arg)) return false;
-                }
-                return args_count > 0;
-            }
-
-            public SM3ExtInstruction(string instruction)
-            {
-                OriginalInstructionString = instruction;
-                IsConcurrent = instruction.Contains(" + ");
-                instruction = instruction.Replace(" + ", "");
-                instruction = instruction.Split(new[] { "//" }, StringSplitOptions.None)[0]; // Take the left side of any comments
-                instruction = instruction.Trim();
-
-                if (String.IsNullOrWhiteSpace(instruction)) return;
-                if (instruction.StartsWith("//")) return; // Is a comment
-
-                var op_codes = instruction.Split(new string[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
-                var args = op_codes.Skip(1);
-
-                var vector_op_code = SM3ExtOperationCodes.GetSM3ExtVectorOPCode(op_codes[0]);
-                var scalar_op_code = SM3ExtOperationCodes.GetSM3ExtScalarOPCode(op_codes[0]);
-
-                var is_scalar = vector_op_code == null || IsScalar(args);
-
-                Operation = is_scalar ? scalar_op_code : vector_op_code;
-            }
-
-            public SM3Instruction ConvertToSM3()
-            {
-                return null;
+                Name = name;
+                Index = index;
+                X = x;
+                Y = y;
+                Z = z;
+                W = w;
             }
         }
 
-        class SM3Instruction
+        class PixelDecalTemplatesFixups : SM3ShaderConverter
         {
-            public SM3Instruction(string instruction)
+            public PixelDecalTemplatesFixups(SM3ExtShaderParser parser, GameCacheContext context, List<ShaderParameter> shader_parameters) : base(parser, context, shader_parameters)
             {
-
             }
 
-            public SM3ExtInstruction ConvertToSM3Ext()
+            public override void PostProcess()
             {
-                // Maybe someday niggas <3 Haydn
-                throw new NotImplementedException();
+                base.PostProcess();
+
+                //TODO: There may be more exports to come, testing is required
+
+                // Vertex -> Pixel Declarations
+                var inputs = new List<SM3Instruction>
+                {
+                    new SM3Instruction("dcl_texcoord", new List<string> { $"v0" }),
+                    new SM3Instruction("dcl_texcoord1", new List<string> { $"v1.x" }),
+                    new SM3Instruction("dcl_texcoord2", new List<string> { $"v2.xyz" }),
+                    new SM3Instruction("dcl_texcoord3", new List<string> { $"v3.xyz" }),
+                    new SM3Instruction("dcl_texcoord4", new List<string> { $"v4.xyz" }),
+                };
+                Instructions.InsertRange(0, inputs);
+
+                // replace registers until changes
+                //r0 => v0
+                //r1 => v1
+                //r2 => v2
+                //r3 => v3
+                //r4 => v4
+                ReplaceInputRegister("r0", "v0"); // Confirmed
+                
+                ReplaceInputRegister("r3", "v2");
+                ReplaceInputRegister("r2", "v4");
+                ReplaceInputRegister("r1", "v3");
+                
+
+                {
+                    // Insert a new instruction at the end of the shader
+                    // this will output the texcoord 1 value fo the correct sampler
+                    //mov oC2, v1.x
+
+                    var instruction = new SM3Instruction("mov", new List<string> { "oC2", "v1.x" });
+                    instruction.Comment = "PixelDecal Unknown Output Fix";
+                    Instructions.Add(instruction);
+                }
             }
         }
 
@@ -478,13 +478,31 @@ namespace TagTool.Shaders
 
         private byte[] ProcessPixelShader(PixelShaderBlock Block)
         {
-            var raw_shader_code = XSDDisassemble();
-            var converted_shader_code = ConvertXboxShader(raw_shader_code);
+            if (IsPixelShader)
+            {
+                var parser = new SM3ExtShaderParser(SM3ExtShaderParser.ShaderType.Pixel, this.ShaderData, this.ConstantData);
+                var converter = new PixelDecalTemplatesFixups(parser, CacheContext, Block.XboxParameters);
+                string converted_shader_code = converter.Convert();
+                Console.WriteLine(converted_shader_code);
+                var shader_bytecode = Utilities.DirectXUtilities.AssembleShader(converted_shader_code);
+                //TODO Add different converters and get the name of a tag (or a better method) to determine the converter type to use
+                return shader_bytecode;
+            }
+            else throw new NotImplementedException();
 
-            var shader_bytecode = Utilities.DirectXUtilities.AssembleShader(converted_shader_code);
 
-            Console.WriteLine("Processed PixelShader");
-            return shader_bytecode;
+            
+
+
+
+            //var raw_shader_code = XSDDisassemble();
+            //var converted_shader_code = ConvertXboxShader(raw_shader_code);
+            //converted_shader_code = File.ReadAllText("shader.txt");
+
+            //
+
+            //
+            //return shader_bytecode;
         }
 
         public byte[] ProcessShader()
@@ -511,6 +529,13 @@ namespace TagTool.Shaders
             return result;
         }
 
+        public enum OutputFile
+        {
+            ShaderData,
+            DebugData,
+            ConstantData
+        }
+
         public void WriteOutput(OutputFile file)
         {
             Directory.CreateDirectory(@"Temp");
@@ -531,45 +556,27 @@ namespace TagTool.Shaders
             }
         }
 
-        private string XSDDisassemble()
+        public static void WriteOutput(OutputFile file, byte[] data)
         {
-            if (!File.Exists(@"Tools\xsd.exe"))
+            Directory.CreateDirectory(@"Temp");
+
+            if (file == OutputFile.ShaderData)
             {
-                Console.WriteLine("Missing tools, please install xsd.exe before porting shaders.");
-                return null;
+                WriteOutput(@"Temp\permutation.shader", data);
             }
 
-            WriteOutput(OutputFile.ShaderData);
-
-            var process = new Process
+            if (file == OutputFile.ConstantData)
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = @"Tools\xsd.exe",
-                    Arguments = IsVertexShader ? "/rawvs permutation.shader" : "/rawps permutation.shader",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "temp")
-                }
-            };
-            process.Start();
+                WriteOutput(@"Temp\permutation.shader.updb", data);
+            }
 
-            string shader_code = process.StandardOutput.ReadToEnd();
-            string err = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            if (!String.IsNullOrWhiteSpace(err)) throw new Exception(err);
-
-            var shader_instructionset = IsVertexShader ? "xvs_3_0" : "xps_3_0";
-            shader_code = $"	{shader_instructionset}\n{shader_code}";
-
-            return shader_code;
+            if (file == OutputFile.ShaderData)
+            {
+                WriteOutput(@"Temp\permutation.shader.cbin", data);
+            }
         }
 
-        private void WriteOutput(string file, byte[] data)
+        private static void WriteOutput(string file, byte[] data)
         {
             if (File.Exists(file)) File.Delete(file);
             if (data.Length > 0)

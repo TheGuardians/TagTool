@@ -117,20 +117,23 @@ namespace TagTool.Commands.Porting
 
                 Console.WriteLine(shader_parser.Disassemble());
 
+#if !DEBUG
                 try
                 {
+#endif
                     shader.PCShaderBytecode = shader_parser.ProcessShader();
                     shader.PCParameters = shader.XboxParameters;
                     shader.XboxShaderReference = null;
 
                     Console.WriteLine("written shader binary for glps");
+                #if !DEBUG
                 }
                 catch(Exception e)
                 {
                     Console.WriteLine("ConvertPixelShader Errors:");
                     Console.WriteLine(e.Message);
                 }
-
+#endif
             }
 
             return pixl;

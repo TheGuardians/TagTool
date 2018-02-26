@@ -368,10 +368,14 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
-    <Compile Include="Shaders\SM3ExtOperationCodes.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtInstruction.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtShaderParser.cs" />
+    <Compile Include="Shaders\SM3\SM3Instruction.cs" />
+    <Compile Include="Shaders\SM3\SM3ShaderConverter.cs" />
     <Compile Include="Shaders\UPDBParser.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
