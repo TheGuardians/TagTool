@@ -94,9 +94,10 @@ namespace TagTool.Shaders.Converters
 
                 var normal_color_output = @this.Instructions.Where(instruction =>
                 {
-                    if (instruction.Operation != "mov") return false;
-                    var register2 = instruction.Args[0].Split('.')[0];
-                    return register2 == $"oC1";
+                    //if (instruction.Operation != "mov") return false;
+                    if (!instruction.InstructionFirstIndexIsOutput) return false;
+                    var dest_register = instruction.Args[0].Split('.')[0];
+                    return dest_register == $"oC1";
                 }).LastOrDefault();
 
                 if (normal_color_output == null)
