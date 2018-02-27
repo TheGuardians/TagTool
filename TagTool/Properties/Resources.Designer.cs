@@ -81,8 +81,7 @@ namespace TagTool.Properties {
         ///         inherits=&quot;&quot;
         ///         headerSize=&quot;0&quot;
         ///         tagsKey=&quot;&quot;
-        ///         stringsKey=&quot;&quot;
-        ///       [rest of string was truncated]&quot;;.
+        ///          [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Builds {
             get {
@@ -103,7 +102,7 @@ namespace TagTool.Properties {
         ///  &lt;class code=&quot;coll&quot; name=&quot;model_collision_geometry&quot; /&gt;
         ///  &lt;class code=&quot;colo&quot; name=&quot;color_table&quot; /&gt;
         ///  &lt;class code=&quot;cont&quot; name=&quot;contrail&quot; /&gt;
-        ///  &lt;class code=&quot;ctrl&quot; na [rest of string was truncated]&quot;;.
+        ///  &lt;class co [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Classes_H1 {
             get {
@@ -121,7 +120,7 @@ namespace TagTool.Properties {
         ///  &lt;class code=&quot;*ipd&quot; name=&quot;scenario_bipeds_resource&quot; /&gt;
         ///  &lt;class code=&quot;*qip&quot; name=&quot;scenario_equipment_resource&quot; /&gt;
         ///  &lt;class code=&quot;*rea&quot; name=&quot;scenario_creature_resource&quot; /&gt;
-        ///  &lt;class code=&quot;*sce&quot; name=&quot;scenario_s [rest of string was truncated]&quot;;.
+        ///  &lt;class code=&quot;*sce&quot; name=&quot;s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Classes_H2 {
             get {
@@ -151,7 +150,7 @@ namespace TagTool.Properties {
         ///      fileTableIndexOffset=&quot;716&quot; /&gt;
         ///    &lt;indexheader
         ///      tagClassCount=&quot;4&quot;
-        ///      tagInfoOffset=&quot;8&quot;  [rest of string was truncated]&quot;;.
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Versions {
             get {
@@ -167,7 +166,7 @@ namespace TagTool.Properties {
         ///      &lt;value stream=&quot;0&quot; offset=&quot;0xC&quot; type=&quot;Float32_2&quot; usage=&quot;texcoords&quot; usageIndex=&quot;0&quot; /&gt;
         ///      &lt;value stream=&quot;0&quot; offset=&quot;0x14&quot; type=&quot;DHenN3&quot; usage=&quot;normal&quot; usageIndex=&quot;0&quot; /&gt;
         ///      &lt;value stream=&quot;0&quot; offset=&quot;0x18&quot; type=&quot;DHenN3&quot; usage=&quot;tangent&quot; usageIndex=&quot;0&quot; /&gt;
-        ///      &lt;value stream=&quot;0&quot; offset=&quot;0x1C&quot; type=&quot;DHenN3&quot; usage=&quot;binorma [rest of string was truncated]&quot;;.
+        ///      &lt;value stream=&quot;0&quot; offset=&quot;0x1C&quot; type=&quot;DHenN3&quot; usage=&quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string VertexBuffer {
             get {

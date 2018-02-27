@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TagTool</RootNamespace>
     <AssemblyName>TagTool</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -368,11 +368,21 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Shaders\Functions\ConverterGlobals.cs" />
+    <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
+    <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtInstruction.cs" />
+    <Compile Include="Shaders\SM3Ext\SM3ExtShaderParser.cs" />
+    <Compile Include="Shaders\SM3\SM3Instruction.cs" />
+    <Compile Include="Shaders\SM3\SM3ShaderConverter.cs" />
+    <Compile Include="Shaders\UPDBParser.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
+    <Compile Include="Shaders\XboxShaderParser.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />
@@ -699,7 +709,12 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\TagToolUtilities\TagToolUtilities.vcxproj">
+      <Project>{c26e8204-0025-4484-955e-a669425fe9d7}</Project>
+      <Name>TagToolUtilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -713,7 +728,7 @@
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
+<PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
 xcopy $(SolutionDir)Tools $(ProjectDir)$(OutDir)Tools /e /i /h /Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

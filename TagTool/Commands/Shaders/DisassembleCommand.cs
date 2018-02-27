@@ -4,6 +4,7 @@ using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
+using TagTool.Shaders;
 
 namespace TagTool.Commands.Shaders
 {
@@ -33,52 +34,52 @@ namespace TagTool.Commands.Shaders
             if (args.Count != 1)
                 return false;
 
-            if (typeof(T) == typeof(VertexShader))
+            if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {
-                var _definition = Definition as VertexShader;
-                var shader = _definition.Shaders[int.Parse(args[0])];
-                var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
-                Console.WriteLine("PC Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                PixelShaderBlock shader_block = null;
+                XboxShaderParser xboxShaderParser = null;
+                if (typeof(T) == typeof(PixelShader))
+                {
+                    var _definition = Definition as PixelShader;
+                    shader_block = _definition.Shaders[int.Parse(args[0])];
+                    xboxShaderParser = new XboxShaderParser(_definition, shader_block, CacheContext);
+                }
+
+                if (typeof(T) == typeof(GlobalPixelShader))
+                {
+                    var _definition = Definition as GlobalPixelShader;
+                    shader_block = _definition.Shaders[int.Parse(args[0])];
+                    xboxShaderParser = new XboxShaderParser(_definition, shader_block, CacheContext);
+                }
+
+                var pc_shader = shader_block.PCShaderBytecode;
+                if (pc_shader != null) Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
+                
+                if (xboxShaderParser.IsValid) Console.WriteLine(xboxShaderParser.Disassemble());
             }
 
-            if (typeof(T) == typeof(PixelShader))
+            if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
             {
-                var _definition = Definition as PixelShader;
-                var shader = _definition.Shaders[int.Parse(args[0])];
-                var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
-                Console.WriteLine("PC Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
-            }
+                VertexShaderBlock shader_block = null;
+                XboxShaderParser xboxShaderParser = null;
+                if (typeof(T) == typeof(VertexShader))
+                {
+                    var _definition = Definition as VertexShader;
+                    shader_block = _definition.Shaders[int.Parse(args[0])];
+                    xboxShaderParser = new XboxShaderParser(_definition, shader_block, CacheContext);
+                }
 
-            if (typeof(T) == typeof(GlobalPixelShader))
-            {
-                var _definition = Definition as GlobalPixelShader;
-                var shader = _definition.Shaders[int.Parse(args[0])];
-                var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
-                Console.WriteLine("PC Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
-            }
+                if (typeof(T) == typeof(GlobalVertexShader))
+                {
+                    var _definition = Definition as GlobalVertexShader;
+                    shader_block = _definition.Shaders[int.Parse(args[0])];
+                    xboxShaderParser = new XboxShaderParser(_definition, shader_block, CacheContext);
+                }
 
-            if (typeof(T) == typeof(GlobalVertexShader))
-            {
-                var _definition = Definition as GlobalVertexShader;
-                var shader = _definition.Shaders[int.Parse(args[0])];
-                var pc_shader = shader.PCShaderBytecode;
-                var xbox_shader = shader.XboxShaderReference.ShaderData;
-                Console.WriteLine("PC Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
-                Console.WriteLine("Xbox Shader");
-                Console.WriteLine(ShaderCompiler.Disassemble(xbox_shader));
+                var pc_shader = shader_block.PCShaderBytecode;
+                if (pc_shader != null) Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
+
+                if (xboxShaderParser.IsValid) Console.WriteLine(xboxShaderParser.Disassemble());
             }
 
 

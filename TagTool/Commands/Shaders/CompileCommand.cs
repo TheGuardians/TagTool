@@ -15,8 +15,10 @@ namespace TagTool.Commands.Shaders
 		private GameCacheContext CacheContext { get; }
 		private CachedTagInstance Tag { get; }
 		private T Definition { get; }
+        public static bool IsVertexShader => typeof(T) == typeof(GlobalVertexShader) || typeof(T) == typeof(VertexShader);
+        public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
-		public CompileCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public CompileCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
 			base(CommandFlags.Inherit,
 
 				"Compile",
@@ -35,16 +37,33 @@ namespace TagTool.Commands.Shaders
 
 		public override object Execute(List<string> args)
 		{
-			if (args.Count != 2)
+			if (args.Count < 2)
 				return false;
 
 
-            string ps = File.ReadAllText(args[1]);
 
-            var bytecode = ShaderCompiler.Compile(ps, "main", "vs_3_0", out string errors);
+            bool use_assembly_compiler = args.Count >= 2 && args[0].ToLower() == "asm";
+            string file = args[args.Count - 1];
+            string shader_code = File.ReadAllText(file);
 
-			if (ShaderCompiler.PrintError(errors))
-				return true;
+            if (use_assembly_compiler && args.Count < 3)
+                return false;
+
+            int index = use_assembly_compiler ? int.Parse(args[1]) : int.Parse(args[0]);
+
+            byte[] bytecode = null;
+            if (use_assembly_compiler)
+            {
+                bytecode = Utilities.DirectXUtilities.AssembleShader(shader_code);
+            }
+            else
+            {
+                var profile = IsVertexShader ? "vs_3_0" : "ps_3_0";
+                bytecode = ShaderCompiler.Compile(shader_code, "main", profile, out string errors);
+
+                if (ShaderCompiler.PrintError(errors))
+                    return true;
+            }
 
 			var disassembly = ShaderCompiler.Disassemble(bytecode);
 
@@ -54,43 +73,53 @@ namespace TagTool.Commands.Shaders
             {
                 var shader_data_block = new PixelShaderBlock
                 {
-                    PCShaderBytecode = bytecode,
-                    PCParameters = GetParamInfo(disassembly),
-                    //Unknown3 = CacheContext.GetStringId("default") // No evidence to suggest this is actually a stringid
+                    PCShaderBytecode = bytecode
                 };
 
                 if (typeof(T) == typeof(PixelShader))
                 {
                     var _definition = Definition as PixelShader;
-                    _definition.Shaders[int.Parse(args[0])] = shader_data_block;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
+                    _definition.Shaders[index] = shader_data_block;
                 }
 
                 if (typeof(T) == typeof(GlobalPixelShader))
                 {
                     var _definition = Definition as GlobalPixelShader;
-                    _definition.Shaders[int.Parse(args[0])] = shader_data_block;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
+                    _definition.Shaders[index] = shader_data_block;
                 }
             }
 
             if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
             {
+                
                 var shader_data_block = new VertexShaderBlock
                 {
-                    PCShaderBytecode = bytecode,
-                    PCParameters = GetParamInfo(disassembly),
-                    //Unknown3 = CacheContext.GetStringId("default") // No evidence to suggest this is actually a stringid
+                    PCShaderBytecode = bytecode
                 };
 
                 if (typeof(T) == typeof(VertexShader))
                 {
                     var _definition = Definition as VertexShader;
-                    _definition.Shaders[int.Parse(args[0])] = shader_data_block;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
+                    _definition.Shaders[index] = shader_data_block;
                 }
 
                 if (typeof(T) == typeof(GlobalVertexShader))
                 {
                     var _definition = Definition as GlobalVertexShader;
-                    _definition.Shaders[int.Parse(args[0])] = shader_data_block;
+                    var existing_block = _definition.Shaders[index];
+                    shader_data_block.PCParameters = existing_block.PCParameters;
+
+
+                    _definition.Shaders[index] = shader_data_block;
                 }
             }
 
