@@ -368,7 +368,6 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
-    <Compile Include="Shaders\Functions\ConverterGlobals.cs" />
     <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
     <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />
     <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
@@ -728,7 +727,7 @@
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
   <PropertyGroup>
-<PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
+    <PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
 xcopy $(SolutionDir)Tools $(ProjectDir)$(OutDir)Tools /e /i /h /Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
