@@ -410,20 +410,24 @@ namespace TagTool.Tags.Definitions
             public class DecoratorGrid
             {
                 public short Amount;
+
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public sbyte DecoratorIndex_H3;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public sbyte DecoratorIndexScattering_H3;
+                public sbyte DecoratorGeometryIndex_H3;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorIndex_HO;
+
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)] 
+                public short Unknown;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorIndexScattering_HO;
+                public short DecoratorGeometryIndex_HO;
 
-                [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.HaloOnline106708)] //Determine what is this
-                public byte[] Unused;
+               
 
-                public int Unknown3;
+                public int DecoratorGeometryOffset;
                 public RealPoint3d Position;
                 public float Radius;
                 public RealPoint3d GridSize;

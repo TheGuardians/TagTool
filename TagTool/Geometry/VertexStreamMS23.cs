@@ -326,7 +326,7 @@ namespace TagTool.Geometry
             {
                 Position = _stream.ReadUShort4N(),
                 Texcoord = _stream.ReadUByte4N(),
-                Unknown = _stream.ReadColor()
+                Color = _stream.ReadColor()
             };
         }
 
@@ -334,7 +334,7 @@ namespace TagTool.Geometry
         {
             _stream.WriteUShort4N(v.Position);
             _stream.WriteUByte4N(v.Texcoord);
-            _stream.WriteColor(v.Unknown);
+            _stream.WriteColor(v.Color);
         }
 
         public PatchyFogVertex ReadPatchyFogVertex()

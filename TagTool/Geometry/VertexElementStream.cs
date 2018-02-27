@@ -290,6 +290,48 @@ namespace TagTool.Geometry
             return result;
         }
 
-        
+        public RealQuaternion ReadUShort4NInv()
+        {
+            return new RealQuaternion(Read(4, () => ConvertUShort(Reader.ReadUInt16(), 1) / 65535.0f));
+        }
+
+        public RealQuaternion ReadTinyPositionData()
+        {
+            RealQuaternion result;
+            byte rotation2 = ConvertByte(Reader.ReadByte());
+            byte rotation1 = ConvertByte(Reader.ReadByte());
+
+            byte scale2 = ConvertByte(Reader.ReadByte());
+            byte scale1 = ConvertByte(Reader.ReadByte());
+
+            result = new RealQuaternion(scale1/255.0f, scale2/255.0f, rotation1/255.0f, rotation2 / 255.0f);
+
+            return result;
+        }
+
+        private static ushort ConvertUShort(ushort value, sbyte fixup)
+        {
+            ushort result = 0;
+            bool lastBit = ((value >> 15) & 1) == 1;
+            if (lastBit)
+                result = (ushort)(value & 0x7FFF);
+            else
+                result = (ushort) (value + 0x8000);
+
+            result = (ushort)(result + fixup); //adjust if it cause problems
+            return result;
+        }
+
+        private static byte ConvertByte(byte value)
+        {
+            byte result = 0;
+            bool lastBit = ((value >> 7) & 1) == 1;
+            if (value <= 0x7F)
+                result = (byte)(value + 0x7F);
+            else
+                result = (byte)((0x7F - (0xFF - value)) - 1);
+
+            return result;
+        }
     }
 }

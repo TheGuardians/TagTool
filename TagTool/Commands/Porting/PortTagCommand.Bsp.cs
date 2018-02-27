@@ -24,8 +24,9 @@ namespace TagTool.Commands.Porting
                 cluster.Bsp = instance;
                 foreach(var grid in cluster.DecoratorGrids)
                 {
-                    grid.DecoratorIndexScattering_HO = grid.DecoratorIndexScattering_H3;
+                    grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3; 
                     grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
+                    grid.Unknown = 0;
                 }
             }
 
@@ -34,9 +35,11 @@ namespace TagTool.Commands.Porting
             //
 
             // Disable decorator geometry for now entirely
+
+            
             for (var i = 0; i < sbsp.Decorators.Count; i++)
                 sbsp.Decorators[i] = new TagReferenceBlock { Instance = CacheContext.TagCache.Index[0x2ECD] };
-
+            
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
                 sbsp.Clusters[i].DecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
@@ -44,6 +47,7 @@ namespace TagTool.Commands.Porting
                 sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
             }
             
+
             //
             // Remove decals
             //
