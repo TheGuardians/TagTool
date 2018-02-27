@@ -62,6 +62,7 @@ namespace TagTool.Shaders.SM3Ext
             {"mad", new ArgumentsLayout(true, 3)},
             {"add", new ArgumentsLayout(true, 2) },
             {"mul", new ArgumentsLayout(true, 2) },
+            {"muls_prev", new ArgumentsLayout(true, 1) },
             {"mulsc", new ArgumentsLayout(true, 2) },
             {"rsq", new ArgumentsLayout(true, 1) },
             {"rcp", new ArgumentsLayout(true, 1) },
@@ -119,8 +120,9 @@ namespace TagTool.Shaders.SM3Ext
             var op_codes = instruction.Split(new string[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
             Operation = op_codes[0];
 
+            if (!OperationArgumentsMap.ContainsKey(Operation)) throw new NotImplementedException($"Unknown SM3Ext operation {Operation}");
             Layout = OperationArgumentsMap[Operation];
-            if (Layout == null) throw new NotImplementedException($"Unknown SM3Ext operation {Operation}");
+            
 
             Args = op_codes.Skip(1).Where((arg) =>
             {

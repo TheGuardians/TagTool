@@ -64,7 +64,7 @@ namespace TagTool.Shaders.SM3
                         Args[2].Replace("tf","s")
                     };
 
-                    
+
 
                     if (indices != null)
                     {
@@ -113,6 +113,14 @@ namespace TagTool.Shaders.SM3
                 case "mulsc":
                     Operation = "mul";
                     break;
+                case "muls_prev":
+                    Operation = "mul";
+
+                    /*
+                     * This function does A *= B
+                     */
+                    Args = new List<string> { Args[0], Args[0], Args[1] }; // a = a * b
+                    break;
                 case "movs":
                     Operation = "mov";
                     break;
@@ -139,7 +147,7 @@ namespace TagTool.Shaders.SM3
             {
                 output += $" // {Comment}";
             }
-            if(IgnoreInstruction)
+            if (IgnoreInstruction)
             {
                 output = "// " + output;
             }
