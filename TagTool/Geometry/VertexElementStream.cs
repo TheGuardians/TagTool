@@ -124,12 +124,12 @@ namespace TagTool.Geometry
 
         public RealQuaternion ReadShort4N()
         {
-            return new RealQuaternion(Read(4, () => Reader.ReadInt16() / 32767.5f));
+            return new RealQuaternion(Read(4, () => Reader.ReadInt16() / 32767.0f));
         }
 
         public void WriteShort4N(RealQuaternion v)
         {
-            Write(v.ToArray(), 4, e => Writer.Write((short)(Clamp(e) * 32767.5f)));
+            Write(v.ToArray(), 4, e => Writer.Write((short)(Clamp(e) * 32767.0f)));
         }
 
         public RealVector2d ReadUShort2N()
@@ -292,7 +292,7 @@ namespace TagTool.Geometry
 
         public RealQuaternion ReadUShort4NInv()
         {
-            return new RealQuaternion(Read(4, () => ConvertUShort(Reader.ReadUInt16()) / 65535.0f));
+            return new RealQuaternion(Read(4, () => ConvertUShort(Reader.ReadUInt16(),1) / 65535.0f));
         }
 
         public RealQuaternion ReadTinyPositionData()
@@ -309,24 +309,21 @@ namespace TagTool.Geometry
             return result;
         }
 
-        private static float ConvertUShort(ushort value)
+        private static float ConvertUShort(ushort value, int fixup)
         {
             float result = 0;
-            //bool lastBit = ((value >> 15) & 1) == 1;
-            //if (lastBit)
-            //    result = (ushort)(value & 0x7FFF);
-            //else
-            //    result = (ushort) (value + 0x8000);
-            result = result + 32767.5f;
-
-            //result = (ushort)(result + fixup); //adjust if it cause problems
+            bool lastBit = ((value >> 15) & 1) == 1;
+            if (lastBit)
+                result = (ushort)(value & 0x7FFF);
+            else
+                result = (ushort) (value + 0x8000);
+            result = (ushort)(result + fixup); //adjust if it cause problems
             return result;
         }
 
         private static float ConvertByte(byte value)
         {
             float result = 0;
-            //bool lastBit = ((value >> 7) & 1) == 1;
             if (value < 127.5f)
                 result = (float)(value + 127.5f);
             else
