@@ -124,12 +124,12 @@ namespace TagTool.Geometry
 
         public RealQuaternion ReadShort4N()
         {
-            return new RealQuaternion(Read(4, () => Reader.ReadInt16() / 32767.0f));
+            return new RealQuaternion(Read(4, () => Reader.ReadInt16() / 32767.5f));
         }
 
         public void WriteShort4N(RealQuaternion v)
         {
-            Write(v.ToArray(), 4, e => Writer.Write((short)(Clamp(e) * 32767.0f)));
+            Write(v.ToArray(), 4, e => Writer.Write((short)(Clamp(e) * 32767.5f)));
         }
 
         public RealVector2d ReadUShort2N()
@@ -292,44 +292,45 @@ namespace TagTool.Geometry
 
         public RealQuaternion ReadUShort4NInv()
         {
-            return new RealQuaternion(Read(4, () => ConvertUShort(Reader.ReadUInt16(), 1) / 65535.0f));
+            return new RealQuaternion(Read(4, () => ConvertUShort(Reader.ReadUInt16()) / 65535.0f));
         }
 
         public RealQuaternion ReadTinyPositionData()
         {
             RealQuaternion result;
-            byte rotation2 = ConvertByte(Reader.ReadByte());
-            byte rotation1 = ConvertByte(Reader.ReadByte());
+            float rotation2 = ConvertByte(Reader.ReadByte());
+            float rotation1 = ConvertByte(Reader.ReadByte());
 
-            byte scale2 = ConvertByte(Reader.ReadByte());
-            byte scale1 = ConvertByte(Reader.ReadByte());
+            float scale2 = ConvertByte(Reader.ReadByte());
+            float scale1 = ConvertByte(Reader.ReadByte());
 
             result = new RealQuaternion(scale1/255.0f, scale2/255.0f, rotation1/255.0f, rotation2 / 255.0f);
 
             return result;
         }
 
-        private static ushort ConvertUShort(ushort value, sbyte fixup)
+        private static ushort ConvertUShort(ushort value)
         {
-            ushort result = 0;
-            bool lastBit = ((value >> 15) & 1) == 1;
-            if (lastBit)
-                result = (ushort)(value & 0x7FFF);
-            else
-                result = (ushort) (value + 0x8000);
+            float result = 0;
+            //bool lastBit = ((value >> 15) & 1) == 1;
+            //if (lastBit)
+            //    result = (ushort)(value & 0x7FFF);
+            //else
+            //    result = (ushort) (value + 0x8000);
+            result = result + 32767.5f
 
-            result = (ushort)(result + fixup); //adjust if it cause problems
+            //result = (ushort)(result + fixup); //adjust if it cause problems
             return result;
         }
 
-        private static byte ConvertByte(byte value)
+        private static float ConvertByte(byte value)
         {
-            byte result = 0;
-            bool lastBit = ((value >> 7) & 1) == 1;
-            if (value <= 0x7F)
-                result = (byte)(value + 0x7F);
+            float result = 0;
+            //bool lastBit = ((value >> 7) & 1) == 1;
+            if (value < 127.5f)
+                result = (float)(value + 127.5f);
             else
-                result = (byte)((0x7F - (0xFF - value)) - 1);
+                result = (float)((127.5f - (255.0f - value)) - 1);
 
             return result;
         }
