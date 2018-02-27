@@ -13,7 +13,7 @@ namespace TagTool.Shaders.SM3
         public SM3ExtShaderParser Parser { get; }
         public List<ShaderParameter> Parameters;
         protected GameCacheContext CacheContext { get; }
-
+        protected string TextureTemporaryRegister = null;
 
         public SM3ShaderConverter(SM3ExtShaderParser parser, GameCacheContext context, List<ShaderParameter> shader_parameters)
         {
@@ -173,12 +173,18 @@ namespace TagTool.Shaders.SM3
             return false;
         }
 
+        protected List<int> AllocatedRegister = new List<int>();
         public string AllocateRegister()
         {
             for (var i = 0; i < 32; i++)
             {
                 var register_name = $"r{i}";
-                if (!RegisterExists(register_name)) return register_name;
+                if (!RegisterExists(register_name))
+                {
+                    if (AllocatedRegister.Contains(i)) continue;
+                    AllocatedRegister.Add(i);
+                    return register_name;
+                }
             }
             //TODO: If we ever run into this issue, we should add a range on this function like
             // a start_instruction and an end_instruction instead of trying to keep this reigster
@@ -188,6 +194,7 @@ namespace TagTool.Shaders.SM3
             throw new Exception("Unable to allocate register!");
         }
 
+        protected List<int> AllocatedConstant = new List<int>();
         public string AllocateConstant(bool reversed)
         {
             if (reversed)
@@ -195,7 +202,12 @@ namespace TagTool.Shaders.SM3
                 for (var i = (255 - 32); i >= 0; i--)
                 {
                     var register_name = $"c{i}";
-                    if (!RegisterExists(register_name)) return register_name;
+                    if (!RegisterExists(register_name))
+                    {
+                        if (AllocatedConstant.Contains(i)) continue;
+                        AllocatedConstant.Add(i);
+                        return register_name;
+                    }
                 }
             }
             else
@@ -203,7 +215,12 @@ namespace TagTool.Shaders.SM3
                 for (var i = 0; i < (255 - 32); i++)
                 {
                     var register_name = $"c{i}";
-                    if (!RegisterExists(register_name)) return register_name;
+                    if (!RegisterExists(register_name))
+                    {
+                        if (AllocatedConstant.Contains(i)) continue;
+                        AllocatedConstant.Add(i);
+                        return register_name;
+                    }
                 }
             }
 
@@ -214,7 +231,7 @@ namespace TagTool.Shaders.SM3
 
         public void CreateConstantDefinitions()
         {
-            List<int> defined_instructions = new List<int>();
+            List<int> defined_constant_location = new List<int>();
             List<SM3Instruction> constant_definitions = new List<SM3Instruction>();
             foreach (var instruction in Instructions)
                 foreach (var arg in instruction.Args)
@@ -226,7 +243,7 @@ namespace TagTool.Shaders.SM3
 
                     if (!Int32.TryParse(left.Substring(1), out int location)) continue;
 
-                    if (defined_instructions.Contains(location)) continue;
+                    if (defined_constant_location.Contains(location)) continue;
                     if (!Parser.ConstantDataDefinitions.ContainsKey(location))
                     {
                         if (location >= 223)
@@ -245,8 +262,9 @@ namespace TagTool.Shaders.SM3
                         constant_data.W.ToString(),
                     };
                     constant_definitions.Insert(0, new SM3Instruction("def", constant_data_args, false));
-                    defined_instructions.Add(location);
+                    defined_constant_location.Add(location);
                 }
+            AllocatedConstant.AddRange(defined_constant_location);
             Instructions.InsertRange(0, constant_definitions);
         }
 
@@ -262,8 +280,11 @@ namespace TagTool.Shaders.SM3
         {
             if (RegisterExists("TSO")) // Temporary Output Sampler
             {
-                var allocated_register = AllocateRegister();
-                ReplaceRegister("TSO", allocated_register);
+                if(TextureTemporaryRegister == null)
+                {
+                    TextureTemporaryRegister = AllocateRegister();
+                }
+                ReplaceRegister("TSO", TextureTemporaryRegister);
             }
         }
         public void FixOutOfBoundsRegisters()
@@ -280,15 +301,62 @@ namespace TagTool.Shaders.SM3
             }
         }
 
+        //TODO: Needs more testing and some extra checks on input format
+        public void OptimizeNormalize()
+        {
+            for(var instruction_index = 0;instruction_index<Instructions.Count;instruction_index++)
+            {
+                if (instruction_index + 2 >= Instructions.Count) break; // Don't go over the end of the array
+
+                var instructionA = Instructions[instruction_index];
+                var instructionB = Instructions[instruction_index+1];
+                var instructionC = Instructions[instruction_index+2];
+
+                if (instructionA.Operation != "dp3") continue;
+                if (instructionB.Operation != "rsq") continue;
+                if (instructionC.Operation != "mul") continue;
+
+                if (instructionA.Args[1] != instructionA.Args[2]) continue;
+                if (instructionB.Args[1].IndexOf("_abs") == -1) continue;
+                if (instructionA.Args[0] != instructionB.Args[0]) continue;
+                if (instructionB.Args[0] != instructionC.Args[2]) continue;
+
+                var registerA0 = instructionA.Args[0].Split('.')[0];
+                var registerA1 = instructionA.Args[1].Split('.')[0];
+                var registerA2 = instructionA.Args[2].Split('.')[0];
+                var registerB1 = instructionB.Args[0].Split('.')[0];
+                var registerC0 = instructionC.Args[0].Split('.')[0];
+                var registerC1 = instructionC.Args[1].Split('.')[0];
+                var registerC2 = instructionC.Args[2].Split('.')[0];
+
+                if (registerA0 != registerA1) continue;
+                if (registerA1 != registerA2) continue;
+                if (registerA2 != registerB1) continue;
+                if (registerB1 != registerC0) continue;
+                if (registerC0 != registerC1) continue;
+                if (registerC1 != registerC2) continue;
+                if (registerC2 != registerA0) continue;
+
+                // This can be optimized out.
+
+                //TODO: Need to organise allocating a register within the range, because NRM src and dst can't be the same register
+
+                //Instructions.RemoveRange(instruction_index, 3);
+                //Instructions.Insert(instruction_index, new SM3Instruction("nrm", new List<string> { instructionC.Args[0], instructionC.Args[1] }));
+                instructionA.Comment = instructionB.Comment = instructionC.Comment = "NRM instruction expanded";
+            }
+        }
+
         public virtual void PostProcess()
         {
+            OptimizeNormalize();
+
             for (var i = Instructions.Count - 1; i >= 0; i--)
             {
                 var instruction = Instructions[i];
                 if (instruction.ChildInstructions.Count == 0) continue;
                 Instructions.InsertRange(i + 1, instruction.ChildInstructions);
             }
-
 
             CreateConstantDefinitions();
 
