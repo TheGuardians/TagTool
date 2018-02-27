@@ -368,6 +368,9 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Shaders\Functions\ConverterGlobals.cs" />
+    <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
+    <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />
     <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />

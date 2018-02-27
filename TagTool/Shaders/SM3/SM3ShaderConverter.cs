@@ -12,8 +12,11 @@ namespace TagTool.Shaders.SM3
     {
         public SM3ExtShaderParser Parser { get; }
         public List<ShaderParameter> Parameters;
-        protected GameCacheContext CacheContext { get; }
-        protected string TextureTemporaryRegister = null;
+        public GameCacheContext CacheContext { get; }
+        public string TextureTemporaryRegister = null;
+        public List<SM3Instruction> Instructions = new List<SM3Instruction>();
+        protected List<int> AllocatedRegister = new List<int>();
+        protected List<int> AllocatedConstant = new List<int>();
 
         public SM3ShaderConverter(SM3ExtShaderParser parser, GameCacheContext context, List<ShaderParameter> shader_parameters)
         {
@@ -21,8 +24,6 @@ namespace TagTool.Shaders.SM3
             Parameters = shader_parameters;
             CacheContext = context;
         }
-
-        public List<SM3Instruction> Instructions = new List<SM3Instruction>();
 
         public string Convert()
         {
@@ -172,8 +173,7 @@ namespace TagTool.Shaders.SM3
                 }
             return false;
         }
-
-        protected List<int> AllocatedRegister = new List<int>();
+        
         public string AllocateRegister()
         {
             for (var i = 0; i < 32; i++)
@@ -194,7 +194,6 @@ namespace TagTool.Shaders.SM3
             throw new Exception("Unable to allocate register!");
         }
 
-        protected List<int> AllocatedConstant = new List<int>();
         public string AllocateConstant(bool reversed)
         {
             if (reversed)
