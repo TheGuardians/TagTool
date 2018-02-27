@@ -309,7 +309,7 @@ namespace TagTool.Geometry
             return result;
         }
 
-        private static ushort ConvertUShort(ushort value)
+        private static float ConvertUShort(ushort value)
         {
             float result = 0;
             //bool lastBit = ((value >> 15) & 1) == 1;
@@ -317,7 +317,7 @@ namespace TagTool.Geometry
             //    result = (ushort)(value & 0x7FFF);
             //else
             //    result = (ushort) (value + 0x8000);
-            result = result + 32767.5f
+            result = result + 32767.5f;
 
             //result = (ushort)(result + fixup); //adjust if it cause problems
             return result;
