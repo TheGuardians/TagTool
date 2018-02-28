@@ -184,8 +184,10 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 
 		auto cstr_name = new char[_name.size()];
 		auto cstr_definition = new char[definition.size()];
-		memcpy(cstr_name, _name.data(), _name.size());
-		memcpy(cstr_definition, definition.data(), definition.size());
+		memset(cstr_name, 0, _name.size() + 1);
+		memset(cstr_definition, 0, definition.size() + 1);
+		memcpy(cstr_name, _name.data(), _name.size() + 1);
+		memcpy(cstr_definition, definition.data(), definition.size() + 1);
 
 		macros[i].Name = cstr_name;
 		macros[i].Definition = cstr_definition;
