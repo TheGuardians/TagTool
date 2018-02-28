@@ -24,7 +24,6 @@ namespace TagTool {
 			static bool CompilePCShader(
 				String^ SrcData, 
 				array<MacroDefine^>^ Defines, 
-				String^ Include, 
 				String^ FunctionName, 
 				String^ Profile, 
 				UInt32 flags,
@@ -32,6 +31,21 @@ namespace TagTool {
 				[Out] String^% ErrorMsgs,
 				[Out] String^% ConstantTable
 			);
+			static bool CompilePCShaderFromFile(
+				String^ File,
+				array<MacroDefine^>^ Defines,
+				String^ FunctionName,
+				String^ Profile,
+				UInt32 flags,
+				[Out] array<Byte>^% Shader,
+				[Out] String^% ErrorMsgs,
+				[Out] String^% ConstantTable);
+
+
+
+
+
+
 			static String^ DisassemblePCShader(array<Byte>^ data);
 		};
 	}
