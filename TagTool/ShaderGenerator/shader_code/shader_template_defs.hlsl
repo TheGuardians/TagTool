@@ -1,4 +1,4 @@
-﻿#ifndef Albedo
+#ifndef Albedo
 #define Albedo albedo_default
 #endif
 #ifndef Bump_Mapping

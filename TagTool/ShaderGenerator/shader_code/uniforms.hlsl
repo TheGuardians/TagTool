@@ -1,4 +1,4 @@
-﻿#ifndef __UNIFORMS
+#ifndef __UNIFORMS
 #define __UNIFORMS
 
 uniform float4 albedo_color : register(c58);

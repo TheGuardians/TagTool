@@ -1,4 +1,4 @@
-﻿#include "albedo/default.hlsl"
+#include "albedo/default.hlsl"
 #include "albedo/detail_blend.hlsl"
 #include "albedo/constant_color.hlsl"
 #include "albedo/two_change_color.hlsl"
