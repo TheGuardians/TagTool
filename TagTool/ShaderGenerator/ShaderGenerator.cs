@@ -9,6 +9,15 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
+        private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
+        {
+            {typeof(Albedo), new List<object> { Albedo.Constant_Color } }
+        };
+
+
+
+
+
         private static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumDefinitions(Type _enum)
         {
             List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
@@ -27,15 +36,15 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static DirectXUtilities.MacroDefine GenerateEnumValueDefinition(object value)
+        private static DirectXUtilities.MacroDefine GenerateEnumValueDefinition(object value, string prefix = "")
         {
             Type _enum = value.GetType();
             var values = Enum.GetValues(_enum);
 
             return new DirectXUtilities.MacroDefine
             {
-                Name = $"{_enum.Name}_{value}",
-                Definition = "1"
+                Name = $"{_enum.Name}",
+                Definition = $"{_enum.Name}_{value}".ToLower()
             };
         }
 
@@ -43,20 +52,47 @@ namespace TagTool.ShaderGenerator
         {
             List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
 
-            definitions.Add(GenerateEnumValueDefinition(_params.albedo));
-            definitions.Add(GenerateEnumValueDefinition(_params.bump_mapping));
-            definitions.Add(GenerateEnumValueDefinition(_params.alpha_test));
-            definitions.Add(GenerateEnumValueDefinition(_params.specular_mask));
-            definitions.Add(GenerateEnumValueDefinition(_params.material_model));
-            definitions.Add(GenerateEnumValueDefinition(_params.environment_mapping));
-            definitions.Add(GenerateEnumValueDefinition(_params.self_illumination));
-            definitions.Add(GenerateEnumValueDefinition(_params.blend_mode));
-            definitions.Add(GenerateEnumValueDefinition(_params.parallax));
-            definitions.Add(GenerateEnumValueDefinition(_params.misc));
-            definitions.Add(GenerateEnumValueDefinition(_params.distortion));
-            definitions.Add(GenerateEnumValueDefinition(_params.soft_fade));
+            definitions.Add(GenerateEnumValueDefinition(_params.albedo, "albedo"));
+            definitions.Add(GenerateEnumValueDefinition(_params.bump_mapping, "bump_mapping"));
+            definitions.Add(GenerateEnumValueDefinition(_params.alpha_test, "alpha_test"));
+            definitions.Add(GenerateEnumValueDefinition(_params.specular_mask, "specular_mask"));
+            definitions.Add(GenerateEnumValueDefinition(_params.material_model, "material_model"));
+            definitions.Add(GenerateEnumValueDefinition(_params.environment_mapping, "environment_mapping"));
+            definitions.Add(GenerateEnumValueDefinition(_params.self_illumination, "self_illumination"));
+            definitions.Add(GenerateEnumValueDefinition(_params.blend_mode, "blend_mode"));
+            definitions.Add(GenerateEnumValueDefinition(_params.parallax, "parallax"));
+            definitions.Add(GenerateEnumValueDefinition(_params.misc, "misc"));
+            definitions.Add(GenerateEnumValueDefinition(_params.distortion, "distortion"));
+            definitions.Add(GenerateEnumValueDefinition(_params.soft_fade, "soft_fade"));
 
             return definitions;
+        }
+
+        private static void CheckImplementedParameters(object value)
+        {
+            if(ImplementedEnums.ContainsKey(value.GetType())) {
+                var list = ImplementedEnums[value.GetType()];
+                if (list.Contains(value)) return;
+            }
+            var message = $"{value.GetType().Name} has not implemented {value}";
+            //throw new NotImplementedException(message);]
+            Console.WriteLine(message);
+        }
+
+        private static void CheckImplementedParameters(Parameters _params)
+        {
+            CheckImplementedParameters(_params.albedo);
+            CheckImplementedParameters(_params.bump_mapping);
+            CheckImplementedParameters(_params.alpha_test);
+            CheckImplementedParameters(_params.specular_mask);
+            CheckImplementedParameters(_params.material_model);
+            CheckImplementedParameters(_params.environment_mapping);
+            CheckImplementedParameters(_params.self_illumination);
+            CheckImplementedParameters(_params.blend_mode);
+            CheckImplementedParameters(_params.parallax);
+            CheckImplementedParameters(_params.misc);
+            CheckImplementedParameters(_params.distortion);
+            CheckImplementedParameters(_params.soft_fade);
         }
 
         public static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumsDefinitions()
@@ -72,7 +108,7 @@ namespace TagTool.ShaderGenerator
             var defs_Parallax = GenerateEnumDefinitions(typeof(Parallax));
             var defs_Misc = GenerateEnumDefinitions(typeof(Misc));
             var defs_Distortion = GenerateEnumDefinitions(typeof(Distortion));
-            var defs_Soft_fade = GenerateEnumDefinitions(typeof(Soft_fade));
+            var defs_Soft_fade = GenerateEnumDefinitions(typeof(Soft_Fade));
             var defs = (new List<DirectXUtilities.MacroDefine> { })
                 .Concat(defs_Albedo)
                 .Concat(defs_Bump_Mapping)
@@ -102,17 +138,21 @@ namespace TagTool.ShaderGenerator
             public Parallax parallax;
             public Misc misc;
             public Distortion distortion;
-            public Soft_fade soft_fade;
+            public Soft_Fade soft_fade;
         }
 
         public static void GenerateSource(Parameters parameters)
         {
+#if DEBUG
+            CheckImplementedParameters(parameters);
+#endif
+
             //TODO: Think about the easiest way to do this
             //var type_defs = GenerateEnumsDefinitions();
             var value_defs = GenerateParametersDefinitions(parameters);
 
 
-
+            
 
 
 

@@ -47,9 +47,9 @@ namespace TagTool.ShaderGenerator
         public enum Specular_Mask
         {
             No_Specular_Mask,
-            Specular_Mask_From_Diffuse,
-            Specular_Mask_From_Texture,
-            Specular_Mask_From_Color_Texture
+            From_Diffuse,
+            From_Texture,
+            From_Color_Texture
         }
 
         public enum Material_Model
@@ -122,7 +122,7 @@ namespace TagTool.ShaderGenerator
             On
         }
 
-        public enum Soft_fade
+        public enum Soft_Fade
         {
             Off,
             On

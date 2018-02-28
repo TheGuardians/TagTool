@@ -1,7 +1,11 @@
-﻿texture tex0;
-sampler s_1D_float;
+﻿#include "default_definitions.hlsl"
+
+float4 albedo_constant_color()
+{
+    return float4(1, 0, 0, 1);
+}
 
 float4 main(float texCoords : TEXCOORD) : COLOR
 {
-    return tex1D(s_1D_float, texCoords);
+    return Albedo;
 }

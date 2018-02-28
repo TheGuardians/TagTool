@@ -758,7 +758,8 @@
     <EmbeddedResource Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_color_texture.hlsl" />
     <EmbeddedResource Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_diffuse.hlsl" />
     <EmbeddedResource Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_texture.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\template.hlsl" />
+    <EmbeddedResource Include="ShaderGenerator\shader_code\default_definitions.hlsl" />
+    <EmbeddedResource Include="ShaderGenerator\shader_code\template.hlsl" />
     <Content Include="TagTool.ico" />
     <None Include="App.config" />
     <None Include="packages.config" />
