@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Geometry;
 using TagTool.Utilities;
 
 namespace TagTool.ShaderGenerator
@@ -197,6 +198,10 @@ namespace TagTool.ShaderGenerator
                 if (!result) throw new Exception(ErrorMsgs);
                 compiled_shader = Shader;
             }
+
+            Console.WriteLine();
+            Console.WriteLine(ShaderCompiler.Disassemble(compiled_shader));
+            Console.WriteLine();
 
             return compiled_shader;
         }
