@@ -170,3 +170,8 @@ String ^ TagTool::Utilities::DirectXUtilities::DisassemblePCShader(array<Byte>^ 
 
 	return gcnew String(reinterpret_cast<char*>(buffer->GetBufferPointer()));
 }
+
+String ^ TagTool::Utilities::DirectXUtilities::MacroDefine::ToString()
+{
+	return "#define " + Name + " " + Definition;
+}

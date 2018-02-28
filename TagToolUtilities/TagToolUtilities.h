@@ -14,7 +14,8 @@ namespace TagTool {
 
 			ref struct MacroDefine {
 				String^ Name;
-				String^ Definition;
+				String^ Definition; 
+				virtual String^ ToString() override;
 			};
 
 
