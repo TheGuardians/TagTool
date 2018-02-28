@@ -143,7 +143,7 @@ namespace TagTool.ShaderGenerator
             public Soft_Fade soft_fade;
         }
 
-        public static void GenerateSource(Parameters parameters)
+        public static byte[] GenerateSource(Parameters parameters)
         {
 #if DEBUG
             CheckImplementedParameters(parameters);
@@ -198,22 +198,7 @@ namespace TagTool.ShaderGenerator
                 compiled_shader = Shader;
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            return compiled_shader;
         }
 
 
