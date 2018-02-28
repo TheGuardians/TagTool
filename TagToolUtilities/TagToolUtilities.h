@@ -35,6 +35,7 @@ namespace TagTool {
 				[Out] array<Byte>^% Shader,
 				[Out] String^% ErrorMsgs
 			);
+			static std::string ExtractDirectoryName(std::string path);
 			static bool CompilePCShaderFromFile(
 				String^ File,
 				array<MacroDefine^>^ Defines,

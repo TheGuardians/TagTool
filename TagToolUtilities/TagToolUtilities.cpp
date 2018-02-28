@@ -6,6 +6,9 @@
 
 #include <string>
 #include <vector>
+#include <iterator>
+#include <fstream>
+#include <map>
 
 #include <msclr\marshal.h>
 #include <msclr\marshal_cppstd.h>
@@ -107,6 +110,69 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
 	return result == S_OK;
 }
 
+std::string TagTool::Utilities::DirectXUtilities::ExtractDirectoryName(std::string path) {
+
+	auto str = gcnew String(path.c_str());
+	auto dir = System::IO::Path::GetDirectoryName(str);
+	return MarshalStringA(dir);
+}
+
+class ExtInclude : public ID3DInclude {
+public:
+
+	std::string root_directory;
+	std::map<const void*, std::string> Directories;
+
+	ExtInclude(std::string _root_directory)
+	{
+		SetParentDirectory(nullptr, _root_directory + "\\");
+	}
+
+	std::string GetParentDirectory(const void* ptr) {
+		return Directories[ptr];
+	}
+
+	void SetParentDirectory(const void* ptr, std::string dir) {
+		Directories[ptr] = dir;
+	}
+
+	HRESULT Open(
+		D3D_INCLUDE_TYPE IncludeType,
+		LPCSTR           pFileName,
+		LPCVOID          pParentData,
+		LPCVOID          *ppData,
+		UINT             *pBytes
+	) {
+		// Filepaths
+		auto root_directory = GetParentDirectory(pParentData);
+		auto filepath = root_directory + pFileName;
+
+		// Read File
+		char* data;
+		{
+			std::ifstream testFile(filepath, std::ios::binary);
+			std::vector<char> fileContents((std::istreambuf_iterator<char>(testFile)), std::istreambuf_iterator<char>());
+
+			data = new char[fileContents.size()];
+			memcpy(data, fileContents.data(), fileContents.size());
+			*ppData = data;
+			*pBytes = (UINT)fileContents.size();
+		}
+
+		auto this_dir = TagTool::Utilities::DirectXUtilities::ExtractDirectoryName(filepath) + "\\";
+		SetParentDirectory(data, this_dir);
+
+		return S_OK;
+	}
+
+	HRESULT Close(
+		LPCVOID pData
+	) {
+		delete[] pData;
+		return S_OK;
+	}
+};
+
 bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 	String ^ _File,
 	array<MacroDefine^>^ _Defines,
@@ -145,10 +211,15 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 	LPD3DBLOB shader = nullptr;
 	LPD3DBLOB errors = nullptr;
 
+	auto root_directory = System::IO::Path::GetDirectoryName(_File);
+	auto std_root_directory = MarshalStringA(root_directory);
+	ExtInclude include = ExtInclude(std_root_directory);
+	
+
 	HRESULT result = D3DCompileFromFile(
 		File.c_str(),
 		macros,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		&include,
 		FunctionName.c_str(),
 		Profile.c_str(),
 		(DWORD)Flags1,
