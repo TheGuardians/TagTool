@@ -2,13 +2,17 @@
 #include <d3dcompiler.h>
 
 #include "stdafx.h"
-#include "TagToolUtilities.h"
+#include "Helpers.h"
+#include "DirectXUtilities.h"
+
 
 #include <string>
 #include <vector>
 #include <iterator>
 #include <fstream>
 #include <map>
+#include <codecvt>
+#include <locale>
 
 #include <msclr\marshal.h>
 #include <msclr\marshal_cppstd.h>
@@ -16,28 +20,15 @@
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Collections::Generic;
+using namespace TagTool::Utilities;
 
-std::string TagTool::Utilities::DirectXUtilities::MarshalStringA(String^ s)
-{
-	std::string outputstring;
-	const char* kPtoC = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
-	outputstring = kPtoC;
-	Marshal::FreeHGlobal(IntPtr((void*)kPtoC));
-	return outputstring;
-}
-
-std::wstring TagTool::Utilities::DirectXUtilities::MarshalStringW(String^ s)
-{
-	return msclr::interop::marshal_as<std::wstring>(s);
-}
-
-array<Byte>^ TagTool::Utilities::DirectXUtilities::AssemblePCShader(String ^ source)
+array<Byte>^ DirectXUtilities::AssemblePCShader(String ^ source)
 {
 	throw gcnew System::NotImplementedException();
 	// TODO: insert return statement here
 }
 
-bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
+bool DirectXUtilities::CompilePCShader(
 	String ^ _SrcData,
 	String ^ _SrcName,
 	array<MacroDefine^>^ _Defines,
@@ -49,10 +40,10 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
 	String ^% ErrorMsgs
 )
 {
-	std::string SrcData = MarshalStringA(_SrcData);
-	std::string SrcName = MarshalStringA(_SrcName);
-	std::string FunctionName = MarshalStringA(_FunctionName);
-	std::string Profile = MarshalStringA(_Profile);
+	std::string SrcData = Helpers::MarshalStringA(_SrcData);
+	std::string SrcName = Helpers::MarshalStringA(_SrcName);
+	std::string FunctionName = Helpers::MarshalStringA(_FunctionName);
+	std::string Profile = Helpers::MarshalStringA(_Profile);
 
 	// Create the macros array
 	auto num_macros = _Defines->Length + 1;
@@ -62,8 +53,8 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
 
 		auto cs_macro = _Defines[i];
 
-		std::string _name = MarshalStringA(cs_macro->Name);
-		std::string definition = MarshalStringA(cs_macro->Definition);
+		std::string _name = Helpers::MarshalStringA(cs_macro->Name);
+		std::string definition = Helpers::MarshalStringA(cs_macro->Definition);
 
 		auto cstr_name = new char[_name.size()];
 		auto cstr_definition = new char[definition.size()];
@@ -110,13 +101,6 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
 	return result == S_OK;
 }
 
-std::string TagTool::Utilities::DirectXUtilities::ExtractDirectoryName(std::string path) {
-
-	auto str = gcnew String(path.c_str());
-	auto dir = System::IO::Path::GetDirectoryName(str);
-	return MarshalStringA(dir);
-}
-
 class ExtInclude : public ID3DInclude {
 public:
 
@@ -150,16 +134,15 @@ public:
 		// Read File
 		char* data;
 		{
-			std::ifstream testFile(filepath, std::ios::binary);
-			std::vector<char> fileContents((std::istreambuf_iterator<char>(testFile)), std::istreambuf_iterator<char>());
+			std::string source_code = Helpers::ReadFile(filepath);
 
-			data = new char[fileContents.size()];
-			memcpy(data, fileContents.data(), fileContents.size());
+			data = new char[source_code.size()];
+			memcpy(data, source_code.data(), source_code.size());
 			*ppData = data;
-			*pBytes = (UINT)fileContents.size();
+			*pBytes = (UINT)source_code.size();
 		}
 
-		auto this_dir = TagTool::Utilities::DirectXUtilities::ExtractDirectoryName(filepath) + "\\";
+		auto this_dir = Helpers::ExtractDirectoryName(filepath) + "\\";
 		SetParentDirectory(data, this_dir);
 
 		return S_OK;
@@ -173,7 +156,7 @@ public:
 	}
 };
 
-bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
+bool DirectXUtilities::CompilePCShaderFromFile(
 	String ^ _File,
 	array<MacroDefine^>^ _Defines,
 	String ^ _FunctionName,
@@ -184,9 +167,9 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 	String ^% ErrorMsgs
 )
 {
-	std::wstring File = MarshalStringW(_File);
-	std::string FunctionName = MarshalStringA(_FunctionName);
-	std::string Profile = MarshalStringA(_Profile);
+	std::wstring File = Helpers::MarshalStringW(_File);
+	std::string FunctionName = Helpers::MarshalStringA(_FunctionName);
+	std::string Profile = Helpers::MarshalStringA(_Profile);
 
 	// Create the macros array
 	auto num_macros = _Defines->Length + 1;
@@ -196,8 +179,8 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 
 		auto cs_macro = _Defines[i];
 
-		std::string _name = MarshalStringA(cs_macro->Name);
-		std::string definition = MarshalStringA(cs_macro->Definition);
+		std::string _name = Helpers::MarshalStringA(cs_macro->Name);
+		std::string definition = Helpers::MarshalStringA(cs_macro->Definition);
 
 		auto cstr_name = new char[_name.size()];
 		auto cstr_definition = new char[definition.size()];
@@ -212,9 +195,9 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 	LPD3DBLOB errors = nullptr;
 
 	auto root_directory = System::IO::Path::GetDirectoryName(_File);
-	auto std_root_directory = MarshalStringA(root_directory);
+	auto std_root_directory = Helpers::MarshalStringA(root_directory);
 	ExtInclude include = ExtInclude(std_root_directory);
-	
+
 
 	HRESULT result = D3DCompileFromFile(
 		File.c_str(),
@@ -247,7 +230,7 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
 	return result == S_OK;
 }
 
-String ^ TagTool::Utilities::DirectXUtilities::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
+String ^ DirectXUtilities::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
 {
 	if (_Data == nullptr) throw gcnew Exception("data is null");
 
@@ -269,12 +252,12 @@ String ^ TagTool::Utilities::DirectXUtilities::DisassemblePCShader(array<Byte>^ 
 	return gcnew String(reinterpret_cast<char*>(buffer->GetBufferPointer()));
 }
 
-String ^ TagTool::Utilities::DirectXUtilities::MacroDefine::ToString()
+String ^ DirectXUtilities::MacroDefine::ToString()
 {
 	return "#define " + Name + " " + Definition;
 }
 //
-//array<Byte>^ TagTool::Utilities::DirectXUtilities::AssemblePCShader(String ^ _source)
+//array<Byte>^ DirectXUtilities::AssemblePCShader(String ^ _source)
 //{
 //	if (_source == nullptr) throw gcnew Exception("source is null");
 //
