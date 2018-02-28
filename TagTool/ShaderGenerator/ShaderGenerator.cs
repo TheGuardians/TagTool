@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,7 +71,8 @@ namespace TagTool.ShaderGenerator
 
         private static void CheckImplementedParameters(object value)
         {
-            if(ImplementedEnums.ContainsKey(value.GetType())) {
+            if (ImplementedEnums.ContainsKey(value.GetType()))
+            {
                 var list = ImplementedEnums[value.GetType()];
                 if (list.Contains(value)) return;
             }
@@ -151,11 +153,50 @@ namespace TagTool.ShaderGenerator
             //var type_defs = GenerateEnumsDefinitions();
             var value_defs = GenerateParametersDefinitions(parameters);
 
+            //var result = DirectXUtilities.CompilePCShaderFromFile(
+            //    "ShaderGenerator/shader_code/shader_template.hlsl",
+            //    value_defs.ToArray(),
+            //    "main",
+            //    "ps_3_0",
+            //    0,
+            //    out byte[] ShaderBytecode,
+            //    out string ErrorMsgs,
+            //    out string ConstantTable
+            //    );
+            //if(!result)
+            //{
+            //    throw new Exception(ErrorMsgs);
+            //}
 
-            
+            byte[] compiled_shader;
+            {
+                var shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
+                var entry_point = "main";
+                //Include include = null;
+                var profile = "ps_3_0";
+                // ShaderFlags flags = ShaderFlags.Debug;
+                //using (var stream = ShaderLoader.CompileShaderFromFile(shader_file, entry_point, include, profile, flags))
+                //{
 
+                //    stream.Seek(0, System.IO.SeekOrigin.Begin);
+                //    compiled_shader = new byte[stream.Length];
+                //    stream.Read(compiled_shader, 0, (int)stream.Length);
+                //}
 
+                var result = Utilities.DirectXUtilities.CompilePCShaderFromFile(
+                    shader_file,
+                    value_defs.ToArray(),
+                    entry_point,
+                    profile,
+                    0,
+                    0,
+                    out byte[] Shader,
+                    out string ErrorMsgs
+                    );
 
+                if (!result) throw new Exception(ErrorMsgs);
+                compiled_shader = Shader;
+            }
 
 
 
