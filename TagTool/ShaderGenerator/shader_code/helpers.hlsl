@@ -3,6 +3,11 @@
 
 #include "parameters.hlsl"
 
+float3 NormalExport(float3 normal)
+{
+    return normal * 0.5 + 0.5;
+}
+
 float3 NormalMapSample(sampler map, float2 texture_coordinate)
 {
     float4 normal_map = tex2D(map, texture_coordinate);

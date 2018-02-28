@@ -68,12 +68,15 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 
     output.Diffuse = float4(color_postprocess, color.w);
     output.Normal = float4(1, 0, 0, color.w);
-    output.Normal.xyz = bump_detail_map_detail(
-        normal_x_component, 
-        normal_y_component, 
-        normal_z_component, 
-        bump_detail_texture_coordinate, 
-        bump_detail_texture_coordinate) * 0.5 + 0.5;
+
+    float3 normal = bump_detail_map_detail(
+        normal_x_component,
+        normal_y_component,
+        normal_z_component,
+        bump_texture_coordinate,
+        bump_detail_texture_coordinate);
+
+    output.Normal.xyz = NormalExport(normal);
 
 
     output.Unknown = unknown.xxxx;
