@@ -1,4 +1,4 @@
-#include "../uniforms.hlsl"
+#include "../parameters.hlsl"
 
 float4 albedo_constant_color()
 {

@@ -1,6 +1,6 @@
-#include "shader_template_defs.hlsl"
-#include "shader_code.hlsl"
-#include "uniforms.hlsl"
+#include "template_default_defs.hlsl"
+#include "template_includes.hlsl"
+#include "parameters.hlsl"
 
 float4 main(float texCoords : TEXCOORD) : COLOR
 {
