@@ -11,14 +11,84 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
+
         private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
         {
             {typeof(Albedo), new List<object> { Albedo.Constant_Color } }
         };
 
+        public static byte[] GenerateSource(ShaderType type, Parameters parameters)
+        {
+#if DEBUG
+            CheckImplementedParameters(parameters);
+#endif
+
+            //TODO: Think about the easiest way to do this
+            //var type_defs = GenerateEnumsDefinitions();
+            var value_defs = GenerateParametersDefinitions(parameters);
+
+            //var result = DirectXUtilities.CompilePCShaderFromFile(
+            //    "ShaderGenerator/shader_code/shader_template.hlsl",
+            //    value_defs.ToArray(),
+            //    "main",
+            //    "ps_3_0",
+            //    0,
+            //    out byte[] ShaderBytecode,
+            //    out string ErrorMsgs,
+            //    out string ConstantTable
+            //    );
+            //if(!result)
+            //{
+            //    throw new Exception(ErrorMsgs);
+            //}
+
+            byte[] compiled_shader;
+            {
+                string shader_file = "";
+                switch (type)
+                {
+                    case ShaderType.DecalsTemplate:
+                        shader_file = "ShaderGenerator/shader_code/decals_template.hlsl";
+                        break;
+                    default:
+                        shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
+                        break;
+                }
 
 
+                var entry_point = "main";
+                //Include include = null;
+                var profile = "ps_3_0";
+                // ShaderFlags flags = ShaderFlags.Debug;
+                //using (var stream = ShaderLoader.CompileShaderFromFile(shader_file, entry_point, include, profile, flags))
+                //{
 
+                //    stream.Seek(0, System.IO.SeekOrigin.Begin);
+                //    compiled_shader = new byte[stream.Length];
+                //    stream.Read(compiled_shader, 0, (int)stream.Length);
+                //}
+
+                var result = Utilities.DirectXUtilities.CompilePCShaderFromFile(
+                    shader_file,
+                    value_defs.ToArray(),
+                    entry_point,
+                    profile,
+                    0,
+                    0,
+                    out byte[] Shader,
+                    out string ErrorMsgs
+                    );
+
+                if (!result) throw new Exception(ErrorMsgs);
+                compiled_shader = Shader;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(ShaderCompiler.Disassemble(compiled_shader));
+            Console.WriteLine();
+
+            return compiled_shader;
+        }
 
         private static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumDefinitions(Type _enum)
         {
@@ -143,73 +213,6 @@ namespace TagTool.ShaderGenerator
             public Distortion distortion;
             public Soft_Fade soft_fade;
         }
-
-        public static byte[] GenerateSource(Parameters parameters)
-        {
-#if DEBUG
-            CheckImplementedParameters(parameters);
-#endif
-
-            //TODO: Think about the easiest way to do this
-            //var type_defs = GenerateEnumsDefinitions();
-            var value_defs = GenerateParametersDefinitions(parameters);
-
-            //var result = DirectXUtilities.CompilePCShaderFromFile(
-            //    "ShaderGenerator/shader_code/shader_template.hlsl",
-            //    value_defs.ToArray(),
-            //    "main",
-            //    "ps_3_0",
-            //    0,
-            //    out byte[] ShaderBytecode,
-            //    out string ErrorMsgs,
-            //    out string ConstantTable
-            //    );
-            //if(!result)
-            //{
-            //    throw new Exception(ErrorMsgs);
-            //}
-
-            byte[] compiled_shader;
-            {
-                var shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
-                var entry_point = "main";
-                //Include include = null;
-                var profile = "ps_3_0";
-                // ShaderFlags flags = ShaderFlags.Debug;
-                //using (var stream = ShaderLoader.CompileShaderFromFile(shader_file, entry_point, include, profile, flags))
-                //{
-
-                //    stream.Seek(0, System.IO.SeekOrigin.Begin);
-                //    compiled_shader = new byte[stream.Length];
-                //    stream.Read(compiled_shader, 0, (int)stream.Length);
-                //}
-
-                var result = Utilities.DirectXUtilities.CompilePCShaderFromFile(
-                    shader_file,
-                    value_defs.ToArray(),
-                    entry_point,
-                    profile,
-                    0,
-                    0,
-                    out byte[] Shader,
-                    out string ErrorMsgs
-                    );
-
-                if (!result) throw new Exception(ErrorMsgs);
-                compiled_shader = Shader;
-            }
-
-            Console.WriteLine();
-            Console.WriteLine(ShaderCompiler.Disassemble(compiled_shader));
-            Console.WriteLine();
-
-            return compiled_shader;
-        }
-
-
-
-
-
 
     }
 }

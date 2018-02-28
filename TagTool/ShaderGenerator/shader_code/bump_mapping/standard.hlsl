@@ -1,12 +1,11 @@
 #include "../parameters.hlsl"
 #include "../helpers.hlsl"
 
-float3 bump_detail_map_detail(
+float3 bump_detail_map_standard(
     float3 normal_x_component,
     float3 normal_y_component,
     float3 normal_z_component,
-    float2 normal_texture_coordinate,
-    float2 normal_detail_texture_coordinate
+    float2 normal_texture_coordinate
 )
 {
     float3 normal = NormalMapSample(bump_map, normal_texture_coordinate);

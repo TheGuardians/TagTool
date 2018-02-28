@@ -33,12 +33,29 @@ namespace TagTool.Commands.Shaders
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count <= 0)
                 return false;
 
-            int index = int.Parse(args[0]);
+            ShaderGenerator.ShaderGenerator.ShaderType type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
+            int index;
+            if (args.Count > 1)
+            {
+                index = int.Parse(args[1]);
+                switch(args[0].ToLower())
+                {
+                    case "shader_template":
+                        type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
+                        break;
+                    case "decals_template":
+                        type = ShaderGenerator.ShaderGenerator.ShaderType.DecalsTemplate;
+                        break;
+                }
+            }
+            else index = int.Parse(args[0]);
 
-            byte[] bytecode = ShaderGenerator.ShaderGenerator.GenerateSource(
+
+
+            byte[] bytecode = ShaderGenerator.ShaderGenerator.GenerateSource(type,
                 new ShaderGenerator.ShaderGenerator.Parameters
                 {
                     albedo = ShaderGenerator.ShaderGenerator.Albedo.Constant_Color

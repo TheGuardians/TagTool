@@ -8,6 +8,12 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
+        public enum ShaderType
+        {
+            ShaderTemplate,
+            DecalsTemplate
+        }
+
         public enum Albedo
         {
             Default,

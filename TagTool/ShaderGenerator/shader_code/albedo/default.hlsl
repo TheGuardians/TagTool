@@ -1,6 +1,6 @@
-#include "../uniforms.hlsl"
+#include "../parameters.hlsl"
 
-float4 albedo_default()
+float4 albedo_default(float2 texture_coordinate)
 {
-    return float4(0, 1, 0, 1);
+    return tex2D(base_map, texture_coordinate);
 }

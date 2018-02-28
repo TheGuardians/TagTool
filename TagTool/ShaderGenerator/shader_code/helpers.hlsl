@@ -1,6 +1,8 @@
 ﻿#ifndef __HELPERS
 #define __HELPERS
 
+#include "parameters.hlsl"
+
 float3 NormalMapSample(sampler map, float2 texture_coordinate)
 {
     float4 normal_map = tex2D(map, texture_coordinate);
@@ -12,5 +14,29 @@ float3 NormalMapSample(sampler map, float2 texture_coordinate)
 
     return float3(normal_xy, normal_z);
 }
+
+float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
+{
+    float4 r0 = float4(color, 0);
+    float4 r1 = float4(0, 0, 0, 0);
+    float4 r2 = float4(0, 0, 0, 0);
+
+    // BEGIN RETARDED CODE
+    r1.xyz = color.xyz * 4.59478998;
+    r1.w = 4.59478998;
+    r0.xyz = r0.xyz * -r1.xyz + debug_tint.xyz;
+    r0.xyz = debug_tint.www * r0.xyz + r1.xyz;
+    r1.xyz = log(r0.xyz);
+    r1.xyz = r1.xyz * 0.416666657; // 5/12
+    
+    r2.xyz = exp(r1.xyz);
+    r1.xyz = r2.xyz * 1.05499995 + -0.0549999997;
+    r2.xyz = (-r0.xyz) * 12.9200001;
+    r0.xyz = r0.xyz * 12.9200001;
+    // END RETARDED CODE
+
+    return r2.xyz >= 0 ? r0.xyz : r1.xyz;
+}
+
 
 #endif
