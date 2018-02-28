@@ -41,6 +41,9 @@ namespace TagTool.Commands.Files
             {
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
+                    if (tagType.Key != "forg")
+                        continue;
+
                     if (path != null)
                     {
                         try
@@ -895,13 +898,7 @@ namespace TagTool.Commands.Files
         /// </summary>
         static Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
         {
-            {CacheVersion.Halo2Vista, "Halo2" },
-            {CacheVersion.Halo3Retail, "Halo3" },
-            {CacheVersion.Halo3ODST, "ODST" },
-            {CacheVersion.HaloReach, "Reach"},
             {CacheVersion.HaloOnline106708, "HaloOnline" },
-            {CacheVersion.HaloOnline498295, "HaloOnlineZBT"},
-            {CacheVersion.HaloOnline700123, "HaloOnlineZBT70"}
         };
 
         /// <summary>
@@ -917,6 +914,9 @@ namespace TagTool.Commands.Files
         {
             if (!Directory.Exists("Plugins"))
                 Directory.CreateDirectory("Plugins");
+
+            if (tagGroup != "forg")
+                return;
 
             ConvertTagDefinition(tagGroup, tagType, cacheVersion, "Plugins");
         }

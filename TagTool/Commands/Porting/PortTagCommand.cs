@@ -152,8 +152,9 @@ namespace TagTool.Commands.Porting
                 if ((tag.ClassCode == groupTag.ToString()) && (IsWildcard || tag.Filename == blamTagName))
                 {
                     blamTags.Add(tag);
-                    if (!IsWildcard) break;
 
+                    if (!IsWildcard)
+                        break;
                 }
             }
 
@@ -168,14 +169,8 @@ namespace TagTool.Commands.Porting
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
                 foreach (var blamTag in blamTags)
-                {
                     ConvertTag(cacheStream, blamTag);
-                }
-            }
-
-
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
@@ -278,7 +273,7 @@ namespace TagTool.Commands.Porting
                 else
                     return CacheContext.GetTag(0x101F);
             }
-            else if (EffectTagGroups.Contains(groupTag))
+            else if (EffectTagGroups.Contains(groupTag) && !UseShaderTest)
             {
                 if (groupTag == "beam")
                     return CacheContext.GetTag(0x18B5);
@@ -295,7 +290,7 @@ namespace TagTool.Commands.Porting
                 else
                     return CacheContext.GetTag(0x29E);
             }
-            else if (OtherTagGroups.Contains(groupTag))
+            else if (OtherTagGroups.Contains(groupTag) && !UseShaderTest)
             {
                 if (groupTag == "foot")
                     return CacheContext.GetTag(0xc0d);

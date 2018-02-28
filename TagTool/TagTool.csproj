@@ -253,9 +253,12 @@
     <Compile Include="Commands\Porting\DumpBspGeometryCommand.cs" />
     <Compile Include="Commands\Porting\DumpScriptInfoCommand.cs" />
     <Compile Include="Commands\Porting\DumpTagFunctionCommand.cs" />
+    <Compile Include="Commands\Porting\EditBlockCommand.cs" />
+    <Compile Include="Commands\Porting\EditTagCommand.cs" />
     <Compile Include="Commands\Porting\ListBitmapsCommand.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\ListBspMoppCodesCommand.cs" />
+    <Compile Include="Commands\Porting\ListFieldsCommand.cs" />
     <Compile Include="Commands\Porting\MatchShadersCommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
@@ -382,6 +385,7 @@
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
     <Compile Include="Shaders\XboxShaderParser.cs" />
+    <Compile Include="Tags\Definitions\ForgeGlobalsDefinition.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
     <Compile Include="Tags\TagData.cs" />

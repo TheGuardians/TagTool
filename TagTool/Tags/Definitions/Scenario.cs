@@ -3324,7 +3324,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown4;
             public short Unknown5;
         }
-
+        
         [TagStructure(Size = 0x14)]
         public class LightmapAirprobe
         {
