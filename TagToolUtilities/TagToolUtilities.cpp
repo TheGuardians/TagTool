@@ -1,4 +1,5 @@
-#include <d3dx9.h>
+
+#include <d3dcompiler.h>
 
 #include "stdafx.h"
 #include "TagToolUtilities.h"
@@ -13,7 +14,7 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Collections::Generic;
 
-std::string MarshalStringA(String^ s)
+std::string TagTool::Utilities::DirectXUtilities::MarshalStringA(String^ s)
 {
 	std::string outputstring;
 	const char* kPtoC = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
@@ -22,48 +23,38 @@ std::string MarshalStringA(String^ s)
 	return outputstring;
 }
 
-std::wstring MarshalStringW(String^ s)
+std::wstring TagTool::Utilities::DirectXUtilities::MarshalStringW(String^ s)
 {
 	return msclr::interop::marshal_as<std::wstring>(s);
 }
 
-array<Byte>^ TagTool::Utilities::DirectXUtilities::AssemblePCShader(String ^ _source)
+array<Byte>^ TagTool::Utilities::DirectXUtilities::AssemblePCShader(String ^ source)
 {
-	if (_source == nullptr) throw gcnew Exception("source is null");
-
-	std::string source = MarshalStringA(_source);
-
-	LPD3DXBUFFER buffer = nullptr;
-	LPD3DXBUFFER errors = nullptr;
-
-	HRESULT result = D3DXAssembleShader(source.c_str(), (UINT)source.length(), NULL, NULL, 0, &buffer, &errors);
-
-	if (result != S_OK) {
-
-		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
-		throw gcnew Exception(errors_str);
-
-	}
-
-	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
-	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
-	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
-		arr[i] = ptr[i];
-	}
-
-	return arr;
+	throw gcnew System::NotImplementedException();
+	// TODO: insert return statement here
 }
 
-bool TagTool::Utilities::DirectXUtilities::CompilePCShader(String ^ _SrcData, array<MacroDefine^>^ _Defines, String ^ _FunctionName, String ^ _Profile, UInt32 flags, array<Byte>^% Shader, String ^% ErrorMsgs, String ^% ConstantTable)
+bool TagTool::Utilities::DirectXUtilities::CompilePCShader(
+	String ^ _SrcData,
+	String ^ _SrcName,
+	array<MacroDefine^>^ _Defines,
+	String ^ _FunctionName,
+	String ^ _Profile,
+	UInt32 Flags1,
+	UInt32 Flags2,
+	array<Byte>^% Shader,
+	String ^% ErrorMsgs
+)
 {
 	std::string SrcData = MarshalStringA(_SrcData);
+	std::string SrcName = MarshalStringA(_SrcName);
 	std::string FunctionName = MarshalStringA(_FunctionName);
 	std::string Profile = MarshalStringA(_Profile);
 
 	// Create the macros array
 	auto num_macros = _Defines->Length + 1;
-	D3DXMACRO* macros = new D3DXMACRO[num_macros];
-	memset(macros, 0, sizeof(D3DXMACRO) * num_macros);
+	D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros];
+	memset(macros, 0, sizeof(D3D_SHADER_MACRO) * num_macros);
 	for (auto i = 0; i < _Defines->Length; i++) {
 
 		auto cs_macro = _Defines[i];
@@ -80,30 +71,31 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(String ^ _SrcData, ar
 		macros[i].Definition = cstr_definition;
 	}
 
-	LPD3DXBUFFER shader = nullptr;
-	LPD3DXBUFFER errors = nullptr;
-	LPD3DXCONSTANTTABLE constanttable = nullptr;
+	LPD3DBLOB shader = nullptr;
+	LPD3DBLOB errors = nullptr;
 
-	HRESULT result = D3DXCompileShader(
+	HRESULT result = D3DCompile(
 		SrcData.data(),
 		(UINT)SrcData.size(),
+		SrcName.c_str(),
 		macros,
 		nullptr,
 		FunctionName.c_str(),
 		Profile.c_str(),
-		(DWORD)flags,
+		(DWORD)Flags1,
+		(DWORD)Flags2,
 		&shader,
-		&errors,
-		&constanttable);
-
-	List<Byte>^ data = gcnew List<Byte>();
-	for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
-		auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
-		data->Add(val);
-	}
-	Shader = data->ToArray();
+		&errors);
 
 	if (result != S_OK) ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+	else {
+		List<Byte>^ data = gcnew List<Byte>();
+		for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
+			auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
+			data->Add(val);
+		}
+		Shader = data->ToArray();
+	}
 
 	//TODO: Implement large address aware constant table
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb172731(v=vs.85).aspx
@@ -115,7 +107,16 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShader(String ^ _SrcData, ar
 	return result == S_OK;
 }
 
-bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(String ^ _File, array<MacroDefine^>^ _Defines, String ^ _FunctionName, String ^ _Profile, UInt32 flags, array<Byte>^% Shader, String ^% ErrorMsgs, String ^% ConstantTable)
+bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(
+	String ^ _File,
+	array<MacroDefine^>^ _Defines,
+	String ^ _FunctionName,
+	String ^ _Profile,
+	UInt32 Flags1,
+	UInt32 Flags2,
+	array<Byte>^% Shader,
+	String ^% ErrorMsgs
+)
 {
 	std::wstring File = MarshalStringW(_File);
 	std::string FunctionName = MarshalStringA(_FunctionName);
@@ -123,8 +124,8 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(String ^ _Fil
 
 	// Create the macros array
 	auto num_macros = _Defines->Length + 1;
-	D3DXMACRO* macros = new D3DXMACRO[num_macros];
-	memset(macros, 0, sizeof(D3DXMACRO) * num_macros);
+	D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros];
+	memset(macros, 0, sizeof(D3D_SHADER_MACRO) * num_macros);
 	for (auto i = 0; i < _Defines->Length; i++) {
 
 		auto cs_macro = _Defines[i];
@@ -141,30 +142,29 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(String ^ _Fil
 		macros[i].Definition = cstr_definition;
 	}
 
-	LPD3DXBUFFER shader = nullptr;
-	LPD3DXBUFFER errors = nullptr;
-	LPD3DXCONSTANTTABLE constanttable = nullptr;
+	LPD3DBLOB shader = nullptr;
+	LPD3DBLOB errors = nullptr;
 
-
-	HRESULT result = D3DXCompileShaderFromFileW(
+	HRESULT result = D3DCompileFromFile(
 		File.c_str(),
 		macros,
-		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		FunctionName.c_str(),
 		Profile.c_str(),
-		(DWORD)flags,
+		(DWORD)Flags1,
+		(DWORD)Flags2,
 		&shader,
-		&errors,
-		&constanttable);
-
-	List<Byte>^ data = gcnew List<Byte>();
-	for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
-		auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
-		data->Add(val);
-	}
-	Shader = data->ToArray();
+		&errors);
 
 	if (result != S_OK) ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+	else {
+		List<Byte>^ data = gcnew List<Byte>();
+		for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
+			auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
+			data->Add(val);
+		}
+		Shader = data->ToArray();
+	}
 
 	//TODO: Implement large address aware constant table
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb172731(v=vs.85).aspx
@@ -176,28 +176,23 @@ bool TagTool::Utilities::DirectXUtilities::CompilePCShaderFromFile(String ^ _Fil
 	return result == S_OK;
 }
 
-String ^ TagTool::Utilities::DirectXUtilities::DisassemblePCShader(array<Byte>^ _data)
+String ^ TagTool::Utilities::DirectXUtilities::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
 {
-	if (_data == nullptr) throw gcnew Exception("data is null");
+	if (_Data == nullptr) throw gcnew Exception("data is null");
 
-	LPD3DXBUFFER buffer = nullptr;
+	LPD3DBLOB buffer = nullptr;
 
 	std::vector<unsigned char> data;
-	data.reserve(_data->Length);
-	for (auto i = 0; i < _data->Length; i++) {
-		auto val = _data[i];
+	data.reserve(_Data->Length);
+	for (auto i = 0; i < _Data->Length; i++) {
+		auto val = _Data[i];
 		data.push_back(val);
 	}
 
-	HRESULT result = D3DXDisassembleShader(reinterpret_cast<DWORD*>(data.data()), false, nullptr, &buffer);
+	HRESULT result = D3DDisassemble(reinterpret_cast<DWORD*>(data.data()), data.size(), 0, nullptr, &buffer);
 
 	if (result != S_OK) {
-		if (result == D3DXERR_INVALIDDATA) {
-			throw gcnew Exception("Invalid data");
-		}
-		else {
-			throw gcnew Exception();
-		}
+		throw gcnew Exception();
 	}
 
 	return gcnew String(reinterpret_cast<char*>(buffer->GetBufferPointer()));
@@ -207,3 +202,30 @@ String ^ TagTool::Utilities::DirectXUtilities::MacroDefine::ToString()
 {
 	return "#define " + Name + " " + Definition;
 }
+//
+//array<Byte>^ TagTool::Utilities::DirectXUtilities::AssemblePCShader(String ^ _source)
+//{
+//	if (_source == nullptr) throw gcnew Exception("source is null");
+//
+//	std::string source = MarshalStringA(_source);
+//
+//	LPD3DXBUFFER buffer = nullptr;
+//	LPD3DXBUFFER errors = nullptr;
+//
+//	HRESULT result = D3DXAssembleShader(source.c_str(), (UINT)source.length(), NULL, NULL, 0, &buffer, &errors);
+//
+//	if (result != S_OK) {
+//
+//		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+//		throw gcnew Exception(errors_str);
+//
+//	}
+//
+//	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
+//	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
+//	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
+//		arr[i] = ptr[i];
+//	}
+//
+//	return arr;
+//}

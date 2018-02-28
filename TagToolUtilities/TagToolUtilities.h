@@ -5,6 +5,8 @@
 using namespace System;
 using namespace System::Runtime::InteropServices;
 
+#include <string>
+
 namespace TagTool {
 
 	namespace Utilities
@@ -14,39 +16,40 @@ namespace TagTool {
 
 			ref struct MacroDefine {
 				String^ Name;
-				String^ Definition; 
+				String^ Definition;
 				virtual String^ ToString() override;
 			};
 
 
 
 			static array<Byte>^ AssemblePCShader(String^ source);
+
 			static bool CompilePCShader(
-				String^ SrcData, 
-				array<MacroDefine^>^ Defines, 
-				String^ FunctionName, 
-				String^ Profile, 
-				UInt32 flags,
+				String^ SrcData,
+				String ^ SrcName,
+				array<MacroDefine^>^ Defines,
+				String^ FunctionName,
+				String^ Profile,
+				UInt32 Flags1,
+				UInt32 Flags2,
 				[Out] array<Byte>^% Shader,
-				[Out] String^% ErrorMsgs,
-				[Out] String^% ConstantTable
+				[Out] String^% ErrorMsgs
 			);
 			static bool CompilePCShaderFromFile(
 				String^ File,
 				array<MacroDefine^>^ Defines,
 				String^ FunctionName,
 				String^ Profile,
-				UInt32 flags,
+				UInt32 Flags1,
+				UInt32 Flags2,
 				[Out] array<Byte>^% Shader,
-				[Out] String^% ErrorMsgs,
-				[Out] String^% ConstantTable);
+				[Out] String^% ErrorMsgs);
 
+			static String^ DisassemblePCShader(array<Byte>^ Data, UInt32 Flags);
 
-
-
-
-
-			static String^ DisassemblePCShader(array<Byte>^ data);
+		private:
+			static std::string MarshalStringA(String ^ s);
+			static std::wstring MarshalStringW(String ^ s);
 		};
 	}
 }
