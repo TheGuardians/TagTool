@@ -69,7 +69,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
     output.Diffuse = float4(color_postprocess, color.w);
     output.Normal = float4(1, 0, 0, color.w);
 
-    float3 normal = bump_detail_map_detail(
+    float3 normal = bump_mapping_detail(
         normal_x_component,
         normal_y_component,
         normal_z_component,
