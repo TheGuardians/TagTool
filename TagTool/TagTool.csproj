@@ -913,9 +913,6 @@
     <Content Include="ShaderGenerator\shader_code\shader_code.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\test.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="ShaderGenerator\shader_code\uniforms.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -963,8 +960,8 @@
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(SolutionDir)Physics $(ProjectDir)$(OutDir)Physics /e /i /h /Y
-xcopy $(SolutionDir)Tools $(ProjectDir)$(OutDir)Tools /e /i /h /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)Physics" "$(OutDir)Physics" /e /i /h /Y
+xcopy "$(SolutionDir)Tools" "$(OutDir)Tools" /e /i /h /Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>cd $(SolutionDir)
