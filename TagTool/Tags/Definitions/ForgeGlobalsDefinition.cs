@@ -219,7 +219,7 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// A Forge sky descriptor.
         /// </summary>
-        [TagStructure(Size = 0x80)]
+        [TagStructure(Size = 0x90)]
         public struct Sky
         {
             /// <summary>
