@@ -28,79 +28,6 @@ array<Byte>^ DirectXUtilities::AssemblePCShader(String ^ source)
 	// TODO: insert return statement here
 }
 
-bool DirectXUtilities::CompilePCShader(
-	String ^ _SrcData,
-	String ^ _SrcName,
-	array<MacroDefine^>^ _Defines,
-	String ^ _FunctionName,
-	String ^ _Profile,
-	UInt32 Flags1,
-	UInt32 Flags2,
-	array<Byte>^% Shader,
-	String ^% ErrorMsgs
-)
-{
-	std::string SrcData = Helpers::MarshalStringA(_SrcData);
-	std::string SrcName = Helpers::MarshalStringA(_SrcName);
-	std::string FunctionName = Helpers::MarshalStringA(_FunctionName);
-	std::string Profile = Helpers::MarshalStringA(_Profile);
-
-	// Create the macros array
-	auto num_macros = _Defines->Length + 1;
-	D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros];
-	memset(macros, 0, sizeof(D3D_SHADER_MACRO) * num_macros);
-	for (auto i = 0; i < _Defines->Length; i++) {
-
-		auto cs_macro = _Defines[i];
-
-		std::string _name = Helpers::MarshalStringA(cs_macro->Name);
-		std::string definition = Helpers::MarshalStringA(cs_macro->Definition);
-
-		auto cstr_name = new char[_name.size()];
-		auto cstr_definition = new char[definition.size()];
-		memcpy(cstr_name, _name.data(), _name.size());
-		memcpy(cstr_definition, definition.data(), definition.size());
-
-		macros[i].Name = cstr_name;
-		macros[i].Definition = cstr_definition;
-	}
-
-	LPD3DBLOB shader = nullptr;
-	LPD3DBLOB errors = nullptr;
-
-	HRESULT result = D3DCompile(
-		SrcData.data(),
-		(UINT)SrcData.size(),
-		SrcName.c_str(),
-		macros,
-		nullptr,
-		FunctionName.c_str(),
-		Profile.c_str(),
-		(DWORD)Flags1,
-		(DWORD)Flags2,
-		&shader,
-		&errors);
-
-	if (result != S_OK) ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
-	else {
-		List<Byte>^ data = gcnew List<Byte>();
-		for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
-			auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
-			data->Add(val);
-		}
-		Shader = data->ToArray();
-	}
-
-	//TODO: Implement large address aware constant table
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb172731(v=vs.85).aspx
-
-
-	//ConstantTable = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
-
-
-	return result == S_OK;
-}
-
 class ExtInclude : public ID3DInclude {
 public:
 
@@ -156,6 +83,86 @@ public:
 	}
 };
 
+bool DirectXUtilities::CompilePCShader(
+	String ^ _SrcData,
+	String ^ _SrcName,
+	array<MacroDefine^>^ _Defines,
+	String ^ _FunctionName,
+	String ^ _Profile,
+	UInt32 Flags1,
+	UInt32 Flags2,
+	array<Byte>^% Shader,
+	String ^% ErrorMsgs
+)
+{
+	std::string SrcData = Helpers::MarshalStringA(_SrcData);
+	std::string SrcName = Helpers::MarshalStringA(_SrcName);
+	std::string FunctionName = Helpers::MarshalStringA(_FunctionName);
+	std::string Profile = Helpers::MarshalStringA(_Profile);
+
+	// Create the macros array
+	auto num_macros = _Defines->Length + 1;
+	D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros];
+	memset(macros, 0, sizeof(D3D_SHADER_MACRO) * num_macros);
+	for (auto i = 0; i < _Defines->Length; i++) {
+
+		auto cs_macro = _Defines[i];
+
+		std::string _name = Helpers::MarshalStringA(cs_macro->Name);
+		std::string definition = Helpers::MarshalStringA(cs_macro->Definition);
+
+		auto cstr_name = new char[_name.size()];
+		auto cstr_definition = new char[definition.size()];
+		memcpy(cstr_name, _name.data(), _name.size());
+		memcpy(cstr_definition, definition.data(), definition.size());
+
+		macros[i].Name = cstr_name;
+		macros[i].Definition = cstr_definition;
+	}
+
+	LPD3DBLOB shader = nullptr;
+	LPD3DBLOB errors = nullptr;
+
+	HRESULT result = D3DCompile(
+		SrcData.data(),
+		(UINT)SrcData.size(),
+		SrcName.c_str(),
+		macros,
+		nullptr,
+		FunctionName.c_str(),
+		Profile.c_str(),
+		(DWORD)Flags1,
+		(DWORD)Flags2,
+		&shader,
+		&errors);
+
+	if (result != S_OK) {
+		if (result == 0x80070002) {
+			throw gcnew Exception("can't find file");
+		}
+		else {
+			ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+		}
+	}
+	else {
+		List<Byte>^ data = gcnew List<Byte>();
+		for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
+			auto val = reinterpret_cast<unsigned char*>(shader->GetBufferPointer())[i];
+			data->Add(val);
+		}
+		Shader = data->ToArray();
+	}
+
+	//TODO: Implement large address aware constant table
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb172731(v=vs.85).aspx
+
+
+	//ConstantTable = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+
+
+	return result == S_OK;
+}
+
 bool DirectXUtilities::CompilePCShaderFromFile(
 	String ^ _File,
 	array<MacroDefine^>^ _Defines,
@@ -200,9 +207,13 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	auto std_root_directory = Helpers::MarshalStringA(root_directory);
 	ExtInclude include = ExtInclude(std_root_directory);
 
+	std::string file_path = Helpers::MarshalStringA(_File);
+	std::string source_code = Helpers::ReadFile(file_path);
 
-	HRESULT result = D3DCompileFromFile(
-		File.c_str(),
+	HRESULT result = D3DCompile(
+		source_code.data(),
+		(UINT)source_code.size(),
+		file_path.c_str(),
 		macros,
 		&include,
 		FunctionName.c_str(),
@@ -212,7 +223,25 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 		&shader,
 		&errors);
 
-	if (result != S_OK) ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+	//HRESULT result = D3DCompileFromFile(
+	//	File.c_str(),
+	//	macros,
+	//	&include,
+	//	FunctionName.c_str(),
+	//	Profile.c_str(),
+	//	(DWORD)Flags1,
+	//	(DWORD)Flags2,
+	//	&shader,
+	//	&errors);
+
+	if (result != S_OK) {
+		if (result == 0x80070002) {
+			throw gcnew Exception("can't find " + _File);
+		}
+		else {
+			ErrorMsgs = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+		}
+	}
 	else {
 		List<Byte>^ data = gcnew List<Byte>();
 		for (DWORD i = 0; i < shader->GetBufferSize(); i++) {
