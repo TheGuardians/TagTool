@@ -218,9 +218,18 @@ namespace TagTool.Tags.Definitions
         }
 
         /// <summary>
+        /// Flags for a Forge sky descriptor.
+        /// </summary>
+        [Flags]
+        public enum SkyFlags : int
+        {
+            None
+        }
+
+        /// <summary>
         /// A Forge sky descriptor.
         /// </summary>
-        [TagStructure(Size = 0xA8)]
+        [TagStructure(Size = 0xAC)]
         public struct Sky
         {
             /// <summary>
@@ -228,7 +237,12 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             [TagField(Length = 32)]
             public string Name;
-            
+
+            /// <summary>
+            /// The flags of the sky.
+            /// </summary>
+            public SkyFlags Flags;
+
             /// <summary>
             /// The default translation of the sky.
             /// </summary>
