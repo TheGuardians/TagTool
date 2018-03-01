@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
@@ -219,7 +220,7 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// A Forge sky descriptor.
         /// </summary>
-        [TagStructure(Size = 0x90)]
+        [TagStructure(Size = 0xA8)]
         public struct Sky
         {
             /// <summary>
@@ -227,6 +228,16 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             [TagField(Length = 32)]
             public string Name;
+            
+            /// <summary>
+            /// The default translation of the sky.
+            /// </summary>
+            public RealPoint3d Translation;
+            
+            /// <summary>
+            /// The default orientation of the sky.
+            /// </summary>
+            public RealEulerAngles3d Orientation;
 
             /// <summary>
             /// The object associated with the sky.
