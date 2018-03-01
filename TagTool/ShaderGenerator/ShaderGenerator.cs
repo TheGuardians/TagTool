@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Geometry;
+using TagTool.Shaders;
 using TagTool.Utilities;
 
 namespace TagTool.ShaderGenerator
@@ -14,10 +17,25 @@ namespace TagTool.ShaderGenerator
 
         private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
         {
-            {typeof(Albedo), new List<object> { Albedo.Constant_Color } }
+            {typeof(Albedo), new List<object> { Albedo.Constant_Color } },
+            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Standard, Bump_Mapping.Detail} }
         };
 
-        public static byte[] GenerateSource(ShaderType type, Parameters parameters)
+        public class ShaderGenerator_Result
+        {
+            public byte[] ByteCode;
+            public List<ShaderParameter> Parameters;
+        }
+        
+
+        private static StringId GetOrCreateStringID(GameCacheContext cacheContext, string str_id)
+        {
+            var value = cacheContext.GetStringId(str_id);
+            if (value == null || value == StringId.Null) value = cacheContext.StringIdCache.AddString(str_id);
+            return value;
+        }
+
+        public static ShaderGenerator_Result GenerateSource(ShaderType type, Parameters parameters, GameCacheContext cacheContext)
         {
 #if DEBUG
             CheckImplementedParameters(parameters);
@@ -83,11 +101,71 @@ namespace TagTool.ShaderGenerator
                 compiled_shader = Shader;
             }
 
+            var disassembly = ShaderCompiler.Disassemble(compiled_shader);
+
             Console.WriteLine();
-            Console.WriteLine(ShaderCompiler.Disassemble(compiled_shader));
+            Console.WriteLine(disassembly);
             Console.WriteLine();
 
-            return compiled_shader;
+            List<ShaderParameter> shader_parameters = new List<ShaderParameter>();
+            using (StringReader reader = new StringReader(disassembly))
+            {
+                bool found_registers_output = false;
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.Trim() == "ps_3_0" || line.Trim() == "vs_3_0") break;
+
+                    if (!found_registers_output && line.Contains("Registers:"))
+                    {
+                        found_registers_output = true;
+                        reader.ReadLine();
+                        reader.ReadLine();
+                        reader.ReadLine();
+                        continue;
+                    }
+                    if (!found_registers_output) continue;
+
+                    var args = line.Trim().Split(new string[] { "//", " "}, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (args.Length != 3) break;
+
+                    var name = args[0];
+                    var register = args[1];
+                    var register_index = ushort.Parse(register.Substring(1));
+                    var size = byte.Parse(args[2]);
+
+                    ShaderParameter parameter = new ShaderParameter
+                    {
+                        ParameterName = GetOrCreateStringID(cacheContext, name),
+                        RegisterCount = size,
+                        RegisterIndex = register_index,
+                    };
+
+                    switch(register[0]) {
+                        case 'c':
+                            parameter.RegisterType = ShaderParameter.RType.Vector;
+                            break;
+                        case 's':
+                            parameter.RegisterType = ShaderParameter.RType.Sampler;
+                            break;
+                        case 'i':
+                            parameter.RegisterType = ShaderParameter.RType.Integer;
+                            break;
+                        case 'b':
+                            parameter.RegisterType = ShaderParameter.RType.Boolean;
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    shader_parameters.Add(parameter);
+
+                    Console.WriteLine($"{name}[{size}] {register}");
+                }
+            }
+
+            return new ShaderGenerator_Result { ByteCode = compiled_shader, Parameters = shader_parameters };
         }
 
         private static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumDefinitions(Type _enum)

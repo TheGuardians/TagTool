@@ -7,6 +7,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Common;
 
 namespace TagTool.Commands.Shaders
 {
@@ -55,24 +56,26 @@ namespace TagTool.Commands.Shaders
 
 
 
-            byte[] bytecode = ShaderGenerator.ShaderGenerator.GenerateSource(type,
+            var result = ShaderGenerator.ShaderGenerator.GenerateSource(type,
                 new ShaderGenerator.ShaderGenerator.Parameters
                 {
-                    albedo = ShaderGenerator.ShaderGenerator.Albedo.Constant_Color
-                });
+                    albedo = ShaderGenerator.ShaderGenerator.Albedo.Default,
+                    bump_mapping= ShaderGenerator.ShaderGenerator.Bump_Mapping.Detail
+                }, CacheContext);
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {
                 var shader_data_block = new PixelShaderBlock
                 {
-                    PCShaderBytecode = bytecode
+                    PCShaderBytecode = result.ByteCode
                 };
 
                 if (typeof(T) == typeof(PixelShader))
                 {
                     var _definition = Definition as PixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    //shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCParameters = result.Parameters;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -81,39 +84,41 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as GlobalPixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    //shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCParameters = result.Parameters;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
             }
+            else throw new NotImplementedException();
 
-            if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
-            {
+            //if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
+            //{
 
-                var shader_data_block = new VertexShaderBlock
-                {
-                    PCShaderBytecode = bytecode
-                };
+            //    var shader_data_block = new VertexShaderBlock
+            //    {
+            //        PCShaderBytecode = bytecode
+            //    };
 
-                if (typeof(T) == typeof(VertexShader))
-                {
-                    var _definition = Definition as VertexShader;
-                    var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+            //    if (typeof(T) == typeof(VertexShader))
+            //    {
+            //        var _definition = Definition as VertexShader;
+            //        var existing_block = _definition.Shaders[index];
+            //        shader_data_block.PCParameters = existing_block.PCParameters;
 
-                    _definition.Shaders[index] = shader_data_block;
-                }
+            //        _definition.Shaders[index] = shader_data_block;
+            //    }
 
-                if (typeof(T) == typeof(GlobalVertexShader))
-                {
-                    var _definition = Definition as GlobalVertexShader;
-                    var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+            //    if (typeof(T) == typeof(GlobalVertexShader))
+            //    {
+            //        var _definition = Definition as GlobalVertexShader;
+            //        var existing_block = _definition.Shaders[index];
+            //        shader_data_block.PCParameters = existing_block.PCParameters;
 
 
-                    _definition.Shaders[index] = shader_data_block;
-                }
-            }
+            //        _definition.Shaders[index] = shader_data_block;
+            //    }
+            //}
 
             return true;
         }

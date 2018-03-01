@@ -298,6 +298,7 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\ListRegisters.cs" />
     <Compile Include="Commands\Shaders\CompileCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateCommand.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
