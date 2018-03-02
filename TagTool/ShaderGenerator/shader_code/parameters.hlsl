@@ -144,4 +144,7 @@ uniform float4 warp_amount_x;
 uniform float4 warp_amount_y;
 uniform float4 warp_map_xform;
 
+uniform float4 tertiary_change_color;
+uniform float4 quaternary_change_color;
+
 #endif

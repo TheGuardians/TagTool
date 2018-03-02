@@ -61,7 +61,11 @@ namespace TagTool.ShaderGenerator
 
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "change_color_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "change_color_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "primary_change_color", ShaderParameter.RType.Vector) },
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "secondary_change_color", ShaderParameter.RType.Vector) },
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "tertiary_change_color", ShaderParameter.RType.Vector) },
