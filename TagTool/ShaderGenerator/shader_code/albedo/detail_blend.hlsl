@@ -12,7 +12,7 @@ float4 albedo_detail_blend(float2 texture_coordinate)
     float4 detail_map_sample = tex2D(detail_map, detail_map_texture_coordinate);
     float4 detail_map2_sample = tex2D(detail_map, detail_map2_texture_coordinate);
 
-    float3 blended_detail = lerp(detail_map2_sample.xyz, detail_map_sample.xyz, base_map_sample.w);
+    float3 blended_detail = lerp(detail_map_sample.xyz, detail_map2_sample.xyz, base_map_sample.w);
 
     return float4(base_map_sample.xyz * blended_detail, base_map_sample.w);
 }
