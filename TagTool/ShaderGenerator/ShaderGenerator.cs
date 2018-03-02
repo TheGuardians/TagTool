@@ -17,6 +17,9 @@ namespace TagTool.ShaderGenerator
         private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.Default },
+            {typeof(Albedo), Albedo.Detail_Blend },
+            {typeof(Albedo), Albedo.Constant_Color },
+            {typeof(Albedo), Albedo.Default },
             {typeof(Bump_Mapping), Bump_Mapping.Standard },
             {typeof(Bump_Mapping), Bump_Mapping.Detail },
             {typeof(Bump_Mapping), Bump_Mapping.Off },
