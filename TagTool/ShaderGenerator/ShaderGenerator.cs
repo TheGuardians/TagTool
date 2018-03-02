@@ -88,8 +88,12 @@ namespace TagTool.ShaderGenerator
 
             //TODO: Think about the easiest way to do this
             //var type_defs = GenerateEnumsDefinitions();
-            var value_defs = GenerateCompilationFlagDefinitions(template_parameters);
+            var func_defs = GenerateFunctionDefinition(template_parameters);
             var flag_defs = GenerateCompilationFlagDefinitions(template_parameters);
+
+            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+            definitions.AddRange(func_defs);
+            definitions.AddRange(flag_defs);
 
             //var result = DirectXUtilities.CompilePCShaderFromFile(
             //    "ShaderGenerator/shader_code/shader_template.hlsl",
@@ -134,7 +138,7 @@ namespace TagTool.ShaderGenerator
 
                 var result = Utilities.DirectXUtilities.CompilePCShaderFromFile(
                     shader_file,
-                    value_defs.ToArray(),
+                    definitions.ToArray(),
                     entry_point,
                     profile,
                     0,

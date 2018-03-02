@@ -20,6 +20,20 @@ float3 NormalMapSample(sampler map, float2 texture_coordinate)
     return float3(normal_xy, normal_z);
 }
 
+float3 TangentSpaceToModelSpace(
+    float3 tangentspace_x,
+    float3 tangentspace_y,
+    float3 tangentspace_z,
+    float3 normal
+)
+{
+    float3 surface_normal = normalize(normal);
+    surface_normal = tangentspace_x * normal.x + tangentspace_y * normal.y + tangentspace_z * normal.z;
+    surface_normal = normalize(normal);
+
+    return surface_normal;
+}
+
 float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
 {
     float4 r0 = float4(color, 0);
