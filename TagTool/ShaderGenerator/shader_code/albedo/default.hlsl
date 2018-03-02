@@ -1,4 +1,6 @@
-#include "../parameters.hlsl"
+#include "../helpers.hlsl"
+
+#ifdef flag_albedo_default
 
 float4 albedo_default(float2 texture_coordinate)
 {
@@ -10,3 +12,5 @@ float4 albedo_default(float2 texture_coordinate)
 
     return base_map_sample * detail_map_sample * albedo_color;
 }
+
+#endif

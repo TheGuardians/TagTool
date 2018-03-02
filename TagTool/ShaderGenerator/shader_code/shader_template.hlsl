@@ -30,12 +30,17 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
     float3 unknown = input.TexCoord1.w;
     
     float4 albedo = Albedo(texcoord);
-    float3 postprocess = Unknown_Crazy_Bungie_Color_Processing(albedo.xyz);
+
+    float3 color = Unknown_Crazy_Bungie_Color_Processing(albedo.xyz);
     float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
+    float alpha = albedo.w;
+
+
 
     PS_OUTPUT output;
-    output.Diffuse = float4(postprocess, albedo.w);
-    output.Normal = float4(NormalExport(normal), albedo.w);
+    output.Diffuse = Blend_Mode(float4(color, albedo.w));
+    output.Normal = Blend_Mode(float4(NormalExport(normal), albedo.w));
+
     output.Unknown = unknown.xxxx;
     return output;
 }

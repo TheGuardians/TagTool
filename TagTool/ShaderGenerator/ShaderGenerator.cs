@@ -17,7 +17,9 @@ namespace TagTool.ShaderGenerator
         private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
         {
             {typeof(Albedo), new List<object> { Albedo.Default } },
-            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Detail} }
+            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Standard} },
+            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Detail} },
+            {typeof(Blend_Mode), new List<object>{ Blend_Mode.Opaque} }
         };
 
         public class ShaderGenerator_Result

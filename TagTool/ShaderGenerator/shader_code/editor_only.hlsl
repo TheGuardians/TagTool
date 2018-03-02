@@ -1,3 +1,39 @@
-﻿#define flag_bump_mapping_off
+﻿#define flag_albedo_default
+#define flag_albedo_detail_blend
+#define flag_albedo_constant_color
+#define flag_albedo_two_change_color
+#define flag_albedo_four_change_color
+#define flag_albedo_three_detail_blend
+#define flag_albedo_two_detail_overlay
+#define flag_albedo_two_detail
+#define flag_albedo_color_mask
+#define flag_albedo_two_detail_black_point
+#define flag_albedo_two_change_color_anim_overlay
+#define flag_albedo_chameleon
+#define flag_albedo_two_change_color_chameleon
+#define flag_albedo_chameleon_masked
+#define flag_albedo_color_mask_hard_light
+
+#define flag_bump_mapping_off
 #define flag_bump_mapping_standard
 #define flag_bump_mapping_detail
+#define flag_bump_mapping_detail_masked
+
+#define flag_alpha_test_none
+#define flag_alpha_test_simple
+
+#define flag_specular_mask_no_specular_mask
+#define flag_specular_mask_from_diffuse
+#define flag_specular_mask_from_texture
+#define flag_specular_mask_from_color_texture
+
+#define flag_blend_mode_opaque
+#define flag_blend_mode_additive
+#define flag_blend_mode_multiply
+#define flag_blend_mode_alpha_blend
+#define flag_blend_mode_double_multiply
+#define flag_blend_mode_pre_multiplied_alpha
+
+
+//TODO There are more of these
+
