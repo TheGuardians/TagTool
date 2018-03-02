@@ -1,7 +1,6 @@
 
 #include <d3dcompiler.h>
 
-#include "stdafx.h"
 #include "Helpers.h"
 #include "DirectXUtilities.h"
 
