@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Serialization;
+
 using ResourceLocation = TagTool.Common.ResourceLocation;
 
 namespace TagTool.Commands.Editing
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Editing
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
-        
+
         public SetFieldCommand(CommandContextStack contextStack, GameCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
             : base(CommandFlags.Inherit,
 
@@ -352,7 +352,7 @@ namespace TagTool.Commands.Editing
                 var query = args[0];
 
                 object found;
-                
+
                 try
                 {
                     found = Enum.Parse(type, query);
@@ -407,10 +407,6 @@ namespace TagTool.Commands.Editing
                         found = Enum.Parse(type, names[namesLow.IndexOf((string)found)]);
                     }
                 }
-                else
-                {
-                    found = Enum.Parse(type, (string)found);
-                }
 
                 output = found;
             }
@@ -418,7 +414,7 @@ namespace TagTool.Commands.Editing
             {
                 var rangeType = type.GenericTypeArguments[0];
                 var argCount = RangeArgCount(rangeType);
-                
+
                 var min = ParseArgs(rangeType, args.Take(argCount).ToList());
 
                 if (min.Equals(false))
@@ -489,17 +485,6 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = new RealRgbColor(i, j, k);
             }
-            else if (type == typeof(ArgbColor))
-            {
-                if (args.Count != 4)
-                    return false;
-                if (!byte.TryParse(args[0], out byte i) ||
-                    !byte.TryParse(args[1], out byte j) ||
-                    !byte.TryParse(args[2], out byte k) ||
-                    !byte.TryParse(args[3], out byte l))
-                    return false;
-                output = new ArgbColor(i, j, k, l);
-            }  
             else if (type == typeof(Bounds<Angle>))
             {
                 if (args.Count != 2)
@@ -530,21 +515,6 @@ namespace TagTool.Commands.Editing
                             throw new FileNotFoundException(args[0]);
                         break;
                 }
-            }
-            else if (type == typeof(Tag))
-            {
-                if (args.Count != 1)
-                    return false;
-
-                if (args[0] == "null")
-                    return null;
-
-                var group = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
-
-                if (group.Value == 0x3F3F3F3F)
-                    return false;
-
-                output = group;
             }
             else
             {

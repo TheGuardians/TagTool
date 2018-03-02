@@ -251,7 +251,7 @@ namespace TagTool.Commands.Porting
             // Disable water shaders until the vertex format is converted.
             // Disable rmct for now as it's unsupported in the renderMethod converter.
 
-            if (groupTag == "rmw " || groupTag == "rmct")
+            if (groupTag == "rmw " || groupTag == "rmct" || groupTag == "rmbk")
                 return null;
 
             //
