@@ -19,7 +19,6 @@ namespace TagTool.ShaderGenerator
             {typeof(Albedo), Albedo.Default },
             {typeof(Albedo), Albedo.Detail_Blend },
             {typeof(Albedo), Albedo.Constant_Color },
-            {typeof(Albedo), Albedo.Default },
             {typeof(Albedo), Albedo.Two_Change_Color },
             {typeof(Albedo), Albedo.Four_Change_Color },
             {typeof(Albedo), Albedo.Two_Detail_Overlay },
