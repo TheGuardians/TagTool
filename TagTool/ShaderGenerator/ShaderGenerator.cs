@@ -14,12 +14,13 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
-        private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
+        private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
-            {typeof(Albedo), new List<object> { Albedo.Default } },
-            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Standard} },
-            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Detail} },
-            {typeof(Blend_Mode), new List<object>{ Blend_Mode.Opaque} }
+            {typeof(Albedo), Albedo.Default },
+            {typeof(Bump_Mapping), Bump_Mapping.Standard },
+            {typeof(Bump_Mapping), Bump_Mapping.Detail },
+            {typeof(Bump_Mapping), Bump_Mapping.Off },
+            {typeof(Blend_Mode), Blend_Mode.Opaque },
         };
 
         public class ShaderGenerator_Result

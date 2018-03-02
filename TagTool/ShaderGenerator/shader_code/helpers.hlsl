@@ -28,11 +28,11 @@ float3 TangentSpaceToModelSpace(
     float3 normal
 )
 {
-    float3 surface_normal = normalize(normal);
-    surface_normal = tangentspace_x * normal.x + tangentspace_y * normal.y + tangentspace_z * normal.z;
-    surface_normal = normalize(normal);
+    float3 src_normal = normalize(normal);
+    float3 surface_normal = tangentspace_x * src_normal.x + tangentspace_y * src_normal.y + tangentspace_z * src_normal.z;
+    float3 result = normalize(surface_normal);
 
-    return surface_normal;
+    return result;
 }
 
 float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)

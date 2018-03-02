@@ -10,7 +10,6 @@ struct VS_OUTPUT
     float4 TexCoord1 : TEXCOORD1;
     float4 TexCoord2 : TEXCOORD2;
     float4 TexCoord3 : TEXCOORD3;
-    float4 TexCoord4 : CHEESE;
 };
 
 struct PS_OUTPUT
