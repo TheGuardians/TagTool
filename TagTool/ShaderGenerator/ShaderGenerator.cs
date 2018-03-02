@@ -33,16 +33,63 @@ namespace TagTool.ShaderGenerator
             return value;
         }
 
-        public static ShaderGenerator_Result GenerateSource(ShaderType type, Parameters parameters, GameCacheContext cacheContext)
+        public static string ShaderParameter_ToString(ShaderParameter param, GameCacheContext cacheContext)
+        {
+            if(param.RegisterCount == 1)
+            {
+                switch (param.RegisterType)
+                {
+                    case ShaderParameter.RType.Boolean:
+                        return $"uniform bool {cacheContext.GetString(param.ParameterName)} : register(b{param.RegisterIndex});";
+                    case ShaderParameter.RType.Integer:
+                        return $"uniform int {cacheContext.GetString(param.ParameterName)} : register(i{param.RegisterIndex});";
+                    case ShaderParameter.RType.Vector:
+                        return $"uniform float4 {cacheContext.GetString(param.ParameterName)} : register(c{param.RegisterIndex});";
+                    case ShaderParameter.RType.Sampler:
+                        return $"uniform sampler {cacheContext.GetString(param.ParameterName)} : register(s{param.RegisterIndex});";
+                    default:
+                        throw new NotImplementedException();
+                }
+            } else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public static string GenerateUniformsFile(List<ShaderParameter> parameters, GameCacheContext cacheContext)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("#ifndef __UNIFORMS");
+            sb.AppendLine("#define __UNIFORMS");
+            sb.AppendLine();
+
+            foreach(var param in parameters)
+            {
+                sb.AppendLine(ShaderParameter_ToString(param, cacheContext));
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("#endif");
+
+            return sb.ToString();
+        }
+
+        public static ShaderGenerator_Result GenerateSource(ShaderType type, ShaderGeneratorParameters template_parameters, GameCacheContext cacheContext)
         {
 #if DEBUG
-            CheckImplementedParameters(parameters);
+            CheckImplementedParameters(template_parameters);
 #endif
+            var shader_parameters = GenerateShaderParameters(cacheContext, template_parameters);
+
+            var uniforms_file = GenerateUniformsFile(shader_parameters, cacheContext);
+            Dictionary<string, string> file_overrides = new Dictionary<string, string>();
+            file_overrides["uniforms.hlsl"] = uniforms_file;
 
             //TODO: Think about the easiest way to do this
             //var type_defs = GenerateEnumsDefinitions();
-            var value_defs = GenerateCompilationFlagDefinitions(parameters);
-            var flag_defs = GenerateCompilationFlagDefinitions(parameters);
+            var value_defs = GenerateCompilationFlagDefinitions(template_parameters);
+            var flag_defs = GenerateCompilationFlagDefinitions(template_parameters);
 
             //var result = DirectXUtilities.CompilePCShaderFromFile(
             //    "ShaderGenerator/shader_code/shader_template.hlsl",
@@ -93,8 +140,8 @@ namespace TagTool.ShaderGenerator
                     0,
                     0,
                     out byte[] Shader,
-                    out string ErrorMsgs
-                    );
+                    out string ErrorMsgs,
+                    file_overrides);
 
                 if (!result) throw new Exception(ErrorMsgs);
                 compiled_shader = Shader;
@@ -106,6 +153,13 @@ namespace TagTool.ShaderGenerator
             Console.WriteLine(disassembly);
             Console.WriteLine();
 
+            //var shader_parameters = ReadShaderParamsFromDisassembly(disassembly, cacheContext);
+
+            return new ShaderGenerator_Result { ByteCode = compiled_shader, Parameters = shader_parameters };
+        }
+
+        private static List<ShaderParameter> ReadShaderParamsFromDisassembly(string disassembly, GameCacheContext cacheContext)
+        {
             List<ShaderParameter> shader_parameters = new List<ShaderParameter>();
             using (StringReader reader = new StringReader(disassembly))
             {
@@ -125,7 +179,7 @@ namespace TagTool.ShaderGenerator
                     }
                     if (!found_registers_output) continue;
 
-                    var args = line.Trim().Split(new string[] { "//", " "}, StringSplitOptions.RemoveEmptyEntries);
+                    var args = line.Trim().Split(new string[] { "//", " " }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (args.Length != 3) break;
 
@@ -141,7 +195,8 @@ namespace TagTool.ShaderGenerator
                         RegisterIndex = register_index,
                     };
 
-                    switch(register[0]) {
+                    switch (register[0])
+                    {
                         case 'c':
                             parameter.RegisterType = ShaderParameter.RType.Vector;
                             break;
@@ -163,8 +218,7 @@ namespace TagTool.ShaderGenerator
                     Console.WriteLine($"{name}[{size}] {register}");
                 }
             }
-
-            return new ShaderGenerator_Result { ByteCode = compiled_shader, Parameters = shader_parameters };
+            return shader_parameters;
         }
 
         private static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumDefinitions(Type _enum)
@@ -209,7 +263,7 @@ namespace TagTool.ShaderGenerator
             };
         }
 
-        private static List<DirectXUtilities.MacroDefine> GenerateFunctionDefinition(Parameters _params)
+        private static List<DirectXUtilities.MacroDefine> GenerateFunctionDefinition(ShaderGeneratorParameters _params)
         {
             List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
 
@@ -229,7 +283,7 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static List<DirectXUtilities.MacroDefine> GenerateCompilationFlagDefinitions(Parameters _params)
+        private static List<DirectXUtilities.MacroDefine> GenerateCompilationFlagDefinitions(ShaderGeneratorParameters _params)
         {
             List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
 
@@ -261,7 +315,7 @@ namespace TagTool.ShaderGenerator
             Console.WriteLine(message);
         }
 
-        private static void CheckImplementedParameters(Parameters _params)
+        private static void CheckImplementedParameters(ShaderGeneratorParameters _params)
         {
             CheckImplementedParameters(_params.albedo);
             CheckImplementedParameters(_params.bump_mapping);
@@ -307,7 +361,7 @@ namespace TagTool.ShaderGenerator
             return defs;
         }
 
-        public class Parameters
+        public class ShaderGeneratorParameters
         {
             public Albedo albedo;
             public Bump_Mapping bump_mapping;

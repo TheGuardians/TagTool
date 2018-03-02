@@ -33,6 +33,7 @@ public:
 
 	std::string root_directory;
 	std::map<const void*, std::string> Directories;
+	std::string uniforms_override;
 
 	ExtInclude(std::string _root_directory)
 	{
@@ -58,10 +59,14 @@ public:
 		auto root_directory = GetParentDirectory(pParentData);
 		auto filepath = root_directory + pFileName;
 
+		bool is_uniforms = std::string(filepath).find("uniforms.hlsl") != std::string::npos;
+
 		// Read File
 		char* data;
 		{
 			std::string source_code = Helpers::ReadFile(filepath);
+
+			if (is_uniforms && uniforms_override.size() > 1) source_code = uniforms_override;
 
 			data = new char[source_code.size()];
 			memcpy(data, source_code.data(), source_code.size());
@@ -171,7 +176,8 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	UInt32 Flags1,
 	UInt32 Flags2,
 	array<Byte>^% Shader,
-	String ^% ErrorMsgs
+	String ^% ErrorMsgs,
+	Dictionary<String^, String^>^ file_overrides
 )
 {
 	std::wstring File = Helpers::MarshalStringW(_File);
@@ -206,6 +212,17 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	auto root_directory = System::IO::Path::GetDirectoryName(_File);
 	auto std_root_directory = Helpers::MarshalStringA(root_directory);
 	ExtInclude include = ExtInclude(std_root_directory);
+
+
+
+
+	//TODO: Improve this
+	if (file_overrides) {
+
+		include.uniforms_override = Helpers::MarshalStringA(file_overrides["uniforms.hlsl"]);
+
+	}
+
 
 	std::string file_path = Helpers::MarshalStringA(_File);
 	std::string source_code = Helpers::ReadFile(file_path);

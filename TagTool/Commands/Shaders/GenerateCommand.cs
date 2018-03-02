@@ -57,7 +57,7 @@ namespace TagTool.Commands.Shaders
 
 
             var result = ShaderGenerator.ShaderGenerator.GenerateSource(type,
-                new ShaderGenerator.ShaderGenerator.Parameters
+                new ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters
                 {
                     albedo = ShaderGenerator.ShaderGenerator.Albedo.Default,
                     bump_mapping= ShaderGenerator.ShaderGenerator.Bump_Mapping.Detail

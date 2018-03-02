@@ -40,7 +40,8 @@ namespace TagTool {
 				UInt32 Flags1,
 				UInt32 Flags2,
 				[System::Runtime::InteropServices::Out] array<Byte>^% Shader,
-				[System::Runtime::InteropServices::Out] String^% ErrorMsgs);
+				[System::Runtime::InteropServices::Out] String^% ErrorMsgs, 
+				System::Collections::Generic::Dictionary<String^, String^>^ file_overrides);
 
 			static String^ DisassemblePCShader(array<Byte>^ Data, UInt32 Flags);
 		};
