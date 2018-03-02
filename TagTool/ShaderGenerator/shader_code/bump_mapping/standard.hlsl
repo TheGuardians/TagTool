@@ -7,12 +7,12 @@ float3 bump_mapping_standard(
     float3 tangentspace_x,
     float3 tangentspace_y,
     float3 tangentspace_z,
-    float2 texture_coordinate
+    float2 texcoord
 )
 {
-    float2 bump_texture_coordinate = texture_coordinate * bump_map_xform.xy;
+    float2 bump_map_texcoord = ApplyXForm(texcoord, bump_map_xform);
 
-    float3 normal = NormalMapSample(bump_map, bump_texture_coordinate);
+    float3 normal = NormalMapSample(bump_map, bump_map_texcoord);
 
     float3 model_normal = TangentSpaceToModelSpace(tangentspace_x, tangentspace_y, tangentspace_z, normal);
 
