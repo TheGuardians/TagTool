@@ -31,6 +31,9 @@ namespace TagTool.ShaderGenerator
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
@@ -115,6 +118,8 @@ namespace TagTool.ShaderGenerator
             {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map", ShaderParameter.RType.Sampler) },
+            {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_map_xform", ShaderParameter.RType.Vector) }, // Manual
+            {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map_xform", ShaderParameter.RType.Vector) }, // Manual
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_coefficient", ShaderParameter.RType.Vector) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map", ShaderParameter.RType.Sampler) },
@@ -329,6 +334,67 @@ namespace TagTool.ShaderGenerator
             return new List<TemplateParameter>();
         }
 
+        class IndicesManager
+        {
+            public int sampler_index = 0;
+            public int vector_index = 58;
+            public int boolean_index = 0; //TODO: Find this starting location
+        }
+
+        static List<ShaderParameter> GenerateShaderParameters(
+            ShaderParameter.RType target_type,
+            GameCacheContext cacheContext, 
+            IEnumerable<TemplateParameter> _params,
+            IndicesManager indices)
+        {
+            List<ShaderParameter> parameters = new List<ShaderParameter>();
+
+            foreach (var param in _params)
+            {
+                if (param.Type != target_type) continue;
+                switch (param.Type)
+                {
+                    case ShaderParameter.RType.Vector:
+                        parameters.Add(new ShaderParameter()
+                        {
+                            ParameterName = cacheContext.GetStringId(param.Name),
+                            RegisterCount = 1,
+                            RegisterType = ShaderParameter.RType.Vector,
+                            RegisterIndex = (ushort)indices.vector_index
+                        });
+                        indices.vector_index++;
+                        break;
+                    case ShaderParameter.RType.Sampler:
+                        parameters.Add(new ShaderParameter()
+                        {
+                            ParameterName = cacheContext.GetStringId(param.Name),
+                            RegisterCount = 1,
+                            RegisterType = ShaderParameter.RType.Sampler,
+                            RegisterIndex = (ushort)indices.sampler_index
+                        });
+                        indices.sampler_index++;
+
+                        break;
+                    case ShaderParameter.RType.Boolean:
+                        parameters.Add(new ShaderParameter()
+                        {
+                            ParameterName = cacheContext.GetStringId(param.Name),
+                            RegisterCount = 1,
+                            RegisterType = ShaderParameter.RType.Boolean,
+                            RegisterIndex = (ushort)indices.boolean_index
+                        });
+                        indices.boolean_index++;
+                        break;
+                    case ShaderParameter.RType.Integer:
+                        throw new NotImplementedException();
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            return parameters;
+        }
+
         static List<ShaderParameter> GenerateShaderParameters(GameCacheContext cacheContext, ShaderGeneratorParameters template_parameters)
         {
             //var params_Albedo = template_uniforms[template_parameters.albedo].Cast<TemplateParameter>().ToList();
@@ -357,67 +423,50 @@ namespace TagTool.ShaderGenerator
             var params_Distortion = GetShaderParametersList(template_parameters.distortion, typeof(Distortion));
             var params_Soft_fade = GetShaderParametersList(template_parameters.soft_fade, typeof(Soft_Fade));
 
-            var _params = (new List<TemplateParameter> { })
-                    .Concat(params_Albedo)
-                    .Concat(params_Bump_Mapping)
-                    .Concat(params_Alpha_Test)
-                    .Concat(params_Specular_Mask)
-                    .Concat(params_Material_Model)
-                    .Concat(params_Environment_Mapping)
-                    .Concat(params_Self_Illumination)
-                    .Concat(params_Blend_Mode)
-                    .Concat(params_Parallax)
-                    .Concat(params_Misc)
-                    .Concat(params_Distortion)
-                    .Concat(params_Soft_fade);
+            List<List<TemplateParameter>> parameter_lists = new List<List<TemplateParameter>>
+            {
+                params_Albedo,
+                params_Bump_Mapping,
+                params_Alpha_Test,
+                params_Specular_Mask,
+                params_Material_Model,
+                params_Environment_Mapping,
+                params_Self_Illumination,
+                params_Blend_Mode,
+                params_Parallax,
+                params_Misc,
+                params_Distortion,
+                params_Soft_fade
+            };
 
-            int sampler_index = 0;
-            int vector_index = 58;
-            int boolean_index = 0; //TODO: Find this starting location
-
+            IndicesManager indices = new IndicesManager();
             List<ShaderParameter> parameters = new List<ShaderParameter>();
 
-            foreach (var param in _params)
+
+            foreach (var _params in parameter_lists)
             {
-                switch(param.Type)
-                {
-                    case ShaderParameter.RType.Vector:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Vector,
-                            RegisterIndex = (ushort)vector_index
-                        });
-                        vector_index++;
-                        break;
-                    case ShaderParameter.RType.Sampler:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Sampler,
-                            RegisterIndex = (ushort)sampler_index
-                        });
-                        sampler_index++;
-                        break;
-                    case ShaderParameter.RType.Boolean:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Boolean,
-                            RegisterIndex = (ushort)boolean_index
-                        });
-                        boolean_index++;
-                        break;
-                    case ShaderParameter.RType.Integer:
-                        throw new NotImplementedException();
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                var vector_params = GenerateShaderParameters(ShaderParameter.RType.Vector, cacheContext, _params, indices);
+                var sampler_params = GenerateShaderParameters(ShaderParameter.RType.Sampler, cacheContext, _params, indices);
+                var boolean_params = GenerateShaderParameters(ShaderParameter.RType.Boolean, cacheContext, _params, indices);
+
+                parameters.AddRange(vector_params);
+                parameters.AddRange(sampler_params);
+                parameters.AddRange(boolean_params);
             }
+
+
+
+
+
+
+            //parameters = 
+            //var vector_params = GenerateShaderParameters(ShaderParameter.RType.Vector, cacheContext, _params, indices);
+            //var sampler_params = GenerateShaderParameters(ShaderParameter.RType.Sampler, cacheContext, _params, indices);
+            //var boolean_params = GenerateShaderParameters(ShaderParameter.RType.Boolean, cacheContext, _params, indices);
+
+            //parameters.AddRange(vector_params);
+            //parameters.AddRange(sampler_params);
+            //parameters.AddRange(boolean_params);
 
             return parameters;
         }

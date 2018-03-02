@@ -59,7 +59,7 @@ public:
 		auto root_directory = GetParentDirectory(pParentData);
 		auto filepath = root_directory + pFileName;
 
-		bool is_uniforms = std::string(filepath).find("uniforms.hlsl") != std::string::npos;
+		bool is_uniforms = std::string(filepath).find("parameters.hlsl") != std::string::npos;
 
 		// Read File
 		char* data;
@@ -219,7 +219,7 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	//TODO: Improve this
 	if (file_overrides) {
 
-		include.uniforms_override = Helpers::MarshalStringA(file_overrides["uniforms.hlsl"]);
+		include.uniforms_override = Helpers::MarshalStringA(file_overrides["parameters.hlsl"]);
 
 	}
 

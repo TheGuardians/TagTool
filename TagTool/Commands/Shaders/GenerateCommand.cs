@@ -24,7 +24,7 @@ namespace TagTool.Commands.Shaders
 
                 "Generate",
                 "Compiles HLSL source file from scratch :D",
-                "Generate <index>",
+                "Generate <index> <shader_type> <parameters...>",
                 "Compiles HLSL source file from scratch :D")
         {
             CacheContext = cacheContext;
@@ -37,12 +37,15 @@ namespace TagTool.Commands.Shaders
             if (args.Count <= 0)
                 return false;
 
-            ShaderGenerator.ShaderGenerator.ShaderType type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
+            ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters shader_generator_params;
+            ShaderGenerator.ShaderGenerator.ShaderType type;
             int index;
-            if (args.Count > 1)
+
+            try
             {
-                index = int.Parse(args[1]);
-                switch(args[0].ToLower())
+                type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
+                index = int.Parse(args[0]);
+                switch (args[1].ToLower())
                 {
                     case "shader_template":
                         type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
@@ -51,17 +54,29 @@ namespace TagTool.Commands.Shaders
                         type = ShaderGenerator.ShaderGenerator.ShaderType.DecalsTemplate;
                         break;
                 }
-            }
-            else index = int.Parse(args[0]);
 
-
-
-            var result = ShaderGenerator.ShaderGenerator.GenerateSource(type,
-                new ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters
+                int arg_pos = 2;
+                shader_generator_params = new ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters
                 {
-                    albedo = ShaderGenerator.ShaderGenerator.Albedo.Default,
-                    bump_mapping= ShaderGenerator.ShaderGenerator.Bump_Mapping.Detail
-                }, CacheContext);
+                    albedo = (ShaderGenerator.ShaderGenerator.Albedo)Int32.Parse(args[arg_pos++]),
+                    bump_mapping = (ShaderGenerator.ShaderGenerator.Bump_Mapping)Int32.Parse(args[arg_pos++]),
+                    alpha_test = (ShaderGenerator.ShaderGenerator.Alpha_Test)Int32.Parse(args[arg_pos++]),
+                    specular_mask = (ShaderGenerator.ShaderGenerator.Specular_Mask)Int32.Parse(args[arg_pos++]),
+                    material_model = (ShaderGenerator.ShaderGenerator.Material_Model)Int32.Parse(args[arg_pos++]),
+                    environment_mapping = (ShaderGenerator.ShaderGenerator.Environment_Mapping)Int32.Parse(args[arg_pos++]),
+                    self_illumination = (ShaderGenerator.ShaderGenerator.Self_Illumination)Int32.Parse(args[arg_pos++]),
+                    blend_mode = (ShaderGenerator.ShaderGenerator.Blend_Mode)Int32.Parse(args[arg_pos++]),
+                    parallax = (ShaderGenerator.ShaderGenerator.Parallax)Int32.Parse(args[arg_pos++]),
+                    misc = (ShaderGenerator.ShaderGenerator.Misc)Int32.Parse(args[arg_pos++]),
+                    //distortion = (ShaderGenerator.ShaderGenerator.Distortion)Int32.Parse(args[arg_pos++]),
+                    //soft_fade = (ShaderGenerator.ShaderGenerator.Soft_Fade)Int32.Parse(args[arg_pos++])
+                };
+
+            } catch {
+                return false;
+            }
+
+            var result = ShaderGenerator.ShaderGenerator.GenerateSource(type, shader_generator_params, CacheContext);
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {

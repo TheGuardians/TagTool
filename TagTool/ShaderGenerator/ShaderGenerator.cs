@@ -16,8 +16,8 @@ namespace TagTool.ShaderGenerator
     {
         private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
         {
-            {typeof(Albedo), new List<object> { Albedo.Constant_Color } },
-            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Standard, Bump_Mapping.Detail} }
+            {typeof(Albedo), new List<object> { Albedo.Default } },
+            {typeof(Bump_Mapping), new List<object>{ Bump_Mapping.Detail} }
         };
 
         public class ShaderGenerator_Result
@@ -84,7 +84,7 @@ namespace TagTool.ShaderGenerator
 
             var uniforms_file = GenerateUniformsFile(shader_parameters, cacheContext);
             Dictionary<string, string> file_overrides = new Dictionary<string, string>();
-            file_overrides["uniforms.hlsl"] = uniforms_file;
+            file_overrides["parameters.hlsl"] = uniforms_file;
 
             //TODO: Think about the easiest way to do this
             //var type_defs = GenerateEnumsDefinitions();
