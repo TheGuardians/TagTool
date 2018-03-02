@@ -404,10 +404,14 @@ namespace TagTool.Commands.Editing
                     }
                     else
                     {
-                        found = Enum.Parse(type, (string)found);
+                        found = Enum.Parse(type, names[namesLow.IndexOf((string)found)]);
                     }
                 }
-                
+                else
+                {
+                    found = Enum.Parse(type, (string)found);
+                }
+
                 output = found;
             }
             else if (type == typeof(Bounds<>))

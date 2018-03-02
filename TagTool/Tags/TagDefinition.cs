@@ -87,6 +87,7 @@ namespace TagTool.Tags
             { new Tag("eqip"), typeof(Equipment) },
             { new Tag("flck"), typeof(Flock) },
             { new Tag("foot"), typeof(MaterialEffects) },
+            { new Tag("forg"), typeof(ForgeGlobalsDefinition) },
             { new Tag("form"), typeof(Formation) },
             { new Tag("gfxt"), typeof(GfxTexturesList) },
             { new Tag("gint"), typeof(Giant) },

@@ -22,6 +22,9 @@ namespace TagTool.Commands.Porting
                 foreach (var shot in cisc.Shots)
                 {
                     shot.ScreenEffects = new List<CinematicScene.ShotBlock.ScreenEffectBlock>();
+                    shot.Unknown5 = 0;
+                    shot.Unknown6 = 0;
+                    shot.Unknown7 = 0;
                 }
             }
             return cisc;
@@ -473,14 +476,29 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case ScriptExpressionType.GlobalsReference:
-                    switch (expr.ValueType.HaloOnline)
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
-                        case ScriptValueType.HaloOnlineValue.Long:
-                            dataSize = 2; // definitely not 4
-                            break;
-                        default:
-                            dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
-                            break;
+                        switch (expr.ValueType.HaloOnline)
+                        {
+                            case ScriptValueType.HaloOnlineValue.Long:
+                                dataSize = 4; // definitely not 4
+                                break;
+                            default:
+                                dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
+                                break;
+                        }
+                    }
+                    else if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        switch (expr.ValueType.HaloOnline)
+                        {
+                            case ScriptValueType.HaloOnlineValue.Long:
+                                dataSize = 2; // definitely not 4
+                                break;
+                            default:
+                                dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
+                                break;
+                        }
                     }
                     break;
 
@@ -581,6 +599,23 @@ namespace TagTool.Commands.Porting
 
                     case 0x34D:// cinematic_scripting_destroy_object; remove last argument
                         expr.Opcode = 0x3A0;
+                        return true;
+
+                    case 0x44D: // objectives_secondary_show (Doesn't exist in H3)
+                        expr.Opcode = 0x4AE; // objectives_show
+                        return true;
+
+                    case 0x44F: // objectives_secondary_unavailable (Doesn't exist in H3)
+                    case 0x44E: // objectives_primary_unavailable ""
+                        expr.Opcode = 0x4B2; // objectives_show
+                        return true;
+
+                    case 0x1B7: // campaign_metagame_award_primary_skull
+                         expr.Opcode = 0x1E5; // ^
+                         return true;
+
+                    case 0x1B8: //campaign_metagame_award_secondary_skull
+                        expr.Opcode = 0x1E6; // ^
                         return true;
 
                     case 0x33C: // cinematic_object_get_unit

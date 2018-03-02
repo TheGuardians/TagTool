@@ -234,7 +234,7 @@ namespace TagTool.Commands.Porting
                 {
                     ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
                     {
-                        Arguments = "-i " + fixedWAV + " "+ tempMP3, //No imposed bitrate for now
+                        Arguments = "-i " + fixedWAV + " -q:a 0 "+ tempMP3, //No imposed bitrate for now
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         UseShellExecute = false,

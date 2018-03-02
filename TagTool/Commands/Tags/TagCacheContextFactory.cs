@@ -44,7 +44,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListNullTagsCommand(cacheContext));
             context.AddCommand(new CreateTagCommand(cacheContext));
             context.AddCommand(new ExtractAllTagsCommand(cacheContext));
-            context.AddCommand(new EditTagCommand(stack, cacheContext));
+            context.AddCommand(new Editing.EditTagCommand(stack, cacheContext));
             context.AddCommand(new CollisionModelTestCommand(cacheContext));
             context.AddCommand(new PhysicsModelTestCommand(cacheContext));
             context.AddCommand(new StringIdCommand(cacheContext));

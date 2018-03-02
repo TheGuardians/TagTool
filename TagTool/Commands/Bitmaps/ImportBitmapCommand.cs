@@ -100,11 +100,9 @@ namespace TagTool.Commands.Bitmaps
             var imagePath = args[1];
             
             Console.WriteLine("Importing image data...");
-
-        #if !DEBUG
+            
             try
             {
-        #endif
                 using (var imageStream = File.OpenRead(imagePath))
                 {
                     var injector = new BitmapDdsInjector(CacheContext);
@@ -116,14 +114,12 @@ namespace TagTool.Commands.Bitmaps
                     var tagContext = new TagSerializationContext(tagsStream, CacheContext, Tag);
                     CacheContext.Serializer.Serialize(tagContext, Bitmap);
                 }
-        #if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Importing image data failed: " + ex.Message);
                 return true;
             }
-        #endif
 
             Console.WriteLine("Done!");
 
