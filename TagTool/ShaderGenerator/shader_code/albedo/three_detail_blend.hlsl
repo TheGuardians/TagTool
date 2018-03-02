@@ -2,7 +2,7 @@
 
 #ifdef flag_albedo_three_detail_blend
 
-float4 albedo_detail_blend(float2 texture_coordinate)
+float4 albedo_three_detail_blend(float2 texture_coordinate)
 {
     float2 base_map_xform_texture_coordinate = texture_coordinate * base_map_xform.xy;
     float2 detail_map_texture_coordinate = texture_coordinate * detail_map_xform.xy;
