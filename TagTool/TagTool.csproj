@@ -298,6 +298,7 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\GenerateTemplateRegisterGroups.cs" />
     <Compile Include="Commands\Shaders\ListRegisters.cs" />
     <Compile Include="Commands\Shaders\CompileCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateCommand.cs" />
@@ -372,6 +373,7 @@
     <Compile Include="Common\Tag.cs" />
     <Compile Include="ShaderGenerator\ShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ShaderGenerator_Enums.cs" />
+    <Compile Include="ShaderGenerator\ShaderGenerator_TemplateParameterBuilder.cs" />
     <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
     <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />
     <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
@@ -937,6 +939,9 @@
     </Reference>
     <Reference Include="LZ4, Version=1.0.15.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
       <HintPath>..\packages\lz4net.1.0.15.93\lib\net4-client\LZ4.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Experimental.Collections, Version=1.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data.Entity.Design" />

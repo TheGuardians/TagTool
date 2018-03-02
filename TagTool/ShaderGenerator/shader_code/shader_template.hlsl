@@ -1,3 +1,4 @@
+#define shader_template
 #include "template_default_defs.hlsl"
 #include "template_includes.hlsl"
 #include "parameters.hlsl"
@@ -54,7 +55,6 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
         bump_detail_texture_coordinate);
 
     output.Normal.xyz = NormalExport(normal);
-
 
     output.Unknown = unknown.xxxx;
     return output;

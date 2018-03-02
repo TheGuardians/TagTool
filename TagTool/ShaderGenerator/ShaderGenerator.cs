@@ -14,7 +14,6 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
-
         private static Dictionary<Type, List<object>> ImplementedEnums = new Dictionary<Type, List<object>>
         {
             {typeof(Albedo), new List<object> { Albedo.Constant_Color } },
@@ -26,7 +25,6 @@ namespace TagTool.ShaderGenerator
             public byte[] ByteCode;
             public List<ShaderParameter> Parameters;
         }
-        
 
         private static StringId GetOrCreateStringID(GameCacheContext cacheContext, string str_id)
         {
@@ -43,7 +41,8 @@ namespace TagTool.ShaderGenerator
 
             //TODO: Think about the easiest way to do this
             //var type_defs = GenerateEnumsDefinitions();
-            var value_defs = GenerateParametersDefinitions(parameters);
+            var value_defs = GenerateCompilationFlagDefinitions(parameters);
+            var flag_defs = GenerateCompilationFlagDefinitions(parameters);
 
             //var result = DirectXUtilities.CompilePCShaderFromFile(
             //    "ShaderGenerator/shader_code/shader_template.hlsl",
@@ -186,7 +185,7 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static DirectXUtilities.MacroDefine GenerateEnumValueDefinition(object value, string prefix = "")
+        private static DirectXUtilities.MacroDefine GenerateEnumFuncDefinition(object value, string prefix = "")
         {
             Type _enum = value.GetType();
             var values = Enum.GetValues(_enum);
@@ -198,22 +197,54 @@ namespace TagTool.ShaderGenerator
             };
         }
 
-        private static List<DirectXUtilities.MacroDefine> GenerateParametersDefinitions(Parameters _params)
+        private static DirectXUtilities.MacroDefine GenerateEnumFlagDefinition(object value, string prefix = "")
+        {
+            Type _enum = value.GetType();
+            var values = Enum.GetValues(_enum);
+
+            return new DirectXUtilities.MacroDefine
+            {
+                Name = $"flag_{ _enum.Name }_{ value }".ToLower(),
+                Definition = "1"
+            };
+        }
+
+        private static List<DirectXUtilities.MacroDefine> GenerateFunctionDefinition(Parameters _params)
         {
             List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
 
-            definitions.Add(GenerateEnumValueDefinition(_params.albedo, "albedo"));
-            definitions.Add(GenerateEnumValueDefinition(_params.bump_mapping, "bump_mapping"));
-            definitions.Add(GenerateEnumValueDefinition(_params.alpha_test, "alpha_test"));
-            definitions.Add(GenerateEnumValueDefinition(_params.specular_mask, "specular_mask"));
-            definitions.Add(GenerateEnumValueDefinition(_params.material_model, "material_model"));
-            definitions.Add(GenerateEnumValueDefinition(_params.environment_mapping, "environment_mapping"));
-            definitions.Add(GenerateEnumValueDefinition(_params.self_illumination, "self_illumination"));
-            definitions.Add(GenerateEnumValueDefinition(_params.blend_mode, "blend_mode"));
-            definitions.Add(GenerateEnumValueDefinition(_params.parallax, "parallax"));
-            definitions.Add(GenerateEnumValueDefinition(_params.misc, "misc"));
-            definitions.Add(GenerateEnumValueDefinition(_params.distortion, "distortion"));
-            definitions.Add(GenerateEnumValueDefinition(_params.soft_fade, "soft_fade"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.albedo, "albedo"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.bump_mapping, "bump_mapping"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.alpha_test, "alpha_test"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.specular_mask, "specular_mask"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.material_model, "material_model"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.environment_mapping, "environment_mapping"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.self_illumination, "self_illumination"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.blend_mode, "blend_mode"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.parallax, "parallax"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.misc, "misc"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.distortion, "distortion"));
+            definitions.Add(GenerateEnumFuncDefinition(_params.soft_fade, "soft_fade"));
+
+            return definitions;
+        }
+
+        private static List<DirectXUtilities.MacroDefine> GenerateCompilationFlagDefinitions(Parameters _params)
+        {
+            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+
+            definitions.Add(GenerateEnumFlagDefinition(_params.albedo, "albedo"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.bump_mapping, "bump_mapping"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.alpha_test, "alpha_test"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.specular_mask, "specular_mask"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.material_model, "material_model"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.environment_mapping, "environment_mapping"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.self_illumination, "self_illumination"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.blend_mode, "blend_mode"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.parallax, "parallax"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.misc, "misc"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.distortion, "distortion"));
+            definitions.Add(GenerateEnumFlagDefinition(_params.soft_fade, "soft_fade"));
 
             return definitions;
         }

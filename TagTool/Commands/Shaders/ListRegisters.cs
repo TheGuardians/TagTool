@@ -62,7 +62,7 @@ namespace TagTool.Commands.Shaders
                     var name = CacheContext.TagNames[tag_index];
                     if (!name.Contains("\\")) continue; // Probbaly an unnamed tag
                     var template_type = name.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries)[1];
-                    if (template_type != _template_type) continue;
+                    if (_template_type != "*" && template_type != _template_type) continue;
 
                     var context = new TagSerializationContext(stream, CacheContext, instance);
                     var type = TagDefinition.Find(instance.Group.Tag);
@@ -94,10 +94,11 @@ namespace TagTool.Commands.Shaders
                 var RegisterCount = param.RegisterCount;
                 var RegisterType = param.RegisterType;
 
-                return $"{ParameterName}[{RegisterCount}]_{(int)RegisterType}{RegisterIndex}";
-
+                //return $"{ParameterName}[{RegisterCount}]_{(int)RegisterType}{RegisterIndex}";
+                return $"{ParameterName}[{RegisterCount}]_{(int)RegisterType}";
             }).Select(g => g.First()).ToList();
             unique.Sort((a, b) => a.RegisterIndex - b.RegisterIndex);
+            unique.Sort((a, b) => CacheContext.GetString(a.ParameterName)[0] - CacheContext.GetString(b.ParameterName)[0]);
 
             var samplers = unique.Where(param => param.RegisterType == ShaderParameter.RType.Sampler);
             var booleans = unique.Where(param => param.RegisterType == ShaderParameter.RType.Boolean);

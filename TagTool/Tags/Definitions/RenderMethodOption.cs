@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -19,8 +20,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
         public class OptionBlock
         {
-            public StringId Type;
-            public uint Unknown;
+            public StringId Name;
+            public OptionDataType Type;
             public uint Unknown2;
             public CachedTagInstance Bitmap;
 
@@ -48,6 +49,16 @@ namespace TagTool.Tags.Definitions
             public uint Unknown17;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public uint Unknown18;
+
+            public enum OptionDataType : uint
+            {
+                Sampler = 0,
+                Vector3 = 1,
+                Float = 2,
+                Unknown = 3, // Probbaly integer?
+                Boolean = 4,
+                Vector4 = 5
+            }
         }
     }
 }

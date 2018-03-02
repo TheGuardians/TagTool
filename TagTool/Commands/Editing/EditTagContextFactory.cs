@@ -18,6 +18,7 @@ using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
 using TagTool.Tags;
+using TagTool.Commands.Shaders;
 
 namespace TagTool.Commands.Editing
 {
@@ -130,6 +131,10 @@ namespace TagTool.Commands.Editing
 
                 case "glvs":
                     Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cacheContext, tag, (GlobalVertexShader)definition);
+                    break;
+
+                case "rmdf":
+                    commandContext.AddCommand(new ListMethodOptionParameters(cacheContext, tag, (RenderMethodDefinition)definition));
                     break;
             }
 
