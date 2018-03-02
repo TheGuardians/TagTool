@@ -14,7 +14,7 @@ float4 albedo_detail_blend(float2 texture_coordinate)
 
     float3 blended_detail = lerp(detail_map2_sample.xyz, detail_map_sample.xyz, base_map_sample.w);
 
-    return base_map_sample * blended_detail;
+    return float4(base_map_sample.xyz * blended_detail, base_map_sample.w);
 }
 
 #endif
