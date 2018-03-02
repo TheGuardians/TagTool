@@ -47,12 +47,11 @@ float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
     r0.xyz = r0.xyz * -r1.xyz + debug_tint.xyz;
     r0.xyz = debug_tint.www * r0.xyz + r1.xyz;
     r1.xyz = log(r0.xyz);
-    r1.xyz = r1.xyz * 0.416666657; // 5/12
-    
+    r1.xyz = r1.xyz * (5.0 / 12.0); // 5/12
     r2.xyz = exp(r1.xyz);
-    r1.xyz = r2.xyz * 1.05499995 + -0.0549999997;
-    r2.xyz = (-r0.xyz) * 12.9200001;
-    r0.xyz = r0.xyz * 12.9200001;
+    r1.xyz = r2.xyz * 1.055 -0.055;
+    r2.xyz = (-r0.xyz) * 12.92;
+    r0.xyz = r0.xyz * 12.92;
     // END RETARDED CODE
 
     return r2.xyz >= 0 ? r0.xyz : r1.xyz;
