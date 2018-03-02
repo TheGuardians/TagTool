@@ -1,6 +1,8 @@
 #include "../parameters.hlsl"
 #include "../helpers.hlsl"
 
+#ifdef flag_bump_mapping_detail
+
 float3 bump_mapping_detail(
     float3 tangentspace_x,
     float3 tangentspace_y,
@@ -20,3 +22,5 @@ float3 bump_mapping_detail(
 
     return model_normal;
 }
+
+#endif

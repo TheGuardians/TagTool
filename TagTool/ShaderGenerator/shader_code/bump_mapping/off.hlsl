@@ -1,6 +1,8 @@
 #include "../parameters.hlsl"
 #include "../helpers.hlsl"
 
+#ifdef flag_bump_mapping_off
+
 float3 bump_mapping_off(
     float3 tangentspace_x,
     float3 tangentspace_y,
@@ -14,3 +16,5 @@ float3 bump_mapping_off(
 
     return model_normal;
 }
+
+#endif

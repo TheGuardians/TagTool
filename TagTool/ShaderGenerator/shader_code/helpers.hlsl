@@ -2,6 +2,7 @@
 #define __HELPERS
 
 #include "parameters.hlsl"
+#include "editor_only.hlsl"
 
 float3 NormalExport(float3 normal)
 {
