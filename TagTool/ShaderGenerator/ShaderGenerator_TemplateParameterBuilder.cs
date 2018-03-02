@@ -35,8 +35,12 @@ namespace TagTool.ShaderGenerator
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_detail_blend_s1", ShaderParameter.RType.Sampler) }, // Manually added (Unknown bitmap)
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map2_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Constant_Color,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
