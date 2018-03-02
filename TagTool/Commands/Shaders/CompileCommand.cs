@@ -54,7 +54,7 @@ namespace TagTool.Commands.Shaders
             byte[] bytecode = null;
             if (use_assembly_compiler)
             {
-                bytecode = Utilities.DirectXUtilities.AssembleShader(shader_code);
+                bytecode = Utilities.DirectXUtilities.AssemblePCShader(shader_code);
             }
             else
             {

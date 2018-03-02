@@ -439,14 +439,6 @@ namespace TagTool.Commands.Porting
             return CacheContext.GetTag(pRmt2);
         }
 
-        private class Arguments
-        {
-            public float Arg1;
-            public float Arg2;
-            public float Arg3;
-            public float Arg4;
-        }
-
         private class ShaderTemplateItem
         {
             public int rmt2TagIndex;

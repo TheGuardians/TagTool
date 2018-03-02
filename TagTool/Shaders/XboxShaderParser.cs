@@ -68,7 +68,7 @@ namespace TagTool.Shaders
         private string GetShaderParameterTypeString(ShaderParameter.RType type)
         {
             if (type == ShaderParameter.RType.Boolean) return "b";
-            if (type == ShaderParameter.RType.Float) return "c";
+            if (type == ShaderParameter.RType.Vector) return "c";
             if (type == ShaderParameter.RType.Integer) return "i";
             if (type == ShaderParameter.RType.Sampler) return "s";
             throw new NotImplementedException();
@@ -76,7 +76,7 @@ namespace TagTool.Shaders
         private string GetShaderParameterNameString(ShaderParameter.RType type)
         {
             if (type == ShaderParameter.RType.Boolean) return "bool";
-            if (type == ShaderParameter.RType.Float) return "float4";
+            if (type == ShaderParameter.RType.Vector) return "float4";
             if (type == ShaderParameter.RType.Integer) return "integer";
             if (type == ShaderParameter.RType.Sampler) return "sampler";
             throw new NotImplementedException();
@@ -446,7 +446,7 @@ namespace TagTool.Shaders
 
                 string converted_shader_code = converter.Convert();
                 Console.WriteLine(converted_shader_code);
-                var shader_bytecode = Utilities.DirectXUtilities.AssembleShader(converted_shader_code);
+                var shader_bytecode = Utilities.DirectXUtilities.AssemblePCShader(converted_shader_code);
                 //TODO Add different converters and get the name of a tag (or a better method) to determine the converter type to use
                 return shader_bytecode;
             }

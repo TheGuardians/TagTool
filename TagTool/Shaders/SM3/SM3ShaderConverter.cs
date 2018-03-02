@@ -148,7 +148,7 @@ namespace TagTool.Shaders.SM3
                             case ShaderParameter.RType.Boolean:
                                 if ($"b{index}" == check_register) return true;
                                 break;
-                            case ShaderParameter.RType.Float:
+                            case ShaderParameter.RType.Vector:
                                 if ($"c{index}" == check_register) return true;
                                 break;
                             case ShaderParameter.RType.Integer:

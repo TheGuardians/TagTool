@@ -20,7 +20,7 @@ namespace TagTool.Shaders
         {
             Boolean = 0,
             Integer = 1,
-            Float = 2,
+            Vector = 2,
             Sampler = 3
         }
     }
