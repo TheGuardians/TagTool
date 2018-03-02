@@ -23,8 +23,6 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
-        private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("shit"), new Tag("prt3")};
         private List<Tag> OtherTagGroups = new List<Tag> { new Tag("foot") };
 
         private bool IsReplacing = false;
@@ -250,51 +248,11 @@ namespace TagTool.Commands.Porting
             replacedTags.Add(blamTag.Filename);
             ReplacedTags[groupTag] = replacedTags;
 
-            //
-            // Return engine default tags for any unsupported tag groups
-            //
+            // Disable water shaders until the vertex format is converted.
+            // Disable rmct for now as it's unsupported in the renderMethod converter.
 
-            if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest)
-            {
-                if (groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if (groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if (groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if (groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if (groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if (groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if (groupTag == "rmct")
-                    return null;
-                else
-                    return CacheContext.GetTag(0x101F);
-            }
-            else if (EffectTagGroups.Contains(groupTag) && !UseShaderTest)
-            {
-                if (groupTag == "beam")
-                    return CacheContext.GetTag(0x18B5);
-                else if (groupTag == "cntl")
-                    return CacheContext.GetTag(0x528);
-                else if (groupTag == "ltvl")
-                    return CacheContext.GetTag(0x594);
-                else if (groupTag == "decs")
-                    return CacheContext.GetTag(0x3A4);
-                else if (groupTag == "shit")
-                    return CacheContext.GetTag(0x139C);
-                else if (groupTag == "effe")
-                    return CacheContext.GetTag(0x12FE);
-                else
-                    return CacheContext.GetTag(0x29E);
-            }
-            else if (OtherTagGroups.Contains(groupTag) && !UseShaderTest)
-            {
-                if (groupTag == "foot")
-                    return CacheContext.GetTag(0xc0d);
-            }
+            if (groupTag == "rmw " || groupTag == "rmct")
+                return null;
 
             //
             // Allocate Eldorado Tag
@@ -485,6 +443,8 @@ namespace TagTool.Commands.Porting
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 Console.WriteLine($"Something happened when converting  {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))}, returning null tag reference.");
+                CacheContext.TagNames.Remove(edTag.Index);
+                CacheContext.TagCache.Index[edTag.Index] = null;
                 return null;
             }
 
