@@ -158,15 +158,12 @@ namespace TagTool.Commands.Porting
             return rasg;
         }
 
-        private static bool debugDrawInfo = true;
         private static bool debugUseEDFunctions;
         private static int pRmt2 = 0;
         private static List<string> bmMaps;
         private static List<string> bmArgs;
         private static List<string> edMaps;
         private static List<string> edArgs;
-        private static List<string> csvQ = new List<string>();
-        private static CachedTagInstance parentShader;
 
         private RenderMethod ConvertRenderMethod(Stream cacheStream, RenderMethod bmRm, string blamTagName)
         {
@@ -180,7 +177,15 @@ namespace TagTool.Commands.Porting
             edArgs = new List<string>();
 
             // Loop only once trough all ED rmt2 tags and store them globally, string lists of their bitmaps and arguments
-            GetRmt2Info(cacheStream, CacheContext);
+            if (CacheContext.Rmt2TagsInfo.Count == 0)
+            {
+                Console.WriteLine($"Shader matching info: collecting all rmt2 tags info...");
+                GetRmt2Info(cacheStream, CacheContext);
+
+                Console.WriteLine($"Shader matching info: naming all rmt2 tags...");
+                NameRmt2(CacheContext, cacheStream);
+                CacheContext.SaveTagNames();
+            }
 
             // Make a template of ShaderProperty, with the correct bitmaps and arguments counts. 
             var newShaderProperty = new RenderMethod.ShaderProperty
@@ -201,38 +206,40 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find existing rmt2 tags
-            var edRmt2Instance = ArgumentParser.ParseTagName(CacheContext, $"{bmRmt2Instance.Filename}.rmt2");
+            // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
+            var edRmt2Instances = new List<CachedTagInstance>();
+            CachedTagInstance edRmt2Instance = null;
+            foreach (var a in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
+            {
+                if (CacheContext.TagNames.ContainsKey(a.Index))
+                {
+                    if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}")
+                        edRmt2Instances.Add(a);
+                    if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}_0")
+                        edRmt2Instances.Add(a);
+                    if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}_0_0")
+                        edRmt2Instances.Add(a);
+                }
+            }
 
-            // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if test namermt2 is ran before
-            if (edRmt2Instance == null)
-                edRmt2Instance = ArgumentParser.ParseTagName(CacheContext, $"{bmRmt2Instance.Filename}_0.rmt2");
+            if (edRmt2Instances.Count == 0)
+                edRmt2Instance = FindEquivalentRmt2(bmRmt2Instance);
+            else
+                edRmt2Instance = edRmt2Instances.First();
 
-            if (edRmt2Instance == null)
-                edRmt2Instance = ArgumentParser.ParseTagName(CacheContext, $"{bmRmt2Instance.Filename}_0_0.rmt2");
-
-            if (edRmt2Instance == null)
-                edRmt2Instance = FindEquivalentRmt2(edRmt2Instance, bmRmt2Instance);
-
-            if (edRmt2Instance == null)
+            if (edRmt2Instance == null) // should never happen
             {
                 var shaderInvalid = ArgumentParser.ParseTagName(CacheContext, $"shaders\\invalid.rmsh");
 
                 if (shaderInvalid == null)
                     shaderInvalid = CacheContext.GetTag(0x101F);
 
-                Console.WriteLine($"ERROR: failed to match {bmRmt2Instance.Filename}. Replacing with 0x{shaderInvalid.Index:X4} shaders\\invalid.shader");
-
                 var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
 
                 return CacheContext.Deserializer.Deserialize<Shader>(edContext2);
             }
 
-            var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ?
-            CacheContext.TagNames[edRmt2Instance.Index] :
-            $"0x{edRmt2Instance.Index:X4}";
-
-            Console.WriteLine($"{bmRmt2Instance.Filename} (Required H3 rmt2)");
-            Console.WriteLine($"{edRmt2Tagname} (Found rmt2 0x{edRmt2Instance.Index:X4})");
+            var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ? CacheContext.TagNames[edRmt2Instance.Index] : $"0x{edRmt2Instance.Index:X4}";
 
             // To prevent a billion lines of bad code, let it find the rmt2 tag, and only replace it with a preset now
             GetShaderPresets(CacheContext, blamTagName);
@@ -297,6 +304,26 @@ namespace TagTool.Commands.Porting
                 if (a.Bitmap == null)
                     a.Bitmap = CacheContext.GetTag(DefaultBitmapsTags(edMaps[(int)bmRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
 
+            // Verify that none of the bitmaps are still H3 bitmaps
+            foreach (var a in bmRm.ShaderProperties[0].ShaderMaps)
+            {
+                if (a.Bitmap == null)
+                    throw new Exception("ERROR: bitmap is null even after trying to replace with default bitmaps.");
+
+                try
+                {
+                    var b = CacheContext.GetTag(a.Bitmap.Index);
+
+                    if (b.Group.Tag.ToString() != "bitm")
+                        throw new Exception("ERROR: tag index exists, but the tag doesn't actually exist.");
+                }
+                catch
+                {
+                    throw new Exception("ERROR: bitmap is a H3 bitmap where only valid HO bitmaps should be.");
+                }
+
+            }
+
             return bmRm;
         }
 
@@ -323,12 +350,8 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private CachedTagInstance FindEquivalentRmt2(CachedTagInstance edRmt2, CacheFile.IndexItem bmRmt2Instance)
+        private List<ShaderTemplateItem> CollectRmt2Info(CacheFile.IndexItem bmRmt2Instance)
         {
-            // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
-            var edRmt2Temp = new List<ShaderTemplateItem>();
-
-            // Make a new dictionary with rmt2 of the same shader type
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
             // loop trough all rmt2 and find the closest
@@ -336,15 +359,15 @@ namespace TagTool.Commands.Porting
             {
                 var rmt2Type = bmRmt2Instance.Filename.Split("\\".ToArray())[1];
 
-                // If rmt2 aren't named, it won't be able to search by type: shader_templates, halogram_templates, terrain_templates etc
+                // If rmt2 aren't named, name them all; TODO
                 if (!CacheContext.TagNames.ContainsKey(edRmt2_.Key))
-                    goto label1;
+                {
+
+                }
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
                     continue;
-
-                label1: // WARNING dangerous, it will most likely end up with a rmt2 from a different type
 
                 int mapsCommon = 0;
                 int argsCommon = 0;
@@ -352,7 +375,6 @@ namespace TagTool.Commands.Porting
                 int argsUncommon = 0;
                 int mapsMissing = 0;
                 int argsMissing = 0;
-                int matchingRmdfValues = 0;
 
                 var edMaps_ = new List<string>();
                 var edArgs_ = new List<string>();
@@ -390,6 +412,7 @@ namespace TagTool.Commands.Porting
                 edRmt2BestStats.Add(new ShaderTemplateItem
                 {
                     rmt2TagIndex = edRmt2_.Key,
+                    rmdfValuesMatchingCount = 0,
                     mapsCountEd = edRmt2_.Value[0].Count,
                     argsCountEd = edRmt2_.Value[1].Count,
                     mapsCommon = mapsCommon,
@@ -400,6 +423,19 @@ namespace TagTool.Commands.Porting
                     argsMissing = argsMissing
                 });
             }
+
+            return edRmt2BestStats;
+        }
+
+        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem bmRmt2Instance)
+        {
+            // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
+            var edRmt2Temp = new List<ShaderTemplateItem>();
+
+            // Make a new dictionary with rmt2 of the same shader type
+            var edRmt2BestStats = new List<ShaderTemplateItem>();
+
+            edRmt2BestStats = CollectRmt2Info(bmRmt2Instance);
 
             // Filter by common bitmaps count
             foreach (var d in edRmt2BestStats)
@@ -433,15 +469,50 @@ namespace TagTool.Commands.Porting
             edRmt2BestStats = edRmt2Temp;
             edRmt2Temp = new List<ShaderTemplateItem>();
 
+            // Filter by the highest count of common rmdf reference values
+            // Count how many rmdf values match
+            // This should greatly improve rmt2 matching
+            foreach (var d in edRmt2BestStats)
+            {
+                var edRmdfValues = CacheContext.TagNames[d.rmt2TagIndex].Split("_".ToCharArray()).ToList(); // rmdfValues = new List<string> {"0", "0", ... "3", "0", ...};
+                edRmdfValues.RemoveAt(0);
+
+                var bmRmdfValues = bmRmt2Instance.Filename.Split("_".ToCharArray()).ToList();
+                bmRmdfValues.RemoveAt(0);
+
+                int matchingValues = 0;
+                for (int i = 0; i < bmRmdfValues.Count; i++)
+                    if (bmRmdfValues[i] == edRmdfValues[i])
+                        matchingValues++;
+
+                d.rmdfValuesMatchingCount = matchingValues;
+            }
+
+            foreach (var d in edRmt2BestStats)
+                if (d.rmdfValuesMatchingCount == edRmt2BestStats.OrderBy(
+                    x => x.rmdfValuesMatchingCount).First().rmdfValuesMatchingCount) // or Last()
+                    edRmt2Temp.Add(d);
+
+            edRmt2BestStats = edRmt2Temp;
+
             var pRmt2Item = edRmt2BestStats.First();
             pRmt2 = pRmt2Item.rmt2TagIndex;
 
             return CacheContext.GetTag(pRmt2);
         }
 
+        private class Arguments
+        {
+            public float Arg1;
+            public float Arg2;
+            public float Arg3;
+            public float Arg4;
+        }
+
         private class ShaderTemplateItem
         {
             public int rmt2TagIndex;
+            public int rmdfValuesMatchingCount = 0;
             public int mapsCountEd;
             public int argsCountEd;
             public int mapsCommon;
@@ -630,7 +701,6 @@ namespace TagTool.Commands.Porting
                 case "rim_maps_transition_ratio":
                 case "self_illumination":
                 case "specialized_rendering":
-                case "specular_coefficient_m_3":
                 case "subsurface_normal_detail":
                 case "time_warp":
                 case "time_warp_aux":
@@ -708,10 +778,6 @@ namespace TagTool.Commands.Porting
                 case "overlay_tint":
                 case "rim_fresnel_color":
                 case "self_illum_color":
-                case "specular_coefficient":
-                case "specular_coefficient_m_0":
-                case "specular_coefficient_m_1":
-                case "specular_coefficient_m_2":
                 case "specular_tint":
                 case "specular_tint_m_0":
                 case "specular_tint_m_1":
@@ -723,6 +789,13 @@ namespace TagTool.Commands.Porting
                 case "transparence_normal_detail":
                 case "u_tiles":
                 case "v_tiles": val = new float[] { 1f, 1f, 1f, 1f }; break;
+
+                case "specular_coefficient":
+                case "specular_coefficient_m_0":
+                case "specular_coefficient_m_1":
+                case "specular_coefficient_m_2":
+                case "specular_coefficient_m_3":
+                    val = new float[] { 0, 0, 0, 0 }; break;
 
                 default: val = new float[] { 0, 0, 0, 0 }; break;
             }
@@ -802,7 +875,6 @@ namespace TagTool.Commands.Porting
                     return 0x037B;
 
                 default:
-                    Console.WriteLine($"WARNING: unknown bitmap type for Halo Online: {type}. Using 0x02B7");
                     return 0x02B7;
                     // throw new NotImplementedException($"Useless exception. Bitmaps table requires an update for {type}.");
                     // Better replace with return 0x02B7;
@@ -836,138 +908,138 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // Snowbound Skybox:
-                case @"levels\multi\snowbound\sky\shaders\skydome":
-                    // pRmsh = 0x35BB;
-                    pEdArgs.Add("albedo_color", new float[] { 0.254901975f, 0.384313732f, 1f, 0f });
-                    break;
-
-                case @"levels\multi\snowbound\sky\shaders\aurora":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_0_0_0_0_0_0_3_0_0_0.rmt2").Index;
-                    break;
-
-                case @"levels\multi\snowbound\shaders\plasma_spire_a":
-                case @"levels\multi\snowbound\sky\shaders\sun_clouds":
-                case @"levels\multi\snowbound\sky\shaders\dust_clouds":
-                case @"levels\multi\snowbound\sky\shaders\clouds_cirrus":
-                    // forceFunctions = true; // MatchShader7 would always bring the function if the H3 shader has one
-                    break;
-
-                // Snowbound:
-                case @"levels\multi\snowbound\shaders\cov_battery":
-                case @"levels\multi\snowbound\shaders\cov_metalplates_icy":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_0_1_2_0_1_0_0_0.rmt2").Index;
-                    pEdArgs.Add("albedo_color", new float[] { 0.8f, 0.2f, 0.3f, 1f }); // 2
-                    pEdArgs.Add("env_tint_color", new float[] { 0.05f, 0.05f, 0.4f, 1f }); // 23
-                    break;
-
-                case @"levels\multi\snowbound\shaders\terrain_snow":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\terrain_templates\_0_0_1_1_0_0.rmt2").Index;
-                    pEdArgs.Add("diffuse_coefficient_m_0", new float[] { 2f, 0, 0, 0 }); // 14
-                    break;
-
-                case @"levels\multi\snowbound\shaders\cov_glass_window_opaque":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_3_0_3_1_4_0_0_0_1_0.rmt2").Index;
-                    pEdArgs.Add("env_roughness_scale", new float[] { 0.1f, 0, 0, 0 });
-                    pEdArgs.Add("env_tint_color", new float[] { 0.02f, 0.01f, 0, 0 });
-                    break;
-
-                // Chillout/ Cold Storage
-                case @"levels\dlc\chillout\shaders\chillout_floodroom02":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_0_1_4_9_0_0_1_0.rmt2").Index;
-                    break;
-
-                case @"levels\dlc\chillout\shaders\chillout_trim_a":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_1_2_1_0_0_0_0.rmt2").Index;
-                    break;
-
-                case @"levels\dlc\chillout\shaders\chillout_floor_glass_a":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_0_0_1_5_2_0_1_0_0_0_0.rmt2").Index;
-                    break;
-
-                case @"levels\dlc\chillout\shaders\chillout_floodroom03":
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_3_0_0_1_4_0_0_0_0_0.rmt2").Index;
-                    break;
-
-                // Weapons
-                // compass 0x0EEA
-                // tens 0x0EEC
-                // ones 0x0EEB
-                case @"objects\weapons\rifle\assault_rifle\shaders\ones":
-                case @"objects\weapons\rifle\battle_rifle\shaders\ones":
-                    // pRmsh = 0x0EEB;
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
-                    debugUseEDFunctions = true;
-                    break;
-                case @"objects\weapons\rifle\assault_rifle\shaders\tens":
-                case @"objects\weapons\rifle\battle_rifle\shaders\tens":
-                    // pRmsh = 0x0EEC;
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
-                    debugUseEDFunctions = true;
-                    break;
-                case @"objects\weapons\rifle\assault_rifle\shaders\compass":
-                    // pRmsh = 0x0EEA;
-                    pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_8_1_0_1.rmt2").Index;
-                    debugUseEDFunctions = true;
-                    break;
-
-                case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
-                case @"objects\weapons\melee\energy_blade\shaders\energy_blade_illum":
-                    // debugUseEDFunctions = true;
-                    break;
-
-                // case @"objects\weapons\rifle\assault_rifle\shaders\assault_rifle":
-                //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_2_0_1_0_0_0_0.rmt2").Index;
+                // case @"levels\multi\snowbound\sky\shaders\skydome":
+                //     // pRmsh = 0x35BB;
+                //     pEdArgs.Add("albedo_color", new float[] { 0.254901975f, 0.384313732f, 1f, 0f });
                 //     break;
                 // 
-                // case @"objects\weapons\rifle\battle_rifle\shaders\battle_rifle":
-                //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_2_1_0_0_0_0.rmt2").Index;
-                //     break;
-
-                // case @"objects\weapons\rifle\smg\shaders\smg_metal":
-                //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // case @"levels\multi\snowbound\sky\shaders\aurora":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_0_0_0_0_0_0_3_0_0_0.rmt2").Index;
                 //     break;
                 // 
-                // case @"objects\weapons\rifle\shotgun\shaders\shotgun":
-                //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // case @"levels\multi\snowbound\shaders\plasma_spire_a":
+                // case @"levels\multi\snowbound\sky\shaders\sun_clouds":
+                // case @"levels\multi\snowbound\sky\shaders\dust_clouds":
+                // case @"levels\multi\snowbound\sky\shaders\clouds_cirrus":
+                //     // forceFunctions = true; // MatchShader7 would always bring the function if the H3 shader has one
                 //     break;
                 // 
-                // case @"objects\weapons\rifle\sniper_rifle\shaders\sniper_rifle_metal":
-                //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // // Snowbound:
+                // case @"levels\multi\snowbound\shaders\cov_battery":
+                // case @"levels\multi\snowbound\shaders\cov_metalplates_icy":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_0_1_2_0_1_0_0_0.rmt2").Index;
+                //     pEdArgs.Add("albedo_color", new float[] { 0.8f, 0.2f, 0.3f, 1f }); // 2
+                //     pEdArgs.Add("env_tint_color", new float[] { 0.05f, 0.05f, 0.4f, 1f }); // 23
                 //     break;
-
-                case @"objects\weapons\rifle\covenant_carbine\shaders\carbine_display": // done trough script
-                case @"objects\weapons\rifle\covenant_carbine\shaders\carbine_switch":
-                    // pRmsh = 0x11A9;
-                    // debugConvertFunctions = true;
-                    // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_4_0_6_1_0_1_0.rmt2").Index;
-                    break;
-
-                case @"objects\weapons\rifle\beam_rifle\shaders\beam_rifle_luminous":
-                    // debugUseEDFunctions = true;
-                    // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_4_0_6_1_0_1_0.rmt2").Index;
-                    break;
-
-                case @"levels\atlas\sc140\shaders\ext_metal_trim_red":
-                case @"levels\atlas\sc140\shaders\ext_wall_column":
-                case @"levels\atlas\sc140\shaders\glass_light_b_blue":
-                case @"levels\atlas\sc140\shaders\glass_light_b_blue_off":
-                case @"levels\atlas\sc140\shaders\mc_stairs_ext":
-                case @"levels\atlas\sc140\shaders\wall_ext":
-                case @"levels\atlas\sc140\shaders\wall_ext_2":
-                case @"levels\atlas\sc140\shaders\wall_ext_center":
-                case @"levels\atlas\shared\shaders\light_white":
-                case @"levels\dlc\spacecamp\shaders\glass_light_a":
-                case @"levels\dlc\spacecamp\shaders\glass_light_b_blue":
-                case @"levels\dlc\spacecamp\shaders\glass_light_sign_d":
-                    pEdArgs.Add("specular_coefficient", new float[] { 0, 0, 0, 0 }); // should add to all shaders
-                    break;
-
-                case @"objects\weapons\pistol\plasma_pistol\shaders\plasma_pistol_metal": // UNTESTED
-                    // debugConvertFunctions = true;
-                    break;
-
-                case @"objects\weapons\rifle\battle_rifle\shaders\battle_rifle_lens":
-                // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_1_2_0_0_0_1.rmt2").Index;
+                // 
+                // case @"levels\multi\snowbound\shaders\terrain_snow":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\terrain_templates\_0_0_1_1_0_0.rmt2").Index;
+                //     pEdArgs.Add("diffuse_coefficient_m_0", new float[] { 2f, 0, 0, 0 }); // 14
+                //     break;
+                // 
+                // case @"levels\multi\snowbound\shaders\cov_glass_window_opaque":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_3_0_3_1_4_0_0_0_1.rmt2").Index;
+                //     pEdArgs.Add("env_roughness_scale", new float[] { 0.1f, 0, 0, 0 });
+                //     pEdArgs.Add("env_tint_color", new float[] { 0.02f, 0.01f, 0, 0 });
+                //     break;
+                // 
+                // // Chillout/ Cold Storage
+                // case @"levels\dlc\chillout\shaders\chillout_floodroom02":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_0_1_4_9_0_0_1.rmt2").Index;
+                //     break;
+                // 
+                // case @"levels\dlc\chillout\shaders\chillout_trim_a":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_1_2_1_0_0_0.rmt2").Index;
+                //     break;
+                // 
+                // case @"levels\dlc\chillout\shaders\chillout_floor_glass_a":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_0_0_1_5_2_0_1_0_0.rmt2").Index;
+                //     break;
+                // 
+                // case @"levels\dlc\chillout\shaders\chillout_floodroom03":
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_3_0_0_1_4_0_0_0_0_0.rmt2").Index;
+                //     break;
+                // 
+                // // Weapons
+                // // compass 0x0EEA
+                // // tens 0x0EEC
+                // // ones 0x0EEB
+                // case @"objects\weapons\rifle\assault_rifle\shaders\ones":
+                // case @"objects\weapons\rifle\battle_rifle\shaders\ones":
+                //     // pRmsh = 0x0EEB;
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
+                //     debugUseEDFunctions = true;
+                //     break;
+                // case @"objects\weapons\rifle\assault_rifle\shaders\tens":
+                // case @"objects\weapons\rifle\battle_rifle\shaders\tens":
+                //     // pRmsh = 0x0EEC;
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
+                //     debugUseEDFunctions = true;
+                //     break;
+                // case @"objects\weapons\rifle\assault_rifle\shaders\compass":
+                //     // pRmsh = 0x0EEA;
+                //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_8_1_0_1.rmt2").Index;
+                //     debugUseEDFunctions = true;
+                //     break;
+                // 
+                // case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
+                // case @"objects\weapons\melee\energy_blade\shaders\energy_blade_illum":
+                //     // debugUseEDFunctions = true;
+                //     break;
+                // 
+                // // case @"objects\weapons\rifle\assault_rifle\shaders\assault_rifle":
+                // //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_2_0_1_0_0_0_0.rmt2").Index;
+                // //     break;
+                // // 
+                // // case @"objects\weapons\rifle\battle_rifle\shaders\battle_rifle":
+                // //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_2_1_0_0_0_0.rmt2").Index;
+                // //     break;
+                // 
+                // // case @"objects\weapons\rifle\smg\shaders\smg_metal":
+                // //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // //     break;
+                // // 
+                // // case @"objects\weapons\rifle\shotgun\shaders\shotgun":
+                // //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // //     break;
+                // // 
+                // // case @"objects\weapons\rifle\sniper_rifle\shaders\sniper_rifle_metal":
+                // //     rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_2_0_1_2_1_1_0_1_0_0.rmt2").Index;
+                // //     break;
+                // 
+                // case @"objects\weapons\rifle\covenant_carbine\shaders\carbine_display": // done trough script
+                // case @"objects\weapons\rifle\covenant_carbine\shaders\carbine_switch":
+                //     // pRmsh = 0x11A9;
+                //     // debugConvertFunctions = true;
+                //     // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_4_0_6_1_0_1_0.rmt2").Index;
+                //     break;
+                // 
+                // case @"objects\weapons\rifle\beam_rifle\shaders\beam_rifle_luminous":
+                //     // debugUseEDFunctions = true;
+                //     // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_4_0_6_1_0_1_0.rmt2").Index;
+                //     break;
+                // 
+                // case @"levels\atlas\sc140\shaders\ext_metal_trim_red":
+                // case @"levels\atlas\sc140\shaders\ext_wall_column":
+                // case @"levels\atlas\sc140\shaders\glass_light_b_blue":
+                // case @"levels\atlas\sc140\shaders\glass_light_b_blue_off":
+                // case @"levels\atlas\sc140\shaders\mc_stairs_ext":
+                // case @"levels\atlas\sc140\shaders\wall_ext":
+                // case @"levels\atlas\sc140\shaders\wall_ext_2":
+                // case @"levels\atlas\sc140\shaders\wall_ext_center":
+                // case @"levels\atlas\shared\shaders\light_white":
+                // case @"levels\dlc\spacecamp\shaders\glass_light_a":
+                // case @"levels\dlc\spacecamp\shaders\glass_light_b_blue":
+                // case @"levels\dlc\spacecamp\shaders\glass_light_sign_d":
+                //     pEdArgs.Add("specular_coefficient", new float[] { 0, 0, 0, 0 }); // should add to all shaders
+                //     break;
+                // 
+                // case @"objects\weapons\pistol\plasma_pistol\shaders\plasma_pistol_metal": // UNTESTED
+                //     // debugConvertFunctions = true;
+                //     break;
+                // 
+                // case @"objects\weapons\rifle\battle_rifle\shaders\battle_rifle_lens":
+                // // rmt2Preset = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_1_1_2_0_0_0_1.rmt2").Index;
 
                 default:
                     break;
@@ -979,14 +1051,13 @@ namespace TagTool.Commands.Porting
 
         private static void FixTagblocks(GameCacheContext CacheContext, Stream cacheStream, CachedTagInstance edRmt2Instance, RenderMethod bmRm)
         {
+            CachedTagInstance templateShader = null;
+
             // Find what rmdf this rmt2 is supposed to use
             // Find what shader does this rmt2 belong to.
             var dependsOn = CacheContext.TagCache.Index.NonNull().Where(t => t.Dependencies.Contains(edRmt2Instance.Index));
 
             var validShaders = new List<string> { "beam", "decs", "ltvl", "prt3", "rmcs", "rmd ", "rmfl", "rmhg", "rmsh", "rmss", "rmtr", "rmw ", "rmzo", "cntl" };
-
-            if (dependsOn.ToArray().Length == 0) // will not work with rmt2 tags that don't have a parent renderMethod. Can be avoided.
-                throw new Exception();
 
             var orderedDependsOn = dependsOn.OrderBy(x => x.Index);
 
@@ -994,17 +1065,50 @@ namespace TagTool.Commands.Porting
             {
                 if (validShaders.Contains(dependency.Group.Tag.ToString()))
                 {
-                    parentShader = dependency;
+                    templateShader = dependency;
                     break;
                 }
             }
 
+            // Incase it's a ported rmt2 without a shader, find any shader that uses this type of rmt2.
+            if (dependsOn.ToArray().Length == 0)
+            {
+                var tagname = CacheContext.TagNames[edRmt2Instance.Index];
+                var type = tagname.Split("\\".ToCharArray())[1];
+                var shaderType = "";
+
+                switch (type)
+                {
+                    case "shader_templates": shaderType = "rmsh"; break;
+                    case "black_templates": shaderType = "rmbk"; break;
+                    case "cortana_templates": shaderType = "rmct"; break;
+                    case "custom_templates": shaderType = "rmcs"; break;
+                    case "decal_templates": shaderType = "rmd "; break;
+                    case "foliage_templates": shaderType = "rmfl"; break;
+                    case "screen_templates": shaderType = "rmss"; break;
+                    case "terrain_templates": shaderType = "rmtr"; break;
+                    case "water_templates": shaderType = "rmw "; break;
+                    case "zonly_templates": shaderType = "rmzo"; break;
+                    case "halogram_templates": shaderType = "rmhg"; break;
+                    case "particle_templates": shaderType = "prt3"; break;
+                    case "beam_templates": shaderType = "beam"; break;
+                    case "contrail_templates": shaderType = "cntl"; break;
+                    case "light_volume_templates": shaderType = "ltvl"; break;
+
+                    default:
+                        break;
+                }
+
+                templateShader = CacheContext.TagCache.Index.FindAllInGroup(shaderType).First();
+
+            }
+
             // Fix tagblock at the top
-            var parentShaderDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, parentShader), TagDefinition.Find(parentShader.Group.Tag));
+            var parentShaderDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, templateShader), TagDefinition.Find(templateShader.Group.Tag));
 
             RenderMethod renderMethod = null;
 
-            switch (parentShader.Group.Tag.ToString())
+            switch (templateShader.Group.Tag.ToString())
             {
                 case "rmsh": renderMethod = (Shader)parentShaderDef; break;
                 case "rmbk": renderMethod = (ShaderBlack)parentShaderDef; break;
@@ -1016,25 +1120,25 @@ namespace TagTool.Commands.Porting
                 case "rmtr": renderMethod = (ShaderTerrain)parentShaderDef; break;
                 case "rmw ": renderMethod = (ShaderWater)parentShaderDef; break;
                 case "rmzo": renderMethod = (ShaderZonly)parentShaderDef; break;
-                case "rmhg":
-                    renderMethod = (ShaderHalogram)parentShaderDef;
-                    debugUseEDFunctions = true;// rmhg seems to crash if it doesn't have functions
-                    break;
-
                 case "beam": var a = (BeamSystem)parentShaderDef; foreach (var f in a.Beam) renderMethod = f.RenderMethod; break; // any would do
                 case "cntl": var b = (ContrailSystem)parentShaderDef; foreach (var f in b.Contrail) renderMethod = f.RenderMethod; break;
                 case "decs": var c = (DecalSystem)parentShaderDef; foreach (var f in c.DecalSystem2) renderMethod = f.RenderMethod; break;
                 case "ltvl": var d = (LightVolumeSystem)parentShaderDef; foreach (var f in d.LightVolume) renderMethod = f.RenderMethod; break;
                 case "prt3": var e = (Particle)parentShaderDef; renderMethod = e.RenderMethod; break;
+                case "rmhg":
+                    renderMethod = (ShaderHalogram)parentShaderDef;
+                    debugUseEDFunctions = true;// rmhg seems to crash if it doesn't have functions
+                    break;
 
                 default: break;
             }
 
             bmRm.BaseRenderMethod = renderMethod.BaseRenderMethod;
             bmRm.Unknown = renderMethod.Unknown;
+
             bmRm.ImportData = new List<RenderMethod.ImportDatum>(); // probably not used
 
-            if (debugUseEDFunctions) // trash, definitely not the way to go
+            if (debugUseEDFunctions && bmRm.ShaderProperties[0].Functions.Count > 0) // trash, definitely not the way to go
             {
                 bmRm.ShaderProperties[0].Unknown = renderMethod.ShaderProperties[0].Unknown;
                 bmRm.ShaderProperties[0].DrawModes = renderMethod.ShaderProperties[0].DrawModes;
@@ -1052,6 +1156,62 @@ namespace TagTool.Commands.Porting
             bmRm.ShaderProperties[0].Unknown5 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
             bmRm.ShaderProperties[0].Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
 
+        }
+
+        private static void NameRmt2(GameCacheContext CacheContext, Stream cacheStream)
+        {
+            var validShaders = new List<string> { "rmsh", "beam", "decs", "ltvl", "prt3", "rmcs", "rmd ", "rmfl", "rmhg", "rmss", "rmtr", "rmw ", "rmzo", "cntl" };
+
+            foreach (var edInstance in CacheContext.TagCache.Index.NonNull())
+            {
+                if (!validShaders.Contains(edInstance.Group.Tag.ToString()))
+                    continue;
+
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                var parentShaderDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
+
+                RenderMethod renderMethod = null;
+
+                var type = "invalid";
+
+                switch (edInstance.Group.Tag.ToString()) // none of these are correct
+                {
+                    case "rmsh": renderMethod = (Shader)parentShaderDef; type = "shader"; break;
+                    case "rmbk": renderMethod = (ShaderBlack)parentShaderDef; type = "black"; break;
+                    case "rmct": renderMethod = (ShaderCortana)parentShaderDef; type = "cortana"; break;
+                    case "rmcs": renderMethod = (ShaderCustom)parentShaderDef; type = "custom"; break;
+                    case "rmd ": renderMethod = (ShaderDecal)parentShaderDef; type = "decal"; break;
+                    case "rmfl": renderMethod = (ShaderFoliage)parentShaderDef; type = "foliage"; break;
+                    case "rmss": renderMethod = (ShaderScreen)parentShaderDef; type = "screen"; break;
+                    case "rmtr": renderMethod = (ShaderTerrain)parentShaderDef; type = "terrain"; break;
+                    case "rmw ": renderMethod = (ShaderWater)parentShaderDef; type = "water"; break;
+                    case "rmzo": renderMethod = (ShaderZonly)parentShaderDef; type = "zonly"; break;
+                    case "rmhg": renderMethod = (ShaderHalogram)parentShaderDef; type = "halogram"; break;
+                    case "prt3": var e = (Particle)parentShaderDef; renderMethod = e.RenderMethod; type = "particle"; break;
+                    case "beam": var a = (BeamSystem)parentShaderDef; foreach (var f in a.Beam) renderMethod = f.RenderMethod; type = "beam"; break; // any would do
+                    case "cntl": var b = (ContrailSystem)parentShaderDef; foreach (var f in b.Contrail) renderMethod = f.RenderMethod; type = "contrail"; break;
+                    case "decs": var c = (DecalSystem)parentShaderDef; foreach (var f in c.DecalSystem2) renderMethod = f.RenderMethod; type = "decal"; break;
+                    case "ltvl": var d = (LightVolumeSystem)parentShaderDef; foreach (var f in d.LightVolume) renderMethod = f.RenderMethod; type = "light_volume"; break;
+
+                    default: break;
+                }
+
+                var newTagName = $"shaders\\{type}_templates\\";
+
+                var rmdfRefValues = "";
+
+                for (int i = 0; i < renderMethod.Unknown.Count; i++)
+                {
+                    if (edInstance.Group.Tag.ToString() == "rmsh" && i > 9)
+                        break;
+
+                    rmdfRefValues = $"{rmdfRefValues}_{renderMethod.Unknown[i].Unknown}";
+                }
+
+                newTagName = $"{newTagName}{rmdfRefValues}";
+
+                CacheContext.TagNames[renderMethod.ShaderProperties[0].Template.Index] = newTagName;
+            }
         }
 
     }
