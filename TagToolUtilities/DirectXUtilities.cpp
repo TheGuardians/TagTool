@@ -60,13 +60,16 @@ public:
 		auto filepath = root_directory + pFileName;
 
 		bool is_uniforms = std::string(filepath).find("parameters.hlsl") != std::string::npos;
+		bool is_editor_only = std::string(filepath).find("editor_only.hlsl") != std::string::npos;
 
 		// Read File
 		char* data;
 		{
-			std::string source_code = Helpers::ReadFile(filepath);
+			std::string source_code;
 
 			if (is_uniforms && uniforms_override.size() > 1) source_code = uniforms_override;
+			else if (is_editor_only && uniforms_override.size() > 1) source_code = "";
+			else source_code = Helpers::ReadFile(filepath);
 
 			data = new char[source_code.size()];
 			memcpy(data, source_code.data(), source_code.size());
