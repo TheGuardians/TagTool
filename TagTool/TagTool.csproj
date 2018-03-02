@@ -982,8 +982,8 @@
 xcopy "$(SolutionDir)Tools" "$(OutDir)Tools" /e /i /h /Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>cd $(SolutionDir)
-call $(SolutionDir)fixhlslencoding.bat</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
