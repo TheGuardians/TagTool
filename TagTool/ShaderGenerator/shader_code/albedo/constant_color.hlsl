@@ -1,6 +1,10 @@
-#include "../parameters.hlsl"
+#include "../helpers.hlsl"
 
-float4 albedo_constant_color()
+#ifdef flag_albedo_constant_color
+
+float4 albedo_constant_color(float2 texture_coordinate)
 {
     return albedo_color;
 }
+
+#endif

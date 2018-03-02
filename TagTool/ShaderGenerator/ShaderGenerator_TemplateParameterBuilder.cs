@@ -16,6 +16,7 @@ namespace TagTool.ShaderGenerator
             public byte Size;
             public ShaderParameter.RType Type;
             public Type Target_Type;
+            public Boolean enabled = true;
 
             public TemplateParameter(Type target_method_type, string _name, ShaderParameter.RType _type, byte _size = 1)
             {
@@ -36,7 +37,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) }, // Manually added (Unknown bitmap)
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -48,7 +49,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Constant_Color,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) }, // Manually added (Unknown bitmap)
+            {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -67,7 +68,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "quaternary_change_color", ShaderParameter.RType.Vector) },
 
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) }, // Manually added (Unknown bitmap)
+            {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -77,8 +78,8 @@ namespace TagTool.ShaderGenerator
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map3_xform", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
@@ -358,7 +359,8 @@ namespace TagTool.ShaderGenerator
             if (template_uniforms.ContainsKey((object)key))
             {
                 var list = template_uniforms[(object)key].Cast<TemplateParameter>().ToList();
-                return list.Where(param => param.Target_Type == type).ToList();
+                list = list.Where(param => param.Target_Type == type).ToList();
+                return list;
             }
             return new List<TemplateParameter>();
         }
@@ -372,7 +374,7 @@ namespace TagTool.ShaderGenerator
 
         static List<ShaderParameter> GenerateShaderParameters(
             ShaderParameter.RType target_type,
-            GameCacheContext cacheContext, 
+            GameCacheContext cacheContext,
             IEnumerable<TemplateParameter> _params,
             IndicesManager indices)
         {
@@ -384,34 +386,37 @@ namespace TagTool.ShaderGenerator
                 switch (param.Type)
                 {
                     case ShaderParameter.RType.Vector:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Vector,
-                            RegisterIndex = (ushort)indices.vector_index
-                        });
+                        if (param.enabled)
+                            parameters.Add(new ShaderParameter()
+                            {
+                                ParameterName = cacheContext.GetStringId(param.Name),
+                                RegisterCount = 1,
+                                RegisterType = ShaderParameter.RType.Vector,
+                                RegisterIndex = (ushort)indices.vector_index
+                            });
                         indices.vector_index++;
                         break;
                     case ShaderParameter.RType.Sampler:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Sampler,
-                            RegisterIndex = (ushort)indices.sampler_index
-                        });
+                        if (param.enabled)
+                            parameters.Add(new ShaderParameter()
+                            {
+                                ParameterName = cacheContext.GetStringId(param.Name),
+                                RegisterCount = 1,
+                                RegisterType = ShaderParameter.RType.Sampler,
+                                RegisterIndex = (ushort)indices.sampler_index
+                            });
                         indices.sampler_index++;
 
                         break;
                     case ShaderParameter.RType.Boolean:
-                        parameters.Add(new ShaderParameter()
-                        {
-                            ParameterName = cacheContext.GetStringId(param.Name),
-                            RegisterCount = 1,
-                            RegisterType = ShaderParameter.RType.Boolean,
-                            RegisterIndex = (ushort)indices.boolean_index
-                        });
+                        if (param.enabled)
+                            parameters.Add(new ShaderParameter()
+                            {
+                                ParameterName = cacheContext.GetStringId(param.Name),
+                                RegisterCount = 1,
+                                RegisterType = ShaderParameter.RType.Boolean,
+                                RegisterIndex = (ushort)indices.boolean_index
+                            });
                         indices.boolean_index++;
                         break;
                     case ShaderParameter.RType.Integer:
@@ -500,5 +505,5 @@ namespace TagTool.ShaderGenerator
             return parameters;
         }
 
-    }; 
+    };
 }

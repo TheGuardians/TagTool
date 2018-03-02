@@ -35,6 +35,11 @@ float3 TangentSpaceToModelSpace(
     return result;
 }
 
+float2 ApplyXForm(float2 texcoord, float4 xform)
+{
+    return texcoord * xform.xy + xform.zw;
+}
+
 float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
 {
     float4 r0 = float4(color, 0);
