@@ -14,10 +14,6 @@
 #define flag_albedo_chameleon_masked
 #define flag_albedo_color_mask_hard_light
 
-// MS 30
-#define flag_albedo_two_change_color_tex_overlay
-#define flag_albedo_chameleon_albedo_masked
-
 #define flag_bump_mapping_off
 #define flag_bump_mapping_standard
 #define flag_bump_mapping_detail
@@ -40,4 +36,10 @@
 
 
 //TODO There are more of these
+
+
+// MS 30
+#define flag_albedo_two_change_color_tex_overlay
+#define flag_albedo_chameleon_albedo_masked
+#define flag_bump_mapping_detail_plus_detail_masked
 

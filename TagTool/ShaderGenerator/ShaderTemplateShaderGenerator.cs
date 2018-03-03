@@ -237,6 +237,7 @@ namespace TagTool.ShaderGenerator
         public static MultiValueDictionary<object, object> Uniforms = new MultiValueDictionary<object, object>
         {
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -391,7 +392,8 @@ namespace TagTool.ShaderGenerator
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_mask_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_coefficient", ShaderParameter.RType.Vector) },
-            {Alpha_Test.Simple,  new TemplateParameter(typeof(Alpha_Test),"alpha_test_map", ShaderParameter.RType.Sampler) },
+
+            { Alpha_Test.Simple,  new TemplateParameter(typeof(Alpha_Test),"alpha_test_map", ShaderParameter.RType.Sampler) },
             {Specular_Mask.From_Texture,  new TemplateParameter(typeof(Specular_Mask),"specular_mask_texture", ShaderParameter.RType.Sampler) },
             {Specular_Mask.From_Color_Texture,  new TemplateParameter(typeof(Specular_Mask),"specular_mask_texture", ShaderParameter.RType.Sampler) },
             {Material_Model.Diffuse_Only,  new TemplateParameter(typeof(Material_Model),"no_dynamic_lights", ShaderParameter.RType.Boolean) },
