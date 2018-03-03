@@ -102,7 +102,7 @@ namespace TagTool.ShaderGenerator
 
         #region Implemented Features Check
 
-        private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
+        public static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.Default },
             {typeof(Albedo), Albedo.Detail_Blend },
@@ -113,6 +113,7 @@ namespace TagTool.ShaderGenerator
             {typeof(Albedo), Albedo.Three_Detail_Blend },
             {typeof(Albedo), Albedo.Two_Detail },
             {typeof(Albedo), Albedo.Color_Mask },
+            {typeof(Albedo), Albedo.Two_Detail_Black_Point },
             {typeof(Bump_Mapping), Bump_Mapping.Standard },
             {typeof(Bump_Mapping), Bump_Mapping.Detail },
             {typeof(Bump_Mapping), Bump_Mapping.Off },
@@ -124,7 +125,7 @@ namespace TagTool.ShaderGenerator
             foreach (var value in values)
             {
                 if (ImplementedEnums.ContainsKey(value.GetType()))
-                    if (ImplementedEnums[value.GetType()].Contains(value)) return;
+                    if (ImplementedEnums[value.GetType()].Contains(value)) continue;
                 Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
             }
         }
@@ -321,8 +322,17 @@ namespace TagTool.ShaderGenerator
 
 
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map2_xform", ShaderParameter.RType.Vector) }, // Manually added
+            
+
+
+
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "change_color_map", ShaderParameter.RType.Sampler) },
