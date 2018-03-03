@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Cache;
 
 namespace TagTool.ShaderGenerator
 {
-    public class ContrailTemplateShaderGenerator : IShaderGenerator
+    public class ContrailTemplateShaderGenerator
     {
+        public GameCacheContext CacheContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         #region Enums
 
         public enum Albedo

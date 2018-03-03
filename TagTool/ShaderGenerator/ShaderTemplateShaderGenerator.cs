@@ -4,15 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Geometry;
 using TagTool.ShaderGenerator.Types;
 using TagTool.Shaders;
+using TagTool.Util;
 
 namespace TagTool.ShaderGenerator
 {
-    public class ShaderTemplateShaderGenerator : TemplateShaderGenerator, IShaderGenerator
+    public class ShaderTemplateShaderGenerator : TemplateShaderGenerator
     {
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_template.hlsl";
 
         public ShaderTemplateShaderGenerator(
+            GameCacheContext cacheContext,
             Albedo albedo,
             Bump_Mapping bump_mapping,
             Alpha_Test alpha_test,
@@ -26,6 +30,7 @@ namespace TagTool.ShaderGenerator
             Distortion distortion,
             Soft_Fade soft_fade)
         {
+            this.CacheContext = cacheContext;
             this.albedo = albedo;
             this.bump_mapping = bump_mapping;
             this.alpha_test = alpha_test;
@@ -40,8 +45,50 @@ namespace TagTool.ShaderGenerator
             this.soft_fade = soft_fade;
         }
 
-        static List<TemplateParameter> GetShaderParametersList(object key, Type type)
+        #region TemplateShaderGenerator
+
+        public override ShaderGeneratorResult Generate()
         {
+#if DEBUG
+            CheckImplementedParameters();
+#endif
+
+            var shader_parameters = GenerateShaderParameters();
+            Dictionary<string, string> file_overrides = new Dictionary<string, string>()
+            {
+                { "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
+            };
+
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+            definitions.AddRange(GenerateFunctionDefinition());
+            definitions.AddRange(GenerateCompilationFlagDefinitions());
+
+            var compiler = new Util.DirectX();
+            compiler.SetCompilerFileOverrides(file_overrides);
+            var result = compiler.CompilePCShaderFromFile(
+                ShaderFile,
+                definitions.ToArray(),
+                "main",
+                "ps_3_0",
+                0,
+                0,
+                out byte[] ShaderBytecode,
+                out string ErrorMsgs
+            );
+            if (!result) throw new Exception(ErrorMsgs);
+
+            var disassembly = ShaderCompiler.Disassemble(ShaderBytecode);
+
+            Console.WriteLine();
+            Console.WriteLine(disassembly);
+            Console.WriteLine();
+
+            return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
+        }
+
+        public override List<TemplateParameter> GetShaderParametersList(object key)
+        {
+            Type type = key.GetType();
             if (Uniforms.ContainsKey((object)key))
             {
                 var list = Uniforms[(object)key].Cast<TemplateParameter>().ToList();
@@ -51,54 +98,136 @@ namespace TagTool.ShaderGenerator
             return new List<TemplateParameter>();
         }
 
-        private List<ShaderParameter> GenerateShaderParameters(GameCacheContext cacheContext)
+        #endregion
+
+        #region Implemented Features Check
+
+        private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
-            var params_Albedo = GetShaderParametersList(this.albedo, typeof(Albedo));
-            var params_Bump_Mapping = GetShaderParametersList(this.bump_mapping, typeof(Bump_Mapping));
-            var params_Alpha_Test = GetShaderParametersList(this.alpha_test, typeof(Alpha_Test));
-            var params_Specular_Mask = GetShaderParametersList(this.specular_mask, typeof(Specular_Mask));
-            var params_Material_Model = GetShaderParametersList(this.material_model, typeof(Material_Model));
-            var params_Environment_Mapping = GetShaderParametersList(this.environment_mapping, typeof(Environment_Mapping));
-            var params_Self_Illumination = GetShaderParametersList(this.self_illumination, typeof(Self_Illumination));
-            var params_Blend_Mode = GetShaderParametersList(this.blend_mode, typeof(Blend_Mode));
-            var params_Parallax = GetShaderParametersList(this.parallax, typeof(Parallax));
-            var params_Misc = GetShaderParametersList(this.misc, typeof(Misc));
-            var params_Distortion = GetShaderParametersList(this.distortion, typeof(Distortion));
-            var params_Soft_fade = GetShaderParametersList(this.soft_fade, typeof(Soft_Fade));
+            {typeof(Albedo), Albedo.Default },
+            {typeof(Albedo), Albedo.Detail_Blend },
+            {typeof(Albedo), Albedo.Constant_Color },
+            {typeof(Albedo), Albedo.Two_Change_Color },
+            {typeof(Albedo), Albedo.Four_Change_Color },
+            {typeof(Albedo), Albedo.Two_Detail_Overlay },
+            {typeof(Albedo), Albedo.Three_Detail_Blend },
+            {typeof(Bump_Mapping), Bump_Mapping.Standard },
+            {typeof(Bump_Mapping), Bump_Mapping.Detail },
+            {typeof(Bump_Mapping), Bump_Mapping.Off },
+            {typeof(Blend_Mode), Blend_Mode.Opaque },
+        };
 
-            List<List<TemplateParameter>> parameter_lists = new List<List<TemplateParameter>>
+        private static void CheckImplementedParameters(params object[] values)
+        {
+            foreach (var value in values)
             {
-                params_Albedo,
-                params_Bump_Mapping,
-                params_Alpha_Test,
-                params_Specular_Mask,
-                params_Material_Model,
-                params_Environment_Mapping,
-                params_Self_Illumination,
-                params_Blend_Mode,
-                params_Parallax,
-                params_Misc,
-                params_Distortion,
-                params_Soft_fade
-            };
-
-            IndicesManager indices = new IndicesManager();
-            List<ShaderParameter> parameters = new List<ShaderParameter>();
-
-
-            foreach (var _params in parameter_lists)
-            {
-                var vector_params = GenerateShaderParameters(ShaderParameter.RType.Vector, cacheContext, _params, indices);
-                var sampler_params = GenerateShaderParameters(ShaderParameter.RType.Sampler, cacheContext, _params, indices);
-                var boolean_params = GenerateShaderParameters(ShaderParameter.RType.Boolean, cacheContext, _params, indices);
-
-                parameters.AddRange(vector_params);
-                parameters.AddRange(sampler_params);
-                parameters.AddRange(boolean_params);
+                if (ImplementedEnums.ContainsKey(value.GetType()))
+                    if (ImplementedEnums[value.GetType()].Contains(value)) return;
+                Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
             }
-
-            return parameters;
         }
+
+        private void CheckImplementedParameters()
+        {
+            CheckImplementedParameters(
+                albedo,
+                bump_mapping,
+                alpha_test,
+                specular_mask,
+                material_model,
+                environment_mapping,
+                self_illumination,
+                blend_mode,
+                parallax,
+                misc,
+                distortion,
+                soft_fade
+            );
+        }
+
+        #endregion
+
+        #region HLSL Generation
+
+
+
+        private List<DirectX.MacroDefine> GenerateFunctionDefinition()
+        {
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+
+            definitions.Add(GenerateEnumFuncDefinition(albedo));
+            definitions.Add(GenerateEnumFuncDefinition(bump_mapping));
+            definitions.Add(GenerateEnumFuncDefinition(alpha_test));
+            definitions.Add(GenerateEnumFuncDefinition(specular_mask));
+            definitions.Add(GenerateEnumFuncDefinition(material_model));
+            definitions.Add(GenerateEnumFuncDefinition(environment_mapping));
+            definitions.Add(GenerateEnumFuncDefinition(self_illumination));
+            definitions.Add(GenerateEnumFuncDefinition(blend_mode));
+            definitions.Add(GenerateEnumFuncDefinition(parallax));
+            definitions.Add(GenerateEnumFuncDefinition(misc));
+            definitions.Add(GenerateEnumFuncDefinition(distortion));
+            definitions.Add(GenerateEnumFuncDefinition(soft_fade));
+
+            return definitions;
+        }
+
+        private List<DirectX.MacroDefine> GenerateCompilationFlagDefinitions()
+        {
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+
+            definitions.Add(GenerateEnumFlagDefinition(albedo));
+            definitions.Add(GenerateEnumFlagDefinition(bump_mapping));
+            definitions.Add(GenerateEnumFlagDefinition(alpha_test));
+            definitions.Add(GenerateEnumFlagDefinition(specular_mask));
+            definitions.Add(GenerateEnumFlagDefinition(material_model));
+            definitions.Add(GenerateEnumFlagDefinition(environment_mapping));
+            definitions.Add(GenerateEnumFlagDefinition(self_illumination));
+            definitions.Add(GenerateEnumFlagDefinition(blend_mode));
+            definitions.Add(GenerateEnumFlagDefinition(parallax));
+            definitions.Add(GenerateEnumFlagDefinition(misc));
+            definitions.Add(GenerateEnumFlagDefinition(distortion));
+            definitions.Add(GenerateEnumFlagDefinition(soft_fade));
+
+            return definitions;
+        }
+
+        private List<ShaderParameter> GenerateShaderParameters()
+        {
+            return GenerateShaderParameters(
+                typeof(Albedo),
+                typeof(Bump_Mapping),
+                typeof(Alpha_Test),
+                typeof(Specular_Mask),
+                typeof(Material_Model),
+                typeof(Environment_Mapping),
+                typeof(Self_Illumination),
+                typeof(Blend_Mode),
+                typeof(Parallax),
+                typeof(Misc),
+                typeof(Distortion),
+                typeof(Soft_Fade)
+            );
+        }
+
+        private static IEnumerable<DirectX.MacroDefine> GenerateHLSLEnumDefinitions()
+        {
+            return GenerateHLSLEnumDefinitions(
+                typeof(Albedo),
+                typeof(Bump_Mapping),
+                typeof(Alpha_Test),
+                typeof(Specular_Mask),
+                typeof(Material_Model),
+                typeof(Environment_Mapping),
+                typeof(Self_Illumination),
+                typeof(Blend_Mode),
+                typeof(Parallax),
+                typeof(Misc),
+                typeof(Distortion),
+                typeof(Soft_Fade)
+            );
+        }
+
+        #endregion
 
         #region Uniforms/Registers
 
@@ -224,12 +353,16 @@ namespace TagTool.ShaderGenerator
             {Albedo.Color_Mask_Hard_Light,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Color_Mask_Hard_Light,  new TemplateParameter(typeof(Albedo), "color_mask_map", ShaderParameter.RType.Sampler) },
             {Albedo.Color_Mask_Hard_Light,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
+
             {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
+            {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping),"bump_map_xform", ShaderParameter.RType.Vector) }, // Manual
+
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_map_xform", ShaderParameter.RType.Vector) }, // Manual
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map_xform", ShaderParameter.RType.Vector) }, // Manual
             {Bump_Mapping.Detail,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_coefficient", ShaderParameter.RType.Vector) },
+
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_mask_map", ShaderParameter.RType.Sampler) },

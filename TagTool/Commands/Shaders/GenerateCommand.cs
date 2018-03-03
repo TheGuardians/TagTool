@@ -73,6 +73,26 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
+            var generator = new ShaderTemplateShaderGenerator(
+                CacheContext,
+                shader_generator_params.albedo,
+                shader_generator_params.bump_mapping,
+                shader_generator_params.alpha_test,
+                shader_generator_params.specular_mask,
+                shader_generator_params.material_model,
+                shader_generator_params.environment_mapping,
+                shader_generator_params.self_illumination,
+                shader_generator_params.blend_mode,
+                shader_generator_params.parallax,
+                shader_generator_params.misc,
+                shader_generator_params.distortion,
+                shader_generator_params.soft_fade
+            );
+
+            var result_new = generator.Generate();
+
+
+
             var result = ShaderGenerator.ShaderGenerator.GenerateSource(shader_generator_params, CacheContext);
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))

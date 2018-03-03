@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderGenerator
 {
-    public class WaterTemplateShaderGenerator : IShaderGenerator
+    public class WaterTemplateShaderGenerator
     {
         #region Enums
 

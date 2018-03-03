@@ -15,26 +15,6 @@ namespace TagTool.ShaderGenerator
 {
     public partial class ShaderGenerator
     {
-        private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
-        {
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Default },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Detail_Blend },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Constant_Color },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Change_Color },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Four_Change_Color },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Detail_Overlay },
-            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Three_Detail_Blend },
-            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Standard },
-            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Detail },
-            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Off },
-            {typeof(ShaderTemplateShaderGenerator.Blend_Mode), ShaderTemplateShaderGenerator.Blend_Mode.Opaque },
-        };
-
-        public class ShaderGenerator_Result
-        {
-            public byte[] ByteCode;
-            public List<ShaderParameter> Parameters;
-        }
 
         private static StringId GetOrCreateStringID(GameCacheContext cacheContext, string str_id)
         {
@@ -43,49 +23,7 @@ namespace TagTool.ShaderGenerator
             return value;
         }
 
-        public static string ShaderParameter_ToString(ShaderParameter param, GameCacheContext cacheContext)
-        {
-            if(param.RegisterCount == 1)
-            {
-                switch (param.RegisterType)
-                {
-                    case ShaderParameter.RType.Boolean:
-                        return $"uniform bool {cacheContext.GetString(param.ParameterName)} : register(b{param.RegisterIndex});";
-                    case ShaderParameter.RType.Integer:
-                        return $"uniform int {cacheContext.GetString(param.ParameterName)} : register(i{param.RegisterIndex});";
-                    case ShaderParameter.RType.Vector:
-                        return $"uniform float4 {cacheContext.GetString(param.ParameterName)} : register(c{param.RegisterIndex});";
-                    case ShaderParameter.RType.Sampler:
-                        return $"uniform sampler {cacheContext.GetString(param.ParameterName)} : register(s{param.RegisterIndex});";
-                    default:
-                        throw new NotImplementedException();
-                }
-            } else
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public static string GenerateUniformsFile(List<ShaderParameter> parameters, GameCacheContext cacheContext)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("#ifndef __UNIFORMS");
-            sb.AppendLine("#define __UNIFORMS");
-            sb.AppendLine();
-
-            foreach(var param in parameters)
-            {
-                sb.AppendLine(ShaderParameter_ToString(param, cacheContext));
-            }
-
-            sb.AppendLine();
-            sb.AppendLine("#endif");
-
-            return sb.ToString();
-        }
-
-        public static ShaderGenerator_Result GenerateSource(ShaderGeneratorParameters template_parameters, GameCacheContext cacheContext)
+        public static ShaderGeneratorResult GenerateSource(ShaderGeneratorParameters template_parameters, GameCacheContext cacheContext)
         {
 #if DEBUG
             CheckImplementedParameters(template_parameters);
@@ -94,7 +32,7 @@ namespace TagTool.ShaderGenerator
 
             var shader_parameters = GenerateShaderParameters(cacheContext, template_parameters);
 
-            var uniforms_file = GenerateUniformsFile(shader_parameters, cacheContext);
+            var uniforms_file = TemplateShaderGenerator.GenerateUniformsFile(shader_parameters, cacheContext);
 
 
             Dictionary<string, string> file_overrides = new Dictionary<string, string>();
@@ -127,11 +65,11 @@ namespace TagTool.ShaderGenerator
             byte[] compiled_shader;
             {
                 string shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
-
-
                 var entry_point = "main";
-                //Include include = null;
                 var profile = "ps_3_0";
+
+                //Include include = null;
+
                 // ShaderFlags flags = ShaderFlags.Debug;
                 //using (var stream = ShaderLoader.CompileShaderFromFile(shader_file, entry_point, include, profile, flags))
                 //{
@@ -165,7 +103,7 @@ namespace TagTool.ShaderGenerator
 
             //var shader_parameters = ReadShaderParamsFromDisassembly(disassembly, cacheContext);
 
-            return new ShaderGenerator_Result { ByteCode = compiled_shader, Parameters = shader_parameters };
+            return new ShaderGeneratorResult { ByteCode = compiled_shader, Parameters = shader_parameters };
         }
 
         private static List<ShaderParameter> ReadShaderParamsFromDisassembly(string disassembly, GameCacheContext cacheContext)
@@ -229,24 +167,6 @@ namespace TagTool.ShaderGenerator
                 }
             }
             return shader_parameters;
-        }
-
-        private static IEnumerable<DirectX.MacroDefine> GenerateEnumDefinitions(Type _enum)
-        {
-            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-
-            var values = Enum.GetValues(_enum);
-
-            foreach (var value in values)
-            {
-                definitions.Add(new DirectX.MacroDefine
-                {
-                    Name = $"{_enum.Name}_{value}",
-                    Definition = Convert.ChangeType(value, Enum.GetUnderlyingType(_enum)).ToString()
-                });
-            }
-
-            return definitions;
         }
 
         private static DirectX.MacroDefine GenerateEnumFuncDefinition(object value, string prefix = "")
@@ -313,63 +233,51 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static void CheckImplementedParameters(object value)
+        private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
-            if (ImplementedEnums.ContainsKey(value.GetType()))
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Default },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Detail_Blend },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Constant_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Change_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Four_Change_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Detail_Overlay },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Three_Detail_Blend },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Standard },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Detail },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Off },
+            {typeof(ShaderTemplateShaderGenerator.Blend_Mode), ShaderTemplateShaderGenerator.Blend_Mode.Opaque },
+        };
+
+        private static void CheckImplementedParameters(params object[] values)
+        {
+            foreach (var value in values)
             {
-                var list = ImplementedEnums[value.GetType()];
-                if (list.Contains(value)) return;
+                if (ImplementedEnums.ContainsKey(value.GetType()))
+                    if (ImplementedEnums[value.GetType()].Contains(value)) return;
+                Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
             }
-            var message = $"{value.GetType().Name} has not implemented {value}";
-            //throw new NotImplementedException(message);]
-            Console.WriteLine(message);
         }
 
         private static void CheckImplementedParameters(ShaderGeneratorParameters _params)
         {
-            CheckImplementedParameters(_params.albedo);
-            CheckImplementedParameters(_params.bump_mapping);
-            CheckImplementedParameters(_params.alpha_test);
-            CheckImplementedParameters(_params.specular_mask);
-            CheckImplementedParameters(_params.material_model);
-            CheckImplementedParameters(_params.environment_mapping);
-            CheckImplementedParameters(_params.self_illumination);
-            CheckImplementedParameters(_params.blend_mode);
-            CheckImplementedParameters(_params.parallax);
-            CheckImplementedParameters(_params.misc);
-            CheckImplementedParameters(_params.distortion);
-            CheckImplementedParameters(_params.soft_fade);
+            CheckImplementedParameters(
+            _params.albedo,
+            _params.bump_mapping,
+            _params.alpha_test,
+            _params.specular_mask,
+            _params.material_model,
+            _params.environment_mapping,
+            _params.self_illumination,
+            _params.blend_mode,
+            _params.parallax,
+            _params.misc,
+            _params.distortion,
+            _params.soft_fade);
         }
 
-        public static IEnumerable<DirectX.MacroDefine> GenerateEnumsDefinitions()
-        {
-            var defs_Albedo = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Albedo));
-            var defs_Bump_Mapping = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Bump_Mapping));
-            var defs_Alpha_Test = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Alpha_Test));
-            var defs_Specular_Mask = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Specular_Mask));
-            var defs_Material_Model = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Material_Model));
-            var defs_Environment_Mapping = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Environment_Mapping));
-            var defs_Self_Illumination = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Self_Illumination));
-            var defs_Blend_Mode = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Blend_Mode));
-            var defs_Parallax = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Parallax));
-            var defs_Misc = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Misc));
-            var defs_Distortion = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Distortion));
-            var defs_Soft_fade = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Soft_Fade));
-            var defs = (new List<DirectX.MacroDefine> { })
-                .Concat(defs_Albedo)
-                .Concat(defs_Bump_Mapping)
-                .Concat(defs_Alpha_Test)
-                .Concat(defs_Specular_Mask)
-                .Concat(defs_Material_Model)
-                .Concat(defs_Environment_Mapping)
-                .Concat(defs_Self_Illumination)
-                .Concat(defs_Blend_Mode)
-                .Concat(defs_Parallax)
-                .Concat(defs_Misc)
-                .Concat(defs_Distortion)
-                .Concat(defs_Soft_fade);
-            return defs;
-        }
+
+
+
 
         public class ShaderGeneratorParameters
         {
