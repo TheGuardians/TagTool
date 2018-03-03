@@ -9,8 +9,6 @@ namespace TagTool.ShaderGenerator
 {
     public class ContrailTemplateShaderGenerator
     {
-        public GameCacheContext CacheContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         #region Enums
 
         public enum Albedo

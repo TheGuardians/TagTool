@@ -111,6 +111,7 @@ namespace TagTool.ShaderGenerator
             {typeof(Albedo), Albedo.Four_Change_Color },
             {typeof(Albedo), Albedo.Two_Detail_Overlay },
             {typeof(Albedo), Albedo.Three_Detail_Blend },
+            {typeof(Albedo), Albedo.Two_Detail },
             {typeof(Bump_Mapping), Bump_Mapping.Standard },
             {typeof(Bump_Mapping), Bump_Mapping.Detail },
             {typeof(Bump_Mapping), Bump_Mapping.Off },
@@ -297,8 +298,14 @@ namespace TagTool.ShaderGenerator
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map_overlay_xform", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map2_xform", ShaderParameter.RType.Vector) }, // Manually added
+
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "color_mask_map", ShaderParameter.RType.Sampler) },
