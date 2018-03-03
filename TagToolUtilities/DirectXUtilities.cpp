@@ -47,13 +47,8 @@ public:
 		Directories[ptr] = dir;
 	}
 
-	HRESULT Open(
-		D3D_INCLUDE_TYPE IncludeType,
-		LPCSTR           pFileName,
-		LPCVOID          pParentData,
-		LPCVOID          *ppData,
-		UINT             *pBytes
-	) {
+	HRESULT __stdcall Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes) {
+
 		// Filepaths
 		auto root_directory = GetParentDirectory(pParentData);
 		auto filepath = root_directory + pFileName;
@@ -82,9 +77,7 @@ public:
 		return S_OK;
 	}
 
-	HRESULT Close(
-		LPCVOID pData
-	) {
+	HRESULT __stdcall Close(LPCVOID pData) {
 		delete[] pData;
 		return S_OK;
 	}
