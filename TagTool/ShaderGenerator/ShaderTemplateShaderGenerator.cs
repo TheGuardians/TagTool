@@ -112,6 +112,7 @@ namespace TagTool.ShaderGenerator
             {typeof(Albedo), Albedo.Two_Detail_Overlay },
             {typeof(Albedo), Albedo.Three_Detail_Blend },
             {typeof(Albedo), Albedo.Two_Detail },
+            {typeof(Albedo), Albedo.Color_Mask },
             {typeof(Bump_Mapping), Bump_Mapping.Standard },
             {typeof(Bump_Mapping), Bump_Mapping.Detail },
             {typeof(Bump_Mapping), Bump_Mapping.Off },
@@ -305,14 +306,20 @@ namespace TagTool.ShaderGenerator
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map2_xform", ShaderParameter.RType.Vector) }, // Manually added
-
-            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "color_mask_map", ShaderParameter.RType.Sampler) },
+            
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "albedo_color2", ShaderParameter.RType.Vector) },
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "albedo_color3", ShaderParameter.RType.Vector) },
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "color_mask_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
+            {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "color_mask_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "neutral_gray", ShaderParameter.RType.Vector) },
+
+
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
