@@ -382,8 +382,6 @@
     <Compile Include="ShaderGenerator\IShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\LightVolumeTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ParticleTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ShaderGenerator_TemplateParameterBuilder.cs" />
     <Compile Include="ShaderGenerator\ShaderTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\TemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\TerrainTemplateShaderGenerator.cs" />

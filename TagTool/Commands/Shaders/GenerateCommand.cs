@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Common;
 using TagTool.ShaderGenerator;
+using TagTool.ShaderGenerator.Types;
+using System.Linq;
 
 namespace TagTool.Commands.Shaders
 {
@@ -33,73 +35,93 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
+        private ShaderGeneratorResult shader_template_gen(List<string> args)
+        {
+            int arg_pos = 0;
+
+            ShaderTemplateShaderGenerator generator = null;
+            try
+            {
+                var albedo = (ShaderTemplateShaderGenerator.Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var bump_mapping = (ShaderTemplateShaderGenerator.Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var alpha_test = (ShaderTemplateShaderGenerator.Alpha_Test)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var specular_mask = (ShaderTemplateShaderGenerator.Specular_Mask)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var material_model = (ShaderTemplateShaderGenerator.Material_Model)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var environment_mapping = (ShaderTemplateShaderGenerator.Environment_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var self_illumination = (ShaderTemplateShaderGenerator.Self_Illumination)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var blend_mode = (ShaderTemplateShaderGenerator.Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var parallax = (ShaderTemplateShaderGenerator.Parallax)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var misc = (ShaderTemplateShaderGenerator.Misc)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var distortion = (ShaderTemplateShaderGenerator.Distortion)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var soft_fade = (ShaderTemplateShaderGenerator.Soft_Fade)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+
+                generator = new ShaderTemplateShaderGenerator(
+                    CacheContext,
+                    albedo,
+                    bump_mapping,
+                    alpha_test,
+                    specular_mask,
+                    material_model,
+                    environment_mapping,
+                    self_illumination,
+                    blend_mode,
+                    parallax,
+                    misc,
+                    distortion,
+                    soft_fade
+                );
+
+            } catch
+            {
+                Console.WriteLine("Invalid arguments");
+            }
+
+            return generator?.Generate();
+        }
+
         public override object Execute(List<string> args)
         {
             if (args.Count <= 0)
                 return false;
 
-            ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters shader_generator_params;
-            int index;
-
-            try
+            if(args.Count < 2)
             {
-                index = int.Parse(args[0]);
-                switch (args[1].ToLower())
-                {
-                    case "shader_template":
-                        break;
-                    case "decals_template":
-                        break;
-                }
-
-                int arg_pos = 2;
-                shader_generator_params = new ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters
-                {
-                    albedo = (ShaderTemplateShaderGenerator.Albedo)Int32.Parse(args[arg_pos++]),
-                    bump_mapping = (ShaderTemplateShaderGenerator.Bump_Mapping)Int32.Parse(args[arg_pos++]),
-                    alpha_test = (ShaderTemplateShaderGenerator.Alpha_Test)Int32.Parse(args[arg_pos++]),
-                    specular_mask = (ShaderTemplateShaderGenerator.Specular_Mask)Int32.Parse(args[arg_pos++]),
-                    material_model = (ShaderTemplateShaderGenerator.Material_Model)Int32.Parse(args[arg_pos++]),
-                    environment_mapping = (ShaderTemplateShaderGenerator.Environment_Mapping)Int32.Parse(args[arg_pos++]),
-                    self_illumination = (ShaderTemplateShaderGenerator.Self_Illumination)Int32.Parse(args[arg_pos++]),
-                    blend_mode = (ShaderTemplateShaderGenerator.Blend_Mode)Int32.Parse(args[arg_pos++]),
-                    parallax = (ShaderTemplateShaderGenerator.Parallax)Int32.Parse(args[arg_pos++]),
-                    misc = (ShaderTemplateShaderGenerator.Misc)Int32.Parse(args[arg_pos++]),
-                    //distortion = (ShaderGenerator.ShaderGenerator.Distortion)Int32.Parse(args[arg_pos++]),
-                    //soft_fade = (ShaderGenerator.ShaderGenerator.Soft_Fade)Int32.Parse(args[arg_pos++])
-                };
-
-            } catch {
+                Console.WriteLine("Invalid number of args");
                 return false;
             }
 
-            var generator = new ShaderTemplateShaderGenerator(
-                CacheContext,
-                shader_generator_params.albedo,
-                shader_generator_params.bump_mapping,
-                shader_generator_params.alpha_test,
-                shader_generator_params.specular_mask,
-                shader_generator_params.material_model,
-                shader_generator_params.environment_mapping,
-                shader_generator_params.self_illumination,
-                shader_generator_params.blend_mode,
-                shader_generator_params.parallax,
-                shader_generator_params.misc,
-                shader_generator_params.distortion,
-                shader_generator_params.soft_fade
-            );
+            int index;
+            string type;
+            try
+            {
+                index = int.Parse(args[0]);
+                type = args[1].ToLower();
+            } catch
+            {
+                Console.WriteLine("Invalid index and type combination");
+                return false;
+            }
+            
+            ShaderGeneratorResult shader_gen_result;
+            switch(type)
+            {
+                case "shader_template":
+                    shader_gen_result = shader_template_gen(args.Skip(2).ToList());
+                    break;
+                //case "decals_template":
+                //    break;
+                default:
+                    Console.WriteLine($"{type} is not implemented");
+                    return false;
+            }
 
-            var result_new = generator.Generate();
-
-
-
-            var result = ShaderGenerator.ShaderGenerator.GenerateSource(shader_generator_params, CacheContext);
+            if (shader_gen_result == null) return false;
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {
                 var shader_data_block = new PixelShaderBlock
                 {
-                    PCShaderBytecode = result.ByteCode
+                    PCShaderBytecode = shader_gen_result.ByteCode
                 };
 
                 if (typeof(T) == typeof(PixelShader))
@@ -107,7 +129,7 @@ namespace TagTool.Commands.Shaders
                     var _definition = Definition as PixelShader;
                     var existing_block = _definition.Shaders[index];
                     //shader_data_block.PCParameters = existing_block.PCParameters;
-                    shader_data_block.PCParameters = result.Parameters;
+                    shader_data_block.PCParameters = shader_gen_result.Parameters;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -117,7 +139,7 @@ namespace TagTool.Commands.Shaders
                     var _definition = Definition as GlobalPixelShader;
                     var existing_block = _definition.Shaders[index];
                     //shader_data_block.PCParameters = existing_block.PCParameters;
-                    shader_data_block.PCParameters = result.Parameters;
+                    shader_data_block.PCParameters = shader_gen_result.Parameters;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
