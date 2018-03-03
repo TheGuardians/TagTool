@@ -383,10 +383,13 @@
     <Compile Include="ShaderGenerator\LightVolumeTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ParticleTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ShaderGenerator_Enums.cs" />
     <Compile Include="ShaderGenerator\ShaderGenerator_TemplateParameterBuilder.cs" />
     <Compile Include="ShaderGenerator\ShaderTemplateShaderGenerator.cs" />
+    <Compile Include="ShaderGenerator\TemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\TerrainTemplateShaderGenerator.cs" />
+    <Compile Include="ShaderGenerator\Types\IndicesManager.cs" />
+    <Compile Include="ShaderGenerator\Types\TemplateParameter.cs" />
+    <Compile Include="ShaderGenerator\Types\TemplateParameterManager.cs" />
     <Compile Include="ShaderGenerator\WaterTemplateShaderGenerator.cs" />
     <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
     <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />

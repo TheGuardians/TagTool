@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderGenerator
 {
-    class ParticleTemplateShaderGenerator : IShaderGenerator
+    public class ParticleTemplateShaderGenerator : IShaderGenerator
     {
         #region Enums
 

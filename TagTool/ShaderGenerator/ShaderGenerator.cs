@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
+using TagTool.ShaderGenerator.Types;
 using TagTool.Shaders;
 using TagTool.Util;
 
@@ -16,17 +17,17 @@ namespace TagTool.ShaderGenerator
     {
         private static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
         {
-            {typeof(Albedo), Albedo.Default },
-            {typeof(Albedo), Albedo.Detail_Blend },
-            {typeof(Albedo), Albedo.Constant_Color },
-            {typeof(Albedo), Albedo.Two_Change_Color },
-            {typeof(Albedo), Albedo.Four_Change_Color },
-            {typeof(Albedo), Albedo.Two_Detail_Overlay },
-            {typeof(Albedo), Albedo.Three_Detail_Blend },
-            {typeof(Bump_Mapping), Bump_Mapping.Standard },
-            {typeof(Bump_Mapping), Bump_Mapping.Detail },
-            {typeof(Bump_Mapping), Bump_Mapping.Off },
-            {typeof(Blend_Mode), Blend_Mode.Opaque },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Default },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Detail_Blend },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Constant_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Change_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Four_Change_Color },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Two_Detail_Overlay },
+            {typeof(ShaderTemplateShaderGenerator.Albedo), ShaderTemplateShaderGenerator.Albedo.Three_Detail_Blend },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Standard },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Detail },
+            {typeof(ShaderTemplateShaderGenerator.Bump_Mapping), ShaderTemplateShaderGenerator.Bump_Mapping.Off },
+            {typeof(ShaderTemplateShaderGenerator.Blend_Mode), ShaderTemplateShaderGenerator.Blend_Mode.Opaque },
         };
 
         public class ShaderGenerator_Result
@@ -84,14 +85,18 @@ namespace TagTool.ShaderGenerator
             return sb.ToString();
         }
 
-        public static ShaderGenerator_Result GenerateSource(ShaderType type, ShaderGeneratorParameters template_parameters, GameCacheContext cacheContext)
+        public static ShaderGenerator_Result GenerateSource(ShaderGeneratorParameters template_parameters, GameCacheContext cacheContext)
         {
 #if DEBUG
             CheckImplementedParameters(template_parameters);
 #endif
+
+
             var shader_parameters = GenerateShaderParameters(cacheContext, template_parameters);
 
             var uniforms_file = GenerateUniformsFile(shader_parameters, cacheContext);
+
+
             Dictionary<string, string> file_overrides = new Dictionary<string, string>();
             file_overrides["parameters.hlsl"] = uniforms_file;
 
@@ -121,16 +126,7 @@ namespace TagTool.ShaderGenerator
 
             byte[] compiled_shader;
             {
-                string shader_file = "";
-                switch (type)
-                {
-                    case ShaderType.DecalsTemplate:
-                        shader_file = "ShaderGenerator/shader_code/decals_template.hlsl";
-                        break;
-                    default:
-                        shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
-                        break;
-                }
+                string shader_file = "ShaderGenerator/shader_code/shader_template.hlsl";
 
 
                 var entry_point = "main";
@@ -347,18 +343,18 @@ namespace TagTool.ShaderGenerator
 
         public static IEnumerable<DirectX.MacroDefine> GenerateEnumsDefinitions()
         {
-            var defs_Albedo = GenerateEnumDefinitions(typeof(Albedo));
-            var defs_Bump_Mapping = GenerateEnumDefinitions(typeof(Bump_Mapping));
-            var defs_Alpha_Test = GenerateEnumDefinitions(typeof(Alpha_Test));
-            var defs_Specular_Mask = GenerateEnumDefinitions(typeof(Specular_Mask));
-            var defs_Material_Model = GenerateEnumDefinitions(typeof(Material_Model));
-            var defs_Environment_Mapping = GenerateEnumDefinitions(typeof(Environment_Mapping));
-            var defs_Self_Illumination = GenerateEnumDefinitions(typeof(Self_Illumination));
-            var defs_Blend_Mode = GenerateEnumDefinitions(typeof(Blend_Mode));
-            var defs_Parallax = GenerateEnumDefinitions(typeof(Parallax));
-            var defs_Misc = GenerateEnumDefinitions(typeof(Misc));
-            var defs_Distortion = GenerateEnumDefinitions(typeof(Distortion));
-            var defs_Soft_fade = GenerateEnumDefinitions(typeof(Soft_Fade));
+            var defs_Albedo = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Albedo));
+            var defs_Bump_Mapping = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Bump_Mapping));
+            var defs_Alpha_Test = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Alpha_Test));
+            var defs_Specular_Mask = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Specular_Mask));
+            var defs_Material_Model = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Material_Model));
+            var defs_Environment_Mapping = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Environment_Mapping));
+            var defs_Self_Illumination = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Self_Illumination));
+            var defs_Blend_Mode = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Blend_Mode));
+            var defs_Parallax = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Parallax));
+            var defs_Misc = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Misc));
+            var defs_Distortion = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Distortion));
+            var defs_Soft_fade = GenerateEnumDefinitions(typeof(ShaderTemplateShaderGenerator.Soft_Fade));
             var defs = (new List<DirectX.MacroDefine> { })
                 .Concat(defs_Albedo)
                 .Concat(defs_Bump_Mapping)
@@ -377,18 +373,18 @@ namespace TagTool.ShaderGenerator
 
         public class ShaderGeneratorParameters
         {
-            public Albedo albedo;
-            public Bump_Mapping bump_mapping;
-            public Alpha_Test alpha_test;
-            public Specular_Mask specular_mask;
-            public Material_Model material_model;
-            public Environment_Mapping environment_mapping;
-            public Self_Illumination self_illumination;
-            public Blend_Mode blend_mode;
-            public Parallax parallax;
-            public Misc misc;
-            public Distortion distortion;
-            public Soft_Fade soft_fade;
+            public ShaderTemplateShaderGenerator.Albedo albedo;
+            public ShaderTemplateShaderGenerator.Bump_Mapping bump_mapping;
+            public ShaderTemplateShaderGenerator.Alpha_Test alpha_test;
+            public ShaderTemplateShaderGenerator.Specular_Mask specular_mask;
+            public ShaderTemplateShaderGenerator.Material_Model material_model;
+            public ShaderTemplateShaderGenerator.Environment_Mapping environment_mapping;
+            public ShaderTemplateShaderGenerator.Self_Illumination self_illumination;
+            public ShaderTemplateShaderGenerator.Blend_Mode blend_mode;
+            public ShaderTemplateShaderGenerator.Parallax parallax;
+            public ShaderTemplateShaderGenerator.Misc misc;
+            public ShaderTemplateShaderGenerator.Distortion distortion;
+            public ShaderTemplateShaderGenerator.Soft_Fade soft_fade;
         }
 
     }

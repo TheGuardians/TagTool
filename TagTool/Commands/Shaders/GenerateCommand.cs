@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Common;
+using TagTool.ShaderGenerator;
 
 namespace TagTool.Commands.Shaders
 {
@@ -38,36 +39,32 @@ namespace TagTool.Commands.Shaders
                 return false;
 
             ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters shader_generator_params;
-            ShaderGenerator.ShaderGenerator.ShaderType type;
             int index;
 
             try
             {
-                type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
                 index = int.Parse(args[0]);
                 switch (args[1].ToLower())
                 {
                     case "shader_template":
-                        type = ShaderGenerator.ShaderGenerator.ShaderType.ShaderTemplate;
                         break;
                     case "decals_template":
-                        type = ShaderGenerator.ShaderGenerator.ShaderType.DecalsTemplate;
                         break;
                 }
 
                 int arg_pos = 2;
                 shader_generator_params = new ShaderGenerator.ShaderGenerator.ShaderGeneratorParameters
                 {
-                    albedo = (ShaderGenerator.ShaderGenerator.Albedo)Int32.Parse(args[arg_pos++]),
-                    bump_mapping = (ShaderGenerator.ShaderGenerator.Bump_Mapping)Int32.Parse(args[arg_pos++]),
-                    alpha_test = (ShaderGenerator.ShaderGenerator.Alpha_Test)Int32.Parse(args[arg_pos++]),
-                    specular_mask = (ShaderGenerator.ShaderGenerator.Specular_Mask)Int32.Parse(args[arg_pos++]),
-                    material_model = (ShaderGenerator.ShaderGenerator.Material_Model)Int32.Parse(args[arg_pos++]),
-                    environment_mapping = (ShaderGenerator.ShaderGenerator.Environment_Mapping)Int32.Parse(args[arg_pos++]),
-                    self_illumination = (ShaderGenerator.ShaderGenerator.Self_Illumination)Int32.Parse(args[arg_pos++]),
-                    blend_mode = (ShaderGenerator.ShaderGenerator.Blend_Mode)Int32.Parse(args[arg_pos++]),
-                    parallax = (ShaderGenerator.ShaderGenerator.Parallax)Int32.Parse(args[arg_pos++]),
-                    misc = (ShaderGenerator.ShaderGenerator.Misc)Int32.Parse(args[arg_pos++]),
+                    albedo = (ShaderTemplateShaderGenerator.Albedo)Int32.Parse(args[arg_pos++]),
+                    bump_mapping = (ShaderTemplateShaderGenerator.Bump_Mapping)Int32.Parse(args[arg_pos++]),
+                    alpha_test = (ShaderTemplateShaderGenerator.Alpha_Test)Int32.Parse(args[arg_pos++]),
+                    specular_mask = (ShaderTemplateShaderGenerator.Specular_Mask)Int32.Parse(args[arg_pos++]),
+                    material_model = (ShaderTemplateShaderGenerator.Material_Model)Int32.Parse(args[arg_pos++]),
+                    environment_mapping = (ShaderTemplateShaderGenerator.Environment_Mapping)Int32.Parse(args[arg_pos++]),
+                    self_illumination = (ShaderTemplateShaderGenerator.Self_Illumination)Int32.Parse(args[arg_pos++]),
+                    blend_mode = (ShaderTemplateShaderGenerator.Blend_Mode)Int32.Parse(args[arg_pos++]),
+                    parallax = (ShaderTemplateShaderGenerator.Parallax)Int32.Parse(args[arg_pos++]),
+                    misc = (ShaderTemplateShaderGenerator.Misc)Int32.Parse(args[arg_pos++]),
                     //distortion = (ShaderGenerator.ShaderGenerator.Distortion)Int32.Parse(args[arg_pos++]),
                     //soft_fade = (ShaderGenerator.ShaderGenerator.Soft_Fade)Int32.Parse(args[arg_pos++])
                 };
@@ -76,7 +73,7 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
-            var result = ShaderGenerator.ShaderGenerator.GenerateSource(type, shader_generator_params, CacheContext);
+            var result = ShaderGenerator.ShaderGenerator.GenerateSource(shader_generator_params, CacheContext);
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {

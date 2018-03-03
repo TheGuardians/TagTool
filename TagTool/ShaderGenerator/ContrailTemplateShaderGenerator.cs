@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderGenerator
 {
-    class ContrailTemplateShaderGenerator : IShaderGenerator
+    public class ContrailTemplateShaderGenerator : IShaderGenerator
     {
         #region Enums
 

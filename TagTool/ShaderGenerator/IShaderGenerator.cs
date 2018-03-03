@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderGenerator
 {
-    interface IShaderGenerator
+    public interface IShaderGenerator
     {
+
     }
 }

@@ -8,7 +8,7 @@ namespace TagTool.ShaderGenerator
 {
     #region Enums
 
-    class HalogramTemplateShaderGenerator : IShaderGenerator
+    public class HalogramTemplateShaderGenerator : IShaderGenerator
     {
         public enum Albedo
         {
