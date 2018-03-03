@@ -2,8 +2,8 @@
 #include <d3dcompiler.h>
 
 #include "Helpers.h"
-#include "DirectXUtilities.h"
-
+#include "DirectX.h"
+#include "D3DIncludeExt.h"
 
 #include <string>
 #include <vector>
@@ -19,71 +19,44 @@
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Collections::Generic;
-using namespace TagTool::Utilities;
+using namespace TagTool::Util;
 
-array<Byte>^ DirectXUtilities::AssemblePCShader(String ^ source)
+void DirectX::SetCompilerFileOverrides(System::Collections::Generic::Dictionary<String^, String^>^ file_overrides)
 {
-	throw gcnew System::NotImplementedException();
-	// TODO: insert return statement here
+	FileOverrides = file_overrides;
 }
 
-class ExtInclude : public ID3DInclude {
-public:
+array<Byte>^ DirectX::AssemblePCShader(String ^ source)
+{
+	throw gcnew System::NotImplementedException();
 
-	std::string root_directory;
-	std::map<const void*, std::string> Directories;
-	std::string uniforms_override;
+	//	if (_source == nullptr) throw gcnew Exception("source is null");
+	//
+	//	std::string source = MarshalStringA(_source);
+	//
+	//	LPD3DXBUFFER buffer = nullptr;
+	//	LPD3DXBUFFER errors = nullptr;
+	//
+	//	HRESULT result = D3DXAssembleShader(source.c_str(), (UINT)source.length(), NULL, NULL, 0, &buffer, &errors);
+	//
+	//	if (result != S_OK) {
+	//
+	//		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+	//		throw gcnew Exception(errors_str);
+	//
+	//	}
+	//
+	//	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
+	//	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
+	//	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
+	//		arr[i] = ptr[i];
+	//	}
+	//
+	//	return arr;
 
-	ExtInclude(std::string _root_directory)
-	{
-		SetParentDirectory(nullptr, _root_directory + "\\");
-	}
+}
 
-	std::string GetParentDirectory(const void* ptr) {
-		return Directories[ptr];
-	}
-
-	void SetParentDirectory(const void* ptr, std::string dir) {
-		Directories[ptr] = dir;
-	}
-
-	HRESULT __stdcall Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes) {
-
-		// Filepaths
-		auto root_directory = GetParentDirectory(pParentData);
-		auto filepath = root_directory + pFileName;
-
-		bool is_uniforms = std::string(filepath).find("parameters.hlsl") != std::string::npos;
-		bool is_editor_only = std::string(filepath).find("editor_only.hlsl") != std::string::npos;
-
-		// Read File
-		char* data;
-		{
-			std::string source_code;
-
-			if (is_uniforms && uniforms_override.size() > 1) source_code = uniforms_override;
-			else if (is_editor_only && uniforms_override.size() > 1) source_code = "";
-			else source_code = Helpers::ReadFile(filepath);
-
-			data = new char[source_code.size()];
-			memcpy(data, source_code.data(), source_code.size());
-			*ppData = data;
-			*pBytes = (UINT)source_code.size();
-		}
-
-		auto this_dir = Helpers::ExtractDirectoryName(filepath) + "\\";
-		SetParentDirectory(data, this_dir);
-
-		return S_OK;
-	}
-
-	HRESULT __stdcall Close(LPCVOID pData) {
-		delete[] pData;
-		return S_OK;
-	}
-};
-
-bool DirectXUtilities::CompilePCShader(
+bool DirectX::CompilePCShader(
 	String ^ _SrcData,
 	String ^ _SrcName,
 	array<MacroDefine^>^ _Defines,
@@ -163,7 +136,7 @@ bool DirectXUtilities::CompilePCShader(
 	return result == S_OK;
 }
 
-bool DirectXUtilities::CompilePCShaderFromFile(
+bool DirectX::CompilePCShaderFromFile(
 	String ^ _File,
 	array<MacroDefine^>^ _Defines,
 	String ^ _FunctionName,
@@ -171,8 +144,7 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	UInt32 Flags1,
 	UInt32 Flags2,
 	array<Byte>^% Shader,
-	String ^% ErrorMsgs,
-	Dictionary<String^, String^>^ file_overrides
+	String ^% ErrorMsgs
 )
 {
 	std::wstring File = Helpers::MarshalStringW(_File);
@@ -206,18 +178,12 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 
 	auto root_directory = System::IO::Path::GetDirectoryName(_File);
 	auto std_root_directory = Helpers::MarshalStringA(root_directory);
-	ExtInclude include = ExtInclude(std_root_directory);
-
-
-
+	D3DIncludeExt include = D3DIncludeExt(std_root_directory);
 
 	//TODO: Improve this
-	if (file_overrides) {
-
-		include.uniforms_override = Helpers::MarshalStringA(file_overrides["parameters.hlsl"]);
-
+	if (FileOverrides) {
+		include.uniforms_override = Helpers::MarshalStringA(FileOverrides["parameters.hlsl"]);
 	}
-
 
 	std::string file_path = Helpers::MarshalStringA(_File);
 	std::string source_code = Helpers::ReadFile(file_path);
@@ -273,7 +239,7 @@ bool DirectXUtilities::CompilePCShaderFromFile(
 	return result == S_OK;
 }
 
-String ^ DirectXUtilities::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
+String ^ DirectX::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
 {
 	if (_Data == nullptr) throw gcnew Exception("data is null");
 
@@ -295,34 +261,7 @@ String ^ DirectXUtilities::DisassemblePCShader(array<Byte>^ _Data, UInt32 Flags)
 	return gcnew String(reinterpret_cast<char*>(buffer->GetBufferPointer()));
 }
 
-String ^ DirectXUtilities::MacroDefine::ToString()
+String ^ DirectX::MacroDefine::ToString()
 {
 	return "#define " + Name + " " + Definition;
 }
-//
-//array<Byte>^ DirectXUtilities::AssemblePCShader(String ^ _source)
-//{
-//	if (_source == nullptr) throw gcnew Exception("source is null");
-//
-//	std::string source = MarshalStringA(_source);
-//
-//	LPD3DXBUFFER buffer = nullptr;
-//	LPD3DXBUFFER errors = nullptr;
-//
-//	HRESULT result = D3DXAssembleShader(source.c_str(), (UINT)source.length(), NULL, NULL, 0, &buffer, &errors);
-//
-//	if (result != S_OK) {
-//
-//		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
-//		throw gcnew Exception(errors_str);
-//
-//	}
-//
-//	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
-//	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
-//	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
-//		arr[i] = ptr[i];
-//	}
-//
-//	return arr;
-//}

@@ -5,13 +5,17 @@
 using namespace System;
 
 #include <string>
+#include <vcclr.h>  
 
 namespace TagTool {
-
-	namespace Utilities
+	namespace Util
 	{
-		public ref class DirectXUtilities {
+
+		public ref class DirectX {
 		public:
+
+			System::Collections::Generic::Dictionary<String^, String^>^ FileOverrides;
+			void SetCompilerFileOverrides(System::Collections::Generic::Dictionary<String^, String^>^ file_overrides);
 
 			ref struct MacroDefine {
 				String^ Name;
@@ -21,7 +25,7 @@ namespace TagTool {
 
 			static array<Byte>^ AssemblePCShader(String^ source);
 
-			static bool CompilePCShader(
+			bool CompilePCShader(
 				String^ SrcData,
 				String ^ SrcName,
 				array<MacroDefine^>^ Defines,
@@ -30,9 +34,9 @@ namespace TagTool {
 				UInt32 Flags1,
 				UInt32 Flags2,
 				[System::Runtime::InteropServices::Out] array<Byte>^% Shader,
-				[System::Runtime::InteropServices::Out] String^% ErrorMsgs
-			);
-			static bool CompilePCShaderFromFile(
+				[System::Runtime::InteropServices::Out] String^% ErrorMsgs);
+
+			bool CompilePCShaderFromFile(
 				String^ File,
 				array<MacroDefine^>^ Defines,
 				String^ FunctionName,
@@ -40,10 +44,10 @@ namespace TagTool {
 				UInt32 Flags1,
 				UInt32 Flags2,
 				[System::Runtime::InteropServices::Out] array<Byte>^% Shader,
-				[System::Runtime::InteropServices::Out] String^% ErrorMsgs, 
-				System::Collections::Generic::Dictionary<String^, String^>^ file_overrides);
+				[System::Runtime::InteropServices::Out] String^% ErrorMsgs);
 
 			static String^ DisassemblePCShader(array<Byte>^ Data, UInt32 Flags);
+
 		};
 	}
 }

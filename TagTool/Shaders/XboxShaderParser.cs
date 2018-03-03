@@ -12,6 +12,7 @@ using TagTool.Shaders.Converters;
 using TagTool.Shaders.SM3;
 using TagTool.Shaders.SM3Ext;
 using TagTool.Tags.Definitions;
+using TagTool.Util;
 
 namespace TagTool.Shaders
 {
@@ -446,7 +447,7 @@ namespace TagTool.Shaders
 
                 string converted_shader_code = converter.Convert();
                 Console.WriteLine(converted_shader_code);
-                var shader_bytecode = Utilities.DirectXUtilities.AssemblePCShader(converted_shader_code);
+                var shader_bytecode = DirectX.AssemblePCShader(converted_shader_code);
                 //TODO Add different converters and get the name of a tag (or a better method) to determine the converter type to use
                 return shader_bytecode;
             }

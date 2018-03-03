@@ -145,12 +145,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="D3DIncludeExt.h" />
     <ClInclude Include="Helpers.h" />
-    <ClInclude Include="DirectXUtilities.h" />
+    <ClInclude Include="DirectX.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="D3DIncludeExt.cpp" />
     <ClCompile Include="Helpers.cpp" />
-    <ClCompile Include="DirectXUtilities.cpp" />
+    <ClCompile Include="DirectX.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

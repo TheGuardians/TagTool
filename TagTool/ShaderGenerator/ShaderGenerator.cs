@@ -8,7 +8,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Shaders;
-using TagTool.Utilities;
+using TagTool.Util;
 
 namespace TagTool.ShaderGenerator
 {
@@ -100,7 +100,7 @@ namespace TagTool.ShaderGenerator
             var func_defs = GenerateFunctionDefinition(template_parameters);
             var flag_defs = GenerateCompilationFlagDefinitions(template_parameters);
 
-            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
             definitions.AddRange(func_defs);
             definitions.AddRange(flag_defs);
 
@@ -145,7 +145,9 @@ namespace TagTool.ShaderGenerator
                 //    stream.Read(compiled_shader, 0, (int)stream.Length);
                 //}
 
-                var result = Utilities.DirectXUtilities.CompilePCShaderFromFile(
+                var compiler = new Util.DirectX();
+
+                var result = compiler.CompilePCShaderFromFile(
                     shader_file,
                     definitions.ToArray(),
                     entry_point,
@@ -153,8 +155,7 @@ namespace TagTool.ShaderGenerator
                     0,
                     0,
                     out byte[] Shader,
-                    out string ErrorMsgs,
-                    file_overrides);
+                    out string ErrorMsgs);
 
                 if (!result) throw new Exception(ErrorMsgs);
                 compiled_shader = Shader;
@@ -234,15 +235,15 @@ namespace TagTool.ShaderGenerator
             return shader_parameters;
         }
 
-        private static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumDefinitions(Type _enum)
+        private static IEnumerable<DirectX.MacroDefine> GenerateEnumDefinitions(Type _enum)
         {
-            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
 
             var values = Enum.GetValues(_enum);
 
             foreach (var value in values)
             {
-                definitions.Add(new DirectXUtilities.MacroDefine
+                definitions.Add(new DirectX.MacroDefine
                 {
                     Name = $"{_enum.Name}_{value}",
                     Definition = Convert.ChangeType(value, Enum.GetUnderlyingType(_enum)).ToString()
@@ -252,33 +253,33 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static DirectXUtilities.MacroDefine GenerateEnumFuncDefinition(object value, string prefix = "")
+        private static DirectX.MacroDefine GenerateEnumFuncDefinition(object value, string prefix = "")
         {
             Type _enum = value.GetType();
             var values = Enum.GetValues(_enum);
 
-            return new DirectXUtilities.MacroDefine
+            return new DirectX.MacroDefine
             {
                 Name = $"{_enum.Name}",
                 Definition = $"{_enum.Name}_{value}".ToLower()
             };
         }
 
-        private static DirectXUtilities.MacroDefine GenerateEnumFlagDefinition(object value, string prefix = "")
+        private static DirectX.MacroDefine GenerateEnumFlagDefinition(object value, string prefix = "")
         {
             Type _enum = value.GetType();
             var values = Enum.GetValues(_enum);
 
-            return new DirectXUtilities.MacroDefine
+            return new DirectX.MacroDefine
             {
                 Name = $"flag_{ _enum.Name }_{ value }".ToLower(),
                 Definition = "1"
             };
         }
 
-        private static List<DirectXUtilities.MacroDefine> GenerateFunctionDefinition(ShaderGeneratorParameters _params)
+        private static List<DirectX.MacroDefine> GenerateFunctionDefinition(ShaderGeneratorParameters _params)
         {
-            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
 
             definitions.Add(GenerateEnumFuncDefinition(_params.albedo, "albedo"));
             definitions.Add(GenerateEnumFuncDefinition(_params.bump_mapping, "bump_mapping"));
@@ -296,9 +297,9 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        private static List<DirectXUtilities.MacroDefine> GenerateCompilationFlagDefinitions(ShaderGeneratorParameters _params)
+        private static List<DirectX.MacroDefine> GenerateCompilationFlagDefinitions(ShaderGeneratorParameters _params)
         {
-            List<DirectXUtilities.MacroDefine> definitions = new List<DirectXUtilities.MacroDefine>();
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
 
             definitions.Add(GenerateEnumFlagDefinition(_params.albedo, "albedo"));
             definitions.Add(GenerateEnumFlagDefinition(_params.bump_mapping, "bump_mapping"));
@@ -344,7 +345,7 @@ namespace TagTool.ShaderGenerator
             CheckImplementedParameters(_params.soft_fade);
         }
 
-        public static IEnumerable<DirectXUtilities.MacroDefine> GenerateEnumsDefinitions()
+        public static IEnumerable<DirectX.MacroDefine> GenerateEnumsDefinitions()
         {
             var defs_Albedo = GenerateEnumDefinitions(typeof(Albedo));
             var defs_Bump_Mapping = GenerateEnumDefinitions(typeof(Bump_Mapping));
@@ -358,7 +359,7 @@ namespace TagTool.ShaderGenerator
             var defs_Misc = GenerateEnumDefinitions(typeof(Misc));
             var defs_Distortion = GenerateEnumDefinitions(typeof(Distortion));
             var defs_Soft_fade = GenerateEnumDefinitions(typeof(Soft_Fade));
-            var defs = (new List<DirectXUtilities.MacroDefine> { })
+            var defs = (new List<DirectX.MacroDefine> { })
                 .Concat(defs_Albedo)
                 .Concat(defs_Bump_Mapping)
                 .Concat(defs_Alpha_Test)

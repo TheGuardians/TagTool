@@ -6,7 +6,7 @@
 
 namespace TagTool {
 
-	namespace Utilities
+	namespace Util
 	{
 		private ref class Helpers {
 		public:

@@ -18,7 +18,10 @@
     <ClInclude Include="Helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXUtilities.h">
+    <ClInclude Include="D3DIncludeExt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -26,7 +29,10 @@
     <ClCompile Include="Helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXUtilities.cpp">
+    <ClCompile Include="D3DIncludeExt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

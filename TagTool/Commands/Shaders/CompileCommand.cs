@@ -7,6 +7,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Util;
 
 namespace TagTool.Commands.Shaders
 {
@@ -54,7 +55,7 @@ namespace TagTool.Commands.Shaders
             byte[] bytecode = null;
             if (use_assembly_compiler)
             {
-                bytecode = Utilities.DirectXUtilities.AssemblePCShader(shader_code);
+                bytecode = DirectX.AssemblePCShader(shader_code);
             }
             else
             {

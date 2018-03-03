@@ -13,7 +13,7 @@
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
-using namespace TagTool::Utilities;
+using namespace TagTool::Util;
 
 std::string Helpers::MarshalStringA(String^ s)
 {
