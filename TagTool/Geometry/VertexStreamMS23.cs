@@ -324,15 +324,15 @@ namespace TagTool.Geometry
         {
             return new TinyPositionVertex
             {
-                Position = _stream.ReadUShort4N(),
-                Texcoord = _stream.ReadUByte4N(),
+                Position = _stream.ReadShort4N(),
+                Texcoord = _stream.ReadSByte4N(),
                 Color = _stream.ReadColor()
             };
         }
 
         public void WriteTinyPositionVertex(TinyPositionVertex v)
         {
-            _stream.WriteUShort4N(v.Position);
+            _stream.WriteShort4N(v.Position);
             _stream.WriteUByte4N(v.Texcoord);
             _stream.WriteColor(v.Color);
         }
