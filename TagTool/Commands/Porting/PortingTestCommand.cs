@@ -1310,6 +1310,37 @@ namespace TagTool.Commands.Porting
                 "00035767,EF2B8BB7,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EF238BAF",
                 "00035910,EFBA8C46,EFC08C4C,0333,478CBBEF,Group,Void,switch_zone_set,// EFBD8C49",
             },
+            ["020_base"] = new List<string>
+            {
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,,begin",
+                "00000546,E5950222,FFFFFFFF,0376,230296E5,Group,Void,,cinematic_skip_stop_internal,E5970224",
+            },
+
+            ["040_voi"] = new List<string>
+            {
+                "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
+                "00009478,887A2506,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
+                "00012297,937D3009,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
+            },
+
+            ["070_waste"] = new List<string>
+            {
+                "00000546,E5950222,FFFFFFFF,0376,230296E5,Group,Void,,cinematic_skip_stop_internal,D:E5970224",
+
+                // Default script lines:
+                "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,",
+                "00009478,887A2506,887B2507,0013,3C000040,Expression,Ai,ai,",
+                "00012297,937D3009,937E300A,0002,00000000,Expression,FunctionName,,if",
+            },
+
+            ["110_hc"] = new List<string>
+            {
+                "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal",
+            },
+            ["120_halo"] = new List<string>
+            {
+                "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal,D:E4A90136",
+            },
         };
     }
 }
