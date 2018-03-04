@@ -260,33 +260,14 @@ namespace TagTool.Geometry
         }
 
         //
-        // Bad conversion
+        // Bad Conversion
         //
-
-        public float ReadSByte4NToFloat()
-        {
-            return BitConverter.ToSingle(BitConverter.GetBytes((uint)(Reader.ReadUInt32() + 0x7F7F7F7F)), 0);
-        }
 
         public RealQuaternion ReadSByte4NToUByte4N()
         {
             var result = new byte[4];
             var value = Reader.ReadUInt32() + 0x7f7f7f7f;
             return new RealQuaternion((byte)(value) / 255.0f, (byte)(value >> 8) / 255.0f, (byte)(value >> 16) / 255.0f, (byte)(value >> 24) / 255.0f);
-        }
-
-        public RealQuaternion ReadTPPosition()
-        {
-            return new RealQuaternion(Read(4, () => ChangeBasis(DenormalizeUnsigned(Reader.ReadUInt16()))));
-        }
-
-        public RealQuaternion ReadTPRotation()
-        {
-            var x = InverseChangeBasis(DenormalizeSigned(Reader.ReadSByte()));
-            var y = InverseChangeBasis(DenormalizeSigned(Reader.ReadSByte()));
-            var z = InverseChangeBasis(DenormalizeSigned(Reader.ReadSByte()));
-            var w = InverseChangeBasis(DenormalizeSigned(Reader.ReadSByte()));
-            return new RealQuaternion(w, z, y, x);
         }
 
         //
@@ -296,7 +277,7 @@ namespace TagTool.Geometry
         /// <summary> 
         /// Force range [-1,1] on input float
         /// </summary>
-        private static float Clamp(float e)
+        public static float Clamp(float e)
         {
             return Math.Max(-1.0f, Math.Min(1.0f, e));
         }
@@ -304,27 +285,9 @@ namespace TagTool.Geometry
         /// <summary> 
         /// Force range [a,b] on input float
         /// </summary>
-        private static float Clamp(float e, float a, float b)
+        public static float Clamp(float e, float a, float b)
         {
             return Math.Max(a, Math.Min(b, e));
-        }
-
-        /// <summary> 
-        /// Change basis [0,1] to [-1,1] uniformly
-        /// </summary>
-        private static float ChangeBasis(float value)
-        {
-            value = Clamp(value,0.0f,1.0f);
-            return 2.0f * (value - 0.5f);
-        }
-
-        /// <summary> 
-        /// Change basis [-1,1] to [0,1] uniformly
-        /// </summary>
-        private static float InverseChangeBasis(float value)
-        {
-            value = Clamp(value);
-            return (value + 1.0f)/2.0f;
         }
 
         /// <summary> 

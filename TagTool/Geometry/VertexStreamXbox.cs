@@ -253,8 +253,8 @@ namespace TagTool.Geometry
         {
             return new TinyPositionVertex
             {   
-                Position = Stream.ReadTPPosition(),
-                Texcoord = Stream.ReadTPRotation(),
+                Position = Stream.ReadUShort4N(),
+                Normal = Stream.ReadSByte4N(),
                 Color = Stream.ReadColor()
             };
         }

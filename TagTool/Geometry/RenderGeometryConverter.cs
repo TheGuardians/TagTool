@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using System.Linq;
 
 namespace TagTool.Geometry
 {
@@ -49,6 +50,7 @@ namespace TagTool.Geometry
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        //v.Tangent = new RealQuaternion(0,0,0,0);
                         outVertexStream.WriteWorldVertex(v);
                     });
                     break;
@@ -59,6 +61,7 @@ namespace TagTool.Geometry
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteRigidVertex(v);
                     });
                     break;
@@ -69,6 +72,7 @@ namespace TagTool.Geometry
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteSkinnedVertex(v);
                     });
                     break;
@@ -120,7 +124,8 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.TinyPosition:
                     ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) => 
                     {
-                        
+                        v.Position = ConvertPositionShort(v.Position);
+                        v.Normal = ConvertNormal(v.Normal);
                         outVertexStream.WriteTinyPositionVertex(v);
                     });
                     
@@ -510,5 +515,54 @@ namespace TagTool.Geometry
 
             return geometry;
         }
+
+        /// <summary> 
+        /// Change basis [0,1] to [-1,1] uniformly
+        /// </summary>
+        private static float ConvertFromNormalBasis(float value)
+        {
+            value = VertexElementStream.Clamp(value, 0.0f, 1.0f);
+            return 2.0f * (value - 0.5f);
+        }
+
+        /// <summary> 
+        /// Change basis [-1,1] to [0,1] uniformly
+        /// </summary>
+        private static float ConvertToNormalBasis(float value)
+        {
+            value = VertexElementStream.Clamp(value);
+            return (value / 2.0f) + 0.5f;
+        }
+
+        /// <summary>
+        /// Modify value to account for some rounding error
+        /// </summary>
+        private static float FixRoundingShort(float value)
+        {
+            value = VertexElementStream.Clamp(value);
+            if (value > 0 && value < 1)
+            {
+                value += 1.0f / 32767.0f;
+                value = VertexElementStream.Clamp(value);
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Convert H3 normal to HO normal for tinyposition vertex
+        /// </summary>
+        public RealQuaternion ConvertNormal(RealQuaternion normal)
+        {
+            return new RealQuaternion(normal.ToArray().Select(e => ConvertToNormalBasis(e)).Reverse());
+        }
+
+        /// <summary>
+        /// Convert H3 position to HO position including rounding error for tinyposition vertex
+        /// </summary>
+        public RealQuaternion ConvertPositionShort(RealQuaternion position)
+        {
+            return new RealQuaternion(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))));
+        }
+
     }
 }
