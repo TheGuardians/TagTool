@@ -132,7 +132,7 @@ namespace TagTool.Geometry
         {
             return new LinearPrtData
             {
-                BlendWeight = Stream.ReadSByte4NToUByte4N()
+                BlendWeight = Stream.ReadSByte4N()
             };
         }
 
@@ -241,11 +241,12 @@ namespace TagTool.Geometry
         {
             return new StaticPerVertexData
             {
-                Texcoord1 = Stream.ReadSByte4NToUByte4N(),
-                Texcoord2 = Stream.ReadSByte4NToUByte4N(),
-                Texcoord3 = Stream.ReadSByte4NToUByte4N(),
-                Texcoord4 = Stream.ReadSByte4NToUByte4N(),
-                Texcoord5 = Stream.ReadSByte4NToUByte4N()
+                
+                Texcoord1 = Stream.ReadSByte4N(),
+                Texcoord2 = Stream.ReadSByte4N(),
+                Texcoord3 = Stream.ReadSByte4N(),
+                Texcoord4 = Stream.ReadSByte4N(),
+                Texcoord5 = Stream.ReadSByte4N()
             };
         }
 

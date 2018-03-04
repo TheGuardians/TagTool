@@ -82,7 +82,15 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.StaticPerVertex:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) => outVertexStream.WriteStaticPerVertexData(v));
+                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
+                    {
+                        v.Texcoord1 = ConvertNormal(v.Texcoord1);
+                        v.Texcoord2 = ConvertNormal(v.Texcoord2);
+                        v.Texcoord3 = ConvertNormal(v.Texcoord3);
+                        v.Texcoord4 = ConvertNormal(v.Texcoord4);
+                        v.Texcoord5 = ConvertNormal(v.Texcoord5);
+                        outVertexStream.WriteStaticPerVertexData(v);
+                    });
                     break;
 
                 case VertexBufferFormat.AmbientPrt:
@@ -90,7 +98,11 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.LinearPrt:
-                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) => outVertexStream.WriteLinearPrtData(v));
+                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) =>
+                    {
+                        v.BlendWeight = ConvertNormal(v.BlendWeight);
+                        outVertexStream.WriteLinearPrtData(v);
+                    });
                     break;
 
                 case VertexBufferFormat.QuadraticPrt:

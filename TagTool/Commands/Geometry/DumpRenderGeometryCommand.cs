@@ -85,7 +85,7 @@ namespace TagTool.Commands.Geometry
 
                             var vertexBuffer = definition.VertexBuffers[i].Definition;
                             
-                            fileWriter.WriteLine($"Offset = {vertexBuffer.Data.Address.Offset.ToString("X8")} Count = {vertexBuffer.Count} Size = {vertexBuffer.VertexSize}, Format = {vertexBuffer.Format.ToString()}");
+                            //fileWriter.WriteLine($"Offset = {vertexBuffer.Data.Address.Offset.ToString("X8")} Count = {vertexBuffer.Count} Size = {vertexBuffer.VertexSize}, Format = {vertexBuffer.Format.ToString()}");
                             //fileWriter.WriteLine(Environment.NewLine);
                             
                             //fileWriter.WriteLine($"Vertex buffer index: {i}");
@@ -95,11 +95,25 @@ namespace TagTool.Commands.Geometry
                                 case VertexBufferFormat.TinyPosition:
                                     for (var j = 0; j < vertexBuffer.Count; j++)
                                     {
-                                        /*
+                                        
                                         fileWriter.WriteLine($"Position = ({edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")},{edResourceReader.ReadUInt16().ToString("X4")})");
                                         fileWriter.WriteLine($"Normal   = ({edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")},{edResourceReader.ReadByte().ToString("X2")})");
                                         fileWriter.WriteLine($"Color    = {edResourceReader.ReadUInt32().ToString("X8")}");
-                                        */
+                                        
+                                    }
+                                    break;
+
+                                case VertexBufferFormat.StaticPerVertex:
+                                    for (var j = 0; j < vertexBuffer.Count; j++)
+                                    {
+                                        fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
+                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
+                                        fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
+                                        fileWriter.WriteLine(Environment.NewLine);
                                     }
                                     break;
                                     /*
@@ -184,19 +198,7 @@ namespace TagTool.Commands.Geometry
                                         break;
 
 
-                                    case VertexBufferFormat.StaticPerVertex:
-                                        for (var j = 0; j < vertexBuffer.Count; j++)
-                                        {
-                                            fileWriter.WriteLine($"{vertexBuffer.Format} index: {j}:");
-                                            fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"Texcoord = " + edResourceReader.ReadUInt32().ToString("X8"));
-                                            fileWriter.WriteLine($"End of {vertexBuffer.Format} index: {j}");
-                                            fileWriter.WriteLine(Environment.NewLine);
-                                        }
-                                        break;
+                                    
                                         */
                                     /*
                                         case VertexBufferFormat.QuadraticPrt:

@@ -258,18 +258,7 @@ namespace TagTool.Geometry
             for (var i = 0; i < count; i++)
                 writeAction(elems[i]);
         }
-
-        //
-        // Bad Conversion
-        //
-
-        public RealQuaternion ReadSByte4NToUByte4N()
-        {
-            var result = new byte[4];
-            var value = Reader.ReadUInt32() + 0x7f7f7f7f;
-            return new RealQuaternion((byte)(value) / 255.0f, (byte)(value >> 8) / 255.0f, (byte)(value >> 16) / 255.0f, (byte)(value >> 24) / 255.0f);
-        }
-
+        
         //
         //  Helpers
         //
