@@ -414,16 +414,16 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public sbyte DecoratorIndex_H3;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public sbyte DecoratorGeometryIndex_H3;
+                public sbyte DecoratorVariant_H3;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorIndex_HO;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)] 
-                public short Unknown;
+                public short DecoratorVariant_HO;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorGeometryIndex_HO;
+                public short DecoratorGeometryIndex;
 
                
 

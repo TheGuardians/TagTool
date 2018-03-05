@@ -24,9 +24,10 @@ namespace TagTool.Commands.Porting
                 cluster.Bsp = instance;
                 foreach(var grid in cluster.DecoratorGrids)
                 {
-                    grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3; 
+                    grid.DecoratorGeometryIndex = grid.DecoratorIndex_H3; 
                     grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
-                    grid.Unknown = 0;
+
+                    grid.DecoratorVariant_HO = grid.DecoratorVariant_H3;
                 }
             }
 
