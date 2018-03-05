@@ -357,6 +357,9 @@ namespace TagTool.Commands.Porting
             if (groupTag == "cisc")
                 blamDefinition = ConvertCinematicScene((CinematicScene)blamDefinition);
 
+            if (groupTag == "crte")
+                blamDefinition = ConvertCortanaEffect((CortanaEffectDefinition)blamDefinition);
+
             if (groupTag == "effe")
             {
                 var effect = (Effect)blamDefinition;

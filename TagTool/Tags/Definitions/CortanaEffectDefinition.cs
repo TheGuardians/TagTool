@@ -29,11 +29,24 @@ namespace TagTool.Tags.Definitions
 
         public List<UnknownBlock3> Unknown7;
         
-        [TagStructure(Size = 0x18)]
+        [TagStructure(MaxVersion = CacheVersion.Halo3Retail, Size = 0x18)]
+        [TagStructure(MinVersion = CacheVersion.HaloOnline106708, Size = 0x48)]
         public class UnknownBlock1
         {
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public List<UnknownBlock4> Unknown1;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public List<UnknownBlock5> Unknown2;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public UnknownObject Unknown3;
+
+            [TagStructure(Size = 0x48)]
+            public class UnknownObject
+            {
+                public UnknownBlock4 Unknown1;
+                public UnknownBlock5 Unknown2;
+            }
 
             [TagStructure(Size = 0x20)]
             public class UnknownBlock4
