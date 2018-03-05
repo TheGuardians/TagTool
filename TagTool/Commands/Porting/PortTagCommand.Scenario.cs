@@ -80,6 +80,26 @@ namespace TagTool.Commands.Porting
 
                     foreach(var baseSquad in squad.BaseSquad)
                     {
+                        //
+                        // Convert StringIds?
+                        //
+
+                        baseSquad.InitialState = ConvertStringId(baseSquad.InitialState);
+
+                        foreach(var spawnpoint in baseSquad.StartingLocations)
+                        {
+                            spawnpoint.Name = ConvertStringId(spawnpoint.Name);
+                            spawnpoint.ActorVariant = ConvertStringId(spawnpoint.ActorVariant);
+                            spawnpoint.VehicleVariant = ConvertStringId(spawnpoint.VehicleVariant);
+
+                            foreach (var squadpoint in spawnpoint.Points)
+                            {
+                                squadpoint.ActivityName = ConvertStringId(squadpoint.ActivityName);
+                            }
+                        }
+                        
+
+
                         //Append all starting locations from all baseSquads into Spawnpoints
                         foreach (var spawnpoint in baseSquad.StartingLocations)
                             squad.SpawnPoints.Add(spawnpoint);
