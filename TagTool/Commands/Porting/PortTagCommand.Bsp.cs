@@ -37,18 +37,19 @@ namespace TagTool.Commands.Porting
 
             // Disable decorator geometry for now entirely
 
-            
+            /*
             for (var i = 0; i < sbsp.Decorators.Count; i++)
                 sbsp.Decorators[i] = new TagReferenceBlock { Instance = CacheContext.TagCache.Index[0x2ECD] };
             
+         */
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
-                sbsp.Clusters[i].DecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
+                //sbsp.Clusters[i].DecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
                 sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
                 sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
             }
             
-
+            
             //
             // Remove decals
             //
