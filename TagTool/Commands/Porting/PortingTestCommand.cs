@@ -1310,6 +1310,12 @@ namespace TagTool.Commands.Porting
                 "00035767,EF2B8BB7,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EF238BAF",
                 "00035910,EFBA8C46,EFC08C4C,0333,478CBBEF,Group,Void,switch_zone_set,// EFBD8C49",
             },
+
+            ["005_intro"] = new List<string>
+            {
+                "00002585,ED8C0A19,ED920A1F,0424,1A0A8DED,Group,Void,,chud_show_shield,ED8F0A1C"
+            },
+
             ["020_base"] = new List<string>
             {
                 "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,,begin",
@@ -1337,6 +1343,7 @@ namespace TagTool.Commands.Porting
             {
                 "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal",
             },
+
             ["120_halo"] = new List<string>
             {
                 "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal,D:E4A90136",
