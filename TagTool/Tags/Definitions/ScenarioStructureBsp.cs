@@ -424,9 +424,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorGeometryIndex;
-
-               
-
+                
                 public int DecoratorGeometryOffset;
                 public RealPoint3d Position;
                 public float Radius;

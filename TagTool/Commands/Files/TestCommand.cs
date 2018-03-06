@@ -54,7 +54,7 @@ namespace TagTool.Commands.Files
                 { "nametag", "Name all dependencies of a named tag using the same nameUsage: test nametag all shaders\\invalid." },
                 { "listtags", "Listtags with a simplified output." },
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
-                { "shadowfixtest", "Hack/fix a weapon or forge object's shadow mehs." }
+                { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." }
             };
 
             switch (name)
@@ -67,7 +67,7 @@ namespace TagTool.Commands.Files
                 case "listtags": return ListTags(args);
                 case "dumpcommandsscript": return DumpCommandsScript(args);
                 case "temp": return Temp(args);
-                case "shadowfixtest": return ShadowFixTest(args);
+                case "shadowfix": return ShadowFix(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -726,140 +726,133 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-        
-        public bool ShadowFixTest(List<string> args)
+
+        public bool ShadowFix(List<string> args)
         {
-            var instance1 = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            Model tag1;
-
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, instance1);
-                tag1 = CacheContext.Deserializer.Deserialize<Model>(edContext);
-            }
+                var hlmtInstance = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
 
-            tag1.CollisionRegions.Add(new Model.CollisionRegion { Permutations = new List<Model.CollisionRegion.Permutation> { new Model.CollisionRegion.Permutation() } });
-
-            Console.WriteLine("Serializing...");
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context1 = new TagSerializationContext(stream, CacheContext, instance1);
-                CacheContext.Serializer.Serialize(context1, tag1);
-            }
-
-            RenderModel tag2;
-
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, tag1.RenderModel);
-                tag2 = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
-            }
-
-            var resourceContext2 = new ResourceSerializationContext(tag2.Geometry.Resource);
-
-            var def2 = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext2);
-
-            def2.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
-            {
-                Address = 0,
-                UnusedC = 0,
-                Definition = new IndexBufferDefinition
+                if (!hlmtInstance.IsInGroup("hlmt"))
                 {
-                    Format = IndexBufferFormat.TriangleStrip,
-                    Data = new TagData
-                    {
-                        Size = 0x6,
-                        Address = def2.IndexBuffers[0].Definition.Data.Address
-                    }
+                    Console.WriteLine($"ERROR: tag group must be 'hlmt'. Supplied tag group was '{hlmtInstance.Group.Tag}'.");
+                    return false;
                 }
-            });
 
-            def2.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
-            {
-                Definition = new VertexBufferDefinition
-                {
-                    Count = 3,
-                    VertexSize = 0x38,
-                    Data = new TagData
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtInstance);
+                var hlmtDefinition = CacheContext.Deserializer.Deserialize<Model>(edContext);
+
+                hlmtDefinition.CollisionRegions.Add(
+                    new Model.CollisionRegion
                     {
-                        Size = 0xA8,
-                        Address = def2.VertexBuffers[0].Definition.Data.Address
+                        Permutations = new List<Model.CollisionRegion.Permutation>
+                        {
+                            new Model.CollisionRegion.Permutation()
+                        }
+                    });
+
+                edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtInstance);
+                CacheContext.Serializer.Serialize(edContext, hlmtDefinition);
+                
+                edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtDefinition.RenderModel);
+                var modeDefinition = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
+
+                var resourceContext = new ResourceSerializationContext(modeDefinition.Geometry.Resource);
+                var geometryResource = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+
+                geometryResource.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                {
+                    Address = 0,
+                    UnusedC = 0,
+                    Definition = new IndexBufferDefinition
+                    {
+                        Format = IndexBufferFormat.TriangleStrip,
+                        Data = new TagData
+                        {
+                            Size = 0x6,
+                            Address = geometryResource.IndexBuffers[0].Definition.Data.Address
+                        }
                     }
-                }
-            });
+                });
 
-            def2.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
-            {
-                Definition = new VertexBufferDefinition
+                geometryResource.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
                 {
-                    Count = 3,
-                    VertexSize = 0x38,
-                    Data = new TagData
+                    Definition = new VertexBufferDefinition
                     {
-                        Size = 0xA8,
-                        Address = def2.VertexBuffers[1].Definition.Data.Address
+                        Count = 3,
+                        VertexSize = 0x38,
+                        Data = new TagData
+                        {
+                            Size = 0xA8,
+                            Address = geometryResource.VertexBuffers[0].Definition.Data.Address
+                        }
                     }
-                }
-            });
+                });
 
-            var context = new ResourceSerializationContext(tag2.Geometry.Resource);
-            CacheContext.Serializer.Serialize(context, def2);
-
-            tag2.Geometry.Meshes.Add(new Mesh
-            {
-                VertexBuffers = new ushort[] { (ushort)(def2.VertexBuffers.Count - 2), 0xFFFF, 0xFFFF, (ushort)(def2.VertexBuffers.Count - 1), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
-                IndexBuffers = new ushort[] { (ushort)(def2.IndexBuffers.Count - 1), 0xFFFF },
-                Type = VertexType.Rigid,
-                PrtType = PrtType.Ambient,
-                IndexBufferType = PrimitiveType.TriangleStrip,
-                RigidNodeIndex = 0,
-                Parts = new List<Mesh.Part>
+                geometryResource.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
                 {
-                    new Mesh.Part
+                    Definition = new VertexBufferDefinition
                     {
-                        TransparentSortingIndex = -1,
-                        SubPartCount = 1,
-                        Type = 2,
-                        Flags = Mesh.Part.PartFlags.PerVertexLightmapPart,
-                        VertexCount = 3
+                        Count = 3,
+                        VertexSize = 0x38,
+                        Data = new TagData
+                        {
+                            Size = 0xA8,
+                            Address = geometryResource.VertexBuffers[1].Definition.Data.Address
+                        }
+                    }
+                });
+
+                CacheContext.Serializer.Serialize(resourceContext, geometryResource);
+
+                modeDefinition.Geometry.Meshes.Add(new Mesh
+                {
+                    VertexBuffers = new ushort[] { (ushort)(geometryResource.VertexBuffers.Count - 2), 0xFFFF, 0xFFFF, (ushort)(geometryResource.VertexBuffers.Count - 1), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
+                    IndexBuffers = new ushort[] { (ushort)(geometryResource.IndexBuffers.Count - 1), 0xFFFF },
+                    Type = VertexType.Rigid,
+                    PrtType = PrtType.Ambient,
+                    IndexBufferType = PrimitiveType.TriangleStrip,
+                    RigidNodeIndex = 0,
+                    Parts = new List<Mesh.Part>
+                    {
+                        new Mesh.Part
+                        {
+                            TransparentSortingIndex = -1,
+                            SubPartCount = 1,
+                            Type = Mesh.Part.PartType.OpaqueShadowCasting,
+                            Flags = Mesh.Part.PartFlags.PerVertexLightmapPart,
+                            VertexCount = 3
+                        },
                     },
-                },
-
-                SubParts = new List<Mesh.SubPart>
-                {
-                    new Mesh.SubPart
+                    SubParts = new List<Mesh.SubPart>
                     {
-                        FirstIndex = 0,
-                        IndexCount = 3,
-                        PartIndex = 0,
-                        VertexCount = 0,
+                        new Mesh.SubPart
+                        {
+                            FirstIndex = 0,
+                            IndexCount = 3,
+                            PartIndex = 0,
+                            VertexCount = 0
+                        }
                     }
-                }
-            });
+                });
 
-            tag2.Regions.Add(new RenderModel.Region { Permutations = new List<RenderModel.Region.Permutation> { new RenderModel.Region.Permutation { MeshIndex = (short)(tag2.Geometry.Meshes.Count - 1) } } });
+                modeDefinition.Regions.Add(
+                    new RenderModel.Region
+                    {
+                        Permutations = new List<RenderModel.Region.Permutation>
+                        {
+                            new RenderModel.Region.Permutation
+                            {
+                                MeshIndex = (short)(modeDefinition.Geometry.Meshes.Count - 1)
+                            }
+                        }
+                    });
 
-            // def2.IndexBuffers.Add(def1.IndexBuffers[0]);
-            // def2.IndexBuffers.Last().Definition.Data.Address = def2.IndexBuffers[0].Definition.Data.Address;
-
-            // def2.VertexBuffers.Add(def1.VertexBuffers[0]);
-            // def2.VertexBuffers[2].Definition.Data.Address = def2.VertexBuffers[0].Definition.Data.Address;
-            // def2.VertexBuffers.Add(def1.VertexBuffers[1]);
-            // def2.VertexBuffers[3].Definition.Data.Address = def2.VertexBuffers[1].Definition.Data.Address;
-
-
-            Console.WriteLine("Serializing...");
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context2 = new TagSerializationContext(stream, CacheContext, tag1.RenderModel);
-                CacheContext.Serializer.Serialize(context2, tag2);
+                edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtDefinition.RenderModel);
+                CacheContext.Serializer.Serialize(edContext, modeDefinition);
             }
-
-            Console.WriteLine("Done.");
 
             return true;
         }
-
     }
 }

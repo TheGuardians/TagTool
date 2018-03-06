@@ -65,7 +65,7 @@ namespace TagTool.Geometry
             /// <summary>
             /// The type of the mesh part.
             /// </summary>
-            public sbyte Type;
+            public PartType Type;
 
             /// <summary>
             /// The flags of the mesh part.
@@ -76,6 +76,16 @@ namespace TagTool.Geometry
             /// The number of vertices that the mesh part uses.
             /// </summary>
             public ushort VertexCount;
+
+            public enum PartType : sbyte
+            {
+                NotDrawn,
+                OpaqueShadowOnly,
+                OpaqueShadowCasting,
+                OpaqueNonshadowing,
+                Transparent,
+                LightmapOnly
+            }
 
             /// <summary>
             /// WARNING: EXPERIMENTAL H5F VALUES!!!

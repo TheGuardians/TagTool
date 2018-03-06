@@ -172,9 +172,25 @@ namespace TagTool.Geometry
                 outIndexStream.WriteIndex(inIndexStream.ReadIndex());
         }
 
-        public void CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream)
+        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, int count)
         {
-            var indexBuffer = resourceDefinition.IndexBuffers[0].Definition;
+            resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+            {
+                Definition = new IndexBufferDefinition
+                {
+                    Format = IndexBufferFormat.TriangleStrip,
+                    Data = new TagData
+                    {
+                        Size = count * 2,
+                        Unused4 = 0,
+                        Unused8 = 0,
+                        Address = new CacheAddress(),
+                        Unused10 = 0
+                    }
+                }
+            });
+
+            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
 
             var indexCount = indexBuffer.Data.Size / 2;
             
@@ -187,6 +203,8 @@ namespace TagTool.Geometry
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)j);
+
+            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
 
         public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, List<RenderMaterial> materials)
@@ -374,10 +392,6 @@ namespace TagTool.Geometry
                 IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
             };
 
-            var vertexCount = 0; // For render geometry without index buffer only (dctr related mode)
-            var containsDecorators = false;
-            var createIndexBuffer = false;
-
             using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.DefinitionData))
             using (var rsrcDefReader = new EndianReader(rsrcDefStream, EndianFormat.BigEndian))
             {
@@ -410,51 +424,27 @@ namespace TagTool.Geometry
                             }
                         }
                     });
-                    containsDecorators = containsDecorators || rsrcDef.VertexBuffers[i].Definition.Format == VertexBufferFormat.Decorator ? true : false;
-                    vertexCount = rsrcDef.VertexBuffers[i].Definition.Count;
                 }
 
                 rsrcDefReader.Skip(vertexBufferCount * 12);
 
-                if (indexBufferCount == 0 && containsDecorators)
+                for (var i = 0; i < indexBufferCount; i++)
                 {
-                    createIndexBuffer = true;
                     rsrcDef.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
                     {
                         Definition = new IndexBufferDefinition
                         {
-                            Format = IndexBufferFormat.TriangleStrip,
+                            Format = (IndexBufferFormat)rsrcDefReader.ReadInt32(),
                             Data = new TagData
                             {
-                                Size = vertexCount * 2,
-                                Unused4 = 0,
-                                Unused8 = 0,
-                                Address = new CacheAddress(),
-                                Unused10 = 0
+                                Size = rsrcDefReader.ReadInt32(),
+                                Unused4 = rsrcDefReader.ReadInt32(),
+                                Unused8 = rsrcDefReader.ReadInt32(),
+                                Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
+                                Unused10 = rsrcDefReader.ReadInt32()
                             }
                         }
                     });
-                }
-                else
-                {
-                    for (var i = 0; i < indexBufferCount; i++)
-                    {
-                        rsrcDef.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
-                        {
-                            Definition = new IndexBufferDefinition
-                            {
-                                Format = (IndexBufferFormat)rsrcDefReader.ReadInt32(),
-                                Data = new TagData
-                                {
-                                    Size = rsrcDefReader.ReadInt32(),
-                                    Unused4 = rsrcDefReader.ReadInt32(),
-                                    Unused8 = rsrcDefReader.ReadInt32(),
-                                    Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
-                                    Unused10 = rsrcDefReader.ReadInt32()
-                                }
-                            }
-                        });
-                    }
                 }
             }
 
@@ -463,42 +453,37 @@ namespace TagTool.Geometry
             //
 
             using (var edResourceStream = new MemoryStream())
+            using (var blamResourceStream = new MemoryStream(rsrcData))
             {
                 //
                 // Convert Blam render_geometry_api_resource_definition
                 //
 
-                using (var blamResourceStream = new MemoryStream(rsrcData))
+                for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                 {
-                    //
-                    // Convert Blam vertex buffers
-                    //
-
-                    for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
-                    {
-                        blamResourceStream.Position = rsrcDefEntry.Fixups[i].Offset;
-                        ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
-                    }
-
-                    //
-                    // Convert Blam index buffers
-                    //
-
-                    if (createIndexBuffer)
-                    {
-                        geometry.Meshes[0].IndexBuffers[0] = 0; // Fix valid index buffer
-                        CreateIndexBuffer(rsrcDef, edResourceStream);
-                    }
-                    else
-                    {
-                        for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
-                        {
-                            blamResourceStream.Position = rsrcDefEntry.Fixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
-                            ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
-                        }
-                    }
+                    blamResourceStream.Position = rsrcDefEntry.Fixups[i].Offset;
+                    ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
                 }
 
+                for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
+                {
+                    blamResourceStream.Position = rsrcDefEntry.Fixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
+                    ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
+                }
+
+                foreach (var mesh in geometry.Meshes)
+                {
+                    if (!mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+                        continue;
+
+                    var indexCount = 0;
+
+                    foreach (var part in mesh.Parts)
+                        indexCount += part.IndexCount;
+
+                    mesh.IndexBuffers[0] = CreateIndexBuffer(rsrcDef, edResourceStream, indexCount);
+                }
+                
                 //
                 // Finalize the new ElDorado geometry resource
                 //
@@ -575,6 +560,5 @@ namespace TagTool.Geometry
         {
             return new RealQuaternion(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))));
         }
-
     }
 }
