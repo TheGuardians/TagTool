@@ -168,7 +168,7 @@ namespace TagTool.Commands.Porting
 
         private CortanaEffectDefinition ConvertCortanaEffect(CortanaEffectDefinition crte)
         {
-            foreach(var block in crte.Unknown5)
+            foreach(var block in crte.Unknown2)
             {
                 block.Unknown3 = new CortanaEffectDefinition.UnknownBlock1.UnknownObject();
 
