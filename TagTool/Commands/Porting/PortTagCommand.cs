@@ -82,18 +82,15 @@ namespace TagTool.Commands.Porting
 
                     case "new":
                         IsNew = true;
-                        UseNull = false;
                         break;
 
                     case "single":
                         IsRecursive = false;
-                        UseNull = false;
                         IsNew = true;
                         break;
 
                     case "*":
                         IsWildcard = true;
-                        UseNull = false;
                         IsNew = true;
                         break;
 
@@ -247,6 +244,32 @@ namespace TagTool.Commands.Porting
                     }
                 }
             }
+
+            //
+            // If isReplacing is true, check current tags if there is an existing instance to replace
+            //
+
+            if (IsReplacing)
+            {
+                var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Filename);
+
+                foreach (var entry in listEntries)
+                {
+                    var tagInstance = CacheContext.GetTag(entry.Key);
+
+                    if (tagInstance.Group.Tag == groupTag)
+                    {
+                        edTag = tagInstance;
+                        //If not recursive, use existing tags
+                        if (!IsRecursive)
+                            IsReplacing = false;
+                        break;
+                    }
+                }
+            }
+            
+
+
 
             var replacedTags = ReplacedTags.ContainsKey(groupTag) ?
                 (ReplacedTags[groupTag] ?? new List<string>()) :
