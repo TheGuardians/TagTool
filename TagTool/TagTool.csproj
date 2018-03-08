@@ -374,6 +374,7 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\DecalTemplateShaderGenerator.cs" />

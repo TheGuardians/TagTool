@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
@@ -37,7 +38,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance SuperDetonation;
         public CachedTagInstance SuperDetonationDamage;
         public CachedTagInstance DetonationSound;
-        public DamageReportingTypeValue DamageReportingType;
+        public DamageReportingType DamageReportingType;
 
         [TagField(Padding = true, Length = 3)]
         public byte[] Unused2;
@@ -106,74 +107,6 @@ namespace TagTool.Tags.Definitions
             Quiet
         }
         
-        public enum DamageReportingTypeValue : sbyte
-        {
-            GuardiansUnknown,
-            Guardians,
-            FallingDamage,
-            GenericCollision,
-            ArmorLockCrush,
-            GenericMelee,
-            GenericExplosion,
-            Magnum,
-            PlasmaPistol,
-            Needler,
-            Mauler,
-            Smg,
-            PlasmaRifle,
-            BattleRifle,
-            Carbine,
-            Shotgun,
-            SniperRifle,
-            BeamRifle,
-            AssaultRifle,
-            Spiker,
-            FuelRodCannon,
-            MissilePod,
-            RocketLauncher,
-            SpartanLaser,
-            BruteShot,
-            Flamethrower,
-            SentinelGun,
-            EnergySword,
-            GravityHammer,
-            FragGrenade,
-            PlasmaGrenade,
-            SpikeGrenade,
-            FirebombGrenade,
-            Flag,
-            Bomb,
-            BombExplosion,
-            Ball,
-            MachinegunTurret,
-            PlasmaCannon,
-            PlasmaMortar,
-            PlasmaTurret,
-            ShadeTurret,
-            Banshee,
-            Ghost,
-            Mongoose,
-            Scorpion,
-            ScorpionGunner,
-            Spectre,
-            SpectreGunner,
-            Warthog,
-            WarthogGunner,
-            WarthogGaussTurret,
-            Wraith,
-            WraithGunner,
-            Tank,
-            Chopper,
-            Hornet,
-            Mantis,
-            Prowler,
-            SentinelBeam,
-            SentinelRpg,
-            Teleporter,
-            Tripmine,
-            Dmr
-        }
-
         [TagStructure(Size = 0x40)]
         public class MaterialResponse
         {

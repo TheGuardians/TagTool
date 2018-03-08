@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using TagTool.Damage;
 
 namespace TagTool.Commands.Porting
 {
@@ -398,23 +399,6 @@ namespace TagTool.Commands.Porting
             if (groupTag == "glvs" && UseShaderTest)
                 blamDefinition = ConvertGlobalVertexShader((GlobalVertexShader)blamDefinition);
 
-            if (groupTag == "hlmt")
-            {
-                var hlmt = (Model)blamDefinition;
-
-                foreach (var damage in hlmt.NewDamageInfo)
-                {
-                    damage.CollisionDamageReportingType++;
-                    damage.ResponseDamageReportingType++;
-
-                    if (damage.CollisionDamageReportingType >= Model.NewDamageInfoBlock.DamageReportingTypeValue.ArmorLockCrush)
-                        damage.CollisionDamageReportingType++;
-
-                    if (damage.ResponseDamageReportingType >= Model.NewDamageInfoBlock.DamageReportingTypeValue.ArmorLockCrush)
-                        damage.ResponseDamageReportingType++;
-                }
-            }
-
             if (groupTag == "jmad")
                 blamDefinition = ConvertModelAnimationGraph(cacheStream, (ModelAnimationGraph)blamDefinition);
 
@@ -495,18 +479,6 @@ namespace TagTool.Commands.Porting
             if (groupTag == "weap")
             {
                 var weapon = (Weapon)blamDefinition;
-                weapon.MeleeDamageReportingType++;
-
-                if (weapon.MeleeDamageReportingType >= Weapon.MeleeDamageReportingTypeValue.ArmorLockCrush)
-                    weapon.MeleeDamageReportingType++;
-
-                foreach (var barrel in weapon.Barrels)
-                {
-                    barrel.DamageReportingType++;
-
-                    if (barrel.DamageReportingType >= Weapon.Barrel.DamageReportingTypeValue.ArmorLockCrush)
-                        barrel.DamageReportingType++;
-                }
 
                 foreach (var attach in weapon.Attachments)
                     if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
@@ -546,15 +518,6 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
-                case RenderMethod renderMethod:
-                    var rm = (RenderMethod)data;
-                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
-                    return ConvertRenderMethod(cacheStream, rm, blamTagName);
-
-                case CollisionMoppCode collisionMopp:
-                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-                    return collisionMopp;
-
                 case StringId stringId:
                     return ConvertStringId(stringId);
 
@@ -576,6 +539,18 @@ namespace TagTool.Commands.Porting
                         return GeometryConverter.Convert(cacheStream, renderGeometry, mode.Materials);
                     return GeometryConverter.Convert(cacheStream, renderGeometry, null);
 
+                case RenderMethod renderMethod:
+                    var rm = (RenderMethod)data;
+                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
+                    return ConvertRenderMethod(cacheStream, rm, blamTagName);
+
+                case CollisionMoppCode collisionMopp:
+                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
+                    return collisionMopp;
+
+                case DamageReportingType damageReportingType:
+                    return ConvertDamageReportingType(damageReportingType);
+
                 case GameObjectType gameObjectType:
                     return ConvertGameObjectType(gameObjectType);
 
@@ -593,6 +568,32 @@ namespace TagTool.Commands.Porting
                 return ConvertStructure(cacheStream, data, type, definition, blamTagName);
 
             return data;
+        }
+
+        private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
+        {
+            string value = null;
+
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Vista:
+                    value = damageReportingType.Halo2Retail.ToString();
+                    break;
+
+                case CacheVersion.Halo3Retail:
+                    value = damageReportingType.Halo3Retail.ToString();
+                    break;
+
+                case CacheVersion.Halo3ODST:
+                    value = damageReportingType.Halo3ODST.ToString();
+                    break;
+            }
+
+            if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
+                throw new NotSupportedException(value ?? CacheContext.Version.ToString());
+            
+            return damageReportingType;
         }
 
         private StringId ConvertStringId(StringId stringId)

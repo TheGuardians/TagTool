@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
+using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
@@ -58,7 +59,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance GunSwordClangResponse;
         public CachedTagInstance ClashEffect;
 
-        public MeleeDamageReportingTypeValue MeleeDamageReportingType;
+        public DamageReportingType MeleeDamageReportingType;
         public sbyte Unknown9;
         public short MagnificationLevels;
         public Bounds<float> MagnificationBounds;
@@ -190,75 +191,7 @@ namespace TagTool.Tags.Definitions
             LoadsAlternateAmmunition,
             LoadsMultiplePrimaryAmmunition,
         }
-
-        public enum MeleeDamageReportingTypeValue : sbyte
-        {
-            GuardiansUnknown,
-            Guardians,
-            FallingDamage,
-            GenericCollision,
-            ArmorLockCrush,
-            GenericMelee,
-            GenericExplosion,
-            Magnum,
-            PlasmaPistol,
-            Needler,
-            Mauler,
-            Smg,
-            PlasmaRifle,
-            BattleRifle,
-            Carbine,
-            Shotgun,
-            SniperRifle,
-            BeamRifle,
-            AssaultRifle,
-            Spiker,
-            FuelRodCannon,
-            MissilePod,
-            RocketLauncher,
-            SpartanLaser,
-            BruteShot,
-            Flamethrower,
-            SentinelGun,
-            EnergySword,
-            GravityHammer,
-            FragGrenade,
-            PlasmaGrenade,
-            SpikeGrenade,
-            FirebombGrenade,
-            Flag,
-            Bomb,
-            BombExplosion,
-            Ball,
-            MachinegunTurret,
-            PlasmaCannon,
-            PlasmaMortar,
-            PlasmaTurret,
-            ShadeTurret,
-            Banshee,
-            Ghost,
-            Mongoose,
-            Scorpion,
-            ScorpionGunner,
-            Spectre,
-            SpectreGunner,
-            Warthog,
-            WarthogGunner,
-            WarthogGaussTurret,
-            Wraith,
-            WraithGunner,
-            Tank,
-            Chopper,
-            Hornet,
-            Mantis,
-            Prowler,
-            SentinelBeam,
-            SentinelRpg,
-            Teleporter,
-            Tripmine,
-            Dmr,
-        }
-
+        
         [TagStructure(Size = 0x38)]
         public class TargetTrackingBlock
         {
@@ -514,7 +447,7 @@ namespace TagTool.Tags.Definitions
             public float DualErrorAngleMaximumRotation;
 
             public List<FirstPersonOffsetBlock> FirstPersonOffsets;
-            public DamageReportingTypeValue DamageReportingType;
+            public DamageReportingType DamageReportingType;
             public sbyte Unknown3;
             public short Unknown4;
             public CachedTagInstance InitialProjectile;
@@ -611,74 +544,6 @@ namespace TagTool.Tags.Definitions
             public class DualTurningPenaltyFunctionBlock
             {
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
-            }
-
-            public enum DamageReportingTypeValue : sbyte
-            {
-                GuardiansUnknown,
-                Guardians,
-                FallingDamage,
-                GenericCollision,
-                ArmorLockCrush,
-                GenericMelee,
-                GenericExplosion,
-                Magnum,
-                PlasmaPistol,
-                Needler,
-                Mauler,
-                Smg,
-                PlasmaRifle,
-                BattleRifle,
-                Carbine,
-                Shotgun,
-                SniperRifle,
-                BeamRifle,
-                AssaultRifle,
-                Spiker,
-                FuelRodCannon,
-                MissilePod,
-                RocketLauncher,
-                SpartanLaser,
-                BruteShot,
-                Flamethrower,
-                SentinelGun,
-                EnergySword,
-                GravityHammer,
-                FragGrenade,
-                PlasmaGrenade,
-                SpikeGrenade,
-                FirebombGrenade,
-                Flag,
-                Bomb,
-                BombExplosion,
-                Ball,
-                MachinegunTurret,
-                PlasmaCannon,
-                PlasmaMortar,
-                PlasmaTurret,
-                ShadeTurret,
-                Banshee,
-                Ghost,
-                Mongoose,
-                Scorpion,
-                ScorpionGunner,
-                Spectre,
-                SpectreGunner,
-                Warthog,
-                WarthogGunner,
-                WarthogGaussTurret,
-                Wraith,
-                WraithGunner,
-                Tank,
-                Chopper,
-                Hornet,
-                Mantis,
-                Prowler,
-                SentinelBeam,
-                SentinelRpg,
-                Teleporter,
-                Tripmine,
-                Dmr,
             }
 
             public enum AngleChangeFunctionValue : short

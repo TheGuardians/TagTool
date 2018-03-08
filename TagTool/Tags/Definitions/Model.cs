@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
@@ -321,8 +322,8 @@ namespace TagTool.Tags.Definitions
             public short IndirectDamageSection;
             public short Unknown;
             public uint Unknown2;
-            public DamageReportingTypeValue CollisionDamageReportingType;
-            public DamageReportingTypeValue ResponseDamageReportingType;
+            public DamageReportingType CollisionDamageReportingType;
+            public DamageReportingType ResponseDamageReportingType;
             public short Unknown3;
             public uint Unknown4;
             public uint Unknown5;
@@ -403,74 +404,6 @@ namespace TagTool.Tags.Definitions
                 Bit29 = 536870912,
                 Bit30 = 1073741824,
                 Bit31 = -2147483648,
-            }
-
-            public enum DamageReportingTypeValue : sbyte
-            {
-                GuardiansUnknown,
-                Guardians,
-                FallingDamage,
-                GenericCollision,
-                ArmorLockCrush,
-                GenericMelee,
-                GenericExplosion,
-                Magnum,
-                PlasmaPistol,
-                Needler,
-                Mauler,
-                Smg,
-                PlasmaRifle,
-                BattleRifle,
-                Carbine,
-                Shotgun,
-                SniperRifle,
-                BeamRifle,
-                AssaultRifle,
-                Spiker,
-                FuelRodCannon,
-                MissilePod,
-                RocketLauncher,
-                SpartanLaser,
-                BruteShot,
-                Flamethrower,
-                SentinelGun,
-                EnergySword,
-                GravityHammer,
-                FragGrenade,
-                PlasmaGrenade,
-                SpikeGrenade,
-                FirebombGrenade,
-                Flag,
-                Bomb,
-                BombExplosion,
-                Ball,
-                MachinegunTurret,
-                PlasmaCannon,
-                PlasmaMortar,
-                PlasmaTurret,
-                ShadeTurret,
-                Banshee,
-                Ghost,
-                Mongoose,
-                Scorpion,
-                ScorpionGunner,
-                Spectre,
-                SpectreGunner,
-                Warthog,
-                WarthogGunner,
-                WarthogGaussTurret,
-                Wraith,
-                WraithGunner,
-                Tank,
-                Chopper,
-                Hornet,
-                Mantis,
-                Prowler,
-                SentinelBeam,
-                SentinelRpg,
-                Teleporter,
-                Tripmine,
-                Dmr,
             }
 
             [TagStructure(Size = 0x44)]
