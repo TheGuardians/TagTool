@@ -340,6 +340,14 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
+            
+            if (groupTag == "sbsp")
+            {
+                var a = (ScenarioStructureBsp)blamDefinition;
+                foreach (var b in a.InstancedGeometryInstances)
+                    b.Name = new StringId();
+            }
+            
             blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag.Filename);
 
             //
