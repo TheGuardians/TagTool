@@ -13,19 +13,6 @@ namespace TagTool.Commands.Porting
     {
         private PhysicsModel ConvertPhysicsModel(PhysicsModel phmo)
         {
-            foreach(var phantom in phmo.PhantomTypes)
-            {
-                if(BlamCache.Version == CacheVersion.Halo3Retail)
-                {
-                    //
-                    //Fix flags
-                    //
-
-                    if (phantom.Flags >= PhysicsModel.PhantomTypeFlags.IgnoresARGDevices)
-                        phantom.Flags++;
-                }
-            }
-
             //
             // Fix mopp code array headers for both H3 and ODST
             //
