@@ -1,16 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
@@ -603,4 +603,3 @@ namespace TagTool.Commands.Porting
         }
     }
 }
-

@@ -1,18 +1,17 @@
+using System.Collections.Generic;
+using System.IO;
 using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
-using TagTool.Tags.Definitions;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-       private Globals ConvertGlobals(Globals glob, Stream cacheStream)
+       private Globals ConvertGlobals(Globals matg, Stream cacheStream)
         {
             //Add aigl from H3
 
@@ -22,7 +21,7 @@ namespace TagTool.Commands.Porting
                 {
                     Data = new List<AiGlobalsDatum>(),
                 };
-                foreach(var value in glob.AiGlobalsOld)
+                foreach(var value in matg.AiGlobalsOld)
                 {
                     value.SearchRangeInfantry = 30;
                     value.SearchRangeFlying = 40;
@@ -38,15 +37,15 @@ namespace TagTool.Commands.Porting
                 CacheContext.TagNames[edTag.Index] = "globals\ai_globals";
                 var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
                 CacheContext.Serializer.Serialize(edContext, aigl);
-                glob.AiGlobals = edTag;
-                glob.AiGlobalsOld = new List<AiGlobalsDatum>();
+                matg.AiGlobals = edTag;
+                matg.AiGlobalsOld = new List<AiGlobalsDatum>();
             }
 
             //Might require adding the GfxUiStrings block
 
             if(BlamCache.Version == CacheVersion.Halo3Retail)
             {
-                glob.Unknown60 = new List<Globals.UnknownBlock>
+                matg.Unknown60 = new List<Globals.UnknownBlock>
                 {
                     new Globals.UnknownBlock
                     {
@@ -56,7 +55,7 @@ namespace TagTool.Commands.Porting
                     }
                 };
 
-                foreach (var metagame in glob.MetagameGlobals)
+                foreach (var metagame in matg.MetagameGlobals)
                 {
                     //Medal values for H3 do not need to be modified, but if survival is introduced on an H3 port, it will require ODST or HO points
 
@@ -80,8 +79,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            return glob;
+            return matg;
         }
     }
 }
-

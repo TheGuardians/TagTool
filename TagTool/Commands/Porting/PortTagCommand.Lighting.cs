@@ -130,9 +130,9 @@ namespace TagTool.Commands.Porting
             return lensFlare;
         }
 
-        private ScenarioLightmap ConvertScenarioLightmap(GameCacheContext cacheContext, Stream cacheStream, CacheFile blamCache, string blamTagName, ScenarioLightmap scenarioLightmap)
+        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
-            if (blamCache.Version > CacheVersion.Halo3Retail)
+            if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return scenarioLightmap;
 
             scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
@@ -145,11 +145,11 @@ namespace TagTool.Commands.Porting
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, entry, scenarioLightmap, blamTagName);
                 IsReplacing = wasReplacing;
 
-                var edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("Lbsp")]);
-                CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
+                var edTag = this.CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("Lbsp")]);
+                this.CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
 
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                CacheContext.Serializer.Serialize(edContext, Lbsp);
+                var edContext = new TagSerializationContext(cacheStream, this.CacheContext, edTag);
+                this.CacheContext.Serializer.Serialize(edContext, Lbsp);
 
                 scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference
                 {

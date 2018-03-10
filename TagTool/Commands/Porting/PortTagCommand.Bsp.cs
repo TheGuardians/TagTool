@@ -1,8 +1,6 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Tags.Definitions;
 using System.Collections.Generic;
-using System.Linq;
+using TagTool.Cache;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
@@ -37,18 +35,15 @@ namespace TagTool.Commands.Porting
 
             // Disable decorator geometry for now entirely
 
-            /*
-            for (var i = 0; i < sbsp.Decorators.Count; i++)
-                sbsp.Decorators[i] = new TagReferenceBlock { Instance = CacheContext.TagCache.Index[0x2ECD] };
+            /*for (var i = 0; i < sbsp.Decorators.Count; i++)
+                sbsp.Decorators[i] = new TagReferenceBlock { Instance = CacheContext.TagCache.Index[0x2ECD] };*/
             
-         */
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
                 //sbsp.Clusters[i].DecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
                 sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
                 sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
             }
-            
             
             //
             // Remove decals
@@ -77,4 +72,3 @@ namespace TagTool.Commands.Porting
         }
     }
 }
-

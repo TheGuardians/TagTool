@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
-using System.Collections.Generic;
 
 namespace TagTool.Commands.Porting
 {
@@ -9,7 +9,7 @@ namespace TagTool.Commands.Porting
     {
         private Style ConvertStyle(Style style)
         {
-            if(BlamCache.Version == CacheVersion.Halo3Retail)
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
                 //Note : Might have to hardcode some of the flags like fight_positining, kungfu, inspect and engineers from tag names. For now they are always off.
 
@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting
 
                 //                 First part      shift by one the rest        add 3 remaining of behavior 1
 
-                style.Behaviors1 = (H3B1 & 0x3FFF) + ((H3B1 & 0x7FFC000) << 1) + ((H3B1 & 0x38000000)<<2);
+                style.Behaviors1 = (H3B1 & 0x3FFF) + ((H3B1 & 0x7FFC000) << 1) + ((H3B1 & 0x38000000) << 2);
 
                 //                  Reuse 2 flags of H3B1       Use all of H3B2 except 2 last
 
@@ -42,11 +42,11 @@ namespace TagTool.Commands.Porting
 
                 //                  Reuse 2 flags of H3B2        Some flags of H3B3     rest of flags
 
-                style.Behaviors3 = ((H3B2 & 0xC0000000) >> 30) + ((H3B3 & 0x1FFFF)<<2) + ((H3B3 & 0x1FFE0000)<<3);
+                style.Behaviors3 = ((H3B2 & 0xC0000000) >> 30) + ((H3B3 & 0x1FFFF) << 2) + ((H3B3 & 0x1FFE0000) << 3);
 
                 //                  Reuse 3 flags of H3B3         Some flags of H3B4
 
-                style.Behaviors4 = ((H3B3 & 0xE0000000) >> 29) + ((H3B4 & 0x1FFFFFFF)<<3);
+                style.Behaviors4 = ((H3B3 & 0xE0000000) >> 29) + ((H3B4 & 0x1FFFFFFF) << 3);
 
                 //                  Reuse 3 flags of H3B4         Some flags of H3B5     more flags of H3B5         
 
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
 
                 //                  rest of H3B5            20 first flags of H3B6
 
-                style.Behaviors6 = ((H3B5 & 0xFE000000) >> 20) + ((H3B6 & 0xFFFFF) << 12) ;
+                style.Behaviors6 = ((H3B5 & 0xFE000000) >> 20) + ((H3B6 & 0xFFFFF) << 12);
 
                 //              12 last flags of H3B6            5 flags of H3B7
 
@@ -63,8 +63,8 @@ namespace TagTool.Commands.Porting
 
                 //Add the new behaviors to the list at the end of the tag:
 
-                style.BehaviorList.Insert( 14, new Style.BehaviorListBlock { BehaviorName = "squad_patrol_behavior" });
-                style.BehaviorList.Insert( 28, new Style.BehaviorListBlock { BehaviorName = "fight_positioning" });
+                style.BehaviorList.Insert(14, new Style.BehaviorListBlock { BehaviorName = "squad_patrol_behavior" });
+                style.BehaviorList.Insert(28, new Style.BehaviorListBlock { BehaviorName = "fight_positioning" });
 
                 style.BehaviorList.Insert(83, new Style.BehaviorListBlock { BehaviorName = "kungfu_cover" });
 
@@ -78,7 +78,6 @@ namespace TagTool.Commands.Porting
                 style.BehaviorList.Insert(162, new Style.BehaviorListBlock { BehaviorName = "engineer_explode" });
                 style.BehaviorList.Insert(163, new Style.BehaviorListBlock { BehaviorName = "engineer_broken_detonation" });
                 style.BehaviorList.Insert(164, new Style.BehaviorListBlock { BehaviorName = "boost_allies" });
-
             }
 
             return style;
@@ -86,17 +85,13 @@ namespace TagTool.Commands.Porting
 
         private Character ConvertCharacter(Character character)
         {
-            if(BlamCache.Version == CacheVersion.Halo3Retail)
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
                 character.InspectProperties = new List<CharacterInspectProperties>();
                 character.EngineerProperties = new List<CharacterEngineerProperties>();
             }
+
             return character;
         }
     }
-} 
-
-
-
-
-
+}

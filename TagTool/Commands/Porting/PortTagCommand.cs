@@ -34,6 +34,7 @@ namespace TagTool.Commands.Porting
         private bool IsNew = false;
         private bool UseNull = false;
         private bool NoAudio = false;
+        private bool NoElites = false;
         private bool UseShaderTest = false;
         private bool MatchShaders = false;
 
@@ -41,14 +42,14 @@ namespace TagTool.Commands.Porting
             base(CommandFlags.Inherit,
 
                 "PortTag",
-                "Ports a tag from the current cache file. Options are : noaudio | noreplace | replace | new | single | nonnull" + Environment.NewLine + Environment.NewLine +
+                "Ports a tag from the current cache file. Options are : noaudio | noreplace | noelites | replace | new | single | nonnull" + Environment.NewLine + Environment.NewLine +
                 "Replace: Use existing matching tag names if available." + Environment.NewLine +
                 "New: Create a new tag after the last index." + Environment.NewLine +
                 "Single: Port a new tag without any reference." + Environment.NewLine +
                 "UseNull: Port a tag using nulled tag indices where available." + Environment.NewLine +
                 "No option: Ports a tag if its name is not present in the tag names.",
 
-                "PortTag [Options] <Tag Group> <Tag Name>",
+                "PortTag [Options] <Tag>",
 
                 "")
         {
@@ -60,10 +61,10 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2)
+            if (args.Count < 1)
                 return false;
 
-            while (args.Count > 2 || args.Count >= 2 && args[0] == "*")
+            while (args.Count > 1)
             {
                 var arg = args[0].ToLower();
 
@@ -75,6 +76,10 @@ namespace TagTool.Commands.Porting
 
                     case "noreplace":
                         IsReplacing = false;
+                        break;
+
+                    case "noelites":
+                        NoElites = true;
                         break;
 
                     case "replace":
@@ -115,65 +120,14 @@ namespace TagTool.Commands.Porting
             }
 
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
-
-            //
-            // Verify Blam group tag
-            //
-
-            String groupName = "";
-            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
-
-#if !DEBUG
-            try
-            {
-#endif
-            groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
-#if !DEBUG
-            }
-            catch (Exception)
-            {
-                Console.WriteLine($"Failed to find the tag group: {args[0]}");
-            }
-#endif
-
-            if (groupTag == Tag.Null)
-            {
-                Console.WriteLine($"ERROR: Invalid tag group \"{args[0]}\"");
-                return true;
-            }
-
-            //
-            // Verify Blam tag instance
-            //
-
-            var blamTagName = IsWildcard ? null : args[1];
-
-            List<CacheFile.IndexItem> blamTags = new List<CacheFile.IndexItem>();
-
-            foreach (var tag in BlamCache.IndexItems)
-            {
-                if ((tag.ClassCode == groupTag.ToString()) && (IsWildcard || tag.Filename == blamTagName))
-                {
-                    blamTags.Add(tag);
-
-                    if (!IsWildcard)
-                        break;
-                }
-            }
-
-            if (blamTags.Count == 0)
-            {
-                Console.WriteLine($"ERROR: Blam {groupName} tag does not exist: " + blamTagName);
-                return true;
-            }
+            var blamTag = ParseLegacyTag(args[0]);
 
             //
             // Convert Blam data to ElDorado data
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                foreach (var blamTag in blamTags)
-                    ConvertTag(cacheStream, blamTag);
+                ConvertTag(cacheStream, blamTag);
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
@@ -182,6 +136,32 @@ namespace TagTool.Commands.Porting
             CacheContext.SaveTagNames();
 
             return true;
+        }
+
+        private CacheFile.IndexItem ParseLegacyTag(string name)
+        {
+            if (name.Length == 0 || !char.IsLetter(name[0]) || !name.Contains('.'))
+                throw new Exception($"Invalid tag name: {name}");
+
+            var namePieces = name.Split('.');
+
+            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, namePieces[1]);
+            if (groupTag == Tag.Null)
+                throw new Exception($"Invalid tag name: {name}");
+
+            var tagName = namePieces[0];
+
+            foreach (var item in BlamCache.IndexItems)
+            {
+                if (item == null || item.Filename != tagName)
+                    continue;
+
+                if (groupTag == item.ClassCode)
+                    return item;
+            }
+            
+            Console.WriteLine($"Invalid tag name: {name}");
+            return null;
         }
 
         public CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
@@ -202,6 +182,9 @@ namespace TagTool.Commands.Porting
             CachedTagInstance edTag = null;
 
             if ((groupTag == "snd!") && NoAudio)
+                return null;
+
+            if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
             if (!IsNew)
@@ -365,13 +348,7 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "bitm")
                 blamDefinition = ConvertBitmap((Bitmap)blamDefinition);
-
-            if (groupTag == "bipd")
-            {
-                var biped = (Biped)blamDefinition;
-                biped.PhysicsFlags = (Biped.PhysicsFlagBits)(((int)biped.PhysicsFlags & 0x7) + (((int)biped.PhysicsFlags & 0x7FFFFFF8) << 1));
-            }
-
+            
             if (groupTag == "char")
                 blamDefinition = ConvertCharacter((Character)blamDefinition);
 
@@ -406,7 +383,7 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertLensFlare((LensFlare)blamDefinition);
 
             if (groupTag == "lsnd")
-                blamDefinition = ConvertSoundLooping((SoundLooping)blamDefinition, BlamCache);
+                blamDefinition = ConvertSoundLooping((SoundLooping)blamDefinition);
 
             if (groupTag == "matg")
                 blamDefinition = ConvertGlobals((Globals)blamDefinition, cacheStream);
@@ -450,7 +427,7 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertStructureDesign((StructureDesign)blamDefinition);
 
             if (groupTag == "sLdT")
-                blamDefinition = ConvertScenarioLightmap(CacheContext, cacheStream, BlamCache, blamTag.Filename, (ScenarioLightmap)blamDefinition);
+                blamDefinition = ConvertScenarioLightmap(cacheStream, blamTag.Filename, (ScenarioLightmap)blamDefinition);
 
             if (groupTag == "Lbsp")
                 blamDefinition = ConvertScenarionLightmapBspData((ScenarioLightmapBspData)blamDefinition);
@@ -459,22 +436,22 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertSound((Sound)blamDefinition);
 
             if (groupTag == "snmx")
-                blamDefinition = ConvertSoundMix(BlamCache, (SoundMix)blamDefinition);
+                blamDefinition = ConvertSoundMix((SoundMix)blamDefinition);
 
             if (groupTag == "styl")
                 blamDefinition = ConvertStyle((Style)blamDefinition);
 
             if (groupTag == "udlg")
-                blamDefinition = ConvertDialogue(cacheStream, CacheContext, (Dialogue)blamDefinition);
+                blamDefinition = ConvertDialogue(cacheStream, (Dialogue)blamDefinition);
 
             if (groupTag == "unic")
                 blamDefinition = ConvertStrings((MultilingualUnicodeStringList)blamDefinition);
 
             if (groupTag == "chdt")
-                blamDefinition = ConvertChudDefinition(blamContext.BlamCache.Version, (ChudDefinition)blamDefinition);
+                blamDefinition = ConvertChudDefinition((ChudDefinition)blamDefinition);
 
             if (groupTag == "chgd")
-                blamDefinition = ConvertChudGlobalsDefinition(blamContext.BlamCache.Version, (ChudGlobalsDefinition)blamDefinition);
+                blamDefinition = ConvertChudGlobalsDefinition((ChudGlobalsDefinition)blamDefinition);
 
             if (groupTag == "weap")
             {
@@ -524,7 +501,7 @@ namespace TagTool.Commands.Porting
                 case CachedTagInstance tag:
                     if (IsRecursive == false)
                         return null;
-                    tag = PortTagReference(CacheContext, BlamCache, tag.Index);
+                    tag = PortTagReference(tag.Index);
                     if (tag != null && !(IsNew || IsReplacing))
                         return tag;
                     return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
@@ -735,12 +712,12 @@ namespace TagTool.Commands.Porting
             return objectType;
         }
 
-        public static CachedTagInstance PortTagReference(GameCacheContext cacheContext, CacheFile blamCache, int index, int maxIndex = 0xFFFF)
+        private CachedTagInstance PortTagReference(int index, int maxIndex = 0xFFFF)
         {
             if (index == -1)
                 return null;
 
-            var instance = blamCache.IndexItems.Find(i => i.ID == index);
+            var instance = BlamCache.IndexItems.Find(i => i.ID == index);
 
             if (instance != null)
             {
@@ -748,14 +725,14 @@ namespace TagTool.Commands.Porting
                 for (var i = 0; i < instance.ClassCode.Length; i++)
                     chars[i] = instance.ClassCode[i];
 
-                var tags = cacheContext.TagCache.Index.FindAllInGroup(new string(chars));
+                var tags = CacheContext.TagCache.Index.FindAllInGroup(new string(chars));
 
                 foreach (var tag in tags)
                 {
-                    if (!cacheContext.TagNames.ContainsKey(tag.Index))
+                    if (!CacheContext.TagNames.ContainsKey(tag.Index))
                         continue;
 
-                    if (instance.Filename == cacheContext.TagNames[tag.Index] && tag.Index < maxIndex)
+                    if (instance.Filename == CacheContext.TagNames[tag.Index] && tag.Index < maxIndex)
                         return tag;
                 }
             }

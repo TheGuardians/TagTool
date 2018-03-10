@@ -1,20 +1,19 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-
-        private ChudDefinition.HudWidget.StateDatum ConvertStateData(ChudDefinition.HudWidget.StateDatum stateData, CacheVersion portingVersion)
+        private ChudDefinition.HudWidget.StateDatum ConvertStateData(ChudDefinition.HudWidget.StateDatum stateData)
         {
             //Maybe missile pod should be added...
-            switch (portingVersion)
+            switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
                     stateData.EngineFlags_HO = GetEquivalentFlags(stateData.EngineFlags_HO, stateData.EngineFlags_H3);
@@ -38,7 +37,7 @@ namespace TagTool.Commands.Porting
             return stateData;
         }
 
-        private ChudDefinition.HudWidget.RenderDatum ConvertRenderData(ChudDefinition.HudWidget.RenderDatum renderData, CacheVersion portingVersion)
+        private ChudDefinition.HudWidget.RenderDatum ConvertRenderData(ChudDefinition.HudWidget.RenderDatum renderData)
         {
             foreach (FieldInfo haloOnlineFieldInfo in typeof(ChudDefinition.HudWidget.RenderDatum).GetFields())
             {
@@ -76,7 +75,7 @@ namespace TagTool.Commands.Porting
                 renderData.Unknown = 1;
             }
 
-            switch (portingVersion)
+            switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
                     renderData.Input_HO = GetEquivalentValue(renderData.Input_HO, renderData.Input_H3);
@@ -100,9 +99,9 @@ namespace TagTool.Commands.Porting
             return renderData;
         }
 
-        private ChudDefinition.HudWidget.TextWidget ConvertTextWidget(ChudDefinition.HudWidget.TextWidget textWidget, CacheVersion portingVersion)
+        private ChudDefinition.HudWidget.TextWidget ConvertTextWidget(ChudDefinition.HudWidget.TextWidget textWidget)
         {
-            switch(portingVersion)
+            switch(BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
                     textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.Flags_H3);
@@ -112,36 +111,36 @@ namespace TagTool.Commands.Porting
             return textWidget;
         }
 
-        private ChudDefinition ConvertChudDefinition(CacheVersion portingVersion, ChudDefinition chudDefinition)
+        private ChudDefinition ConvertChudDefinition(ChudDefinition chudDefinition)
         {
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)
             {
                 for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].StateData.Count; stateDatumIndex++)
-                    chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex], portingVersion);
+                    chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex]);
                 for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].RenderData.Count; renderDatumIndex++)
-                    chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex], portingVersion);
+                    chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex]);
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDatumIndex++)
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex], portingVersion);
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex]);
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData.Count; renderDatumIndex++)
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex], portingVersion);
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex]);
                 }
 
                 for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
                 {
-                    chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex] = ConvertTextWidget(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex], portingVersion);
+                    chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex] = ConvertTextWidget(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex]);
 
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData.Count; stateDatumIndex++)
-                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex], portingVersion);
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex]);
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
-                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex], portingVersion);
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
 				}
             }
             return chudDefinition;
         }
 
-		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(CacheVersion portingVersion, ChudGlobalsDefinition chudGlobalsDefinition)
+		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition chudGlobalsDefinition)
 		{
             Console.WriteLine("Warning: The tagtool is about to port a HUD Globals (CHGD) tag. HUD globals cannot yet be fully ported without manual modification, and will result in frequent crashes.");
 
@@ -207,7 +206,7 @@ namespace TagTool.Commands.Porting
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
-                    if (portingVersion == CacheVersion.Halo3Retail)
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAngle_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAngle_H3;
                         chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAmount_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAmount_H3;
@@ -218,7 +217,7 @@ namespace TagTool.Commands.Porting
                 }
                 for (int hudSoundsIndex = 0; hudSoundsIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds.Count; hudSoundsIndex++)
                 {
-                    if (portingVersion == CacheVersion.Halo3Retail)
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo 
                             = GetEquivalentFlags(chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo, chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo_H3);
@@ -243,7 +242,7 @@ namespace TagTool.Commands.Porting
                             chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.Add(eliteBiped);
                         }
                     }
-					else if(portingVersion == CacheVersion.Halo3ODST)
+					else if(BlamCache.Version == CacheVersion.Halo3ODST)
 					{
 						for (int bipedIndex = 0; bipedIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.Count; bipedIndex++)
 						{
