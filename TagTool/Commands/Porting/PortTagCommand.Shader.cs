@@ -1,4 +1,4 @@
-using TagTool.Cache;
+>using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
@@ -1138,7 +1138,7 @@ namespace TagTool.Commands.Porting
 
             bmRm.ImportData = new List<RenderMethod.ImportDatum>(); // probably not used
 
-            if (debugUseEDFunctions && bmRm.ShaderProperties[0].Functions.Count > 0) // trash, definitely not the way to go
+            if (debugUseEDFunctions && renderMethod.ShaderProperties[0].Functions.Count > 0) // trash, definitely not the way to go
             {
                 bmRm.ShaderProperties[0].Unknown = renderMethod.ShaderProperties[0].Unknown;
                 bmRm.ShaderProperties[0].DrawModes = renderMethod.ShaderProperties[0].DrawModes;
