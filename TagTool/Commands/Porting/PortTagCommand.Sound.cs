@@ -272,6 +272,16 @@ namespace TagTool.Commands.Porting
             return tempMP3;
         }
 
+        /// <summary>
+        /// Modify gain linearly. modifier is a percentage of the ratio P_out / P_in
+        /// </summary>
+        private static float ModifyGain(float gain, float modifier)
+        {
+            // gain (dB) = 10*log(P_out / P_in) * (dB)
+            double ratio = Math.Pow(10, gain / 10.0f) * (1.0+modifier);
+            return 10.0f * (float)Math.Log10(ratio);
+        }
+
         private Sound ConvertSound(Sound sound)
         {
             if (BlamSoundGestalt == null)
@@ -305,10 +315,10 @@ namespace TagTool.Commands.Porting
             sound.PlaybackParameters = BlamSoundGestalt.PlaybackParameters[sound.PlaybackParameterIndex];
 
             //
-            // Trial for gain leveling (compared to HO)
+            // Trial for gain leveling (compared to HO) 20% increase
             //
 
-            sound.PlaybackParameters.GainBase += 1.3f;
+            sound.PlaybackParameters.GainBase = ModifyGain(sound.PlaybackParameters.GainBase, 0.2f);
 
             sound.Scale = BlamSoundGestalt.Scales[sound.ScaleIndex];
 
