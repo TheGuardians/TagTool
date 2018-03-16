@@ -41,9 +41,6 @@ namespace TagTool.Commands.Files
             {
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
-                    if (tagType.Key != "forg")
-                        continue;
-
                     if (path != null)
                     {
                         try
@@ -915,7 +912,8 @@ namespace TagTool.Commands.Files
             if (!Directory.Exists("Plugins"))
                 Directory.CreateDirectory("Plugins");
 
-            if (tagGroup != "forg")
+            // these groups give a stackoverflow error if not skipped
+            if (tagGroup == "forg" || tagGroup == "cntl" || tagGroup == "coll")
                 return;
 
             ConvertTagDefinition(tagGroup, tagType, cacheVersion, "Plugins");
