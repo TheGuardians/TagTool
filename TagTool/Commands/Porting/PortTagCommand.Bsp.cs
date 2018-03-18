@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
                     grid.DecoratorGeometryIndex = grid.DecoratorIndex_H3; 
                     grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
 
-                    grid.DecoratorVariant_HO = grid.DecoratorVariant_H3;
+                    grid.DecoratorVariant_HO = 0;
                 }
             }
 
