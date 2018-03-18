@@ -169,6 +169,8 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
+            
+
             //
             // Check to see if the ElDorado tag exists
             //
@@ -352,6 +354,8 @@ namespace TagTool.Commands.Porting
             // Load the Blam tag definition and convert Blam data to ElDorado data
             //
 
+            Console.WriteLine($"Porting {blamTag.Filename}.{groupTag.ToString()}");
+
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
@@ -505,7 +509,7 @@ namespace TagTool.Commands.Porting
             CacheContext.Serializer.Serialize(edContext, blamDefinition);
             CacheContext.SaveTagNames(); // Always save new tagnames in case of a crash
 
-            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
         }
