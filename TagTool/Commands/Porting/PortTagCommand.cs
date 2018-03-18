@@ -266,26 +266,19 @@ namespace TagTool.Commands.Porting
             // Return engine default tags for any unsupported tag groups
             //
 
-            // Disable water shaders until the vertex format is converted.
-            // Disable rmct for now as it's unsupported in the renderMethod converter.
-            if (RenderMethodTagGroups.Contains(groupTag) && (!UseShaderTest && !MatchShaders) )
+            else if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest && MatchShaders)
             {
-                if (groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if (groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if (groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if (groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if (groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if (groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if (groupTag == "rmct")
-                    return null;
-                else
-                    return CacheContext.GetTag(0x101F);
+                switch (groupTag.ToString())
+                {
+                    case "rmw ": // until water vertices port, always null water shaders to prevent the screen from turning blue
+                        return null;
+                    case "rmct": // cortana shaders don't exist in HO, they need a real port
+                        return CacheContext.GetTag(0x101F);
+                    case "rmbk": // unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
+                        return CacheContext.GetTag(0x101F);
+                    default:
+                        return CacheContext.GetTag(0x101F);
+                }
             }
             else if (EffectTagGroups.Contains(groupTag) && (!UseShaderTest && !MatchShaders) )
             {
