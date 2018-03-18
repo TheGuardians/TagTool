@@ -23,10 +23,10 @@ namespace TagTool.Commands.Porting
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
+
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-
-        private List<Tag> OtherTagGroups = new List<Tag> { new Tag("foot"), new Tag("shit") };
+        private List<Tag> OtherTagGroups = new List<Tag> {new Tag("shit") };    //foot and effe may be added to this list
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
@@ -253,8 +253,6 @@ namespace TagTool.Commands.Porting
             }
             
 
-
-
             var replacedTags = ReplacedTags.ContainsKey(groupTag) ?
                 (ReplacedTags[groupTag] ?? new List<string>()) :
                 new List<string>();
@@ -262,69 +260,72 @@ namespace TagTool.Commands.Porting
             replacedTags.Add(blamTag.Filename);
             ReplacedTags[groupTag] = replacedTags;
 
+            
             //
-            // Return engine default tags for any unsupported tag groups
+            // Handle shaders that do not exist (either in code or in tags)
             //
 
-            // Disable water shaders until the vertex format is converted.
-            // Disable rmct for now as it's unsupported in the renderMethod converter.
-            if (RenderMethodTagGroups.Contains(groupTag) && (!UseShaderTest && !MatchShaders) )
+            switch (groupTag.ToString())
             {
-                if (groupTag == "rmw ")
-                    return CacheContext.GetTag(0x400F);
-                else if (groupTag == "rmhg")
-                    return CacheContext.GetTag(0x2647);
-                else if (groupTag == "rmtr")
-                    return CacheContext.GetTag(0x3AAD);
-                else if (groupTag == "rmcs")
-                    return CacheContext.GetTag(0x101F);
-                else if (groupTag == "rmd ")
-                    return CacheContext.GetTag(0x1BA2);
-                else if (groupTag == "rmfl")
-                    return CacheContext.GetTag(0x4CA9);
-                else if (groupTag == "rmct")
+                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return null;
-                else
+                case "rmct": // Cortana shaders have no example in HO, they need a real port
+                    return CacheContext.GetTag(0x101F);
+                case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTag(0x101F);
             }
-            else if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest && MatchShaders)
+
+            //
+            // Handle shader tags when not porting or matching shaders
+            //
+
+            if ((RenderMethodTagGroups.Contains(groupTag)  || EffectTagGroups.Contains(groupTag)) && (!UseShaderTest && !MatchShaders) )
             {
                 switch (groupTag.ToString())
                 {
-                    case "rmw ": // until water vertices port, always null water shaders to prevent the screen from turning blue
-                        return null;
-                    case "rmct": // cortana shaders don't exist in HO, they need a real port
+                    case "rmhg":
+                        return CacheContext.GetTag(0x2647);
+                    case "rmtr":
+                        return CacheContext.GetTag(0x3AAD);
+                    case "rmd ":
+                        return CacheContext.GetTag(0x1BA2);
+                    case "rmfl":
+                        return CacheContext.GetTag(0x4CA9);
+                    case "rmsh":
+                    case "rmss":
+                    case "rmrd":
+                    case "rmcs":
                         return CacheContext.GetTag(0x101F);
-                    case "rmbk": // unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
-                        return CacheContext.GetTag(0x101F);
-                    default:
-                        return CacheContext.GetTag(0x101F);
-                }
-            }
-            else if (EffectTagGroups.Contains(groupTag) && (!UseShaderTest && !MatchShaders) )
-            {
-                if (groupTag == "beam")
-                    return CacheContext.GetTag(0x18B5);
-                else if (groupTag == "cntl")
-                    return CacheContext.GetTag(0x528);
-                else if (groupTag == "ltvl")
-                    return CacheContext.GetTag(0x594);
-                else if (groupTag == "decs")
-                    return CacheContext.GetTag(0x3A4);
-                else if (groupTag == "effe")
-                    return CacheContext.GetTag(0x12FE);
-                else
-                    return CacheContext.GetTag(0x29E);
-            }
-            else if (OtherTagGroups.Contains(groupTag) && !UseShaderTest)
-            {
-                if (groupTag == "foot")
-                    return CacheContext.GetTag(0xc0d);
-                else if (groupTag == "shit")
-                    return CacheContext.GetTag(0x139C);
+                    case "beam":
+                        return CacheContext.GetTag(0x18B5);
+                    case "cntl":
+                        return CacheContext.GetTag(0x528);
+                    case "ltvl":
+                        return CacheContext.GetTag(0x594);
+                    case "decs":
+                        return CacheContext.GetTag(0x3A4);
+                    case "ptr3":
+                        return CacheContext.GetTag(0x29E);
+                }   
+
             }
 
-            
+            //
+            // Handle tags that are not ready to be ported
+            //
+
+            if (OtherTagGroups.Contains(groupTag))
+            {
+                switch (groupTag.ToString())
+                {
+                    case "foot":
+                        return CacheContext.GetTag(0xC0D);
+                    case "shit":
+                        return CacheContext.GetTag(0x139C);
+                    case "effe":
+                        return CacheContext.GetTag(0x12FE);
+                }    
+            }
 
             //
             // Allocate Eldorado Tag
@@ -355,6 +356,10 @@ namespace TagTool.Commands.Porting
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
             
+            //
+            // Remove unused sbsp stringIDs in the instanced geometry instances block before converting them
+            //
+
             if (groupTag == "sbsp")
             {
                 var a = (ScenarioStructureBsp)blamDefinition;
