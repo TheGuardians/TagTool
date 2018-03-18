@@ -287,6 +287,20 @@ namespace TagTool.Commands.Porting
                 else
                     return CacheContext.GetTag(0x101F);
             }
+            else if (RenderMethodTagGroups.Contains(groupTag) && !UseShaderTest && MatchShaders)
+            {
+                switch (groupTag.ToString())
+                {
+                    case "rmw ": // until water vertices port, always null water shaders to prevent the screen from turning blue
+                        return null;
+                    case "rmct": // cortana shaders don't exist in HO, they need a real port
+                        return CacheContext.GetTag(0x101F);
+                    case "rmbk": // unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
+                        return CacheContext.GetTag(0x101F);
+                    default:
+                        return CacheContext.GetTag(0x101F);
+                }
+            }
             else if (EffectTagGroups.Contains(groupTag) && (!UseShaderTest && !MatchShaders) )
             {
                 if (groupTag == "beam")
