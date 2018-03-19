@@ -21,6 +21,9 @@ namespace TagTool.Commands.Files
     class TestCommand : Command
     {
         private GameCacheContext CacheContext { get; }
+        private static bool debugConsoleWrite = true;
+        private static List<string> csvQueue1 = new List<string>();
+        private static List<string> csvQueue2 = new List<string>();
 
         public TestCommand(GameCacheContext cacheContext) :
             base(CommandFlags.Inherit,
@@ -77,6 +80,39 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+        
+        public void csvDumpQueueToFile(List<string> in_, string file)
+        {
+            var fileOut = new FileInfo(file);
+            if (File.Exists(file))
+                File.Delete(file);
+
+            int i = -1;
+            using (var csvStream = fileOut.OpenWrite())
+            using (var csvWriter = new StreamWriter(csvStream))
+            {
+                foreach (var a in in_)
+                {
+                    csvStream.Position = csvStream.Length;
+                    csvWriter.WriteLine(a);
+                    i++;
+                }
+            }
+        }
+
+        public static void csv1(string in_)
+        {
+            csvQueue1.Add(in_);
+            if (debugConsoleWrite)
+                Console.WriteLine($"{in_}");
+        }
+
+        public static void csv2(string in_)
+        {
+            csvQueue2.Add(in_);
+            if (debugConsoleWrite)
+                Console.WriteLine($"{in_}");
         }
 
         private CacheFile OpenCacheFile(string cacheArg)
