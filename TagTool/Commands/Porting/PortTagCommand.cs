@@ -380,12 +380,6 @@ namespace TagTool.Commands.Porting
             if (groupTag == "bitm")
                 blamDefinition = ConvertBitmap((Bitmap)blamDefinition);
             
-            if (groupTag == "bipd")
-            {
-                var biped = (Biped)blamDefinition;
-                biped.PhysicsFlags = (Biped.PhysicsFlagBits)(((int)biped.PhysicsFlags & 0x7) + (((int)biped.PhysicsFlags & 0x7FFFFFF8) << 1));
-            }
-
             if (groupTag == "char")
                 blamDefinition = ConvertCharacter((Character)blamDefinition);
 
@@ -570,6 +564,9 @@ namespace TagTool.Commands.Porting
 
                 case ScenarioObjectType scenarioObjectType:
                     return ConvertScenarioObjectType(scenarioObjectType);
+
+                case BipedPhysicsFlags bipedPhysicsFlags:
+                    return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
             }
 
             if (type.IsArray)
@@ -582,6 +579,14 @@ namespace TagTool.Commands.Porting
                 return ConvertStructure(cacheStream, data, type, definition, blamTagName);
 
             return data;
+        }
+
+        private BipedPhysicsFlags ConvertBipedPhysicsFlags(BipedPhysicsFlags bipedPhysicsFlags)
+        {
+            if (!Enum.TryParse(bipedPhysicsFlags.Halo3Retail.ToString(), out bipedPhysicsFlags.Halo3Odst))
+                throw new FormatException(BlamCache.Version.ToString());
+
+            return bipedPhysicsFlags;
         }
 
         private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)

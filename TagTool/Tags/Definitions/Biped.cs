@@ -1,8 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Havok;
+using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
 {
@@ -83,7 +84,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown41;
 
-        public PhysicsFlagBits PhysicsFlags;
+        public BipedPhysicsFlags PhysicsFlags;
         public float HeightStanding;
         public float HeightCrouching;
         public float Radius;
@@ -219,26 +220,6 @@ namespace TagTool.Tags.Definitions
             public uint Unknown3;
             public uint Unknown4;
             public TagFunction Function = new TagFunction { Data = new byte[0] };
-        }
-
-        [Flags]
-        public enum PhysicsFlagBits : int
-        {
-            None,
-            CenteredAtOrigin = 1 << 0,
-            ShapeSpherical = 1 << 1,
-            UsePlayerPhysics = 1 << 2,
-            ClimbAnySurface = 1 << 3,
-            Flying = 1 << 4,
-            NotPhysical = 1 << 5,
-            DeadCharacterCollisionGroup = 1 << 6,
-            SuppressGroundPlanesOnBipeds = 1 << 7,
-            PhysicalRagdoll = 1 << 8,
-            DoNotResizeDeadSpheres = 1 << 9,
-            MultipleShapes = 1 << 10,
-            ExtremeSlipSurface = 1 << 11,
-            SlipsOffMovers = 1 << 12,
-            AlignsWithGround = 1 << 13
         }
 
         [TagStructure(Size = 0x4)]

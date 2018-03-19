@@ -922,9 +922,9 @@ namespace TagTool.Commands.Files
                 args.RemoveAt(0);
             }
             else
-                CacheContext2 = CacheContext1;
+                CacheContext2 = CacheContext;
 
-            var tag1 = ArgumentParser.ParseTagSpecifier(CacheContext1, args[0]);
+            var tag1 = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
             if (tag1 == null)
             {
                 Console.WriteLine($"ERROR: tag cannot be found in this cache: {args[0]}");
@@ -951,15 +951,15 @@ namespace TagTool.Commands.Files
 
             object def1 = null;
 
-            using (var cacheStream = CacheContext1.OpenTagCacheReadWrite())
-                def1 = CacheContext1.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext1, tag1), TagDefinition.Find(tag1.Group.Tag));
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+                def1 = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, tag1), TagDefinition.Find(tag1.Group.Tag));
 
             object def2 = null;
 
             using (var cacheStream = CacheContext2.OpenTagCacheReadWrite())
                 def2 = CacheContext2.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext2, tag2), TagDefinition.Find(tag2.Group.Tag));
 
-            CompareBlocks(def1, def2, CacheContext1, CacheContext2, "");
+            CompareBlocks(def1, def2, CacheContext, CacheContext2, "");
 
             if (csvQueue1.Count == 0)
             {
@@ -971,7 +971,7 @@ namespace TagTool.Commands.Files
                 Console.WriteLine($"Found differences.");
             }
 
-            var tagname1 = CacheContext1.TagNames.ContainsKey(tag1.Index) ? CacheContext1.TagNames[tag1.Index] : $"0x{tag1.Index:X4}";
+            var tagname1 = CacheContext.TagNames.ContainsKey(tag1.Index) ? CacheContext.TagNames[tag1.Index] : $"0x{tag1.Index:X4}";
             var tagname2 = CacheContext2.TagNames.ContainsKey(tag2.Index) ? CacheContext2.TagNames[tag2.Index] : $"0x{tag2.Index:X4}";
             var filename1 = tagname1.Split("\\".ToCharArray()).Last();
             var filename2 = tagname2.Split("\\".ToCharArray()).Last();
@@ -1167,7 +1167,6 @@ namespace TagTool.Commands.Files
                         break;
                 }
             }
-
         }
     }
 }

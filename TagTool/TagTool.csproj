@@ -700,6 +700,7 @@
     <Compile Include="Tags\Resources\SoundResourceDefinition.cs" />
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
+    <Compile Include="Havok\BipedPhysicsFlags.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Builds.xml" />
@@ -980,6 +981,9 @@
       <Project>{c26e8204-0025-4484-955e-a669425fe9d7}</Project>
       <Name>TagToolUtilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Units\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
