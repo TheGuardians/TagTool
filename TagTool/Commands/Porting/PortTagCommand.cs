@@ -380,6 +380,12 @@ namespace TagTool.Commands.Porting
             if (groupTag == "bitm")
                 blamDefinition = ConvertBitmap((Bitmap)blamDefinition);
             
+            if (groupTag == "bipd")
+            {
+                var biped = (Biped)blamDefinition;
+                biped.PhysicsFlags = (Biped.PhysicsFlagBits)(((int)biped.PhysicsFlags & 0x7) + (((int)biped.PhysicsFlags & 0x7FFFFFF8) << 1));
+            }
+
             if (groupTag == "char")
                 blamDefinition = ConvertCharacter((Character)blamDefinition);
 
