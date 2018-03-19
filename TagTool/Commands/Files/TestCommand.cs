@@ -54,7 +54,8 @@ namespace TagTool.Commands.Files
                 { "nametag", "Name all dependencies of a named tag using the same nameUsage: test nametag all shaders\\invalid." },
                 { "listtags", "Listtags with a simplified output." },
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
-                { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." }
+                { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
+                { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache."}
             };
 
             switch (name)
@@ -68,6 +69,7 @@ namespace TagTool.Commands.Files
                 case "dumpcommandsscript": return DumpCommandsScript(args);
                 case "temp": return Temp(args);
                 case "shadowfix": return ShadowFix(args);
+                case "comparetags": return CompareTags(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -853,6 +855,283 @@ namespace TagTool.Commands.Files
             }
 
             return true;
+        }
+        
+        
+        public bool CompareTags(List<string> args)
+        {
+            // When comparing between different caches, compare by name or tag index
+            // test compare "D:\Halo\Halo3\maps\tags.dat" levels\solo\005_intro\005_intro.scenario levels\solo\005_intro\005_intro.scenario
+
+            // Get the tag with the same name from both caches
+            // test compare "D:\Halo\Halo3\maps\tags.dat" levels\solo\005_intro\005_intro.scenario
+
+            // Compare in the same cache between 2 named tags, or tag indexes
+            // test compare levels\solo\005_intro\005_intro.scenario levels\solo\005_intro\005_intro_scripts.scenario
+
+            debugConsoleWrite = false;
+            var dumpMatch = false;
+            var dumpDiff = true;
+
+            if (args.Count < 2)
+                return false;
+
+            csvQueue1 = new List<string>();
+
+            GameCacheContext CacheContext2 = null;
+
+            if (args[0].Contains(".dat"))
+            {
+                CacheContext2 = new GameCacheContext(new FileInfo(args[0]).Directory);
+                args.RemoveAt(0);
+            }
+            else
+                CacheContext2 = CacheContext1;
+
+            var tag1 = ArgumentParser.ParseTagSpecifier(CacheContext1, args[0]);
+            if (tag1 == null)
+            {
+                Console.WriteLine($"ERROR: tag cannot be found in this cache: {args[0]}");
+                return false;
+            }
+
+            CachedTagInstance tag2 = null;
+
+            if (args.Count == 1)
+            {
+                tag2 = ArgumentParser.ParseTagSpecifier(CacheContext2, args[0]);
+            }
+            else
+            {
+                args.RemoveAt(0);
+                tag2 = ArgumentParser.ParseTagSpecifier(CacheContext2, args[0]);
+            }
+
+            if (tag2 == null)
+            {
+                Console.WriteLine($"ERROR: tag cannot be found in the second cache: {args[0]}");
+                return false;
+            }
+
+            object def1 = null;
+
+            using (var cacheStream = CacheContext1.OpenTagCacheReadWrite())
+                def1 = CacheContext1.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext1, tag1), TagDefinition.Find(tag1.Group.Tag));
+
+            object def2 = null;
+
+            using (var cacheStream = CacheContext2.OpenTagCacheReadWrite())
+                def2 = CacheContext2.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext2, tag2), TagDefinition.Find(tag2.Group.Tag));
+
+            CompareBlocks(def1, def2, CacheContext1, CacheContext2, "");
+
+            if (csvQueue1.Count == 0)
+            {
+                Console.WriteLine($"No changes found.");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine($"Found differences.");
+            }
+
+            var tagname1 = CacheContext1.TagNames.ContainsKey(tag1.Index) ? CacheContext1.TagNames[tag1.Index] : $"0x{tag1.Index:X4}";
+            var tagname2 = CacheContext2.TagNames.ContainsKey(tag2.Index) ? CacheContext2.TagNames[tag2.Index] : $"0x{tag2.Index:X4}";
+            var filename1 = tagname1.Split("\\".ToCharArray()).Last();
+            var filename2 = tagname2.Split("\\".ToCharArray()).Last();
+
+            csvDumpQueueToFile(csvQueue1, $"{tag1.Group}_{filename1}_diff.csv");
+            if (dumpMatch)
+                csvDumpQueueToFile(csvQueue2, $"{tag1.Group}_{filename1}_match.csv");
+
+            return true;
+        }
+
+        public static void CompareBlocks(object leftData, object rightData, GameCacheContext CacheContext, GameCacheContext CacheContext2, String name)
+        {
+            var dumpMatch = false;
+            var dumpDiff = true;
+
+            if (leftData == null || rightData == null)
+                return;
+
+            if (name.Contains("ResourcePageIndex"))
+                return;
+
+            var type = leftData.GetType();
+
+            if (type == typeof(CachedTagInstance))
+            {
+                // If the objects are tags, then we've found a match
+                var leftTag = (CachedTagInstance)leftData;
+                var rightTag = (CachedTagInstance)rightData;
+
+                var leftName = CacheContext.TagNames.ContainsKey(leftTag.Index) ? CacheContext.TagNames[leftTag.Index] : "";
+                var rightName = CacheContext2.TagNames.ContainsKey(rightTag.Index) ? CacheContext2.TagNames[rightTag.Index] : "";
+
+                if (leftName != rightName)
+                {
+                    csv1($"{name,-120},{leftName},{rightName}");
+                    return;
+                }
+                else
+                    csv2($"{name,-120},{leftName,-60},{rightName}");
+
+                if (leftTag.Group.Tag != rightTag.Group.Tag)
+                    csv1($"{name,-120},{leftName}.{leftTag.Group.Tag,-20},{rightName}.{rightTag.Group.Tag}");
+                else
+                    csv2($"{name,-120},{leftName}.{leftTag.Group.Tag,-60},{rightName}.{rightTag.Group.Tag}");
+            }
+            else if (type.IsArray)
+            {
+                if (type.GetElementType().IsPrimitive)
+                {
+                    switch (Type.GetTypeCode(type))
+                    {
+                        case TypeCode.Int32:
+                        case TypeCode.UInt32:
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    return;
+                }
+
+                // If the objects are arrays, then loop through each element
+                var leftArray = (Array)leftData;
+                var rightArray = (Array)rightData;
+
+                if (leftArray.Length != rightArray.Length)
+                {
+                    csv1($"{name,-120},{leftArray.Length,-20},{rightArray.Length}");
+                    return;
+                }
+                else
+                    csv2($"{name,-120},{leftArray.Length,-60},{rightArray.Length}");
+
+                for (var i = 0; i < leftArray.Length; i++)
+                    CompareBlocks(leftArray.GetValue(i), rightArray.GetValue(i), CacheContext, CacheContext2, name);
+            }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                if (type.GenericTypeArguments[0].IsPrimitive)
+                {
+                    csv1($"{name,-120} : type.GenericTypeArguments().IsPrimitive");
+                    return;
+                }
+
+                // If the objects are lists, then loop through each element
+                var countProperty = type.GetProperty("Count");
+                var leftCount = (int)countProperty.GetValue(leftData);
+                var rightCount = (int)countProperty.GetValue(rightData);
+                if (leftCount != rightCount) // If the sizes are different, we probably can't compare them
+                {
+                    csv1($"{name,-120},{leftCount,-20},{rightCount}");
+                    return;
+                }
+                else if (dumpMatch)
+                    csv2($"{name,-120},{leftCount,-60},{rightCount}");
+
+                var getItem = type.GetMethod("get_Item");
+                for (var i = 0; i < leftCount; i++)
+                {
+                    var leftItem = getItem.Invoke(leftData, new object[] { i });
+                    var rightItem = getItem.Invoke(rightData, new object[] { i });
+                    CompareBlocks(leftItem, rightItem, CacheContext, CacheContext2, $"{name}[{i}].");
+                }
+            }
+            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+            {
+                // The objects are structures
+                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                while (left.Next() && right.Next())
+                {
+                    // Keep going on the left until the field is on the right
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+                    {
+                        if (!left.Next())
+                            return; // probably unused
+                    }
+
+                    // Keep going on the right until the field is on the left
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+                    {
+                        if (!right.Next())
+                            return;
+                    }
+                    if (left.Field.MetadataToken != right.Field.MetadataToken)
+                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+
+                    // Process the fields
+                    var leftFieldData = left.Field.GetValue(leftData);
+                    var rightFieldData = right.Field.GetValue(rightData);
+                    CompareBlocks(leftFieldData, rightFieldData, CacheContext, CacheContext2, $"{name}{left.Field.Name}");
+                }
+            }
+            else if (type.IsEnum)
+            {
+                var a = leftData.ToString();
+                var b = rightData.ToString();
+                if (a != b)
+                    csv1($"{name,-120},{leftData,-20},{rightData}");
+                else if (dumpMatch)
+                    csv2($"{name,-120},{leftData,-60},{rightData}");
+            }
+            else if (type.IsPrimitive)
+            {
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.SByte:
+                        if ((sbyte)leftData != (sbyte)rightData)
+                            csv1($"{name,-120},{(sbyte)leftData,-20},{(sbyte)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(sbyte)leftData,-60},{(sbyte)rightData}");
+                        break;
+                    case TypeCode.Byte:
+                        if ((byte)leftData != (byte)rightData)
+                            csv1($"{name,-120},{(byte)leftData,-20},{(byte)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(byte)leftData,-60},{(byte)rightData}");
+                        break;
+                    case TypeCode.Int16:
+                        if ((short)leftData != (short)rightData)
+                            csv1($"{name,-120},{(short)leftData,-20},{(short)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(short)leftData,-60},{(short)rightData}");
+                        break;
+                    case TypeCode.UInt16:
+                        if ((ushort)leftData != (ushort)rightData)
+                            csv1($"{name,-120},{(ushort)leftData,-20},{(ushort)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(ushort)leftData,-60},{(ushort)rightData}");
+                        break;
+                    case TypeCode.Int32:
+                        if ((int)leftData != (int)rightData)
+                            csv1($"{name,-120},{(int)leftData,-20},{(int)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(int)leftData,-60},{(int)rightData}");
+                        break;
+                    case TypeCode.UInt32:
+                        if ((uint)leftData != (uint)rightData)
+                            csv1($"{name,-120},{(uint)leftData,-20},{(uint)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(uint)leftData,-60},{(uint)rightData}");
+                        break;
+                    case TypeCode.Single:
+                        if ((float)leftData != (float)rightData)
+                            csv1($"{name,-120},{(float)leftData,-20},{(float)rightData}");
+                        else if (dumpMatch)
+                            csv2($"{name,-120},{(float)leftData,-60},{(float)rightData}");
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
         }
     }
 }
