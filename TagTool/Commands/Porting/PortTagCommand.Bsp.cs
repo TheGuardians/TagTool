@@ -1,6 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using TagTool.Cache;
+using TagTool.Geometry;
+using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
@@ -12,22 +18,56 @@ namespace TagTool.Commands.Porting
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp);
 
             sbsp.Unknown86 = 1;
-            
+
             //
             // Fix cluster tag ref and decorator grids indices
             //
 
-            foreach (var cluster in sbsp.Clusters)
-            {
-                cluster.Bsp = instance;
-                foreach(var grid in cluster.DecoratorGrids)
-                {
-                    grid.DecoratorGeometryIndex = grid.DecoratorIndex_H3; 
-                    grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
+            var resourceContext = new ResourceSerializationContext(sbsp.Geometry.Resource);
+            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
-                    grid.DecoratorVariant_HO = 0;
+            using (var edResourceStream = new MemoryStream())
+            using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+            {
+
+                CacheContext.ExtractResource(sbsp.Geometry.Resource, edResourceStream);
+                var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
+
+                foreach (var cluster in sbsp.Clusters)
+                {
+                    cluster.Bsp = instance;
+                    foreach (var grid in cluster.DecoratorGrids)
+                    {
+                        grid.DecoratorGeometryIndex = grid.DecoratorVariant_H3;
+                        grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
+                        
+
+                        var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex].Definition;
+
+                        edResourceStream.Position = vertexBuffer.Data.Address.Offset;
+
+                        var tiny = inVertexStream.ReadTinyPositionVertex();
+
+                        //undo conversion
+
+                        var floatvalue = tiny.Position.W;
+
+                        if ((floatvalue - 1.0f / 32767.0f )> 0 && floatvalue <=1)
+                            floatvalue -= 1.0f / 32767.0f;
+
+                        floatvalue = (floatvalue / 2.0f) + 0.5f;
+
+                        ushort result = (ushort)(floatvalue * ushort.MaxValue);
+
+                        var variant = ((result >> 8) & 0xFF);
+
+                        grid.DecoratorVariant_HO = (short)variant;
+
+                    }
                 }
             }
+
+            
 
             //
             // Temporary Fixes:
