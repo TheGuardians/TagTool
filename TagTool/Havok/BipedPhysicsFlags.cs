@@ -8,7 +8,7 @@ using TagTool.Serialization;
 
 namespace TagTool.Havok
 {
-    [TagStructure]
+    [TagStructure(Size = 0x4)]
     public struct BipedPhysicsFlags
     {
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
