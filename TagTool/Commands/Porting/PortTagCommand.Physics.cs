@@ -6,6 +6,7 @@ using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace TagTool.Commands.Porting
 {
@@ -13,6 +14,12 @@ namespace TagTool.Commands.Porting
     {
         private PhysicsModel ConvertPhysicsModel(PhysicsModel phmo)
         {
+            //
+            // Remove powered chain block to fix crashing on cold storage (Must fix later on)
+            //
+
+            phmo.PoweredChains = new List<PhysicsModel.PoweredChain>();
+
             //
             // Fix mopp code array headers for both H3 and ODST
             //
