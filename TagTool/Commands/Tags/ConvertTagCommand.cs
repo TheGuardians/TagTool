@@ -276,12 +276,15 @@ namespace TagTool.Commands.Tags
 
         private PageableResource ConvertResource(PageableResource resource, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
         {
-            if (resource == null)
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
-            Console.WriteLine("- Copying resource {0} in {1}...", resource.Page.Index, resource.GetLocation());
+
+            Console.WriteLine("- Copying resource {0} in {1}...", resource.Page.Index, location);
+
             var data = srcCacheContext.ExtractRawResource(resource);
-            var newLocation = FixResourceLocation(resource.GetLocation(), srcCacheContext.Version, destCacheContext.Version);
+            var newLocation = FixResourceLocation(location, srcCacheContext.Version, destCacheContext.Version);
             destCacheContext.AddRawResource(resource, newLocation, data);
+
             return resource;
         }
 
@@ -302,7 +305,7 @@ namespace TagTool.Commands.Tags
 
         private RenderGeometry ConvertGeometry(RenderGeometry geometry, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
         {
-            if (geometry == null || geometry.Resource == null || geometry.Resource.Page.Index < 0)
+            if (geometry == null || geometry.Resource == null || geometry.Resource.Page.Index < 0 || !geometry.Resource.GetLocation(out var location))
                 return geometry;
 
             // The format changed starting with version 1.235640, so if both versions are on the same side then they can be converted normally
@@ -314,7 +317,7 @@ namespace TagTool.Commands.Tags
                 return geometry;
             }
 
-            Console.WriteLine("- Rebuilding geometry resource {0} in {1}...", geometry.Resource.Page.Index, geometry.Resource.GetLocation());
+            Console.WriteLine("- Rebuilding geometry resource {0} in {1}...", geometry.Resource.Page.Index, location);
             using (MemoryStream inStream = new MemoryStream(), outStream = new MemoryStream())
             {
                 // First extract the model data
@@ -350,10 +353,12 @@ namespace TagTool.Commands.Tags
                 destCacheContext.Serializer.Serialize(resourceContext, definition);
 
                 // Now inject the new resource data
-                var newLocation = FixResourceLocation(geometry.Resource.GetLocation(), srcCacheContext.Version, destCacheContext.Version);
+                var newLocation = FixResourceLocation(location, srcCacheContext.Version, destCacheContext.Version);
+
                 outStream.Position = 0;
                 destCacheContext.AddResource(geometry.Resource, newLocation, outStream);
             }
+
             return geometry;
         }
 

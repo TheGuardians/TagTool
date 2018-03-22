@@ -66,32 +66,33 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             filePath = args[2]; // sc140_000_geometry2.raw
 
             uint compressedSize = 0x7FFFFFFF;
-            int index = -1;
 
+            PageableResource resource = null;
+            
             switch (resourceType)
             {
                 case "geometry":
-                    index = Definition.Geometry.Resource == null ? -1 : Definition.Geometry.Resource.Page.Index;
-                    cachePath = CacheContext.ResourceCacheNames[Definition.Geometry.Resource.GetLocation()];
+                    resource = Definition.Geometry.Resource;
                     break;
+
                 case "geometry2":
-                    index = Definition.Geometry2.Resource == null ? -1 : Definition.Geometry2.Resource.Page.Index;
-                    cachePath = CacheContext.ResourceCacheNames[Definition.Geometry2.Resource.GetLocation()];
+                    resource = Definition.Geometry2.Resource;
                     break;
+
                 case "collisionbspresource":
-                    index = Definition.CollisionBspResource == null ? -1 : Definition.CollisionBspResource.Page.Index;
-                    cachePath = CacheContext.ResourceCacheNames[Definition.CollisionBspResource.GetLocation()];
+                    resource = Definition.CollisionBspResource;
                     break;
+
                 case "pathfindingresource":
-                    index = Definition.PathfindingResource == null ? -1 : Definition.PathfindingResource.Page.Index;
-                    cachePath = CacheContext.ResourceCacheNames[Definition.PathfindingResource.GetLocation()];
+                    resource = Definition.PathfindingResource;
                     break;
+
                 default:
                     Console.WriteLine($"Invalid sbsp resource type.");
                     return false;
             }
 
-            if (index == -1)
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
             {
                 Console.WriteLine("Resource is null.");
                 return false;
@@ -104,7 +105,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     var cache = new ResourceCache(stream);
                     using (var outStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        cache.Decompress(stream, index, compressedSize, outStream);
+                        cache.Decompress(stream, resource.Page.Index, resource.Page.CompressedBlockSize, outStream);
                         Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, filePath);
                     }
                 }

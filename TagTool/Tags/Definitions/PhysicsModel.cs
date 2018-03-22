@@ -102,13 +102,13 @@ namespace TagTool.Tags.Definitions
         public class PositionMotor
         {
             public StringId Name;
-            public uint MaximumForce;
-            public uint MinimumForce;
-            public uint Tau;
-            public uint Damping;
-            public uint ProportionRecoverVelocity;
-            public uint ConstantRecoverVelocity;
-            public uint InitialPosition;
+            public float MaximumForce;
+            public float MinimumForce;
+            public float Tau;
+            public float Damping;
+            public float ProportionRecoverVelocity;
+            public float ConstantRecoverVelocity;
+            public float InitialPosition;
         }
 
         public enum PhantomTypeFlags : int
@@ -201,6 +201,13 @@ namespace TagTool.Tags.Definitions
             StrongestForce
         }
 
+        [TagStructure(Size = 0x4)]
+        public struct Motor
+        {
+            public MotorType Type;
+            public short Index;
+        }
+
         [TagStructure(Size = 0x18)]
         public class PoweredChain
         {
@@ -218,12 +225,9 @@ namespace TagTool.Tags.Definitions
             {
                 public ConstraintType ConstraintType;
                 public short ConstraintIndex;
-                public MotorType MotorXType;
-                public short MotorXIndex;
-                public MotorType MotorYType;
-                public short MotorYIndex;
-                public MotorType MotorZType;
-                public short MotorZIndex;
+                public Motor MotorX;
+                public Motor MotorY;
+                public Motor MotorZ;
             }
         }
 
@@ -261,19 +265,15 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0xC)]
                 public class RagdollMotor
                 {
-                    public MotorType TwistMotorType;
-                    public short TwistIndex;
-                    public MotorType ConeMotorType;
-                    public short ConeIndex;
-                    public MotorType PlaneMotorType;
-                    public short PlaneIndex;
+                    public Motor TwistMotor;
+                    public Motor ConeMotor;
+                    public Motor PlaneMotor;
                 }
 
                 [TagStructure(Size = 0x4)]
                 public class LimitedHingeMotor
                 {
-                    public short MotorType;
-                    public short Index;
+                    public Motor Motor;
                 }
             }
         }

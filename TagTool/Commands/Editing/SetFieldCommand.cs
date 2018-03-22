@@ -528,28 +528,7 @@ namespace TagTool.Commands.Editing
 
         private PageableResource SetResourceData(PageableResource pageable, FileInfo file)
         {
-            if (!file.Exists)
-                throw new FileNotFoundException(file.FullName);
-
-            var location = pageable?.GetLocation() ?? ResourceLocation.ResourcesB;
-            var cache = CacheContext.GetResourceCache(location);
-            var data = File.ReadAllBytes(file.FullName);
-            var index = pageable?.Page.Index ?? -1;
-
-            using (var cacheStream = CacheContext.OpenResourceCacheReadWrite(location))
-            {
-                if (index != -1)
-                {
-                    cache.ImportRaw(cacheStream, index, data);
-                    return pageable;
-                }
-
-                pageable.Page.Index = cache.Add(cacheStream, data, out uint compressedSize);
-                pageable.Page.CompressedBlockSize = compressedSize;
-                pageable.Page.UncompressedBlockSize = (uint)data.Length;
-            }
-
-            return pageable;
+            throw new NotImplementedException();
         }
 
         private int RangeArgCount(Type type)

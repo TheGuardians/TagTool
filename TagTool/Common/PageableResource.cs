@@ -28,40 +28,78 @@ namespace TagTool.Common
         /// </summary>
         /// <returns>The resource's location.</returns>
         /// <exception cref="InvalidOperationException">The resource does not have a location flag set</exception>
-        public ResourceLocation GetLocation()
+        public bool GetLocation(out ResourceLocation location)
         {
             if (Page.OldFlags != 0)
             {
-                if ((Page.OldFlags & OldRawPageFlags.InResources) != 0)
-                    return ResourceLocation.Resources;
-                if ((Page.OldFlags & OldRawPageFlags.InTextures) != 0)
-                    return ResourceLocation.Textures;
-                if ((Page.OldFlags & OldRawPageFlags.InTexturesB) != 0)
-                    return ResourceLocation.TexturesB;
-                if ((Page.OldFlags & OldRawPageFlags.InAudio) != 0)
-                    return ResourceLocation.Audio;
-                if ((Page.OldFlags & OldRawPageFlags.InResourcesB) != 0)
-                    return ResourceLocation.ResourcesB;
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InResources))
+                {
+                    location = ResourceLocation.Resources;
+                    return true;
+                }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InTextures))
+                {
+                    location = ResourceLocation.Textures;
+                    return true;
+                }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InTexturesB))
+                {
+                    location = ResourceLocation.TexturesB;
+                    return true;
+                }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InAudio))
+                {
+                    location = ResourceLocation.Audio;
+                    return true;
+                }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InResourcesB))
+                {
+                    location = ResourceLocation.ResourcesB;
+                    return true;
+                }
             }
             else if (Page.NewFlags != 0)
             {
                 // FIXME: haxhaxhax, maybe we should just have separate types for the old and new reference layouts?
-                if ((Page.NewFlags & NewRawPageFlags.InResources) != 0)
-                    return ResourceLocation.Resources;
-                if ((Page.NewFlags & NewRawPageFlags.InTextures) != 0)
-                    return ResourceLocation.Textures;
-                if ((Page.NewFlags & NewRawPageFlags.InTexturesB) != 0)
-                    return ResourceLocation.TexturesB;
-                if ((Page.NewFlags & NewRawPageFlags.InAudio) != 0)
-                    return ResourceLocation.Audio;
-                if ((Page.NewFlags & NewRawPageFlags.InResourcesB) != 0)
-                    return ResourceLocation.ResourcesB;
-                if ((Page.NewFlags & NewRawPageFlags.InRenderModels) != 0)
-                    return ResourceLocation.RenderModels;
-                if ((Page.NewFlags & NewRawPageFlags.InLightmaps) != 0)
-                    return ResourceLocation.Lightmaps;
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InResources))
+                {
+                    location = ResourceLocation.Resources;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InTextures))
+                {
+                    location = ResourceLocation.Textures;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InTexturesB))
+                {
+                    location = ResourceLocation.TexturesB;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InAudio))
+                {
+                    location = ResourceLocation.Audio;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InResourcesB))
+                {
+                    location = ResourceLocation.ResourcesB;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InRenderModels))
+                {
+                    location = ResourceLocation.RenderModels;
+                    return true;
+                }
+                if (Page.NewFlags.HasFlag(NewRawPageFlags.InLightmaps))
+                {
+                    location = ResourceLocation.Lightmaps;
+                    return true;
+                }
             }
-            throw new InvalidOperationException("The resource does not have a location flag set");
+
+            location = ResourceLocation.None;
+            return false;
         }
 
         /// <summary>
@@ -121,6 +159,11 @@ namespace TagTool.Common
     /// </summary>
     public enum ResourceLocation
     {
+        /// <summary>
+        /// The resource is not cached.
+        /// </summary>
+        None = -1,
+
         /// <summary>
         /// The resource is in resources.dat.
         /// </summary>
