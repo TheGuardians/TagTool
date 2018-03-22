@@ -30,13 +30,12 @@ namespace TagTool.Commands.Porting
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
-        private bool IsWildcard = false;
         private bool IsNew = false;
         private bool UseNull = false;
         private bool NoAudio = false;
         private bool NoElites = false;
         private bool UseShaderTest = false;
-        private bool MatchShaders = false;
+        private bool MatchShaders = true;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -95,11 +94,6 @@ namespace TagTool.Commands.Porting
                         IsNew = true;
                         break;
 
-                    case "*":
-                        IsWildcard = true;
-                        IsNew = true;
-                        break;
-
                     case "usenull":
                         UseNull = true;
                         break;
@@ -108,8 +102,8 @@ namespace TagTool.Commands.Porting
                         UseShaderTest = true;
                         break;
 
-                    case "matchshaders":
-                        MatchShaders = true;
+                    case "noshaders":
+                        MatchShaders = false;
                         break;
 
                     default:

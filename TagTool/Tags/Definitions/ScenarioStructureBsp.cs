@@ -414,22 +414,38 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public sbyte DecoratorIndex_H3;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public sbyte DecoratorVariant_H3;
+                public sbyte DecoratorGeometryIndex_H3;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorIndex_HO;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)] 
-                public short DecoratorVariant_HO;
+                public short DecoratorVariant;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorGeometryIndex;
+                public short DecoratorGeometryIndex_HO;
                 
                 public int DecoratorGeometryOffset;
                 public RealPoint3d Position;
                 public float Radius;
                 public RealPoint3d GridSize;
                 public RealPoint3d BoundingSphereOffset;
+
+
+                public DecoratorGrid Copy()
+                {
+                    DecoratorGrid result = new DecoratorGrid();
+
+                    result.DecoratorIndex_HO = DecoratorIndex_HO;
+                    result.DecoratorGeometryIndex_HO = DecoratorGeometryIndex_HO;
+                    result.DecoratorGeometryOffset = DecoratorGeometryOffset;
+                    result.Position = Position;
+                    result.Radius = Radius;
+                    result.GridSize = GridSize;
+                    result.BoundingSphereOffset = BoundingSphereOffset;
+
+                    return result;
+                }
             }
 
             [TagStructure(Size = 0x4)]

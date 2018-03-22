@@ -20,84 +20,73 @@ namespace TagTool.Commands.Porting
             sbsp.Unknown86 = 1;
 
             //
-            // Fix cluster tag ref and decorator grids indices
+            // Fix cluster tag ref and decorator grids
             //
 
-            var resourceContext = new ResourceSerializationContext(sbsp.Geometry.Resource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var resource = sbsp.Geometry.Resource;
 
-            using (var edResourceStream = new MemoryStream())
-            using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+            if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
             {
-                CacheContext.ExtractResource(sbsp.Geometry.Resource, edResourceStream);
-                var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
+                var resourceContext = new ResourceSerializationContext(sbsp.Geometry.Resource);
+                var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
-                foreach (var cluster in sbsp.Clusters)
+                using (var edResourceStream = new MemoryStream())
+                using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
-                    cluster.Bsp = instance;
-                    foreach (var grid in cluster.DecoratorGrids)
+
+                    CacheContext.ExtractResource(sbsp.Geometry.Resource, edResourceStream);
+                    var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
+
+                    foreach (var cluster in sbsp.Clusters)
                     {
-                        grid.DecoratorGeometryIndex = grid.DecoratorVariant_H3;
-                        grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
-                        
+                        List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
 
-                        var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex].Definition;
+                        foreach (var grid in cluster.DecoratorGrids)
+                        {
+                            grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3;
+                            grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
 
-                        edResourceStream.Position = vertexBuffer.Data.Address.Offset;
+                            if (grid.Amount == 0)
+                                newDecoratorGrids.Add(grid);
+                            else
+                            {
+                                List<TinyPositionVertex> vertices = new List<TinyPositionVertex>();
 
-                        var tiny = inVertexStream.ReadTinyPositionVertex();
+                                // Get the buffer the right grid
+                                var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex_HO].Definition;
+                                // Get the offset from the grid
+                                edResourceStream.Position = vertexBuffer.Data.Address.Offset + grid.DecoratorGeometryOffset;
+                                // Read all vertices and add to the list
+                                for (int i = 0; i < grid.Amount; i++)
+                                    vertices.Add(inVertexStream.ReadTinyPositionVertex());
 
-                        //undo conversion
+                                // Get the new grids
+                                List<ScenarioStructureBsp.Cluster.DecoratorGrid> newGrids = ConvertDecoratorGrid(vertices, grid);
 
-                        var floatvalue = tiny.Position.W;
+                                // Add all to list
+                                foreach (var newGrid in newGrids)
+                                    newDecoratorGrids.Add(newGrid);
 
-                        if ((floatvalue - 1.0f / 32767.0f )> 0 && floatvalue <=1)
-                            floatvalue -= 1.0f / 32767.0f;
+                            }
+                        }
 
-                        floatvalue = (floatvalue / 2.0f) + 0.5f;
-
-                        ushort result = (ushort)(floatvalue * ushort.MaxValue);
-
-                        var variant = ((result >> 8) & 0xFF);
-
-                        grid.DecoratorVariant_HO = (short)variant;
-
+                        cluster.DecoratorGrids = newDecoratorGrids;
                     }
                 }
             }
-
-            
 
             //
             // Temporary Fixes:
             //
 
-            // Disable decorator geometry for now entirely
-
-            /*for (var i = 0; i < sbsp.Decorators.Count; i++)
-                sbsp.Decorators[i] = new TagReferenceBlock { Instance = CacheContext.TagCache.Index[0x2ECD] };*/
-            
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
-                //sbsp.Clusters[i].DecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
+                sbsp.Clusters[i].Bsp = instance;
                 sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
                 sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
             }
             
-            //
-            // Remove decals
-            //
-
-            sbsp.RuntimeDecals = new List<ScenarioStructureBsp.RuntimeDecal>();
-
-            foreach (var Cluster in sbsp.Clusters)
-            {
-                Cluster.RuntimeDecalStartIndex = -1;
-                Cluster.RuntimeDecalEntryCount = 0;
-            }
-
-            // These aren't removed properly, to verify
-            sbsp.Geometry2.UnknownSections = new List<TagTool.Geometry.RenderGeometry.UnknownSection>();
+            sbsp.Geometry2.UnknownSections = new List<RenderGeometry.UnknownSection>();
             
             return sbsp;
         }
@@ -109,5 +98,81 @@ namespace TagTool.Commands.Porting
 
             return sddt;
         }
+
+
+
+        private int GetVariantIndex(float value)
+        {
+            if ((value - 1.0f / 32767.0f) > 0 && value <= 1)
+                value -= 1.0f / 32767.0f;
+
+            value = (value / 2.0f) + 0.5f;
+
+            ushort result = (ushort)(value * ushort.MaxValue);
+
+            return ((result >> 8) & 0xFF);
+        }
+
+        List<ScenarioStructureBsp.Cluster.DecoratorGrid> ConvertDecoratorGrid(List<TinyPositionVertex> vertices, ScenarioStructureBsp.Cluster.DecoratorGrid grid)
+        {
+            List<ScenarioStructureBsp.Cluster.DecoratorGrid> decoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
+
+            List<DecoratorData> decoratorData = ParseVertices(vertices);
+
+            foreach(var data in decoratorData)
+            {
+                ScenarioStructureBsp.Cluster.DecoratorGrid newGrid = grid.Copy();
+
+                newGrid.Amount = data.Amount;
+                newGrid.DecoratorGeometryOffset = grid.DecoratorGeometryOffset+data.GeometryOffset;
+                newGrid.DecoratorVariant = data.Variant;
+
+                //Position fixups should go here if needed
+
+                decoratorGrids.Add(newGrid);
+            }
+            return decoratorGrids;
+        }
+
+        List<DecoratorData> ParseVertices(List<TinyPositionVertex> vertices)
+        {
+            List<DecoratorData> decoratorData = new List<DecoratorData>();
+            var currentIndex = 0;
+            while(currentIndex < vertices.Count)
+            {
+                var currentVertex = vertices[currentIndex];
+                var currentVariant = GetVariantIndex(currentVertex.Position.W);
+
+                DecoratorData data = new DecoratorData(0,(short)currentVariant,currentIndex*16);
+
+                while(currentIndex < vertices.Count && currentVariant == GetVariantIndex(currentVertex.Position.W))
+                {
+                    currentVertex = vertices[currentIndex];
+                    data.Amount++;
+                    currentIndex++;
+                }
+
+                decoratorData.Add(data);
+            }
+
+            return decoratorData;
+        }
     }
+
+    class DecoratorData
+    {
+        public short Amount;
+        public short Variant;
+        public int GeometryOffset;
+
+        //Add position data if needed
+
+        public DecoratorData(short count, short variant, int offset)
+        {
+            Amount = count;
+            Variant = variant;
+            GeometryOffset = offset;
+        }
+    }
+    
 }
