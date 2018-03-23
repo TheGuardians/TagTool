@@ -97,20 +97,6 @@ namespace TagTool.Commands.Porting
             return sddt;
         }
 
-
-
-        private int GetVariantIndex(float value)
-        {
-            if ((value - 1.0f / 32767.0f) > 0 && value <= 1)
-                value -= 1.0f / 32767.0f;
-
-            value = (value / 2.0f) + 0.5f;
-
-            ushort result = (ushort)(value * ushort.MaxValue);
-
-            return ((result >> 8) & 0xFF);
-        }
-
         List<ScenarioStructureBsp.Cluster.DecoratorGrid> ConvertDecoratorGrid(List<TinyPositionVertex> vertices, ScenarioStructureBsp.Cluster.DecoratorGrid grid)
         {
             List<ScenarioStructureBsp.Cluster.DecoratorGrid> decoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
@@ -139,11 +125,11 @@ namespace TagTool.Commands.Porting
             while(currentIndex < vertices.Count)
             {
                 var currentVertex = vertices[currentIndex];
-                var currentVariant = GetVariantIndex(currentVertex.Position.W);
+                var currentVariant = currentVertex.Variant;
 
                 DecoratorData data = new DecoratorData(0,(short)currentVariant,currentIndex*16);
 
-                while(currentIndex < vertices.Count && currentVariant == GetVariantIndex(currentVertex.Position.W))
+                while(currentIndex < vertices.Count && currentVariant == currentVertex.Variant)
                 {
                     currentVertex = vertices[currentIndex];
                     data.Amount++;

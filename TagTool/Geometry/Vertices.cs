@@ -131,7 +131,8 @@ namespace TagTool.Geometry
 
     public class TinyPositionVertex
     {
-        public RealQuaternion Position { get; set; }
+        public RealVector3d Position { get; set; }
+        public ushort Variant { get; set; }
         public RealQuaternion Normal { get; set; }
         public uint Color { get; set; }
     }

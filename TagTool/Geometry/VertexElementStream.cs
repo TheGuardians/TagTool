@@ -96,7 +96,47 @@ namespace TagTool.Geometry
         {
             Write(v, 4, e => Writer.Write(e));
         }
-        
+
+        public sbyte ReadSByte()
+        {
+            return Reader.ReadSByte();
+        }
+
+        public byte ReadUByte()
+        {
+            return Reader.ReadByte();
+        }
+
+        public short ReadShort()
+        {
+            return Reader.ReadInt16();
+        }
+
+        public ushort ReadUShort()
+        {
+            return Reader.ReadUInt16();
+        }
+
+        public void WriteSByte(sbyte v)
+        {
+            Writer.Write(v);
+        }
+
+        public void WriteUByte(byte v)
+        {
+            Writer.Write(v);
+        }
+
+        public void WriteShort(short v)
+        {
+            Writer.Write(v);
+        }
+
+        public void WriteUShort(ushort v)
+        {
+            Writer.Write(v);
+        }
+
         public RealQuaternion ReadSByte4N()
         {
             return new RealQuaternion(Read(4, Reader.ReadSByte, e => DenormalizeSigned(e)).ToArray());
@@ -128,6 +168,16 @@ namespace TagTool.Geometry
             Write(v.ToArray(), 2, e => Writer.Write(NormalizeShort(e)));
         }
 
+        public RealVector3d ReadShort3N()
+        {
+            return new RealVector3d(Read(3, () => DenormalizeSigned(Reader.ReadInt16())));
+        }
+
+        public void WriteShort3N(RealVector3d v)
+        {
+            Write(v.ToArray(), 3, e => Writer.Write(NormalizeShort(e)));
+        }
+
         public RealQuaternion ReadShort4N()
         {
             return new RealQuaternion(Read(4, () => DenormalizeSigned(Reader.ReadInt16())));
@@ -146,6 +196,16 @@ namespace TagTool.Geometry
         public void WriteUShort2N(RealVector2d v)
         {
             Write(v.ToArray(), 2, e => Writer.Write(NormalizeUShort(e)));
+        }
+
+        public RealVector3d ReadUShort3N()
+        {
+            return new RealVector3d(Read(3, () => DenormalizeUnsigned(Reader.ReadUInt16())));
+        }
+
+        public void WriteUShort3N(RealVector3d v)
+        {
+            Write(v.ToArray(), 3, e => Writer.Write(NormalizeUShort(e)));
         }
 
         public RealQuaternion ReadUShort4N()

@@ -309,7 +309,8 @@ namespace TagTool.Geometry
         {
             return new TinyPositionVertex
             {
-                Position = _stream.ReadShort4N(),
+                Position = _stream.ReadShort3N(),
+                Variant = _stream.ReadUShort(),
                 Normal = _stream.ReadUByte4N(),
                 Color = _stream.ReadColor()
             };
@@ -317,7 +318,8 @@ namespace TagTool.Geometry
 
         public void WriteTinyPositionVertex(TinyPositionVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort3N(v.Position);
+            _stream.WriteUShort(v.Variant);
             _stream.WriteUByte4N(v.Normal);
             _stream.WriteColor(v.Color);
         }

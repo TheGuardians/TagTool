@@ -137,6 +137,7 @@ namespace TagTool.Geometry
                     ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) => 
                     {
                         v.Position = ConvertPositionShort(v.Position);
+                        v.Variant = (ushort) ((v.Variant >> 8) & 0xFF);
                         v.Normal = ConvertNormal(v.Normal);
                         outVertexStream.WriteTinyPositionVertex(v);
                     });
@@ -556,9 +557,9 @@ namespace TagTool.Geometry
         /// <summary>
         /// Convert H3 position to HO position including rounding error for tinyposition vertex
         /// </summary>
-        public RealQuaternion ConvertPositionShort(RealQuaternion position)
+        public RealVector3d ConvertPositionShort(RealVector3d position)
         {
-            return new RealQuaternion(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))));
+            return new RealVector3d(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))).ToArray());
         }
     }
 }
