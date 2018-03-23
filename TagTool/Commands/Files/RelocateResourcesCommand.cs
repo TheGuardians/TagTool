@@ -72,10 +72,8 @@ namespace TagTool.Commands.Files
 
                             if (resource.Page.Index == -1)
                                 continue;
-
-                            var resourceLocation = resource.GetLocation();
-
-                            if (resourceLocation == ResourceLocation.ResourcesB)
+                            
+                            if (resource.GetLocation(out var location) && location == ResourceLocation.ResourcesB)
                             {
                                 isB = true;
                                 break;
@@ -109,7 +107,7 @@ namespace TagTool.Commands.Files
             {
                 var resource = (PageableResource)data;
                 
-                if (resource.GetLocation() == ResourceLocation.ResourcesB)
+                if (resource.GetLocation(out var location) && location == ResourceLocation.ResourcesB)
                 {
                     resource.ChangeLocation(ResourceLocation.Resources);
 

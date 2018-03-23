@@ -32,8 +32,13 @@ namespace TagTool.Commands.RenderModels
             if (args.Count != 0)
                 return false;
 
+            var resource = Definition.Geometry.Resource;
+
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
+                return true;
+
             Console.WriteLine();
-            Console.WriteLine($"[Location: {Definition.Geometry.Resource.GetLocation()}, Index: {Definition.Geometry.Resource.Page.Index}, Compressed Size: {Definition.Geometry.Resource.Page.CompressedBlockSize}]");
+            Console.WriteLine($"[Location: {location}, Index: {resource.Page.Index}, Compressed Size: {resource.Page.CompressedBlockSize}]");
 
             return true;
         }

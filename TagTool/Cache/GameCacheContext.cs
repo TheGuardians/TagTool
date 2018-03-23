@@ -542,11 +542,12 @@ namespace TagTool.Cache
 
         private LoadedResourceCache GetResourceCache(PageableResource resource)
         {
-            var location = resource.GetLocation();
+            if (!resource.GetLocation(out var location))
+                return null;
 
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
             {
-                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[resource.GetLocation()]));
+                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
 
                 using (var stream = file.OpenRead())
                 {

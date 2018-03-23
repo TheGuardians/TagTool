@@ -291,19 +291,18 @@ namespace TagTool.Commands.Files
 
         private PageableResource ConvertResource(PageableResource resource, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
         {
-            if (resource == null)
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
 
             if (resource.Page.CompressedBlockSize > 0)
             {
-                var location = resource.GetLocation();
                 var index = resource.Page.Index;
 
                 if (ConvertedResources[location].ContainsKey(index))
                     return ConvertedResources[location][index];
 
                 var data = srcCacheContext.ExtractRawResource(resource);
-                destCacheContext.AddRawResource(resource, resource.GetLocation(), data);
+                destCacheContext.AddRawResource(resource, location, data);
 
                 ConvertedResources[location][index] = resource;
             }

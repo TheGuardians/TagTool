@@ -54,30 +54,18 @@ namespace TagTool.Commands.Sounds
         {
             if (args.Count != 1)
                 return false;
+            
+            var filePath = args[0];
 
-            var filePath = "";
-            var cachePath = "resources.dat";
+            var resource = Definition.Resource;
 
-            filePath = args[0]; // sc140_000_geometry2.raw
-
-            uint compressedSize = 0x7FFFFFFF;
-            int index = -1;
-
-            try
-            {
-                index = Definition.Resource == null ? -1 : Definition.Resource.Page.Index;
-                cachePath = CacheContext.ResourceCacheNames[Definition.Resource.GetLocation()];
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"FAILURE: could not import resource: {e.Message}");
-            }
-
-            if (index == -1)
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
             {
                 Console.WriteLine("Resource is null.");
                 return false;
             }
+
+            var cachePath = CacheContext.ResourceCacheNames[location];
 
             try
             {
@@ -86,7 +74,7 @@ namespace TagTool.Commands.Sounds
                     var cache = new ResourceCache(stream);
                     using (var outStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        cache.Decompress(stream, index, compressedSize, outStream);
+                        cache.Decompress(stream, resource.Page.Index, resource.Page.CompressedBlockSize, outStream);
                         Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, filePath);
                     }
                 }

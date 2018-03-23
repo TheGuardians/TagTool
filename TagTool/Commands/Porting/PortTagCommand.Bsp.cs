@@ -23,7 +23,9 @@ namespace TagTool.Commands.Porting
             // Fix cluster tag ref and decorator grids
             //
 
-            if(sbsp.Geometry.Resource.Page.OldFlags != 0 || sbsp.Geometry.Resource.Page.NewFlags != 0)
+            var resource = sbsp.Geometry.Resource;
+
+            if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
             {
                 var resourceContext = new ResourceSerializationContext(sbsp.Geometry.Resource);
                 var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);

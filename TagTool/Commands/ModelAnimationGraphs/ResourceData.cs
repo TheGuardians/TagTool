@@ -73,7 +73,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             try
             {
-                using (var stream = File.OpenRead(CacheContext.TagCacheFile.DirectoryName + "\\" + CacheContext.ResourceCacheNames[Definition.ResourceGroups[groupIndex].Resource.GetLocation()]))
+                Definition.ResourceGroups[groupIndex].Resource.GetLocation(out var location);
+                using (var stream = File.OpenRead(CacheContext.TagCacheFile.DirectoryName + "\\" + CacheContext.ResourceCacheNames[location]))
                 {
                     var cache = new ResourceCache(stream);
                     using (var outStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
