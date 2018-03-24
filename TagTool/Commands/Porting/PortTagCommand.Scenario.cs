@@ -179,7 +179,7 @@ namespace TagTool.Commands.Porting
             if (tagName == "levels\\dlc\\chillout\\chillout")
             {
                 var position = new RealPoint3d(-2.415f, 8.467f, 4.481f);
-                var orientation = new RealEulerAngles3d(Angle.FromDegrees(-54.13f), Angle.FromDegrees(- 12.64f), Angle.FromDegrees(1.0f));
+                var orientation = new RealEulerAngles3d(Angle.FromDegrees(-54.13f), Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f));
                 scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
             }
                 
