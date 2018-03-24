@@ -1672,6 +1672,7 @@ namespace TagTool.Commands.Porting
                 case "warp_amount_x":
                 case "warp_amount_y":
                 case "waveshape":
+                case "env_tint_color":
                     return new RealArgbColor(0f, 0f, 0f, 0f);
 
                 case "alpha_map":
@@ -1731,7 +1732,6 @@ namespace TagTool.Commands.Porting
                 case "edge_fade_power":
                 case "ending_uv_scale":
                 case "env_roughness_scale":
-                case "env_tint_color":
                 case "environment_map_specular_contribution":
                 case "environment_map_tint":
                 case "final_tint":
