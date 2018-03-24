@@ -30,7 +30,7 @@ namespace TagTool.Commands.Porting
             return cisc;
         }
 
-        private Scenario ConvertScenario(Scenario scnr)
+        private Scenario ConvertScenario(Scenario scnr, string tagName)
         {
             //
             // Ai Pathfinding block conversion 
@@ -52,10 +52,11 @@ namespace TagTool.Commands.Porting
             // Temporary fixes
             //
 
-            scnr.ScenarioKillTriggers = new List<Scenario.ScenarioKillTrigger>();
-            scnr.SimulationDefinitionTable = new List<Scenario.SimulationDefinitionTableBlock>();
+            //scnr.ScenarioKillTriggers = new List<Scenario.ScenarioKillTrigger>();
+            //scnr.SimulationDefinitionTable = new List<Scenario.SimulationDefinitionTableBlock>();
 
             // Cheap color fix for now
+
             foreach(var title in scnr.CutsceneTitles)
             {
                 title.TextColor = new ArgbColor(title.TextColor.Blue, title.TextColor.Green, title.TextColor.Red, title.TextColor.Alpha);
@@ -171,30 +172,60 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            //
+            // Add prematch camera position
+            //
 
+            if (tagName == "levels\\dlc\\chillout\\chillout")
+            {
+                var position = new RealPoint3d(-2.415f, 8.467f, 4.481f);
+                var orientation = new RealEulerAngles3d(Angle.FromDegrees(-54.13f), Angle.FromDegrees(- 12.64f), Angle.FromDegrees(1.0f));
+                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
+            }
+                
             //
             // Convert scripts
             //
 
-            foreach (var global in scnr.Globals)
+            if (ConvertScripts)
             {
-                ConvertScriptValueType(global.Type);
+                foreach (var global in scnr.Globals)
+                {
+                    ConvertScriptValueType(global.Type);
+                }
+
+                foreach (var script in scnr.Scripts)
+                {
+                    ConvertScriptValueType(script.ReturnType);
+
+                    foreach (var parameter in script.Parameters)
+                        ConvertScriptValueType(parameter.Type);
+                }
+
+                foreach (var expr in scnr.ScriptExpressions)
+                {
+                    ConvertScriptExpression(scnr, expr);
+                }
             }
-
-            foreach (var script in scnr.Scripts)
+            else
             {
-                ConvertScriptValueType(script.ReturnType);
-
-                foreach (var parameter in script.Parameters)
-                    ConvertScriptValueType(parameter.Type);
-            }
-
-            foreach (var expr in scnr.ScriptExpressions)
-            {
-                ConvertScriptExpression(scnr, expr);
+                scnr.Globals = new List<ScriptGlobal>();
+                scnr.Scripts = new List<Script>();
+                scnr.ScriptExpressions = new List<ScriptExpression>();
             }
 
             return scnr;
+        }
+
+        public Scenario.CutsceneCameraPoint MultiplayerPrematchCamera(RealPoint3d position, RealEulerAngles3d orientation)
+        {
+            var camera = new Scenario.CutsceneCameraPoint();
+            camera.Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
+            camera.Type = Scenario.CutsceneCameraPointType.Normal;
+            camera.Name = "prematch_camera";
+            camera.Position = position;
+            camera.Orientation = orientation;
+            return camera;
         }
 
         public void ConvertScriptExpression(Scenario scnr, ScriptExpression expr)

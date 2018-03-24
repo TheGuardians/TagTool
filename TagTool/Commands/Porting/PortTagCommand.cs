@@ -36,6 +36,7 @@ namespace TagTool.Commands.Porting
         private bool NoElites = false;
         private bool UseShaderTest = false;
         private bool MatchShaders = true;
+        private bool ConvertScripts = true;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -104,6 +105,10 @@ namespace TagTool.Commands.Porting
 
                     case "noshaders":
                         MatchShaders = false;
+                        break;
+
+                    case "noscripts":
+                        ConvertScripts = false;
                         break;
 
                     default:
@@ -432,7 +437,7 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertScenarioStructureBsp((ScenarioStructureBsp)blamDefinition, edTag);
 
             if (groupTag == "scnr")
-                blamDefinition = ConvertScenario((Scenario)blamDefinition);
+                blamDefinition = ConvertScenario((Scenario)blamDefinition, blamTag.Filename);
 
             if (groupTag == "sefc")
             {
