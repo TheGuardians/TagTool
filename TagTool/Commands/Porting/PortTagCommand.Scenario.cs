@@ -179,8 +179,7 @@ namespace TagTool.Commands.Porting
             if (tagName == "levels\\dlc\\chillout\\chillout")
             {
                 var position = new RealPoint3d(-2.415f, 8.467f, 4.481f);
-                var orientation = new RealEulerAngles3d(Angle.FromDegrees(-54.13f), Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f));
-                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
+                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, 305.87f,-12.64f) };
             }
                 
             //
@@ -217,15 +216,38 @@ namespace TagTool.Commands.Porting
             return scnr;
         }
 
-        public Scenario.CutsceneCameraPoint MultiplayerPrematchCamera(RealPoint3d position, RealEulerAngles3d orientation)
+        /// <summary>
+        /// Given the position and the yaw/pitch given by the camera coordinates, create a CutsceneCameraPoint block. Note that roll is always 0 in the coordinates.
+        /// </summary>
+        public Scenario.CutsceneCameraPoint MultiplayerPrematchCamera(RealPoint3d position, float yaw, float pitch)
         {
-            var camera = new Scenario.CutsceneCameraPoint();
-            camera.Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
-            camera.Type = Scenario.CutsceneCameraPointType.Normal;
-            camera.Name = "prematch_camera";
-            camera.Position = position;
-            camera.Orientation = orientation;
+            var orientation = ConvertXYZtoZYX(new RealEulerAngles3d(Angle.FromDegrees(yaw), Angle.FromDegrees(pitch), Angle.FromDegrees(0)));
+
+            var camera = new Scenario.CutsceneCameraPoint()
+            {
+                Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,
+                Type = Scenario.CutsceneCameraPointType.Normal,
+                Name = "prematch_camera",
+                Position = position,
+                Orientation = orientation
+
+            };
             return camera;
+        }
+
+        /// <summary>
+        /// Convert from the Tait-Bryan XYZ to ZYX coordinate, assuming input Z = 0.
+        /// </summary>
+        public RealEulerAngles3d ConvertXYZtoZYX(RealEulerAngles3d angle)
+        {
+            var x1 = angle.Yaw.Radians;
+            var y1 = angle.Pitch.Radians;
+
+            var y2 = (float)Math.Asin(Math.Cos(x1) * Math.Sin(y1));
+            var z2 = (float)Math.Acos(Math.Cos(y1) / Math.Cos(y2));
+            var x2 = x1;
+
+            return new RealEulerAngles3d(Angle.FromRadians(x2), Angle.FromRadians(y2), Angle.FromRadians(z2));
         }
 
         public void ConvertScriptExpression(Scenario scnr, ScriptExpression expr)
