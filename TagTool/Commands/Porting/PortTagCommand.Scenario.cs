@@ -176,12 +176,41 @@ namespace TagTool.Commands.Porting
             // Add prematch camera position
             //
 
-            if (tagName == "levels\\dlc\\chillout\\chillout")
+            bool createPrematchCamera = false;
+
+            RealPoint3d position = new RealPoint3d();
+            float yaw = 0.0f;
+            float pitch = 0.0f;
+
+            switch (tagName)
             {
-                var position = new RealPoint3d(-2.415f, 8.467f, 4.481f);
-                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, 305.87f,-12.64f) };
+                case "levels\\dlc\\chillout\\chillout":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(-6.559f, 4.763f, 0.699f);
+                    yaw = 239.89f;
+                    pitch = -1.36f;
+                    break;
+
+                case "levels\\dlc\\descent\\descent":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(9.259f, 3.942f, -17.249f);
+                    yaw = 188.57f;
+                    pitch = -12.60f;
+                    break;
+
+                case "levels\\multi\\salvation\\salvation":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(1.522f, 16.490f, 4.648f);
+                    yaw = 252.14f;
+                    pitch = -13.68f;
+                    break;
+
             }
-                
+
+            if(createPrematchCamera)
+                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, yaw, pitch) };
+            
+
             //
             // Convert scripts
             //
