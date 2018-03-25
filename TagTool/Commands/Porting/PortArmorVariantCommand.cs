@@ -120,7 +120,7 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
             var edModeDefinition = blamDeserializer.Deserialize<RenderModel>(blamContext);
 
-            var blamMaterials = edModeDefinition.Materials.Select(i => new RenderMaterial
+            var materials = edModeDefinition.Materials.Select(i => new RenderMaterial
             {
                 BreakableSurfaceIndex = i.BreakableSurfaceIndex,
                 Properties = i.Properties,
@@ -232,18 +232,18 @@ namespace TagTool.Commands.Porting
             // Port Blam render_model materials
             //
 
-            blamMaterials = blamMaterials.Where(i => variantMaterials.Contains(blamMaterials.IndexOf(i))).ToList();
+            materials = materials.Where(i => variantMaterials.Contains(materials.IndexOf(i))).ToList();
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                for (var i = 0; i < blamMaterials.Count; i++)
+                for (var i = 0; i < materials.Count; i++)
                 {
-                    var material = blamMaterials[i];
+                    var material = materials[i];
 
                     if (material.RenderMethod.Index == -1)
                         continue;
 
-                    var blamRenderMethod = blamMaterials[i].RenderMethod;
+                    var blamRenderMethod = materials[i].RenderMethod;
                     var blamRenderMethodTag = BlamCache.IndexItems.GetItemByID(blamRenderMethod.Index);
 
                     var renderMethodExists = false;
@@ -283,7 +283,53 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            edModeDefinition.Materials = blamMaterials;
+            edModeDefinition.Materials = materials;
+
+            //
+            // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
+            //
+
+            var ms30Vertices = new Dictionary<int, List<int>>();
+
+            if (materials != null)
+            {
+                var ms30Materials = new List<bool>();
+
+                using (var cacheStream = CacheContext.OpenTagCacheRead())
+                {
+                    foreach (var material in materials)
+                    {
+                        if (material.RenderMethod == null)
+                            continue;
+
+                        var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
+                        var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
+
+                        ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
+                    }
+                }
+
+                foreach (var mesh in edModeDefinition.Geometry.Meshes)
+                {
+                    var ms30Indices = new List<int>();
+                    var partStartVertex = 0;
+
+                    foreach (var part in mesh.Parts)
+                    {
+                        if (part.IndexCount > 0)
+                        {
+                            if (part.MaterialIndex > 0 && part.MaterialIndex < ms30Materials.Count && ms30Materials[part.MaterialIndex])
+                                for (var i = partStartVertex; i < part.VertexCount; i++)
+                                    ms30Indices.Add(i);
+                        }
+
+
+                        partStartVertex += part.VertexCount;
+                    }
+
+                    ms30Vertices[mesh.VertexBuffers[0]] = ms30Indices;
+                }
+            }
 
             //
             // Load Blam resource data
@@ -397,7 +443,7 @@ namespace TagTool.Commands.Porting
                         blamResourceStream.Position = definitionEntry.Fixups[i].Offset;
                         if (i > 0)
                             previousVertexBufferCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count;
-                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount, new List<int>());
+                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
                     }
 
                     Console.WriteLine("done.");
