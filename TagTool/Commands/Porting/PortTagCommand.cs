@@ -185,6 +185,9 @@ namespace TagTool.Commands.Porting
             if ((groupTag == "snd!") && NoAudio)
                 return null;
 
+            if( groupTag == "rmhg")
+                return CacheContext.GetTag(0x2647);
+
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
