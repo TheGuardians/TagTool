@@ -619,9 +619,6 @@ namespace TagTool.Commands.Porting
 
         private StringId ConvertStringId(StringId stringId)
         {
-            if (stringId.Value == 0x4000C)  //teleporter_active stringid conversion override
-                return stringId;
-
             var value = BlamCache.Strings.GetString(stringId);
             var edStringId = CacheContext.StringIdCache.GetStringId(stringId.Set, value);
 
