@@ -328,7 +328,8 @@ namespace TagTool.Tags.Definitions
             public float BoundingSpherePad;
             public uint Unknown10;
             public uint Unknown11;
-            public uint Unknown12;
+            public short Unknown12;
+            public short Unknown13;
 
             public enum MotionTypeValue : short
             {
@@ -342,7 +343,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum MaterialFlags : ushort
+        public enum MaterialFlags : byte
         {
             None = 0,
             SupressesEffects = 1 << 0,
@@ -356,21 +357,22 @@ namespace TagTool.Tags.Definitions
             public StringId MaterialName;
             public short PhantomType;
             public MaterialFlags Flags;
+            public byte Unknown;
         }
 
-        [TagStructure(Size = 0x70, Align = 0x10)]
-        public class Sphere
+        
+        [TagStructure(Size = 0x40)]
+        public class Shape
         {
             public StringId Name;
-            public sbyte MaterialIndex;
-            public sbyte Unknown;
+            public short MaterialIndex;
             public short GlobalMaterialIndex;
             public float RelativeMassScale;
             public float Friction;
             public float Restitution;
             public float Volume;
             public float Mass;
-            public short OverallShapeIndex;
+            public short Index;
             public sbyte PhantomIndex;
             public sbyte InteractionUnknown;
             public int Unknown2;
@@ -382,6 +384,11 @@ namespace TagTool.Tags.Definitions
             public uint Unknown4;
             public uint Unknown5;
             public uint Unknown6;
+        }
+
+        [TagStructure(Size = 0x30, Align = 0x10)]
+        public class Sphere : Shape
+        {
             public int Unknown7;
             public short Size2;
             public short Count2;
@@ -395,61 +402,18 @@ namespace TagTool.Tags.Definitions
             public float TranslationRadius;
         }
 
-        [TagStructure(Size = 0x60, Align = 0x10)]
-        public class Pill
+        [TagStructure(Size = 0x20, Align = 0x10)]
+        public class Pill : Shape
         {
-            public StringId Name;
-            public sbyte MaterialIndex;
-            public sbyte Unknown;
-            public short GlobalMaterialIndex;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short Index;
-            public sbyte PhantomIndex;
-            public sbyte InteractionUnknown;
-            public int Unknown2;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown3;
-            public float Radius;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
             public RealVector3d Bottom;
             public float BottomRadius;
             public RealVector3d Top;
             public float TopRadius;
         }
 
-        [TagStructure(Size = 0xB0, Align = 0x10)]
-        public class Box
+        [TagStructure(Size = 0x70, Align = 0x10)]
+        public class Box : Shape
         {
-            public StringId Name;
-            public sbyte MaterialIndex;
-            public sbyte Unknown;
-            public short GlobalMaterialIndex;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short Index;
-            public sbyte PhantomIndex;
-            public sbyte InteractionUnknown;
-            public int Unknown2;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown3;
-            public float Radius;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-
             public RealVector3d HalfExtents;
             public float HalfExtentsRadius;
 
@@ -476,29 +440,9 @@ namespace TagTool.Tags.Definitions
             public float TranslationRadius;
         }
 
-        [TagStructure(Size = 0x80, Align = 0x10)]
-        public class Triangle
+        [TagStructure(Size = 0x40, Align = 0x10)]
+        public class Triangle : Shape
         {
-            public StringId Name;
-            public sbyte MaterialIndex;
-            public sbyte Unknown;
-            public short GlobalMaterialIndex;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short OverallShapeIndex;
-            public sbyte PhantomIndex;
-            public sbyte InteractionUnknown;
-            public int Unknown2;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
             public uint Unknown7;
             public uint Unknown8;
             public uint Unknown9;
@@ -515,34 +459,11 @@ namespace TagTool.Tags.Definitions
             public uint Unknown20;
             public uint Unknown21;
             public uint Unknown22;
-            public uint Unknown23;
         }
 
-        [TagStructure(Size = 0x80, Align = 0x10)]
-        public class Polyhedron
+        [TagStructure(Size = 0x40, Align = 0x10)]
+        public class Polyhedron : Shape
         {
-            public StringId Name;
-            public sbyte MaterialIndex;
-            public sbyte Unknown;
-            public short GlobalMaterialIndex;
-            public float RelativeMassScale;
-            public float Friction;
-            public float Restitution;
-            public float Volume;
-            public float Mass;
-            public short OverallShapeIndex;
-            public sbyte PhantomIndex;
-            public sbyte InteractionUnknown;
-            public int Unknown2;
-            public short Size;
-            public short Count;
-            public int Offset;
-            public int Unknown3;
-            public float Radius;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-
             public RealVector3d AabbHalfExtents;
             public float AabbHalfExtentsRadius;
 
