@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
         public List<ScenarioLightmapBspData> Lightmaps;
 
         public List<LightmapDataReference> LightmapDataReferences;
-        public List<UnknownBlock> Unknown2;
+        public List<TagReferenceBlock> Unknown2;
         public List<Airprobe> Airprobes;
         public List<UnknownBlock2> Unknown3;
         public List<UnknownBlock3> Unknown4;
@@ -34,11 +34,27 @@ namespace TagTool.Tags.Definitions
         {
             public CachedTagInstance LightmapData;
         }
-
-        [TagStructure(Size = 0x10)]
-        public class UnknownBlock
+        
+        [Flags]
+        public enum AirprobeFlags : ushort
         {
-            public CachedTagInstance Unknown;
+            None = 0,
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7,
+            Bit8 = 1 << 8,
+            Bit9 = 1 << 9,
+            Bit10 = 1 << 10,
+            Bit11 = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15
         }
 
         [TagStructure(Size = 0x5C)]
@@ -46,66 +62,18 @@ namespace TagTool.Tags.Definitions
         {
             public RealPoint3d Position;
             public StringId Name;
-            public FlagsValue Flags;
-		    public short Unknown12;
-		    public short Unknown14;
-		    public short Unknown16;
-		    public short Unknown18;
-		    public short Unknown1A;
-		    public short Unknown1C;
-		    public short Unknown1E;
-		    public short Unknown20;
-		    public short Unknown22;
-		    public short Unknown24;
-		    public short Unknown26;
-		    public short Unknown28;
-		    public short Unknown2A;
-		    public short Unknown2C;
-		    public short Unknown2E;
-		    public short Unknown30;
-		    public short Unknown32;
-		    public short Unknown34;
-		    public short Unknown36;
-		    public short Unknown38;
-		    public short Unknown3A;
-		    public short Unknown3C;
-		    public short Unknown3E;
-		    public short Unknown40;
-		    public short Unknown42;
-		    public short Unknown44;
-		    public short Unknown46;
-		    public short Unknown48;
-		    public short Unknown4A;
-		    public short Unknown4C;
-		    public short Unknown4E;
-		    public short Unknown50;
-		    public short Unknown52;
-		    public short Unknown54;
-		    public short Unknown56;
-		    public short Unknown58;
-		    public short Unknown5A;
+            public AirprobeFlags Flags;
 
-            [Flags]
-            public enum FlagsValue : ushort
-            {
-                None = 0,
-                Bit0 = 1 << 0,
-                Bit1 = 1 << 1,
-                Bit2 = 1 << 2,
-                Bit3 = 1 << 3,
-                Bit4 = 1 << 4,
-                Bit5 = 1 << 5,
-                Bit6 = 1 << 6,
-                Bit7 = 1 << 7,
-                Bit8 = 1 << 8,
-                Bit9 = 1 << 9,
-                Bit10 = 1 << 10,
-                Bit11 = 1 << 11,
-                Bit12 = 1 << 12,
-                Bit13 = 1 << 13,
-                Bit14 = 1 << 14,
-                Bit15 = 1 << 15
-            }
+            [TagField(Length = 12)]
+            public short[] RedShiftCoefficients = new short[12];
+
+            [TagField(Length = 12)]
+            public short[] GreenShiftCoefficients = new short[12];
+
+            [TagField(Length = 12)]
+            public short[] BlueShiftCoefficients = new short[12];
+
+            public short AnalyticalVisibility;
         }
 
         [TagStructure(Size = 0x50)]
