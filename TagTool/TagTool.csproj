@@ -997,8 +997,8 @@
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)Physics" "$(OutDir)Physics" /e /i /h /Y
-xcopy "$(SolutionDir)Tools" "$(OutDir)Tools" /e /i /h /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)Physics" "Physics" /e /i /h /Y
+xcopy "$(SolutionDir)Tools" "Tools" /e /i /h /Y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
