@@ -52,9 +52,6 @@ namespace TagTool.Commands.Porting
             // Temporary fixes
             //
 
-            //scnr.ScenarioKillTriggers = new List<Scenario.ScenarioKillTrigger>();
-            //scnr.SimulationDefinitionTable = new List<Scenario.SimulationDefinitionTableBlock>();
-
             // Cheap color fix for now
 
             foreach(var title in scnr.CutsceneTitles)
@@ -62,6 +59,10 @@ namespace TagTool.Commands.Porting
                 title.TextColor = new ArgbColor(title.TextColor.Blue, title.TextColor.Green, title.TextColor.Red, title.TextColor.Alpha);
                 title.ShadowColor = new ArgbColor(title.ShadowColor.Blue, title.ShadowColor.Green, title.ShadowColor.Red, title.ShadowColor.Alpha);
             }
+
+            // Null cubemaps until shaders and bitmaps are fixed
+            foreach (var sbspblock in scnr.StructureBsps)
+                sbspblock.Cubemap = null;
 
             //
             // Convert Squads
