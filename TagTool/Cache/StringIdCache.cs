@@ -80,7 +80,7 @@ namespace TagTool.Cache
         public StringId GetStringId(int index)
         {
             if (index < 0 || index >= Strings.Count)
-                return StringId.Null;
+                return StringId.Invalid;
 
             return Resolver.IndexToStringID(index);
         }
@@ -89,7 +89,7 @@ namespace TagTool.Cache
         /// Gets the stringID corresponding to a string in the list.
         /// </summary>
         /// <param name="value">The string to search for.</param>
-        /// <returns>The corresponding stringID, or <see cref="StringId.Null"/> if not found.</returns>
+        /// <returns>The corresponding stringID, or <see cref="StringId.Invalid"/> if not found.</returns>
         public StringId GetStringId(string value)
         {
             return GetStringId(Strings.IndexOf(value));
@@ -100,7 +100,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="set">The set containing the string.</param>
         /// <param name="value">The string to search for.</param>
-        /// <returns>The corresponding string_id, or <see cref="StringId.Null"/> if not found.</returns>
+        /// <returns>The corresponding string_id, or <see cref="StringId.Invalid"/> if not found.</returns>
         public StringId GetStringId(int set, string value)
         {
             var setOffsets = Resolver.GetSetOffsets();
@@ -125,7 +125,7 @@ namespace TagTool.Cache
             if (setStrings.ContainsKey(value))
                 return setStrings[value];
 
-            return StringId.Null;
+            return StringId.Invalid;
         }
 
         /// <summary>

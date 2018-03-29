@@ -48,7 +48,7 @@ namespace TagTool.Commands.Unicode
             }
 
             var stringId = CacheContext.GetStringId(stringIdIndex);
-            if (stringId == StringId.Null)
+            if (stringId == StringId.Invalid)
             {
                 Console.WriteLine("Failed to resolve the stringID.");
                 return true;

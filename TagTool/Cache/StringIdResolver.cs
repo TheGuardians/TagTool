@@ -57,11 +57,11 @@ namespace TagTool.Cache
         /// Converts a string list index to a stringID value.
         /// </summary>
         /// <param name="index">The index.</param>
-        /// <returns>The stringID value, or <see cref="StringId.Null"/> if none.</returns>
+        /// <returns>The stringID value, or <see cref="StringId.Invalid"/> if none.</returns>
         public StringId IndexToStringID(int index)
         {
             if (index < 0)
-                return StringId.Null;
+                return StringId.Invalid;
 
             var setMin = GetMinSetStringIndex();
             var setMax = GetMaxSetStringIndex();

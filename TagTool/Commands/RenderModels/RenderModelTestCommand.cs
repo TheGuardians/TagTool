@@ -194,7 +194,7 @@ namespace TagTool.Commands.RenderModels
                     var regionName = Console.ReadLine();
                     var regionStringId = CacheContext.GetStringId(regionName);
 
-                    if (regionStringId == StringId.Null)
+                    if (regionStringId == StringId.Invalid)
                         regionStringId = CacheContext.StringIdCache.AddString(regionName);
 
                     // Begin building the default region and permutation

@@ -13,7 +13,7 @@ namespace TagTool.Tags
         /// Constructs an empty tag group description.
         /// </summary>
         public TagGroup()
-            : this(Tag.Null, Tag.Null, Tag.Null, StringId.Null)
+            : this(Tag.Null, Tag.Null, Tag.Null, StringId.Invalid)
         {
         }
 
@@ -40,7 +40,7 @@ namespace TagTool.Tags
         /// <summary>
         /// Represents a "null" tag group.
         /// </summary>
-        public static readonly TagGroup Null = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Null);
+        public static readonly TagGroup Null = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
 
         /// <summary>
         /// A dictionary of available tag groups.

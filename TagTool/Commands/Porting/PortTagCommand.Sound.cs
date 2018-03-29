@@ -587,7 +587,7 @@ namespace TagTool.Commands.Porting
                 {
                     var rawInfoBlock = new SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation.RawInfoBlock
                     {
-                        SkipFractionName = StringId.Null,
+                        SkipFractionName = StringId.Invalid,
                         Unknown24 = 480,
                         UnknownList = new List<SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation.RawInfoBlock.Unknown>(),
                         Compression = 8,

@@ -117,7 +117,7 @@ namespace TagTool.Tags.Definitions
 
         public LocalizedString()
         {
-            StringID = StringId.Null;
+            StringID = StringId.Invalid;
             StringIDStr = "";
             Offsets = new int[12];
             for (var i = 0; i < Offsets.Length; i++)

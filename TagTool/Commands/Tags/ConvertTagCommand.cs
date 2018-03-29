@@ -263,13 +263,13 @@ namespace TagTool.Commands.Tags
 
         private StringId ConvertStringID(StringId stringId, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
         {
-            if (stringId == StringId.Null)
+            if (stringId == StringId.Invalid)
                 return stringId;
             var srcString = srcCacheContext.GetString(stringId);
             if (srcString == null)
-                return StringId.Null;
+                return StringId.Invalid;
             var destStringID = destCacheContext.GetStringId(srcString);
-            if (destStringID == StringId.Null)
+            if (destStringID == StringId.Invalid)
                 destStringID = destCacheContext.StringIdCache.AddString(srcString);
             return destStringID;
         }

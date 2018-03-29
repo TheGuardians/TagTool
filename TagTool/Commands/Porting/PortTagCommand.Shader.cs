@@ -539,13 +539,13 @@ namespace TagTool.Commands.Porting
             [TagStructure]
             public class Argument
             {
-                public StringId Name = StringId.Null;
+                public StringId Name = StringId.Invalid;
             }
 
             [TagStructure]
             public class ShaderMap
             {
-                public StringId Name = StringId.Null;
+                public StringId Name = StringId.Invalid;
             }
         }
 

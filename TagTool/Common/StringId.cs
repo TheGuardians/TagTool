@@ -10,7 +10,7 @@ namespace TagTool.Common
         /// <summary>
         /// A null stringID.
         /// </summary>
-        public static readonly StringId Null = new StringId(0);
+        public static readonly StringId Invalid = new StringId(0);
 
         private readonly uint _value;
 

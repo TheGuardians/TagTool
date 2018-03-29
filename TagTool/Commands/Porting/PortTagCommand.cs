@@ -34,6 +34,7 @@ namespace TagTool.Commands.Porting
         private bool UseNull = false;
         private bool NoAudio = false;
         private bool NoElites = false;
+        private bool NoForgePalette = false;
         private bool UseShaderTest = false;
         private bool MatchShaders = true;
         private bool ConvertScripts = true;
@@ -42,7 +43,7 @@ namespace TagTool.Commands.Porting
             base(CommandFlags.Inherit,
 
                 "PortTag",
-                "Ports a tag from the current cache file. Options are : noaudio | noreplace | noelites | replace | new | single | nonnull" + Environment.NewLine + Environment.NewLine +
+                "Ports a tag from the current cache file. Options are : noaudio | noreplace | noelites | noforgepalette | replace | new | single | nonnull" + Environment.NewLine + Environment.NewLine +
                 "Replace: Use existing matching tag names if available." + Environment.NewLine +
                 "New: Create a new tag after the last index." + Environment.NewLine +
                 "Single: Port a new tag without any reference." + Environment.NewLine +
@@ -111,6 +112,10 @@ namespace TagTool.Commands.Porting
                         ConvertScripts = false;
                         break;
 
+                    case "noforgepalette":
+                        NoForgePalette = true;
+                        break;
+
                     default:
                         throw new NotImplementedException(args[0]);
                 }
@@ -167,9 +172,7 @@ namespace TagTool.Commands.Porting
         {
             if (blamTag == null)
                 return null;
-
             
-
             //
             // Check to see if the ElDorado tag exists
             //
@@ -256,14 +259,12 @@ namespace TagTool.Commands.Porting
                 }
             }
             
-
             var replacedTags = ReplacedTags.ContainsKey(groupTag) ?
                 (ReplacedTags[groupTag] ?? new List<string>()) :
                 new List<string>();
 
             replacedTags.Add(blamTag.Filename);
             ReplacedTags[groupTag] = replacedTags;
-
             
             //
             // Handle shaders that do not exist (either in code or in tags)
@@ -283,35 +284,44 @@ namespace TagTool.Commands.Porting
             // Handle shader tags when not porting or matching shaders
             //
 
-            if ((RenderMethodTagGroups.Contains(groupTag)  || EffectTagGroups.Contains(groupTag)) && (!UseShaderTest && !MatchShaders) )
+            if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
+                (!UseShaderTest && !MatchShaders))
             {
                 switch (groupTag.ToString())
                 {
                     case "rmhg":
                         return CacheContext.GetTag(0x2647);
+
                     case "rmtr":
                         return CacheContext.GetTag(0x3AAD);
+
                     case "rmd ":
                         return CacheContext.GetTag(0x1BA2);
+
                     case "rmfl":
                         return CacheContext.GetTag(0x4CA9);
+
                     case "rmsh":
                     case "rmss":
                     case "rmrd":
                     case "rmcs":
                         return CacheContext.GetTag(0x101F);
+
                     case "beam":
                         return CacheContext.GetTag(0x18B5);
+
                     case "cntl":
                         return CacheContext.GetTag(0x528);
+
                     case "ltvl":
                         return CacheContext.GetTag(0x594);
+
                     case "decs":
                         return CacheContext.GetTag(0x3A4);
+
                     case "ptr3":
                         return CacheContext.GetTag(0x29E);
-                }   
-
+                }
             }
 
             //
@@ -324,8 +334,10 @@ namespace TagTool.Commands.Porting
                 {
                     case "foot":
                         return CacheContext.GetTag(0xC0D);
+
                     case "shit":
                         return CacheContext.GetTag(0x139C);
+
                     case "effe":
                         return CacheContext.GetTag(0x12FE);
                 }    
@@ -361,18 +373,28 @@ namespace TagTool.Commands.Porting
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
             var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            
+
             //
             // Remove unused sbsp stringIDs in the instanced geometry instances block before converting them
             //
 
             if (groupTag == "sbsp")
+                foreach (var instance in (blamDefinition as ScenarioStructureBsp)?.InstancedGeometryInstances)
+                    instance.Name = StringId.Invalid;
+
+            if (groupTag == "scnr" && NoForgePalette)
             {
-                var a = (ScenarioStructureBsp)blamDefinition;
-                foreach (var b in a.InstancedGeometryInstances)
-                    b.Name = new StringId();
+                var scnr = blamDefinition as Scenario;
+
+                scnr.SandboxEquipment.Clear();
+                scnr.SandboxGoalObjects.Clear();
+                scnr.SandboxScenery.Clear();
+                scnr.SandboxSpawning.Clear();
+                scnr.SandboxTeleporters.Clear();
+                scnr.SandboxVehicles.Clear();
+                scnr.SandboxWeapons.Clear();
             }
-            
+
             blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag.Filename);
 
             //
@@ -622,10 +644,10 @@ namespace TagTool.Commands.Porting
             var value = BlamCache.Strings.GetString(stringId);
             var edStringId = CacheContext.StringIdCache.GetStringId(stringId.Set, value);
 
-            if ((stringId != StringId.Null) && (edStringId != StringId.Null))
+            if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
                 return edStringId;
 
-            if (((stringId != StringId.Null) && (edStringId == StringId.Null)) || !CacheContext.StringIdCache.Contains(value))
+            if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
                 CacheContext.StringIdCache.AddString(value);
 
             return CacheContext.GetStringId(value);
