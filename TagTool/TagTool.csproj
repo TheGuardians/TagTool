@@ -183,6 +183,7 @@
     <Compile Include="Cache\StringIdCache.cs" />
     <Compile Include="Cache\StringIdResolver.cs" />
     <Compile Include="Cache\StringIdResolverHalo3.cs" />
+    <Compile Include="Cache\StringIdResolverHaloReach.cs" />
     <Compile Include="Cache\StringIdResolverHalo3ODST.cs" />
     <Compile Include="Cache\StringIdResolverMS23.cs" />
     <Compile Include="Cache\StringIdResolverMS28.cs" />
