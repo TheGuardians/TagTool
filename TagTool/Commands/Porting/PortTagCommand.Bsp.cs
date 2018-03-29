@@ -78,13 +78,6 @@ namespace TagTool.Commands.Porting
             //
             // Temporary Fixes:
             //
-
-            for (int i = 0; i < sbsp.Clusters.Count; i++)
-            {
-                sbsp.Clusters[i].Bsp = instance;
-                sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
-                sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
-            }
             
             sbsp.Geometry2.UnknownSections = new List<RenderGeometry.UnknownSection>();
             
