@@ -386,7 +386,7 @@ namespace TagTool.Serialization
             if (Version > CacheVersion.Halo2Vista)
                 reader.BaseStream.Position = startOffset + 0xC;
             var pointer = reader.ReadUInt32();
-            if (pointer == 0)
+            if (pointer == 0 || size < 0)
             {
                 // Null data reference
                 reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
