@@ -143,7 +143,7 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x5C)]
+            [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline106708)]
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ParticleSystem
             {
@@ -186,7 +186,7 @@ namespace TagTool.Tags.Definitions
 
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST)]
+                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
                 [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
                 public class Emitter
                 {
