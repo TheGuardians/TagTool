@@ -50,11 +50,11 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="str">The string to add.</param>
         /// <returns>The stringID corresponding to the string that was added.</returns>
-        public StringId AddString(string str)
+        public StringId AddString(string str, CacheVersion version = CacheVersion.Halo3Retail)
         {
             var strIndex = Strings.Count;
             Strings.Add(str);
-            return GetStringId(strIndex);
+            return GetStringId(strIndex, version);
         }
 
         /// <summary>
@@ -86,13 +86,28 @@ namespace TagTool.Cache
         }
 
         /// <summary>
+        /// Gets the stringID corresponding to a string list index from the cache version.
+        /// </summary>
+        /// <param name="index">The string list index to convert.</param>
+        /// <param name="version">The version of the returned StringID.</param>
+        /// <returns>The corresponding stringID.</returns>
+        public StringId GetStringId(int index, CacheVersion version)
+        {
+            if (index < 0 || index >= Strings.Count)
+                return StringId.Invalid;
+
+            return Resolver.IndexToStringID(index, version);
+        }
+
+        /// <summary>
         /// Gets the stringID corresponding to a string in the list.
         /// </summary>
         /// <param name="value">The string to search for.</param>
+        /// <param name="version">The version of the returned StringID.</param>
         /// <returns>The corresponding stringID, or <see cref="StringId.Invalid"/> if not found.</returns>
-        public StringId GetStringId(string value)
+        public StringId GetStringId(string value, CacheVersion version = CacheVersion.Halo3Retail)
         {
-            return GetStringId(Strings.IndexOf(value));
+            return GetStringId(Strings.IndexOf(value), version);
         }
 
         /// <summary>
@@ -100,8 +115,9 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="set">The set containing the string.</param>
         /// <param name="value">The string to search for.</param>
+        /// <param name = "version" > The version of the returned StringID.</param>
         /// <returns>The corresponding string_id, or <see cref="StringId.Invalid"/> if not found.</returns>
-        public StringId GetStringId(int set, string value)
+        public StringId GetStringId(int set, string value, CacheVersion version = CacheVersion.Halo3Retail)
         {
             var setOffsets = Resolver.GetSetOffsets();
 
@@ -112,7 +128,7 @@ namespace TagTool.Cache
 
             for (var i = 1; i < Strings.Count; i++)
             {
-                var stringId = GetStringId(i);
+                var stringId = GetStringId(i, version);
                 var stringValue = GetString(stringId);
 
                 if (stringValue == null)

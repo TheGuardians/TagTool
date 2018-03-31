@@ -1,4 +1,5 @@
 using System;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -14,6 +15,10 @@ namespace TagTool.Common
 
         private readonly uint _value;
 
+        private byte IndexBits;
+        private byte SetBits;
+        private byte LengthBits;
+
         /// <summary>
         /// Constructs a new StringID from a set and an index.
         /// </summary>
@@ -25,16 +30,72 @@ namespace TagTool.Common
         }
 
         /// <summary>
-        /// Constructs a new StringID from a length, a set, and an index.
+        /// Constructs a new StringID from a set and an index from specified version.
+        /// </summary>
+        /// <param name="set">The set the stringID belongs to.</param>
+        /// <param name="index">The index of the stringID within the set.</param>
+        /// <param name="version">The version of the cache the stringID is from.</param>
+        public StringId(int set, int index, CacheVersion version)
+            : this(0, set, index, version)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new StringID from a length, a set, and an index based on Halo 3 format.
         /// </summary>
         /// <param name="length">The length of the string.</param>
         /// <param name="set">The set the stringID belongs to.</param>
         /// <param name="index">The index of the stringID within the set.</param>
         public StringId(int length, int set, int index)
         {
+            IndexBits = 16;
+            SetBits = 8;
+            LengthBits = 8;
+
             var shiftedLength = ((length & 0xFF) << 24);
             var shiftedSet = ((set & 0xFF) << 16);
             var shiftedIndex = (index & 0xFFFF);
+            _value = (uint)(shiftedLength | shiftedSet | shiftedIndex);
+        }
+
+        /// <summary>
+        /// Constructs a new StringID from a length, a set, and an index from specified version.
+        /// </summary>
+        /// <param name="length">The length of the string.</param>
+        /// <param name="set">The set the stringID belongs to.</param>
+        /// <param name="index">The index of the stringID within the set.</param>
+        /// <param name="version">The version of the cache the stringID is from.</param>
+        public StringId(int length, int set, int index, CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.HaloOnline106708:
+                    IndexBits = 16;
+                    SetBits = 8;
+                    LengthBits = 8;
+                    break;
+
+                case CacheVersion.HaloReach:
+                    IndexBits = 17;
+                    SetBits = 8;
+                    LengthBits = 7;
+                    break;
+
+                default:
+                    IndexBits = 16;
+                    SetBits = 8;
+                    LengthBits = 8;
+                    break;
+            }
+            var indexMask = (0x1 << IndexBits) - 1;
+            var setMask = (0x1 << SetBits) - 1;
+            var lengthMask = (0x1 << LengthBits) - 1;
+
+            var shiftedLength = ((length & lengthMask) << (IndexBits+SetBits) );
+            var shiftedSet = ((set & setMask) << IndexBits);
+            var shiftedIndex = (index & indexMask);
             _value = (uint)(shiftedLength | shiftedSet | shiftedIndex);
         }
 
@@ -44,6 +105,41 @@ namespace TagTool.Common
         /// <param name="value">The 32-bit value of the stringID.</param>
         public StringId(uint value)
         {
+            IndexBits = 16;
+            SetBits = 8;
+            LengthBits = 8;
+            _value = value;
+        }
+
+        /// <summary>
+        /// Constructs a new StringID from a 32-bit value from specified version.
+        /// </summary>
+        /// <param name="value">The 32-bit value of the stringID.</param>
+        public StringId(uint value, CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.HaloOnline106708:
+                    IndexBits = 16;
+                    SetBits = 8;
+                    LengthBits = 8;
+                    break;
+
+                case CacheVersion.HaloReach:
+                    IndexBits = 17;
+                    SetBits = 8;
+                    LengthBits = 7;
+                    break;
+
+                default:
+                    IndexBits = 16;
+                    SetBits = 8;
+                    LengthBits = 8;
+                    break;
+            }
+
             _value = value;
         }
 
@@ -60,7 +156,10 @@ namespace TagTool.Common
         /// </summary>
         public int Length
         {
-            get { return (int)((_value >> 24) & 0xFF); }
+            get {
+                var lengthMask = (0x1 << LengthBits) - 1;
+                return (int)((_value >> (IndexBits + SetBits)) & lengthMask);
+            }
         }
 
         /// <summary>
@@ -68,7 +167,10 @@ namespace TagTool.Common
         /// </summary>
         public int Set
         {
-            get { return (int)((_value >> 16) & 0xFF); }
+            get {
+                var setMask = (0x1 << SetBits) - 1;
+                return (int)((_value >> IndexBits) & setMask);
+            }
         }
 
         /// <summary>
@@ -77,7 +179,10 @@ namespace TagTool.Common
         /// </summary>
         public int Index
         {
-            get { return (int)(_value & 0xFFFF); }
+            get {
+                var indexMask = (0x1 << IndexBits) - 1;
+                return (int)(_value & indexMask);
+            }
         }
 
         public override bool Equals(object obj)

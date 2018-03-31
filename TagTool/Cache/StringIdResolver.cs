@@ -57,8 +57,9 @@ namespace TagTool.Cache
         /// Converts a string list index to a stringID value.
         /// </summary>
         /// <param name="index">The index.</param>
+        /// <param name="index">The version of the stringID. Halo 3 By default.</param>
         /// <returns>The stringID value, or <see cref="StringId.Invalid"/> if none.</returns>
-        public StringId IndexToStringID(int index)
+        public StringId IndexToStringID(int index, CacheVersion version = CacheVersion.Halo3Retail)
         {
             if (index < 0)
                 return StringId.Invalid;
@@ -69,7 +70,7 @@ namespace TagTool.Cache
 
             // If the value is outside of a set, just return it
             if (index < setMin || index > setMax)
-                return new StringId(0, index);
+                return new StringId(0, index, version);
 
             // Find the set which the index is closest to
             var set = 0;
@@ -89,7 +90,7 @@ namespace TagTool.Cache
             var idIndex = index - setOffsets[set];
             if (set == 0)
                 idIndex += setMin;
-            return new StringId(set, idIndex);
+            return new StringId(set, idIndex, version);
         }
     }
 }
