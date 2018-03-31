@@ -420,9 +420,10 @@ namespace TagTool.Commands.Porting
             {
                 var effect = (Effect)blamDefinition;
 
-                foreach (var even in effect.Events)
-                    foreach (var particle in even.ParticleSystems)
-                        particle.Unknown7 = 1.0f / particle.Unknown7;
+                if (BlamCache.Version != CacheVersion.HaloReach)
+                    foreach (var even in effect.Events)
+                        foreach (var particle in even.ParticleSystems)
+                            particle.Unknown7 = 1.0f / particle.Unknown7;
             }
 
             if (groupTag == "glps" && UseShaderTest)
