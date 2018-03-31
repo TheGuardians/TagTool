@@ -674,7 +674,7 @@ namespace TagTool.Commands.Porting
 
             if (!CacheContext.StringIdCache.Contains(value))
             {
-                ConvertStringId(new StringId((uint)blamStringId));
+                ConvertStringId(new StringId((uint)blamStringId, BlamCache.Version));
                 /*
                 Console.WriteLine($"ERROR: stringid does not exist in ED: {value}");
                 expr.Data = new byte[4]; // set to blank
