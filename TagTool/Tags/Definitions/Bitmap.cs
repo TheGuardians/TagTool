@@ -67,8 +67,6 @@ namespace TagTool.Tags.Definitions
         public List<Image> XenonImages;
 
         public List<BitmapResource> Resources;
-
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public List<BitmapResource> InterleavedResources;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
