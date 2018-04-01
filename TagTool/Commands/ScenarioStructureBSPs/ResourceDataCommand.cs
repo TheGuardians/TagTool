@@ -64,9 +64,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             resourceType = args[1].ToLower(); // geometry2
             filePath = args[2]; // sc140_000_geometry2.raw
-
-            uint compressedSize = 0x7FFFFFFF;
-
+            
             PageableResource resource = null;
             
             switch (resourceType)

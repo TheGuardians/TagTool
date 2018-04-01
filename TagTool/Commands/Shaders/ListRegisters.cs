@@ -31,8 +31,14 @@ namespace TagTool.Commands.Shaders
 
         struct ParameterGroup
         {
-            string name;
-            ShaderParameter param;
+            string Name;
+            ShaderParameter Parameter;
+
+            public ParameterGroup(string name)
+            {
+                Name = name;
+                Parameter = new ShaderParameter();
+            }
         }
 
         public override object Execute(List<string> args)

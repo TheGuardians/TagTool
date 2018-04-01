@@ -153,7 +153,9 @@ namespace TagTool.ShaderGenerator
 
             foreach (var param in _params)
             {
-                if (param.Type != target_type) continue;
+                if (param.Type != target_type)
+                    continue;
+
                 switch (param.Type)
                 {
                     case ShaderParameter.RType.Vector:
@@ -167,6 +169,7 @@ namespace TagTool.ShaderGenerator
                             });
                         indices.vector_index++;
                         break;
+
                     case ShaderParameter.RType.Sampler:
                         if (param.enabled)
                             parameters.Add(new ShaderParameter()
@@ -177,8 +180,8 @@ namespace TagTool.ShaderGenerator
                                 RegisterIndex = (ushort)indices.sampler_index
                             });
                         indices.sampler_index++;
-
                         break;
+
                     case ShaderParameter.RType.Boolean:
                         if (param.enabled)
                             parameters.Add(new ShaderParameter()
@@ -190,9 +193,7 @@ namespace TagTool.ShaderGenerator
                             });
                         indices.boolean_index++;
                         break;
-                    case ShaderParameter.RType.Integer:
-                        throw new NotImplementedException();
-                        break;
+
                     default:
                         throw new NotImplementedException();
                 }

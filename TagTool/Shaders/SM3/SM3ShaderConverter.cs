@@ -100,8 +100,6 @@ namespace TagTool.Shaders.SM3
             }
             else
             {
-                int minimum_index = 0;
-
                 bool register_written_to = false;
 
                 for (var instruction_index = 0; instruction_index < Instructions.Count; instruction_index++)
@@ -371,11 +369,14 @@ namespace TagTool.Shaders.SM3
             for (var i = Parameters.Count - 1; i >= 0; i--)
             {
                 var parameter = Parameters[i];
-                if (parameter.RegisterType != ShaderParameter.RType.Sampler) continue;
 
-                var instruction = new SM3Instruction("dcl_2d", new List<string> { $"s{parameter.RegisterIndex}" });
-                instruction.Comment = CacheContext.GetString(parameter.ParameterName);
-                Instructions.Insert(0, instruction);
+                if (parameter.RegisterType != ShaderParameter.RType.Sampler)
+                    continue;
+                
+                Instructions.Insert(0, new SM3Instruction("dcl_2d", new List<string> { $"s{parameter.RegisterIndex}" })
+                {
+                    Comment = CacheContext.GetString(parameter.ParameterName)
+                });
             }
         }
 

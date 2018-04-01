@@ -20,6 +20,15 @@ namespace TagTool.Commands.Porting
             bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
             bitmap.UnknownB4 = 0;
 
+            if (BlamCache.Version == CacheVersion.HaloReach)
+            {
+                bitmap.TightBoundsOld = bitmap.TightBoundsNew;
+                bitmap.InterleavedResourcesOld = bitmap.InterleavedResourcesNew;
+
+                foreach (var resource in bitmap.Resources)
+                    resource.ZoneAssetHandleOld = resource.ZoneAssetHandleNew;
+            }
+
             //
             // For each bitmaps, apply conversion process and create a new list of resources that will replace the one from H3.
             //
@@ -27,24 +36,28 @@ namespace TagTool.Commands.Porting
             var resourceList = new List<Bitmap.BitmapResource>();
             for (int i = 0; i < bitmap.Images.Count(); i++)
             {
+#if !DEBUG
                 try
                 {
+#endif
                     var resource = ConvertBlamBitmap(bitmap, i);
                     Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
                     {
                         Resource = resource
                     };
                     resourceList.Add(bitmapResource);
+#if !DEBUG
                 }
                 catch
                 {
                     Console.WriteLine("Failed to port bitmap");
                     return null;
                 }
+#endif
             }
 
             bitmap.Resources = resourceList;
-            bitmap.InterleavedResources = null;
+            bitmap.InterleavedResourcesOld = null;
 
             return bitmap;
         }
@@ -118,7 +131,7 @@ namespace TagTool.Commands.Porting
                     //First or second image in an interleaved bitmap
                     var interleavedIndex = blamBitmap.Image.InterleavedTextureIndex2;
 
-                    int rawID = bitmap.InterleavedResources[blamBitmap.Image.InterleavedTextureIndex1].ZoneAssetHandle;
+                    int rawID = bitmap.InterleavedResourcesOld[blamBitmap.Image.InterleavedTextureIndex1].ZoneAssetHandleOld;
                     byte[] totalRaw = BlamCache.GetRawFromID(rawID, (interleavedIndex + 1) * rawSize);
 
                     if (totalRaw == null)
@@ -137,7 +150,7 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    int rawID = bitmap.Resources[imageIndex].ZoneAssetHandle;
+                    int rawID = bitmap.Resources[imageIndex].ZoneAssetHandleOld;
                     raw = BlamCache.GetRawFromID(rawID, rawSize);
                     if (raw == null)
                         throw new Exception("Raw not found");

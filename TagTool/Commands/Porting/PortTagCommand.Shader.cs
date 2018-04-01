@@ -93,7 +93,7 @@ namespace TagTool.Commands.Porting
         {
             throw new NotImplementedException();
 
-            foreach (var shader in glvs.Shaders)
+            /*foreach (var shader in glvs.Shaders)
             {
                 var shader_parser = new XboxShaderParser(glvs, shader, CacheContext);
 
@@ -104,7 +104,7 @@ namespace TagTool.Commands.Porting
             }
 
             //add conversion code when ready
-            return glvs;
+            return glvs;*/
         }
 
         private PixelShader ConvertPixelShader(PixelShader pixl)
@@ -503,10 +503,10 @@ namespace TagTool.Commands.Porting
 
         private class Arguments
         {
-            public float Arg1;
-            public float Arg2;
-            public float Arg3;
-            public float Arg4;
+            public float Arg1 = 0.0f;
+            public float Arg2 = 0.0f;
+            public float Arg3 = 0.0f;
+            public float Arg4 = 0.0f;
         }
 
         private class ShaderTemplateItem

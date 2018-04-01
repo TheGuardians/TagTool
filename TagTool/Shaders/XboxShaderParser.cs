@@ -18,7 +18,7 @@ namespace TagTool.Shaders
 {
     class XboxShaderParser
     {
-        public UPDBParser UPDB;
+        public UPDBParser UPDB = null;
         public byte[] ShaderData => IsVertexShader ? (Block as VertexShaderBlock).XboxShaderReference?.ShaderData : (Block as PixelShaderBlock).XboxShaderReference?.ShaderData;
         public byte[] DebugData => IsVertexShader ? (Block as VertexShaderBlock).XboxShaderReference?.DebugData : (Block as PixelShaderBlock).XboxShaderReference?.DebugData;
         public byte[] ConstantData => IsVertexShader ? (Block as VertexShaderBlock).XboxShaderReference?.ConstantData : (Block as PixelShaderBlock).XboxShaderReference?.ConstantData;
@@ -132,7 +132,7 @@ namespace TagTool.Shaders
 
         public string Disassemble(string _raw_shader_code = null)
         {
-            var raw_shader_code = _raw_shader_code == null ? SM3Ext.SM3ExtShaderParser.XSDDisassemble(IsVertexShader ? SM3ExtShaderParser.ShaderType.Vertex : SM3ExtShaderParser.ShaderType.Pixel, ShaderData) : _raw_shader_code;
+            var raw_shader_code = _raw_shader_code ?? SM3Ext.SM3ExtShaderParser.XSDDisassemble(IsVertexShader ? SM3ExtShaderParser.ShaderType.Vertex : SM3ExtShaderParser.ShaderType.Pixel, ShaderData);
             var formatted_raw_block = CommentStringBlock(raw_shader_code, true);
             var converted_shader_code = ConvertXboxShader(raw_shader_code);
 

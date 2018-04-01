@@ -26,7 +26,7 @@ namespace TagTool.Tags.Definitions
         /// Number of pixels between adjacent sprites (0 uses default, negative numbers set no spacing)
         /// </summary>
         public short SpriteSpacing;
-        
+
         public float Unknown10;
         public float Unknown14;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -46,28 +46,30 @@ namespace TagTool.Tags.Definitions
         public short ForceBitmapFormatEnum;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown3;
+        public float TightBoundsThreshold;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
-        public List<TightBinding> TightBounds;
+        public List<TightBinding> TightBoundsOld;
 
         public List<UsageOverride> UsageOverrides;
         public List<Sequence> ManualSequences;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<TightBinding> TightBounds2;
+        public List<TightBinding> TightBoundsNew;
 
         public byte[] SourceData;
         public byte[] ProcessedPixelData;
         public List<Sequence> Sequences;
         public List<Image> Images;
-
         public byte[] XenonProcessedPixelData;
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public List<Image> XenonImages;
 
         public List<BitmapResource> Resources;
-        public List<BitmapResource> InterleavedResources;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        public List<BitmapResource> InterleavedResourcesOld;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<BitmapResource> InterleavedResourcesNew;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public int UnknownB4;
@@ -220,16 +222,18 @@ namespace TagTool.Tags.Definitions
             public sbyte Unknown27;
             public int Unknown28;
             [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
-            public int Unknown2C;  
+            public int Unknown2C;
         }
 
         [TagStructure(Size = 0x8)]
         public class BitmapResource
         {
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public int ZoneAssetHandle;
-            [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708)]
+            public int ZoneAssetHandleOld;
+            [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public PageableResource Resource;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int ZoneAssetHandleNew;
 
             public int Unknown4;
         }

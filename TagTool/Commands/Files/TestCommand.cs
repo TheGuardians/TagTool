@@ -82,7 +82,7 @@ namespace TagTool.Commands.Files
             }
         }
         
-        public void csvDumpQueueToFile(List<string> in_, string file)
+        public void CsvDumpQueueToFile(List<string> in_, string file)
         {
             var fileOut = new FileInfo(file);
             if (File.Exists(file))
@@ -101,14 +101,14 @@ namespace TagTool.Commands.Files
             }
         }
 
-        public static void csv1(string in_)
+        public static void Csv1(string in_)
         {
             csvQueue1.Add(in_);
             if (debugConsoleWrite)
                 Console.WriteLine($"{in_}");
         }
 
-        public static void csv2(string in_)
+        public static void Csv2(string in_)
         {
             csvQueue2.Add(in_);
             if (debugConsoleWrite)
@@ -907,7 +907,6 @@ namespace TagTool.Commands.Files
 
             debugConsoleWrite = false;
             var dumpMatch = false;
-            var dumpDiff = true;
 
             if (args.Count < 2)
                 return false;
@@ -976,9 +975,9 @@ namespace TagTool.Commands.Files
             var filename1 = tagname1.Split("\\".ToCharArray()).Last();
             var filename2 = tagname2.Split("\\".ToCharArray()).Last();
 
-            csvDumpQueueToFile(csvQueue1, $"{tag1.Group}_{filename1}_diff.csv");
+            CsvDumpQueueToFile(csvQueue1, $"{tag1.Group}_{filename1}_diff.csv");
             if (dumpMatch)
-                csvDumpQueueToFile(csvQueue2, $"{tag1.Group}_{filename1}_match.csv");
+                CsvDumpQueueToFile(csvQueue2, $"{tag1.Group}_{filename1}_match.csv");
 
             return true;
         }
@@ -986,7 +985,6 @@ namespace TagTool.Commands.Files
         public static void CompareBlocks(object leftData, object rightData, GameCacheContext CacheContext, GameCacheContext CacheContext2, String name)
         {
             var dumpMatch = false;
-            var dumpDiff = true;
 
             if (leftData == null || rightData == null)
                 return;
@@ -1007,16 +1005,16 @@ namespace TagTool.Commands.Files
 
                 if (leftName != rightName)
                 {
-                    csv1($"{name,-120},{leftName},{rightName}");
+                    Csv1($"{name,-120},{leftName},{rightName}");
                     return;
                 }
                 else
-                    csv2($"{name,-120},{leftName,-60},{rightName}");
+                    Csv2($"{name,-120},{leftName,-60},{rightName}");
 
                 if (leftTag.Group.Tag != rightTag.Group.Tag)
-                    csv1($"{name,-120},{leftName}.{leftTag.Group.Tag,-20},{rightName}.{rightTag.Group.Tag}");
+                    Csv1($"{name,-120},{leftName}.{leftTag.Group.Tag,-20},{rightName}.{rightTag.Group.Tag}");
                 else
-                    csv2($"{name,-120},{leftName}.{leftTag.Group.Tag,-60},{rightName}.{rightTag.Group.Tag}");
+                    Csv2($"{name,-120},{leftName}.{leftTag.Group.Tag,-60},{rightName}.{rightTag.Group.Tag}");
             }
             else if (type.IsArray)
             {
@@ -1041,11 +1039,11 @@ namespace TagTool.Commands.Files
 
                 if (leftArray.Length != rightArray.Length)
                 {
-                    csv1($"{name,-120},{leftArray.Length,-20},{rightArray.Length}");
+                    Csv1($"{name,-120},{leftArray.Length,-20},{rightArray.Length}");
                     return;
                 }
                 else
-                    csv2($"{name,-120},{leftArray.Length,-60},{rightArray.Length}");
+                    Csv2($"{name,-120},{leftArray.Length,-60},{rightArray.Length}");
 
                 for (var i = 0; i < leftArray.Length; i++)
                     CompareBlocks(leftArray.GetValue(i), rightArray.GetValue(i), CacheContext, CacheContext2, name);
@@ -1054,7 +1052,7 @@ namespace TagTool.Commands.Files
             {
                 if (type.GenericTypeArguments[0].IsPrimitive)
                 {
-                    csv1($"{name,-120} : type.GenericTypeArguments().IsPrimitive");
+                    Csv1($"{name,-120} : type.GenericTypeArguments().IsPrimitive");
                     return;
                 }
 
@@ -1064,11 +1062,11 @@ namespace TagTool.Commands.Files
                 var rightCount = (int)countProperty.GetValue(rightData);
                 if (leftCount != rightCount) // If the sizes are different, we probably can't compare them
                 {
-                    csv1($"{name,-120},{leftCount,-20},{rightCount}");
+                    Csv1($"{name,-120},{leftCount,-20},{rightCount}");
                     return;
                 }
                 else if (dumpMatch)
-                    csv2($"{name,-120},{leftCount,-60},{rightCount}");
+                    Csv2($"{name,-120},{leftCount,-60},{rightCount}");
 
                 var getItem = type.GetMethod("get_Item");
                 for (var i = 0; i < leftCount; i++)
@@ -1112,9 +1110,9 @@ namespace TagTool.Commands.Files
                 var a = leftData.ToString();
                 var b = rightData.ToString();
                 if (a != b)
-                    csv1($"{name,-120},{leftData,-20},{rightData}");
+                    Csv1($"{name,-120},{leftData,-20},{rightData}");
                 else if (dumpMatch)
-                    csv2($"{name,-120},{leftData,-60},{rightData}");
+                    Csv2($"{name,-120},{leftData,-60},{rightData}");
             }
             else if (type.IsPrimitive)
             {
@@ -1122,45 +1120,45 @@ namespace TagTool.Commands.Files
                 {
                     case TypeCode.SByte:
                         if ((sbyte)leftData != (sbyte)rightData)
-                            csv1($"{name,-120},{(sbyte)leftData,-20},{(sbyte)rightData}");
+                            Csv1($"{name,-120},{(sbyte)leftData,-20},{(sbyte)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(sbyte)leftData,-60},{(sbyte)rightData}");
+                            Csv2($"{name,-120},{(sbyte)leftData,-60},{(sbyte)rightData}");
                         break;
                     case TypeCode.Byte:
                         if ((byte)leftData != (byte)rightData)
-                            csv1($"{name,-120},{(byte)leftData,-20},{(byte)rightData}");
+                            Csv1($"{name,-120},{(byte)leftData,-20},{(byte)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(byte)leftData,-60},{(byte)rightData}");
+                            Csv2($"{name,-120},{(byte)leftData,-60},{(byte)rightData}");
                         break;
                     case TypeCode.Int16:
                         if ((short)leftData != (short)rightData)
-                            csv1($"{name,-120},{(short)leftData,-20},{(short)rightData}");
+                            Csv1($"{name,-120},{(short)leftData,-20},{(short)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(short)leftData,-60},{(short)rightData}");
+                            Csv2($"{name,-120},{(short)leftData,-60},{(short)rightData}");
                         break;
                     case TypeCode.UInt16:
                         if ((ushort)leftData != (ushort)rightData)
-                            csv1($"{name,-120},{(ushort)leftData,-20},{(ushort)rightData}");
+                            Csv1($"{name,-120},{(ushort)leftData,-20},{(ushort)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(ushort)leftData,-60},{(ushort)rightData}");
+                            Csv2($"{name,-120},{(ushort)leftData,-60},{(ushort)rightData}");
                         break;
                     case TypeCode.Int32:
                         if ((int)leftData != (int)rightData)
-                            csv1($"{name,-120},{(int)leftData,-20},{(int)rightData}");
+                            Csv1($"{name,-120},{(int)leftData,-20},{(int)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(int)leftData,-60},{(int)rightData}");
+                            Csv2($"{name,-120},{(int)leftData,-60},{(int)rightData}");
                         break;
                     case TypeCode.UInt32:
                         if ((uint)leftData != (uint)rightData)
-                            csv1($"{name,-120},{(uint)leftData,-20},{(uint)rightData}");
+                            Csv1($"{name,-120},{(uint)leftData,-20},{(uint)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(uint)leftData,-60},{(uint)rightData}");
+                            Csv2($"{name,-120},{(uint)leftData,-60},{(uint)rightData}");
                         break;
                     case TypeCode.Single:
                         if ((float)leftData != (float)rightData)
-                            csv1($"{name,-120},{(float)leftData,-20},{(float)rightData}");
+                            Csv1($"{name,-120},{(float)leftData,-20},{(float)rightData}");
                         else if (dumpMatch)
-                            csv2($"{name,-120},{(float)leftData,-60},{(float)rightData}");
+                            Csv2($"{name,-120},{(float)leftData,-60},{(float)rightData}");
                         break;
 
                     default:

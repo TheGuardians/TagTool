@@ -37,8 +37,7 @@ namespace TagTool.Commands
 
             while (!fileInfo.Exists)
             {
-                Console.WriteLine($"ERROR: File not found: '{fileInfo.FullName}");
-                Console.WriteLine("Please enter the path for 'tags.dat':");
+                Console.WriteLine("Enter the path to 'tags.dat':");
                 Console.Write("> ");
 
                 fileInfo = new FileInfo(Console.ReadLine());
