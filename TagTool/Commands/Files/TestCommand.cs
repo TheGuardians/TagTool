@@ -3,7 +3,6 @@ using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
-using TagTool.Legacy.Base;
 using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -142,12 +141,15 @@ namespace TagTool.Commands.Files
 
                 switch (version)
                 {
-                    case CacheVersion.Halo3Retail:
-                        BlamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, CacheContext, version);
+                    case CacheVersion.Halo2Xbox:
+                    case CacheVersion.Halo2Vista:
+                        BlamCache = new CacheFileGen2(blamCacheFile, version);
                         break;
 
+                    case CacheVersion.Halo3Retail:
                     case CacheVersion.Halo3ODST:
-                        BlamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, CacheContext, version);
+                    case CacheVersion.HaloReach:
+                        BlamCache = new CacheFileGen3(blamCacheFile, CacheContext, version);
                         break;
 
                     default:

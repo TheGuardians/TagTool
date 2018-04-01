@@ -1,19 +1,18 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
+using TagTool.Common;
+using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
-namespace TagTool.Legacy.Halo3Retail
+namespace TagTool.Cache
 {
-    public class CacheFile : Base.CacheFile
+    public class CacheFileGen3 : CacheFile
     {
-        public CacheFile(FileInfo file, GameCacheContext cacheContext, CacheVersion version = CacheVersion.Halo3Retail)
+        public CacheFileGen3(FileInfo file, GameCacheContext cacheContext, CacheVersion version = CacheVersion.Halo3Retail)
             : base(file, version)
         {
             CacheContext = cacheContext;
@@ -21,16 +20,33 @@ namespace TagTool.Legacy.Halo3Retail
             IndexHeader = new CacheIndexHeader(this);
             IndexItems = new IndexTable(this);
             Strings = new StringTable(this);
-            Resolver = new StringIdResolverHalo3();
             LocaleTables = new List<LocaleTable>();
+
+            switch (version)
+            {
+                case CacheVersion.Halo3Retail:
+                    Resolver = new StringIdResolverHalo3();
+                    break;
+
+                case CacheVersion.Halo3ODST:
+                    Resolver = new StringIdResolverHalo3ODST();
+                    break;
+
+                case CacheVersion.HaloReach:
+                    Resolver = new StringIdResolverHaloReach();
+                    break;
+
+                default:
+                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(version));
+            }
 
             foreach (var language in Enum.GetValues(typeof(GameLanguage)))
                 LocaleTables.Add(new LocaleTable(this, (GameLanguage)language));
         }
 
-        new public class CacheHeader : Base.CacheFile.CacheHeader
+        new public class CacheHeader : CacheFile.CacheHeader
         {
-            public CacheHeader(Base.CacheFile Cache)
+            public CacheHeader(CacheFile Cache)
             {
                 base.Cache = Cache;
                 var Reader = base.Cache.Reader;
@@ -139,9 +155,9 @@ namespace TagTool.Legacy.Halo3Retail
             }
         }
 
-        new public class CacheIndexHeader : Base.CacheFile.CacheIndexHeader
+        new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
-            public CacheIndexHeader(Base.CacheFile Cache)
+            public CacheIndexHeader(CacheFile Cache)
             {
                 cache = Cache;
                 var Reader = cache.Reader;
@@ -192,9 +208,9 @@ namespace TagTool.Legacy.Halo3Retail
             }
         }
 
-        new public class IndexTable : Base.CacheFile.IndexTable
+        new public class IndexTable : CacheFile.IndexTable
         {
-            public IndexTable(Base.CacheFile Cache)
+            public IndexTable(CacheFile Cache)
             {
                 cache = Cache;
 
@@ -321,7 +337,6 @@ namespace TagTool.Legacy.Halo3Retail
                 {
                     var blamContext = new CacheSerializationContext(CacheContext, this, item);
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
-
                     break;
                 }
             }
@@ -333,9 +348,9 @@ namespace TagTool.Legacy.Halo3Retail
                     var blamContext = new CacheSerializationContext(CacheContext, this, item);
                     ResourceGestalt = deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
 
-                    foreach(var tagresource in ResourceGestalt.TagResources)
+                    foreach (var tagresource in ResourceGestalt.TagResources)
                     {
-                        foreach(var fixup in tagresource.ResourceFixups)
+                        foreach (var fixup in tagresource.ResourceFixups)
                         {
                             fixup.Offset = (fixup.Address & 0x0FFFFFFF);
                             fixup.Type = (fixup.Address >> 28) & 0xF;

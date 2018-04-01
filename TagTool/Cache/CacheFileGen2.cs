@@ -1,15 +1,14 @@
-using TagTool.Cache;
-using TagTool.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using TagTool.IO;
 
-namespace TagTool.Legacy.Halo2Xbox
+namespace TagTool.Cache
 {
-    public class CacheFile : Base.CacheFile
+    public class CacheFileGen2 : CacheFile
     {
-        public CacheFile(FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
+        public CacheFileGen2(FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
             base(file, version)
         {
             Reader.Format = EndianFormat.LittleEndian;
@@ -20,7 +19,7 @@ namespace TagTool.Legacy.Halo2Xbox
             LocaleTables = new List<LocaleTable>();
         }
         
-        new public class CacheHeader : Base.CacheFile.CacheHeader
+        new public class CacheHeader : CacheFile.CacheHeader
         {
             public int LanguagePacksOffset = -1;
             public uint LanguagePacksSize = 0;
@@ -33,7 +32,7 @@ namespace TagTool.Legacy.Halo2Xbox
             public bool UsesCustomSoundGestalt => SecondarySoundGestaltDatumIndex != uint.MaxValue;
             public bool UsesCustomLanguagePack => LanguagePacksOffset != -1;
 
-            public CacheHeader(Base.CacheFile Cache)
+            public CacheHeader(CacheFile Cache)
             {
                 base.Cache = Cache;
                 EndianReader Reader = base.Cache.Reader;
@@ -118,9 +117,9 @@ namespace TagTool.Legacy.Halo2Xbox
             }
         }
 
-        new public class CacheIndexHeader : Base.CacheFile.CacheIndexHeader
+        new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
-            public CacheIndexHeader(Base.CacheFile Cache)
+            public CacheIndexHeader(CacheFile Cache)
             {
                 cache = Cache;
                 var Reader = cache.Reader;
@@ -153,9 +152,9 @@ namespace TagTool.Legacy.Halo2Xbox
             }
         }
 
-        new public class IndexTable : Base.CacheFile.IndexTable
+        new public class IndexTable : CacheFile.IndexTable
         {
-            public IndexTable(Base.CacheFile Cache)
+            public IndexTable(CacheFile Cache)
             {
                 cache = Cache;
 

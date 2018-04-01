@@ -1,7 +1,6 @@
 using TagTool.Cache;
 using TagTool.Commands;
 using TagTool.IO;
-using TagTool.Legacy.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -78,23 +77,14 @@ namespace TagTool.Commands.Porting
                 switch (version)
                 {
                     case CacheVersion.Halo2Xbox:
-                        blamCache = new TagTool.Legacy.Halo2Xbox.CacheFile(blamCacheFile, version);
-                        break;
-
                     case CacheVersion.Halo2Vista:
-                        blamCache = new TagTool.Legacy.Halo2Vista.CacheFile(blamCacheFile, version);
+                        blamCache = new CacheFileGen2(blamCacheFile, version);
                         break;
-
+                        
                     case CacheVersion.Halo3Retail:
-                        blamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, CacheContext, version);
-                        break;
-
                     case CacheVersion.Halo3ODST:
-                        blamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, CacheContext, version);
-                        break;
-
                     case CacheVersion.HaloReach:
-                        blamCache = new TagTool.Legacy.HaloReach.CacheFile(blamCacheFile, CacheContext, version);
+                        blamCache = new CacheFileGen3(blamCacheFile, CacheContext, version);
                         break;
 
                     default:

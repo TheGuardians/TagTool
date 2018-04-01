@@ -1,5 +1,4 @@
 using TagTool.Cache;
-using TagTool.Legacy.Base;
 using System;
 using System.Collections.Generic;
 using TagTool.Serialization;

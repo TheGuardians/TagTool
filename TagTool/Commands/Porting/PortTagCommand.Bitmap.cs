@@ -36,24 +36,20 @@ namespace TagTool.Commands.Porting
             var resourceList = new List<Bitmap.BitmapResource>();
             for (int i = 0; i < bitmap.Images.Count(); i++)
             {
-#if !DEBUG
                 try
                 {
-#endif
                     var resource = ConvertBlamBitmap(bitmap, i);
                     Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
                     {
                         Resource = resource
                     };
                     resourceList.Add(bitmapResource);
-#if !DEBUG
                 }
                 catch
                 {
                     Console.WriteLine("Failed to port bitmap");
                     return null;
                 }
-#endif
             }
 
             bitmap.Resources = resourceList;

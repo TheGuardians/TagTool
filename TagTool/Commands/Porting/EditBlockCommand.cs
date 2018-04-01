@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands;
-using TagTool.Legacy.Base;
 using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting

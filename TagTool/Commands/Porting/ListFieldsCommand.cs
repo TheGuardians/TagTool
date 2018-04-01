@@ -6,7 +6,6 @@ using TagTool.Common;
 using TagTool.Cache;
 using TagTool.Commands;
 using TagTool.Tags;
-using TagTool.Legacy.Base;
 
 namespace TagTool.Commands.Porting
 {

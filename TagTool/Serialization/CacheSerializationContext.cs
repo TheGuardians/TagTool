@@ -1,7 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Legacy.Base;
 using System;
 using TagTool.Tags;
 

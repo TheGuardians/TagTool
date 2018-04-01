@@ -3,7 +3,6 @@ using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.IO;
-using TagTool.Legacy.Base;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using System;
