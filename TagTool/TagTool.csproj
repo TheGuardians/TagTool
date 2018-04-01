@@ -406,6 +406,7 @@
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
     <Compile Include="Shaders\XboxShaderParser.cs" />
+    <Compile Include="Tags\Definitions\CacheFileResourceLayoutTable.cs" />
     <Compile Include="Tags\Definitions\ForgeGlobalsDefinition.cs" />
     <Compile Include="Tags\TagBlock.cs" />
     <Compile Include="Common\TagCacheMap.cs" />
@@ -475,30 +476,11 @@
     <Compile Include="Layouts\TagLayout.cs" />
     <Compile Include="Layouts\TagLayoutField.cs" />
     <Compile Include="Layouts\TagLayoutWriter.cs" />
-    <Compile Include="Legacy\Base\bink.cs" />
-    <Compile Include="Legacy\Base\bitmap.cs" />
     <Compile Include="Legacy\Base\CacheFileBase.cs" />
-    <Compile Include="Legacy\Base\cache_file_resource_gestalt.cs" />
-    <Compile Include="Legacy\Base\cache_file_resource_layout_table.cs" />
-    <Compile Include="Legacy\Base\multilingual_unicode_string_list.cs" />
-    <Compile Include="Legacy\Base\render_method_template.cs" />
-    <Compile Include="Legacy\Base\shader.cs" />
-    <Compile Include="Legacy\Base\sound.cs" />
-    <Compile Include="Legacy\Base\sound_cache_file_gestalt.cs" />
     <Compile Include="Legacy\Halo2Vista\CacheFile.cs" />
     <Compile Include="Legacy\Halo2Xbox\CacheFile.cs" />
-    <Compile Include="Legacy\Halo3Beta\bitmap.cs" />
-    <Compile Include="Legacy\Halo3Beta\cache_file_resource_gestalt.cs" />
-    <Compile Include="Legacy\Halo3Beta\multilingual_unicode_string_list.cs" />
-    <Compile Include="Legacy\Halo3Beta\render_method_template.cs" />
-    <Compile Include="Legacy\Halo3Beta\shader.cs" />
     <Compile Include="Legacy\Halo3ODST\CacheFile.cs" />
-    <Compile Include="Legacy\Halo3ODST\sound_cache_file_gestalt.cs" />
     <Compile Include="Legacy\Halo3Retail\CacheFile.cs" />
-    <Compile Include="Legacy\Halo3Retail\cache_file_resource_gestalt.cs" />
-    <Compile Include="Legacy\Halo3Retail\cache_file_resource_layout_table.cs" />
-    <Compile Include="Legacy\Halo3Retail\sound.cs" />
-    <Compile Include="Legacy\Halo3Retail\sound_cache_file_gestalt.cs" />
     <Compile Include="Legacy\HaloReach\CacheFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -984,7 +966,9 @@
       <Name>TagToolUtilities</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Legacy\Halo3Beta\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

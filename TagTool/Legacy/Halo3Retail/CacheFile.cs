@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
+using TagTool.Serialization;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Legacy.Halo3Retail
 {
     public class CacheFile : Base.CacheFile
     {
-        public CacheFile(FileInfo file, CacheVersion version = CacheVersion.Halo3Retail)
+        public CacheFile(FileInfo file, GameCacheContext cacheContext, CacheVersion version = CacheVersion.Halo3Retail)
             : base(file, version)
         {
+            CacheContext = cacheContext;
             Header = new CacheHeader(this);
             IndexHeader = new CacheIndexHeader(this);
             IndexItems = new IndexTable(this);
@@ -310,26 +313,15 @@ namespace TagTool.Legacy.Halo3Retail
 
         public override void LoadResourceTags()
         {
+            TagDeserializer deserializer = new TagDeserializer(CacheVersion.Halo3Retail);
+
             foreach (IndexItem item in IndexItems)
             {
                 if (item.ClassCode == "play")
                 {
-                    if (item.Offset > Reader.Length)
-                    {
-                        foreach (IndexItem item2 in IndexItems)
-                        {
-                            if (item2.ClassCode == "zone")
-                            {
-                                //fix for H4 prologue, play address is out of 
-                                //bounds and data is held inside the zone tag 
-                                //instead so make a fake play tag using zone data
-                                item.Offset = item2.Offset + 28;
-                                break;
-                            }
-                        }
-                    }
+                    var blamContext = new CacheSerializationContext(CacheContext, this, item);
+                    ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
 
-                    ResourceLayoutTable = new cache_file_resource_layout_table(this, item.Offset);
                     break;
                 }
             }
@@ -338,7 +330,19 @@ namespace TagTool.Legacy.Halo3Retail
             {
                 if (item.ClassCode == "zone")
                 {
-                    ResourceGestalt = new cache_file_resource_gestalt(this, item.Offset);
+                    var blamContext = new CacheSerializationContext(CacheContext, this, item);
+                    ResourceGestalt = deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
+
+                    foreach(var tagresource in ResourceGestalt.TagResources)
+                    {
+                        foreach(var fixup in tagresource.ResourceFixups)
+                        {
+                            fixup.Offset = (fixup.Address & 0x0FFFFFFF);
+                            fixup.Type = (fixup.Address >> 28) & 0xF;
+                            fixup.RawAddress = fixup.Address;
+                        }
+                    }
+
                     break;
                 }
             }
@@ -355,34 +359,34 @@ namespace TagTool.Legacy.Halo3Retail
             EndianReader er;
             string fName = "";
 
-            var Entry = ResourceGestalt.DefinitionEntries[ID & ushort.MaxValue];
+            var Entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            if (Entry.SegmentIndex == -1) return null;
+            if (Entry.PlaySegmentIndex == -1) return null;
 
-            var Loc = ResourceLayoutTable.Segments[Entry.SegmentIndex];
+            var Loc = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
 
-            if (Loc.RequiredPageIndex == -1 || Loc.RequiredPageOffset == -1)
+            if (Loc.PrimaryPageIndex == -1 || Loc.PrimarySegmentOffset == -1)
             {
                 Console.WriteLine($"Failed to find the raw at definition entry {ID & ushort.MaxValue} : resource offset and index are -1.");
                 return null;
             }
                 
-            int index = (Loc.OptionalPageIndex2 != -1) ? Loc.OptionalPageIndex2 : (Loc.OptionalPageIndex != -1) ? Loc.OptionalPageIndex : Loc.RequiredPageIndex;
-            int locOffset = (Loc.OptionalPageOffset2 != -1) ? Loc.OptionalPageOffset2 : (Loc.OptionalPageOffset != -1) ? Loc.OptionalPageOffset : Loc.RequiredPageOffset;
+            int index = (Loc.SecondaryPageIndex != -1) ? Loc.SecondaryPageIndex : Loc.PrimaryPageIndex;
+            int locOffset = (Loc.SecondarySegmentOffset != -1) ? Loc.SecondarySegmentOffset : Loc.PrimarySegmentOffset;
 
             if (index == -1 || locOffset == -1) return null;
 
-            if (ResourceLayoutTable.Pages[index].RawOffset == -1)
+            if (ResourceLayoutTable.RawPages[index].BlockOffset == -1)
             {
-                index = Loc.RequiredPageIndex;
-                locOffset = Loc.RequiredPageOffset;
+                index = Loc.PrimaryPageIndex;
+                locOffset = Loc.PrimarySegmentOffset;
             }
 
-            var Pool = ResourceLayoutTable.Pages[index];
+            var Pool = ResourceLayoutTable.RawPages[index];
 
-            if (Pool.CacheIndex != -1)
+            if (Pool.SharedCacheIndex != -1)
             {
-                fName = ResourceLayoutTable.SharedCaches[Pool.CacheIndex].FileName;
+                fName = ResourceLayoutTable.ExternalCacheReferences[Pool.SharedCacheIndex].MapPath;
                 fName = fName.Substring(fName.LastIndexOf('\\'));
                 fName = File.DirectoryName + fName;
 
@@ -398,31 +402,35 @@ namespace TagTool.Legacy.Halo3Retail
                 er = Reader;
 
             er.SeekTo(int.Parse(versionNode.ChildNodes[0].Attributes["rawTableOffset"].Value));
-            int offset = Pool.RawOffset + er.ReadInt32();
+            int offset = Pool.BlockOffset + er.ReadInt32();
             er.SeekTo(offset);
-            byte[] compressed = er.ReadBytes(Pool.CompressedSize);
-            byte[] decompressed = new byte[Pool.DecompressedSize];
+            byte[] compressed = er.ReadBytes(Pool.CompressedBlockSize);
+            byte[] decompressed = new byte[Pool.UncompressedBlockSize];
 
             BinaryReader BR = new BinaryReader(new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress));
-            decompressed = BR.ReadBytes(Pool.DecompressedSize);
+            decompressed = BR.ReadBytes(Pool.UncompressedBlockSize);
             BR.Close();
             BR.Dispose();
 
-            byte[] data = new byte[(DataLength != -1) ? DataLength : (Pool.DecompressedSize - locOffset)];
+            byte[] data = new byte[(DataLength != -1) ? DataLength : (Pool.UncompressedBlockSize - locOffset)];
             int length = data.Length;
-            if (length > decompressed.Length) length = decompressed.Length;
+   
+            if (length > decompressed.Length)
+                length = decompressed.Length;
 
             //Attempt to fix offset/lengths problem on some resources
-            if(length > decompressed.Length - locOffset)
+            if (length > decompressed.Length - locOffset)
             {
                 var remainder = length - (decompressed.Length - locOffset);
-                Array.Copy(decompressed, locOffset, data, 0, length-remainder);
+                Array.Copy(decompressed, locOffset, data, 0, length - remainder);
             }
             else
             {
                 Array.Copy(decompressed, locOffset, data, 0, length);
             }
-            
+
+
+            Array.Copy(decompressed, locOffset, data, 0, length);
 
             if (er != Reader)
             {
@@ -438,9 +446,9 @@ namespace TagTool.Legacy.Halo3Retail
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var Entry = ResourceGestalt.DefinitionEntries[ID & ushort.MaxValue];
+            var Entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            if (Entry.SegmentIndex == -1)
+            if (Entry.PlaySegmentIndex == -1)
             {
                 Console.WriteLine($"Segment index = -1 at definition entry {ID & ushort.MaxValue} ");
                 return null;
@@ -448,22 +456,22 @@ namespace TagTool.Legacy.Halo3Retail
                 
             
 
-            var segment = ResourceLayoutTable.Segments[Entry.SegmentIndex];
+            var segment = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
 
-            if (segment.RequiredPageIndex == -1 || segment.RequiredPageOffset == -1 ||  segment.SoundNumber == -1 || segment.SoundRawIndex == -1)
+            if (segment.PrimaryPageIndex == -1 || segment.PrimarySegmentOffset == -1 ||  segment.PrimarySizeIndex == -1 || segment.SecondarySizeIndex == -1)
             {
                 Console.WriteLine($"Failed to find the raw at definition entry {ID & ushort.MaxValue} : sound offset and index are -1.");
                 return null;
             }
                 
 
-            var sRaw = ResourceLayoutTable.SoundRawChunks[segment.SoundRawIndex];
-            var reqPage = ResourceLayoutTable.Pages[segment.RequiredPageIndex];
-            var optPage = ResourceLayoutTable.Pages[segment.OptionalPageIndex];
+            var sRaw = ResourceLayoutTable.Sizes[segment.SecondarySizeIndex];
+            var reqPage = ResourceLayoutTable.RawPages[segment.PrimaryPageIndex];
+            var optPage = ResourceLayoutTable.RawPages[segment.SecondaryPageIndex];
 
-            if (size == 0) size = (reqPage.CompressedSize != 0) ? reqPage.CompressedSize : optPage.CompressedSize;
+            if (size == 0) size = (reqPage.CompressedBlockSize != 0) ? reqPage.CompressedBlockSize : optPage.CompressedBlockSize;
 
-            var reqSize = size - sRaw.RawSize;
+            var reqSize = size - sRaw.OverallSize;
             var optSize = size - reqSize;
 
             byte[] buffer;
@@ -475,9 +483,9 @@ namespace TagTool.Legacy.Halo3Retail
             #region REQUIRED
             if (reqSize > 0)
             {
-                if (reqPage.CacheIndex != -1)
+                if (reqPage.SharedCacheIndex != -1)
                 {
-                    fName = ResourceLayoutTable.SharedCaches[reqPage.CacheIndex].FileName;
+                    fName = ResourceLayoutTable.ExternalCacheReferences[reqPage.SharedCacheIndex].MapPath;
                     fName = fName.Substring(fName.LastIndexOf('\\'));
                     fName = File.DirectoryName + fName;
 
@@ -490,12 +498,12 @@ namespace TagTool.Legacy.Halo3Retail
                     er = Reader;
 
                 er.SeekTo(1136);
-                offset = reqPage.RawOffset + er.ReadInt32();
+                offset = reqPage.BlockOffset + er.ReadInt32();
 
                 er.SeekTo(offset);
-                buffer = er.ReadBytes(reqPage.CompressedSize);
+                buffer = er.ReadBytes(reqPage.CompressedBlockSize);
 
-                Array.Copy(buffer, segment.RequiredPageOffset, data, 0, reqSize);
+                Array.Copy(buffer, segment.PrimarySegmentOffset, data, 0, reqSize);
 
                 if (er != Reader)
                 {
@@ -506,11 +514,11 @@ namespace TagTool.Legacy.Halo3Retail
             #endregion
 
             #region OPTIONAL
-            if (segment.OptionalPageIndex != -1 && optSize > 0)
+            if (segment.SecondaryPageIndex != -1 && optSize > 0)
             {
-                if (optPage.CacheIndex != -1)
+                if (optPage.SharedCacheIndex != -1)
                 {
-                    fName = ResourceLayoutTable.SharedCaches[optPage.CacheIndex].FileName;
+                    fName = ResourceLayoutTable.ExternalCacheReferences[optPage.SharedCacheIndex].MapPath;
                     fName = fName.Substring(fName.LastIndexOf('\\'));
                     fName = File.DirectoryName + fName;
 
@@ -523,15 +531,15 @@ namespace TagTool.Legacy.Halo3Retail
                     er = Reader;
 
                 er.SeekTo(1136);
-                offset = optPage.RawOffset + er.ReadInt32();
+                offset = optPage.BlockOffset + er.ReadInt32();
 
                 er.SeekTo(offset);
-                buffer = er.ReadBytes(optPage.CompressedSize);
+                buffer = er.ReadBytes(optPage.CompressedBlockSize);
 
                 if (buffer.Length > data.Length)
                     data = buffer;
                 else
-                    Array.Copy(buffer, segment.OptionalPageOffset, data, reqSize, optSize);
+                    Array.Copy(buffer, segment.SecondarySegmentOffset, data, reqSize, optSize);
 
 
                 if (er != Reader)

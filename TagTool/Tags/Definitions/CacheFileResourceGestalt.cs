@@ -6,42 +6,29 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "cache_file_resource_gestalt", Size = 0x214, Tag = "zone", MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Size = 0x214, Tag = "zone")]
     public class CacheFileResourceGestalt
     {
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public MapTypeHalo3RetailValue MapTypeHalo3Retail;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public MapTypeHalo3OdstValue MapTypeHalo3Odst;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public MapSubTypeHalo3OdstValue MapSubTypeHalo3Odst;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public MapTypeHalo3RetailValue MapSubTypeHaloReach;
+
         public short Flags;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public List<ResourceType> ResourceTypes;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public List<ResourceStructureType> ResourceStructureTypes;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public List<CompressionCodec> CompressionCodecs;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public List<ExternalCacheReference> ExternalCacheReferences;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public List<ExternalCacheReference> ExternalCacheReferences; 
         public List<RawPage> RawPages;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public List<Size> Sizes;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public List<Segment> Segments;
-
         public List<TagResource> TagResources;
         public List<Zoneset> DesignerZonesets;
         public List<Zoneset> GlobalZoneset;
@@ -118,7 +105,7 @@ namespace TagTool.Tags.Definitions
             Multiplayer,
             MainMenu
         }
-
+        
         public enum MapTypeHalo3OdstValue : sbyte
         {
             SinglePlayer,
@@ -164,15 +151,47 @@ namespace TagTool.Tags.Definitions
             public byte[] Guid;
         }
 
-        [TagStructure(Size = 0x108)]
+        [TagStructure(Size = 0x108, Align = 0x10)]
         public class ExternalCacheReference
         {
-            [TagField(Length = 256)] public string MapPath;
+            [TagField(Length = 0x12)]
+            public string MapPath;
+
+            [TagField(Length = 0xEE)]
+            public byte[] UnusedData;
+
             public short Unknown;
             public short Unknown2;
             public uint Unknown3;
         }
-        
+
+        [TagStructure(Size = 0x58, Align = 0x8)]
+        public class RawPage
+        {
+            public short Salt;
+            public byte Flags;
+            public byte CompressionCodecIndex;
+            public short SharedCacheIndex;
+            public short Unknown;
+
+            public int BlockOffset;
+            public uint CompressedBlockSize;
+            public uint UncompressedBlockSize;
+            public uint CrcChecksum;
+
+            [TagField(Length = 20)]
+            public byte[] EntireBufferHash;
+
+            [TagField(Length = 20)]
+            public byte[] FirstChunkHash;
+
+            [TagField(Length = 20)]
+            public byte[] LastChunkHash;
+
+            public short BlockAssetCount;
+            public short Unknown3;
+        }
+
         [TagStructure(Size = 0x10, Align = 0x8)]
         public class Size
         {
@@ -197,8 +216,47 @@ namespace TagTool.Tags.Definitions
             public short PrimarySizeIndex;
             public short SecondarySizeIndex;
         }
-        
-        [TagStructure(Size = 0x78)]
+
+        [TagStructure(Size = 0x40)]
+        public class TagResource
+        {
+            public CachedTagInstance ParentTag;
+            public ushort Salt;
+            public byte ResourceTypeIndex;
+            public byte Flags;
+            public int FixupInformationOffset;
+            public int FixupInformationLength;
+            public int SecondaryFixupInformationOffset;
+            public short Unknown1;
+            public short PlaySegmentIndex;
+            public int DefinitionAddress;
+            public List<ResourceFixup> ResourceFixups;
+            public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
+
+            [TagStructure(Size = 0x8)]
+            public class ResourceFixup
+            {
+                public int BlockOffset;
+                public int Address;
+
+                [TagField(Local = true)]
+                public int Type;
+                [TagField(Local = true)]
+                public int Offset;
+                [TagField(Local = true)]
+                public int RawAddress;
+            }
+
+            [TagStructure(Size = 0x8)]
+            public class ResourceDefinitionFixup
+            {
+                public uint Address;
+                public int ResourceStructureTypeIndex;
+            }
+        }
+
+        [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloReach)]
         public class Zoneset
         {
             public List<MemoryPoolBlock> RequiredRawPool;

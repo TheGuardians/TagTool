@@ -86,15 +86,15 @@ namespace TagTool.Commands.Porting
                         break;
 
                     case CacheVersion.Halo3Retail:
-                        blamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, version);
+                        blamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, CacheContext, version);
                         break;
 
                     case CacheVersion.Halo3ODST:
-                        blamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, version);
+                        blamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, CacheContext, version);
                         break;
 
                     case CacheVersion.HaloReach:
-                        blamCache = new TagTool.Legacy.HaloReach.CacheFile(blamCacheFile, version);
+                        blamCache = new TagTool.Legacy.HaloReach.CacheFile(blamCacheFile, CacheContext, version);
                         break;
 
                     default:

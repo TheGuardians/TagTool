@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -255,9 +256,15 @@ namespace TagTool.IO
         /// </summary>
         /// <param name="MaxLength">The maximum number of characters to read.</param>
         /// <returns></returns>
-        public string ReadNullTerminatedString(int MaxLength)
+        public string ReadNullTerminatedString(int MaxLength, CharSet charSet = CharSet.Ansi)
         {
-            string str = Encoding.UTF8.GetString(ReadBytes(MaxLength));
+            string str;
+            if (charSet == CharSet.Ansi)
+                str = Encoding.UTF8.GetString(ReadBytes(MaxLength));
+            else if (charSet == CharSet.Unicode)
+                str = Encoding.Unicode.GetString(ReadBytes(MaxLength * 2));
+            else
+                str = "";
             return str.Substring(0, str.IndexOf('\0'));
         }
         #endregion

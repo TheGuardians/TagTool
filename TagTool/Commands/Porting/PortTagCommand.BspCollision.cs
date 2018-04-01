@@ -281,10 +281,10 @@ namespace TagTool.Commands.Porting
             
             var blamDeserializer = new TagDeserializer(BlamCache.Version);
 
-            var resourceEntry = BlamCache.ResourceGestalt.DefinitionEntries[bsp.ZoneAssetIndex3 & ushort.MaxValue];
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3 & ushort.MaxValue];
 
             bsp.CollisionBspResource.Resource.DefinitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress);
-            bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.DefinitionData.Skip(resourceEntry.Offset).Take(resourceEntry.Size).ToArray();
+            bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             StructureBspTagResources resourceDefinition = null;
 
@@ -292,13 +292,13 @@ namespace TagTool.Commands.Porting
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
             {
-                foreach (var fixup in resourceEntry.Fixups)
+                foreach (var fixup in resourceEntry.ResourceFixups)
                 {
                     var newFixup = new TagResource.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
                         Address = new CacheAddress(
-                            fixup.FixupType == 4 ?
+                            fixup.Type == 4 ?
                                 CacheAddressType.Resource :
                                 CacheAddressType.Definition,
                             fixup.Offset)

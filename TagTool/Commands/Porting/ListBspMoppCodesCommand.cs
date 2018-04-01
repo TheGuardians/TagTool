@@ -68,10 +68,10 @@ namespace TagTool.Commands.Porting
 
             if (resourceData != null)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.DefinitionEntries[blamSbsp.ZoneAssetIndex3 & ushort.MaxValue];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[blamSbsp.ZoneAssetIndex3 & ushort.MaxValue];
 
                 var definitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress);
-                var definitionData = BlamCache.ResourceGestalt.DefinitionData.Skip(resourceEntry.Offset).Take(resourceEntry.Size).ToArray();
+                var definitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
                 StructureBspTagResources resourceDefinition = null;
 

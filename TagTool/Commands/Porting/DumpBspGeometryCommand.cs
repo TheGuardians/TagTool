@@ -161,7 +161,7 @@ namespace TagTool.Commands.Porting
 
             Console.Write("Loading Blam render_geometry resource definition...");
 
-            var definitionEntry = BlamCache.ResourceGestalt.DefinitionEntries[geometry.ZoneAssetHandle & ushort.MaxValue];
+            var definitionEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
 
             var resourceDefinition = new RenderGeometryApiResourceDefinition
             {
@@ -169,18 +169,18 @@ namespace TagTool.Commands.Porting
                 IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
             };
 
-            using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.DefinitionData))
+            using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             {
                 var dataContext = new DataSerializationContext(definitionReader, null, CacheAddressType.Definition);
 
-                definitionReader.SeekTo(definitionEntry.Offset + (definitionEntry.Size - 24));
+                definitionReader.SeekTo(definitionEntry.FixupInformationOffset + (definitionEntry.FixupInformationLength - 24));
 
                 var vertexBufferCount = definitionReader.ReadInt32();
                 definitionReader.Skip(8);
                 var indexBufferCount = definitionReader.ReadInt32();
 
-                definitionReader.SeekTo(definitionEntry.Offset);
+                definitionReader.SeekTo(definitionEntry.FixupInformationOffset);
 
                 for (var i = 0; i < vertexBufferCount; i++)
                 {
@@ -247,7 +247,7 @@ namespace TagTool.Commands.Porting
 
                     for (var i = 0; i < resourceDefinition.VertexBuffers.Count; i++)
                     {
-                        blamResourceStream.Position = definitionEntry.Fixups[i].Offset;
+                        blamResourceStream.Position = definitionEntry.ResourceFixups[i].Offset;
 
                         var vertexBuffer = resourceDefinition.VertexBuffers[i].Definition;
 

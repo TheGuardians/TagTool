@@ -1,9 +1,9 @@
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Legacy.Base;
-using TagTool.Legacy.Halo3Beta;
 using System;
 using System.Collections.Generic;
+using TagTool.Serialization;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
@@ -51,20 +51,26 @@ namespace TagTool.Commands.Porting
                 return false;
             }
 
-            var blamShader = new shader(BlamCache, item.Offset);
+            TagDeserializer deserializer = new TagDeserializer(BlamCache.Version);
+
+            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, item);
+            var blamShader = deserializer.Deserialize<RenderMethod>(blamContext);
+
+            
 
             var templateItem = BlamCache.IndexItems.Find(i =>
-                i.ID == blamShader.Properties[0].TemplateTagID);
+                i.ID == blamShader.ShaderProperties[0].Template.Index);
 
-            var template = new render_method_template(BlamCache, templateItem.Offset);
+            blamContext = new CacheSerializationContext(CacheContext, BlamCache, templateItem);
+            var template = deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
-            for (var i = 0; i < template.UsageBlocks.Count; i++)
+            for (var i = 0; i < template.ShaderMaps.Count; i++)
             {
-                var entry = template.UsageBlocks[i].Usage;
+                var entry = template.ShaderMaps[i].Name;
 
                 var bitmItem = BlamCache.IndexItems.Find(j =>
-                j.ID == blamShader.Properties[0].ShaderMaps[i].BitmapTagID);
-                Console.WriteLine(string.Format("{0:D2} {2}\t {1}", i, bitmItem, entry));
+                j.ID == blamShader.ShaderProperties[0].ShaderMaps[i].Bitmap.Index);
+                Console.WriteLine(string.Format("{0:D2} {2}\t {1}", i, bitmItem, BlamCache.Strings.GetString(entry)));
             }
 
             return true;

@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Legacy.Base
 {
     public abstract class CacheFile
     {
+        public GameCacheContext CacheContext { get; set; }
+
         public FileInfo File;
         public EndianReader Reader;
 
@@ -26,8 +29,8 @@ namespace TagTool.Legacy.Base
         public List<LocaleTable> LocaleTables;
         public StringIdResolver Resolver;
 
-        public cache_file_resource_gestalt ResourceGestalt;
-        public cache_file_resource_layout_table ResourceLayoutTable;
+        public CacheFileResourceGestalt ResourceGestalt;
+        public CacheFileResourceLayoutTable ResourceLayoutTable;
 
         public string LocalesKey;
         public string StringsKey;

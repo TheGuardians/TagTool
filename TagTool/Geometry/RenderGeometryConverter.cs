@@ -385,7 +385,7 @@ namespace TagTool.Geometry
             // Load Blam resource definition
             //
 
-            var rsrcDefEntry = BlamCache.ResourceGestalt.DefinitionEntries[geometry.ZoneAssetHandle & ushort.MaxValue];
+            var rsrcDefEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
 
             var rsrcDef = new RenderGeometryApiResourceDefinition
             {
@@ -393,18 +393,18 @@ namespace TagTool.Geometry
                 IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
             };
 
-            using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.DefinitionData))
+            using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
             using (var rsrcDefReader = new EndianReader(rsrcDefStream, EndianFormat.BigEndian))
             {
                 var dataContext = new DataSerializationContext(rsrcDefReader, null, CacheAddressType.Definition);
 
-                rsrcDefReader.SeekTo(rsrcDefEntry.Offset + (rsrcDefEntry.Size - 24));
+                rsrcDefReader.SeekTo(rsrcDefEntry.FixupInformationOffset + (rsrcDefEntry.FixupInformationLength - 24));
 
                 var vertexBufferCount = rsrcDefReader.ReadInt32();
                 rsrcDefReader.Skip(8);
                 var indexBufferCount = rsrcDefReader.ReadInt32();
 
-                rsrcDefReader.SeekTo(rsrcDefEntry.Offset);
+                rsrcDefReader.SeekTo(rsrcDefEntry.FixupInformationOffset);
 
                 for (var i = 0; i < vertexBufferCount; i++)
                 {
@@ -462,13 +462,13 @@ namespace TagTool.Geometry
 
                 for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.Fixups[i].Offset;
+                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[i].Offset;
                     ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
                 }
 
                 for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.Fixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
+                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
                     ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
                 }
 

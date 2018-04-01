@@ -26,7 +26,7 @@ namespace TagTool.Commands.Porting
             List<ModelAnimationTagResource> resourceDefinition = new List<ModelAnimationTagResource>();
             foreach (var group in definition.ResourceGroups)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.DefinitionEntries[group.ZoneAssetDatumIndex & ushort.MaxValue];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetDatumIndex & ushort.MaxValue];
 
                 group.Resource = new PageableResource
                 {
@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
                     Resource = new TagResource
                     {
                         Type = TagResourceType.Animation,
-                        DefinitionData = BlamCache.ResourceGestalt.DefinitionData.Skip(resourceEntry.Offset).Take(resourceEntry.Size).ToArray(),
+                        DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray(),
                         DefinitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress),
                         ResourceFixups = new List<TagResource.ResourceFixup>(),
                         ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
                     using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                     using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                     {
-                        foreach (var fixup in resourceEntry.Fixups)
+                        foreach (var fixup in resourceEntry.ResourceFixups)
                         {
                             var newFixup = new TagResource.ResourceFixup
                             {

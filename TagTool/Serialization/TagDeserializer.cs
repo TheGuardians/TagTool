@@ -437,9 +437,8 @@ namespace TagTool.Serialization
             switch (valueInfo.CharSet)
             {
                 case CharSet.Ansi:
-                    return Encoding.Default.GetString(reader.ReadBytes(valueInfo.Length));
                 case CharSet.Unicode:
-                    return Encoding.Unicode.GetString(reader.ReadBytes(valueInfo.Length * 2));
+                    return reader.ReadNullTerminatedString(valueInfo.Length,valueInfo.CharSet);
                 default:
                     throw new NotSupportedException($"{valueInfo.CharSet}");
             }

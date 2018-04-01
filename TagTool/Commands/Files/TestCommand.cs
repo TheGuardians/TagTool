@@ -143,11 +143,11 @@ namespace TagTool.Commands.Files
                 switch (version)
                 {
                     case CacheVersion.Halo3Retail:
-                        BlamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, version);
+                        BlamCache = new TagTool.Legacy.Halo3Retail.CacheFile(blamCacheFile, CacheContext, version);
                         break;
 
                     case CacheVersion.Halo3ODST:
-                        BlamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, version);
+                        BlamCache = new TagTool.Legacy.Halo3ODST.CacheFile(blamCacheFile, CacheContext, version);
                         break;
 
                     default:

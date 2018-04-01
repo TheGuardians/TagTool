@@ -121,6 +121,7 @@ namespace TagTool.Tags
             { new Tag("perf"), typeof(PerformanceThrottles) },
             { new Tag("phmo"), typeof(PhysicsModel) },
             { new Tag("pixl"), typeof(PixelShader) },
+            { new Tag("play"), typeof(CacheFileResourceLayoutTable) },
             { new Tag("pmdf"), typeof(ParticleModel) },
             { new Tag("pmov"), typeof(ParticlePhysics) },
             { new Tag("pphy"), typeof(PointPhysics) },

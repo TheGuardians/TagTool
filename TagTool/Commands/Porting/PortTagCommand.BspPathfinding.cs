@@ -60,22 +60,22 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version >= CacheVersion.Halo3ODST)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.DefinitionEntries[bsp.ZoneAssetIndex4 & ushort.MaxValue];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex4 & ushort.MaxValue];
 
                 bsp.PathfindingResource.Resource.DefinitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress);
-                bsp.PathfindingResource.Resource.DefinitionData = BlamCache.ResourceGestalt.DefinitionData.Skip(resourceEntry.Offset).Take(resourceEntry.Size).ToArray();
+                bsp.PathfindingResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
                 using (var definitionStream = new MemoryStream(bsp.PathfindingResource.Resource.DefinitionData, true))
                 using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                 using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                 {
-                    foreach (var fixup in resourceEntry.Fixups)
+                    foreach (var fixup in resourceEntry.ResourceFixups)
                     {
                         var newFixup = new TagResource.ResourceFixup
                         {
                             BlockOffset = (uint)fixup.BlockOffset,
                             Address = new CacheAddress(
-                                fixup.FixupType == 4 ?
+                                fixup.Type == 4 ?
                                     CacheAddressType.Resource :
                                     CacheAddressType.Definition,
                                 fixup.Offset)
