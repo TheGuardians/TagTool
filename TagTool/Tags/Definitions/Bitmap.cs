@@ -9,6 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xAC, MinVersion = CacheVersion.HaloOnline235640)]
+    [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
     public class Bitmap
     {
         /// <summary>
@@ -28,6 +29,10 @@ namespace TagTool.Tags.Definitions
         
         public float Unknown10;
         public float Unknown14;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown2;
 
         public BitmapCurveMode BitmapCurveMode;
 
@@ -40,17 +45,25 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short ForceBitmapFormatEnum;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Unknown3;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
         public List<TightBinding> TightBounds;
 
         public List<UsageOverride> UsageOverrides;
         public List<Sequence> ManualSequences;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<TightBinding> TightBounds2;
+
         public byte[] SourceData;
         public byte[] ProcessedPixelData;
         public List<Sequence> Sequences;
         public List<Image> Images;
 
         public byte[] XenonProcessedPixelData;
+        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public List<Image> XenonImages;
 
         public List<BitmapResource> Resources;
@@ -58,6 +71,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public List<BitmapResource> InterleavedResources;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
         public int UnknownB4;
 
         [TagStructure(Size = 0x8)]
@@ -120,7 +134,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x30)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
         public class Image
         {
             /// <summary>
@@ -150,6 +165,8 @@ namespace TagTool.Tags.Definitions
 
             [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused1;
+            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Unused2;
 
             /// <summary>
             /// The type of the bitmap image. DO NOT CHANGE
@@ -204,6 +221,7 @@ namespace TagTool.Tags.Definitions
             public sbyte Unknown26;
             public sbyte Unknown27;
             public int Unknown28;
+            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public int Unknown2C;  
         }
 
