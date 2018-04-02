@@ -329,7 +329,7 @@ namespace TagTool.Cache
 
         public override void LoadResourceTags()
         {
-            TagDeserializer deserializer = new TagDeserializer(CacheVersion.Halo3Retail);
+            TagDeserializer deserializer = new TagDeserializer(Version);
 
             foreach (IndexItem item in IndexItems)
             {
