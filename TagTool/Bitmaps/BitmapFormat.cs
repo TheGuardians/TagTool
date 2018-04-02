@@ -43,8 +43,8 @@ namespace TagTool.Bitmaps
         Dxt3aAlpha,         // 0x23
         Dxt3aMono,          // 0x24
         Dxt5aAlpha,         // 0x25
-        Dxt5aMono,          // 0x26
-        DxnMonoAlpha,       // 0x27
+        Dxt5aMono,          // 0x26, Reach DXN
+        DxnMonoAlpha,       // 0x27, Reach CTX1
         ReachDxt3aMono,     // 0x28, Reach Dxt3aMono
         ReachDxt3aAlpha,    // 0x29, Reach Dxt3aAlpha
         ReachDxt5aMono,     // 0x2A, Reach Dxt5aAlpha

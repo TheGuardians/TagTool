@@ -27,6 +27,13 @@ namespace TagTool.Commands.Porting
 
                 foreach (var resource in bitmap.Resources)
                     resource.ZoneAssetHandleOld = resource.ZoneAssetHandleNew;
+
+                foreach(var image in bitmap.Images)
+                {
+                    // For all formats above #38 (reach DXN, CTX1, DXT3a_mono, DXT3a_alpha, DXT5a_mono, DXT5a_alpha, DXN_mono_alpha), subtract 5 to match with H3/ODST/HO enum
+                    if (image.Format >= (BitmapFormat)38)
+                        image.Format = image.Format - 5;
+                }
             }
 
             //
@@ -127,7 +134,13 @@ namespace TagTool.Commands.Porting
                     //First or second image in an interleaved bitmap
                     var interleavedIndex = blamBitmap.Image.InterleavedTextureIndex2;
 
-                    int rawID = bitmap.InterleavedResourcesOld[blamBitmap.Image.InterleavedTextureIndex1].ZoneAssetHandleOld;
+                    int rawID;
+
+                    if (BlamCache.Version == CacheVersion.HaloReach)
+                        rawID = bitmap.InterleavedResourcesOld[blamBitmap.Image.InterleavedTextureIndex1].ZoneAssetHandleNew;
+                    else
+                        rawID = bitmap.InterleavedResourcesOld[blamBitmap.Image.InterleavedTextureIndex1].ZoneAssetHandleOld;
+
                     byte[] totalRaw = BlamCache.GetRawFromID(rawID, (interleavedIndex + 1) * rawSize);
 
                     if (totalRaw == null)
@@ -146,7 +159,13 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    int rawID = bitmap.Resources[imageIndex].ZoneAssetHandleOld;
+                    int rawID;
+
+                    if (BlamCache.Version == CacheVersion.HaloReach)
+                        rawID = bitmap.Resources[imageIndex].ZoneAssetHandleNew;
+                    else
+                        rawID= bitmap.Resources[imageIndex].ZoneAssetHandleOld;
+
                     raw = BlamCache.GetRawFromID(rawID, rawSize);
                     if (raw == null)
                         throw new Exception("Raw not found");

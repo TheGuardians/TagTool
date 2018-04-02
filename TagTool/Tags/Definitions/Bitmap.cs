@@ -141,6 +141,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// The group tag signature of the image.
             /// </summary>
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Tag Signature;
 
             /// <summary>
@@ -165,29 +166,30 @@ namespace TagTool.Tags.Definitions
 
             [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused1;
-            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloReach)]
-            public byte[] Unused2;
+
 
             /// <summary>
             /// The type of the bitmap image. DO NOT CHANGE
             /// </summary>
             public BitmapType Type;
 
-            /// <summary>
-            /// DO NOT CHANGE
-            /// </summary>
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public byte FourTimesLog2Size;
+            public byte UnknownFlags;
 
+            // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
             [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused2_1;
+            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Unused2_3;
+
             /// <summary>
             /// The format of the bitmap image. DO NOT CHANGE
             /// </summary>
             public BitmapFormat Format;
 
-            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Unused2_2;
+
 
             /// <summary>
             /// The flags of the bitmap image. DO NOT CHANGE
@@ -221,7 +223,6 @@ namespace TagTool.Tags.Definitions
             public sbyte Unknown26;
             public sbyte Unknown27;
             public int Unknown28;
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
             public int Unknown2C;
         }
 
