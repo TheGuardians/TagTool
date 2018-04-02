@@ -443,6 +443,14 @@ namespace TagTool.Commands.Porting
             if (groupTag == "matg")
                 blamDefinition = ConvertGlobals((Globals)blamDefinition, cacheStream);
 
+            if (groupTag == "mode")
+            {
+                // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
+                var mode = (RenderModel)blamDefinition;
+                if (mode.Geometry.Resource.Page.Index == -1)
+                    blamDefinition = null;
+            }
+
             if (groupTag == "phmo")
                 blamDefinition = ConvertPhysicsModel((PhysicsModel)blamDefinition);
 
