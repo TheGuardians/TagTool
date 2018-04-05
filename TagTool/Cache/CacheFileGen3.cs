@@ -31,7 +31,7 @@ namespace TagTool.Cache
 
                 var resourcePartition = Header.Partitions[(int)CacheFilePartitionType.Resources];
                 var resourceSection = Header.Interop.Sections[(int)CacheFileSectionType.Resource];
-                Magic = (int)(BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (Header.Interop.DebugSectionSize + resourceSection.Size));
+                Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (Header.Interop.DebugSectionSize + resourceSection.Size);
             }
             
             Header.TagIndexAddress = BitConverter.ToUInt32(BitConverter.GetBytes(Header.TagIndexAddress - Magic), 0);
