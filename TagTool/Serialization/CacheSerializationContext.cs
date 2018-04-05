@@ -8,13 +8,11 @@ namespace TagTool.Serialization
 {
     public class CacheSerializationContext : ISerializationContext
     {
-        public GameCacheContext CacheContext { get; }
         public CacheFile BlamCache { get; }
         public CacheFile.IndexItem BlamTag { get; }
 
-        public CacheSerializationContext(GameCacheContext cacheContext, CacheFile blamCache, CacheFile.IndexItem blamTag)
+        public CacheSerializationContext(CacheFile blamCache, CacheFile.IndexItem blamTag)
         {
-            CacheContext = cacheContext;
             BlamCache = blamCache;
             BlamTag = blamTag;
         }
@@ -53,8 +51,8 @@ namespace TagTool.Serialization
         {
             var item = BlamCache.IndexItems.Find(i => i.ID == index);
 
-            var group = item != null ?
-                new TagGroup(new Tag(item.ClassCode), new Tag(item.ParentClass), new Tag(item.ParentClass2), CacheContext == null ? StringId.Invalid : CacheContext.GetStringId(item.ClassName)) :
+            var group = (item != null) ?
+                new TagGroup(new Tag(item.ClassCode), new Tag(item.ParentClass), new Tag(item.ParentClass2), BlamCache.CacheContext?.GetStringId(item.ClassName) ?? StringId.Invalid) :
                 TagGroup.Null;
 
             return new CachedTagInstance(index, group);

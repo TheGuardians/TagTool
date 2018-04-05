@@ -50,13 +50,13 @@ namespace TagTool.Commands.Porting
                 return false;
             }
             
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, item);
+            var blamContext = new CacheSerializationContext(BlamCache, item);
             var blamShader = BlamCache.Deserializer.Deserialize<RenderMethod>(blamContext);
             
             var templateItem = BlamCache.IndexItems.Find(i =>
                 i.ID == blamShader.ShaderProperties[0].Template.Index);
 
-            blamContext = new CacheSerializationContext(CacheContext, BlamCache, templateItem);
+            blamContext = new CacheSerializationContext(BlamCache, templateItem);
             var template = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             for (var i = 0; i < template.ShaderMaps.Count; i++)

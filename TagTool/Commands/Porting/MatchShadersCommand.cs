@@ -189,7 +189,7 @@ namespace TagTool.Commands.Porting
 
             tagNameShort = tagName.Substring(tagName.LastIndexOf("\\") + 1, tagName.Length - tagName.LastIndexOf("\\") - 1);
             
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3Tag);
+            var blamContext = new CacheSerializationContext(BlamCache, h3Tag);
 
             object definition = null;
 
@@ -421,7 +421,7 @@ namespace TagTool.Commands.Porting
         public static CachedTagInstance MatchShader7(Stream stream, GameCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3ShaderTag);
+            var blamContext = new CacheSerializationContext(BlamCache, h3ShaderTag);
 
             var blamTagGroupChars = new char[] { ' ', ' ', ' ', ' ' };
             for (var i = 0; i < h3Tag.ClassCode.Length; i++)
@@ -450,7 +450,7 @@ namespace TagTool.Commands.Porting
 
             // Deserialize blam rmt2
             var h3Rmt2Instance = BlamCache.IndexItems.GetItemByID(h3Shader.ShaderProperties[0].Template.Index);
-            blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3Rmt2Instance);
+            blamContext = new CacheSerializationContext(BlamCache, h3Rmt2Instance);
             var h3Rmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             // Check for errors

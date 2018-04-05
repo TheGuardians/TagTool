@@ -48,13 +48,14 @@ namespace TagTool.Serialization
         /// <returns><c>true</c> if the enumerator moved to a new element, or <c>false</c> if the end of the structure has been reached.</returns>
         public bool Next()
         {
-            do
-            {
-                if (_fields == null || _nextIndex >= _fields.Count)
-                    return false;
-                Field = _fields[_nextIndex];
-                _nextIndex++;
-            } while (!GetCurrentPropertyInfo());
+            if (_fields == null || _nextIndex >= _fields.Count)
+                return false;
+
+            Field = _fields[_nextIndex];
+            Attribute = Field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
+
+            _nextIndex++;
+
             return true;
         }
 
@@ -64,23 +65,18 @@ namespace TagTool.Serialization
             // hierarchy and add any fields belonging to tag structures.
             foreach (var type in Info.Types.Reverse<Type>())
             {
-                var typeFields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-                Array.Sort(typeFields, (x, y) => x.MetadataToken - y.MetadataToken); // Ensure that fields are in declaration order - GetFields does NOT guarantee this!
-                _fields.AddRange(typeFields);
+                // Ensure that fields are in declaration order - GetFields does NOT guarantee this!
+                foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
+                {
+                    var attribute = field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
+
+                    if (CacheVersionDetection.IsBetween(Info.Version, attribute.MinVersion, attribute.MaxVersion))
+                        _fields.Add(field);
+                }
             }
         }
 
         public FieldInfo Find(Predicate<FieldInfo> match) =>
             _fields.Find(match);
-
-        private bool GetCurrentPropertyInfo()
-        {
-            // If the field has a TagFieldAttribute, use it, otherwise use the default
-            Attribute = Field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
-            if (Attribute.Offset >= Info.TotalSize)
-                throw new InvalidOperationException("Offset for property \"" + Field.Name + "\" is outside of its structure");
-            
-            return CacheVersionDetection.IsBetween(Info.Version, Attribute.MinVersion, Attribute.MaxVersion);
-        }
     }
 }

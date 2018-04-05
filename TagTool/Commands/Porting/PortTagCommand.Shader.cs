@@ -196,7 +196,7 @@ namespace TagTool.Commands.Porting
             var bmRmt2Instance = BlamCache.IndexItems.Find(x => x.ID == bmRm.ShaderProperties[0].Template.Index);
 
             // Get a simple list of bitmaps and arguments names
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, bmRmt2Instance);
+            var blamContext = new CacheSerializationContext(BlamCache, bmRmt2Instance);
             var bmRmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             foreach (var a in bmRmt2.ShaderMaps)

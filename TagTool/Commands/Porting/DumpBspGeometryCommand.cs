@@ -67,7 +67,7 @@ namespace TagTool.Commands.Porting
             // Load the Blam scenario_structure_bsp tag
             //
             
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
             var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
 
             //
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamLbsp = BlamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(new CacheSerializationContext(CacheContext, BlamCache, blamLbspTag));
+                var blamLbsp = BlamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(new CacheSerializationContext(BlamCache, blamLbspTag));
 
                 blamSbsp.Geometry2.ZoneAssetHandle = blamLbsp.Geometry.ZoneAssetHandle;
             }
@@ -108,7 +108,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(CacheContext, BlamCache, blamScenarioTag));
+                var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(BlamCache, blamScenarioTag));
 
                 int sbspIndex = 0;
                 for (int i = 0; i < blamScenario.StructureBsps.Count; i++)
@@ -135,7 +135,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamsLdT = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(new CacheSerializationContext(CacheContext, BlamCache, blamsLdTTag));
+                var blamsLdT = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(new CacheSerializationContext(BlamCache, blamsLdTTag));
 
                 blamSbsp.Geometry2.ZoneAssetHandle = blamsLdT.Lightmaps[sbspIndex].Geometry.ZoneAssetHandle;
             }

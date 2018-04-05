@@ -50,7 +50,7 @@ namespace TagTool.Commands.Porting
             // Load the Blam scenario tag
             //
             
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
             var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(blamContext);
 
             foreach (var script in blamScenario.Scripts)

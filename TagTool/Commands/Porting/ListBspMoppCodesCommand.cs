@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
                 return false;
             }
             
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
             var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
 
             var blamMoppCodes = new List<byte>();

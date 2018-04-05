@@ -367,7 +367,7 @@ namespace TagTool.Commands.Porting
 
             Console.WriteLine($"Porting {blamTag.Filename}.{groupTag.ToString()}");
 
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
 
             var blamDefinition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
 

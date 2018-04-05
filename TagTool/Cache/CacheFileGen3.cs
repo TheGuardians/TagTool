@@ -243,7 +243,7 @@ namespace TagTool.Cache
             {
                 if (item.ClassCode == "play")
                 {
-                    var blamContext = new CacheSerializationContext(CacheContext, this, item);
+                    var blamContext = new CacheSerializationContext(this, item);
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
                     break;
                 }
@@ -253,7 +253,7 @@ namespace TagTool.Cache
             {
                 if (item.ClassCode == "zone")
                 {
-                    var blamContext = new CacheSerializationContext(CacheContext, this, item);
+                    var blamContext = new CacheSerializationContext(this, item);
                     ResourceGestalt = deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
 
                     foreach (var tagresource in ResourceGestalt.TagResources)

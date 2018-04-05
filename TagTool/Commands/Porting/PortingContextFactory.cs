@@ -32,7 +32,7 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
-            var blamContext = new CacheSerializationContext(cacheContext, blamCache, blamTag);
+            var blamContext = new CacheSerializationContext(blamCache, blamTag);
             return blamCache.Deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
         }
 
@@ -52,7 +52,7 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
-            var blamContext = new CacheSerializationContext(cacheContext, blamCache, blamTag);
+            var blamContext = new CacheSerializationContext(blamCache, blamTag);
             return blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
         }
 
