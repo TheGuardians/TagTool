@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
@@ -17,11 +18,11 @@ namespace TagTool.Cache
         public EndianReader Reader;
 
         public CacheVersion Version;
-        public string Build;
-        public int HeaderSize;
+        public TagDeserializer Deserializer;
+
         public int Magic;
 
-        public CacheHeader Header;
+        public CacheFileHeader Header;
         public CacheIndexHeader IndexHeader;
         public IndexTable IndexItems;
         public StringTable Strings;
@@ -31,79 +32,35 @@ namespace TagTool.Cache
         public CacheFileResourceGestalt ResourceGestalt;
         public CacheFileResourceLayoutTable ResourceLayoutTable;
 
-        public string LocalesKey;
-        public string StringsKey;
-        public string TagsKey;
-        public string NetworkKey;
-        public string StringMods;
+        public string Build => CacheVersionDetection.GetBuildName(Version);
 
-        public XmlNode buildNode;
-        public XmlNode versionNode;
-        public XmlNode vertexNode;
+        public XmlNode BuildInfo => GetBuildNode(Build);
+        public XmlNode VersionInfo => GetVersionNode(BuildInfo.Attributes["version"].Value);
+        public XmlNode VertexInfo => GetVertexNode(BuildInfo.Attributes["vertDef"].Value);
 
-        public CacheFile(FileInfo file, CacheVersion version)
+        public string LocalesKey => BuildInfo.Attributes["localesKey"].Value;
+        public string StringsKey => BuildInfo.Attributes["stringsKey"].Value;
+        public string TagsKey => BuildInfo.Attributes["tagsKey"].Value;
+        public string NetworkKey => BuildInfo.Attributes["networkKey"].Value;
+        public string StringMods => BuildInfo.Attributes["stringMods"].Value;
+
+        public CacheFile(GameCacheContext cacheContext, FileInfo file, CacheVersion version)
         {
+            CacheContext = cacheContext;
             File = file;
             Version = version;
-            Build = CacheVersionDetection.GetBuildName(version);
-            
-            Reader = new EndianReader(file.OpenRead(), EndianFormat.BigEndian);
-            
-            buildNode = GetBuildNode(Build);
-            versionNode = GetVersionNode(buildNode.Attributes["version"].Value);
-            HeaderSize = int.Parse(buildNode.Attributes["headerSize"].Value);
-            StringMods = buildNode.Attributes["stringMods"].Value;
+            Deserializer = new TagDeserializer(Version);
 
-            TagsKey = buildNode.Attributes["tagsKey"].Value;
-            StringsKey = buildNode.Attributes["stringsKey"].Value;
-            LocalesKey = buildNode.Attributes["localesKey"].Value;
-            NetworkKey = buildNode.Attributes["networkKey"].Value;
+            Reader = new EndianReader(file.OpenRead(), EndianFormat.LittleEndian);
 
-            vertexNode = GetVertexNode(buildNode.Attributes["vertDef"].Value);
+            Reader.SeekTo(0);
+            if (Reader.ReadTag() == "daeh")
+                Reader.Format = EndianFormat.BigEndian;
+
+            Reader.SeekTo(0);
+            Header = Deserializer.Deserialize<CacheFileHeader>(new DataSerializationContext(Reader));
         }
         
-        public class CacheHeader
-        {
-            public int Magic;
-
-            public int FileLength;
-            public int IndexOffset;
-            public int IndexStreamSize;
-            public int TagBufferSize;
-
-            public uint VirtualAddress = 0;
-
-            public int TagDependencyGraphOffset = -1;
-            public bool HasTagDependencyGraph => TagDependencyGraphOffset != -1;
-
-            public uint TagDependencyGraphSize = 0;
-
-            public string SourceFile;
-            public string Build;
-            public int CacheType;
-
-            public int StringIdsCount;
-            public int StringIdsBufferSize;
-            public int StringIdIndicesOffset;
-            public int StringIdsBufferOffset;
-
-            public string Name;
-            public string ScenarioPath;
-            public bool NeedsShared = false;
-
-            public int TagNamesCount;
-            public int TagNamesBufferOffset;
-            public int TagNamesBufferSize;
-            public int TagNameIndicesOffset;
-
-            public int VirtualBaseAddress;
-            public int RawTableOffset;
-            public int LocaleModifier;
-            public int RawTableSize;
-
-            protected CacheFile Cache;
-        }
-
         public class CacheIndexHeader
         {
             public int tagClassCount;
@@ -127,26 +84,26 @@ namespace TagTool.Cache
                 var reader = this.Cache.Reader;
                 var cacheHeader = this.Cache.Header;
 
-                reader.SeekTo(cacheHeader.StringIdIndicesOffset);
-                int[] indices = new int[cacheHeader.StringIdsCount];
-                for (int i = 0; i < cacheHeader.StringIdsCount; i++)
+                reader.SeekTo(cacheHeader.StringIDsIndicesOffset);
+                int[] indices = new int[cacheHeader.StringIDsCount];
+                for (int i = 0; i < cacheHeader.StringIDsCount; i++)
                 {
                     indices[i] = reader.ReadInt32();
                     this.Add("");
                 }
 
-                reader.SeekTo(cacheHeader.StringIdsBufferOffset);
+                reader.SeekTo(cacheHeader.StringIDsBufferOffset);
 
                 EndianReader newReader = null;
 
                 if (this.Cache.StringsKey == "" || this.Cache.StringsKey == null)
                 {
-                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(cacheHeader.StringIdsBufferSize)), EndianFormat.BigEndian);
+                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(cacheHeader.StringIDsBufferSize)), EndianFormat.BigEndian);
                 }
                 else
                 {
-                    reader.BaseStream.Position = cacheHeader.StringIdsBufferOffset;
-                    newReader = new EndianReader(reader.DecryptAesSegment(cacheHeader.StringIdsBufferSize, Cache.StringsKey));
+                    reader.BaseStream.Position = cacheHeader.StringIDsBufferOffset;
+                    newReader = new EndianReader(reader.DecryptAesSegment(cacheHeader.StringIDsBufferSize, Cache.StringsKey));
                 }
 
                 for (int i = 0; i < indices.Length; i++)
@@ -161,7 +118,7 @@ namespace TagTool.Cache
 
                     int length;
                     if (i == indices.Length - 1)
-                        length = cacheHeader.StringIdsBufferSize - indices[i];
+                        length = cacheHeader.StringIDsBufferSize - indices[i];
                     else
                         length = (indices[i + 1] != -1)
                             ? indices[i + 1] - indices[i]
@@ -249,8 +206,8 @@ namespace TagTool.Cache
             public LocaleTable(CacheFile Cache, GameLanguage Lang)
             {
                 cache = Cache;
-                EndianReader reader = cache.Reader;
-                CacheHeader CH = cache.Header;
+                var reader = cache.Reader;
+                var CH = cache.Header;
 
                 int matgOffset = -1;
                 foreach (IndexItem item in cache.IndexItems)
@@ -262,13 +219,15 @@ namespace TagTool.Cache
 
                 if (matgOffset == -1) return;
 
-                int localeStart = int.Parse(cache.buildNode.Attributes["localesStart"].Value);
-                reader.SeekTo(matgOffset + localeStart + (int)Lang * int.Parse(cache.buildNode.Attributes["languageSize"].Value));
+                var buildInfo = cache.BuildInfo;
+                int localeStart = int.Parse(buildInfo.Attributes["localesStart"].Value);
+                reader.SeekTo(matgOffset + localeStart + (int)Lang * int.Parse(buildInfo.Attributes["languageSize"].Value));
 
                 int localeCount = reader.ReadInt32();
                 int tableSize = reader.ReadInt32();
-                int indexOffset = reader.ReadInt32() + CH.LocaleModifier;
-                int tableOffset = reader.ReadInt32() + CH.LocaleModifier;
+
+                var indexOffset = (int)(reader.ReadInt32() + CH.Interop.UnknownBaseAddress);
+                var tableOffset = (int)(reader.ReadInt32() + CH.Interop.UnknownBaseAddress);
 
                 #region Read Indices
                 reader.SeekTo(indexOffset);
@@ -391,9 +350,6 @@ namespace TagTool.Cache
             IndexItems.Clear();
             ResourceLayoutTable = null;
             ResourceGestalt = null;
-            buildNode = null;
-            versionNode = null;
-            vertexNode = null;
             Header = null;
             IndexHeader = null;
         }

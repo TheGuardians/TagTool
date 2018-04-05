@@ -8,115 +8,15 @@ namespace TagTool.Cache
 {
     public class CacheFileGen2 : CacheFile
     {
-        public CacheFileGen2(FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
-            base(file, version)
+        public CacheFileGen2(GameCacheContext cacheContext, FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
+            base(cacheContext, file, version)
         {
-            Reader.Format = EndianFormat.LittleEndian;
-            Header = new CacheHeader(this);
             IndexHeader = new CacheIndexHeader(this);
             IndexItems = new IndexTable(this);
             Strings = new StringTable(this);
             LocaleTables = new List<LocaleTable>();
         }
         
-        new public class CacheHeader : CacheFile.CacheHeader
-        {
-            public int LanguagePacksOffset = -1;
-            public uint LanguagePacksSize = 0;
-            public uint SecondarySoundGestaltDatumIndex = uint.MaxValue;
-            public int FastLoadGeometryBlockOffset = -1;
-            public uint FastLoadGeometryBlockSize = 0;
-            public uint Checksum = 0;
-            public uint MoppCodesChecksum = 0;
-            
-            public bool UsesCustomSoundGestalt => SecondarySoundGestaltDatumIndex != uint.MaxValue;
-            public bool UsesCustomLanguagePack => LanguagePacksOffset != -1;
-
-            public CacheHeader(CacheFile Cache)
-            {
-                base.Cache = Cache;
-                EndianReader Reader = base.Cache.Reader;
-
-                Reader.SeekTo(0);
-
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-
-                FileLength = Reader.ReadInt32();
-
-                Reader.ReadInt32();
-
-                IndexOffset = Reader.ReadInt32();
-                IndexStreamSize = Reader.ReadInt32();
-                TagBufferSize = Reader.ReadInt32();
-
-                Reader.ReadInt32();
-
-                if (base.Cache.Version == CacheVersion.Halo2Vista)
-                {
-                    VirtualAddress = Reader.ReadUInt32();
-                    TagDependencyGraphOffset = Reader.ReadInt32();
-                    TagDependencyGraphSize = Reader.ReadUInt32();
-                }
-
-                SourceFile = Reader.ReadString(256);
-                Build = Reader.ReadString(32);
-                CacheType = Reader.ReadInt32();
-
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-
-                StringIdsCount = Reader.ReadInt32();
-                StringIdsBufferSize = Reader.ReadInt32();
-                StringIdIndicesOffset = Reader.ReadInt32();
-                StringIdsBufferOffset = Reader.ReadInt32();
-
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-                Reader.ReadInt32();
-
-                Name = Reader.ReadString(32);
-
-                Reader.ReadInt32();
-
-                ScenarioPath = Reader.ReadString(256);
-                NeedsShared = Reader.ReadInt32() == 1;
-                TagNamesCount = Reader.ReadInt32();
-                TagNamesBufferOffset = Reader.ReadInt32();
-                TagNamesBufferSize = Reader.ReadInt32();
-                TagNameIndicesOffset = Reader.ReadInt32();
-
-                if (base.Cache.Version == CacheVersion.Halo2Vista)
-                {
-                    LanguagePacksOffset = Reader.ReadInt32();
-                    LanguagePacksSize = Reader.ReadUInt32();
-                    SecondarySoundGestaltDatumIndex = Reader.ReadUInt32();
-                    FastLoadGeometryBlockOffset = Reader.ReadInt32();
-                    FastLoadGeometryBlockSize = Reader.ReadUInt32();
-                    Checksum = Reader.ReadUInt32();
-                    MoppCodesChecksum = Reader.ReadUInt32();
-                    Reader.BaseStream.Seek(1288, SeekOrigin.Current);
-                }
-                else
-                {
-                    Checksum = Reader.ReadUInt32();
-                    Reader.BaseStream.Seek(1324, SeekOrigin.Current);
-                }
-            }
-        }
-
         new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
             public CacheIndexHeader(CacheFile Cache)
@@ -125,28 +25,28 @@ namespace TagTool.Cache
                 var Reader = cache.Reader;
 
                 #region Read Values
-                XmlNode indexHeaderNode = cache.versionNode.ChildNodes[1];
+                XmlNode indexHeaderNode = cache.VersionInfo.ChildNodes[1];
+
+                Reader.SeekTo(cache.Header.TagIndexAddress);
+                cache.Header.Magic = (int)(Reader.ReadUInt32() - (cache.Header.TagIndexAddress + 32));
 
                 XmlAttribute attr = indexHeaderNode.Attributes["tagClassCount"];
                 int offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagClassCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoOffset"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoOffset = Reader.ReadInt32() - cache.Header.Magic;
-
-                Reader.SeekTo(cache.Header.IndexOffset);
-                cache.Header.Magic = Reader.ReadInt32() - (cache.Header.IndexOffset + 32);
 
                 tagClassCount = Reader.ReadInt32();
                 tagInfoOffset = Reader.ReadInt32() - cache.Header.Magic;
 
                 Reader.SeekTo(tagInfoOffset + 8);
-                cache.Magic = Reader.ReadInt32() - (cache.Header.IndexOffset + cache.Header.IndexStreamSize);
+                cache.Magic = (int)(Reader.ReadUInt32() - (cache.Header.TagIndexAddress + cache.Header.MemoryBufferSize));
 
-                Reader.SeekTo(cache.Header.IndexOffset + 24);
+                Reader.SeekTo(cache.Header.TagIndexAddress + 24);
                 tagCount = Reader.ReadInt32();
                 #endregion
             }
@@ -229,7 +129,7 @@ namespace TagTool.Cache
 
                 #region Read Indices
 
-                Reader.SeekTo(CH.TagNameIndicesOffset);
+                Reader.SeekTo(CH.TagNamesIndicesOffset);
                 var offsets = new int[IH.tagCount];
                 for (int i = 0; i < IH.tagCount; i++)
                     offsets[i] = Reader.ReadInt32();

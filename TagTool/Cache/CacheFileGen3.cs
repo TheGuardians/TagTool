@@ -12,11 +12,30 @@ namespace TagTool.Cache
 {
     public class CacheFileGen3 : CacheFile
     {
-        public CacheFileGen3(FileInfo file, GameCacheContext cacheContext, CacheVersion version = CacheVersion.Halo3Retail)
-            : base(file, version)
+        public CacheFileGen3(GameCacheContext cacheContext, FileInfo file, CacheVersion version)
+            : base(cacheContext, file, version)
         {
-            CacheContext = cacheContext;
-            Header = new CacheHeader(this);
+            if (Header.Interop.ResourceBaseAddress == 0)
+            {
+                Magic = (int)(Header.Interop.RuntimeBaseAddress - Header.MemoryBufferSize);
+            }
+            else
+            {
+
+                Header.Magic = Header.StringIDsIndicesOffset - 0x3000;
+
+                Header.TagNamesBufferOffset -= Header.Magic;
+                Header.TagNamesIndicesOffset -= Header.Magic;
+                Header.StringIDsIndicesOffset -= Header.Magic;
+                Header.StringIDsBufferOffset -= Header.Magic;
+
+                var resourcePartition = Header.Partitions[(int)CacheFilePartitionType.Resources];
+                var resourceSection = Header.Interop.Sections[(int)CacheFileSectionType.Resource];
+                Magic = (int)(BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (Header.Interop.DebugSectionSize + resourceSection.Size));
+            }
+            
+            Header.TagIndexAddress = BitConverter.ToUInt32(BitConverter.GetBytes(Header.TagIndexAddress - Magic), 0);
+
             IndexHeader = new CacheIndexHeader(this);
             IndexItems = new IndexTable(this);
             Strings = new StringTable(this);
@@ -44,117 +63,6 @@ namespace TagTool.Cache
                 LocaleTables.Add(new LocaleTable(this, (GameLanguage)language));
         }
 
-        new public class CacheHeader : CacheFile.CacheHeader
-        {
-            public CacheHeader(CacheFile Cache)
-            {
-                base.Cache = Cache;
-                var Reader = base.Cache.Reader;
-
-                #region Read Values
-                XmlNode headerNode = base.Cache.versionNode.ChildNodes[0];
-                XmlAttribute attr = headerNode.Attributes["fileSize"];
-                int offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                FileLength = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["indexOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                IndexOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["tagDataAddress"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                IndexStreamSize = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["stringCount"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                StringIdsCount = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["stringTableSize"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                StringIdsBufferSize = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["stringTableIndexOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                StringIdIndicesOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["stringTableOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                StringIdsBufferOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["scenarioName"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                ScenarioPath = Reader.ReadString(256);
-
-                attr = headerNode.Attributes["fileCount"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                TagNamesCount = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["fileTableOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                TagNamesBufferOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["fileTableSize"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                TagNamesBufferSize = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["fileTableIndexOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                TagNameIndicesOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["virtualBaseAddress"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                VirtualBaseAddress = Reader.ReadInt32();
-                attr = headerNode.Attributes["rawTableOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                RawTableOffset = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["localeModifier"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                LocaleModifier = Reader.ReadInt32();
-
-                attr = headerNode.Attributes["rawTableSize"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset);
-                RawTableSize = Reader.ReadInt32();
-                #endregion
-
-                #region Modify Offsets
-                if (RawTableOffset == 0)
-                {
-                    base.Cache.Magic = VirtualBaseAddress - IndexStreamSize;
-                }
-                else
-                {
-
-                    this.Magic = StringIdIndicesOffset - base.Cache.HeaderSize;
-
-                    TagNamesBufferOffset -= this.Magic;
-                    TagNameIndicesOffset -= this.Magic;
-                    StringIdIndicesOffset -= this.Magic;
-                    StringIdsBufferOffset -= this.Magic;
-
-                    base.Cache.Magic = VirtualBaseAddress - (RawTableOffset + RawTableSize);
-                }
-                IndexOffset -= base.Cache.Magic;
-                #endregion
-            }
-        }
-
         new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
             public CacheIndexHeader(CacheFile Cache)
@@ -163,46 +71,46 @@ namespace TagTool.Cache
                 var Reader = cache.Reader;
 
                 #region Read Values
-                XmlNode indexHeaderNode = cache.versionNode.ChildNodes[1];
+                XmlNode indexHeaderNode = cache.VersionInfo.ChildNodes[1];
 
                 XmlAttribute attr = indexHeaderNode.Attributes["tagClassCount"];
                 int offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagClassCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoOffset"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagClassIndexOffset"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagClassIndexOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagCount"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderCount"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoHeaderCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderOffset"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoHeaderOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderCount2"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoHeaderCount2 = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderOffset2"];
                 offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.IndexOffset);
+                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
                 tagInfoHeaderOffset2 = Reader.ReadInt32() - cache.Magic;
                 #endregion
             }
@@ -249,7 +157,7 @@ namespace TagTool.Cache
                 #endregion
 
                 #region Read Indices
-                reader.SeekTo(cacheHeader.TagNameIndicesOffset);
+                reader.SeekTo(cacheHeader.TagNamesIndicesOffset);
                 int[] indices = new int[indexHeader.tagCount];
                 for (int i = 0; i < indexHeader.tagCount; i++)
                     indices[i] = reader.ReadInt32();
@@ -416,7 +324,7 @@ namespace TagTool.Cache
             else
                 er = Reader;
 
-            er.SeekTo(int.Parse(versionNode.ChildNodes[0].Attributes["rawTableOffset"].Value));
+            er.SeekTo(int.Parse(VersionInfo.ChildNodes[0].Attributes["rawTableOffset"].Value));
             int offset = Pool.BlockOffset + er.ReadInt32();
             er.SeekTo(offset);
             byte[] compressed = er.ReadBytes(Pool.CompressedBlockSize);
