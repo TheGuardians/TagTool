@@ -988,21 +988,9 @@ namespace TagTool.Tags.Definitions
                 public InputValue_ODST Input_ODST;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public InputValue_ODST RangeInput_ODST;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ArgbColor LocalColorA_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ArgbColor LocalColorB_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ArgbColor LocalColorC_HO;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ArgbColor LocalColorD_HO;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public ArgbColor LocalColorA;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public ArgbColor LocalColorB;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public ArgbColor LocalColorC;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public ArgbColor LocalColorD;
                 public float LocalScalarA;
                 public float LocalScalarB;
