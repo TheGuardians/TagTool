@@ -988,10 +988,11 @@ namespace TagTool.Tags.Definitions
                 public InputValue_ODST Input_ODST;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public InputValue_ODST RangeInput_ODST;
-                public ArgbColor LocalColorA;
-                public ArgbColor LocalColorB;
-                public ArgbColor LocalColorC;
-                public ArgbColor LocalColorD;
+                //these are ARGB colors but I set them to Int32 because they need endian-conversion
+                public Int32 LocalColorA;
+                public Int32 LocalColorB;
+                public Int32 LocalColorC;
+                public Int32 LocalColorD;
                 public float LocalScalarA;
                 public float LocalScalarB;
                 public float LocalScalarC;
