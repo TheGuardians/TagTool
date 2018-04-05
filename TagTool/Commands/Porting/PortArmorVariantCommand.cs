@@ -114,10 +114,9 @@ namespace TagTool.Commands.Porting
                         throw new InvalidDataException($"{args}");
                 }
             }
-
-            var blamDeserializer = new TagDeserializer(BlamCache.Version);
+            
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
-            var edModeDefinition = blamDeserializer.Deserialize<RenderModel>(blamContext);
+            var edModeDefinition = BlamCache.Deserializer.Deserialize<RenderModel>(blamContext);
 
             var materials = edModeDefinition.Materials.Select(i => new RenderMaterial
             {
@@ -543,7 +542,7 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("done.");
 
                 blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamHlmtTag);
-                edHlmtDefinition = (Model)ConvertData(null, blamDeserializer.Deserialize<Model>(blamContext), false);
+                edHlmtDefinition = (Model)ConvertData(null, BlamCache.Deserializer.Deserialize<Model>(blamContext), false);
 
                 edHlmtDefinition.RenderModel = edModeTag;
                 edHlmtDefinition.ReduceToL1SuperLow = 36.38004f;

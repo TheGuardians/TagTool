@@ -53,9 +53,7 @@ namespace TagTool.Commands.Porting
             //
             // Port Blam resource definition
             //
-
-            var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
+            
             StructureBspCacheFileTagResources resourceDefinition = null;
 
             if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -90,7 +88,7 @@ namespace TagTool.Commands.Porting
                     var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
 
                     definitionStream.Position = bsp.PathfindingResource.Resource.DefinitionAddress.Offset;
-                    resourceDefinition = blamDeserializer.Deserialize<StructureBspCacheFileTagResources>(dataContext);
+                    resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspCacheFileTagResources>(dataContext);
                 }
             }
             else
@@ -122,7 +120,7 @@ namespace TagTool.Commands.Porting
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.UnknownRaw6ths[i] :
-                        blamDeserializer.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(dataContext);
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(dataContext);
 
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
@@ -140,7 +138,7 @@ namespace TagTool.Commands.Porting
                     CacheContext.Serializer.Serialize(dataContext,
                         BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.UnknownRaw1sts[i] :
-                        blamDeserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext));
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext));
 
                 StreamUtil.Align(edResourceStream, 0x4);
                 blamResourceStream.Position = resourceDefinition.UnknownRaw7ths.Address.Offset;
@@ -149,7 +147,7 @@ namespace TagTool.Commands.Porting
                     CacheContext.Serializer.Serialize(dataContext,
                         BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.UnknownRaw7ths[i] :
-                        blamDeserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext));
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext));
 
                 if (BlamCache.Version < CacheVersion.Halo3ODST && bsp.PathfindingData.Count != 0)
                 {
@@ -222,7 +220,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Sectors[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -234,7 +232,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Links[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -246,7 +244,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].References[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -258,7 +256,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Bsp2dNodes[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -270,7 +268,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Vertices[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
 
                     for (var objRefIdx = 0; objRefIdx < pathfindingDatum.ObjectReferences.Count; objRefIdx++)
                     {
@@ -287,7 +285,7 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serializer.Serialize(dataContext,
                                     BlamCache.Version < CacheVersion.Halo3ODST ?
                                     bsp.PathfindingData[0].ObjectReferences[objRefIdx].Unknown2[unk2Idx].Unknown3[unk3Idx] :
-                                    blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(dataContext));
+                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(dataContext));
                         }
                     }
 
@@ -301,7 +299,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].PathfindingHints[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -313,7 +311,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].InstancedGeometryReferences[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
 
                     StreamUtil.Align(edResourceStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -325,7 +323,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Unknown1s[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown1Block>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown1Block>(dataContext));
 
                     for (var unk2Idx = 0; unk2Idx < pathfindingDatum.Unknown2s.Count; unk2Idx++)
                     {
@@ -339,7 +337,7 @@ namespace TagTool.Commands.Porting
                             CacheContext.Serializer.Serialize(dataContext,
                                 BlamCache.Version < CacheVersion.Halo3ODST ?
                                 bsp.PathfindingData[0].Unknown2s[unk2Idx].Unknown[unkIdx] :
-                                blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock>(dataContext));
+                                BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock>(dataContext));
                     }
 
                     for (var unk33Idx = 0; unk33Idx < pathfindingDatum.Unknown3s.Count; unk33Idx++)
@@ -354,7 +352,7 @@ namespace TagTool.Commands.Porting
                             CacheContext.Serializer.Serialize(dataContext,
                                 BlamCache.Version < CacheVersion.Halo3ODST ?
                                 bsp.PathfindingData[0].Unknown3s[unk33Idx].Unknown4[unk4Idx] :
-                                blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock>(dataContext));
+                                BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock>(dataContext));
                     }
 
                     StreamUtil.Align(edResourceStream, 0x4);
@@ -367,7 +365,7 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].Unknown4s[i] :
-                            blamDeserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown4Block>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown4Block>(dataContext));
                 }
 
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.PathfindingResource), resourceDefinition);

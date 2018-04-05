@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
             var tagType = TagDefinition.Find(groupTag);
             var structure = new TagStructureInfo(tagType);
 
-            var definition = new TagDeserializer(BlamCache.Version).Deserialize(new CacheSerializationContext(null, BlamCache, tag), tagType);
+            var definition = BlamCache.Deserializer.Deserialize(new CacheSerializationContext(null, BlamCache, tag), tagType);
 
             var oldContext = ContextStack.Context;
 

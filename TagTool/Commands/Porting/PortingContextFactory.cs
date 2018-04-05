@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting
                 return null;
 
             var blamContext = new CacheSerializationContext(cacheContext, blamCache, blamTag);
-            return new TagDeserializer(blamCache.Version).Deserialize<CacheFileResourceGestalt>(blamContext);
+            return blamCache.Deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
         }
 
         public static SoundCacheFileGestalt LoadSoundGestalt(GameCacheContext cacheContext, CacheFile blamCache)
@@ -53,13 +53,12 @@ namespace TagTool.Commands.Porting
                 return null;
 
             var blamContext = new CacheSerializationContext(cacheContext, blamCache, blamTag);
-            return new TagDeserializer(blamCache.Version).Deserialize<SoundCacheFileGestalt>(blamContext);
+            return blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
         }
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCacheContext cacheContext, CacheFile blamCache)
         {
             context.AddCommand(new EditTagCommand(contextStack, blamCache));
-            context.AddCommand(new ConvertBitmapCommand(cacheContext, blamCache));
             context.AddCommand(new DumpBspGeometryCommand(cacheContext, blamCache));
             context.AddCommand(new DumpScriptInfoCommand(cacheContext, blamCache));
             context.AddCommand(new DumpTagFunctionCommand(cacheContext, blamCache));

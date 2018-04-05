@@ -53,10 +53,9 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Blam scenario_structure_bsp tag does not exist: " + blamTagName);
                 return false;
             }
-
-            var blamDeserializer = new TagDeserializer(BlamCache.Version);
+            
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
-            var blamSbsp = blamDeserializer.Deserialize<ScenarioStructureBsp>(blamContext);
+            var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
 
             var blamMoppCodes = new List<byte>();
 
@@ -78,7 +77,7 @@ namespace TagTool.Commands.Porting
                 using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                 {
                     definitionStream.Position = definitionAddress.Offset;
-                    resourceDefinition = blamDeserializer.Deserialize<StructureBspTagResources>(
+                    resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspTagResources>(
                         new DataSerializationContext(definitionReader, CacheAddressType.Definition));
                 }
 

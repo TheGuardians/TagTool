@@ -249,7 +249,6 @@
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
     <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
-    <Compile Include="Commands\Porting\ConvertBitmapCommand.cs" />
     <Compile Include="Commands\Porting\DumpBspGeometryCommand.cs" />
     <Compile Include="Commands\Porting\DumpScriptInfoCommand.cs" />
     <Compile Include="Commands\Porting\DumpTagFunctionCommand.cs" />

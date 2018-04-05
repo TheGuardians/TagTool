@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < phmo.Mopps.Count; i++)
                 {
-                    var header = BlamDeserializer.Deserialize<MoppCode>(dataContext);
+                    var header = BlamCache.Deserializer.Deserialize<MoppCode>(dataContext);
                     CacheContext.Serializer.Serialize(dataContext, header);
                     
                     var adjustedDataSize = header.DataSize % 16 == 0 ? header.DataSize : (header.DataSize / 16 + 1) * 16;       //Align on 16 bytes.

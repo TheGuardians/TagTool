@@ -18,7 +18,6 @@ namespace TagTool.Commands.Porting
     {
         private GameCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
-        private TagDeserializer BlamDeserializer { get; }
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
@@ -55,7 +54,6 @@ namespace TagTool.Commands.Porting
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
-            BlamDeserializer = new TagDeserializer(BlamCache.Version);
             GeometryConverter = new RenderGeometryConverter(cacheContext, blamCache);
         }
 
@@ -371,7 +369,7 @@ namespace TagTool.Commands.Porting
 
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
 
-            var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
+            var blamDefinition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
 
             //
             // Remove unused sbsp stringIDs in the instanced geometry instances block before converting them

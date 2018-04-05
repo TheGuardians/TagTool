@@ -49,19 +49,15 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("Blam shader tag does not exist: " + shaderName);
                 return false;
             }
-
-            TagDeserializer deserializer = new TagDeserializer(BlamCache.Version);
-
-            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, item);
-            var blamShader = deserializer.Deserialize<RenderMethod>(blamContext);
-
             
-
+            var blamContext = new CacheSerializationContext(CacheContext, BlamCache, item);
+            var blamShader = BlamCache.Deserializer.Deserialize<RenderMethod>(blamContext);
+            
             var templateItem = BlamCache.IndexItems.Find(i =>
                 i.ID == blamShader.ShaderProperties[0].Template.Index);
 
             blamContext = new CacheSerializationContext(CacheContext, BlamCache, templateItem);
-            var template = deserializer.Deserialize<RenderMethodTemplate>(blamContext);
+            var template = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             for (var i = 0; i < template.ShaderMaps.Count; i++)
             {

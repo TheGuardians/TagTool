@@ -188,10 +188,8 @@ namespace TagTool.Commands.Porting
             }
 
             tagNameShort = tagName.Substring(tagName.LastIndexOf("\\") + 1, tagName.Length - tagName.LastIndexOf("\\") - 1);
-
-            var BlamDeserializer = new TagDeserializer(BlamCache.Version);
+            
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3Tag);
-            // var blamDefinition = BlamDeserializer.Deserialize(blamContext, TagDefinition.Find(tagGroup));
 
             object definition = null;
 
@@ -203,14 +201,14 @@ namespace TagTool.Commands.Porting
 
                 if (tag.Group.Tag.ToString() == "sbsp")
                 {
-                    var blamDefinition = BlamDeserializer.Deserialize<ScenarioStructureBspMaterials>(blamContext);
+                    var blamDefinition = BlamCache.Deserializer.Deserialize<ScenarioStructureBspMaterials>(blamContext);
 
                     RestoreH3Shaders(stream, CacheContext, BlamCache, blamDefinition.Materials);
                     renderMaterials = blamDefinition.Materials;
                 }
                 else if (tag.Group.Tag.ToString() == "mode")
                 {
-                    var blamDefinition = BlamDeserializer.Deserialize<RenderModel>(blamContext);
+                    var blamDefinition = BlamCache.Deserializer.Deserialize<RenderModel>(blamContext);
 
                     RestoreH3Shaders(stream, CacheContext, BlamCache, blamDefinition.Materials);
                     renderMaterials = blamDefinition.Materials;
@@ -423,7 +421,6 @@ namespace TagTool.Commands.Porting
         public static CachedTagInstance MatchShader7(Stream stream, GameCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
-            var blamDeserializer = new TagDeserializer(BlamCache.Version);
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3ShaderTag);
 
             var blamTagGroupChars = new char[] { ' ', ' ', ' ', ' ' };
@@ -433,12 +430,12 @@ namespace TagTool.Commands.Porting
             object h3Definition = null;
 
             if (h3Tag.ClassCode == "rmd")
-                h3Definition = blamDeserializer.Deserialize<ShaderDecal>(blamContext);
+                h3Definition = BlamCache.Deserializer.Deserialize<ShaderDecal>(blamContext);
             // rmw was disabled previously
             // else if (h3Tag.ClassCode == "rmw")
             //     h3Definition = blamDeserializer.Deserialize<ShaderWater>(blamContext);
             else
-                h3Definition = blamDeserializer.Deserialize(blamContext, TagDefinition.Find(h3Tag.ClassCode));
+                h3Definition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(h3Tag.ClassCode));
 
             var h3Shader = ConvertDefinition(h3Tag.ClassCode, h3Definition);
 
@@ -454,7 +451,7 @@ namespace TagTool.Commands.Porting
             // Deserialize blam rmt2
             var h3Rmt2Instance = BlamCache.IndexItems.GetItemByID(h3Shader.ShaderProperties[0].Template.Index);
             blamContext = new CacheSerializationContext(CacheContext, BlamCache, h3Rmt2Instance);
-            RenderMethodTemplate h3Rmt2 = blamDeserializer.Deserialize<RenderMethodTemplate>(blamContext);
+            var h3Rmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             // Check for errors
             if (h3Rmt2 == null)

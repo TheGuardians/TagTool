@@ -66,10 +66,9 @@ namespace TagTool.Commands.Porting
             //
             // Load the Blam scenario_structure_bsp tag
             //
-
-            var blamDeserializer = new TagDeserializer(BlamCache.Version);
+            
             var blamContext = new CacheSerializationContext(CacheContext, BlamCache, blamTag);
-            var blamSbsp = blamDeserializer.Deserialize<ScenarioStructureBsp>(blamContext);
+            var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
 
             //
             // Load blam ScenarioLightmapBspData to get geometry for geometry2
@@ -88,7 +87,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamLbsp = blamDeserializer.Deserialize<ScenarioLightmapBspData>(new CacheSerializationContext(CacheContext, BlamCache, blamLbspTag));
+                var blamLbsp = BlamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(new CacheSerializationContext(CacheContext, BlamCache, blamLbspTag));
 
                 blamSbsp.Geometry2.ZoneAssetHandle = blamLbsp.Geometry.ZoneAssetHandle;
             }
@@ -109,7 +108,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamScenario = blamDeserializer.Deserialize<Scenario>(new CacheSerializationContext(CacheContext, BlamCache, blamScenarioTag));
+                var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(CacheContext, BlamCache, blamScenarioTag));
 
                 int sbspIndex = 0;
                 for (int i = 0; i < blamScenario.StructureBsps.Count; i++)
@@ -136,7 +135,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                var blamsLdT = blamDeserializer.Deserialize<ScenarioLightmap>(new CacheSerializationContext(CacheContext, BlamCache, blamsLdTTag));
+                var blamsLdT = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(new CacheSerializationContext(CacheContext, BlamCache, blamsLdTTag));
 
                 blamSbsp.Geometry2.ZoneAssetHandle = blamsLdT.Lightmaps[sbspIndex].Geometry.ZoneAssetHandle;
             }
