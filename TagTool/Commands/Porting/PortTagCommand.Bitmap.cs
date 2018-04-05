@@ -337,6 +337,8 @@ namespace TagTool.Commands.Porting
                 blamBitmap.Height = (int)dds.Height;
                 blamBitmap.Width = (int)dds.Width;
                 blamBitmap.MipMapCount = (int)dds.MipMapCount-1;
+                if (blamBitmap.MipMapCount < 0)
+                    blamBitmap.MipMapCount = 0;
                 blamBitmap.RawSize = dataSize;
 
                 if(format == BitmapFormat.Dxn)
