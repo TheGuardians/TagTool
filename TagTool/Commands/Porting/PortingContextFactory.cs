@@ -53,7 +53,13 @@ namespace TagTool.Commands.Porting
                 return null;
 
             var blamContext = new CacheSerializationContext(blamCache, blamTag);
-            return blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
+            var ugh = blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
+
+            //
+            // Apply conversion to ugh! data (gain increase and such)
+            //
+
+            return ugh;
         }
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCacheContext cacheContext, CacheFile blamCache)

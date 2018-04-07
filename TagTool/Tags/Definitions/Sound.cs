@@ -3,97 +3,66 @@ using TagTool.Common;
 using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound", Tag = "snd!", Size = 0xD8, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound", Tag = "snd!", Size = 0xD8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MinVersion = CacheVersion.HaloReach)]
     public class Sound
     {
         public FlagsValue Flags;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(HaloOnlineOnly = true)]
         public short Unknown1;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(HaloOnlineOnly = true)]
         public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(HaloOnlineOnly = true)]
         public uint Unknown3;
         
-        public SoundClassValue SoundClass;
+        public SoundClass SoundClass;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public SampleRateValue SampleRate;
+        [TagField(HaloOnlineOnly = true)]
+        public SampleRate SampleRate;
+
+        [TagField(Gen3Only = true)]
+        public SoundCacheFileGestaltReference SoundReference;
         
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public byte UniqueSoundCount;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short PlatformCodecIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short PitchRangeIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short LanguageBIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short Unknown4;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short PlaybackParameterIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short ScaleIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public sbyte PromotionIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public sbyte CustomPlaybackIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short ExtraInfoIndex;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int Unknown5;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int ZoneAssetHandle;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(HaloOnlineOnly = true)]
         public byte Unknown6;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public ImportTypeValue ImportType;
+        [TagField(HaloOnlineOnly = true)]
+        public ImportType ImportType;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public SoundCacheFileGestalt.PlaybackParameter PlaybackParameters;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public SoundCacheFileGestalt.Scale Scale;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public SoundCacheFileGestalt.PlatformCodecBlock PlatformCodec;
+        [TagField(HaloOnlineOnly = true)]
+        public PlaybackParameter PlaybackParameters;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public SoundCacheFileGestalt.Promotion Promotion;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<SoundCacheFileGestalt.PitchRange> PitchRanges;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<SoundCacheFileGestalt.CustomPlayback> CustomPlayBacks;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<SoundCacheFileGestalt.ExtraInfoBlock> ExtraInfo;
-        
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<SoundCacheFileGestalt.LanguageBlock> Languages;
+        [TagField(HaloOnlineOnly = true)]
+        public Scale Scale;
 
-        [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(HaloOnlineOnly = true)]
+        public PlatformCodec PlatformCodec;
+
+        [TagField(HaloOnlineOnly = true)]
+        public Promotion Promotion;
+
+        [TagField(HaloOnlineOnly = true)]
+        public List<PitchRange> PitchRanges;
+
+        [TagField(HaloOnlineOnly = true)]
+        public List<CustomPlayback> CustomPlayBacks;
+
+        [TagField(HaloOnlineOnly = true)]
+        public List<ExtraInfo> ExtraInfo;
+
+        [TagField(HaloOnlineOnly = true)]
+        public List<LanguageBlock> Languages;
+
+        [TagField(Pointer = true, HaloOnlineOnly = true)]
         public PageableResource Resource;
         
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Padding = true, Length = 4, HaloOnlineOnly = true)]
         public byte[] Unused;
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -106,97 +75,26 @@ namespace TagTool.Tags.Definitions
             FitToAdpcmBlockSize = 1 << 0,
             SplitLongSoundIntoPermutations  = 1 << 1
         }
-        
-        public enum SoundClassValue : sbyte
+
+        [TagStructure(Size = 0x1D)]
+        public class SoundCacheFileGestaltReference
         {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            WeaponFireLodFar,
-            Unused2Impacts,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            PlayerArmor,
-            UnknownUnused1,
-            AmbientFlock,
-            NoPad,
-            NoPadStationary,
-            Arg,
-            CortanaMission,
-            CortanaGravemindChannel,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            Hud,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest,
-            AmbientNatureDetails,
-            AmbientMachineryDetails,
-            InsideSurroundTail,
-            OutsideSurroundTail,
-            VehicleDetonation,
-            AmbientDetonation,
-            FirstPersonInside,
-            FirstPersonOutside,
-            FirstPersonAnywhere,
-            UiPda
+            public byte PitchRangeCount;
+            public short PlatformCodecIndex;
+            public short PitchRangeIndex;
+            public short LanguageIndex;
+            public short Unknown4;
+            public short PlaybackParameterIndex;
+            public short ScaleIndex;
+            public sbyte PromotionIndex;
+            public sbyte CustomPlaybackIndex;
+            public short ExtraInfoIndex;
+            public int Unknown5;
+
+            public int ZoneAssetHandle;
+            [TagField(Padding = true, Length = 4)]
+            public byte[] Unused;
         }
-        
-        public enum SampleRateValue : sbyte
-        {
-            _22khz,
-            _44khz,
-            _32khz
-        }
-        
-        public enum ImportTypeValue : sbyte
-        {
-            Unknown,
-            SingleShot,
-            SingleLayer,
-            MultiLayer
-        }
-        
-        public enum EncodingValue : sbyte
-        {
-            Mono,
-            Stereo,
-            Surround,
-            _51Surround
-        }
+
     }
 }

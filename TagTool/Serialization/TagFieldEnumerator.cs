@@ -70,6 +70,27 @@ namespace TagTool.Serialization
                 {
                     var attribute = field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
 
+                    if (attribute.Gen3Only)
+                    {
+                        if (Info.Version == CacheVersion.Halo3Retail || Info.Version == CacheVersion.Halo3ODST || Info.Version == CacheVersion.HaloReach)
+                            _fields.Add(field);
+                        continue;
+                    }
+
+                    if (attribute.HaloOnlineOnly)
+                    {
+                        if (CacheVersionDetection.IsBetween(Info.Version, CacheVersion.HaloOnline106708, CacheVersion.HaloOnline700123))
+                            _fields.Add(field);
+                        continue;
+                    }
+
+                    if (attribute.Version != CacheVersion.Unknown)
+                    {
+                        if (Info.Version == attribute.Version)
+                            _fields.Add(field);
+                        continue;
+                    }
+
                     if (CacheVersionDetection.IsBetween(Info.Version, attribute.MinVersion, attribute.MaxVersion))
                         _fields.Add(field);
                 }

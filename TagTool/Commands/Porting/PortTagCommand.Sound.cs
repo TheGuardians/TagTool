@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using TagTool.Audio;
 
 namespace TagTool.Commands.Porting
 {
@@ -93,7 +94,7 @@ namespace TagTool.Commands.Porting
             return header;
         }
 
-        public static string ConvertSoundPermutation(byte[] buffer, int index, int count, int fileSize, byte channelCount, int sampleRate, bool loop)
+        public static string ConvertSoundPermutation(byte[] buffer, int index, int count, int fileSize, byte channelCount, SampleRate sampleRate, bool loop)
         {
             Directory.CreateDirectory(@"Temp");
 
@@ -125,7 +126,7 @@ namespace TagTool.Commands.Porting
             {
                 using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
                 {
-                    output.Write(CreateXMAHeader(fileSize, channelCount, sampleRate));
+                    output.Write(CreateXMAHeader(fileSize,channelCount, sampleRate.GetSampleRateHz()));
                     output.Format = EndianFormat.LittleEndian;
                     output.Write(buffer, index, count);
                 }
@@ -150,7 +151,7 @@ namespace TagTool.Commands.Porting
                     //towav wav header requires a modification to work with mp3loop
 
                     byte[] WAVstream = File.ReadAllBytes(tempWAV);
-                    int removeBeginning = 1152 * channelCount * (sampleRate / 44100);
+                    int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
 
                     //Loop will require further testing without the removed bits.
 
@@ -159,7 +160,7 @@ namespace TagTool.Commands.Porting
                         var WAVFileSize = WAVstream.Length - 0x2C - removeBeginning;
                         using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
                         {
-                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate));
+                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
                             output.Format = EndianFormat.LittleEndian;
                             output.WriteBlock(WAVstream, 0x2C + removeBeginning, WAVFileSize);
                         }
@@ -169,7 +170,7 @@ namespace TagTool.Commands.Porting
                         var WAVFileSize = WAVstream.Length - 0x2C;
                         using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
                         {
-                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate));
+                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
                             output.Format = EndianFormat.LittleEndian;
                             output.WriteBlock(WAVstream, 0x2C, WAVFileSize);
                         }
@@ -190,13 +191,13 @@ namespace TagTool.Commands.Porting
                     Process ffmpeg = Process.Start(info);
                     ffmpeg.WaitForExit();
 
-                    int removeBeginning = 1152 * channelCount * (sampleRate / 44100);
+                    int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
                     uint size = (uint)((new FileInfo(tempWAV).Length) - removeBeginning - 78);       //header size is 78 bytes.
                     byte[] WAVstream = File.ReadAllBytes(tempWAV);
                     var WAVFileSize = WAVstream.Length - 0x4E;
                     using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
                     {
-                        output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate));
+                        output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
                         output.WriteBlock(WAVstream, 0x4E + removeBeginning, (int)size);
                     }
                 }
@@ -286,72 +287,55 @@ namespace TagTool.Commands.Porting
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, BlamCache);
 
-            if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe"))
+            if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
-                Console.WriteLine("Failed to convert sounds, please install ffmpeg and mp3loop in the Helpers folder");
+                Console.WriteLine("Failed to sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
                 return null;
             }
 
             //
-            // Convert Blam data to ElDorado data
+            // Convert Sound Tag Data
             //
 
-            sound.SoundClass = ((int)sound.SoundClass < 50) ? sound.SoundClass : (sound.SoundClass + 1);
-            if (sound.SoundClass == Sound.SoundClassValue.FirstPersonInside)
-                sound.SoundClass = Sound.SoundClassValue.InsideSurroundTail;
-            if (sound.SoundClass == Sound.SoundClassValue.FirstPersonOutside)
-                sound.SoundClass = Sound.SoundClassValue.OutsideSurroundTail;
-
-            sound.SampleRate = BlamSoundGestalt.PlatformCodecs[sound.PlatformCodecIndex].SampleRate;
-
-            var sampleRate = sound.SampleRate == Sound.SampleRateValue._22khz ? 22050 : (sound.SampleRate == Sound.SampleRateValue._44khz ? 44100 : 32000);
+            var platformCodec = BlamSoundGestalt.PlatformCodecs[sound.SoundReference.PlatformCodecIndex];
+            var playbackParameters = BlamSoundGestalt.PlaybackParameters[sound.SoundReference.PlaybackParameterIndex];
+            var scale = BlamSoundGestalt.Scales[sound.SoundReference.ScaleIndex];
+            var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
+            var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
 
 
-            // Testing import type with SingleLayer
-            sound.ImportType = Sound.ImportTypeValue.SingleLayer;
-
-            // Assuming these all exists, which should happen in most if not all cases.
-            sound.PlaybackParameters = BlamSoundGestalt.PlaybackParameters[sound.PlaybackParameterIndex];
-
+            sound.PlaybackParameters = playbackParameters;
+            sound.Scale = scale;
+            sound.PlatformCodec = platformCodec;
+            sound.Promotion = promotion;
+            sound.CustomPlayBacks = customPlayBack;
             //
-            // Trial for gain leveling (compared to HO) 20% increase
+            // Tag fixes
             //
 
-            sound.PlaybackParameters.GainBase = ModifyGain(sound.PlaybackParameters.GainBase, 0.2f);
-
-            sound.Scale = BlamSoundGestalt.Scales[sound.ScaleIndex];
-
-            sound.PlatformCodec = BlamSoundGestalt.PlatformCodecs[sound.PlatformCodecIndex];
-
-
+            sound.SampleRate = platformCodec.SampleRate;
+            sound.ImportType = ImportType.SingleLayer;
+            //sound.PlaybackParameters.GainBase = ModifyGain(sound.PlaybackParameters.GainBase, 0.2f);
             sound.PlatformCodec.Unknown = 0;
 
             //
-            // Convert Blam promotion to ElDorado format
+            // Process all the pitch ranges
             //
 
-            sound.Promotion = (sound.PromotionIndex != -1) ?
-                BlamSoundGestalt.Promotions[sound.PromotionIndex] :
-                new SoundCacheFileGestalt.Promotion();
-
-            //
-            // Process all the unique sounds first:
-            //
-
-            sound.PitchRanges = new List<SoundCacheFileGestalt.PitchRange>(sound.UniqueSoundCount);
+            sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
 
             Directory.CreateDirectory(@"Temp");
             string soundMP3 = @"Temp\soundMP3.mp3";
             if (File.Exists(soundMP3))
                 File.Delete(soundMP3);
 
-            uint LargestSampleCount = 0;
 
-            for (int u = 0; u < sound.UniqueSoundCount; u++)
+            uint LargestSampleCount = 0;
+            for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
                 //Need to get permlist, MaxChunkIndex,MaxIndex etc...
 
-                int firstPermutationIndex = BlamSoundGestalt.PitchRanges[sound.PitchRangeIndex + u].FirstPermutationIndex;
+                int firstPermutationIndex = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u].FirstPermutationIndex;
 
                 //Index of the permutation that contains the largest offset
                 int maxIndex = 0;
@@ -366,7 +350,7 @@ namespace TagTool.Commands.Porting
                 uint SumSamples = BlamSoundGestalt.Permutations[firstPermutationIndex].SampleSize;
 
                 //Number of permutation
-                int permutationCount = (BlamSoundGestalt.PitchRanges[sound.PitchRangeIndex + u].EncodedPermutationCount >> 4) & 63;
+                int permutationCount = (BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u].EncodedPermutationCount >> 4) & 63;
 
                 //Next permutation, if it exists.
                 int permutationIndex = firstPermutationIndex + 1;
@@ -403,7 +387,7 @@ namespace TagTool.Commands.Porting
                 // Convert Blam pitch range to ElDorado format
                 //
 
-                var pitchRange = BlamSoundGestalt.PitchRanges[sound.PitchRangeIndex + u];
+                var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
                 pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name);
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
                 pitchRange.Unknown1 = 0;
@@ -417,41 +401,22 @@ namespace TagTool.Commands.Porting
                 pitchRange.PermutationCount = (byte)permutationCount;
                 pitchRange.Unknown8 = -1;
                 sound.PitchRanges.Add(pitchRange);
-                sound.PitchRanges[u].Permutations = new List<SoundCacheFileGestalt.Permutation>();
+                sound.PitchRanges[u].Permutations = new List<Permutation>();
 
                 //
                 // Determine the audio channel count
                 //
 
-                var channelCount = 0;
-
-                switch (sound.PlatformCodec.Encoding)
-                {
-                    case Sound.EncodingValue.Mono:
-                        channelCount = 1;
-                        break;
-
-                    case Sound.EncodingValue.Stereo:
-                        channelCount = 2;
-                        break;
-
-                    case Sound.EncodingValue.Surround:
-                        channelCount = 4;
-                        break;
-
-                    case Sound.EncodingValue._51Surround:
-                        channelCount = 6;
-                        break;
-                }
+                var channelCount = sound.PlatformCodec.Encoding.GetChannelCount();
 
                 //
                 // Set compression format
                 //
 
                 if (((ushort)sound.Flags & (ushort)Sound.FlagsValue.FitToAdpcmBlockSize) != 0 && channelCount >= 3)
-                    sound.PlatformCodec.Compression = 3;
+                    sound.PlatformCodec.Compression = Compression.PCM;
                 else
-                    sound.PlatformCodec.Compression = 8;
+                    sound.PlatformCodec.Compression = Compression.MP3;
 
                 //
                 // Convert Blam resource data to ElDorado resource data
@@ -462,10 +427,10 @@ namespace TagTool.Commands.Porting
 
                 //No audio data present
 
-                if (xmaFileSize == -1)
+                if (xmaFileSize <= 0)
                     return null;
 
-                var resourceData = BlamCache.GetSoundRaw(sound.ZoneAssetHandle, xmaFileSize);
+                var resourceData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
 
                 if (resourceData == null)
                     return null;
@@ -483,7 +448,7 @@ namespace TagTool.Commands.Porting
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
-                    permutation.PermutationChunks = new List<SoundCacheFileGestalt.PermutationChunk>();
+                    permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationList[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
 
@@ -507,7 +472,7 @@ namespace TagTool.Commands.Porting
                         loop = true;
                     }
 
-                    var permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sampleRate, loop);
+                    var permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop);
 
                     uint permutationChunkSize = 0;
 
@@ -535,7 +500,7 @@ namespace TagTool.Commands.Porting
 
                     var chunkSize = (ushort)(permutationChunkSize & ushort.MaxValue);
 
-                    var permutationChunk = new SoundCacheFileGestalt.PermutationChunk
+                    var permutationChunk = new PermutationChunk
                     {
                         Offset = (uint)new FileInfo(soundMP3).Length - permutationChunkSize,
                         Size = chunkSize,
@@ -554,43 +519,36 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            sound.Promotion.LongestPermutationDuration = (uint)(1000 * ((float)LargestSampleCount) / sampleRate);
-
-            //
-            // Convert Blam custom playbacks to ElDorado format
-            //
-
-            if (sound.CustomPlaybackIndex != -1)
-                sound.CustomPlayBacks = new List<SoundCacheFileGestalt.CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.CustomPlaybackIndex] };
+            sound.Promotion.LongestPermutationDuration = (uint)(1000 * ((float)LargestSampleCount) / sound.SampleRate.GetSampleRateHz());
 
             //
             // Convert Blam extra info to ElDorado format
             //
 
-            var extraInfo = new SoundCacheFileGestalt.ExtraInfoBlock()
+            var extraInfo = new ExtraInfo()
             {
-                LanguagePermutations = new List<SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation>()
+                LanguagePermutations = new List<ExtraInfo.LanguagePermutation>()
             };
 
-            for (int u = 0; u < sound.UniqueSoundCount; u++)
+            for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
-                var pitchRange = BlamSoundGestalt.PitchRanges[sound.PitchRangeIndex + u];
+                var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
 
-                var extraInfoBlock = new SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation
+                var extraInfoBlock = new ExtraInfo.LanguagePermutation
                 {
-                    RawInfo = new List<SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation.RawInfoBlock>()
+                    RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>()
                 };
 
 
                 for (int i = 0; i < sound.PitchRanges[u].PermutationCount; i++)
                 {
-                    var rawInfoBlock = new SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation.RawInfoBlock
+                    var rawInfoBlock = new ExtraInfo.LanguagePermutation.RawInfoBlock
                     {
                         SkipFractionName = StringId.Invalid,
                         Unknown24 = 480,
-                        UnknownList = new List<SoundCacheFileGestalt.ExtraInfoBlock.LanguagePermutation.RawInfoBlock.Unknown>(),
+                        UnknownList = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown>(),
                         Compression = 8,
-                        SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sampleRate)),
+                        SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
                         ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
                         ResourceSampleOffset = pitchRange.Permutations[i].PermutationChunks[0].Offset
                     };
@@ -599,7 +557,6 @@ namespace TagTool.Commands.Porting
                 extraInfo.LanguagePermutations.Add(extraInfoBlock);
             }
 
-
             extraInfo.Unknown1 = 0;
             extraInfo.Unknown2 = 0;
             extraInfo.Unknown3 = 0;
@@ -607,40 +564,40 @@ namespace TagTool.Commands.Porting
 
             //Data ref needs endian swapping
 
-            if (sound.ExtraInfoIndex != -1)
+            if (sound.SoundReference.ExtraInfoIndex != -1)
             {
-                if (BlamSoundGestalt.ExtraInfo[sound.ExtraInfoIndex].EncodedPermutationSections.Count != 0)
+                if (BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections.Count != 0)
                 {
-                    extraInfo.EncodedPermutationSections = BlamSoundGestalt.ExtraInfo[sound.ExtraInfoIndex].EncodedPermutationSections;
+                    extraInfo.EncodedPermutationSections = BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections;
                 }
             }
 
-            sound.ExtraInfo = new List<SoundCacheFileGestalt.ExtraInfoBlock> { extraInfo };
+            sound.ExtraInfo = new List<ExtraInfo> { extraInfo };
 
             //
             // Convert Blam languages to ElDorado format
             //
 
-            if (sound.LanguageBIndex != -1)
+            if (sound.SoundReference.LanguageIndex != -1)
             {
-                sound.Languages = new List<SoundCacheFileGestalt.LanguageBlock>();
+                sound.Languages = new List<LanguageBlock>();
 
                 foreach (var language in BlamSoundGestalt.Languages)
                 {
-                    sound.Languages.Add(new SoundCacheFileGestalt.LanguageBlock
+                    sound.Languages.Add(new LanguageBlock
                     {
                         Language = language.Language,
-                        PermutationDurations = new List<SoundCacheFileGestalt.LanguageBlock.PermutationDurationBlock>(),
-                        PitchRangeDurations = new List<SoundCacheFileGestalt.LanguageBlock.PitchRangeDurationBlock>(),
+                        PermutationDurations = new List<LanguageBlock.PermutationDurationBlock>(),
+                        PitchRangeDurations = new List<LanguageBlock.PitchRangeDurationBlock>(),
                     });
 
                     //Add all the  Pitch Range Duration block (pitch range count dependent)
 
                     var curLanguage = sound.Languages.Last();
 
-                    for (int i = 0; i < sound.UniqueSoundCount; i++)
+                    for (int i = 0; i < sound.SoundReference.PitchRangeCount; i++)
                     {
-                        curLanguage.PitchRangeDurations.Add(language.PitchRangeDurations[sound.LanguageBIndex + i]);
+                        curLanguage.PitchRangeDurations.Add(language.PitchRangeDurations[sound.SoundReference.LanguageIndex + i]);
                     }
 
                     //Add all the Permutation Duration Block and adjust offsets
@@ -711,10 +668,10 @@ namespace TagTool.Commands.Porting
                     sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
                 }
             }
-
+            
             if (File.Exists(soundMP3))
                 File.Delete(soundMP3);
-
+            
             return sound;
         }
 

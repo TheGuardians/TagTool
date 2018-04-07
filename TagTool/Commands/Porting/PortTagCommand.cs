@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Tags;
 using TagTool.Damage;
+using TagTool.Audio;
 
 namespace TagTool.Commands.Porting
 {
@@ -588,6 +589,9 @@ namespace TagTool.Commands.Porting
 
                 case DamageReportingType damageReportingType:
                     return ConvertDamageReportingType(damageReportingType);
+
+                case SoundClass soundClass:
+                    return soundClass.ConvertSoundClass(BlamCache.Version);
 
                 case GameObjectType gameObjectType:
                     return ConvertGameObjectType(gameObjectType);

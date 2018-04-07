@@ -70,6 +70,21 @@ namespace TagTool.Serialization
         public CacheVersion MaxVersion { get; set; } = CacheVersion.Unknown;
 
         /// <summary>
+        /// The tag field is only present in all 3rd generation Halo games.
+        /// </summary>
+        public bool Gen3Only = false;
+
+        /// <summary>
+        /// The tag field is only present in all Halo Online versions.
+        /// </summary>
+        public bool HaloOnlineOnly = false;
+
+        /// <summary>
+        /// The tag field version.
+        /// </summary>
+        public CacheVersion Version = CacheVersion.Unknown;
+
+        /// <summary>
         /// If the field is a tag reference, an array of valid group tags, or any if null.
         /// </summary>
         public string[] ValidTags { get; set; } = null;

@@ -434,15 +434,16 @@ namespace TagTool.Tags.Definitions
 
                 public DecoratorGrid Copy()
                 {
-                    DecoratorGrid result = new DecoratorGrid();
-
-                    result.DecoratorIndex_HO = DecoratorIndex_HO;
-                    result.DecoratorGeometryIndex_HO = DecoratorGeometryIndex_HO;
-                    result.DecoratorGeometryOffset = DecoratorGeometryOffset;
-                    result.Position = Position;
-                    result.Radius = Radius;
-                    result.GridSize = GridSize;
-                    result.BoundingSphereOffset = BoundingSphereOffset;
+                    DecoratorGrid result = new DecoratorGrid
+                    {
+                        DecoratorIndex_HO = DecoratorIndex_HO,
+                        DecoratorGeometryIndex_HO = DecoratorGeometryIndex_HO,
+                        DecoratorGeometryOffset = DecoratorGeometryOffset,
+                        Position = Position,
+                        Radius = Radius,
+                        GridSize = GridSize,
+                        BoundingSphereOffset = BoundingSphereOffset
+                    };
 
                     return result;
                 }

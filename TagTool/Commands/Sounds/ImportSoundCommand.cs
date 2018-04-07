@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using TagTool.Audio;
 
 namespace TagTool.Commands.Sounds
 {
@@ -101,7 +102,7 @@ namespace TagTool.Commands.Sounds
 
             var chunkSize = (ushort)fileSize;
             
-            var permutationChunk = new SoundCacheFileGestalt.PermutationChunk
+            var permutationChunk = new PermutationChunk
             {
                 Offset = 0,
                 Size = chunkSize,
@@ -114,7 +115,7 @@ namespace TagTool.Commands.Sounds
 
             var permutation = Definition.PitchRanges[0].Permutations[0];
 
-            permutation.PermutationChunks = new List<SoundCacheFileGestalt.PermutationChunk>
+            permutation.PermutationChunks = new List<PermutationChunk>
             {
                 permutationChunk
             };
@@ -123,12 +124,12 @@ namespace TagTool.Commands.Sounds
             permutation.SampleSize = 0;
             permutation.IsNotFirstPermutation = 0;
 
-            Definition.PitchRanges[0].Permutations = new List<SoundCacheFileGestalt.Permutation>
+            Definition.PitchRanges[0].Permutations = new List<Permutation>
             {
                 permutation
             };
 
-            Definition.PlatformCodec.Compression = 8; // MP3
+            Definition.PlatformCodec.Compression = Compression.MP3;
             
             return true;
         }
