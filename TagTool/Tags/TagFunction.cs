@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Serialization;
 
 namespace TagTool.Tags
@@ -352,5 +355,503 @@ namespace TagTool.Tags
         {
             return (max - min) * scale + min;
         }
+
+        public class TagFunctionHeader
+        {
+            public byte Opcode;
+            public byte Flags;
+            public byte Unused1;
+            public byte Unused2;
+
+            public uint Unknown1;
+            public uint Unknown2;
+            public uint Unknown3;
+            public uint Unknown4;
+            public uint Unknown5;
+            public uint Unknown6;
+
+            public uint RemainingDataSize;
+            
+            public void Read(EndianReader reader)
+            {
+                Opcode = reader.ReadByte();
+                Flags = reader.ReadByte();
+                Unused1 = reader.ReadByte();
+                Unused2 = reader.ReadByte();
+
+                Unknown1 = reader.ReadUInt32();
+                Unknown2 = reader.ReadUInt32();
+                Unknown3 = reader.ReadUInt32();
+                Unknown4 = reader.ReadUInt32();
+                Unknown5 = reader.ReadUInt32();
+                Unknown6 = reader.ReadUInt32();
+
+                RemainingDataSize = reader.ReadUInt32();
+            }
+
+            public void Write(EndianWriter writer)
+            {
+                writer.Write(Opcode);
+                writer.Write(Flags);
+                writer.Write(Unused1);
+                writer.Write(Unused2);
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+                writer.Write(Unknown5);
+                writer.Write(Unknown6);
+                writer.Write(RemainingDataSize);
+            }
+
+            public bool Interpolated()
+            {
+                return (Flags & 0x1) == 1;
+            }
+        }
+
+        public abstract class TagFunctionTypeData
+        {
+            public abstract void Read(EndianReader reader);
+            public abstract void Write(EndianWriter writer);
+        }
+
+        public class TagFunctionType2Data : TagFunctionTypeData
+        {
+            public byte Unknown;
+            public byte Unused1;
+            public byte Unused2;
+            public byte Unused3;
+
+            public float Unknown1;
+            public float Unknown2;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown = reader.ReadByte();
+                Unused1 = reader.ReadByte();
+                Unused2 = reader.ReadByte();
+                Unused3 = reader.ReadByte();
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown);
+                writer.Write(Unused1);
+                writer.Write(Unused2);
+                writer.Write(Unused3);
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+            }
+        }
+
+        public class TagFunctionType3Data : TagFunctionTypeData
+        {
+            public byte Unknown;
+            public byte Unused1;
+            public byte Unused2;
+            public byte Unused3;
+
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown = reader.ReadByte();
+                Unused1 = reader.ReadByte();
+                Unused2 = reader.ReadByte();
+                Unused3 = reader.ReadByte();
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                Unknown3 = reader.ReadSingle();
+                Unknown4 = reader.ReadSingle();
+
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown);
+                writer.Write(Unused1);
+                writer.Write(Unused2);
+                writer.Write(Unused3);
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+            }
+        }
+
+        public class TagFunctionType4Data : TagFunctionTypeData
+        {
+            
+            public float Unknown1;
+            public float Unknown2;
+            
+            public override void Read(EndianReader reader)
+            {
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle(); 
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+            }
+        }
+
+        public class TagFunctionType5Data : TagFunctionTypeData
+        {
+
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+            public float Unknown5;
+            public float Unknown6;
+            public float Unknown7;
+            public float Unknown8;
+            public float Unknown9;
+            public float Unknown10;
+            public float Unknown11;
+            public float Unknown12;
+            public float Unknown13;
+            public float Unknown14;
+            public float Unknown15;
+            public float Unknown16;
+            public float Unknown17;
+            public float Unknown18;
+            public float Unknown19;
+            public float Unknown20;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                Unknown3 = reader.ReadSingle();
+                Unknown4 = reader.ReadSingle();
+                Unknown5 = reader.ReadSingle();
+                Unknown6 = reader.ReadSingle();
+                Unknown7 = reader.ReadSingle();
+                Unknown8 = reader.ReadSingle();
+                Unknown9 = reader.ReadSingle();
+                Unknown10 = reader.ReadSingle();
+                Unknown11 = reader.ReadSingle();
+                Unknown12 = reader.ReadSingle();
+                Unknown13 = reader.ReadSingle();
+                Unknown14 = reader.ReadSingle();
+                Unknown15 = reader.ReadSingle();
+                Unknown16 = reader.ReadSingle();
+                Unknown17 = reader.ReadSingle();
+                Unknown18 = reader.ReadSingle();
+                Unknown19 = reader.ReadSingle();
+                Unknown20 = reader.ReadSingle();
+                Unknown10 = reader.ReadSingle();
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+                writer.Write(Unknown5);
+                writer.Write(Unknown6);
+                writer.Write(Unknown7);
+                writer.Write(Unknown8);
+                writer.Write(Unknown9);
+                writer.Write(Unknown10);
+                writer.Write(Unknown11);
+                writer.Write(Unknown12);
+                writer.Write(Unknown13);
+                writer.Write(Unknown14);
+                writer.Write(Unknown15);
+                writer.Write(Unknown16);
+                writer.Write(Unknown17);
+                writer.Write(Unknown18);
+                writer.Write(Unknown19);
+                writer.Write(Unknown20);
+            }
+        }
+
+        public class TagFunctionType7Data : TagFunctionTypeData
+        {
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                Unknown3 = reader.ReadSingle();
+                Unknown4 = reader.ReadSingle();
+
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+            }
+        }
+
+        public class TagFunctionType9Data : TagFunctionTypeData
+        {
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                Unknown3 = reader.ReadSingle();
+
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+            }
+        }
+
+        public class TagFunctionTypeAData : TagFunctionTypeData
+        {
+
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+            public float Unknown5;
+            public float Unknown6;
+            public float Unknown7;
+
+            public override void Read(EndianReader reader)
+            {
+                Unknown1 = reader.ReadSingle();
+                Unknown2 = reader.ReadSingle();
+                Unknown3 = reader.ReadSingle();
+                Unknown4 = reader.ReadSingle();
+                Unknown5 = reader.ReadSingle();
+                Unknown6 = reader.ReadSingle();
+                Unknown7 = reader.ReadSingle();  
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+                writer.Write(Unknown5);
+                writer.Write(Unknown6);
+                writer.Write(Unknown7);
+            }
+        }
+
+        public class TagFunctionType8Data : TagFunctionTypeData
+        {
+            public uint Count;
+            public List<Type8Section> Sections;
+
+            public class Type8Section
+            {
+                public byte Unknown; // Specifies the length of the section 4 -> 16, 7 -> 24, other -> 36
+                public byte Unused1;
+                public byte Unused2;
+                public byte Unused3;
+
+                public float Unknown1;
+                public float Unknown2;
+                public float Unknown3;
+                public float Unknown4;
+                public float Unknown5;
+                public float Unknown6;
+                public float Unknown7;
+                public float Unknown8;
+
+                public void Read(EndianReader reader)
+                {
+                    Unknown = reader.ReadByte(); 
+                    Unused1 = reader.ReadByte();
+                    Unused2 = reader.ReadByte();
+                    Unused3 = reader.ReadByte();
+
+                    Unknown1 = reader.ReadSingle();
+                    Unknown2 = reader.ReadSingle();
+                    Unknown3 = reader.ReadSingle();
+
+                    if(Unknown != 4)
+                    {
+                        Unknown4 = reader.ReadSingle();
+                        Unknown5 = reader.ReadSingle();
+                    }
+                    
+                    if(Unknown != 7 && Unknown != 4)
+                    {
+                        Unknown6 = reader.ReadSingle();
+                        Unknown7 = reader.ReadSingle();
+                        Unknown8 = reader.ReadSingle();
+                    }
+                }
+
+                public void Write(EndianWriter writer)
+                {
+                    writer.Write(Unknown);
+                    writer.Write(Unused1);
+                    writer.Write(Unused2);
+                    writer.Write(Unused3);
+
+                    writer.Write(Unknown1);
+                    writer.Write(Unknown2);
+                    writer.Write(Unknown3);
+
+                    if (Unknown != 4)
+                    {
+                        writer.Write(Unknown4);
+                        writer.Write(Unknown5);
+                    }
+
+                    if (Unknown != 7 && Unknown != 4)
+                    {
+                        writer.Write(Unknown6);
+                        writer.Write(Unknown7);
+                        writer.Write(Unknown8);
+                    }    
+                }
+            }
+
+            public override void Read(EndianReader reader)
+            {
+                Count = reader.ReadUInt32();
+                Sections = new List<Type8Section>();
+                for(int i =0; i< Count; i++)
+                {
+                    Type8Section section = new Type8Section();
+                    section.Read(reader);
+                    Sections.Add(section);
+                }
+
+            }
+
+            public override void Write(EndianWriter writer)
+            {
+                writer.Write(Count);
+                for(int i =0; i< Count; i++)
+                {
+                    Sections[i].Write(writer);
+                }
+            }
+        }
+
+        public static TagFunction ConvertTagFunction(TagFunction function)
+        {
+            if (function == null || function.Data == null)
+                return null;
+
+            if (function.Data.Length == 0)
+                return function;
+
+            var result = new byte[function.Data.Length];
+
+            using (var inputReader = new EndianReader(new MemoryStream(function.Data), EndianFormat.BigEndian))
+            using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
+            {
+                TagFunctionHeader header = new TagFunctionHeader();
+                header.Read(inputReader);
+                header.Write(outputWriter);
+
+                var opcode = header.Opcode;
+
+                ParseTagFunctionData(header.Opcode, inputReader, outputWriter);
+
+                if (header.Interpolated())
+                    ParseTagFunctionData(header.Opcode, inputReader, outputWriter);
+
+                if (!inputReader.EOF)
+                    throw new Exception($"TagFunction opcode {opcode} has more data than handled. Send beatthezombie this error message and the tag at which it happened");
+
+                function.Data = result;
+            }
+
+            return function;
+        }
+
+        private static void ParseTagFunctionData(byte opcode, EndianReader inputReader, EndianWriter outputWriter)
+        {
+            switch (opcode)
+            {
+                case 0x00:
+                case 0x01:
+                    break;
+
+                case 0x02:
+                    TagFunctionType2Data data2 = new TagFunctionType2Data();
+                    data2.Read(inputReader);
+                    data2.Write(outputWriter);
+                    break;
+
+                case 0x03:
+                    TagFunctionType3Data data3 = new TagFunctionType3Data();
+                    data3.Read(inputReader);
+                    data3.Write(outputWriter);
+                    break;
+
+                case 0x04:
+                    TagFunctionType4Data data4 = new TagFunctionType4Data();
+                    data4.Read(inputReader);
+                    data4.Write(outputWriter);
+                    break;
+
+                case 0x05:
+                    TagFunctionType5Data data5 = new TagFunctionType5Data();
+                    data5.Read(inputReader);
+                    data5.Write(outputWriter);
+                    break;
+
+                case 0x07:
+                    TagFunctionType7Data data7 = new TagFunctionType7Data();
+                    data7.Read(inputReader);
+                    data7.Write(outputWriter);
+                    break;
+
+                case 0x09:
+                    TagFunctionType9Data data9 = new TagFunctionType9Data();
+                    data9.Read(inputReader);
+                    data9.Write(outputWriter);
+                    break;
+
+                case 0x0A:
+                    TagFunctionTypeAData dataA = new TagFunctionTypeAData();
+                    dataA.Read(inputReader);
+                    dataA.Write(outputWriter);
+                    break;
+
+
+                case 0x08:
+                    TagFunctionType8Data data8 = new TagFunctionType8Data();
+                    data8.Read(inputReader);
+                    data8.Write(outputWriter);
+                    break;
+
+
+                case 0x06:
+                default:
+                    Console.WriteLine($"TagFunction opcode {opcode} not present in Halo Online parser! REPORT IT.");
+                    break;
+            }
+        }
+
     }
 }

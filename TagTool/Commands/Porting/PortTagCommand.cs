@@ -185,10 +185,10 @@ namespace TagTool.Commands.Porting
 
             if ((groupTag == "snd!") && NoAudio)
                 return null;
-
+            
             if( groupTag == "rmhg")
                 return CacheContext.GetTag(0x2647);
-
+            
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -714,53 +714,7 @@ namespace TagTool.Commands.Porting
 
         private TagFunction ConvertTagFunction(TagFunction function)
         {
-            if (function == null || function.Data == null)
-                return null;
-
-            var result = new byte[function.Data.Length];
-
-            using (var inputReader = new EndianReader(new MemoryStream(function.Data), EndianFormat.BigEndian))
-            using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
-            {
-                while (!inputReader.EOF)
-                {
-                    var opcode = inputReader.ReadByte();
-                    var isOpcode = false;
-
-                    switch (opcode)
-                    {
-                        case 0x01:
-                        case 0x02:
-                        case 0x03:
-                        case 0x04:
-                        case 0x05:
-                        case 0x06:
-                        case 0x07:
-                        case 0x08:
-                        case 0x09:
-                        case 0x0A:
-                            isOpcode = true;
-                            break;
-                    }
-
-                    inputReader.SeekTo(inputReader.Position - 1);
-
-                    if (isOpcode)
-                    {
-                        outputWriter.Format = EndianFormat.BigEndian;
-                        outputWriter.Write(inputReader.ReadUInt32());
-                    }
-                    else
-                    {
-                        outputWriter.Format = EndianFormat.LittleEndian;
-                        outputWriter.Write(inputReader.ReadUInt32());
-                    }
-                }
-
-                function.Data = result;
-            }
-
-            return function;
+            return TagFunction.ConvertTagFunction(function);
         }
 
         private GameObjectType ConvertGameObjectType(GameObjectType objectType)
