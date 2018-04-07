@@ -779,8 +779,12 @@ namespace TagTool.Tags
                 if (header.Interpolated())
                     ParseTagFunctionData(header.Opcode, inputReader, outputWriter);
 
-                if (!inputReader.EOF)
-                    throw new Exception($"TagFunction opcode {opcode} has more data than handled. Send beatthezombie this error message and the tag at which it happened");
+                // If any tag function has remaining data, just endian swap it. It is a very rare occurence, not handled by the HO parser. That piece of the function is most likely ignored at runtime.
+                while (!inputReader.EOF)
+                {
+                    float temp = inputReader.ReadSingle();
+                    outputWriter.Write(temp);
+                }
 
                 function.Data = result;
             }
@@ -848,8 +852,7 @@ namespace TagTool.Tags
 
                 case 0x06:
                 default:
-                    Console.WriteLine($"TagFunction opcode {opcode} not present in Halo Online parser! REPORT IT.");
-                    break;
+                    throw new Exception($"TagFunction opcode {opcode} not present in Halo Online parser! REPORT IT.");
             }
         }
 
