@@ -93,5 +93,16 @@ namespace TagTool.Serialization
         /// If the field is a string id, determines if it is used as a label.
         /// </summary>
         public bool Label { get; set; } = false;
+
+        /// <summary>
+        /// A data-orientage description of the usage format of the field.
+        /// (i.e., world units, [0,1], degrees, etc...)
+        /// </summary>
+        public string Format { get; set; } = "";
+
+        /// <summary>
+        /// States whether the field is a fraction if it is a float value (real_fraction).
+        /// </summary>
+        public bool IsFraction { get; set; } = false;
     }
 }

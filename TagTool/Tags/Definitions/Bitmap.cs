@@ -27,27 +27,62 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         public short SpriteSpacing;
 
-        public float Unknown10;
-        public float Unknown14;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown1;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown2;
+        /// <summary>
+        /// The apparent height of the bump map above the triangle it is textured onto, in texture repeats
+        /// (i.e., 1.0 would be as high as the texture is wide)
+        /// </summary>
+        [TagField(Format = "Repeats")]
+        public float BumpMapHeight;
 
+        /// <summary>
+        /// Used by detail maps and illum maps. 0 means fade by last mipmap, 1 means fade by first mipmap
+        /// </summary>
+        [TagField(IsFraction = true, Format = "[0,1]")]
+        public float FadeFactor;
+
+        /// <summary>
+        /// How much to blur the input image
+        /// </summary>
+        [TagField(Format = "Pixels", MinVersion = CacheVersion.HaloReach)]
+        public float Blur;
+
+        /// <summary>
+        /// How much to blur as each mip level is being downsampled
+        /// </summary>
+        [TagField(Format = "Pixels", MinVersion = CacheVersion.HaloReach)]
+        public float MipMapBlur;
+
+        /// <summary>
+        /// Automatic chooses FAST if your bitmap is bright, and PRETTY if your bitmap has dark bits
+        /// </summary>
         public BitmapCurveMode BitmapCurveMode;
 
+        /// <summary>
+        /// 0 = use default defined by usage
+        /// </summary>
         public byte MaxMipMapLevel;
 
+        /// <summary>
+        /// 0 = do not downsample source image
+        /// </summary>
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short MaxResolution;
 
+        /// <summary>
+        /// Index into global atlas if the texture is missing its required resources and has been atlased
+        /// </summary>
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short AtlasIndex;
 
-        
-        public short ForceBitmapFormatEnum;
+        /// <summary>
+        /// Overrides the format defined by usage
+        /// </summary>
+        public short ForceBitmapFormat;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        /// <summary>
+        /// This is the level cutoff for tight bounds. 0.0 is monochrome black, 1.0 is monochrome white
+        /// </summary>
+        [TagField(Format = "[0,1]", MinVersion = CacheVersion.HaloReach)]
         public float TightBoundsThreshold;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
