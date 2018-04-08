@@ -37,12 +37,14 @@ namespace TagTool.Tags.Definitions
         public BitmapCurveMode BitmapCurveMode;
 
         public byte MaxMipMapLevel;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short MaxResolution;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short AtlasIndex;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        
         public short ForceBitmapFormatEnum;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
