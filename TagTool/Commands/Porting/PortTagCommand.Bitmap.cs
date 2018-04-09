@@ -246,6 +246,7 @@ namespace TagTool.Commands.Porting
                 texture.Type = imageData.Image.Type;
                 texture.D3DFormatUnused = GetUnusedFormat(blamBitmap.Format);
                 texture.Format = imageData.Format;
+                texture.Curve = bitmap.Images[imageIndex].Curve;
                 texture.Flags = bitmap.Images[imageIndex].Flags;
 
 
