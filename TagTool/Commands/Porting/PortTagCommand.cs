@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
 
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-        private List<Tag> OtherTagGroups = new List<Tag> {new Tag("shit") };    //foot and effe may be added to this list
+        private List<Tag> OtherTagGroups = new List<Tag> {new Tag("shit"), new Tag("sncl") };    //foot and effe may be added to this list
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
@@ -188,7 +188,7 @@ namespace TagTool.Commands.Porting
             
             if( groupTag == "rmhg")
                 return CacheContext.GetTag(0x2647);
-            
+
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -338,6 +338,9 @@ namespace TagTool.Commands.Porting
 
                     case "effe":
                         return CacheContext.GetTag(0x12FE);
+
+                    case "sncl":
+                        return CacheContext.GetTag(0x019F);
                 }    
             }
 
