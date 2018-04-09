@@ -417,6 +417,19 @@ namespace TagTool.Commands.Porting
             if (groupTag == "crte")
                 blamDefinition = ConvertCortanaEffect((CortanaEffectDefinition)blamDefinition);
 
+            if (groupTag == "chdt")
+            {
+                var hud = (ChudDefinition)blamDefinition;
+
+                if (BlamCache.Version < CacheVersion.HaloOnline106708)
+                    foreach (var wids in hud.HudWidgets)
+                        foreach (var plac in wids.PlacementData)
+                        {
+                            plac.Scale.X = 1.5f * plac.Scale.X;
+                            plac.Scale.Y = 1.5f * plac.Scale.Y;
+                        }
+            }
+
             if (groupTag == "effe")
             {
                 var effect = (Effect)blamDefinition;
