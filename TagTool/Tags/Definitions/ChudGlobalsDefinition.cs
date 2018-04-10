@@ -515,9 +515,7 @@ namespace TagTool.Tags.Definitions
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown20;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown21;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown22;
+                public RealPoint2d PickupDialogOffset;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown23;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
