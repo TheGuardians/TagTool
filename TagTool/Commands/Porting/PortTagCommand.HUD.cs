@@ -129,7 +129,11 @@ namespace TagTool.Commands.Porting
                     //fixup for ammo charge meter widgets
                     //only apply to weapons with ammo meters such as the gravity hammer
                     //first check if widget name is meter
-                    if (BlamCache.Strings.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name) == "meter")
+                    //convert stringid to use for checking
+
+                    var widgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
+
+                    if (widgetname == "meter")
                     {
                         for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData.Count; placementDatumIndex++)
                         {
@@ -143,7 +147,7 @@ namespace TagTool.Commands.Porting
                     }
                     //fixup for corners_720 HUD widgets rendering offscreen to the left and right
                     //check widget name
-                    if (BlamCache.Strings.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name) == "corners_720")
+                    if (widgetname == "corners_720")
                     {
                         for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData.Count; placementDatumIndex++)
                         {
