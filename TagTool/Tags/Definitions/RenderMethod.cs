@@ -69,8 +69,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock1> Unknown;
             public uint Unknown2;
             public List<DrawMode> DrawModes;
-            public List<UnknownBlock2> Unknown4;
-            public List<UnknownBlock3> Unknown5;
+            public List<UnknownBlock3> Unknown3;
+            public List<ArgumentMapping> ArgumentMappings;
             public List<FunctionBlock> Functions;
             public int BitmapTransparency;
             public int Unknown7;
@@ -117,23 +117,23 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x2)]
             public class DrawMode
             {
-                public short Unknown;
+                public ushort DataHandle;
             }
 
             [TagStructure(Size = 0x6)]
-            public class UnknownBlock2
+            public class UnknownBlock3
             {
-                public uint Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
+                public short DataHandleSampler;
+                public short DataHandleUnknown;
+                public short DataHandleVector;
             }
 
             [TagStructure(Size = 0x4)]
-            public class UnknownBlock3
+            public class ArgumentMapping
             {
                 public short RegisterIndex;
                 public byte FunctionIndex;
-                public byte Unknown3; // Not a register, common value with H3
+                public byte ArgumentIndex;
             }
 
             [TagStructure(Size = 0x24)]

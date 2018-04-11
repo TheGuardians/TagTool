@@ -48,7 +48,7 @@ namespace TagTool.Geometry
                     {
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
                         //v.Tangent = new RealQuaternion(0,0,0,0);
                         outVertexStream.WriteWorldVertex(v);
                     });
@@ -59,7 +59,7 @@ namespace TagTool.Geometry
                     {
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
                         //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteRigidVertex(v);
                     });
@@ -70,7 +70,7 @@ namespace TagTool.Geometry
                     {
                         if (ms30Indices.Contains(i))
                             v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
-                        //v.Tangent = new RealQuaternion(Math.Abs(v.Tangent.I), Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W));
+                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
                         //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteSkinnedVertex(v);
                     });

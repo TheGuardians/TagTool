@@ -1223,8 +1223,8 @@ namespace TagTool.Commands.Porting
                 // TODO: see which does what and which is the real function
                 edProperty.Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>();
                 edProperty.DrawModes = new List<RenderMethod.ShaderProperty.DrawMode>();
-                edProperty.Unknown4 = new List<RenderMethod.ShaderProperty.UnknownBlock2>();
-                edProperty.Unknown5 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
+                edProperty.Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
+                edProperty.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
                 edProperty.Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
             }
 
