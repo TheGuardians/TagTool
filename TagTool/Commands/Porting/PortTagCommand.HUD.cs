@@ -115,6 +115,9 @@ namespace TagTool.Commands.Porting
         {
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)
             {
+                //get stringid text for patch targeting
+                var widgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].Name);
+
                 for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].StateData.Count; stateDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex]);
                 for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].RenderData.Count; renderDatumIndex++)
@@ -126,35 +129,43 @@ namespace TagTool.Commands.Porting
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData.Count; renderDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[renderDatumIndex]);
 
+                    //get stringid text for patch targeting
+                    var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
+
                     //fixup for ammo charge meter widgets
-                    //only apply to weapons with ammo meters such as the gravity hammer
-                    //first check if widget name is meter
-                    //convert stringid to use for checking
-
-                    var widgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
-
-                    if (widgetname == "meter")
+                    if (bitmapwidgetname == "meter")
                     {
-                        for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData.Count; placementDatumIndex++)
-                        {
                             //check these two offsets to make sure only the correct meters are targeted
-                            if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Offset.X == -7 && chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Offset.Y == 47)
+                            if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X == -7 && chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y == 47)
                             {
-                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 0.58f;
-                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 0.58f;
-                            }
-                        }
+                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 0.58f;
+                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 0.58f;
+                            }                       
                     }
-                    //fixup for corners_720 HUD widgets rendering offscreen to the left and right
-                    //check widget name
-                    if (widgetname == "corners_720")
+                    //fixup for corners_720 Spartan HUD widgets rendering offscreen to the left and right
+                    if (bitmapwidgetname == "corners_720" && widgetname == "in_helmet_top")
                     {
-                        for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData.Count; placementDatumIndex++)
-                        {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.TopEdge;
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].MirrorOffset.X = 3.57f;
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[placementDatumIndex].Offset.Y = -16f;
-                        }
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.TopEdge;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 3.57f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -16f;            
+                    }
+                    //fixup for center_720 Elite HUD widgets rendering too far offset from top and bottom
+                    if (bitmapwidgetname == "center_720" && widgetname == "in_helmet")
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.Y = 7.05f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 1.2f;
+                    }
+                    //fixup for upper_corners_720 Elite HUD widgets rendering too far offset from center
+                    if (bitmapwidgetname == "upper_corners_720" && widgetname == "in_helmet")
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -2.22f;
+                    }
+                    //fixup for lower_corners_720 Elite HUD widgets rendering too far offset from center
+                    if (bitmapwidgetname == "lower_corners_720" && widgetname == "in_helmet")
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -2.9f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -100.0f;
                     }
 
                     for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
