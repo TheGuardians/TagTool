@@ -408,6 +408,12 @@ namespace TagTool.Commands.Porting
             if (groupTag == "char")
                 blamDefinition = ConvertCharacter((Character)blamDefinition);
 
+            if (groupTag == "chdt")
+                blamDefinition = ConvertChudDefinition((ChudDefinition)blamDefinition);
+
+            if (groupTag == "chgd")
+                blamDefinition = ConvertChudGlobalsDefinition((ChudGlobalsDefinition)blamDefinition);
+
             if (groupTag == "cine")
                 blamDefinition = ConvertCinematic((Cinematic)blamDefinition);
 
@@ -511,12 +517,6 @@ namespace TagTool.Commands.Porting
 
             if (groupTag == "unic")
                 blamDefinition = ConvertStrings((MultilingualUnicodeStringList)blamDefinition);
-
-            if (groupTag == "chdt")
-                blamDefinition = ConvertChudDefinition((ChudDefinition)blamDefinition);
-
-            if (groupTag == "chgd")
-                blamDefinition = ConvertChudGlobalsDefinition((ChudGlobalsDefinition)blamDefinition);
 
             if (groupTag == "weap")
             {

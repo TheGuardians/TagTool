@@ -342,9 +342,9 @@ namespace TagTool.Tags.Definitions
 			public int Unknown4;
 
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance Unknown5;
+			public CachedTagInstance GrenadeWaypoint;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance Unknown6;
+			public CachedTagInstance PinkGradient;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public int Unknown7;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -358,9 +358,9 @@ namespace TagTool.Tags.Definitions
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public int Unknown12;
 
-			public CachedTagInstance Waypoints;
+			public CachedTagInstance ObjectiveWaypoints;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance Unknown19;
+			public CachedTagInstance PlayerWaypoints;
 			public CachedTagInstance ScoreboardHud;
 			public CachedTagInstance MetagameScoreboardHud;
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -528,17 +528,16 @@ namespace TagTool.Tags.Definitions
 				//I'm not too familiar with tag definition conventions, so I'm following the lens tag, which has the same problem.
 				//In other words, this could probably be cleaner! - Alex-231 17/7/17
 				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-				public float NotificationOffsetX;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
+				public float NotificationOffsetX_H3;
+				[TagField(MaxVersion = CacheVersion.Halo3ODST)]
 				public float NotificationOffsetY_H3;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
+				[TagField(MaxVersion = CacheVersion.Halo3ODST)]
 				public float StateLeftRightOffsetY_H3;
 
-				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-				public float Unknown27;
-
 				public float StateCenterOffsetY;
-				[TagField(MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                public float Unknown27;
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
 				public float Unknown28;
 				public float Unknown29;
 				public float Unknown30;

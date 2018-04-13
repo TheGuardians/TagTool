@@ -68,7 +68,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            //For some reason, the turbulance shader in H:O only works if the following unknown is 1.
+            //For some reason, the turbulence shader in H:O only works if the following unknown is 1.
             //So if the turbulance shader is selected, set the following unknown to 1.
             if (renderData.ShaderIndex == ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Turbulence)
             {
@@ -183,8 +183,7 @@ namespace TagTool.Commands.Porting
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X;
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y;
-                    }
-                
+                    }               
             }
             return chudDefinition;
         }
@@ -193,7 +192,7 @@ namespace TagTool.Commands.Porting
 		{
             Console.WriteLine("Warning: The tagtool is about to port a HUD Globals (CHGD) tag. HUD globals cannot yet be fully ported without manual modification, and will result in frequent crashes.");
 
-			chudGlobalsDefinition.SprintFOVMultiplier = 1;
+            chudGlobalsDefinition.SprintFOVMultiplier = 1;
 			chudGlobalsDefinition.SprintFOVTransitionInTime = 0.5f;
 			chudGlobalsDefinition.SprintFOXTransitionOutTime = 1;
 			chudGlobalsDefinition.Unknown56 = new byte[] { 0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -232,10 +231,10 @@ namespace TagTool.Commands.Porting
                             {
                                 var newColor = new ArgbColor()
                                 {
-                                    Alpha = ((ArgbColor)halo3FieldValue).Alpha,
-                                    Red = ((ArgbColor)halo3FieldValue).Blue,
-                                    Green = ((ArgbColor)halo3FieldValue).Green,
-                                    Blue = ((ArgbColor)halo3FieldValue).Red
+                                    Alpha = ((ArgbColor)halo3FieldValue).Blue,
+                                    Red = ((ArgbColor)halo3FieldValue).Green,
+                                    Green = ((ArgbColor)halo3FieldValue).Red,
+                                    Blue = ((ArgbColor)halo3FieldValue).Alpha
                                 };
                                 haloOnlineFieldInfo.SetValue(chudGlobalsDefinition.HudGlobals[hudGlobalsIndex], newColor);
                             }
@@ -243,26 +242,38 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                //chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic27_HO = new RgbaColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic29_HO = new ArgbColor();
-                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DefaultItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].GlobalDynamic29_HO = new ArgbColor(0xFF, 0x00, 0xFF, 0xFF);
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DefaultItemOutline = new ArgbColor(0xFF, 0x00, 0x5D, 0xA9);
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].MAGItemOutline = new ArgbColor();
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].DMGItemOutline = new ArgbColor();
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ACCItemOutline = new ArgbColor();
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].ROFItemOutline = new ArgbColor();
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].RNGItemOutline = new ArgbColor();
                 chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].PWRItemOutline = new ArgbColor();
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown7 = 1075838976;
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown8 = 1084227584;
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown9 = 1124859904;
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown10 = 1135542272;
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown11 = 1118437376;
+                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].Unknown12 = 1128792064;
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
+                    var attributes = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAngle_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAngle_H3;
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAmount_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpAmount_H3;
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpDirection_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].WarpDirection_H3;
-
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].NotificationOffsetY_HO = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex].NotificationOffsetY_H3;
+                        attributes.WarpAngle_HO = attributes.WarpAngle_H3;
+                        attributes.WarpAmount_HO = attributes.WarpAmount_H3;
+                        attributes.WarpDirection_HO = attributes.WarpDirection_H3;
                     }
+                    if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        attributes.NotificationOffsetX_HO = attributes.NotificationOffsetX_H3;
+                    }
+                    attributes.NotificationOffsetY_HO = attributes.NotificationOffsetY_H3;
+                    attributes.ResolutionWidth = 1920;
+                    attributes.ResolutionHeight = 1080;
+
                 }
                 for (int hudSoundsIndex = 0; hudSoundsIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds.Count; hudSoundsIndex++)
                 {
@@ -380,7 +391,7 @@ namespace TagTool.Commands.Porting
             //Check params are enums.
             if (!(enum1 is Enum) || !(enum2 is Enum))
             {
-                Console.WriteLine("GetEquevelantFlags called with a non enum parameter.");
+                Console.WriteLine("Get Equivalent Flags called with a non-enum parameter.");
                 return enum1;
             }
 
