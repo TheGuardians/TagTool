@@ -185,8 +185,8 @@ namespace TagTool.Commands.Porting
 
             if ((groupTag == "snd!") && NoAudio)
                 return null;
-            
-            if( groupTag == "rmhg")
+
+            if ( groupTag == "rmhg")
                 return CacheContext.GetTag(0x2647);
 
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
@@ -317,7 +317,7 @@ namespace TagTool.Commands.Porting
                     case "decs":
                         return CacheContext.GetTag(0x3A4);
 
-                    case "ptr3":
+                    case "prt3":
                         return CacheContext.GetTag(0x29E);
                 }
             }
