@@ -122,15 +122,15 @@ namespace TagTool.Commands.Porting
             }
 
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
-            var blamTag = ParseLegacyTag(args[0]);
-
+            
             //
             // Convert Blam data to ElDorado data
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                ConvertTag(cacheStream, blamTag);
-
+                foreach (var item in ParseLegacyTag(args[0])) 
+                    ConvertTag(cacheStream, item);
+                 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
                     CacheContext.StringIdCache.Save(stringIdCacheStream);
@@ -140,9 +140,9 @@ namespace TagTool.Commands.Porting
             return true;
         }
 
-        private CacheFile.IndexItem ParseLegacyTag(string name)
+        private List<CacheFile.IndexItem> ParseLegacyTag(string name)
         {
-            if (name.Length == 0 || !char.IsLetter(name[0]) || !name.Contains('.'))
+            if (name.Length == 0 || (!char.IsLetter(name[0]) && !name.Contains('*')) || !name.Contains('.'))
                 throw new Exception($"Invalid tag name: {name}");
 
             var namePieces = name.Split('.');
@@ -153,17 +153,33 @@ namespace TagTool.Commands.Porting
 
             var tagName = namePieces[0];
 
+            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
+
             foreach (var item in BlamCache.IndexItems)
             {
-                if (item == null || item.Filename != tagName)
-                    continue;
+                if(tagName == "*")
+                {
+                    if(item != null && groupTag == item.ClassCode)
+                        result.Add(item);
+                }
+                  
+                else
+                {
+                    if (item == null || item.Filename != tagName)
+                        continue;
 
-                if (groupTag == item.ClassCode)
-                    return item;
+                    if (groupTag == item.ClassCode)
+                    {
+                        result.Add(item);
+                        break;
+                    }    
+                }
             }
-            
-            Console.WriteLine($"Invalid tag name: {name}");
-            return null;
+
+            if(result.Count == 0)
+                Console.WriteLine($"Invalid tag name: {name}");
+
+            return result;
         }
 
         public CachedTagInstance ConvertTag(Stream cacheStream, CacheFile.IndexItem blamTag)
