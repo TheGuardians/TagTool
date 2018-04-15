@@ -759,7 +759,12 @@ namespace TagTool.Commands.Porting
         
         public void AdjustScripts(Scenario scnr, string tagName)
         {
-            foreach (var line in DisabledScriptsString[tagName.Split("\\".ToCharArray()).Last()])
+            tagName = tagName.Split("\\".ToCharArray()).Last();
+
+            if (tagName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
+                tagName = "mainmenu_odst";
+                
+            foreach (var line in DisabledScriptsString[tagName])
             {
                 var items = line.Split(",".ToCharArray());
 
@@ -787,6 +792,14 @@ namespace TagTool.Commands.Porting
             // expression type, value type, script expression name, original value, comment
             // Ideally this should use a dictionary with a list of script expressions per map name. I'm using a simple text format as this is how I dump scripts and modify them currently.
 
+            ["mainmenu_odst"] = new List<string>
+            {
+                "00001043,E7860413,E79B0428,0112,140487E7,Group,Void,unit_enable_vision_mode, //default:E78B0418",
+                "00001064,E79B0428,E7AD043A,0009,29049CE7,ScriptReference,Void,, //default:E79D042A",
+                "00001328,E8A30530,E8B80545,0112,3105A4E8,Group,Void,unit_enable_vision_mode, //default:E8A80535",
+                "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin, //default:E9790606",
+            },
+            
             ["c100"] = new List<string>
             {
                 "00000293,E4980125,E48E011B,0000,00000000,Expression,FunctionName,begin,// E4860113",
