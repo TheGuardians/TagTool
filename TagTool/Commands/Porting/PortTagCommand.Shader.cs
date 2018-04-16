@@ -1156,7 +1156,10 @@ namespace TagTool.Commands.Porting
                 return finalRm;
 
             foreach (var a in finalRm.ShaderProperties[0].Functions)
+            {
+                a.Name = ConvertStringId(a.Name);
                 ConvertTagFunction(a.Function);
+            }    
 
             var pixlTag = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edRmt2.PixelShader), TagDefinition.Find(edRmt2.PixelShader.Group.Tag));
             var edPixl = (PixelShader)pixlTag;
