@@ -428,7 +428,7 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertChudDefinition((ChudDefinition)blamDefinition);
 
             if (groupTag == "chgd")
-                blamDefinition = ConvertChudGlobalsDefinition((ChudGlobalsDefinition)blamDefinition);
+                blamDefinition = ConvertChudGlobalsDefinition((Stream)cacheStream, (ChudGlobalsDefinition)blamDefinition);
 
             if (groupTag == "cine")
                 blamDefinition = ConvertCinematic((Cinematic)blamDefinition);

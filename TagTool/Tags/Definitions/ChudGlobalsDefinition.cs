@@ -7,7 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0xF0, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0x2C0, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0x208, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0x2C0, MinVersion = CacheVersion.HaloOnline106708)]
     public class ChudGlobalsDefinition
 	{
 		public List<HudGlobal> HudGlobals;
@@ -192,43 +193,24 @@ namespace TagTool.Tags.Definitions
             [TagField(Label = true)]
             public BipedValue Biped;
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HUDDisabled;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HUDPrimary;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HUDForeground;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HUDWarning;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor NeutralReticule;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HostileReticule;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor FriendlyReticule;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDyanamic7_UnknownBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor NeutralBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HostileBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor FriendlyPlayerBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor FriendlyAIBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic12;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor WaypointBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor DistantWaypointBlip;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor FriendlyWaypoint;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor NeutralWaypoint;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor HostileWaypoint;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor DeadWaypoint;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic19;
@@ -249,44 +231,6 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic27;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HUDDisabled_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HUDPrimary_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HUDForeground_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HUDWarning_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor NeutralReticule_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HostileReticule_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor FriendlyReticule_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic7_UnknownBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor NeutralBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HostileBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor FriendlyPlayerBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor FriendlyAIBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic12_UnknownBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor WaypointBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor DistantWaypointBlip_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor FriendlyWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor NeutralWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HostileWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor DeadWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public ArgbColor BlueWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
