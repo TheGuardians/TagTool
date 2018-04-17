@@ -33,9 +33,12 @@ namespace TagTool.Commands.Porting
 
             var blamCacheFile = new FileInfo(args[0]);
 
-            if (!blamCacheFile.Exists) // Why are we throwing this exception instead of just printing & returning false?
-                throw new FileNotFoundException(blamCacheFile.FullName);
-
+            if (!blamCacheFile.Exists)
+            {
+                Console.WriteLine($"CacheFile {blamCacheFile.FullName} does not exist");
+                return true;
+            }
+                
             Console.Write("Loading blam cache file...");
 
             CacheFile blamCache = null;

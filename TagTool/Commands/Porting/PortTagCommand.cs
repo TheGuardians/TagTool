@@ -127,15 +127,24 @@ namespace TagTool.Commands.Porting
             // Convert Blam data to ElDorado data
             //
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                foreach (var item in ParseLegacyTag(args[0])) 
-                    ConvertTag(cacheStream, item);
-                 
-            if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
-                using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
-                    CacheContext.StringIdCache.Save(stringIdCacheStream);
+            try
+            {
+                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+                    foreach (var item in ParseLegacyTag(args[0]))
+                        ConvertTag(cacheStream, item);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
+                    using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
+                        CacheContext.StringIdCache.Save(stringIdCacheStream);
 
-            CacheContext.SaveTagNames();
+                CacheContext.SaveTagNames();
+            }
 
             return true;
         }
@@ -217,7 +226,7 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
                     {
-                        if (IsReplacing && !instance.IsInGroup("rm  "))
+                        if (IsReplacing)
                             edTag = instance;
                         else
                         {
