@@ -17,11 +17,11 @@ namespace TagTool.Commands.Files
 			: base(CommandFlags.Inherit,
 
 				  "UpdateMapFiles",
-				  "Updates the game's .map files to contain valid map IDs.",
+				  "Updates the game's .map files to contain valid scenario indices.",
 
 				  "UpdateMapFiles",
 
-				  "Updates the game's .map files to contain valid map IDs.")
+				  "Updates the game's .map files to contain valid scenario indices.")
 		{
 			CacheContext = cacheContext;
 		}
@@ -31,8 +31,8 @@ namespace TagTool.Commands.Files
 			if (args.Count != 0)
 				return false;
 
-			// build a dictionary of (scnrIndex, mapID)
-			var mapIDs = new Dictionary<int, int>();
+			// build a dictionary of (mapID, scnrIndex)
+			var scnrIndices = new Dictionary<int, int>();
 			using (var stream = CacheContext.OpenTagCacheRead())
 			using (var reader = new BinaryReader(stream))
 			{
@@ -42,7 +42,7 @@ namespace TagTool.Commands.Files
 						continue;
 
 					reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset + 0x8;
-					mapIDs[reader.ReadInt32()] = tag.Index;
+					scnrIndices[reader.ReadInt32()] = tag.Index;
 				}
 			}
 
@@ -58,19 +58,19 @@ namespace TagTool.Commands.Files
 
 					// scenario index
 					reader.BaseStream.Position = 0x2DEC;
-					var scnrIndex = reader.ReadInt32();
+					var mapID = reader.ReadInt32();
 
-					if (!mapIDs.ContainsKey(scnrIndex)) // verify that the map contains a valid scenario index
+					if (!scnrIndices.ContainsKey(mapID)) // verify that the map contains a valid scenario index
 						continue;
 
 					// write our mapID
-					var mapID = mapIDs[scnrIndex];
+					var scnrIndex = scnrIndices[mapID];
 					writer.BaseStream.Position = 0x2DF0;
-					writer.Write(mapID);
+					writer.Write(scnrIndex);
 
-					mapIDs.Remove(scnrIndex); // remove scenario entries once the map file has been updated...
+					scnrIndices.Remove(mapID); // remove scenario entries once the map file has been updated...
 
-					Console.WriteLine($"Scenario tag index for {mapFile.Name}: {mapID:X8}");
+					Console.WriteLine($"Scenario tag index for {mapFile.Name}: {scnrIndex:X8}");
 				}
 			}
 
@@ -95,14 +95,14 @@ namespace TagTool.Commands.Files
 					reader.BaseStream.Position = 0x02C8; // move to the position following the map-path in the file
 					var footer = reader.ReadBytes((int)reader.BaseStream.Length - (int)reader.BaseStream.Position); // all the rest of the data
 
-					foreach (var map in mapIDs)
+					foreach (var scnr in scnrIndices)
 					{
-						var scnrIndex = map.Key;
-						var mapID = map.Value;
-						var sMapPath = CacheContext.TagNames.ContainsKey(scnrIndex) ? 
-										CacheContext.TagNames[scnrIndex] : 
-										"0x" + scnrIndex.ToString("X4");	// levels\atlas\sc100\sc100
-						var sMapName = sMapPath.Split('\\').Last();			// sc100
+						var mapID = scnr.Key;
+						var scnrIndex = scnr.Value;
+						var sMapPath = CacheContext.TagNames.ContainsKey(scnrIndex) ?
+										CacheContext.TagNames[scnrIndex] :
+										"0x" + scnrIndex.ToString("X4");    // levels\atlas\sc100\sc100
+						var sMapName = sMapPath.Split('\\').Last();         // sc100
 						var bMapPath = Encoding.ASCII.GetBytes(sMapPath);
 						var bMapName = Encoding.ASCII.GetBytes(sMapName);
 
@@ -118,8 +118,8 @@ namespace TagTool.Commands.Files
 						var newMapFileData = header.Concat(mapName).Concat(mapPath).Concat(footer).ToArray();
 
 						// replace the scenario index and map ID in our map data
-						BitConverter.GetBytes(scnrIndex).CopyTo(newMapFileData, 0x2DEC);
-						BitConverter.GetBytes(mapID).CopyTo(newMapFileData, 0x2DF0);
+						BitConverter.GetBytes(mapID).CopyTo(newMapFileData, 0x2DEC);
+						BitConverter.GetBytes(scnrIndex).CopyTo(newMapFileData, 0x2DF0);
 
 						// save our new map file
 						using (var fs = new FileStream(Path.Combine(CacheContext.Directory.FullName, sMapName + ".map"),
