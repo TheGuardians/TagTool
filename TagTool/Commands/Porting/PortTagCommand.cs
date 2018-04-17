@@ -421,6 +421,14 @@ namespace TagTool.Commands.Porting
                 scnr.SandboxWeapons.Clear();
             }
 
+            if (groupTag == "chgd")
+            {
+                var chud = blamDefinition as ChudGlobalsDefinition;
+                chud.HudShaders.Clear();
+                for (int hudGlobalsIndex = 0; hudGlobalsIndex < chud.HudGlobals.Count; hudGlobalsIndex++)
+                    chud.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
+            }
+
             blamDefinition = ConvertData(cacheStream, blamDefinition, blamDefinition, blamTag.Filename);
 
             //
@@ -437,7 +445,7 @@ namespace TagTool.Commands.Porting
                 blamDefinition = ConvertChudDefinition((ChudDefinition)blamDefinition);
 
             if (groupTag == "chgd")
-                blamDefinition = ConvertChudGlobalsDefinition((Stream)cacheStream, (ChudGlobalsDefinition)blamDefinition);
+                blamDefinition = ConvertChudGlobalsDefinition((Stream)cacheStream, (ChudGlobalsDefinition)blamDefinition, blamTag, edTag);
 
             if (groupTag == "cine")
                 blamDefinition = ConvertCinematic((Cinematic)blamDefinition);
