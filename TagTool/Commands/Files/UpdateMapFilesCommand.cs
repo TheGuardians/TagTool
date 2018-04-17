@@ -56,14 +56,14 @@ namespace TagTool.Commands.Files
 					if (reader.ReadInt32() != new Tag("head").Value) // verify the map file is a HO .map
 						continue;
 
-					// scenario index
+					// mapID
 					reader.BaseStream.Position = 0x2DEC;
 					var mapID = reader.ReadInt32();
 
 					if (!scnrIndices.ContainsKey(mapID)) // verify that the map contains a valid scenario index
 						continue;
 
-					// write our mapID
+					// write our scenario index
 					var scnrIndex = scnrIndices[mapID];
 					writer.BaseStream.Position = 0x2DF0;
 					writer.Write(scnrIndex);
