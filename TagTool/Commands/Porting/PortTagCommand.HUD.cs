@@ -170,6 +170,14 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -2.9f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -100.0f;
                     }
+                    //fixup for red warning flashes not scaling with HUD
+                    if (widgetname.Contains("warning_flashes_spartan"))
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X = -96.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 102.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.42f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 1.0f;
+                    }
 
                     for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
                     {
@@ -191,30 +199,32 @@ namespace TagTool.Commands.Porting
             return chudDefinition;
         }
 
-		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, ChudGlobalsDefinition H3Definition)
+		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, ChudGlobalsDefinition H3Definition, CacheFile.IndexItem blamTag, Cache.CachedTagInstance edTag)
 		{
-            //Console.WriteLine("Warning: The tagtool is about to port a HUD Globals (CHGD) tag. HUD globals cannot yet be fully ported without manual modification, and will result in frequent crashes.");
-
+            //get HO tag
             var srcTag = CacheContext.GetTag(0x01BD);
             var srcContext = new TagSerializationContext(cacheStream, CacheContext, srcTag);
             ChudGlobalsDefinition HODefinition = CacheContext.Deserializer.Deserialize<ChudGlobalsDefinition>(srcContext);
 
-            foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition).GetFields())
+            //keep elite and monitor entries for HUDGlobals
+            if (BlamCache.Version == CacheVersion.Halo3ODST)
             {
-                object H3FieldValue = H3FieldInfo.GetValue(H3Definition);
-                object HOFieldValue = H3FieldInfo.GetValue(HODefinition);
-
-                if (H3FieldValue == null)
-                    H3FieldInfo.SetValue(H3Definition, HOFieldValue);
-                if (H3FieldInfo.Name.Contains("H3"))
-                    H3FieldInfo.SetValue(H3Definition, null);
+                HODefinition.HudGlobals[0] = H3Definition.HudGlobals[0];
+                H3Definition.HudGlobals = HODefinition.HudGlobals;
             }
+
+            //Use HO Shaders
+            H3Definition.HudShaders = HODefinition.HudShaders;
 
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
                 var HOglobs = HODefinition.HudGlobals[hudGlobalsIndex];
 
+                //Use HO Sounds
+                H3globs.HudSounds = HOglobs.HudSounds;
+                
+                //Color Conversion
                 H3globs.HUDDisabled = ConvertColor(H3globs.HUDDisabled);
                 H3globs.HUDPrimary = ConvertColor(H3globs.HUDPrimary);
                 H3globs.HUDForeground = ConvertColor(H3globs.HUDForeground);
@@ -235,16 +245,8 @@ namespace TagTool.Commands.Porting
                 H3globs.HostileWaypoint = ConvertColor(H3globs.HostileWaypoint);
                 H3globs.DeadWaypoint = ConvertColor(H3globs.DeadWaypoint);
 
-                foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal).GetFields())
-                {
-                    object H3FieldValue = H3FieldInfo.GetValue(H3globs);
-                    object HOFieldValue = H3FieldInfo.GetValue(HOglobs);
-
-                    if (H3FieldValue == null)
-                        H3FieldInfo.SetValue(H3globs, HOFieldValue);
-                    if (H3FieldInfo.Name.Contains("H3"))
-                        H3FieldInfo.SetValue(H3globs, null);
-                }
+                //fixups
+                H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
@@ -257,12 +259,13 @@ namespace TagTool.Commands.Porting
                         H3att.WarpAmount_HO = H3att.WarpAmount_H3;
                         H3att.WarpDirection_HO = H3att.WarpDirection_H3;
                     }
+
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
                         H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
                     }
-                    H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
-
+                    
+                    //more fixups
                     H3att.ResolutionWidth = 1920;
                     H3att.ResolutionHeight = 1080;
                     H3att.MotionSensorOffset.X = 1.5f * H3att.MotionSensorOffset.X;
@@ -271,38 +274,21 @@ namespace TagTool.Commands.Porting
                     H3att.MotionSensorScale = 1.5f * H3att.MotionSensorScale;
                     H3att.HorizontalScale = 1.0f;
                     H3att.VerticalScale = 1.0f;
-                    H3att.PickupDialogOffset.Y = 0.2f;
+                    H3att.PickupDialogOffset.Y = 0.3f;
+                    H3att.PickupDialogScale = 1.2f;
+                    H3att.NotificationScale = 1.2f * H3att.NotificationScale;
+                    H3att.NotificationLineSpacing = 1.2f * H3att.NotificationLineSpacing;
+                    H3att.NotificationOffsetY_HO = 0.65f;
 
-                    foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal.HudAttribute).GetFields())
-                    {
-                        object H3FieldValue = H3FieldInfo.GetValue(H3att);
-                        object HOFieldValue = H3FieldInfo.GetValue(HOatt);
 
-                        if (H3FieldValue == null)
-                            H3FieldInfo.SetValue(H3att, HOFieldValue);
-                        if (H3FieldInfo.Name.Contains("H3"))
-                            H3FieldInfo.SetValue(H3att, null);
-                    }
                 }
 
-                
+                /*
                 for (int hudSoundsIndex = 0; hudSoundsIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudSounds.Count; hudSoundsIndex++)
                 {
                     var H3snd = H3Definition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex];
                     var HOsnd = HODefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex];
 
-                    foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal.HudSound).GetFields())
-                    {
-                        object H3FieldValue = H3FieldInfo.GetValue(H3snd);
-                        object HOFieldValue = H3FieldInfo.GetValue(HOsnd);
-
-                        if (H3FieldValue == null)
-                            H3FieldInfo.SetValue(H3snd, HOFieldValue);
-                        if (H3FieldInfo.Name.Contains("H3"))
-                            H3FieldInfo.SetValue(H3snd, null);
-                    }
-
-                    /*
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo 
@@ -345,16 +331,41 @@ namespace TagTool.Commands.Porting
                             }
 						}
                     }
-                    */
+                    
                 }
-            
+            */
             }
 
+            foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition).GetFields())
+            {
+                object H3FieldValue = H3FieldInfo.GetValue(H3Definition);
+                object HOFieldValue = H3FieldInfo.GetValue(HODefinition);
+                object zeroint = (int)0;
+                object zerofloat = 0.0f;
+                object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
+                object zerotag = new CachedTagInstance(0);
+
+                if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
+                    H3FieldInfo.SetValue(H3Definition, HOFieldValue);
+                if (H3FieldInfo.FieldType is TagFunction)
+                    H3FieldInfo.SetValue(H3Definition, HOFieldValue);
+            }
             return H3Definition;
         }
 
         private ArgbColor ConvertColor(ArgbColor oldcolor)
         {
+            if (BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                var odstcolor = new ArgbColor()
+                {
+                    Alpha = ((ArgbColor)oldcolor).Alpha,
+                    Red = ((ArgbColor)oldcolor).Blue,
+                    Green = ((ArgbColor)oldcolor).Green,
+                    Blue = ((ArgbColor)oldcolor).Red
+                };
+                return odstcolor;
+            }
             var newcolor = new ArgbColor()
             {
                 Alpha = ((ArgbColor)oldcolor).Blue,

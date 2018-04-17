@@ -457,7 +457,7 @@ namespace TagTool.Tags.Definitions
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
 				public CachedTagInstance ThirdPersonDamageBorder;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown20;
+				public float PickupDialogScale;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public RealPoint2d PickupDialogOffset;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
