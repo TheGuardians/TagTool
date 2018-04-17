@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting
 
             var blamCacheFile = new FileInfo(args[0]);
 
-            if (!blamCacheFile.Exists)
+            if (!blamCacheFile.Exists) // Why are we throwing this exception instead of just printing & returning false?
                 throw new FileNotFoundException(blamCacheFile.FullName);
 
             Console.Write("Loading blam cache file...");
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Porting
                         blamCache = new CacheFileGen3(CacheContext, blamCacheFile, version);
                         break;
 
-                    default:
+                    default: // Same question here as above.
                         throw new NotSupportedException(CacheVersionDetection.GetBuildName(version));
                 }
             }
