@@ -56,14 +56,14 @@ namespace TagTool.Commands.Files
 					if (reader.ReadInt32() != new Tag("head").Value) // verify the map file is a HO .map
 						continue;
 
-					// mapID
+					// scenario index
 					reader.BaseStream.Position = 0x2DEC;
 					var mapID = reader.ReadInt32();
 
 					if (!scnrIndices.ContainsKey(mapID)) // verify that the map contains a valid scenario index
 						continue;
 
-					// write our scenario index
+					// write our mapID
 					var scnrIndex = scnrIndices[mapID];
 					writer.BaseStream.Position = 0x2DF0;
 					writer.Write(scnrIndex);
@@ -90,46 +90,43 @@ namespace TagTool.Commands.Files
 					if (reader.ReadInt32() != new Tag("head").Value) // verify the map file is a HO .map
 						continue;
 
-					reader.BaseStream.Position = 0x0000; // move to the beginning of the file 
-					var header = reader.ReadBytes(0x01A4); // data that we don't need to change
-					reader.BaseStream.Position = 0x02C8; // move to the position following the map-path in the file
-					var footer = reader.ReadBytes((int)reader.BaseStream.Length - (int)reader.BaseStream.Position); // all the rest of the data
+					// read the entire .map to use as a base
+					reader.BaseStream.Position = 0x0000;
+					var mapFileData = reader.ReadBytes((int)reader.BaseStream.Length);
 
 					foreach (var scnr in scnrIndices)
 					{
+						// get byte[]'s for our map-name and map-path
 						var mapID = scnr.Key;
 						var scnrIndex = scnr.Value;
 						var sMapPath = CacheContext.TagNames.ContainsKey(scnrIndex) ?
 										CacheContext.TagNames[scnrIndex] :
 										"0x" + scnrIndex.ToString("X4");    // levels\atlas\sc100\sc100
 						var sMapName = sMapPath.Split('\\').Last();         // sc100
-						var bMapPath = Encoding.ASCII.GetBytes(sMapPath);
-						var bMapName = Encoding.ASCII.GetBytes(sMapName);
+						var bMapName = new byte[0x0024];
+							Encoding.ASCII.GetBytes(sMapName).CopyTo(bMapName, 0);
+						var bMapPath = new byte[0x0100];
+							Encoding.ASCII.GetBytes(sMapPath).CopyTo(bMapPath, 0);
 
-						// create a byte[] of the appropriate size containing the map name
-						var mapName = new byte[0x0024];
-						bMapName.CopyTo(mapName, 0);
-
-						// create a byte[] of the appropriate size containing the map path
-						var mapPath = new byte[0x0100];
-						bMapPath.CopyTo(mapPath, 0);
-
-						// concatonate all our map file data
-						var newMapFileData = header.Concat(mapName).Concat(mapPath).Concat(footer).ToArray();
+						// replace the map name and path in our map data
+						bMapName.CopyTo(mapFileData, 0x01A4);
+						bMapPath.CopyTo(mapFileData, 0x02C8);
 
 						// replace the scenario index and map ID in our map data
-						BitConverter.GetBytes(mapID).CopyTo(newMapFileData, 0x2DEC);
-						BitConverter.GetBytes(scnrIndex).CopyTo(newMapFileData, 0x2DF0);
+						BitConverter.GetBytes(mapID).CopyTo(mapFileData, 0x2DEC);
+						BitConverter.GetBytes(scnrIndex).CopyTo(mapFileData, 0x2DF0);
 
 						// save our new map file
 						using (var fs = new FileStream(Path.Combine(CacheContext.Directory.FullName, sMapName + ".map"),
 														FileMode.Create, FileAccess.Write))
-							fs.Write(newMapFileData, 0, newMapFileData.Length);
+							fs.Write(mapFileData, 0, mapFileData.Length);
+
+						Console.WriteLine($"Created map file: {sMapName}.map, with scenario: 0x{scnrIndex.ToString("X4")}, and map ID: {mapID}");
 					}
 				}
-
-				Console.WriteLine("Done!");
 			}
+
+			Console.WriteLine("Done!");
 
 			return true;
 		}
