@@ -866,9 +866,6 @@ namespace TagTool.Commands.Porting
                 "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
                 "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
-                "00018057,A9FD4689,AA03468F,0015,8A46FEA9,Group,Void,sleep_forever,// AA00468C",
-                
-                // "00016605,A45140DD,A49B4127,0004,DE4052A4,Group,Void,set,// A45540E1" // remove intro cine
             },
 
             ["h100"] = new List<string>
