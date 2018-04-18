@@ -110,7 +110,7 @@ namespace TagTool.Commands.Files
 
 						// replace the map name and path in our map data
 						bMapName.CopyTo(mapFileData, 0x01A4);
-						bMapPath.CopyTo(mapFileData, 0x02C8);
+						bMapPath.CopyTo(mapFileData, 0x01C8);
 
 						// replace the scenario index and map ID in our map data
 						BitConverter.GetBytes(mapID).CopyTo(mapFileData, 0x2DEC);
