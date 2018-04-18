@@ -122,29 +122,20 @@ namespace TagTool.Commands.Porting
             }
 
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
-            
+
             //
             // Convert Blam data to ElDorado data
             //
 
-            try
-            {
-                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                    foreach (var item in ParseLegacyTag(args[0]))
-                        ConvertTag(cacheStream, item);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
-                    using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
-                        CacheContext.StringIdCache.Save(stringIdCacheStream);
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+                foreach (var item in ParseLegacyTag(args[0]))
+                    ConvertTag(cacheStream, item);
 
-                CacheContext.SaveTagNames();
-            }
+            if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
+                using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
+                    CacheContext.StringIdCache.Save(stringIdCacheStream);
+
+            CacheContext.SaveTagNames();
 
             return true;
         }
