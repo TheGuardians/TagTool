@@ -85,7 +85,7 @@ namespace TagTool.Commands.Files
 			// *WARNING: requires at least one existing HO .map be in the CacheContext.Directory
 			// *WARNING: map file name, and name(s) within the file come from the scenario tagname
 			// *TODO: Handle campaign & menu .maps; this is only currently setup for multiplayer maps. 
-			if (args[0].ToLower() == "gen")
+			if (args.Count > 0 && args.args[0].ToLower() == "gen")
 				foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
 				{
 					// don't use mainmenu.map for this because it is pretty different.
