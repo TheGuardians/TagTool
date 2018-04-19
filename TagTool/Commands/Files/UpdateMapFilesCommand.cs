@@ -13,10 +13,13 @@ namespace TagTool.Commands.Files
 	class UpdateMapFilesCommand : Command
     {
         private const int MapNameOffset = 0x01A4;
-        private const int ScenarioPathOffset = 0X01C8;
-        private const int ScenarioTagIndexOffset = 0x2DEC;
+        private const int ScenarioPathOffset = 0x01C8;
+        private const int ScenarioMapIdOffset = 0x2DEC;
+        private const int ScenarioTagIndexOffset = 0x2DF0;
 
-        private static readonly int[] MapIdOffsets = new[] { 0x2DF0, 0x33CC, 0xBE60, 0xBE80 };
+        private const int ContentNameOffset = 0x42D4;
+        private const int ContentMapNameOffset = 0x43D4;
+        private static readonly int[] ContentMapIdOffsets = new[] { 0x33CC, 0xBE60, 0xBE80 };
 
         public GameCacheContext CacheContext { get; }
 
@@ -88,21 +91,31 @@ namespace TagTool.Commands.Files
                     for (var i = 0; i < 256; i++)
                         writer.Write(i < scenarioPath.Length ? scenarioPath[i] : '\0');
 
+                    stream.Position = ScenarioMapIdOffset;
+                    writer.Write(entry.Key);
+
                     stream.Position = ScenarioTagIndexOffset;
                     writer.Write(entry.Value.Item2);
 
                     if (entry.Value.Item1 == ScenarioMapType.Multiplayer)
                     {
-                        foreach (var offset in MapIdOffsets)
+                        var contentName = scenarioPath.StartsWith("levels\\dlc\\") ?
+                            $"dlc_{mapName}" :
+                            $"m_{mapName}";
+
+                        stream.Position = ContentNameOffset;
+                        for (var i = 0; i < 256; i++)
+                            writer.Write(i < contentName.Length ? contentName[i] : '\0');
+
+                        stream.Position = ContentMapNameOffset;
+                        for (var i = 0; i < 256; i++)
+                            writer.Write(i < mapName.Length ? mapName[i] : '\0');
+
+                        foreach (var offset in ContentMapIdOffsets)
                         {
                             stream.Position = offset;
                             writer.Write(entry.Key);
                         }
-                    }
-                    else
-                    {
-                        stream.Position = MapIdOffsets[0];
-                        writer.Write(entry.Key);
                     }
                     
                     Console.WriteLine($"Scenario tag index for {mapFile.Name}: 0x{entry.Value.Item2:X4}");

@@ -763,6 +763,9 @@ namespace TagTool.Commands.Porting
 
             if (tagName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
                 tagName = "mainmenu_odst";
+
+            if (!DisabledScriptsString.ContainsKey(tagName))
+                return;
                 
             foreach (var line in DisabledScriptsString[tagName])
             {
