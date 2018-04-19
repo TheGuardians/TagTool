@@ -91,9 +91,17 @@ namespace TagTool.Commands.Files
                     stream.Position = ScenarioTagIndexOffset;
                     writer.Write(entry.Value.Item2);
 
-                    foreach (var offset in MapIdOffsets)
+                    if (entry.Value.Item1 == ScenarioMapType.Multiplayer)
                     {
-                        stream.Position = offset;
+                        foreach (var offset in MapIdOffsets)
+                        {
+                            stream.Position = offset;
+                            writer.Write(entry.Key);
+                        }
+                    }
+                    else
+                    {
+                        stream.Position = MapIdOffsets[0];
                         writer.Write(entry.Key);
                     }
                     
