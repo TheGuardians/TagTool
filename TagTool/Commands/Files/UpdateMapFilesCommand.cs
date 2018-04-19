@@ -1,16 +1,16 @@
-using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TagTool.Cache;
+using TagTool.Commands;
+using TagTool.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
 {
-	class UpdateMapFilesCommand : Command
+    class UpdateMapFilesCommand : Command
     {
         private const int MapNameOffset = 0x01A4;
         private const int ScenarioPathOffset = 0x01C8;
@@ -23,18 +23,18 @@ namespace TagTool.Commands.Files
 
         public GameCacheContext CacheContext { get; }
 
-		public UpdateMapFilesCommand(GameCacheContext cacheContext)
-			: base(CommandFlags.Inherit,
+        public UpdateMapFilesCommand(GameCacheContext cacheContext)
+            : base(CommandFlags.Inherit,
 
-				  "UpdateMapFiles",
-				  "Updates the game's .map files to contain valid scenario indices.",
+                  "UpdateMapFiles",
+                  "Updates the game's .map files to contain valid scenario indices.",
 
-				  "UpdateMapFiles",
+                  "UpdateMapFiles",
 
-				  "Updates the game's .map files to contain valid scenario indices.")
-		{
-			CacheContext = cacheContext;
-		}
+                  "Updates the game's .map files to contain valid scenario indices.")
+        {
+            CacheContext = cacheContext;
+        }
         
         public override object Execute(List<string> args)
         {
@@ -126,5 +126,5 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-	}
+    }
 }
