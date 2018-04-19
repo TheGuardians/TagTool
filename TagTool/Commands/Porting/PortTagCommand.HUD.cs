@@ -59,13 +59,8 @@ namespace TagTool.Commands.Porting
 
                     if (halo3FieldValue is ArgbColor)
                     {
-                        var newColor = new ArgbColor()
-                        {
-                            Alpha = ((ArgbColor)halo3FieldValue).Alpha,
-                            Red = ((ArgbColor)halo3FieldValue).Blue,
-                            Green = ((ArgbColor)halo3FieldValue).Green,
-                            Blue = ((ArgbColor)halo3FieldValue).Red
-                        };
+                        var newColor = new ArgbColor();
+                        newColor = ConvertColor((ArgbColor)halo3FieldValue);
                         haloOnlineFieldInfo.SetValue(renderData, newColor);
                     }
                 }
@@ -171,7 +166,7 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -100.0f;
                     }
                     //fixup for red warning flashes not scaling with HUD
-                    if (widgetname.Contains("warning_flashes_spartan"))
+                    if (widgetname.Contains("warning_flashes_spartan") && BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X = -96.0f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 102.0f;
@@ -194,7 +189,15 @@ namespace TagTool.Commands.Porting
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X;
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y;
-                    }               
+                    //HUD X-Scale Fixup
+                    if (widgetname == "in_helmet_bottom" && BlamCache.Version == CacheVersion.Halo3ODST)
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.0f;
+                    //fixup for ODST Grenade Placement
+                    if (widgetname.Contains("grenade") && BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y;
+                    }
+                }               
             }
             return chudDefinition;
         }
@@ -205,13 +208,6 @@ namespace TagTool.Commands.Porting
             var srcTag = CacheContext.GetTag(0x01BD);
             var srcContext = new TagSerializationContext(cacheStream, CacheContext, srcTag);
             ChudGlobalsDefinition HODefinition = CacheContext.Deserializer.Deserialize<ChudGlobalsDefinition>(srcContext);
-
-            //keep elite and monitor entries for HUDGlobals
-            if (BlamCache.Version == CacheVersion.Halo3ODST)
-            {
-                HODefinition.HudGlobals[0] = H3Definition.HudGlobals[0];
-                H3Definition.HudGlobals = HODefinition.HudGlobals;
-            }
 
             //Use HO Shaders
             H3Definition.HudShaders = HODefinition.HudShaders;
@@ -253,13 +249,6 @@ namespace TagTool.Commands.Porting
                     var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
                     var HOatt = HODefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
 
-                    if (BlamCache.Version == CacheVersion.Halo3Retail)
-                    {
-                        H3att.WarpAngle_HO = H3att.WarpAngle_H3;
-                        H3att.WarpAmount_HO = H3att.WarpAmount_H3;
-                        H3att.WarpDirection_HO = H3att.WarpDirection_H3;
-                    }
-
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
                         H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
@@ -276,8 +265,8 @@ namespace TagTool.Commands.Porting
                     H3att.VerticalScale = 1.0f;
                     H3att.PickupDialogOffset.Y = 0.3f;
                     H3att.PickupDialogScale = 1.2f;
-                    H3att.NotificationScale = 1.2f * H3att.NotificationScale;
-                    H3att.NotificationLineSpacing = 1.2f * H3att.NotificationLineSpacing;
+                    H3att.NotificationScale = 1.2f;
+                    H3att.NotificationLineSpacing = 30.0f;
                     H3att.NotificationOffsetY_HO = 0.65f;
 
 
@@ -336,6 +325,16 @@ namespace TagTool.Commands.Porting
             */
             }
 
+            //keep elite and monitor entries for HUDGlobals
+            if (BlamCache.Version == CacheVersion.Halo3ODST)
+            {
+                var HOcopy = new ChudGlobalsDefinition();
+                HOcopy.HudGlobals = HODefinition.HudGlobals;
+                HOcopy.HudGlobals[0] = H3Definition.HudGlobals[0];
+                H3Definition.HudGlobals = HOcopy.HudGlobals;
+            }
+
+            //loop through all fields and set unfilled fields to HO values
             foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition).GetFields())
             {
                 object H3FieldValue = H3FieldInfo.GetValue(H3Definition);
@@ -343,7 +342,7 @@ namespace TagTool.Commands.Porting
                 object zeroint = (int)0;
                 object zerofloat = 0.0f;
                 object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
-                object zerotag = new CachedTagInstance(0);
+                object zerotag = new CachedTagInstance(-1);
 
                 if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
                     H3FieldInfo.SetValue(H3Definition, HOFieldValue);

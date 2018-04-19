@@ -353,12 +353,10 @@ namespace TagTool.Tags.Definitions
 			{
 				public ResolutionFlagValue ResolutionFlags;
 
-				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-				public float Unknown1;
-				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-				public float Unknown2;
-				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-				public float Unknown3;
+                public float WarpAngle;
+                public float WarpAmount;
+                public float WarpDirection;
+
 				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 				public float Unknown4;
 				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -424,20 +422,6 @@ namespace TagTool.Tags.Definitions
 				public float VerticalFlip2;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public RealPoint2d HUDOffset;
-
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
-				public Angle WarpAngle_H3;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
-				public float WarpAmount_H3;
-				[TagField(MaxVersion = CacheVersion.Halo3Retail)]
-				public float WarpDirection_H3;
-
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public Angle WarpAngle_HO;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float WarpAmount_HO;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float WarpDirection_HO;
 
 				public uint ResolutionWidth;
 				public uint ResolutionHeight;
