@@ -173,6 +173,13 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.42f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 1.0f;
                     }
+                    //fixup ODST waypoint lightup
+                    if (widgetname == "waypoint_light_bottom720")
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 310.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.02f;
+                    }
 
                     for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
                     {
@@ -192,6 +199,9 @@ namespace TagTool.Commands.Porting
                     //HUD X-Scale Fixup
                     if (widgetname == "in_helmet_bottom" && BlamCache.Version == CacheVersion.Halo3ODST)
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.0f;
+                    //HUD Y-Offset Top Fixup
+                    if (widgetname == "in_helmet_top" && BlamCache.Version == CacheVersion.Halo3ODST)
+                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y = -110.0f;
                     //fixup for ODST Grenade Placement
                     if (widgetname.Contains("grenade") && BlamCache.Version == CacheVersion.Halo3ODST)
                     {
