@@ -16,10 +16,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public byte MapTypePadding;
 
-        public MapTypeValue MapType;
+        public ScenarioMapType MapType;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public MapSubTypeValue MapSubType;
+        public ScenarioMapSubType MapSubType;
 
         public ScenarioFlags Flags;
         public int CampaignId;
@@ -3336,14 +3336,14 @@ namespace TagTool.Tags.Definitions
         }
     }
 
-    public enum MapTypeValue : sbyte
+    public enum ScenarioMapType : sbyte
     {
         SinglePlayer,
         Multiplayer,
         MainMenu
     }
 
-    public enum MapSubTypeValue : sbyte
+    public enum ScenarioMapSubType : sbyte
     {
         None,
         Hub,

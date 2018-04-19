@@ -633,7 +633,7 @@ namespace TagTool.Commands.Files
 
         private void CleanScenario(Stream srcStream, Scenario scnrDefinition)
         {
-            if (scnrDefinition.MapType != MapTypeValue.Multiplayer)
+            if (scnrDefinition.MapType != ScenarioMapType.Multiplayer)
                 return;
 
             if (MulgDefinition == null)

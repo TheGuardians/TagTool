@@ -6,12 +6,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Files
 {
 	class UpdateMapFilesCommand : Command
-	{
-		public GameCacheContext CacheContext { get; }
+    {
+        private const int MapNameOffset = 0x01A4;
+        private const int ScenarioPathOffset = 0X01C8;
+        private const int ScenarioTagIndexOffset = 0x2DEC;
+
+        private static readonly int[] MapIdOffsets = new[] { 0x2DF0, 0x33CC, 0xBE60, 0xBE80 };
+
+        public GameCacheContext CacheContext { get; }
 
 		public UpdateMapFilesCommand(GameCacheContext cacheContext)
 			: base(CommandFlags.Inherit,
@@ -19,124 +26,84 @@ namespace TagTool.Commands.Files
 				  "UpdateMapFiles",
 				  "Updates the game's .map files to contain valid scenario indices.",
 
-				  "UpdateMapFiles [gen]",
+				  "UpdateMapFiles",
 
-				  "Updates the game's .map files to contain valid scenario indices." +
-				  "If 'gen' option is set, generates map files for scenario's that were unable to update a map file.")
+				  "Updates the game's .map files to contain valid scenario indices.")
 		{
 			CacheContext = cacheContext;
 		}
+        
+        public override object Execute(List<string> args)
+        {
+            if (args.Count != 0)
+                return false;
+            
+            var scenarioIndices = new Dictionary<int, (ScenarioMapType, int)>();
 
-		int FILE_START_OFFSET = 0x0000;
-		int MAP_NAME_OFFSET = 0x01A4;
-		int MAP_PATH_OFFSET = 0X01C8;
-		int SCNR_INDEX_OFFSET = 0x2DEC;
-		int MAP_ID_OFFSET = 0x2DF0;
+            using (var stream = CacheContext.OpenTagCacheRead())
+            using (var reader = new BinaryReader(stream))
+            {
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
+                {
+                    if (tag.HeaderOffset == -1)
+                        continue;
 
-		public override object Execute(List<string> args)
-		{
-			if (args.Count > 1)
-				return false;
+                    reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset;
+                    var mapType = (ScenarioMapType)reader.ReadByte();
 
-			// build a dictionary of (mapID, scnrIndex)
-			var scnrIndices = new Dictionary<int, int>();
-			using (var stream = CacheContext.OpenTagCacheRead())
-			using (var reader = new BinaryReader(stream))
-			{
-				foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
-				{
-					if (tag.HeaderOffset == -1)
-						continue;
+                    reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset + 0x8;
+                    var mapId = reader.ReadInt32();
 
-					reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset + 0x8;
-					scnrIndices[reader.ReadInt32()] = tag.Index;
-				}
-			}
+                    scenarioIndices[mapId] = (mapType, tag.Index);
+                }
+            }
 
-			// update the .map files
-			foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
-			{
-				using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
-				using (var reader = new BinaryReader(stream))
-				using (var writer = new BinaryWriter(stream))
-				{
-					if (reader.ReadInt32() != new Tag("head").Value) // verify the map file is a HO .map
-						continue;
+            var mainmenuMapFile = CacheContext.Directory.GetFiles("mainmenu.map")[0];
+            var guardianMapFile = CacheContext.Directory.GetFiles("guardian.map")[0];
 
-					// scenario index
-					reader.BaseStream.Position = SCNR_INDEX_OFFSET;
-					var mapID = reader.ReadInt32();
+            foreach (var entry in scenarioIndices)
+            {
+                var scenarioPath = CacheContext.TagNames.ContainsKey(entry.Value.Item2) ?
+                    CacheContext.TagNames[entry.Value.Item2] :
+                    $"0x{entry.Value:X4}";
 
-					if (!scnrIndices.ContainsKey(mapID)) // verify that the map contains a valid scenario index
-						continue;
+                var mapName = scenarioPath.Split('\\').Last();
+                var mapFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, $"{mapName}.map"));
 
-					// write our mapID
-					var scnrIndex = scnrIndices[mapID];
-					writer.BaseStream.Position = MAP_ID_OFFSET;
-					writer.Write(scnrIndex);
+                if (!mapFile.Exists)
+                    mapFile = ((entry.Value.Item1 == ScenarioMapType.Multiplayer) ? guardianMapFile : mainmenuMapFile).CopyTo(mapFile.FullName);
 
-					scnrIndices.Remove(mapID); // remove scenario entries once the map file has been updated...
+                using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                using (var reader = new BinaryReader(stream))
+                using (var writer = new BinaryWriter(stream))
+                {
+                    if (reader.ReadInt32() != new Tag("head").Value)
+                        continue;
 
-					Console.WriteLine($"Scenario tag index for {mapFile.Name}: {scnrIndex:X8}");
-				}
-			}
+                    stream.Position = MapNameOffset;
+                    for (var i = 0; i < 32; i++)
+                        writer.Write(i < mapName.Length ? mapName[i] : '\0');
 
-			// generate map files for scenarios that were unable to have a map file updated
-			// *WARNING: requires at least one existing HO .map be in the CacheContext.Directory
-			// *WARNING: map file name, and name(s) within the file come from the scenario tagname
-			// *TODO: Handle campaign & menu .maps; this is only currently setup for multiplayer maps. 
-			if (args.Count > 0 && args.args[0].ToLower() == "gen")
-				foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
-				{
-					// don't use mainmenu.map for this because it is pretty different.
-					if (mapFile.Name.ToLower().Contains("mainmenu"))
-						continue;
+                    stream.Position = ScenarioPathOffset;
+                    for (var i = 0; i < 256; i++)
+                        writer.Write(i < scenarioPath.Length ? scenarioPath[i] : '\0');
 
-					using (var stream = mapFile.Open(FileMode.Open, FileAccess.Read))
-					using (var reader = new BinaryReader(stream))
-					{
-						if (reader.ReadInt32() != new Tag("head").Value) // verify the map file is a HO .map
-							continue;
+                    stream.Position = ScenarioTagIndexOffset;
+                    writer.Write(entry.Value.Item2);
 
-						// read the entire .map to use as a base
-						reader.BaseStream.Position = FILE_START_OFFSET;
-						var mapFileData = reader.ReadBytes((int)reader.BaseStream.Length);
+                    foreach (var offset in MapIdOffsets)
+                    {
+                        stream.Position = offset;
+                        writer.Write(entry.Key);
+                    }
+                    
+                    Console.WriteLine($"Scenario tag index for {mapFile.Name}: 0x{entry.Value.Item2:X4}");
+                }
+            }
+            
+            Console.WriteLine("Done!");
 
-						foreach (var scnr in scnrIndices)
-						{
-							// get byte[]'s for our map-name and map-path
-							var mapID = scnr.Key;
-							var scnrIndex = scnr.Value;
-							var sMapPath = CacheContext.TagNames.ContainsKey(scnrIndex) ?
-											CacheContext.TagNames[scnrIndex] :
-											"0x" + scnrIndex.ToString("X4");    // levels\atlas\sc100\sc100
-							var sMapName = sMapPath.Split('\\').Last();         // sc100
-							var bMapName = new byte[0x0024];
-							Encoding.ASCII.GetBytes(sMapName).CopyTo(bMapName, 0);
-							var bMapPath = new byte[0x0100];
-							Encoding.ASCII.GetBytes(sMapPath).CopyTo(bMapPath, 0);
-
-							// replace the map name and path in our map data
-							bMapName.CopyTo(mapFileData, MAP_NAME_OFFSET);
-							bMapPath.CopyTo(mapFileData, MAP_PATH_OFFSET);
-
-							// replace the scenario index and map ID in our map data
-							BitConverter.GetBytes(mapID).CopyTo(mapFileData, SCNR_INDEX_OFFSET);
-							BitConverter.GetBytes(scnrIndex).CopyTo(mapFileData, MAP_ID_OFFSET);
-
-							// save our new map file
-							using (var fs = new FileStream(Path.Combine(CacheContext.Directory.FullName, sMapName + ".map"),
-															FileMode.Create, FileAccess.Write))
-								fs.Write(mapFileData, 0, mapFileData.Length);
-
-							Console.WriteLine($"Created map file: {sMapName}.map, with scenario: 0x{scnrIndex.ToString("X4")}, and map ID: {mapID}");
-						}
-					}
-				}
-
-			Console.WriteLine("Done!");
-
-			return true;
-		}
+            return true;
+        }
 	}
 }
