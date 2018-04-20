@@ -87,8 +87,41 @@ namespace System.IO
         public static StringId ReadStringId(this BinaryReader reader) =>
             new StringId(reader.ReadUInt32());
 
-        //
-        // TODO
-        //
+        public static T ReadEnum<T>(this BinaryReader reader)
+            where T : struct, IConvertible
+        {
+            var type = typeof(T);
+
+            if (!type.IsEnum)
+                throw new NotSupportedException(type.Name);
+
+            var valueType = type.GetEnumUnderlyingType();
+
+            if (valueType == typeof(sbyte))
+                return (T)(object)reader.ReadSByte();
+
+            if (valueType == typeof(byte))
+                return (T)(object)reader.ReadByte();
+
+            if (valueType == typeof(short))
+                return (T)(object)reader.ReadInt16();
+
+            if (valueType == typeof(ushort))
+                return (T)(object)reader.ReadUInt16();
+
+            if (valueType == typeof(int))
+                return (T)(object)reader.ReadInt32();
+
+            if (valueType == typeof(uint))
+                return (T)(object)reader.ReadUInt32();
+
+            if (valueType == typeof(long))
+                return (T)(object)reader.ReadInt64();
+
+            if (valueType == typeof(ulong))
+                return (T)(object)reader.ReadUInt64();
+
+            throw new NotSupportedException(type.Name);
+        }
     }
 }

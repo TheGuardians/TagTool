@@ -52,7 +52,7 @@ namespace TagTool.Commands.Files
                         continue;
 
                     reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset;
-                    var mapType = (ScenarioMapType)reader.ReadByte();
+                    var mapType = reader.ReadEnum<ScenarioMapType>();
 
                     reader.BaseStream.Position = tag.HeaderOffset + tag.DefinitionOffset + 0x8;
                     var mapId = reader.ReadInt32();
