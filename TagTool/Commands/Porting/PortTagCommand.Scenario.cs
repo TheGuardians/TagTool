@@ -1,11 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
 using TagTool.Tags.Definitions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
 
 namespace TagTool.Commands.Porting
 {
@@ -766,7 +766,7 @@ namespace TagTool.Commands.Porting
 
             if (!DisabledScriptsString.ContainsKey(tagName))
                 return;
-                
+
             foreach (var line in DisabledScriptsString[tagName])
             {
                 var items = line.Split(",".ToCharArray());

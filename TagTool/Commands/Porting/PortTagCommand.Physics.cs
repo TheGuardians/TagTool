@@ -51,11 +51,7 @@ namespace TagTool.Commands.Porting
 
         private Projectile ConvertProjectile(Projectile proj)
         {
-            //Seems to fix projectile speed
-
-            float temp = proj.AiGuidedAngularVelocityScale;
-            proj.AiGuidedAngularVelocityScale = proj.AiVelocityScale;
-            proj.AiVelocityScale = temp;
+            proj.AiVelocityScaleBounds = new Bounds<float>(0.0f, proj.AiVelocityScale);
 
             return proj;
         }

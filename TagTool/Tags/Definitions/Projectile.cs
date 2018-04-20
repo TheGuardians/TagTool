@@ -7,7 +7,8 @@ using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "projectile", Tag = "proj")]
+    [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1A8, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1AC, MinVersion = CacheVersion.HaloOnline106708)]
     public class Projectile : GameObject
     {
         public ProjectileFlagBits ProjectileFlags;
@@ -58,7 +59,13 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> WaterDamageScale;
         public float InitialVelocity;
         public float FinalVelocity;
+
+        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public float AiVelocityScale;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public Bounds<float> AiVelocityScaleBounds;
+
         public float AiGuidedAngularVelocityScale;
         public Bounds<Angle> GuidedAngularVelocity;
         public Angle GuidedAngularVelocityAtRest;
