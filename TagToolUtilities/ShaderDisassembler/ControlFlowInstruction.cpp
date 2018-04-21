@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <cstdint>
 
 #pragma pack(push, 1)

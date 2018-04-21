@@ -38,13 +38,13 @@
     <ClCompile Include="DirectX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ALUInstruction.cpp">
+    <ClCompile Include="ShaderDisassembler\ALUInstruction.cpp">
       <Filter>ShaderDisassembler</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ControlFlowInstruction.cpp">
+    <ClCompile Include="ShaderDisassembler\ControlFlowInstruction.cpp">
       <Filter>ShaderDisassembler</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\FetchInstruction.cpp">
+    <ClCompile Include="ShaderDisassembler\FetchInstruction.cpp">
       <Filter>ShaderDisassembler</Filter>
     </ClCompile>
   </ItemGroup>

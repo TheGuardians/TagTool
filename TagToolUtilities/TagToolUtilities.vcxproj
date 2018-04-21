@@ -150,9 +150,9 @@
     <ClInclude Include="DirectX.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ALUInstruction.cpp" />
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ControlFlowInstruction.cpp" />
-    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\FetchInstruction.cpp" />
+    <ClCompile Include="ShaderDisassembler\ALUInstruction.cpp" />
+    <ClCompile Include="ShaderDisassembler\ControlFlowInstruction.cpp" />
+    <ClCompile Include="ShaderDisassembler\FetchInstruction.cpp" />
     <ClCompile Include="D3DIncludeExt.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="DirectX.cpp" />
