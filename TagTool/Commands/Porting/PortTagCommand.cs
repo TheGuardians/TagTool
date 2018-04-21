@@ -761,7 +761,7 @@ namespace TagTool.Commands.Porting
         private GameObjectType ConvertGameObjectType(GameObjectType objectType)
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
-                if (Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
+                if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
                     throw new FormatException(BlamCache.Version.ToString());
 
             return objectType;
