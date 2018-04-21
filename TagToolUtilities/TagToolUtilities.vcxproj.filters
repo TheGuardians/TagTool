@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ShaderDisassembler">
+      <UniqueIdentifier>{c2cbaa78-38ab-4069-a64e-37254027278f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Helpers.h">
@@ -34,6 +37,15 @@
     </ClCompile>
     <ClCompile Include="DirectX.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ALUInstruction.cpp">
+      <Filter>ShaderDisassembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\ControlFlowInstruction.cpp">
+      <Filter>ShaderDisassembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Documents\Visual Studio 2017\Projects\CSharpInteropWithC_C++\Interop\FetchInstruction.cpp">
+      <Filter>ShaderDisassembler</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
