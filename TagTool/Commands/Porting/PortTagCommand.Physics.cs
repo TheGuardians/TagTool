@@ -51,8 +51,6 @@ namespace TagTool.Commands.Porting
 
         private Projectile ConvertProjectile(Projectile proj)
         {
-            proj.AiVelocityScaleBounds = new Bounds<float>(0.0f, proj.AiVelocityScale);
-
             return proj;
         }
     }

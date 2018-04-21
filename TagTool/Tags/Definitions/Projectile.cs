@@ -60,13 +60,11 @@ namespace TagTool.Tags.Definitions
         public float InitialVelocity;
         public float FinalVelocity;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float AiVelocityScale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public Bounds<float> AiVelocityScaleBounds;
 
-        public float AiGuidedAngularVelocityScale;
         public Bounds<Angle> GuidedAngularVelocity;
         public Angle GuidedAngularVelocityAtRest;
         public Bounds<float> AccelerationRange;
@@ -74,7 +72,7 @@ namespace TagTool.Tags.Definitions
         public float AiTargetLeadingScale;
         public float TargetedLeadingFraction;
         public float GuidedProjectileOuterRangeErrorRadius;
-        public float AutoaimLeadingMaxLeadTime;
+
         public List<MaterialResponse> MaterialResponses;
         public List<BruteGrenadeProperty> BruteGrenadeProperties;
         public List<FireBombGrenadeProperty> FireBombGrenadeProperties;
