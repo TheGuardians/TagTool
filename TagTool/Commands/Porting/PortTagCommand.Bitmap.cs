@@ -474,7 +474,6 @@ namespace TagTool.Commands.Porting
                     break;
 
                 //Generate mipmaps if required, keep format
-                case BitmapFormat.AY8:
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
@@ -492,6 +491,21 @@ namespace TagTool.Commands.Porting
                     genMips = true;
                     break;
 
+                case BitmapFormat.AY8:
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = DxtDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
+                    // Convert to A8Y8
+                    raw = DxtDecoder.ConvertAY8ToA8Y8(raw, blamBitmap.Width, blamBitmap.Height);
+
+                    blamBitmap.Image.Format = BitmapFormat.A8Y8;
+                    blamBitmap.Format = BitmapFormat.A8Y8;
+                    blamBitmap.BlockSize = 2;
+                    blamBitmap.CompressionFactor = 0.5;
+                    blamBitmap.RawSize = raw.Length;
+                    compress = false;
+                    noMips = true;
+                    genMips = true;
+                    break;
 
                 //Decompress, compress with mipmaps.
                 case BitmapFormat.Dxt1:
@@ -539,7 +553,7 @@ namespace TagTool.Commands.Porting
             //Flip byte ordering for regular-sized bitmaps
             if (!blamBitmap.Reformat && !blamBitmap.Convert)
             {
-                if (blamBitmap.Format == BitmapFormat.A8 || blamBitmap.Format == BitmapFormat.A8Y8 || blamBitmap.Format == BitmapFormat.Y8 || blamBitmap.Format == BitmapFormat.A8R8G8B8)
+                if (blamBitmap.Format == BitmapFormat.A8 || blamBitmap.Format == BitmapFormat.AY8 || blamBitmap.Format == BitmapFormat.A8Y8 || blamBitmap.Format == BitmapFormat.Y8 || blamBitmap.Format == BitmapFormat.A8R8G8B8)
                 {
                     //No conversion
                 }

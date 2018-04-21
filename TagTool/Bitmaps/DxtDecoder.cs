@@ -145,6 +145,18 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        public static byte[] ConvertAY8ToA8Y8(byte[] data, int width, int height)
+        {
+            byte[] buffer = new byte[height * width * 2];
+            for(int i =0; i<height*width*2; i += 2)
+            {
+                int index = i / 2;
+                buffer[i] = data[index];
+                buffer[i + 1] = data[index];
+            }
+            return buffer;
+        }
+
         private static byte[] DecodeAY8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 4];
