@@ -56,22 +56,22 @@ namespace TagTool.Tags.Definitions
         public float AirGravityScale;
         public Bounds<float> AirDamageRange;
         public float WaterGravityScale;
-        public Bounds<float> WaterDamageScale;
+        public Bounds<float> WaterDamageRange;
         public float InitialVelocity;
         public float FinalVelocity;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float IndirectFireVelocity;
+
         public float AiVelocityScale;
-
-        public Bounds<float> AiVelocityScaleBounds;
-
+        public float AiGuidedAngularVelocityScale;
         public Bounds<Angle> GuidedAngularVelocity;
         public Angle GuidedAngularVelocityAtRest;
         public Bounds<float> AccelerationRange;
-        public float RuntimeAccelerationBoundInverse;
         public float AiTargetLeadingScale;
         public float TargetedLeadingFraction;
         public float GuidedProjectileOuterRangeErrorRadius;
+        public float AutoaimLeadingMaxLeadTime;
 
         public List<MaterialResponse> MaterialResponses;
         public List<BruteGrenadeProperty> BruteGrenadeProperties;

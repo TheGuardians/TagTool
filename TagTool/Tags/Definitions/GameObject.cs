@@ -363,26 +363,6 @@ namespace TagTool.Tags.Definitions
             }
         }
     }
-    
-    public enum GameObjectTypeHalo3Beta : sbyte
-    {
-        None = -1,
-        Biped,
-        Vehicle,
-        Weapon,
-        Equipment,
-        Terminal,
-        Projectile,
-        Scenery,
-        Machine,
-        Control,
-        LightFixture,
-        SoundScenery,
-        Crate,
-        Creature,
-        Giant,
-        EffectScenery
-    }
 
     public enum GameObjectTypeHalo3Retail : sbyte
     {
@@ -461,6 +441,82 @@ namespace TagTool.Tags.Definitions
 
         [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2;
+    }
+
+    [Flags]
+    public enum ObjectTypeFlagsHalo3Retail : ushort
+    {
+        None,
+        Biped = 1 << 0,
+        Vehicle = 1 << 1,
+        Weapon = 1 << 2,
+        Equipment = 1 << 3,
+        Terminal = 1 << 4,
+        Projectile = 1 << 5,
+        Scenery = 1 << 6,
+        Machine = 1 << 7,
+        Control = 1 << 8,
+        SoundScenery = 1 << 9,
+        Crate = 1 << 10,
+        Creature = 1 << 11,
+        Giant = 1 << 12,
+        EffectScenery = 1 << 13
+    }
+
+    [Flags]
+    public enum ObjectTypeFlagsHalo3ODST : ushort
+    {
+        None,
+        Biped = 1 << 0,
+        Vehicle = 1 << 1,
+        Weapon = 1 << 2,
+        Equipment = 1 << 3,
+        AlternateRealityDevice = 1 << 4,
+        Terminal = 1 << 5,
+        Projectile = 1 << 6,
+        Scenery = 1 << 7,
+        Machine = 1 << 8,
+        Control = 1 << 9,
+        SoundScenery = 1 << 10,
+        Crate = 1 << 11,
+        Creature = 1 << 12,
+        Giant = 1 << 13,
+        EffectScenery = 1 << 14
+    }
+
+    [Flags]
+    public enum ObjectTypeFlagsHaloOnline : ushort
+    {
+        None,
+        Biped = 1 << 0,
+        Vehicle = 1 << 1,
+        Weapon = 1 << 2,
+        Armor = 1 << 3,
+        Equipment = 1 << 4,
+        AlternateRealityDevice = 1 << 5,
+        Terminal = 1 << 6,
+        Projectile = 1 << 7,
+        Scenery = 1 << 8,
+        Machine = 1 << 9,
+        Control = 1 << 10,
+        SoundScenery = 1 << 11,
+        Crate = 1 << 12,
+        Creature = 1 << 13,
+        Giant = 1 << 14,
+        EffectScenery = 1 << 15
+    }
+
+    [TagStructure(Size = 0x2)]
+    public class ObjectTypeFlags
+    {
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        public ObjectTypeFlagsHalo3Retail Halo3Retail;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
+        public ObjectTypeFlagsHalo3ODST Halo3ODST;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+        public ObjectTypeFlagsHaloOnline HaloOnline;
     }
 
     [TagStructure(Size = 0x1)]

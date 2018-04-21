@@ -623,6 +623,9 @@ namespace TagTool.Commands.Porting
                 case GameObjectType gameObjectType:
                     return ConvertGameObjectType(gameObjectType);
 
+                case ObjectTypeFlags objectTypeFlags:
+                    return ConvertObjectTypeFlags(objectTypeFlags);
+
                 case ScenarioObjectType scenarioObjectType:
                     return ConvertScenarioObjectType(scenarioObjectType);
 
@@ -640,6 +643,17 @@ namespace TagTool.Commands.Porting
                 return ConvertStructure(cacheStream, data, type, definition, blamTagName);
 
             return data;
+        }
+
+        private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags objectTypeFlags)
+        {
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                if (!Enum.TryParse(objectTypeFlags.Halo3Retail.ToString(), out objectTypeFlags.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+            }
+
+            return objectTypeFlags;
         }
 
         private BipedPhysicsFlags ConvertBipedPhysicsFlags(BipedPhysicsFlags bipedPhysicsFlags)
@@ -747,24 +761,17 @@ namespace TagTool.Commands.Porting
         private GameObjectType ConvertGameObjectType(GameObjectType objectType)
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
-                if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3Retail.ToString(), out var result))
-                    objectType.Halo3ODST = result;
-                else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                    if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
-                        objectType.Halo3ODST = result2;
+                if (Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
 
             return objectType;
-
         }
 
         private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType)
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
-                if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3Retail.ToString(), out var result))
-                    objectType.Halo3ODST = result;
-                else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                    if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.Halo3ODST.ToString(), out var result2))
-                        objectType.Halo3ODST = result2;
+                if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
 
             return objectType;
         }

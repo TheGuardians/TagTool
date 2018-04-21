@@ -202,6 +202,8 @@ namespace TagTool.Commands.Tags
                 return ConvertGeometry((RenderGeometry)data, srcCacheContext, destCacheContext);
             if (type == typeof(GameObjectType))
                 return ConvertGameObjectType((GameObjectType)data, srcCacheContext, destCacheContext);
+            if (type == typeof(ObjectTypeFlags))
+                return ConvertObjectTypeFlags((ObjectTypeFlags)data, srcCacheContext, destCacheContext);
             if (type == typeof(ScenarioObjectType))
                 return ConvertScenarioObjectType((ScenarioObjectType)data, srcCacheContext, destCacheContext);
             if (type.IsArray)
@@ -210,6 +212,15 @@ namespace TagTool.Commands.Tags
                 return ConvertList(data, type, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
                 return ConvertStructure(data, type, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+            return data;
+        }
+
+        private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags data, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
+        {
+            if (destCacheContext.Version < CacheVersion.HaloOnline449175)
+                if (!Enum.TryParse(data.HaloOnline.ToString(), out data.Halo3ODST))
+                    throw new FormatException(destCacheContext.Version.ToString());
+
             return data;
         }
 
