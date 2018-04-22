@@ -70,7 +70,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						" pv.w = (src0.w > 0.0f) ? src1.w : src2.w;";
 					break;
 				case VectorOpcode.cube:
-					translation += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
+					translation += 
+						$"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
 					translation += 
@@ -244,76 +245,135 @@ namespace TagTool.ShaderDecompiler.Translations
 			{
 				case ScalarOpcode.adds:
 					translation +=
-						"ps = dest = src0 + src0;";
+						"ps = dest = src0.x + src0.y;";
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x + src0.y;";
 					break;
 				case ScalarOpcode.adds_prev:
 					translation +=
 						"ps = dest = src0.x + ps;";
 					break;
 				case ScalarOpcode.cos:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = cos( src0.x );";
 					break;
 				case ScalarOpcode.exp:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = pow( 2, src0.x );";
 					break;
 				case ScalarOpcode.floors:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = floor( src0.x );";
 					break;
 				case ScalarOpcode.frcs:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x − floor( src0.x );";
 					break;
 				case ScalarOpcode.killseq:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						" ps = dest = 0.0f;" +
+						" if ( src0.x == 0 )\n" +
+						" {					\n" +
+						" 	ps = dest= 1.0f;\n" +
+						" }					\n" +
+						" clip(-pv);		  ";
 					break;
 				case ScalarOpcode.killsge:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
-					break;
+					translation +=
+						" ps = dest = 0.0f;" +
+						" if ( src0.x >= 0 )\n" +
+						" {					\n" +
+						" 	ps = dest = 1.0f;\n" +
+						" }					\n" +
+						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsgt:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
-					break;
+					translation +=
+						" ps = dest = 0.0f;" +
+						" if ( src0.x > 0 )\n" +
+						" {					\n" +
+						" 	ps = dest = 1.0f;\n" +
+						" }					\n" +
+						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsne:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
-					break;
+					translation +=
+						" ps = dest = 0.0f;" +
+						" if ( src0.x != 0 )\n" +
+						" {					\n" +
+						" 	ps = dest = 1.0f;\n" +
+						" }					\n" +
+						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsone:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
-					break;
+					translation +=
+						" ps = dest = 0.0f;" +
+						" if ( src0.x == 1 )\n" +
+						" {					\n" +
+						"	ps = dest = 1.0f;\n" +
+						" }					\n" +
+						" clip(-pv);		  "; break;
 				case ScalarOpcode.log:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = log( src0.x ) / log( 2 );";
 					break;
 				case ScalarOpcode.logc:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"dest = log( src0.x ) / log( 2 );\n"+
+						"if (isinf(dest))				 \n" +
+						"{								 \n" +
+						"	dest = -3.402823466e+38F;	 \n" +
+						"}								   " +
+						"ps = dest;";
 					break;
 				case ScalarOpcode.maxas:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"a0 = src0.x; \n" +
+						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxasf:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"int temp = floor( src0.x);\n" +
+						"if (temp < −256 )				\n" +
+						"{								\n" +
+						"	temp = −256;				\n" +
+						"}								\n" +
+						"if (temp > 255)				\n" +
+						"{								\n" +
+						"	temp = 255;					\n" +
+						"}								\n" +
+						"a0 = temp;						\n" +
+						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxs:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = max(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.mins:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = min(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.muls:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x * src0.y;";
 					break;
 				case ScalarOpcode.mulsc0:
 				case ScalarOpcode.mulsc1:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x * src1.y;";
 					break;
 				case ScalarOpcode.muls_prev:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x * ps;";
 					break;
 				case ScalarOpcode.muls_prev2:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = ps == -3.402823466e+38F || isinf(ps) || isnan(ps) || isnan(src0.y) || " +
+						"src0.y <= 0.0 ? -3.402823466e+38F : src0.x * ps;";
 					break;
 				case ScalarOpcode.rcp:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = 1.0f / src1.a;";
 					break;
 				case ScalarOpcode.rcpc:
 					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
@@ -334,7 +394,8 @@ namespace TagTool.ShaderDecompiler.Translations
 					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.seqs:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = ( src1.x == 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.setpclr:
 					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
