@@ -10,38 +10,17 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 	// (inheritence not good practice because we are using structs for C++/C# interop)
 	public class Instruction
 	{
-		public ControlFlowInstruction cfInstr;
-		public ALUInstruction aluInstr;
-		public FetchInstruction fetchInstr;
+		public ControlFlowInstruction[] cf_instr;
+		public ALUInstruction alu_instr;
+		public FetchInstruction fetch_instr;
 
-		public InstructionType instructionType;
-
-		public Instruction(ControlFlowInstruction cf_instr)
+		public Instruction(ControlFlowInstruction[] cf_instr, ALUInstruction alu_instr, FetchInstruction fetch_instr)
 		{
-			this.cfInstr = cf_instr;
-			this.instructionType = InstructionType.CF;
-		}
-
-		public Instruction(ALUInstruction instr)
-		{
-			this.aluInstr = instr;
-			this.instructionType = InstructionType.ALU;
-		}
-
-		public Instruction(FetchInstruction instr)
-		{
-			this.fetchInstr = instr;
-			this.instructionType = InstructionType.FETCH;
+			this.cf_instr = cf_instr;
+			this.alu_instr = alu_instr;
+			this.fetch_instr = fetch_instr;
 		}
 
 		public Instruction() { }
-	}
-
-	public enum InstructionType
-	{
-		UNKNOWN,
-		CF,
-		ALU,
-		FETCH
 	}
 }

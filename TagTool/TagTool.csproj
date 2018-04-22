@@ -279,7 +279,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
-    <Compile Include="Commands\Porting\TestShaderDisassemblerCommand.cs" />
+    <Compile Include="Commands\Porting\TestShaderDecompilerCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
     <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
@@ -721,6 +721,7 @@
     <None Include="Resources\VertexBuffer.xml" />
     <None Include="ShaderDecompiler\UcodeDisassembler\ReadMe.txt" />
     <Content Include="ShaderDecompiler\ReadMe_ShaderPortingPipeline.txt" />
+    <Content Include="ShaderDecompiler\TODO.txt" />
     <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

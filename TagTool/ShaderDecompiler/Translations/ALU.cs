@@ -37,12 +37,12 @@ namespace TagTool.ShaderDecompiler.Translations
 		private string Vector(Instruction instruction)
 		{
 			string translation = "";
-			if (!instruction.aluInstr.Has_vector_op)
+			if (!instruction.alu_instr.Has_vector_op)
 				return translation;
 
 			string asmInstruction = "// {instruction.aluInstr.GetVectorAsmString()}\n";
 
-			switch (instruction.aluInstr.vector_opc)
+			switch (instruction.alu_instr.vector_opc)
 			{
 				case VectorOpcode.add:
 					translation += 
@@ -70,7 +70,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" pv.w = (src0.w > 0.0f) ? src1.w : src2.w;";
 					break;
 				case VectorOpcode.cube:
-					translation += $"// {instruction.aluInstr.GetVectorAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
 					translation += 
@@ -211,24 +211,24 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case VectorOpcode.opcode_30:
 				case VectorOpcode.opcode_31:
-					translation += $"// {instruction.aluInstr.GetVectorAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				default:
-					translation += $"// *DEFAULTED* {instruction.aluInstr.GetVectorAsmString()}\n";
+					translation += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 			}
 
-			translation.Replace("pv.", instruction.aluInstr.GetDest_Register());
-			translation.Replace("pv", instruction.aluInstr.GetDest_Operand());
+			translation.Replace("pv.", instruction.alu_instr.GetDest_Register());
+			translation.Replace("pv", instruction.alu_instr.GetDest_Operand());
 
-			translation.Replace("src0.", instruction.aluInstr.GetSrc0_Register());
-			translation.Replace("src0", instruction.aluInstr.GetSrc0_Operand());
+			translation.Replace("src0.", instruction.alu_instr.GetSrc0_Register());
+			translation.Replace("src0", instruction.alu_instr.GetSrc0_Operand());
 
-			translation.Replace("src1.", instruction.aluInstr.GetSrc1_Register());
-			translation.Replace("src1", instruction.aluInstr.GetSrc1_Operand());
+			translation.Replace("src1.", instruction.alu_instr.GetSrc1_Register());
+			translation.Replace("src1", instruction.alu_instr.GetSrc1_Operand());
 
-			translation.Replace("src2.", instruction.aluInstr.GetSrc2_Register());
-			translation.Replace("src2", instruction.aluInstr.GetSrc2_Operand());
+			translation.Replace("src2.", instruction.alu_instr.GetSrc2_Register());
+			translation.Replace("src2", instruction.alu_instr.GetSrc2_Operand());
 
 			return asmInstruction + translation + "\n";
 		}
@@ -237,10 +237,10 @@ namespace TagTool.ShaderDecompiler.Translations
 		private string Scalar(Instruction instruction)
 		{
 			string translation = "";
-			if (!instruction.aluInstr.Has_scalar_op)
+			if (!instruction.alu_instr.Has_scalar_op)
 				return translation;
 
-			switch (instruction.aluInstr.scalar_opc)
+			switch (instruction.alu_instr.scalar_opc)
 			{
 				case ScalarOpcode.adds:
 					translation +=
@@ -248,190 +248,190 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.adds_prev:
 					translation +=
 						"ps = dest = src0.x + ps;";
 					break;
 				case ScalarOpcode.cos:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.exp:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.floors:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.frcs:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.killseq:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.killsge:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.killsgt:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.killsne:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.killsone:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.log:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.logc:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.maxas:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.maxasf:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.maxs:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.mins:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.muls:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.mulsc0:
 				case ScalarOpcode.mulsc1:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.muls_prev:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.muls_prev2:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rcp:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rcpc:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rcpf:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.retain_prev:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rsq:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rsqc:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.rsqf:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.seqs:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpclr:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpeq:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpge:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpgt:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpinv:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setpne:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setppop:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.setprstr:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.sges:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.sgts:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.sin:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.snes:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.sqrt:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.subs:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.subsc0:
 				case ScalarOpcode.subsc1:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.subs_prev:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.truncs:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_41:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_51:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_52:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_53:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_54:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_55:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_56:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_57:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_58:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_59:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_60:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_61:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_62:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.opcode_63:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				default:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 			}
 

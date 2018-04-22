@@ -76,7 +76,7 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
             context.AddCommand(new PortTagCommand(cacheContext, blamCache));
 			context.AddCommand(new PortingTestCommand(cacheContext, blamCache));
-			context.AddCommand(new TestShaderDisassemblerCommand(cacheContext, blamCache));
+			context.AddCommand(new TestShaderDecompilerCommand(cacheContext, blamCache));
 		}
 	}
 }

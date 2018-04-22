@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Serialization;
-using TagTool.ShaderDecompiler.UcodeDisassembler;
+using TagTool.ShaderDecompiler;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
-	class TestShaderDisassemblerCommand : Command
+	class TestShaderDecompilerCommand : Command
 	{
 		private CacheFile BlamCache { get; }
 		private GameCacheContext CacheContext { get; }
 
-		public TestShaderDisassemblerCommand(GameCacheContext cacheContext, CacheFile blamCache) : base(
+		public TestShaderDecompilerCommand(GameCacheContext cacheContext, CacheFile blamCache) : base(
 			CommandFlags.None,
 
-			"DisassembleShader",
-			"Test command for xbox360 shader disassembly.",
+			"DecompileShader",
+			"Test command for xbox360 shader decompilation.",
 
-			"DisassembleShader <shader_index> <tag_name>",
+			"DecompileShader <shader_index> <tag_name>",
 
-			"shader_index - index into the Shaders block of the shader you wish to disassemble.\n" +
-			"tag_name - the name of the tag which contains the shader you wish to disassemble.")
+			"shader_index - index into the Shaders block of the shader you wish to decompile.\n" +
+			"tag_name - the name of the tag which contains the shader you wish to decompile.")
 		{
 			CacheContext = cacheContext;
 			BlamCache = blamCache;
@@ -55,24 +55,10 @@ namespace TagTool.Commands.Porting
 			}
 
 			var shaderData = pixl.Shaders[shaderIndex].XboxShaderReference.ShaderData;
-			var instrs = Disassembler.Disassemble(shaderData);
 
-			foreach (var instr in instrs)
-			{
-				if (instr.instructionType == InstructionType.CF)
-					Console.WriteLine(instr.cfInstr.opcode);
-				else if (instr.instructionType == InstructionType.ALU)
-				{
-					if (instr.aluInstr.Has_vector_op)
-						Console.WriteLine(instr.aluInstr.vector_opc);
-					if (instr.aluInstr.Has_scalar_op)
-						Console.WriteLine("+ " + instr.aluInstr.scalar_opc);
-				}
-				else if (instr.instructionType == InstructionType.FETCH)
-					Console.WriteLine(instr.fetchInstr.opcode);
-				else if (instr.instructionType == InstructionType.UNKNOWN)
-					Console.WriteLine("<- UnKnown Instruction ->");
-			}
+			var hlsl = Decompiler.Decompile(shaderData);
+
+			Console.WriteLine(hlsl);
 
 			File.WriteAllBytes(tagName.Replace('\\', '_'), shaderData);
 

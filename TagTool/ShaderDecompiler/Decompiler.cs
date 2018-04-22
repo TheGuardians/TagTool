@@ -10,8 +10,9 @@ namespace TagTool.ShaderDecompiler
 	// Class for generating HLSL code from a List<Instruction>
 	public class Decompiler
 	{
-		public static string Decompile(List<Instruction> instructions)
+		public static string Decompile(byte[] shader_data)
 		{
+			var instructions = Disassembler.Disassemble(shader_data);
 			PreFixups.Apply(ref instructions);
 
 			string parameters = "";
@@ -27,22 +28,22 @@ namespace TagTool.ShaderDecompiler
 
 
 			string hlsl = 
-			$"{parameters}          " +
-			"struct INPUT           " +
-			"{                      " +
-			$"{inputs}              " +
-			"};                     " +
-			"struct OUTPUT          " +
-			"{                      " +
-			$"{outputs}             " +
-			"};                     " +
-			$"{functions}           " +
-			"OUTPUT main(INPUT In ) " +
-			"{                      " +
-			$"{constants}           " +
-			"OUTPUT Out;            " +
-			$"{logic}               " +
-			"return Out;            " +
+			$"{parameters}          \n" +
+			"struct INPUT           \n" +
+			"{                      \n" +
+			$"{inputs}              \n" +
+			"};                     \n" +
+			"struct OUTPUT          \n" +
+			"{                      \n" +
+			$"{outputs}             \n" +
+			"};                     \n" +
+			$"{functions}           \n" +
+			"OUTPUT main(INPUT In ) \n" +
+			"{                      \n" +
+			$"{constants}           \n" +
+			"OUTPUT Out;            \n" +
+			$"{logic}               \n" +
+			"return Out;            \n" +
 			"}                      ";
 
 			return PostFixups.Apply(hlsl);

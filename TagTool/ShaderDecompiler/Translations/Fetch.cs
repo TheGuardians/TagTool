@@ -15,7 +15,7 @@ namespace TagTool.ShaderDecompiler.Translations
 		{
 			string translation = "";
 
-			if (instruction.fetchInstr.opcode == FetchOpCode.vfetch)
+			if (instruction.fetch_instr.opcode == FetchOpCode.vfetch)
 				translation += Vfetch(instruction);
 			else
 				translation += Tfetch(instruction);
@@ -28,7 +28,7 @@ namespace TagTool.ShaderDecompiler.Translations
 		{
 			string translation = "";
 
-			translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+			translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 
 			return translation += "\n";
 		}
@@ -38,37 +38,37 @@ namespace TagTool.ShaderDecompiler.Translations
 		{
 			string translation = "";
 
-			switch (instruction.fetchInstr.opcode)
+			switch (instruction.fetch_instr.opcode)
 			{
 				case FetchOpCode.getBCF:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.getCompTexLOD:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.getGradients:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.getWeights:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.setGradientH:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.setGradientV:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.setTexLOD:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.tfetch:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				case FetchOpCode.UnknownTextureOp:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 				default:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 					break;
 			}
 
