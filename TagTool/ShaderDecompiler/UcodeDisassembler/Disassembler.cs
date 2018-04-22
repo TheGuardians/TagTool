@@ -26,6 +26,8 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 				var cfs = InstructionDecoding.DecodeCF(dword0, dword1, dword2);
 				var alu = InstructionDecoding.DecodeALU(dword0, dword1, dword2);
 				var fetch = InstructionDecoding.DecodeFetch(dword0, dword1, dword2);
+
+				instructions.Add(new Instruction(cfs, alu, fetch));
 			}
 
 			// return our List of Instruction
