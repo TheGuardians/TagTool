@@ -39,8 +39,12 @@ namespace TagTool.Commands
             {
                 Console.WriteLine("Enter the path to 'tags.dat':");
                 Console.Write("> ");
+				var tagCacheFile = Console.ReadLine();
 
-                fileInfo = new FileInfo(Console.ReadLine());
+				if (File.Exists(tagCacheFile))
+					fileInfo = new FileInfo(tagCacheFile);
+				else
+					Console.WriteLine("Invalid path to 'tags.dat'!");
 
                 Console.WriteLine();
             }
