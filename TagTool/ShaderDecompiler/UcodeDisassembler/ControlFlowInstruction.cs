@@ -8,53 +8,53 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 	public enum ControlFlowOpcode : uint
 	{
 		// No-op - used to fill space.
-		cnop = 0x00,
+		cnop = 0,
 
 		// Executes up to six fetch or ALU instructions.
-		exec = 0x01,
+		exec = 1,
 
 		// Executes up to six fetch or ALU instructions then ends execution.
-		exece = 0x02,
+		exece = 2,
 
 		// Conditionally executes up to six fetch or ALU instructions based on a bool const.
-		cexec = 0x03,
+		cexec = 3,
 
 		// Conditionally executes up to six fetch or ALU instructions based on a bool const then ends execution.
-		cexece = 0x04,
+		cexece = 4,
 
 		// Conditionally executes up to six fetch or ALU instructions based on the current predicate.
-		cexec_pred = 0x05,
+		cexec_pred = 5,
 
 		// Conditionally executes up to six fetch or ALU instructions based on the current predicate then ends execution.
-		cexece_pred = 0x06,
+		cexece_pred = 6,
 
 		// Starts a loop that must be terminated with 'endloop'.
-		loop = 0x07,
+		loop = 7,
 
 		// Continues or breaks out of a loop started with 'loop'.
-		endloop = 0x08,
+		endloop = 8,
 
 		// Conditionally calls a function.  A return address is pushed to the stack to be used by a 'ret' instruction.
-		ccall = 0x09,
+		ccall = 9,
 
 		// Returns from the current function as called by 'ccall'. This is a no-op if not in a function.
-		ret = 0x0A,
+		ret = 10,
 
 		// Conditionally jumps to an arbitrary address based on a bool const.
-		cjmp = 0x0B,
+		cjmp = 11,
 
 		// Reserves space in the internal buffers that store the shader's output values. 
 		// This instruction must appear before the corresponding output values are written. 
-		alloc = 0x0C,
+		alloc = 12,
 
 		// Conditionally executes based on the current predicate. Optionally resets the predicate value.
-		cexec_pred_clean = 0x0D,
+		cexec_pred_clean = 13,
 
 		// Conditionally executes based on the current predicate then ends execution. Optionally resets the predicate value.
-		cexece_pred_clean = 0x0E,
+		cexece_pred_clean = 14,
 
 		// Hints that no more vertex fetches will be performed.
-		vfetche = 0x0F,
+		vfetche = 15
 	}
 	public enum AddressMode : uint
 	{

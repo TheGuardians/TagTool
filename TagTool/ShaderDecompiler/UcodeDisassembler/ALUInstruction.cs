@@ -17,90 +17,90 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		// Floating-Point Add
 		// adds dest, src0.ab
 		//     dest.xyzw = src0.a + src0.b;
-		adds = 0x00,
+		adds = 0,
 
 		// Floating-Point Add (with Previous)
 		// adds_prev dest, src0.a
 		//     dest.xyzw = src0.a + ps;
-		adds_prev = 0x01,
+		adds_prev = 1,
 
 		// Floating-Point Multiply
 		// muls dest, src0.ab
 		//     dest.xyzw = src0.a * src0.b;
-		muls = 0x02,
+		muls = 2,
 
 		// Floating-Point Multiply (with Previous)
 		// muls_prev dest, src0.a
 		//     dest.xyzw = src0.a * ps;
-		muls_prev = 0x03,
+		muls_prev = 3,
 
 		// Scalar Multiply Emulating LIT Operation
 		// muls_prev2 dest, src0.ab
 		//    dest.xyzw =
 		//        ps == -FLT_MAX || !isfinite(ps) || !isfinite(src0.b) || src0.b <= 0
 		//        ? -FLT_MAX : src0.a * ps;
-		muls_prev2 = 0x4,
+		muls_prev2 = 4,
 
 		// Floating-Point Maximum
 		// maxs dest, src0.ab
 		//     dest.xyzw = src0.a >= src0.b ? src0.a : src0.b;
-		maxs = 0x5,
+		maxs = 5,
 
 		// Floating-Point Minimum
 		// mins dest, src0.ab
 		//     dest.xyzw = src0.a < src0.b ? src0.a : src0.b;
-		mins = 0x6,
+		mins = 6,
 
 		// Floating-Point Set If Equal
 		// seqs dest, src0.a
 		//     dest.xyzw = src0.a == 0.0 ? 1.0 : 0.0;
-		seqs = 0x7,
+		seqs = 7,
 
 		// Floating-Point Set If Greater Than
 		// sgts dest, src0.a
 		//     dest.xyzw = src0.a > 0.0 ? 1.0 : 0.0;
-		sgts = 0x8,
+		sgts = 8,
 
 		// Floating-Point Set If Greater Than Or Equal
 		// sges dest, src0.a
 		//     dest.xyzw = src0.a >= 0.0 ? 1.0 : 0.0;
-		sges = 0x9,
+		sges = 9,
 
 		// Floating-Point Set If Not Equal
 		// snes dest, src0.a
 		//     dest.xyzw = src0.a != 0.0 ? 1.0 : 0.0;
-		snes = 0xA,
+		snes = 10,
 
 		// Floating-Point Fractional
 		// frcs dest, src0.a
 		//     dest.xyzw = src0.a - floor(src0.a);
-		frcs = 0xB,
+		frcs = 11,
 
 		// Floating-Point Truncate
 		// truncs dest, src0.a
 		//     dest.xyzw = src0.a >= 0 ? floor(src0.a) : -floor(-src0.a);
-		truncs = 0xC,
+		truncs = 12,
 
 		// Floating-Point Floor
 		// floors dest, src0.a
 		//     dest.xyzw = floor(src0.a);
-		floors = 0xD,
+		floors = 13,
 
 		// Scalar Base-2 Exponent, IEEE
 		// exp dest, src0.a
 		//     dest.xyzw = src0.a == 0.0 ? 1.0 : pow(2, src0.a);
-		exp = 0xE,
+		exp = 14,
 
 		// Scalar Base-2 Log
 		// logc dest, src0.a
 		//     float t = src0.a == 1.0 ? 0.0 : log(src0.a) / log(2.0);
 		//     dest.xyzw = t == -INF ? -FLT_MAX : t;
-		logc = 0xF,
+		logc = 15,
 
 		// Scalar Base-2 IEEE Log
 		// log dest, src0.a
 		//     dest.xyzw = src0.a == 1.0 ? 0.0 : log(src0.a) / log(2.0);
-		log = 0x10,
+		log = 16,
 
 		// Scalar Reciprocal, Clamp to Maximum
 		// rcpc dest, src0.a
@@ -108,7 +108,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     if (t == -INF) t = -FLT_MAX;
 		//     else if (t == INF) t = FLT_MAX;
 		//     dest.xyzw = t;
-		rcpc = 0x11,
+		rcpc = 17,
 
 		// Scalar Reciprocal, Clamp to Zero
 		// rcpf dest, src0.a
@@ -116,12 +116,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     if (t == -INF) t = -0.0;
 		//     else if (t == INF) t = 0.0;
 		//     dest.xyzw = t;
-		rcpf = 0x12,
+		rcpf = 18,
 
 		// Scalar Reciprocal, IEEE Approximation
 		// rcp dest, src0.a
 		//     dest.xyzw = src0.a == 1.0 ? 1.0 : 1.0 / src0.a;
-		rcp = 0x13,
+		rcp = 19,
 
 		// Scalar Reciprocal Square Root, Clamp to Maximum
 		// rsqc dest, src0.a
@@ -129,7 +129,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     if (t == -INF) t = -FLT_MAX;
 		//     else if (t == INF) t = FLT_MAX;
 		//     dest.xyzw = t;
-		rsqc = 0x14,
+		rsqc = 20,
 
 		// Scalar Reciprocal Square Root, Clamp to Zero
 		// rsqc dest, src0.a
@@ -137,12 +137,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     if (t == -INF) t = -0.0;
 		//     else if (t == INF) t = 0.0;
 		//     dest.xyzw = t;
-		rsqf = 0x15,
+		rsqf = 21,
 
 		// Scalar Reciprocal Square Root, IEEE Approximation
 		// rsq dest, src0.a
 		//     dest.xyzw = src0.a == 1.0 ? 1.0 : 1.0 / sqrt(src0.a);
-		rsq = 0x16,
+		rsq = 22,
 
 		// Floating-Point Maximum with Copy To Integer in AR
 		// maxas dest, src0.ab
@@ -150,7 +150,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     int result = (int)floor(src0.a + 0.5);
 		//     a0 = clamp(result, -256, 255);
 		//     dest.xyzw = src0.a >= src0.b ? src0.a : src0.b;
-		maxas = 0x17,
+		maxas = 23,
 
 		// Floating-Point Maximum with Copy Truncated To Integer in AR
 		// maxasf dest, src0.ab
@@ -158,17 +158,17 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     int result = (int)floor(src0.a);
 		//     a0 = clamp(result, -256, 255);
 		//     dest.xyzw = src0.a >= src0.b ? src0.a : src0.b;
-		maxasf = 0x18,
+		maxasf = 24,
 		
 		// Floating-Point Subtract
 		// subs dest, src0.ab
 		//     dest.xyzw = src0.a - src0.b;
-		subs = 0x19,
+		subs = 25,
 
 		// Floating-Point Subtract (with Previous)
 		// subs_prev dest, src0.a
 		//     dest.xyzw = src0.a - ps;
-		subs_prev = 0x1A,
+		subs_prev = 26,
 
 		// Floating-Point Predicate Set If Equal
 		// setp_eq dest, src0.a
@@ -179,7 +179,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = 1.0;
 		//       p0 = 0;
 		//     }
-		setpeq = 0x1B,
+		setpeq = 27,
 
 		// Floating-Point Predicate Set If Not Equal
 		// setp_ne dest, src0.a
@@ -190,7 +190,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = 1.0;
 		//       p0 = 0;
 		//     }
-		setpne = 0x1C,
+		setpne = 28,
 
 		// Floating-Point Predicate Set If Greater Than
 		// setp_gt dest, src0.a
@@ -201,7 +201,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = 1.0;
 		//       p0 = 0;
 		//     }
-		setpgt = 0x1D,
+		setpgt = 29,
 
 		// Floating-Point Predicate Set If Greater Than Or Equal
 		// setp_ge dest, src0.a
@@ -212,7 +212,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = 1.0;
 		//       p0 = 0;
 		//     }
-		setpge = 0x1E,
+		setpge = 30,
 
 		// Predicate Counter Invert
 		// setp_inv dest, src0.a
@@ -227,7 +227,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       }
 		//       p0 = 0;
 		//     }
-		setpinv = 0x1F,
+		setpinv = 31,
 
 		// Predicate Counter Pop
 		// setp_pop dest, src0.a
@@ -238,13 +238,13 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = src0.a - 1.0;
 		//       p0 = 0;
 		//     }
-		setppop = 0x20,
+		setppop = 32,
 
 		// Predicate Counter Clear
 		// setp_clr dest
 		//     dest.xyzw = FLT_MAX;
 		//     p0 = 0;
-		setpclr = 0x21,
+		setpclr = 33,
 
 		// Predicate Counter Restore
 		// setp_rstr dest, src0.a
@@ -255,7 +255,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//       dest.xyzw = src0.a;
 		//       p0 = 0;
 		//     }
-		setprstr = 0x22,
+		setprstr = 34,
 
 		// Floating-Point Pixel Kill If Equal
 		// kills_eq dest, src0.a
@@ -265,7 +265,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		killseq = 0x23,
+		killseq = 35,
 
 		// Floating-Point Pixel Kill If Greater Than
 		// kills_gt dest, src0.a
@@ -275,7 +275,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		killsgt = 0x24,
+		killsgt = 36,
 
 		// Floating-Point Pixel Kill If Greater Than Or Equal
 		// kills_ge dest, src0.a
@@ -285,7 +285,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		killsge = 0x25,
+		killsge = 37,
 
 		// Floating-Point Pixel Kill If Not Equal
 		// kills_ne dest, src0.a
@@ -295,7 +295,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		killsne = 0x26,
+		killsne = 38,
 
 		// Floating-Point Pixel Kill If One
 		// kills_one dest, src0.a
@@ -305,77 +305,77 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		killsone = 0x27,
+		killsone = 39,
 
 		// Scalar Square Root, IEEE Aproximation
 		// sqrt dest, src0.a
 		//     dest.xyzw = sqrt(src0.a);
-		sqrt = 0x28,
+		sqrt = 40,
 
 		// disassembler calls it this, probably unused garbage.
-		opcode_41 = 0x29,
+		opcode_41 = 41,
 
 		// Floating-Point Multiply - src0 must be a (c#) register, and the src1 must be a (r#) register. 
 		// muls dest, src0.a, src1.b
 		//     dest.xyzw = src0.a * src1.b;
-		mulsc0 = 0x2A,
+		mulsc0 = 42,
 		// same as mulsc0.
-		mulsc1 = 0x2B,
+		mulsc1 = 43,
 
 		// Floating-Point Add - src0 must be a (c#) register, and the src1 must be a (r#) register. 
 		// addsc dest, src0.a, src1.b
 		//     dest.xyzw = src0.a + src1.b;
-		addsc0 = 0x2C,
+		addsc0 = 44,
 		// same as addsc0.
-		addsc1 = 0x2D,
+		addsc1 = 45,
 
 		// Floating-Point Subtract - src0 must be a (c#) register, and the src1 must be a (r#) register. 
 		// addsc dest, src0.a, src1.b
 		//     dest.xyzw = src0.a - src1.b;
-		subsc0 = 0x2E,
+		subsc0 = 46,
 		// same as subsc0.
-		subsc1 = 0x2F,
+		subsc1 = 47,
 
 		// Scalar Sin
 		// sin dest, src0.a
 		//     dest.xyzw = sin(src0.a);
-		sin = 0x30,
+		sin = 48,
 
 		// Scalar Cos
 		// cos dest, src0.a
 		//     dest.xyzw = cos(src0.a);
-		cos = 0x31,
+		cos = 49,
 
 		// retain_prev dest
 		//     dest.xyzw = ps;
-		retain_prev = 0x32,
+		retain_prev = 50,
 
 		// disassembler calls it this, probably unused garbage.
-		opcode_51 = 0x33,
+		opcode_51 = 51,
 		// disassembler calls it this, probably unused garbage.
-		opcode_52 = 0x34,
+		opcode_52 = 52,
 		// disassembler calls it this, probably unused garbage.
-		opcode_53 = 0x35,
+		opcode_53 = 53,
 		// disassembler calls it this, probably unused garbage.
-		opcode_54 = 0x36,
+		opcode_54 = 54,
 		// disassembler calls it this, probably unused garbage.
-		opcode_55 = 0x37,
+		opcode_55 = 55,
 		// disassembler calls it this, probably unused garbage.
-		opcode_56 = 0x38,
+		opcode_56 = 56,
 		// disassembler calls it this, probably unused garbage.
-		opcode_57 = 0x39,
+		opcode_57 = 57,
 		// disassembler calls it this, probably unused garbage.
-		opcode_58 = 0x3A,
+		opcode_58 = 58,
 		// disassembler calls it this, probably unused garbage.
-		opcode_59 = 0x3B,
+		opcode_59 = 59,
 		// disassembler calls it this, probably unused garbage.
-		opcode_60 = 0x3C,
+		opcode_60 = 60,
 		// disassembler calls it this, probably unused garbage.
-		opcode_61 = 0x3D,
+		opcode_61 = 61,
 		// disassembler calls it this, probably unused garbage.
-		opcode_62 = 0x3E,
+		opcode_62 = 62,
 		// disassembler calls it this, probably unused garbage.
-		opcode_63 = 0x3F
+		opcode_63 = 63
 	}
 	public enum VectorOpcode : uint
 	{
@@ -385,7 +385,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y + src1.y;
 		//     dest.z = src0.z + src1.z;
 		//     dest.w = src0.w + src1.w;
-		add = 0x00,
+		add = 0,
 
 		// Per-Component Floating-Point Multiply
 		// mul dest, src0, src1
@@ -393,7 +393,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y * src1.y;
 		//     dest.z = src0.z * src1.z;
 		//     dest.w = src0.w * src1.w;
-		mul = 0x01,
+		mul = 1,
 
 		// Per-Component Floating-Point Maximum
 		// max dest, src0, src1
@@ -401,7 +401,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.x >= src1.y ? src0.y : src1.y;
 		//     dest.z = src0.x >= src1.z ? src0.z : src1.z;
 		//     dest.w = src0.x >= src1.w ? src0.w : src1.w;
-		max = 0x02,
+		max = 2,
 
 		// Per-Component Floating-Point Minimum
 		// min dest, src0, src1
@@ -409,7 +409,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.x < src1.y ? src0.y : src1.y;
 		//     dest.z = src0.x < src1.z ? src0.z : src1.z;
 		//     dest.w = src0.x < src1.w ? src0.w : src1.w;
-		min = 0x03,
+		min = 3,
 
 		// Per-Component Floating-Point Set If Equal
 		// seq dest, src0, src1
@@ -417,7 +417,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y == src1.y ? 1.0 : 0.0;
 		//     dest.z = src0.z == src1.z ? 1.0 : 0.0;
 		//     dest.w = src0.w == src1.w ? 1.0 : 0.0;
-		seq = 0x04,
+		seq = 4,
 
 		// Per-Component Floating-Point Set If Greater Than
 		// sgt dest, src0, src1
@@ -425,7 +425,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y > src1.y ? 1.0 : 0.0;
 		//     dest.z = src0.z > src1.z ? 1.0 : 0.0;
 		//     dest.w = src0.w > src1.w ? 1.0 : 0.0;
-		sgt = 0x05,
+		sgt = 5,
 
 		// Per-Component Floating-Point Set If Greater Than Or Equal
 		// sge dest, src0, src1
@@ -433,7 +433,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y >= src1.y ? 1.0 : 0.0;
 		//     dest.z = src0.z >= src1.z ? 1.0 : 0.0;
 		//     dest.w = src0.w >= src1.w ? 1.0 : 0.0;
-		sge = 0x06,
+		sge = 6,
 
 		// Per-Component Floating-Point Set If Not Equal
 		// sne dest, src0, src1
@@ -441,7 +441,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y != src1.y ? 1.0 : 0.0;
 		//     dest.z = src0.z != src1.z ? 1.0 : 0.0;
 		//     dest.w = src0.w != src1.w ? 1.0 : 0.0;
-		sne = 0x07,
+		sne = 7,
 
 		// Per-Component Floating-Point Fractional
 		// frc dest, src0
@@ -449,7 +449,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y - floor(src0.y);
 		//     dest.z = src0.z - floor(src0.z);
 		//     dest.w = src0.w - floor(src0.w);
-		frc = 0x08,
+		frc = 8,
 
 		// Per-Component Floating-Point Truncate
 		// trunc dest, src0
@@ -457,7 +457,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y >= 0 ? floor(src0.y) : -floor(-src0.y);
 		//     dest.z = src0.z >= 0 ? floor(src0.z) : -floor(-src0.z);
 		//     dest.w = src0.w >= 0 ? floor(src0.w) : -floor(-src0.w);
-		trunc = 0x09,
+		trunc = 9,
 
 		// Per-Component Floating-Point Floor
 		// floor dest, src0
@@ -465,7 +465,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = floor(src0.y);
 		//     dest.z = floor(src0.z);
 		//     dest.w = floor(src0.w);
-		floor = 0x0A,
+		floor = 10,
 
 		// Per-Component Floating-Point Multiply-Add
 		// mad dest, src0, src1, src2
@@ -473,7 +473,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y * src1.y + src2.y;
 		//     dest.z = src0.z * src1.z + src2.z;
 		//     dest.w = src0.w * src1.w + src2.w;
-		mad = 0x0B,
+		mad = 11,
 
 		// Per-Component Floating-Point Conditional Move If Equal
 		// cndeq dest, src0, src1, src2
@@ -481,7 +481,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y == 0.0 ? src1.y : src2.y;
 		//     dest.z = src0.z == 0.0 ? src1.z : src2.z;
 		//     dest.w = src0.w == 0.0 ? src1.w : src2.w;
-		cndeq = 0x0C,
+		cndeq = 12,
 
 		// Per-Component Floating-Point Conditional Move If Greater Than Or Equal
 		// cndge dest, src0, src1, src2
@@ -489,7 +489,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y >= 0.0 ? src1.y : src2.y;
 		//     dest.z = src0.z >= 0.0 ? src1.z : src2.z;
 		//     dest.w = src0.w >= 0.0 ? src1.w : src2.w;
-		cndge = 0x0D,
+		cndge = 13,
 
 		// Per-Component Floating-Point Conditional Move If Greater Than
 		// cndgt dest, src0, src1, src2
@@ -497,26 +497,26 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y > 0.0 ? src1.y : src2.y;
 		//     dest.z = src0.z > 0.0 ? src1.z : src2.z;
 		//     dest.w = src0.w > 0.0 ? src1.w : src2.w;
-		cndgt = 0x0E,
+		cndgt = 14,
 
 		// Four-Element Dot Product
 		// dp4 dest, src0, src1
 		//     dest.xyzw = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z +
 		//                 src0.w * src1.w;
 		// Note: only pv.x contains the value.
-		dp4 = 0x0F,
+		dp4 = 15,
 
 		// Three-Element Dot Product
 		// dp3 dest, src0, src1
 		//     dest.xyzw = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z;
 		// Note: only pv.x contains the value.
-		dp3 = 0x10,
+		dp3 = 16,
 
 		// Two-Element Dot Product and Add
 		// dp2add dest, src0, src1, src2
 		//     dest.xyzw = src0.x * src1.x + src0.y * src1.y + src2.x;
 		// Note: only pv.x contains the value.
-		dp2add = 0x11,
+		dp2add = 17,
 
 		// Cube Map
 		// cube dest, src0, src1
@@ -527,13 +527,13 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		// Expects src0.zzxy and src1.yxzz swizzles.
 		// FaceID is D3DCUBEMAP_FACES:
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/bb172528(v=vs.85).aspx
-		cube = 0x12,
+		cube = 18,
 
 		// Four-Element Maximum
 		// max4 dest, src0
 		//     dest.xyzw = max(src0.x, src0.y, src0.z, src0.w);
 		// Note: only pv.x contains the value.
-		max4 = 0x13,
+		max4 = 19,
 
 		// Floating-Point Predicate Counter Increment If Equal
 		// setp_eq_push dest, src0, src1
@@ -547,7 +547,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = src0.x + 1.0;
 		//     }
-		setp_eq_push = 0x14,
+		setp_eq_push = 20,
 
 		// Floating-Point Predicate Counter Increment If Not Equal
 		// setp_ne_push dest, src0, src1
@@ -561,7 +561,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = src0.x + 1.0;
 		//     }
-		setp_ne_push = 0x15,
+		setp_ne_push = 21,
 
 		// Floating-Point Predicate Counter Increment If Greater Than
 		// setp_gt_push dest, src0, src1
@@ -575,7 +575,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = src0.x + 1.0;
 		//     }
-		setp_gt_push = 0x16,
+		setp_gt_push = 22,
 
 		// Floating-Point Predicate Counter Increment If Greater Than Or Equal
 		// setp_ge_push dest, src0, src1
@@ -589,7 +589,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = src0.x + 1.0;
 		//     }
-		setp_ge_push = 0x17,
+		setp_ge_push = 23,
 
 		// Floating-Point Pixel Kill If Equal
 		// kill_eq dest, src0, src1
@@ -602,7 +602,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		kill_eq = 0x18,
+		kill_eq = 24,
 
 		// Floating-Point Pixel Kill If Greater Than
 		// kill_gt dest, src0, src1
@@ -615,7 +615,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		kill_gt = 0x19,
+		kill_gt = 25,
 
 		// Floating-Point Pixel Kill If Greater-Or-Equal
 		// kill_ge dest, src0, src1
@@ -628,7 +628,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		kill_ge = 0x1A,
+		kill_ge = 26,
 
 		// Floating-Point Pixel Kill If Not-Equal
 		// kill_ne dest, src0, src1
@@ -641,7 +641,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     } else {
 		//       dest.xyzw = 0.0;
 		//     }
-		kill_ne = 0x1B,
+		kill_ne = 27,
 
 		// Floating-Point Distance Vector Computation
 		// dst dest, src0, src1
@@ -649,7 +649,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.y * src1.y;
 		//     dest.z = src0.z;
 		//     dest.w = src1.w;
-		dst = 0x1C,
+		dst = 28,
 
 		// Per-Component Floating-Point Maximum with Copy To Integer in Address Register (a0)
 		// maxa dest, src0, src1
@@ -660,12 +660,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		//     dest.y = src0.x >= src1.y ? src0.y : src1.y;
 		//     dest.z = src0.x >= src1.z ? src0.z : src1.z;
 		//     dest.w = src0.x >= src1.w ? src0.w : src1.w;
-		maxa = 0x1D,
+		maxa = 29,
 
 		// disassembler calls it this, probably unused garbage.
-		opcode_30 = 0x1E,
+		opcode_30 = 30,
 		// disassembler calls it this, probably unused garbage.
-		opcode_31 = 0x1F,
+		opcode_31 = 31,
 	}
 
 	// ALU instruction data

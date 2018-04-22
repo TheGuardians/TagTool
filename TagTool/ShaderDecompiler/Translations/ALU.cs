@@ -11,7 +11,7 @@ namespace TagTool.ShaderDecompiler.Translations
 	public class ALU
 	{
 		// Conventions:
-		// - All temporary registers are vec4s.
+		// - All temporary registers are float4s.
 		// - Scalar ops swizzle out a single component of their source registers denoted
 		//   by 'a' or 'b'. src0.a means 'the first component specified for src0' and
 		//   src0.ab means 'two components specified for src0, in order'.
