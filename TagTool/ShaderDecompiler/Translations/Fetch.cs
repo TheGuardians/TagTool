@@ -28,12 +28,7 @@ namespace TagTool.ShaderDecompiler.Translations
 		{
 			string translation = "";
 
-			switch (instruction.fetchInstr.opcode)
-			{
-				default:
-					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
-					break;
-			}
+			translation += $"// {instruction.fetchInstr.opcode.ToString()}";
 
 			return translation += "\n";
 		}
@@ -45,6 +40,33 @@ namespace TagTool.ShaderDecompiler.Translations
 
 			switch (instruction.fetchInstr.opcode)
 			{
+				case FetchOpCode.getBCF:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.getCompTexLOD:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.getGradients:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.getWeights:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.setGradientH:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.setGradientV:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.setTexLOD:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.tfetch:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
+				case FetchOpCode.UnknownTextureOp:
+					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
+					break;
 				default:
 					translation += $"// {instruction.fetchInstr.opcode.ToString()}";
 					break;
