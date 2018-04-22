@@ -243,14 +243,16 @@ namespace TagTool.ShaderDecompiler.Translations
 			switch (instruction.aluInstr.scalar_opc)
 			{
 				case ScalarOpcode.adds:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0 + src0;";
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
 					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
 					break;
 				case ScalarOpcode.adds_prev:
-					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
+					translation +=
+						"ps = dest = src0.x + ps;";
 					break;
 				case ScalarOpcode.cos:
 					translation += $"// {instruction.aluInstr.GetScalarAsmString()}\n";
