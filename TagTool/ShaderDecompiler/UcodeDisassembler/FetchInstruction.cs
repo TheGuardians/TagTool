@@ -7,16 +7,36 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 {
 	public enum FetchOpCode
 	{
+		// Fetches data from a vertex buffer using a semantic. 
 		vfetch = 0x00,
+
+		// Fetches sample data from a texture. 
 		tfetch = 0x01,
+
+		//Gets the fraction of border color that would be blended into the texture data 
+		// (retrieved using a texture-fetch) at the specified coordinates. 
 		getBCF = 0x10,
+
+		// For textures, gets the LOD for all of the pixels in the quad at the specified coordinates. 
 		getCompTexLOD = 0x11,
+
+		// Gets the gradients of the first source, relative to the screen horizontal and screen vertical. 
 		getGradients = 0x12,
+
+		// Gets the weights used in a bilinear fetch from textures. 
 		getWeights = 0x13,
+
+		// Sets the level of detail. 
 		setTexLOD = 0x18,
+
+		// Sets the horizontal gradients. 
 		setGradientH = 0x19,
+
+		// Sets the vertical gradients. 
 		setGradientV = 0x1A,
-		kUnknownTextureOp = 0x1B,
+
+		// Converts xbox360 shaders to PC format! ecks dee.
+		UnknownTextureOp = 0x1B,
 	}
 	public enum TextureFilter
 	{
