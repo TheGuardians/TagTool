@@ -153,6 +153,33 @@ namespace TagTool.ShaderDisassembler
 		public uint src3_sel;
 		public uint src2_sel;
 		public uint src1_sel;
-	};
 
+		public bool is_export { get { return export_data == 1; } }
+
+		// Whether the instruction is predicated (or conditional).
+		public bool Is_predicated { get { return is_predicated != 0; } }
+
+		// Required condition value of the comparision (true or false).
+		public bool Pred_condition { get { return pred_condition == 1; } }
+		public bool Abs_constants { get { return abs_constants == 1; } }
+
+		public bool Is_const_0_addressed { get { return const_0_rel_abs == 1; } }
+		public bool Is_const_1_addressed { get { return const_1_rel_abs == 1; } }
+		public bool Is_address_relative { get { return address_absolute == 1; } }
+
+		public bool Has_vector_op
+		{
+			get
+			{
+				return vector_write_mask != 0 || is_export;
+			}
+		}
+		public bool Has_scalar_op
+		{
+			get
+			{
+				return scalar_opc != ScalarOpcode.retain_prev || (!is_export && scalar_write_mask != 0);
+			}
+		}
+	}
 }

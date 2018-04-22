@@ -66,8 +66,10 @@ namespace TagTool.Commands.Porting
 					Console.WriteLine(instr.cfInstr.opcode);
 				else if (instr.instructionType == InstructionType.ALU)
 				{
-					Console.WriteLine(instr.aluInstr.vector_opc);
-					Console.WriteLine("+ " + instr.aluInstr.scalar_opc);
+					if (instr.aluInstr.Has_vector_op)
+						Console.WriteLine(instr.aluInstr.vector_opc);
+					if (instr.aluInstr.Has_scalar_op)
+						Console.WriteLine("+ " + instr.aluInstr.scalar_opc);
 				}
 				else if (instr.instructionType == InstructionType.FETCH)
 					Console.WriteLine(instr.fetchInstr.opcode);
