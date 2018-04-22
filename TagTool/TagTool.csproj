@@ -717,6 +717,7 @@
     <None Include="Resources\Versions.xml" />
     <None Include="Resources\VertexBuffer.xml" />
     <None Include="ShaderDecompiler\UcodeDisassembler\ReadMe.txt" />
+    <Content Include="ShaderDecompiler\ReadMe_PortingPipeline.txt" />
     <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
