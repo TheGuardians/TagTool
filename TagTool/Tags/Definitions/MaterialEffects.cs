@@ -5,14 +5,10 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "material_effects", Tag = "foot", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "material_effects", Tag = "foot", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "material_effects", Tag = "foot", Size = 0xC)]
     public class MaterialEffects
     {
         public List<Effect> Effects;
-
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x24)]
         public class Effect

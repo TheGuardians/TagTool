@@ -202,9 +202,15 @@ namespace TagTool.Commands.Porting
             if ((groupTag == "snd!") && NoAudio)
                 return null;
 
-            if ( groupTag == "rmhg")
-                return CacheContext.GetTag(0x2647);
-
+            bool footFix = IsReplacing;
+            bool footFixNew = IsNew;
+            if ((groupTag == "foot"))
+            {
+                IsReplacing = false;
+                IsNew = true;
+            }
+                
+            
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -568,6 +574,12 @@ namespace TagTool.Commands.Porting
             CacheContext.SaveTagNames(); // Always save new tagnames in case of a crash
 
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+
+            // Fix for foot
+            if (footFix)
+                IsReplacing = true;
+            if (footFixNew)
+                IsNew = true;
 
             return edTag;
         }
