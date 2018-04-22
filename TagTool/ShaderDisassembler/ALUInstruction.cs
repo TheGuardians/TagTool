@@ -154,32 +154,27 @@ namespace TagTool.ShaderDisassembler
 		public uint src2_sel;
 		public uint src1_sel;
 
-		public bool is_export { get { return export_data == 1; } }
+		// Whether data is being exported (or written to local registers).
+		public bool is_export { get => export_data != 0; }
 
 		// Whether the instruction is predicated (or conditional).
-		public bool Is_predicated { get { return is_predicated != 0; } }
-
+		public bool Is_predicated { get => is_predicated != 0; }
 		// Required condition value of the comparision (true or false).
-		public bool Pred_condition { get { return pred_condition == 1; } }
-		public bool Abs_constants { get { return abs_constants == 1; } }
+		public bool Pred_condition { get => pred_condition != 0; }
 
-		public bool Is_const_0_addressed { get { return const_0_rel_abs == 1; } }
-		public bool Is_const_1_addressed { get { return const_1_rel_abs == 1; } }
-		public bool Is_address_relative { get { return address_absolute == 1; } }
+		public bool Abs_constants { get => abs_constants == 1; }
+		public bool Is_const_0_addressed { get => const_0_rel_abs != 0; }
+		public bool Is_const_1_addressed { get => const_1_rel_abs != 0; }
+		public bool Is_address_relative { get => address_absolute != 0; }
 
-		public bool Has_vector_op
-		{
-			get
-			{
-				return vector_write_mask != 0 || is_export;
-			}
-		}
-		public bool Has_scalar_op
-		{
-			get
-			{
-				return scalar_opc != ScalarOpcode.retain_prev || (!is_export && scalar_write_mask != 0);
-			}
-		}
+		// Whether the instruction operates on the vector ALU
+		public bool Has_vector_op { get => vector_write_mask != 0 || is_export; }
+		public bool Is_vector_dest_relative { get => vector_dest_rel != 0; }
+		public bool Vector_clamp { get => vector_clamp != 0; }
+
+		// Whether the instruction operates on the scalar ALU
+		public bool Has_scalar_op { get => scalar_opc != ScalarOpcode.retain_prev || (!is_export && scalar_write_mask != 0); }
+		public bool Is_scalar_dest_relative { get => scalar_dest_rel != 0; }
+		public bool Scalar_clamp { get => scalar_clamp != 0; }
 	}
 }

@@ -46,16 +46,21 @@ namespace TagTool.ShaderDisassembler
 	{
 		public uint address;
 		public uint count;
-		public uint is_yeild;
+		private uint is_yeild;
 		public uint serialize;
 		public uint vc_hi;  // Vertex cache?
 
 		public uint vc_lo;
 		public uint reserved0;
-		public uint clean;
+		private uint clean;
 		public uint reserved1;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Whether to reset the current predicate.
+		public bool Clean { get => clean != 0; }
+		// ?
+		public bool Is_yield { get => is_yeild != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kCondExec and kCondExecEnd.
@@ -64,15 +69,20 @@ namespace TagTool.ShaderDisassembler
 	{
 		public uint address;
 		public uint count;
-		public uint is_yeild;
+		private uint is_yeild;
 		public uint serialize;
 		public uint vc_hi;  // Vertex cache?
 
 		public uint vc_lo;
 		public uint bool_address;
-		public uint condition;
+		private uint condition;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Required condition value of the comparision (true or false).
+		public bool Condition { get => condition != 0; }
+		// ?
+		public bool Is_yield { get => is_yeild != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kCondExecPred, kCondExecPredEnd,
@@ -82,16 +92,23 @@ namespace TagTool.ShaderDisassembler
 	{
 		public uint address;
 		public uint count;
-		public uint is_yeild;
+		private uint is_yeild;
 		public uint serialize;
 		public uint vc_hi;  // Vertex cache?
 
 		public uint vc_lo;
 		public uint reserved0;
-		public uint clean;
-		public uint condition;
+		private uint clean;
+		private uint condition;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Whether to reset the current predicate.
+		public bool Clean{ get => clean != 0; }
+		// Required condition value of the comparision (true or false).
+		public bool Condition { get => condition != 0; }
+		// ?
+		public bool Is_yield { get => is_yeild != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kLoopStart.
@@ -99,7 +116,7 @@ namespace TagTool.ShaderDisassembler
 	public struct LoopStart
 	{
 		public uint address;
-		public uint is_repeat;
+		private uint is_repeat;
 		public uint reserved0;
 		public uint loop_id;
 		public uint reserved1;
@@ -107,7 +124,10 @@ namespace TagTool.ShaderDisassembler
 		public uint reserved2;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
-	}
+
+		// Whether to reuse the current aL instead of reset it to loop start.
+		public bool Is_repeat{ get => is_repeat != 0; }
+}
 
 	// Instruction data for ControlFlowOpcode::kLoopEnd.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -116,13 +136,18 @@ namespace TagTool.ShaderDisassembler
 		public uint address;
 		public uint reserved0;
 		public uint loop_id;
-		public uint is_predicated_break;
+		private uint is_predicated_break;
 		public uint reserved1;
 
 		public uint reserved2;
-		public uint condition;
+		private uint condition;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Break from the loop if the predicate matches the expected value.
+		public bool Is_predicated_break{ get => is_predicated_break != 0; }
+		// Required condition value of the comparision (true or false).
+		public bool Condition{ get => condition != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kCondCall.
@@ -130,15 +155,22 @@ namespace TagTool.ShaderDisassembler
 	public struct CondCall
 	{
 		public uint address;
-		public uint is_unconditional;
-		public uint is_predicated;
+		private uint is_unconditional;
+		private uint is_predicated;
 		public uint reserved0;
 
 		public uint reserved1;
 		public uint bool_address;
-		public uint condition;
+		private uint condition;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Unconditional call - ignores condition/predication.
+		public bool Is_unconditional{ get => is_unconditional != 0; }
+		// Whether the call is predicated (or conditional).
+		public bool Is_predicated{ get => is_predicated != 0; }
+		// Required condition value of the comparision (true or false).
+		public bool Condition{ get => condition != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kReturn.
@@ -157,16 +189,23 @@ namespace TagTool.ShaderDisassembler
 	public struct CondJmp
 	{
 		public uint address;
-		public uint is_unconditional;
-		public uint is_predicated;
+		private uint is_unconditional;
+		private uint is_predicated;
 		public uint reserved0;
 
 		public uint reserved1;
 		public uint direction;
 		public uint bool_address;
-		public uint condition;
+		private uint condition;
 		public AddressMode address_mode;
 		public ControlFlowOpcode opcode;
+
+		// Unconditional call - ignores condition/predication.
+		public bool Is_unconditional { get => is_unconditional != 0; }
+		// Whether the call is predicated (or conditional).
+		public bool Is_predicated { get => is_predicated != 0; }
+		// Required condition value of the comparision (true or false).
+		public bool Condition { get => condition != 0; }
 	}
 
 	// Instruction data for ControlFlowOpcode::kAlloc.
@@ -201,46 +240,37 @@ namespace TagTool.ShaderDisassembler
 		// instructions.
 		public bool Executes
 		{
-			get
-			{
-				return this.opcode == ControlFlowOpcode.exec ||
-					   this.opcode == ControlFlowOpcode.exece ||
-					   this.opcode == ControlFlowOpcode.cexec ||
-					   this.opcode == ControlFlowOpcode.cexece ||
-					   this.opcode == ControlFlowOpcode.cexec_pred ||
-					   this.opcode == ControlFlowOpcode.cexece_pred ||
-					   this.opcode == ControlFlowOpcode.cexec_pred_clean ||
-					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
-			}
+			get =>	this.opcode == ControlFlowOpcode.exec ||
+					this.opcode == ControlFlowOpcode.exece ||
+					this.opcode == ControlFlowOpcode.cexec ||
+					this.opcode == ControlFlowOpcode.cexece ||
+					this.opcode == ControlFlowOpcode.cexec_pred ||
+					this.opcode == ControlFlowOpcode.cexece_pred ||
+					this.opcode == ControlFlowOpcode.cexec_pred_clean ||
+					this.opcode == ControlFlowOpcode.cexece_pred_clean;
 		}
 
 		// True if the given control flow opcode terminates the shader after
 		// executing.
 		public bool EndsShader
 		{
-			get
-			{
-				return this.opcode == ControlFlowOpcode.exece ||
-					   this.opcode == ControlFlowOpcode.cexece ||
-					   this.opcode == ControlFlowOpcode.cexece_pred ||
-					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
-			}
+			get =>	this.opcode == ControlFlowOpcode.exece ||
+					this.opcode == ControlFlowOpcode.cexece ||
+					this.opcode == ControlFlowOpcode.cexece_pred ||
+					this.opcode == ControlFlowOpcode.cexece_pred_clean;
 		}
 
 		// True if the given control flow opcode resets the predicate prior to
 		// execution.
 		public bool ResetsPredicate
 		{
-			get
-			{
-				return this.opcode == ControlFlowOpcode.cexec_pred_clean ||
-					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
-			}
+			get =>	this.opcode == ControlFlowOpcode.cexec_pred_clean ||
+					this.opcode == ControlFlowOpcode.cexece_pred_clean;
 		}
 
 		// This is used to determine if an `Executes()` instruction executes Fetch instructions.
 		// index == index of instruction executed by `Executes()` instruction.
-		public bool IsFetch(int index)
+		public bool ExecuteIndexIsFetch(int index)
 		{
 			return (exec.serialize & (1 << (index * 2))) != 0;
 		}

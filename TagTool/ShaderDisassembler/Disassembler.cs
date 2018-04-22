@@ -35,12 +35,12 @@ namespace TagTool.ShaderDisassembler
 							dword1 = BitConverter.ToUInt32(BitConverter.GetBytes(BitConverter.ToUInt32(instrs_data, j + 4)).Reverse().ToArray(), 0);
 							dword2 = BitConverter.ToUInt32(BitConverter.GetBytes(BitConverter.ToUInt32(instrs_data, j + 8)).Reverse().ToArray(), 0);
 
-							if (!cf.IsFetch(j / 12))
+							if (!cf.ExecuteIndexIsFetch(j / 12))
 							{
 								var alu = InstructionDecoding.DecodeALU(dword0, dword1, dword2);
 								instructions.Add(new Instruction(alu));
 							}
-							else if (cf.IsFetch(j / 12))
+							else if (cf.ExecuteIndexIsFetch(j / 12))
 							{
 								var fetch = InstructionDecoding.DecodeFetch(dword0, dword1, dword2);
 								instructions.Add(new Instruction(fetch));

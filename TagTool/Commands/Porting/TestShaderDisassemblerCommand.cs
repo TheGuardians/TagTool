@@ -22,9 +22,10 @@ namespace TagTool.Commands.Porting
 			"DisassembleShader",
 			"Test command for xbox360 shader disassembly.",
 
-			"DisassembleShader <shaderIndex> <tagname>",
+			"DisassembleShader <shader_index> <tag_name>",
 
-			"Test command for xbox360 shader disassembly.")
+			"shader_index - index into the Shaders block of the shader you wish to disassemble.\n" +
+			"tag_name - the name of the tag which contains the shader you wish to disassemble.")
 		{
 			CacheContext = cacheContext;
 			BlamCache = blamCache;
@@ -53,11 +54,10 @@ namespace TagTool.Commands.Porting
 			{
 				Console.WriteLine($"Unable to locate tag: {tagName}\n " +
 					$"Please check your spelling and verify the tag exists.");
-				return true;
+				return false;
 			}
 
 			var shaderData = pixl.Shaders[shaderIndex].XboxShaderReference.ShaderData;
-
 			var instrs = Disassembler.Disassemble(shaderData);
 
 			foreach (var instr in instrs)
