@@ -9,7 +9,7 @@ namespace TagTool.Audio
 
         public enum SampleRateValue : sbyte
         {
-            _22khz,
+            _48khz,
             _44khz,
             _32khz
         }
@@ -18,8 +18,8 @@ namespace TagTool.Audio
         {
             switch (value)
             {
-                case SampleRateValue._22khz:
-                    return 22050;
+                case SampleRateValue._48khz:
+                    return 48000;
 
                 case SampleRateValue._32khz:
                     return 32000;
@@ -34,8 +34,8 @@ namespace TagTool.Audio
         {
             switch (value)
             {
-                case SampleRateValue._22khz:
-                    return 22.050f;
+                case SampleRateValue._48khz:
+                    return 48.000f;
 
                 case SampleRateValue._32khz:
                     return 32.000f;
