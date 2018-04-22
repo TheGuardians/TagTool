@@ -254,6 +254,20 @@ namespace TagTool.Commands.Porting
                 //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
+                //loop through unset fields and set them to HO values
+                foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal).GetFields())
+                {
+                    object H3FieldValue = H3FieldInfo.GetValue(H3Definition.HudGlobals[hudGlobalsIndex]);
+                    object HOFieldValue = H3FieldInfo.GetValue(HODefinition.HudGlobals[hudGlobalsIndex]);
+                    object zeroint = (int)0;
+                    object zerofloat = 0.0f;
+                    object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
+                    object zerotag = new CachedTagInstance(-1);
+
+                    if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
+                        H3FieldInfo.SetValue(H3Definition.HudGlobals[hudGlobalsIndex], HOFieldValue);
+                }
+
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
                     var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
@@ -278,8 +292,7 @@ namespace TagTool.Commands.Porting
                     H3att.NotificationScale = 1.2f;
                     H3att.NotificationLineSpacing = 30.0f;
                     H3att.NotificationOffsetY_HO = 0.65f;
-
-
+                    H3att.WarpAngle = -1.0f;
                 }
 
                 /*
@@ -356,7 +369,7 @@ namespace TagTool.Commands.Porting
 
                 if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
                     H3FieldInfo.SetValue(H3Definition, HOFieldValue);
-                if (H3FieldInfo.FieldType is TagFunction)
+                if (H3FieldInfo.FieldType == typeof(TagFunction))
                     H3FieldInfo.SetValue(H3Definition, HOFieldValue);
             }
             return H3Definition;
