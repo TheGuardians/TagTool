@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderDisassembler
 {
+	// A container for different instruction types, so we can put them into a list.
+	// (inheritence not good practice because we are using structs for C++/C# interop)
 	public class Instruction
 	{
 		public ControlFlowInstruction cfInstr;

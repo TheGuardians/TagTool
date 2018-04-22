@@ -713,6 +713,7 @@
     <None Include="Resources\Classes_H2.xml" />
     <None Include="Resources\Versions.xml" />
     <None Include="Resources\VertexBuffer.xml" />
+    <None Include="ShaderDisassembler\ReadMe.txt" />
     <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

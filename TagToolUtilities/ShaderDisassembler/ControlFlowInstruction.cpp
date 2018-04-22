@@ -1,8 +1,10 @@
 #include <cstdint>
 
-#pragma pack(push, 1)
+/* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
+CHANGES TO THE MATCHING FILE IN THE `TagTool` PROJECT */
+
 // Instruction data for ControlFlowOpcode::kExec and kExecEnd.
-struct PackedExec {
+__declspec(align(1)) struct PackedExec {
 	// Word 0: (32 bits)
 	uint32_t address : 12;
 	uint32_t count : 3;
@@ -18,7 +20,7 @@ struct PackedExec {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct Exec {
+__declspec(align(1)) struct Exec {
 	uint32_t address;
 	uint32_t count;
 	uint32_t is_yeild;
@@ -34,7 +36,7 @@ struct Exec {
 };
 
 // Instruction data for ControlFlowOpcode::kCondExec and kCondExecEnd.
-struct PackedCondExec {
+__declspec(align(1)) struct PackedCondExec {
 	// Word 0: (32 bits)
 	uint32_t address : 12;
 	uint32_t count : 3;
@@ -49,7 +51,7 @@ struct PackedCondExec {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct CondExec {
+__declspec(align(1)) struct CondExec {
 	uint32_t address;
 	uint32_t count;
 	uint32_t is_yeild;
@@ -65,7 +67,7 @@ struct CondExec {
 
 // Instruction data for ControlFlowOpcode::kCondExecPred, kCondExecPredEnd,
 // kCondExecPredClean, kCondExecPredCleanEnd.
-struct PackedCondExecPred {
+__declspec(align(1)) struct PackedCondExecPred {
 	// Word 0: (32 bits)
 	uint32_t address : 12;
 	uint32_t count : 3;
@@ -81,7 +83,7 @@ struct PackedCondExecPred {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct CondExecPred {
+__declspec(align(1)) struct CondExecPred {
 	uint32_t address;
 	uint32_t count;
 	uint32_t is_yeild;
@@ -97,7 +99,7 @@ struct CondExecPred {
 };
 
 // Instruction data for ControlFlowOpcode::kLoopStart.
-struct PackedLoopStart {
+__declspec(align(1)) struct PackedLoopStart {
 	// Word 0: (32 bits)
 	uint32_t address : 13;
 	uint32_t is_repeat : 1;
@@ -110,7 +112,7 @@ struct PackedLoopStart {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct LoopStart {
+__declspec(align(1)) struct LoopStart {
 	uint32_t address;
 	uint32_t is_repeat;
 	uint32_t reserved0;
@@ -123,7 +125,7 @@ struct LoopStart {
 };
 
 // Instruction data for ControlFlowOpcode::kLoopEnd.
-struct PackedLoopEnd {
+__declspec(align(1)) struct PackedLoopEnd {
 	// Word 0: (32 bits)
 	uint32_t address : 13;
 	uint32_t reserved0 : 3;
@@ -137,7 +139,7 @@ struct PackedLoopEnd {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct LoopEnd {
+__declspec(align(1)) struct LoopEnd {
 	uint32_t address;
 	uint32_t reserved0;
 	uint32_t loop_id;
@@ -151,7 +153,7 @@ struct LoopEnd {
 };
 
 // Instruction data for ControlFlowOpcode::kCondCall.
-struct PackedCondCall {
+__declspec(align(1)) struct PackedCondCall {
 	// Word 0: (32 bits)
 	uint32_t address : 13;
 	uint32_t is_unconditional : 1;
@@ -165,7 +167,7 @@ struct PackedCondCall {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct CondCall {
+__declspec(align(1)) struct CondCall {
 	uint32_t address;
 	uint32_t is_unconditional;
 	uint32_t is_predicated;
@@ -179,7 +181,7 @@ struct CondCall {
 };
 
 // Instruction data for ControlFlowOpcode::kReturn.
-struct PackedReturn {
+__declspec(align(1)) struct PackedReturn {
 	// Word 0: (32 bits)
 	uint32_t reserved0 : 32;
 
@@ -188,7 +190,7 @@ struct PackedReturn {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct Return {
+__declspec(align(1)) struct Return {
 	uint32_t reserved0;
 
 	uint32_t reserved1;
@@ -197,7 +199,7 @@ struct Return {
 };
 
 // Instruction data for ControlFlowOpcode::kCondJmp.
-struct PackedCondJmp {
+__declspec(align(1)) struct PackedCondJmp {
 	// Word 0: (32 bits)
 	uint32_t address : 13;
 	uint32_t is_unconditional : 1;
@@ -212,7 +214,7 @@ struct PackedCondJmp {
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
 };
-struct CondJmp {
+__declspec(align(1)) struct CondJmp {
 	uint32_t address;
 	uint32_t is_unconditional;
 	uint32_t is_predicated;
@@ -227,7 +229,7 @@ struct CondJmp {
 };
 
 // Instruction data for ControlFlowOpcode::kAlloc.
-struct PackedAlloc {
+__declspec(align(1)) struct PackedAlloc {
 	// Word 0: (32 bits)
 	uint32_t size : 3;
 	uint32_t reserved0 : 29;
@@ -239,7 +241,7 @@ struct PackedAlloc {
 	uint32_t reserved2 : 1;
 	uint32_t opcode : 4;
 };
-struct Alloc {
+__declspec(align(1)) struct Alloc {
 	uint32_t size;
 	uint32_t reserved0;
 
@@ -250,7 +252,7 @@ struct Alloc {
 	uint32_t opcode;
 };
 
-union CFUnion {
+__declspec(align(1)) union CFUnion {
 
 	PackedExec exec;                    // kExec*
 	PackedCondExec cond_exec;           // kCondExec*
@@ -273,7 +275,7 @@ union CFUnion {
 	};
 };
 
-struct CFInstruction {
+__declspec(align(1)) struct CFInstruction {
 	Exec exec;
 	CondExec cond_exec;
 	CondExecPred cond_exec_pred;
@@ -285,8 +287,6 @@ struct CFInstruction {
 	Alloc alloc;
 	uint32_t opcode;
 };
-
-#pragma pack(pop)
 
 extern "C"
 {

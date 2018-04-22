@@ -1,6 +1,9 @@
 #include <cstdint>
 
-struct PackedVFetch {
+/* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
+CHANGES TO THE MATCHING FILE IN THE `TagTool` PROJECT */
+
+__declspec(align(1)) struct PackedVFetch {
 	uint32_t opcode_value : 5;
 	uint32_t src_reg : 6;
 	uint32_t src_reg_am : 1;
@@ -27,7 +30,7 @@ struct PackedVFetch {
 	uint32_t offset : 23;
 	uint32_t pred_condition : 1;
 };
-struct VFetch {
+__declspec(align(1)) struct VFetch {
 	uint32_t opcode_value;
 	uint32_t src_reg;
 	uint32_t src_reg_am;
@@ -55,7 +58,7 @@ struct VFetch {
 	uint32_t pred_condition;
 };
 
-struct PackedTFetch {
+__declspec(align(1)) struct PackedTFetch {
 	uint32_t opcode_value : 5;
 	uint32_t src_reg : 6;
 	uint32_t src_reg_am : 1;
@@ -89,7 +92,7 @@ struct PackedTFetch {
 	uint32_t offset_z : 5;
 	uint32_t pred_condition : 1;
 };
-struct TFetch {
+__declspec(align(1)) struct TFetch {
 	uint32_t opcode_value;
 	uint32_t src_reg;
 	uint32_t src_reg_am;
@@ -124,7 +127,7 @@ struct TFetch {
 	uint32_t pred_condition;
 };
 
-union FetchUnion {
+__declspec(align(1)) union FetchUnion {
 	PackedVFetch vfetch;
 	PackedTFetch tfetch;
 
@@ -135,7 +138,7 @@ union FetchUnion {
 	};
 };
 
-struct FetchInstruction {
+__declspec(align(1)) struct FetchInstruction {
 	VFetch vfetch;
 	TFetch tfetch;
 	uint32_t opcode;

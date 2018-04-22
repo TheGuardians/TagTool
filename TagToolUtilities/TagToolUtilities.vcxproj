@@ -157,6 +157,12 @@
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="DirectX.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ShaderDisassembler\ReadMe.txt">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

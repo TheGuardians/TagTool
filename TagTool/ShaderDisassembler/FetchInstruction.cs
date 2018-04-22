@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
+
+/* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
+ CHANGES TO THE MATCHING FILE IN THE `TagToolUtilities` PROJECT */
 
 namespace TagTool.ShaderDisassembler
 {
@@ -134,7 +133,7 @@ namespace TagTool.ShaderDisassembler
 		k_32_32_32_32_FLOAT = 0x26,
 		k_32_32_32_FLOAT = 0x39,
 	}
-	public enum TextureDimension : byte
+	public enum TextureDimension
 	{
 		One = 0x00,
 		Two = 0x01,
@@ -142,6 +141,8 @@ namespace TagTool.ShaderDisassembler
 		Cube = 0x03,
 	}
 
+	// Instruction data for FetchOpCode.vfetch
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct VFetch
 	{
 		public FetchOpCode opcode_value;
@@ -221,7 +222,9 @@ namespace TagTool.ShaderDisassembler
 		}
 	}
 
-
+	// Instruction data for FetchOpCode.tfetch, getBCF, getCompTexLod, getGradients, getWeights, setTexLOD,
+	// setGradientH, setGradientV, and "kUnknownTextureOp"
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct TFetch
 	{
 		public FetchOpCode opcode_value;
@@ -280,6 +283,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Use_register_gradients { get => use_reg_gradients != 0; }
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct FetchInstruction
 	{
 		public VFetch vFetch;

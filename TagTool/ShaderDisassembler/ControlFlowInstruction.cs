@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
+
+/* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
+ CHANGES TO THE MATCHING FILE IN THE `TagToolUtilities` PROJECT */
 
 namespace TagTool.ShaderDisassembler
 {
@@ -40,7 +38,7 @@ namespace TagTool.ShaderDisassembler
 		Memory = 0x03,
 	}
 
-	// Instruction data for ControlFlowOpcode::kExec and kExecEnd.
+	// Instruction data for ControlFlowOpcode.exec and exece.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Exec
 	{
@@ -63,7 +61,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Is_yield { get => is_yeild != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kCondExec and kCondExecEnd.
+	// Instruction data for ControlFlowOpcode.cexec and cexece.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct CondExec
 	{
@@ -85,8 +83,8 @@ namespace TagTool.ShaderDisassembler
 		public bool Is_yield { get => is_yeild != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kCondExecPred, kCondExecPredEnd,
-	// kCondExecPredClean, kCondExecPredCleanEnd.
+	// Instruction data for ControlFlowOpcode.cexec_pred, cexece_pred,
+	// cexec_pred_clean, and cexece_pred_clean.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct CondExecPred
 	{
@@ -111,7 +109,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Is_yield { get => is_yeild != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kLoopStart.
+	// Instruction data for ControlFlowOpcode.loop.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct LoopStart
 	{
@@ -129,7 +127,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Is_repeat{ get => is_repeat != 0; }
 }
 
-	// Instruction data for ControlFlowOpcode::kLoopEnd.
+	// Instruction data for ControlFlowOpcode.endloop.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct LoopEnd
 	{
@@ -150,7 +148,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Condition{ get => condition != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kCondCall.
+	// Instruction data for ControlFlowOpcode.ccall.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct CondCall
 	{
@@ -173,7 +171,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Condition{ get => condition != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kReturn.
+	// Instruction data for ControlFlowOpcode.ret.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Return
 	{
@@ -184,7 +182,7 @@ namespace TagTool.ShaderDisassembler
 		public ControlFlowOpcode opcode;
 	}
 
-	// Instruction data for ControlFlowOpcode::kCondJmp.
+	// Instruction data for ControlFlowOpcode.cjmp.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct CondJmp
 	{
@@ -208,7 +206,7 @@ namespace TagTool.ShaderDisassembler
 		public bool Condition { get => condition != 0; }
 	}
 
-	// Instruction data for ControlFlowOpcode::kAlloc.
+	// Instruction data for ControlFlowOpcode.alloc.
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Alloc
 	{

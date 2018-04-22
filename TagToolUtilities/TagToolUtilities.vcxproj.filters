@@ -48,4 +48,9 @@
       <Filter>ShaderDisassembler</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ShaderDisassembler\ReadMe.txt">
+      <Filter>ShaderDisassembler</Filter>
+    </None>
+  </ItemGroup>
 </Project>

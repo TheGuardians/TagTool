@@ -1,6 +1,9 @@
 #include <cstdint>
 
-struct PackedALU {
+/* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
+CHANGES TO THE MATCHING FILE IN THE `TagTool` PROJECT */
+
+__declspec(align(1)) struct PackedALU {
 	uint32_t vector_dest : 6;
 	uint32_t vector_dest_rel : 1;
 	uint32_t abs_constants : 1;
@@ -33,7 +36,7 @@ struct PackedALU {
 	uint32_t src2_sel : 1;
 	uint32_t src1_sel : 1;
 };
-struct ALUInstruction {
+__declspec(align(1)) struct ALUInstruction {
 	uint32_t vector_dest;
 	uint32_t vector_dest_rel;
 	uint32_t abs_constants;
@@ -67,7 +70,7 @@ struct ALUInstruction {
 	uint32_t src1_sel;
 };
 
-union ALUUnion {
+__declspec(align(1)) union ALUUnion {
 	PackedALU alu;
 
 	struct {
