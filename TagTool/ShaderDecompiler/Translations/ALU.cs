@@ -10,6 +10,17 @@ namespace TagTool.ShaderDecompiler.Translations
 	// Class for providing translation methods from Vector/Scalar ALU instructions into HLSL.
 	public class ALU
 	{
+		// Conventions:
+		// - All temporary registers are vec4s.
+		// - Scalar ops swizzle out a single component of their source registers denoted
+		//   by 'a' or 'b'. src0.a means 'the first component specified for src0' and
+		//   src0.ab means 'two components specified for src0, in order'.
+		// - Scalar ops write the result to the entire destination register.
+		// - pv and ps are the previous results of a vector or scalar ALU operation.
+		//   Both are valid only within the current ALU clause. They are not modified
+		//   when write masks are disabled or the instruction that would write them
+		//   fails its predication check.
+
 		// Translates an ALU Vector/Scalar pair into HLSL fragments (Vector and Scalar ALU instructions
 		// are ALWAYS executed in pairs, and are part of the same instruction definition.
 		public string Get(Instruction instruction)
