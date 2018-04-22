@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.ShaderDisassembler
+namespace TagTool.ShaderDecompiler.UcodeDisassembler
 {
 	// A container for different instruction types, so we can put them into a list.
 	// (inheritence not good practice because we are using structs for C++/C# interop)

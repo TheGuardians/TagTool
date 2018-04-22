@@ -375,12 +375,15 @@
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
-    <Compile Include="ShaderDisassembler\ALUInstruction.cs" />
-    <Compile Include="ShaderDisassembler\ControlFlowInstruction.cs" />
-    <Compile Include="ShaderDisassembler\Disassembler.cs" />
-    <Compile Include="ShaderDisassembler\FetchInstruction.cs" />
-    <Compile Include="ShaderDisassembler\Instruction.cs" />
-    <Compile Include="ShaderDisassembler\InstructionDecoding.cs" />
+    <Compile Include="ShaderDecompiler\Decompiler.cs" />
+    <Compile Include="ShaderDecompiler\PostFixups.cs" />
+    <Compile Include="ShaderDecompiler\PreFixups.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\ALUInstruction.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\ControlFlowInstruction.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\Disassembler.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\FetchInstruction.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\Instruction.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\InstructionDecoding.cs" />
     <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\DecalTemplateShaderGenerator.cs" />
@@ -713,7 +716,7 @@
     <None Include="Resources\Classes_H2.xml" />
     <None Include="Resources\Versions.xml" />
     <None Include="Resources\VertexBuffer.xml" />
-    <None Include="ShaderDisassembler\ReadMe.txt" />
+    <None Include="ShaderDecompiler\UcodeDisassembler\ReadMe.txt" />
     <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

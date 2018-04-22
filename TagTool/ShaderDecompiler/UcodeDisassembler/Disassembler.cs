@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.ShaderDisassembler
+namespace TagTool.ShaderDecompiler.UcodeDisassembler
 {
 	public class Disassembler
 	{

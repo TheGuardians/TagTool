@@ -3,7 +3,7 @@
 /* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
  CHANGES TO THE MATCHING FILE IN THE `TagToolUtilities` PROJECT */
 
-namespace TagTool.ShaderDisassembler
+namespace TagTool.ShaderDecompiler.UcodeDisassembler
 {
 	public enum FetchOpCode
 	{

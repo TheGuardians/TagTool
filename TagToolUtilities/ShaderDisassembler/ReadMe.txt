@@ -1,7 +1,7 @@
 
 
 
-	There is a matching "ShaderDisassembler" folder in the TagTool project. 
+	There is a matching "ShaderDecompiler\ShaderDisassembler" folder in the TagTool project. 
 Inside of that folder are matching C# versions of "ControlFlowInstruction.cpp", "ALUInstruction.cpp", and 
 "FetchInstruction.cpp".
 

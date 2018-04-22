@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Common;
 using TagTool.Serialization;
-using TagTool.ShaderDisassembler;
-using TagTool.Tags;
+using TagTool.ShaderDecompiler.UcodeDisassembler;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
