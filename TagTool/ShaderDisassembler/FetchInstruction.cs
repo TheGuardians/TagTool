@@ -209,8 +209,8 @@ namespace TagTool.ShaderDisassembler
 
 	public struct FetchInstruction
 	{
-		VFetch vFetch;
-		TFetch tfetch;
-		FetchOpCode opcode;
+		public VFetch vFetch;
+		public TFetch tfetch;
+		public FetchOpCode opcode;
 	}
 }

@@ -10,7 +10,7 @@ struct PackedExec {
 	uint32_t serialize : 12;
 	uint32_t vc_hi : 4;  // Vertex cache?
 
-	// Word 1: (16 bits)
+						 // Word 1: (16 bits)
 	uint32_t vc_lo : 2;
 	uint32_t reserved0 : 7;
 	uint32_t clean : 1;
@@ -42,13 +42,13 @@ struct PackedCondExec {
 	uint32_t serialize : 12;
 	uint32_t vc_hi : 4;  // Vertex cache?
 
-	// Word 1: (16 bits)
+						 // Word 1: (16 bits)
 	uint32_t vc_lo : 2;
 	uint32_t bool_address : 8;
 	uint32_t condition : 1;
 	uint32_t address_mode : 1;
 	uint32_t opcode : 4;
-}; 
+};
 struct CondExec {
 	uint32_t address;
 	uint32_t count;
@@ -73,7 +73,7 @@ struct PackedCondExecPred {
 	uint32_t serialize : 12;
 	uint32_t vc_hi : 4;  // Vertex cache?
 
-	// Word 1: (16 bits)
+						 // Word 1: (16 bits)
 	uint32_t vc_lo : 2;
 	uint32_t reserved0 : 7;
 	uint32_t clean : 1;
@@ -236,7 +236,7 @@ struct PackedAlloc {
 	uint32_t reserved1 : 8;
 	uint32_t is_unserialized : 1;
 	uint32_t alloc_type : 2;
-	uint32_t reserved2: 1;
+	uint32_t reserved2 : 1;
 	uint32_t opcode : 4;
 };
 struct Alloc {
@@ -261,7 +261,7 @@ union CFUnion {
 	PackedReturn ret;                   // kReturn
 	PackedCondJmp cond_jmp;             // kCondJmp
 	PackedAlloc alloc;                  // kAlloc
-	
+
 	struct {
 		uint32_t unused_0 : 32;
 		uint32_t unused_1 : 12;

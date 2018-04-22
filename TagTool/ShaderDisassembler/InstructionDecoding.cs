@@ -35,14 +35,14 @@ namespace TagTool.ShaderDisassembler
 			return fetch;
 		}
 
-	
-		[DllImport("Interop.dll")]
-		public static extern void decodeCF(uint dword0, uint dword1, ref ControlFlowInstruction cfi);
 
-		[DllImport("Interop.dll")]
+		[DllImport("TagToolUtilities.dll")]
+		private static extern void decodeCF(uint dword0, uint dword1, ref ControlFlowInstruction cfi);
+
+		[DllImport("TagToolUtilities.dll")]
 		private static extern void decodeALU(uint dword0, uint dword1, uint dword2, ref ALUInstruction alui);
 
-		[DllImport("Interop.dll")]
+		[DllImport("TagToolUtilities.dll")]
 		private static extern void decodeFetch(uint dword0, uint dword1, uint dword2, ref FetchInstruction fi);
 	}
 }

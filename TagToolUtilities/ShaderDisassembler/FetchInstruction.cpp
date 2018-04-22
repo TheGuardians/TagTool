@@ -22,7 +22,7 @@ struct PackedVFetch {
 	uint32_t exp_adjust : 6;
 	uint32_t is_mini_fetch : 1;
 	uint32_t is_predicated : 1;
-	
+
 	uint32_t stride : 8;
 	uint32_t offset : 23;
 	uint32_t pred_condition : 1;

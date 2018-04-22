@@ -279,6 +279,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
+    <Compile Include="Commands\Porting\TestShaderDisassemblerCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
     <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
@@ -376,7 +377,9 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="ShaderDisassembler\ALUInstruction.cs" />
     <Compile Include="ShaderDisassembler\ControlFlowInstruction.cs" />
+    <Compile Include="ShaderDisassembler\Disassembler.cs" />
     <Compile Include="ShaderDisassembler\FetchInstruction.cs" />
+    <Compile Include="ShaderDisassembler\Instruction.cs" />
     <Compile Include="ShaderDisassembler\InstructionDecoding.cs" />
     <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />

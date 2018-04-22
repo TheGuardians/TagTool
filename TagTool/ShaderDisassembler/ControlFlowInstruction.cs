@@ -196,5 +196,53 @@ namespace TagTool.ShaderDisassembler
 		public CondJmp cond_jmp;
 		public Alloc alloc;
 		public ControlFlowOpcode opcode;
+
+		// True if the given control flow opcode executes ALU or fetch
+		// instructions.
+		public bool Executes
+		{
+			get
+			{
+				return this.opcode == ControlFlowOpcode.exec ||
+					   this.opcode == ControlFlowOpcode.exece ||
+					   this.opcode == ControlFlowOpcode.cexec ||
+					   this.opcode == ControlFlowOpcode.cexece ||
+					   this.opcode == ControlFlowOpcode.cexec_pred ||
+					   this.opcode == ControlFlowOpcode.cexece_pred ||
+					   this.opcode == ControlFlowOpcode.cexec_pred_clean ||
+					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
+			}
+		}
+
+		// True if the given control flow opcode terminates the shader after
+		// executing.
+		public bool EndsShader
+		{
+			get
+			{
+				return this.opcode == ControlFlowOpcode.exece ||
+					   this.opcode == ControlFlowOpcode.cexece ||
+					   this.opcode == ControlFlowOpcode.cexece_pred ||
+					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
+			}
+		}
+
+		// True if the given control flow opcode resets the predicate prior to
+		// execution.
+		public bool ResetsPredicate
+		{
+			get
+			{
+				return this.opcode == ControlFlowOpcode.cexec_pred_clean ||
+					   this.opcode == ControlFlowOpcode.cexece_pred_clean;
+			}
+		}
+
+		// This is used to determine if an `Executes()` instruction executes Fetch instructions.
+		// index == index of instruction executed by `Executes()` instruction.
+		public bool IsFetch(int index)
+		{
+			return (exec.serialize & (1 << (index * 2))) != 0;
+		}
 	}
 }
