@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderDecompiler.Translations
 {
-	class Fetch
+	// Class for providing translations from Fetch instructions into HLSL.
+	public class Fetch
 	{
 
 	}

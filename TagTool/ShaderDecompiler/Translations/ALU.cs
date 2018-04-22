@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderDecompiler.Translations
 {
-	class ALU
+	// Class for providing translation methods from Vector/Scalar ALU instructions into HLSL.
+	public class ALU
 	{
+
 	}
 }
