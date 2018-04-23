@@ -14,15 +14,17 @@ namespace TagTool.Audio
             _32khz
         }
 
+        // File converted using either 48000 or 24000 are broken, using 44100 seems to work for now.
+
         public int GetSampleRateHz()
         {
             switch (value)
             {
                 case SampleRateValue._48khz:
-                    return 48000;
+                    return 44100;
 
                 case SampleRateValue._32khz:
-                    return 32000;
+                    return 44100;
 
                 case SampleRateValue._44khz:
                 default:
@@ -35,10 +37,10 @@ namespace TagTool.Audio
             switch (value)
             {
                 case SampleRateValue._48khz:
-                    return 48.000f;
+                    return 44.100f;
 
                 case SampleRateValue._32khz:
-                    return 32.000f;
+                    return 44.100f;
 
                 case SampleRateValue._44khz:
                 default:
