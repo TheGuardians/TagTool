@@ -34,6 +34,10 @@ namespace TagTool.ShaderDecompiler
 				"#define ZERO 0							\n";
 
 			string indent = "	";
+
+			// Much more work is needed here.
+			// TODO: handle all ControlFlowInstruction types.
+			// Distinguish between ALU and Fetch instructions.
 			foreach (var instr in instructions)
 			{
 				foreach (var cf_instr in instr.cf_instrs)
