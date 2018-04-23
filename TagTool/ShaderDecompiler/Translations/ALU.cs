@@ -23,194 +23,192 @@ namespace TagTool.ShaderDecompiler.Translations
 
 		// Translates an ALU Vector/Scalar pair into HLSL fragments (Vector and Scalar ALU instructions
 		// are ALWAYS executed in pairs, and are part of the same instruction definition.
-		public string Get(Instruction instruction)
+		public static string Get(Instruction instruction, string indent)
 		{
 			PreFixups.Apply(ref instruction.alu_instr);
 
 			string translation = "";
 
-			translation += $"{Vector(instruction)}";
-			translation += $"{Scalar(instruction)}";
+			translation += $"{Vector(instruction, indent)}";
+			translation += $"{Scalar(instruction, indent)}";
 
 			return translation;
 		}
 
 		// Translates the Vector portions of an ALU instruction into HLSL fragments.
-		private string Vector(Instruction instruction)
+		private static string Vector(Instruction instruction, string indent)
 		{
 			string translation = "";
 			if (!instruction.alu_instr.Has_vector_op)
 				return translation;
 
-			string asmInstruction = $"// {instruction.alu_instr.GetVectorAsmString()}\n";
-
 			switch (instruction.alu_instr.vector_opc)
 			{
 				case VectorOpcode.add:
-					translation += 
-						"pv = src0 + src1;";
+					translation +=
+						"dest = src0 + src1;";
 					break;
 				case VectorOpcode.cndeq:
 					translation +=
-						" pv.x = (src0.x == 0.0f) ? src1.x : src2.x;\n" +
-						" pv.y = (src0.y == 0.0f) ? src1.y : src2.y;\n" +
-						" pv.z = (src0.z == 0.0f) ? src1.z : src2.z;\n" +
-						" pv.w = (src0.w == 0.0f) ? src1.w : src2.w;";
+						" dest.x = (src0.x == 0.0f) ? src1.x : src2.x;\n" +
+						" dest.y = (src0.y == 0.0f) ? src1.y : src2.y;\n" +
+						" dest.z = (src0.z == 0.0f) ? src1.z : src2.z;\n" +
+						" dest.w = (src0.w == 0.0f) ? src1.w : src2.w;";
 					break;
 				case VectorOpcode.cndge:
 					translation +=
-						" pv.x = (src0.x >= 0.0f) ? src1.x : src2.x;\n" +
-						" pv.y = (src0.y >= 0.0f) ? src1.y : src2.y;\n" +
-						" pv.z = (src0.z >= 0.0f) ? src1.z : src2.z;\n" +
-						" pv.w = (src0.w >= 0.0f) ? src1.w : src2.w;";
+						" dest.x = (src0.x >= 0.0f) ? src1.x : src2.x;\n" +
+						" dest.y = (src0.y >= 0.0f) ? src1.y : src2.y;\n" +
+						" dest.z = (src0.z >= 0.0f) ? src1.z : src2.z;\n" +
+						" dest.w = (src0.w >= 0.0f) ? src1.w : src2.w;";
 					break;
 				case VectorOpcode.cndgt:
 					translation +=
-						" pv.x = (src0.x > 0.0f) ? src1.x : src2.x;\n" +
-						" pv.y = (src0.y > 0.0f) ? src1.y : src2.y;\n" +
-						" pv.z = (src0.z > 0.0f) ? src1.z : src2.z;\n" +
-						" pv.w = (src0.w > 0.0f) ? src1.w : src2.w;";
+						" dest.x = (src0.x > 0.0f) ? src1.x : src2.x;\n" +
+						" dest.y = (src0.y > 0.0f) ? src1.y : src2.y;\n" +
+						" dest.z = (src0.z > 0.0f) ? src1.z : src2.z;\n" +
+						" dest.w = (src0.w > 0.0f) ? src1.w : src2.w;";
 					break;
 				case VectorOpcode.cube:
 					translation += 
 						$"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
-					translation += 
-						"pv = src0.x * src1.x + src0.y * src1.y + src2.x;";
+					translation +=
+						"dest = src0.x * src1.x + src0.y * src1.y + src2.x;";
 					break;
 				case VectorOpcode.dp3:
-					translation += 
-						"pv = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z;";
+					translation +=
+						"dest = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z;";
 					break;
 				case VectorOpcode.dp4:
-					translation += 
-						"pv = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z + src0.w * src1.w;";
+					translation +=
+						"dest = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z + src0.w * src1.w;";
 					break;
 				case VectorOpcode.dst:
 					translation +=
-						"pv = dst(src0, src1);";
+						"dest = dst(src0, src1);";
 					break;
 				case VectorOpcode.floor:
-					translation += 
-						"pv = floor(src0);";
+					translation +=
+						"dest = floor(src0);";
 					break;
 				case VectorOpcode.frc:
-					translation += 
-						"pv = fract(src0);";
+					translation +=
+						"dest = fract(src0);";
 					break;
 				case VectorOpcode.kill_eq:
 					translation +=
-						" pv = 0.0f;" +
-						" if ( src1.x == src2.x || src1.y == src2.y || src1.z == src2.z || src1.w == src2.w )\n" +
+						" dest = 0.0f;" +
+						" if ( src0.x == src1.x || src0.y == src1.y || src0.z == src1.z || src0.w == src1.w )\n" +
 						" {					\n" +
-						" 	pv = 1.0f;		\n" +
+						" 	dest = 1.0f;		\n" +
 						" }					\n" +
-						" clip(-pv);		  ";
+						" clip(-dest);		  ";
 					break;
 				case VectorOpcode.kill_ge:
 					translation +=
-						" pv = 0.0f;" +
-						" if ( src1.x >= src2.x || src1.y >= src2.y || src1.z >= src2.z || src1.w >= src2.w )\n" +
+						" dest = 0.0f;" +
+						" if ( src0.x >= src1.x || src0.y >= src1.y || src0.z >= src1.z || src0.w >= src1.w )\n" +
 						" {					\n" +
-						" 	pv = 1.0f;		\n" +
+						" 	dest = 1.0f;		\n" +
 						" }					\n" +
-						" clip(-pv);		  ";
+						" clip(-dest);		  ";
 					break;
 				case VectorOpcode.kill_gt:
 					translation +=
-						" pv = 0.0f;" +
-						" if ( src1.x > src2.x || src1.y > src2.y || src1.z > src2.z || src1.w > src2.w )\n" +
+						" dest = 0.0f;" +
+						" if ( src0.x > src1.x || src0.y > src1.y || src0.z > src1.z || src0.w > src1.w )\n" +
 						" {					\n" +
-						" 	pv = 1.0f;		\n" +
+						" 	dest = 1.0f;		\n" +
 						" }					\n" +
-						" clip(-pv);		  ";
+						" clip(-dest);		  ";
 					break;
 				case VectorOpcode.kill_ne:
 					translation +=
-						" pv = 0.0f;" +
-						" if ( src1.x != src2.x || src1.y != src2.y || src1.z != src2.z || src1.w != src2.w )\n" +
+						" dest = 0.0f;" +
+						" if ( src0.x != src1.x || src0.y != src1.y || src0.z != src1.z || src0.w != src1.w )\n" +
 						" {					\n" +
-						" 	pv = 1.0f;		\n" +
+						" 	dest = 1.0f;		\n" +
 						" }					\n" +
-						" clip(-pv);		  ";
+						" clip(-dest);		  ";
 					break;
 				case VectorOpcode.mad:
-					translation += 
-						"pv = (src0 * src1) + src2;";
+					translation +=
+						"dest = (src0 * src1) + src2;";
 					break;
 				case VectorOpcode.max:
-					translation += 
-						"pv = max(src0, src1);";
+					translation +=
+						"dest = max(src0, src1);";
 					break;
 				case VectorOpcode.max4:
-					translation += 
-						"pv = max(src0.x, max(src0.y, max(src0.z, src0.w)));";
+					translation +=
+						"dest = max(src0.x, max(src0.y, max(src0.z, src0.w)));";
 					break;
 				case VectorOpcode.maxa:
 					translation +=
 						"a0 = clamp(int(floor(src0.w + 0.5)), -256, 255);" +
-						"pv = max(src0, src1);";
+						"dest = max(src0, src1);";
 					break;
 				case VectorOpcode.min:
-					translation += 
-						"pv = min(src0, src1);";
+					translation +=
+						"dest = min(src0, src1);";
 					break;
 				case VectorOpcode.mul:
-					translation += 
-						"pv = src0 * src1;";
+					translation +=
+						"dest = src0 * src1;";
 					break;
 				case VectorOpcode.seq:
 					translation +=
-						"pv.x = (src0.x == src1.x) ? 1.0f : 0.0f;\n" +
-						"pv.y = (src0.y == src1.y) ? 1.0f : 0.0f;\n" +
-						"pv.z = (src0.z == src1.z) ? 1.0f : 0.0f;\n" +
-						"pv.w = (src0.w == src1.w) ? 1.0f : 0.0f;";
+						"dest.x = (src0.x == src1.x) ? 1.0f : 0.0f;\n" +
+						"dest.y = (src0.y == src1.y) ? 1.0f : 0.0f;\n" +
+						"dest.z = (src0.z == src1.z) ? 1.0f : 0.0f;\n" +
+						"dest.w = (src0.w == src1.w) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.setp_eq_push:
 					translation +=
 						"p0 = src0.w == 0.0 && src1.w == 0.0 ? true : false;\n" +
-						"pv = float4(src0.x == 0.0 && src1.x == 0.0 ? 0.0 : src0.x + 1.0);";
+						"dest = float4(src0.x == 0.0 && src1.x == 0.0 ? 0.0 : src0.x + 1.0);";
 					break;
 				case VectorOpcode.setp_ge_push:
 					translation +=
 						"p0 = src0.w == 0.0 && src1.w >= 0.0 ? true : false;\n" +
-						"pv = float4(src0.x == 0.0 && src1.x >= 0.0 ? 0.0 : src0.x + 1.0);";
+						"dest = float4(src0.x == 0.0 && src1.x >= 0.0 ? 0.0 : src0.x + 1.0);";
 					break;
 				case VectorOpcode.setp_gt_push:
 					translation +=
 						"p0 = src0.w == 0.0 && src1.w > 0.0 ? true : false;\n" +
-						"pv = float4(src0.x == 0.0 && src1.x > 0.0 ? 0.0 : src0.x + 1.0);";
+						"dest = float4(src0.x == 0.0 && src1.x > 0.0 ? 0.0 : src0.x + 1.0);";
 					break;
 				case VectorOpcode.setp_ne_push:
 					translation +=
 						"p0 = src0.w == 0.0 && src1.w != 0.0 ? true : false;\n" +
-						"pv = float4(src0.x == 0.0 && src1.x != 0.0 ? 0.0 : src0.x + 1.0);";
+						"dest = float4(src0.x == 0.0 && src1.x != 0.0 ? 0.0 : src0.x + 1.0);";
 					break;
 				case VectorOpcode.sge:
 					translation +=
-						"pv.x = (src0.x >= src1.x) ? 1.0f : 0.0f;\n" +
-						"pv.y = (src0.y >= src1.y) ? 1.0f : 0.0f;\n" +
-						"pv.z = (src0.z >= src1.z) ? 1.0f : 0.0f;\n" +
-						"pv.w = (src0.w >= src1.w) ? 1.0f : 0.0f;";
+						"dest.x = (src0.x >= src1.x) ? 1.0f : 0.0f;\n" +
+						"dest.y = (src0.y >= src1.y) ? 1.0f : 0.0f;\n" +
+						"dest.z = (src0.z >= src1.z) ? 1.0f : 0.0f;\n" +
+						"dest.w = (src0.w >= src1.w) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sgt:
 					translation +=
-						"pv.x = (src0.x > src1.x) ? 1.0f : 0.0f;\n" +
-						"pv.y = (src0.y > src1.y) ? 1.0f : 0.0f;\n" +
-						"pv.z = (src0.z > src1.z) ? 1.0f : 0.0f;\n" +
-						"pv.w = (src0.w > src1.w) ? 1.0f : 0.0f;";
+						"dest.x = (src0.x > src1.x) ? 1.0f : 0.0f;\n" +
+						"dest.y = (src0.y > src1.y) ? 1.0f : 0.0f;\n" +
+						"dest.z = (src0.z > src1.z) ? 1.0f : 0.0f;\n" +
+						"dest.w = (src0.w > src1.w) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sne:
 					translation +=
-						"pv.x = (src0.x != src1.x) ? 1.0f : 0.0f;\n" +
-						"pv.y = (src0.y != src1.y) ? 1.0f : 0.0f;\n" +
-						"pv.z = (src0.z != src1.z) ? 1.0f : 0.0f;\n" +
-						"pv.w = (src0.w != src1.w) ? 1.0f : 0.0f;";
+						"dest.x = (src0.x != src1.x) ? 1.0f : 0.0f;\n" +
+						"dest.y = (src0.y != src1.y) ? 1.0f : 0.0f;\n" +
+						"dest.z = (src0.z != src1.z) ? 1.0f : 0.0f;\n" +
+						"dest.w = (src0.w != src1.w) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.trunc:
 					translation += 
-						"pv = trunc(src0);";
+						"dest = trunc(src0);";
 					break;
 				case VectorOpcode.opcode_30:
 				case VectorOpcode.opcode_31:
@@ -233,17 +231,15 @@ namespace TagTool.ShaderDecompiler.Translations
 			translation.Replace("src2.", instruction.alu_instr.GetSrc2_Register());
 			translation.Replace("src2", instruction.alu_instr.GetSrc2_Operand());
 
-			return asmInstruction + translation + "\n";
+			return $"{indent}{translation}\n";
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
-		private string Scalar(Instruction instruction)
+		private static string Scalar(Instruction instruction, string indent)
 		{
 			string translation = "";
 			if (!instruction.alu_instr.Has_scalar_op)
 				return translation;
-
-			string asmInstruction = $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 
 			switch (instruction.alu_instr.scalar_opc)
 			{
@@ -609,7 +605,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 			}
 
-			return asmInstruction + translation + "\n";
+			return $"{indent}{translation}\n";
 		}
 	}
 }

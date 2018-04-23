@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.ShaderDecompiler.Translations;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
 
 namespace TagTool.ShaderDecompiler
@@ -19,7 +20,12 @@ namespace TagTool.ShaderDecompiler
 			string outputs = "";
 			string functions = "";
 			string constants = "";
-			string logic = "";
+			string main = "";
+
+			// HLSL generation here. Any code generation should be appended to the above stringvariables. If none of the
+			// variables logically fit the generated code, add a new one, along with matching string interpolation
+			// into the 'hlsl' string variable below. Rarely, some things may need be hardcoded into the 'hlsl' string 
+			// variable, however this should be avoided unless it makes either the C# or HLSL output hard to read.
 
 			constants +=
 				"#define MAX_FLOAT 3.402823466e+38F		\n" +
@@ -27,37 +33,53 @@ namespace TagTool.ShaderDecompiler
 				"#define NaN (0 / 0)					\n" +
 				"#define ZERO 0							\n";
 
+			string indent = "	";
+			foreach (var instr in instructions)
+			{
+				foreach (var cf_instr in instr.cf_instrs)
+				{
+					main += $"{indent}// {cf_instr.opcode}\n";
 
-			// HLSL generation here. Any code generation should be appended to the above stringvariables. If none of the
-			// variables logically fit the generated code, add a new one, along with matching string interpolation
-			// into the 'hlsl' string variable below. Rarely, some things may need be hardcoded into the 'hlsl' string 
-			// variable, however this should be avoided unless it makes either the C# or HLSL output hard to read.
+					if (cf_instr.Executes)
+					{
+						var alus = instructions.Skip((int)cf_instr.exec.address).Take((int)cf_instr.exec.count).ToArray();
 
+						foreach (var alu in alus)
+							main += $"{ALU.Get(alu, indent)}\n";
+					}
 
-			string hlsl = 
-			$"{constants}								\n" +
-			$"{parameters}								\n" +
-			"struct INPUT								\n" +
-			"{											\n" +
-			$"{inputs}									\n" +
-			"};											\n" +
-			"											\n" +
-			"struct OUTPUT								\n" +
-			"{											\n" +
-			$"{outputs}									\n" +
-			"};											\n" +
-			$"{functions}								\n" +
-			"OUTPUT main ( INPUT In )					\n" +
-			"{											\n" +
-			"	bool p0 = false;						\n" +
-			"	int a0 = 0;								\n" +
-			"	float4 aL = float4(0, 0, 0, 0);			\n" +
-			"	float4 loop_count = float4(0, 0, 0, 0);	\n" +
-			"	float4 ps = 0.0f;						\n" +
-			"	OUTPUT Out;								\n" +
-			$"{logic}									\n" +
-			"	return Out;								\n" +
-			"}											";
+					if (cf_instr.EndsShader)
+						goto EndOfShader;
+				}
+			}
+			EndOfShader:
+
+			string hlsl =
+				"// Decompiled with Jabukufo's ucode Decompiler \n" +
+				$"{constants}								\n" +
+				$"{parameters}								\n" +
+				"struct INPUT								\n" +
+				"{											\n" +
+				$"{inputs}									\n" +
+				"};											\n" +
+				"											\n" +
+				"struct OUTPUT								\n" +
+				"{											\n" +
+				$"{outputs}									\n" +
+				"};											\n" +
+				$"{functions}								\n" +
+				"OUTPUT main ( INPUT In )					\n" +
+				"{											\n" +
+				"	bool p0 = false;						\n" +
+				"	int a0 = 0;								\n" +
+				"	float4 aL = float4(0, 0, 0, 0);			\n" +
+				"	float4 loop_count = float4(0, 0, 0, 0);	\n" +
+				"	float4 ps = 0.0f;						\n" +
+				"	OUTPUT Out;								\n" +
+				"											\n" +
+				$"{main}									\n" +
+				"	return Out;								\n" +
+				"}											";
 
 			return PostFixups.Apply(hlsl);
 		}
