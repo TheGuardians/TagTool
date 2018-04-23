@@ -11,7 +11,17 @@ namespace TagTool.ShaderDecompiler
 	// Dany's research on Registers/rmt2 https://gist.github.com/dany5639/15b8692fa81cd65d05d07196bd24b225
 	public class PreFixups
 	{
-		public static void Apply(ref List<Instruction> instructions)
+		public static void Apply(ref ControlFlowInstruction instruction)
+		{
+
+		}
+
+		public static void Apply(ref ALUInstruction instruction)
+		{
+
+		}
+
+		public static void Apply(ref FetchInstruction instruction)
 		{
 
 		}

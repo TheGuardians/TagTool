@@ -13,6 +13,8 @@ namespace TagTool.ShaderDecompiler.Translations
 		// Translates a VFetch or TFetch type instruction into an HLSL fragment.
 		public string Get(Instruction instruction)
 		{
+			PreFixups.Apply(ref instruction.fetch_instr);
+
 			string translation = "";
 
 			if (instruction.fetch_instr.opcode == FetchOpCode.vfetch)

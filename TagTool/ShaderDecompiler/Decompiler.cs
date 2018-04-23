@@ -13,7 +13,6 @@ namespace TagTool.ShaderDecompiler
 		public static string Decompile(byte[] shader_data)
 		{
 			var instructions = Disassembler.Disassemble(shader_data);
-			PreFixups.Apply(ref instructions);
 
 			string parameters = "";
 			string inputs = "";
@@ -21,6 +20,12 @@ namespace TagTool.ShaderDecompiler
 			string functions = "";
 			string constants = "";
 			string logic = "";
+
+			constants +=
+				"#define MAX_FLOAT 3.402823466e+38F		\n" +
+				"#define INFINITY (1 / 0)				\n" +
+				"#define NaN (0 / 0)					\n" +
+				"#define ZERO 0							\n";
 
 
 			// HLSL generation here. Any code generation should be appended to the above stringvariables. If none of the
@@ -30,6 +35,7 @@ namespace TagTool.ShaderDecompiler
 
 
 			string hlsl = 
+			$"{constants}								\n" +
 			$"{parameters}								\n" +
 			"struct INPUT								\n" +
 			"{											\n" +
@@ -43,7 +49,6 @@ namespace TagTool.ShaderDecompiler
 			$"{functions}								\n" +
 			"OUTPUT main ( INPUT In )					\n" +
 			"{											\n" +
-			$"{constants}								\n" +
 			"	bool p0 = false;						\n" +
 			"	int a0 = 0;								\n" +
 			"	float4 aL = float4(0, 0, 0, 0);			\n" +
