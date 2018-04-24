@@ -148,6 +148,7 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Audio\FSBHeader.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\BitmapDdsExtractor.cs" />
     <Compile Include="Bitmaps\BitmapDdsFormatDetection.cs" />

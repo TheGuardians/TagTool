@@ -203,9 +203,12 @@ namespace TagTool.Commands.Porting
                 return null;
 
             var wasReplacing = IsReplacing;
-
-            //if (groupTag == "foot")
-                //IsReplacing = true;
+            var wasNew = IsNew;
+            if (groupTag == "foot" && IsReplacing && BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                IsReplacing = false;
+                IsNew = true;
+            } 
 
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
@@ -571,8 +574,11 @@ namespace TagTool.Commands.Porting
 
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
-            //if (groupTag == "foot")
-            //    IsReplacing = wasReplacing;
+            if (groupTag == "foot")
+            {
+                IsReplacing = wasReplacing;
+                IsNew = wasNew;
+            }
 
             return edTag;
         }
