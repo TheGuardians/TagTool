@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.Direct3D
+namespace TagTool.Direct3D.Enums
 {
 	/// <summary>
 	/// Enum names acquired from: https://msdn.microsoft.com/en-us/library/windows/desktop/ff476174(v=vs.85).aspx

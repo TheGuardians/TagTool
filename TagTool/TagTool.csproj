@@ -375,7 +375,8 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
-    <Compile Include="Direct3D\Enums.cs" />
+    <Compile Include="Direct3D\Enums\CompileConstants.cs" />
+    <Compile Include="Direct3D\Enums\ReturnCode.cs" />
     <Compile Include="Direct3D\Functions\Assemble.cs" />
     <Compile Include="Direct3D\Functions\Compile.cs" />
     <Compile Include="Direct3D\Functions\Disassemble.cs" />
@@ -482,7 +483,6 @@
     <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
     <Compile Include="Geometry\RenderMaterial.cs" />
     <Compile Include="Geometry\RenderModelBuilder.cs" />
-    <Compile Include="Direct3D\ShaderCompiler.cs" />
     <Compile Include="Geometry\ShaderConverter.cs" />
     <Compile Include="Geometry\VertexBufferFormat.cs" />
     <Compile Include="Geometry\VertexCompressor.cs" />
