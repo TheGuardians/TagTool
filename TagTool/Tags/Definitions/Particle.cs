@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "particle", Tag = "prt3", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
     public class Particle
     {
-        public FlagsValue Flags;
+        public int Flags;
         public List<Attachment> Attachments;
         public AppearanceFlagsValue AppearanceFlags;
         public ParticleBillboardStyleValue ParticleBillboardStyle;
