@@ -232,12 +232,5 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			get =>	this.opcode == ControlFlowOpcode.cexec_pred_clean ||
 					this.opcode == ControlFlowOpcode.cexece_pred_clean;
 		}
-
-		// True if the given control flow opcode creates a context block
-		// (code surrounded with curly-braces).
-		public bool CreatesContext
-		{
-			get => this.opcode == ControlFlowOpcode.loop;
-		}
 	}
 }

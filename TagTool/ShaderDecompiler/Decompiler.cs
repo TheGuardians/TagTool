@@ -11,13 +11,13 @@ namespace TagTool.ShaderDecompiler
 	// Class for generating HLSL code from a List<Instruction>
 	public static class Decompiler
 	{
-			public static string Constants = "";
-			public static string Parameters = "";
-			public static string Inputs = "";
-			public static string Outputs = "";
-			public static string Functions = "";
-			public static string Main = "";
-			public static string INDENT = "	";
+		public static string Constants = "";
+		public static string Parameters = "";
+		public static string Inputs = "";
+		public static string Outputs = "";
+		public static string Functions = "";
+		public static string Main = "";
+		public static string INDENT = "	";
 
 		public static string Decompile(byte[] shader_data)
 		{
