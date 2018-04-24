@@ -32,8 +32,6 @@ namespace TagTool.ShaderDecompiler.Translations
 				Vector(instruction);
 			if (instruction.alu_instr.Has_vector_op)
 				Scalar(instruction);
-
-			return;
 		}
 
 		// Translates the Vector portions of an ALU instruction into HLSL fragments.
@@ -91,6 +89,8 @@ namespace TagTool.ShaderDecompiler.Translations
 					Main +=
 						$"{dest} = frac({src1});";
 					break;
+
+					// TODO: these kill instructions need to be moved to a per-component function.
 				case VectorOpcode.kill_eq:
 					Main +=
 					   $" if ( {src1} == {src2}) {{\n"+
@@ -219,8 +219,6 @@ namespace TagTool.ShaderDecompiler.Translations
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
-
-			return;
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
@@ -230,39 +228,66 @@ namespace TagTool.ShaderDecompiler.Translations
 			var src1 = instruction.alu_instr.GetSrc1_Operand();
 			var src2 = instruction.alu_instr.GetSrc2_Operand();
 			var src3 = instruction.alu_instr.GetSrc3_Operand();
+			var function = "";
 
 			switch (instruction.alu_instr.scalar_opc)
 			{
 				case ScalarOpcode.adds:
 					Functions +=
-						"src0.x + src0.y";
+						"float4 adds_func(float4 src1) {\n" +
+						"	return ps = src1.x + src1.y;\n" +
+						"}";
 					Main +=
-						"ps = dest = src0.x + src0.y;";
+						$"{dest} = adds_func({src1});";
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
+					Functions +=
+						"float4 addsc_func(float4 src1, float4 src2) {\n" +
+						"	return ps = src1.x + src2.x;\n" +
+						"}";
 					Main +=
-						"ps = dest = src0.x + src0.y;";
+						$"{dest} = addsc_func({src1}, {src2});";
 					break;
 				case ScalarOpcode.adds_prev:
+					Functions +=
+						"float4 adds_prev_func(float4 src1) {\n" +
+						"	return ps = src1.x + ps;\n" +
+						"}";
 					Main +=
-						"ps = dest = src0.x + ps;";
+						$"{dest} = adds_prev_func({src1});";
 					break;
 				case ScalarOpcode.cos:
+					Functions +=
+						"float4 cos_func(float4 src1) {\n" +
+						"	return ps = cos(src1.x);\n" +
+						"}";
 					Main +=
-						"ps = dest = cos( src0.x );";
+						$"{dest} = cos_func({src1});";
 					break;
 				case ScalarOpcode.exp:
+					Functions +=
+						"float4 exp_func(float4 src1) {\n" +
+						"	return ps = pow(2, src1.x);\n" +
+						"}";
 					Main +=
-						"ps = dest = pow( 2, src0.x );";
+						$"{dest} = exp_func({src1});";
 					break;
 				case ScalarOpcode.floors:
+					Functions +=
+						"float4 floors_func(float4 src1) {\n" +
+						"	return ps = floor(src1.x);\n" +
+						"}";
 					Main +=
-						"ps = dest = floor( src0.x );";
+						$"{dest} = floors_func({src1});";
 					break;
 				case ScalarOpcode.frcs:
+					Functions +=
+						"float4 frcs_func(float4 src1) {\n" +
+						"	return ps = src1.x - floor(src1.x);\n" +
+						"}";
 					Main +=
-						"ps = dest = src0.x − floor( src0.x );";
+						$"{dest} = frcs_func({src1});";
 					break;
 				case ScalarOpcode.killseq:
 					Main +=
@@ -596,6 +621,9 @@ namespace TagTool.ShaderDecompiler.Translations
 					Main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 			}
+
+			if (!Functions.Contains(function))
+				Functions += $"{function}\n";
 		}
 	}
 }
