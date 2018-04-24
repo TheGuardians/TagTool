@@ -353,7 +353,7 @@ namespace TagTool.Tags.Definitions
 			{
 				public ResolutionFlagValue ResolutionFlags;
 
-                public float WarpAngle;
+                public Angle WarpAngle;
                 public float WarpAmount;
                 public float WarpDirection;
 
