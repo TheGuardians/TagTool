@@ -219,6 +219,8 @@ namespace TagTool.ShaderDecompiler.Translations
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
+
+			Main += "\n";
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
@@ -624,6 +626,7 @@ namespace TagTool.ShaderDecompiler.Translations
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
+			Main += "\n";
 		}
 	}
 }

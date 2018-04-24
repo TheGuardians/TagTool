@@ -25,7 +25,10 @@ namespace TagTool.Direct3D.Functions
 				fixed (byte* buffer = shader)
 					result = D3DDisassemble((IntPtr)buffer, (uint)shader.Length, 0, null, out blob);
 				if (result != (int)ReturnCode.S_OK || blob == null)
+				{
 					asm = null;
+					return;
+				}
 				var textPtr = blob.GetBufferPointer();
 				asm = Marshal.PtrToStringAnsi(textPtr);
 			}

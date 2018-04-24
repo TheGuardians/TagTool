@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
-using TagTool.Geometry;
 using TagTool.Serialization;
 using TagTool.ShaderDecompiler;
 using TagTool.Tags.Definitions;
+using TagTool.Direct3D.Functions;
 
 namespace TagTool.Commands.Porting
 {
@@ -59,9 +59,17 @@ namespace TagTool.Commands.Porting
 
 			var hlsl = Decompiler.Decompile(shaderData);
 
-			Console.WriteLine(hlsl);
+			/*
+			* Uncomment the code below to test compiling the decompilation into dx9 bytecode,
+			* and then printing the disassembly of the dx9 bytecode.
+			*/
 
-			File.WriteAllBytes(tagName.Replace('\\', '_'), shaderData);
+			new Compile(hlsl, "main", "ps_3_0", out string errors, out shaderData);
+			new PrintError(hlsl, errors, out bool isError);
+			//**********************************************************************************
+
+			if (!isError)
+				File.WriteAllBytes("test", shaderData);
 
 			return true;
 		}

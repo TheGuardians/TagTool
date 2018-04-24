@@ -34,6 +34,7 @@ namespace TagTool.Direct3D.Functions
 					var errorPtr = errorBlob.GetBufferPointer();
 					errors = Marshal.PtrToStringAnsi(errorPtr);
 					data = null;
+					return;
 				}
 				data = new byte[codeBlob.GetBufferSize()];
 				var bufferPtr = codeBlob.GetBufferPointer();

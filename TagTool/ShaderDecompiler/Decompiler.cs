@@ -30,11 +30,7 @@ namespace TagTool.ShaderDecompiler
 			Functions = "";
 			Main = "";
 
-			// HLSL generation here. Any code generation should be appended to the above stringvariables. If none of the
-			// variables logically fit the generated code, add a new one, along with matching string interpolation
-			// into the 'hlsl' string variable below. Rarely, some things may need be hardcoded into the 'hlsl' string 
-			// variable, however this should be avoided unless it makes either the C# or HLSL output hard to read.
-
+			// Constants that are commonly used by instructions.
 			Constants +=
 				"#define MAX_FLOAT 3.402823466e+38F		\n" +
 				"#define INFINITY (1 / 0)				\n" +
@@ -50,7 +46,6 @@ namespace TagTool.ShaderDecompiler
 				"int i[16];	   \n" +
 				"bool b[16];   \n" +
 				"sampler s[16];\n";
-
 
 			// Much more work is needed here.
 			// TODO: handle all ControlFlowInstruction types.
