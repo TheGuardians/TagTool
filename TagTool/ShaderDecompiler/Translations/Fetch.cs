@@ -8,7 +8,7 @@ using TagTool.ShaderDecompiler.UcodeDisassembler;
 namespace TagTool.ShaderDecompiler.Translations
 {
 	// Class for providing translations from Fetch instructions into HLSL.
-	public class Fetch
+	public static class Fetch
 	{
 		// Translates a VFetch or TFetch type instruction into an HLSL fragment.
 		public static string Get(Instruction instruction)

@@ -12,6 +12,8 @@ namespace TagTool.Direct3D.Functions
 	{
 		public PrintError(string code, string error, out bool isError)
 		{
+			var startForegroundColor = Console.ForegroundColor;
+
 			var errorLocation = new string[] { "", "", "" };
 
 			if (string.IsNullOrEmpty(error))
@@ -68,6 +70,8 @@ namespace TagTool.Direct3D.Functions
 					i++;
 				}
 			}
+
+			Console.ForegroundColor = startForegroundColor;
 		}
 	}
 }

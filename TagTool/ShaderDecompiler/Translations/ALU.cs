@@ -9,7 +9,7 @@ using static TagTool.ShaderDecompiler.Decompiler;
 namespace TagTool.ShaderDecompiler.Translations
 {
 	// Class for providing translation methods from Vector/Scalar ALU instructions into HLSL.
-	public class ALU
+	public static class ALU
 	{
 		// Conventions:
 		// - All temporary registers are float4s.
@@ -30,7 +30,7 @@ namespace TagTool.ShaderDecompiler.Translations
 
 			if (instruction.alu_instr.Has_vector_op)
 				Vector(instruction);
-			if (instruction.alu_instr.Has_vector_op)
+			if (instruction.alu_instr.Has_scalar_op)
 				Scalar(instruction);
 		}
 
@@ -42,89 +42,89 @@ namespace TagTool.ShaderDecompiler.Translations
 			var src2 = instruction.alu_instr.GetSrc2_Operand();
 			var src3 = instruction.alu_instr.GetSrc3_Operand();
 			var function = "";
-
+			var main = "";
 			switch (instruction.alu_instr.vector_opc)
 			{
 				case VectorOpcode.add:
-					Main +=
+					main +=
 						$"{dest} = {src1} + {src2};";
 					break;
 				case VectorOpcode.cndeq:
-					Main +=
+					main +=
 						$"{dest} = ({src1} == 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndge:
-					Main +=
+					main +=
 						$"{dest} = ({src1} ?= 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndgt:
-					Main +=
+					main +=
 						$"{dest} = ({src1} > 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cube:
-					Main +=
+					main +=
 						$"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
-					Main +=
+					main +=
 						$"{dest} = dot({src1}, {src2}) + {src3};";
 					break;
 				case VectorOpcode.dp3:
-					Main +=
+					main +=
 						$"{dest} = dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dp4:
-					Main +=
+					main +=
 						$"{dest} = dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dst:
-					Main +=
+					main +=
 						$"{dest} = dst({src1}, {src2});";
 					break;
 				case VectorOpcode.floor:
-					Main +=
+					main +=
 						$"{dest} = floor({src1});";
 					break;
 				case VectorOpcode.frc:
-					Main +=
+					main +=
 						$"{dest} = frac({src1});";
 					break;
 
 					// TODO: these kill instructions need to be moved to a per-component function.
 				case VectorOpcode.kill_eq:
-					Main +=
+					main +=
 					   $" if ( {src1} == {src2}) {{\n"+
 						" 	clip(-1);		\n" +
 						" }					\n" +
 						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_ge:
-					Main +=
+					main +=
 						$" if ( {src1} >= {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
 						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_gt:
-					Main +=
+					main +=
 						$" if ( {src1} > {src2}) {{	\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
 						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_ne:
-					Main +=
+					main +=
 						$" if ( {src1} != {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
 						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.mad:
-					Main +=
+					main +=
 						$"{dest} = ({src1} * {src2}) + {src3};";
 					break;
 				case VectorOpcode.max:
-					Main +=
+					main +=
 						$"{dest} = max({src1}, {src2});";
 					break;
 				case VectorOpcode.max4:
@@ -132,7 +132,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 max4_func(float4 src1) {\n" +
 						"	return max(src1.x, (max(src1.y, max(src1.z, src1.w)));\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = max4_func({src1});";
 					break;
 				case VectorOpcode.maxa:
@@ -141,19 +141,19 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	a0 = clamp(int(floor(src1.w + 0.5)), -256, 255);\n" +
 						"	return max(src1, src2);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = maxa_func({src1}, {src2});";
 					break;
 				case VectorOpcode.min:
-					Main +=
+					main +=
 						$"{dest} = min({src1}, {src2});";
 					break;
 				case VectorOpcode.mul:
-					Main +=
+					main +=
 						$"{dest} = {src1} * {src2};";
 					break;
 				case VectorOpcode.seq:
-					Main +=
+					main +=
 						$"{dest} = ({src1} == {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.setp_eq_push:
@@ -162,7 +162,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	p0 = src1.w == 0.0 && src2.w == 0.0 ? true : false;\n" +
 						"	return float4(src1.x == 0.0 && src2.x == 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = setp_eq_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ge_push:
@@ -171,7 +171,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	p0 = src1.w == 0.0 && src2.w >= 0.0 ? true : false;\n" +
 						"	return float4(src1.x == 0.0 && src2.x >= 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = setp_ge_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_gt_push:
@@ -180,7 +180,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	p0 = src1.w == 0.0 && src2.w > 0.0 ? true : false;\n" +
 						"	return float4(src1.x == 0.0 && src2.x > 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = setp_gt_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ne_push:
@@ -189,38 +189,38 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	p0 = src1.w == 0.0 && src2.w != 0.0 ? true : false;\n" +
 						"	return float4(src1.x == 0.0 && src2.x != 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = setp_ne_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.sge:
-					Main +=
+					main +=
 						$"{dest} = ({src1} >= {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sgt:
-					Main +=
+					main +=
 						$"{dest} = ({src1} > {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sne:
-					Main +=
+					main +=
 						$"{dest} = ({src1} != {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.trunc:
-					Main += 
+					main += 
 						$"{dest} = trunc({src1});";
 					break;
 				case VectorOpcode.opcode_30:
 				case VectorOpcode.opcode_31:
-					Main += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
+					main += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				default:
-					Main += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
+					main += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 			}
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
 
-			Main += "\n";
+			Main += $"{INDENT}{main}\n";
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
@@ -231,6 +231,7 @@ namespace TagTool.ShaderDecompiler.Translations
 			var src2 = instruction.alu_instr.GetSrc2_Operand();
 			var src3 = instruction.alu_instr.GetSrc3_Operand();
 			var function = "";
+			var main = "";
 
 			switch (instruction.alu_instr.scalar_opc)
 			{
@@ -239,7 +240,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 adds_func(float4 src1) {\n" +
 						"	return ps = src1.x + src1.y;\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = adds_func({src1});";
 					break;
 				case ScalarOpcode.addsc0:
@@ -248,7 +249,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 addsc_func(float4 src1, float4 src2) {\n" +
 						"	return ps = src1.x + src2.x;\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = addsc_func({src1}, {src2});";
 					break;
 				case ScalarOpcode.adds_prev:
@@ -256,7 +257,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 adds_prev_func(float4 src1) {\n" +
 						"	return ps = src1.x + ps;\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = adds_prev_func({src1});";
 					break;
 				case ScalarOpcode.cos:
@@ -264,7 +265,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 cos_func(float4 src1) {\n" +
 						"	return ps = cos(src1.x);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = cos_func({src1});";
 					break;
 				case ScalarOpcode.exp:
@@ -272,7 +273,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 exp_func(float4 src1) {\n" +
 						"	return ps = pow(2, src1.x);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = exp_func({src1});";
 					break;
 				case ScalarOpcode.floors:
@@ -280,7 +281,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 floors_func(float4 src1) {\n" +
 						"	return ps = floor(src1.x);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = floors_func({src1});";
 					break;
 				case ScalarOpcode.frcs:
@@ -288,11 +289,11 @@ namespace TagTool.ShaderDecompiler.Translations
 						"float4 frcs_func(float4 src1) {\n" +
 						"	return ps = src1.x - floor(src1.x);\n" +
 						"}";
-					Main +=
+					main +=
 						$"{dest} = frcs_func({src1});";
 					break;
 				case ScalarOpcode.killseq:
-					Main +=
+					main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x == 0 )\n" +
 						" {					\n" +
@@ -301,7 +302,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" clip(-pv);		  ";
 					break;
 				case ScalarOpcode.killsge:
-					Main +=
+					main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x >= 0 )\n" +
 						" {					\n" +
@@ -309,7 +310,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsgt:
-					Main +=
+					main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x > 0 )\n" +
 						" {					\n" +
@@ -317,7 +318,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsne:
-					Main +=
+					main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x != 0 )\n" +
 						" {					\n" +
@@ -325,7 +326,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsone:
-					Main +=
+					main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x == 1 )\n" +
 						" {					\n" +
@@ -333,11 +334,11 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.log:
-					Main +=
+					main +=
 						"ps = dest = log( src0.x ) / log( 2 );";
 					break;
 				case ScalarOpcode.logc:
-					Main +=
+					main +=
 						$"{dest} = log( src0.x ) / log( 2 );	\n"+
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
@@ -346,12 +347,12 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.maxas:
-					Main +=
+					main +=
 						"a0 = src0.x; \n" +
 						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxasf:
-					Main +=
+					main +=
 						"int temp = floor( src0.x);\n" +
 						"if (temp < −256 )				\n" +
 						"{								\n" +
@@ -365,37 +366,37 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxs:
-					Main +=
+					main +=
 						"ps = dest = max(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.mins:
-					Main +=
+					main +=
 						"ps = dest = min(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.muls:
-					Main +=
+					main +=
 						"ps = dest = src0.x * src0.y;";
 					break;
 				case ScalarOpcode.mulsc0:
 				case ScalarOpcode.mulsc1:
-					Main +=
+					main +=
 						"ps = dest = src0.x * {src1}.y;";
 					break;
 				case ScalarOpcode.muls_prev:
-					Main +=
+					main +=
 						"ps = dest = src0.x * ps;";
 					break;
 				case ScalarOpcode.muls_prev2:
-					Main +=
+					main +=
 						"ps = dest = ps == -MAX_FLOAT || isinf(ps) || isnan(ps) || isnan(src0.y) || " +
 						"src0.y <= 0.0 ? -MAX_FLOAT : src0.x * ps;";
 					break;
 				case ScalarOpcode.rcp:
-					Main +=
+					main +=
 						"ps = dest = 1.0f / src0.x;";
 					break;
 				case ScalarOpcode.rcpc:
-					Main +=
+					main +=
 						$"{dest} = 1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
@@ -408,7 +409,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rcpf:
-					Main +=
+					main +=
 						$"{dest} = 1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
@@ -420,15 +421,15 @@ namespace TagTool.ShaderDecompiler.Translations
 						"}									\n" +
 						"ps = dest;"; break;
 				case ScalarOpcode.retain_prev:
-					Main += 
+					main += 
 						"ps = dest = ps;";
 					break;
 				case ScalarOpcode.rsq:
-					Main +=
+					main +=
 						"ps = dest = 1.0f / sqrt ( src0.x );";
 					break;
 				case ScalarOpcode.rsqc:
-					Main +=
+					main +=
 						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)			\n" +
 						"{										\n" +
@@ -441,7 +442,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rsqf:
-					Main +=
+					main +=
 						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)					\n" +
 						"{										\n" +
@@ -454,16 +455,16 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.seqs:
-					Main +=
+					main +=
 						"ps = dest = ( src0.x == 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.setpclr:
-					Main +=
+					main +=
 						"ps = dest = +MAX_FLOAT; \n" +
 						"p0 = false; ";
 					break;
 				case ScalarOpcode.setpeq:
-					Main +=
+					main +=
 						"if (src0.x == 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -477,7 +478,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpge:
-					Main +=
+					main +=
 						"if (src0.x >= 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -491,7 +492,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpgt:
-					Main +=
+					main +=
 						"if (src0.x > 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -505,7 +506,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpinv:
-					Main +=
+					main +=
 						"if (src0.x == 1.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -526,7 +527,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpne:
-					Main +=
+					main +=
 						"if (src0.x != 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -540,7 +541,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setppop:
-					Main +=
+					main +=
 						$"{dest} = src0.x - 1.0f;	\n" +
 						"if (dest <= 0.0f)		\n" +
 						"{						\n" +
@@ -554,7 +555,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setprstr:
-					Main +=
+					main +=
 						$"{dest} = src0.x;			\n" +
 						"if (dest == 0.0f)		\n" +
 						"{						\n" +
@@ -567,40 +568,40 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.sges:
-					Main +=
+					main +=
 						"ps = dest = ( src0.x >= 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sgts:
-					Main +=
+					main +=
 						"ps = dest = ( src0.x > 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sin:
-					Main += 
+					main += 
 						"ps = dest = sin(src0.x);";
 					break;
 				case ScalarOpcode.snes:
-					Main +=
+					main +=
 						"ps = dest = ( src0.x != 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sqrt:
-					Main +=
+					main +=
 						"ps = dest = sqrt(src0.x);";
 					break;
 				case ScalarOpcode.subs:
-					Main +=
+					main +=
 						"ps = dest = src0.x - src0.y;";
 					break;
 				case ScalarOpcode.subsc0:
 				case ScalarOpcode.subsc1:
-					Main +=
+					main +=
 						"ps = dest = src0.x - {src1}.y;";
 					break;
 				case ScalarOpcode.subs_prev:
-					Main +=
+					main +=
 						"ps = dest = src0.x - ps;";
 					break;
 				case ScalarOpcode.truncs:
-					Main +=
+					main +=
 						"ps = dest = trunc( src0.x );";
 					break;
 				case ScalarOpcode.opcode_41:
@@ -617,16 +618,16 @@ namespace TagTool.ShaderDecompiler.Translations
 				case ScalarOpcode.opcode_61:
 				case ScalarOpcode.opcode_62:
 				case ScalarOpcode.opcode_63:
-					Main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				default:
-					Main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 			}
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
-			Main += "\n";
+			Main += $"{INDENT}{main}\n";
 		}
 	}
 }

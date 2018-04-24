@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TagTool.ShaderDecompiler.Translations
 {
 	// Class for providing translations from CF instructions into HLSL.
-	public class ControlFlow
+	public static class ControlFlow
 	{
 
 	}

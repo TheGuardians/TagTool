@@ -76,25 +76,25 @@ namespace TagTool.ShaderDecompiler
 
 			string hlsl =
 				"// Decompiled with Jabukufo's ucode Decompiler \n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Constants:								\n" +
 				$"{Constants}								\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Parameters:							\n" +
 				$"{Parameters}								\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Inputs:								\n" +
 				"struct INPUT								\n" +
 				"{											\n" +
 				$"{Inputs}									\n" +
 				"};											\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Outputs:								\n" +
 				"struct OUTPUT								\n" +
 				"{											\n" +
 				$"{Outputs}									\n" +
 				"};											\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Variables:								\n" +
 				"bool   p0 = false; // predicate 'register'.\n" +
 				"int    a0 = 0; // address 'register'.		\n" +
@@ -102,10 +102,10 @@ namespace TagTool.ShaderDecompiler
 				"float4 lc = 0; // loop count.				\n" +
 				"float4 ps = 0; // previous scalar result,	\n" +
 				"float4 pv = 0; // previous vector result.	\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Functions:								\n" +
 				$"{Functions}								\n" +
-				"/*---------------------------------------*/\n" +
+				"\n" +
 				" // Main:									\n" +
 				"OUTPUT main ( INPUT In )					\n" +
 				"{											\n" +
