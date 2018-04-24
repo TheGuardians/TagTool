@@ -283,12 +283,14 @@ namespace TagTool.Commands.Porting
             string args = " ";
 
             if (format == BitmapFormat.Dxn)
+            {
                 args += "-normal ";
-
+                args += "-resize ";
+            }
+               
             if (noMips)
                 args += "-nomips ";
 
-            args += "-resize ";
             args += "-fast ";
 
             switch (format)
