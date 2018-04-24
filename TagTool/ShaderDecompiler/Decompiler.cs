@@ -41,6 +41,17 @@ namespace TagTool.ShaderDecompiler
 				"#define NaN (0 / 0)					\n" +
 				"#define ZERO 0							\n";
 
+			// declaring these as arrays lets us not even worry about parameters on the HLSL side
+			// and they will point to the correct register index that the game stores values in.
+			// Example: if we disassemble an instruction 'adds r0, c19.xy', we can replace that in HLSL with
+			// r0 = c[19].x + c[19].y - VERY SIMPLE!
+			Parameters +=
+				"float4 c[224];\n" +
+				"int i[16];	   \n" +
+				"bool b[16];   \n" +
+				"sampler s[16];\n";
+
+
 			// Much more work is needed here.
 			// TODO: handle all ControlFlowInstruction types.
 			// Distinguish between ALU and Fetch instructions.
