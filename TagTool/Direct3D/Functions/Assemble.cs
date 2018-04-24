@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Direct3D.Enums;
 using TagTool.Direct3D.Interfaces;
 
 namespace TagTool.Direct3D.Functions
