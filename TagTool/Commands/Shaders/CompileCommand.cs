@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Util;
+using TagTool.Direct3D.Functions;
 
 namespace TagTool.Commands.Shaders
 {
@@ -60,13 +61,14 @@ namespace TagTool.Commands.Shaders
             else
             {
                 var profile = IsVertexShader ? "vs_3_0" : "ps_3_0";
-                bytecode = ShaderCompiler.Compile(shader_code, "main", profile, out string errors);
+                new Compile(shader_code, "main", profile, out string errors, out bytecode);
 
-                if (ShaderCompiler.PrintError(errors))
+				new PrintError(errors, out bool isError);
+                if (isError)
                     return true;
             }
 
-			var disassembly = ShaderCompiler.Disassemble(bytecode);
+			new Disassemble(bytecode, out string disassembly);
 
 
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Direct3D.Functions;
 using TagTool.Geometry;
 using TagTool.ShaderGenerator.Types;
 using TagTool.Shaders;
@@ -77,7 +78,7 @@ namespace TagTool.ShaderGenerator
             );
             if (!result) throw new Exception(ErrorMsgs);
 
-            var disassembly = ShaderCompiler.Disassemble(ShaderBytecode);
+            new Disassemble(ShaderBytecode, out string disassembly);
 
             Console.WriteLine();
             Console.WriteLine(disassembly);

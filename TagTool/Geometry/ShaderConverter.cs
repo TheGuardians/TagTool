@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TagTool.Direct3D.Functions;
 
 namespace TagTool.Geometry
 {
@@ -24,7 +25,7 @@ namespace TagTool.Geometry
                 return shaderData;
 
             // Disassemble the shader
-            var disassembly = ShaderCompiler.Disassemble(shaderData);
+            new Disassemble(shaderData, out string disassembly);
             if (disassembly == null)
                 return null;
             var lines = disassembly.Split('\n').ToList();
@@ -271,7 +272,8 @@ namespace TagTool.Geometry
 
             // Reassemble the shader
             var newShader = string.Join("\n", lines);
-            return ShaderCompiler.Assemble(newShader, out string errors);
+			new Assemble(newShader, out string errors, out byte[] data);
+			return data;
         }
 
         /// <summary>
@@ -286,7 +288,7 @@ namespace TagTool.Geometry
                 return shaderData; // Only default albedo shaders need to be fixed (?)
 
             // Disassemble the shader
-            var disassembly = ShaderCompiler.Disassemble(shaderData);
+            new Disassemble(shaderData, out string disassembly);
             if (disassembly == null)
                 return null;
             var lines = disassembly.Split('\n').ToList();
@@ -401,7 +403,8 @@ namespace TagTool.Geometry
 
             // Reassemble the shader
             var newShader = string.Join("\n", lines);
-            return ShaderCompiler.Assemble(newShader, out string errors);
+			new Assemble(newShader, out string errors, out byte[] data);
+			return data;
         }
     }
 }

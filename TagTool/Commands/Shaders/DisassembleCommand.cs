@@ -5,6 +5,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using TagTool.Shaders;
+using TagTool.Direct3D.Functions;
 
 namespace TagTool.Commands.Shaders
 {
@@ -53,7 +54,8 @@ namespace TagTool.Commands.Shaders
                 }
 
                 var pc_shader = shader_block.PCShaderBytecode;
-                if (pc_shader != null) Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
+				new Disassemble(pc_shader, out string disassembly);
+				if (pc_shader != null) Console.WriteLine(disassembly);
                 
                 if (xboxShaderParser.IsValid) Console.WriteLine(xboxShaderParser.Disassemble());
             }
@@ -77,7 +79,8 @@ namespace TagTool.Commands.Shaders
                 }
 
                 var pc_shader = shader_block.PCShaderBytecode;
-                if (pc_shader != null) Console.WriteLine(ShaderCompiler.Disassemble(pc_shader));
+				new Disassemble(pc_shader, out string disassembly);
+				if (pc_shader != null) Console.WriteLine(disassembly);
 
                 if (xboxShaderParser.IsValid) Console.WriteLine(xboxShaderParser.Disassemble());
             }

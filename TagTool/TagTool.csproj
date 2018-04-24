@@ -375,7 +375,13 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Direct3D\Enums.cs" />
+    <Compile Include="Direct3D\Functions\Assemble.cs" />
+    <Compile Include="Direct3D\Functions\Compile.cs" />
+    <Compile Include="Direct3D\Functions\Disassemble.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
+    <Compile Include="Direct3D\Functions\PrintError.cs" />
+    <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
@@ -476,7 +482,7 @@
     <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
     <Compile Include="Geometry\RenderMaterial.cs" />
     <Compile Include="Geometry\RenderModelBuilder.cs" />
-    <Compile Include="Geometry\ShaderCompiler.cs" />
+    <Compile Include="Direct3D\ShaderCompiler.cs" />
     <Compile Include="Geometry\ShaderConverter.cs" />
     <Compile Include="Geometry\VertexBufferFormat.cs" />
     <Compile Include="Geometry\VertexCompressor.cs" />
