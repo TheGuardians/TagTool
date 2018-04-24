@@ -58,13 +58,18 @@ namespace TagTool.ShaderDecompiler
 
 					if (cf_instr.Executes)
 					{
-						var alus = instructions.Skip((int)cf_instr.exec.address).Take((int)cf_instr.exec.count).ToArray();
+						var executes = instructions.Skip((int)cf_instr.exec.address).Take((int)cf_instr.exec.count).ToArray();
 
-						foreach (var alu in alus)
+						for (var i = 0; i < executes.Length; i++)
 						{
-							ALU.Get(alu);
-							// Main += $"{INDENT}{alu.alu_instr.GetVectorAsmString()}\n";
-							// Main += $"{INDENT}{alu.alu_instr.GetScalarAsmString()}\n";
+							var execute = executes[i];
+
+							// Use 'i' with bit operations on 'cf_instr.exec.serialize' to determine ALU/Fetch.
+							// TODO: work on fetch-type output.
+							if ((cf_instr.exec.serialize & (1 << (i * 2))) != 0)
+								Main += Fetch.Get(execute);
+							else
+								ALU.Get(execute);
 						}
 					}
 
