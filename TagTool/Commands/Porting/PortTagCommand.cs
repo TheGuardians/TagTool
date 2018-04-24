@@ -120,7 +120,7 @@ namespace TagTool.Commands.Porting
 
                 args.RemoveAt(0);
             }
-
+            
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
             //
@@ -202,15 +202,14 @@ namespace TagTool.Commands.Porting
             if ((groupTag == "snd!") && NoAudio)
                 return null;
 
-            bool footFix = IsReplacing;
-            bool footFixNew = IsNew;
-            if ((groupTag == "foot"))
+            var wasReplacing = IsReplacing;
+            var wasNew = IsNew;
+            if (groupTag == "foot" && IsReplacing && BlamCache.Version == CacheVersion.Halo3Retail)
             {
                 IsReplacing = false;
                 IsNew = true;
-            }
-                
-            
+            } 
+
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -575,11 +574,11 @@ namespace TagTool.Commands.Porting
 
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
-            // Fix for foot
-            if (footFix)
-                IsReplacing = true;
-            if (footFixNew)
-                IsNew = true;
+            if (groupTag == "foot")
+            {
+                IsReplacing = wasReplacing;
+                IsNew = wasNew;
+            }
 
             return edTag;
         }

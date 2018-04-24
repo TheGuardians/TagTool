@@ -140,7 +140,6 @@ namespace TagTool.Geometry
                         v.Normal = ConvertNormal(v.Normal);
                         outVertexStream.WriteTinyPositionVertex(v);
                     });
-                    
                     break;
 
                 default:
@@ -210,49 +209,6 @@ namespace TagTool.Geometry
         public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, List<RenderMaterial> materials)
         {
             //
-            // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
-            //
-            
-            var ms30Vertices = new Dictionary<int, List<int>>();
-            
-            if (materials != null)
-            {
-                var ms30Materials = new List<bool>();
-
-                foreach (var material in materials)
-                {
-                    if (material.RenderMethod == null)
-                        continue;
-
-                    var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
-                    var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
-
-                    ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
-                }
-
-                foreach (var mesh in geometry.Meshes)
-                {
-                    var ms30Indices = new List<int>();
-                    var partStartVertex = 0;
-
-                    foreach (var part in mesh.Parts)
-                    {
-                        if (part.IndexCount > 0)
-                        {
-                            if (part.MaterialIndex > 0 && part.MaterialIndex< ms30Materials.Count && ms30Materials[part.MaterialIndex])
-                                for (var i = partStartVertex; i < part.VertexCount; i++)
-                                    ms30Indices.Add(i);
-                        }
-                            
-
-                        partStartVertex += part.VertexCount;
-                    }
-
-                    ms30Vertices[mesh.VertexBuffers[0]] = ms30Indices;
-                }
-            }
-            
-            //
             // Convert byte[] of UnknownBlock
             //
 
@@ -261,14 +217,14 @@ namespace TagTool.Geometry
                 var data = block.Unknown3;
                 if(data != null || data.Length != 0)
                 {
-                    byte[] result = new byte[data.Length];
+                    var result = new byte[data.Length];
+
                     using (var inputReader = new EndianReader(new MemoryStream(data), EndianFormat.BigEndian))
                     using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
                     {
                         while (!inputReader.EOF)
-                        {
                             outputWriter.Write(inputReader.ReadUInt32());
-                        }
+
                         block.Unknown3 = result;
                     }
                 }
@@ -455,6 +411,68 @@ namespace TagTool.Geometry
             using (var edResourceStream = new MemoryStream())
             using (var blamResourceStream = new MemoryStream(rsrcData))
             {
+                //
+                // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
+                //
+                
+                var ms30Vertices = new Dictionary<int, List<int>>();
+
+                if (materials != null)
+                {
+                    var ms30Materials = new List<bool>();
+
+                    foreach (var material in materials)
+                    {
+                        if (material.RenderMethod == null)
+                            continue;
+
+                        var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
+                        var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
+
+                        ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
+                    }
+
+                    foreach (var mesh in geometry.Meshes)
+                    {
+                        var ms30Indices = new List<int>();
+
+                        foreach (var part in mesh.Parts)
+                        {
+                            if (part.MaterialIndex < 0 || part.MaterialIndex >= ms30Materials.Count || !ms30Materials[part.MaterialIndex])
+                                continue;
+
+                            for (var i = part.FirstIndex; i < (part.FirstIndex + part.IndexCount); i++)
+                                ms30Indices.Add(i);
+                        }
+
+                        if (rsrcDef.IndexBuffers.Count == 0 || mesh.IndexBuffers[0] == ushort.MaxValue)
+                            continue;
+
+                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + mesh.IndexBuffers[0]].Offset;
+
+                        var indexStream = new IndexBufferStream(blamResourceStream, EndianFormat.BigEndian);
+                        var indexBuffer = rsrcDef.IndexBuffers[0].Definition;
+                        var indexCount = indexBuffer.Data.Size / 2;
+                        var indices = new List<int>();
+
+                        for (var i = 0; i < indexCount; i++)
+                        {
+                            var index = indexStream.ReadIndex();
+
+                            if (ms30Indices.Contains(i))
+                                indices.Add(index);
+                        }
+
+                        foreach (var vertexBufferIndex in mesh.VertexBuffers)
+                        {
+                            if (vertexBufferIndex == ushort.MaxValue || ms30Vertices.ContainsKey(vertexBufferIndex))
+                                continue;
+
+                            ms30Vertices[vertexBufferIndex] = indices;
+                        }
+                    }
+                }
+
                 //
                 // Convert Blam render_geometry_api_resource_definition
                 //
