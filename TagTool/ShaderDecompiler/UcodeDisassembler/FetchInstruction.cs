@@ -25,7 +25,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		private uint num_format_all;
 		public uint signed_rf_mode_all;
 		private uint is_index_rounded;
-		public VertexFormat format;
+		public DataFormat format;
 		public uint reserved2;
 		public uint exp_adjust;
 		private uint is_mini_fetch;

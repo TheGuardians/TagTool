@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
+using static TagTool.ShaderDecompiler.Decompiler;
 
 namespace TagTool.ShaderDecompiler.Translations
 {
@@ -23,257 +24,248 @@ namespace TagTool.ShaderDecompiler.Translations
 
 		// Translates an ALU Vector/Scalar pair into HLSL fragments (Vector and Scalar ALU instructions
 		// are ALWAYS executed in pairs, and are part of the same instruction definition.
-		public static string Get(Instruction instruction, string indent)
+		public static void Get(Instruction instruction)
 		{
 			PreFixups.Apply(ref instruction.alu_instr);
 
-			string translation = "";
+			if (instruction.alu_instr.Has_vector_op)
+				Vector(instruction);
+			if (instruction.alu_instr.Has_vector_op)
+				Scalar(instruction);
 
-			translation += $"{Vector(instruction, indent)}";
-			translation += $"{Scalar(instruction, indent)}";
-
-			return translation;
+			return;
 		}
 
 		// Translates the Vector portions of an ALU instruction into HLSL fragments.
-		private static string Vector(Instruction instruction, string indent)
+		private static void Vector(Instruction instruction)
 		{
-			string translation = "";
-			if (!instruction.alu_instr.Has_vector_op)
-				return translation;
+			var dest = instruction.alu_instr.GetVectorDest_Operand();
+			var src1 = instruction.alu_instr.GetSrc1_Operand();
+			var src2 = instruction.alu_instr.GetSrc2_Operand();
+			var src3 = instruction.alu_instr.GetSrc3_Operand();
+			var function = "";
 
 			switch (instruction.alu_instr.vector_opc)
 			{
 				case VectorOpcode.add:
-					translation +=
-						"dest = src0 + src1;";
+					Main +=
+						$"{dest} = {src1} + {src2};";
 					break;
 				case VectorOpcode.cndeq:
-					translation +=
-						" dest.x = (src0.x == 0.0f) ? src1.x : src2.x;\n" +
-						" dest.y = (src0.y == 0.0f) ? src1.y : src2.y;\n" +
-						" dest.z = (src0.z == 0.0f) ? src1.z : src2.z;\n" +
-						" dest.w = (src0.w == 0.0f) ? src1.w : src2.w;";
+					Main +=
+						$"{dest} = ({src1} == 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndge:
-					translation +=
-						" dest.x = (src0.x >= 0.0f) ? src1.x : src2.x;\n" +
-						" dest.y = (src0.y >= 0.0f) ? src1.y : src2.y;\n" +
-						" dest.z = (src0.z >= 0.0f) ? src1.z : src2.z;\n" +
-						" dest.w = (src0.w >= 0.0f) ? src1.w : src2.w;";
+					Main +=
+						$"{dest} = ({src1} ?= 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndgt:
-					translation +=
-						" dest.x = (src0.x > 0.0f) ? src1.x : src2.x;\n" +
-						" dest.y = (src0.y > 0.0f) ? src1.y : src2.y;\n" +
-						" dest.z = (src0.z > 0.0f) ? src1.z : src2.z;\n" +
-						" dest.w = (src0.w > 0.0f) ? src1.w : src2.w;";
+					Main +=
+						$"{dest} = ({src1} > 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cube:
-					translation += 
+					Main +=
 						$"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
-					translation +=
-						"dest = src0.x * src1.x + src0.y * src1.y + src2.x;";
+					Main +=
+						$"{dest} = dot({src1}, {src2}) + {src3};";
 					break;
 				case VectorOpcode.dp3:
-					translation +=
-						"dest = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z;";
+					Main +=
+						$"{dest} = dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dp4:
-					translation +=
-						"dest = src0.x * src1.x + src0.y * src1.y + src0.z * src1.z + src0.w * src1.w;";
+					Main +=
+						$"{dest} = dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dst:
-					translation +=
-						"dest = dst(src0, src1);";
+					Main +=
+						$"{dest} = dst({src1}, {src2});";
 					break;
 				case VectorOpcode.floor:
-					translation +=
-						"dest = floor(src0);";
+					Main +=
+						$"{dest} = floor({src1});";
 					break;
 				case VectorOpcode.frc:
-					translation +=
-						"dest = fract(src0);";
+					Main +=
+						$"{dest} = frac({src1});";
 					break;
 				case VectorOpcode.kill_eq:
-					translation +=
-						" dest = 0.0f;" +
-						" if ( src0.x == src1.x || src0.y == src1.y || src0.z == src1.z || src0.w == src1.w )\n" +
-						" {					\n" +
-						" 	dest = 1.0f;		\n" +
+					Main +=
+					   $" if ( {src1} == {src2}) {{\n"+
+						" 	clip(-1);		\n" +
 						" }					\n" +
-						" clip(-dest);		  ";
+						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_ge:
-					translation +=
-						" dest = 0.0f;" +
-						" if ( src0.x >= src1.x || src0.y >= src1.y || src0.z >= src1.z || src0.w >= src1.w )\n" +
-						" {					\n" +
-						" 	dest = 1.0f;		\n" +
+					Main +=
+						$" if ( {src1} >= {src2}) {{\n" +
+						" 	clip(-1);		\n" +
 						" }					\n" +
-						" clip(-dest);		  ";
+						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_gt:
-					translation +=
-						" dest = 0.0f;" +
-						" if ( src0.x > src1.x || src0.y > src1.y || src0.z > src1.z || src0.w > src1.w )\n" +
-						" {					\n" +
-						" 	dest = 1.0f;		\n" +
+					Main +=
+						$" if ( {src1} > {src2}) {{	\n" +
+						" 	clip(-1);		\n" +
 						" }					\n" +
-						" clip(-dest);		  ";
+						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.kill_ne:
-					translation +=
-						" dest = 0.0f;" +
-						" if ( src0.x != src1.x || src0.y != src1.y || src0.z != src1.z || src0.w != src1.w )\n" +
-						" {					\n" +
-						" 	dest = 1.0f;		\n" +
+					Main +=
+						$" if ( {src1} != {src2}) {{\n" +
+						" 	clip(-1);		\n" +
 						" }					\n" +
-						" clip(-dest);		  ";
+						$" {dest} = 0.0f;";
 					break;
 				case VectorOpcode.mad:
-					translation +=
-						"dest = (src0 * src1) + src2;";
+					Main +=
+						$"{dest} = ({src1} * {src2}) + {src3};";
 					break;
 				case VectorOpcode.max:
-					translation +=
-						"dest = max(src0, src1);";
+					Main +=
+						$"{dest} = max({src1}, {src2});";
 					break;
 				case VectorOpcode.max4:
-					translation +=
-						"dest = max(src0.x, max(src0.y, max(src0.z, src0.w)));";
+					function =
+						"float4 max4_func(float4 src1) {\n" +
+						"	return max(src1.x, (max(src1.y, max(src1.z, src1.w)));\n" +
+						"}";
+					Main +=
+						$"{dest} = max4_func({src1});";
 					break;
 				case VectorOpcode.maxa:
-					translation +=
-						"a0 = clamp(int(floor(src0.w + 0.5)), -256, 255);" +
-						"dest = max(src0, src1);";
+					function =
+						"float4 maxa_func(float4 src1, float4 src2) {\n" +
+						"	a0 = clamp(int(floor(src1.w + 0.5)), -256, 255);\n" +
+						"	return max(src1, src2);\n" +
+						"}";
+					Main +=
+						$"{dest} = maxa_func({src1}, {src2});";
 					break;
 				case VectorOpcode.min:
-					translation +=
-						"dest = min(src0, src1);";
+					Main +=
+						$"{dest} = min({src1}, {src2});";
 					break;
 				case VectorOpcode.mul:
-					translation +=
-						"dest = src0 * src1;";
+					Main +=
+						$"{dest} = {src1} * {src2};";
 					break;
 				case VectorOpcode.seq:
-					translation +=
-						"dest.x = (src0.x == src1.x) ? 1.0f : 0.0f;\n" +
-						"dest.y = (src0.y == src1.y) ? 1.0f : 0.0f;\n" +
-						"dest.z = (src0.z == src1.z) ? 1.0f : 0.0f;\n" +
-						"dest.w = (src0.w == src1.w) ? 1.0f : 0.0f;";
+					Main +=
+						$"{dest} = ({src1} == {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.setp_eq_push:
-					translation +=
-						"p0 = src0.w == 0.0 && src1.w == 0.0 ? true : false;\n" +
-						"dest = float4(src0.x == 0.0 && src1.x == 0.0 ? 0.0 : src0.x + 1.0);";
+					function =
+						"float4 setp_eq_push_func(float4 src1, float4 src2) {\n" +
+						"	p0 = src1.w == 0.0 && src2.w == 0.0 ? true : false;\n" +
+						"	return float4(src1.x == 0.0 && src2.x == 0.0 ? 0.0 : src1.x + 1.0);\n" +
+						"}";
+					Main +=
+						$"{dest} = setp_eq_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ge_push:
-					translation +=
-						"p0 = src0.w == 0.0 && src1.w >= 0.0 ? true : false;\n" +
-						"dest = float4(src0.x == 0.0 && src1.x >= 0.0 ? 0.0 : src0.x + 1.0);";
+					function =
+						"float4 setp_ge_push_func(float4 src1, float4 src2) {\n" +
+						"	p0 = src1.w == 0.0 && src2.w >= 0.0 ? true : false;\n" +
+						"	return float4(src1.x == 0.0 && src2.x >= 0.0 ? 0.0 : src1.x + 1.0);\n" +
+						"}";
+					Main +=
+						$"{dest} = setp_ge_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_gt_push:
-					translation +=
-						"p0 = src0.w == 0.0 && src1.w > 0.0 ? true : false;\n" +
-						"dest = float4(src0.x == 0.0 && src1.x > 0.0 ? 0.0 : src0.x + 1.0);";
+					function =
+						"float4 setp_gt_push_func(float4 src1, float4 src2) {\n" +
+						"	p0 = src1.w == 0.0 && src2.w > 0.0 ? true : false;\n" +
+						"	return float4(src1.x == 0.0 && src2.x > 0.0 ? 0.0 : src1.x + 1.0);\n" +
+						"}";
+					Main +=
+						$"{dest} = setp_gt_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ne_push:
-					translation +=
-						"p0 = src0.w == 0.0 && src1.w != 0.0 ? true : false;\n" +
-						"dest = float4(src0.x == 0.0 && src1.x != 0.0 ? 0.0 : src0.x + 1.0);";
+					function =
+						"float4 setp_ne_push_func(float4 src1, float4 src2) {\n" +
+						"	p0 = src1.w == 0.0 && src2.w != 0.0 ? true : false;\n" +
+						"	return float4(src1.x == 0.0 && src2.x != 0.0 ? 0.0 : src1.x + 1.0);\n" +
+						"}";
+					Main +=
+						$"{dest} = setp_ne_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.sge:
-					translation +=
-						"dest.x = (src0.x >= src1.x) ? 1.0f : 0.0f;\n" +
-						"dest.y = (src0.y >= src1.y) ? 1.0f : 0.0f;\n" +
-						"dest.z = (src0.z >= src1.z) ? 1.0f : 0.0f;\n" +
-						"dest.w = (src0.w >= src1.w) ? 1.0f : 0.0f;";
+					Main +=
+						$"{dest} = ({src1} >= {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sgt:
-					translation +=
-						"dest.x = (src0.x > src1.x) ? 1.0f : 0.0f;\n" +
-						"dest.y = (src0.y > src1.y) ? 1.0f : 0.0f;\n" +
-						"dest.z = (src0.z > src1.z) ? 1.0f : 0.0f;\n" +
-						"dest.w = (src0.w > src1.w) ? 1.0f : 0.0f;";
+					Main +=
+						$"{dest} = ({src1} > {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sne:
-					translation +=
-						"dest.x = (src0.x != src1.x) ? 1.0f : 0.0f;\n" +
-						"dest.y = (src0.y != src1.y) ? 1.0f : 0.0f;\n" +
-						"dest.z = (src0.z != src1.z) ? 1.0f : 0.0f;\n" +
-						"dest.w = (src0.w != src1.w) ? 1.0f : 0.0f;";
+					Main +=
+						$"{dest} = ({src1} != {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.trunc:
-					translation += 
-						"dest = trunc(src0);";
+					Main += 
+						$"{dest} = trunc({src1});";
 					break;
 				case VectorOpcode.opcode_30:
 				case VectorOpcode.opcode_31:
-					translation += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
+					Main += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				default:
-					translation += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
+					Main += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 			}
 
-			translation.Replace("pv.", instruction.alu_instr.GetDest_Register());
-			translation.Replace("pv", instruction.alu_instr.GetDest_Operand());
+			if (!Functions.Contains(function))
+				Functions += $"{function}\n";
 
-			translation.Replace("src0.", instruction.alu_instr.GetSrc0_Register());
-			translation.Replace("src0", instruction.alu_instr.GetSrc0_Operand());
-
-			translation.Replace("src1.", instruction.alu_instr.GetSrc1_Register());
-			translation.Replace("src1", instruction.alu_instr.GetSrc1_Operand());
-
-			translation.Replace("src2.", instruction.alu_instr.GetSrc2_Register());
-			translation.Replace("src2", instruction.alu_instr.GetSrc2_Operand());
-
-			return $"{indent}{translation}\n";
+			return;
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
-		private static string Scalar(Instruction instruction, string indent)
+		private static void Scalar(Instruction instruction)
 		{
-			string translation = "";
-			if (!instruction.alu_instr.Has_scalar_op)
-				return translation;
+			var dest = instruction.alu_instr.GetScalarDest_Operand();
+			var src1 = instruction.alu_instr.GetSrc1_Operand();
+			var src2 = instruction.alu_instr.GetSrc2_Operand();
+			var src3 = instruction.alu_instr.GetSrc3_Operand();
 
 			switch (instruction.alu_instr.scalar_opc)
 			{
 				case ScalarOpcode.adds:
-					translation +=
+					Functions +=
+						"src0.x + src0.y";
+					Main +=
 						"ps = dest = src0.x + src0.y;";
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
-					translation +=
+					Main +=
 						"ps = dest = src0.x + src0.y;";
 					break;
 				case ScalarOpcode.adds_prev:
-					translation +=
+					Main +=
 						"ps = dest = src0.x + ps;";
 					break;
 				case ScalarOpcode.cos:
-					translation +=
+					Main +=
 						"ps = dest = cos( src0.x );";
 					break;
 				case ScalarOpcode.exp:
-					translation +=
+					Main +=
 						"ps = dest = pow( 2, src0.x );";
 					break;
 				case ScalarOpcode.floors:
-					translation +=
+					Main +=
 						"ps = dest = floor( src0.x );";
 					break;
 				case ScalarOpcode.frcs:
-					translation +=
+					Main +=
 						"ps = dest = src0.x − floor( src0.x );";
 					break;
 				case ScalarOpcode.killseq:
-					translation +=
+					Main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x == 0 )\n" +
 						" {					\n" +
@@ -282,7 +274,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" clip(-pv);		  ";
 					break;
 				case ScalarOpcode.killsge:
-					translation +=
+					Main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x >= 0 )\n" +
 						" {					\n" +
@@ -290,7 +282,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsgt:
-					translation +=
+					Main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x > 0 )\n" +
 						" {					\n" +
@@ -298,7 +290,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsne:
-					translation +=
+					Main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x != 0 )\n" +
 						" {					\n" +
@@ -306,7 +298,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.killsone:
-					translation +=
+					Main +=
 						" ps = dest = 0.0f;" +
 						" if ( src0.x == 1 )\n" +
 						" {					\n" +
@@ -314,12 +306,12 @@ namespace TagTool.ShaderDecompiler.Translations
 						" }					\n" +
 						" clip(-pv);		  "; break;
 				case ScalarOpcode.log:
-					translation +=
+					Main +=
 						"ps = dest = log( src0.x ) / log( 2 );";
 					break;
 				case ScalarOpcode.logc:
-					translation +=
-						"dest = log( src0.x ) / log( 2 );	\n"+
+					Main +=
+						$"{dest} = log( src0.x ) / log( 2 );	\n"+
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
 						"	dest = -MAX_FLOAT;				\n" +
@@ -327,12 +319,12 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.maxas:
-					translation +=
+					Main +=
 						"a0 = src0.x; \n" +
 						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxasf:
-					translation +=
+					Main +=
 						"int temp = floor( src0.x);\n" +
 						"if (temp < −256 )				\n" +
 						"{								\n" +
@@ -346,38 +338,38 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxs:
-					translation +=
+					Main +=
 						"ps = dest = max(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.mins:
-					translation +=
+					Main +=
 						"ps = dest = min(src0.x, src0.y);";
 					break;
 				case ScalarOpcode.muls:
-					translation +=
+					Main +=
 						"ps = dest = src0.x * src0.y;";
 					break;
 				case ScalarOpcode.mulsc0:
 				case ScalarOpcode.mulsc1:
-					translation +=
-						"ps = dest = src0.x * src1.y;";
+					Main +=
+						"ps = dest = src0.x * {src1}.y;";
 					break;
 				case ScalarOpcode.muls_prev:
-					translation +=
+					Main +=
 						"ps = dest = src0.x * ps;";
 					break;
 				case ScalarOpcode.muls_prev2:
-					translation +=
+					Main +=
 						"ps = dest = ps == -MAX_FLOAT || isinf(ps) || isnan(ps) || isnan(src0.y) || " +
 						"src0.y <= 0.0 ? -MAX_FLOAT : src0.x * ps;";
 					break;
 				case ScalarOpcode.rcp:
-					translation +=
+					Main +=
 						"ps = dest = 1.0f / src0.x;";
 					break;
 				case ScalarOpcode.rcpc:
-					translation +=
-						"dest = 1.0f / src0.x;				\n" +
+					Main +=
+						$"{dest} = 1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
 						"	dest = -MAX_FLOAT;				\n" +
@@ -389,8 +381,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rcpf:
-					translation +=
-						"dest = 1.0f / src0.x;				\n" +
+					Main +=
+						$"{dest} = 1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
 						"	dest = -ZERO;					\n" +
@@ -401,16 +393,16 @@ namespace TagTool.ShaderDecompiler.Translations
 						"}									\n" +
 						"ps = dest;"; break;
 				case ScalarOpcode.retain_prev:
-					translation += 
+					Main += 
 						"ps = dest = ps;";
 					break;
 				case ScalarOpcode.rsq:
-					translation +=
+					Main +=
 						"ps = dest = 1.0f / sqrt ( src0.x );";
 					break;
 				case ScalarOpcode.rsqc:
-					translation +=
-						"dest = 1.0f / sqrt ( src0.x );			\n" +
+					Main +=
+						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)			\n" +
 						"{										\n" +
 						"	dest = -MAX_FLOAT;			\n" +
@@ -422,8 +414,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rsqf:
-					translation +=
-						"dest = 1.0f / sqrt ( src0.x );			\n" +
+					Main +=
+						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)					\n" +
 						"{										\n" +
 						"	dest = -ZERO;						\n" +
@@ -435,16 +427,16 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.seqs:
-					translation +=
+					Main +=
 						"ps = dest = ( src0.x == 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.setpclr:
-					translation +=
+					Main +=
 						"ps = dest = +MAX_FLOAT; \n" +
 						"p0 = false; ";
 					break;
 				case ScalarOpcode.setpeq:
-					translation +=
+					Main +=
 						"if (src0.x == 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -458,7 +450,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpge:
-					translation +=
+					Main +=
 						"if (src0.x >= 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -472,7 +464,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpgt:
-					translation +=
+					Main +=
 						"if (src0.x > 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -486,7 +478,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpinv:
-					translation +=
+					Main +=
 						"if (src0.x == 1.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -507,7 +499,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setpne:
-					translation +=
+					Main +=
 						"if (src0.x != 0.0f)	\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -521,8 +513,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setppop:
-					translation +=
-						"dest = src0.x - 1.0f;	\n" +
+					Main +=
+						$"{dest} = src0.x - 1.0f;	\n" +
 						"if (dest <= 0.0f)		\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -535,8 +527,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.setprstr:
-					translation +=
-						"dest = src0.x;			\n" +
+					Main +=
+						$"{dest} = src0.x;			\n" +
 						"if (dest == 0.0f)		\n" +
 						"{						\n" +
 						"	p0 = true;			\n" +
@@ -548,40 +540,40 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest;";
 					break;
 				case ScalarOpcode.sges:
-					translation +=
+					Main +=
 						"ps = dest = ( src0.x >= 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sgts:
-					translation +=
+					Main +=
 						"ps = dest = ( src0.x > 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sin:
-					translation += 
+					Main += 
 						"ps = dest = sin(src0.x);";
 					break;
 				case ScalarOpcode.snes:
-					translation +=
+					Main +=
 						"ps = dest = ( src0.x != 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sqrt:
-					translation +=
+					Main +=
 						"ps = dest = sqrt(src0.x);";
 					break;
 				case ScalarOpcode.subs:
-					translation +=
+					Main +=
 						"ps = dest = src0.x - src0.y;";
 					break;
 				case ScalarOpcode.subsc0:
 				case ScalarOpcode.subsc1:
-					translation +=
-						"ps = dest = src0.x - src1.y;";
+					Main +=
+						"ps = dest = src0.x - {src1}.y;";
 					break;
 				case ScalarOpcode.subs_prev:
-					translation +=
+					Main +=
 						"ps = dest = src0.x - ps;";
 					break;
 				case ScalarOpcode.truncs:
-					translation +=
+					Main +=
 						"ps = dest = trunc( src0.x );";
 					break;
 				case ScalarOpcode.opcode_41:
@@ -598,14 +590,12 @@ namespace TagTool.ShaderDecompiler.Translations
 				case ScalarOpcode.opcode_61:
 				case ScalarOpcode.opcode_62:
 				case ScalarOpcode.opcode_63:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					Main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 				default:
-					translation += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					Main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 			}
-
-			return $"{indent}{translation}\n";
 		}
 	}
 }

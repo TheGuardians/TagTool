@@ -9,31 +9,37 @@ using TagTool.ShaderDecompiler.UcodeDisassembler;
 namespace TagTool.ShaderDecompiler
 {
 	// Class for generating HLSL code from a List<Instruction>
-	public class Decompiler
+	public static class Decompiler
 	{
+			public static string Constants = "";
+			public static string Parameters = "";
+			public static string Inputs = "";
+			public static string Outputs = "";
+			public static string Functions = "";
+			public static string Main = "";
+			public static string INDENT = "	";
+
+
 		public static string Decompile(byte[] shader_data)
 		{
 			var instructions = Disassembler.Disassemble(shader_data);
-
-			string parameters = "";
-			string inputs = "";
-			string outputs = "";
-			string functions = "";
-			string constants = "";
-			string main = "";
+			Constants = "";
+			Parameters = "";
+			Inputs = "";
+			Outputs = "";
+			Functions = "";
+			Main = "";
 
 			// HLSL generation here. Any code generation should be appended to the above stringvariables. If none of the
 			// variables logically fit the generated code, add a new one, along with matching string interpolation
 			// into the 'hlsl' string variable below. Rarely, some things may need be hardcoded into the 'hlsl' string 
 			// variable, however this should be avoided unless it makes either the C# or HLSL output hard to read.
 
-			constants +=
+			Constants +=
 				"#define MAX_FLOAT 3.402823466e+38F		\n" +
 				"#define INFINITY (1 / 0)				\n" +
 				"#define NaN (0 / 0)					\n" +
 				"#define ZERO 0							\n";
-
-			string indent = "	";
 
 			// Much more work is needed here.
 			// TODO: handle all ControlFlowInstruction types.
@@ -42,14 +48,18 @@ namespace TagTool.ShaderDecompiler
 			{
 				foreach (var cf_instr in instr.cf_instrs)
 				{
-					main += $"{indent}// {cf_instr.opcode}\n";
+					Main += $"{INDENT}// {cf_instr.opcode}\n";
 
 					if (cf_instr.Executes)
 					{
 						var alus = instructions.Skip((int)cf_instr.exec.address).Take((int)cf_instr.exec.count).ToArray();
 
 						foreach (var alu in alus)
-							main += $"{ALU.Get(alu, indent)}\n";
+						{
+							ALU.Get(alu);
+							// Main += $"{INDENT}{alu.alu_instr.GetVectorAsmString()}\n";
+							// Main += $"{INDENT}{alu.alu_instr.GetScalarAsmString()}\n";
+						}
 					}
 
 					if (cf_instr.EndsShader)
@@ -60,28 +70,42 @@ namespace TagTool.ShaderDecompiler
 
 			string hlsl =
 				"// Decompiled with Jabukufo's ucode Decompiler \n" +
-				$"{constants}								\n" +
-				$"{parameters}								\n" +
+				"/*---------------------------------------*/\n" +
+				" // Constants:								\n" +
+				$"{Constants}								\n" +
+				"/*---------------------------------------*/\n" +
+				" // Parameters:							\n" +
+				$"{Parameters}								\n" +
+				"/*---------------------------------------*/\n" +
+				" // Inputs:								\n" +
 				"struct INPUT								\n" +
 				"{											\n" +
-				$"{inputs}									\n" +
+				$"{Inputs}									\n" +
 				"};											\n" +
-				"											\n" +
+				"/*---------------------------------------*/\n" +
+				" // Outputs:								\n" +
 				"struct OUTPUT								\n" +
 				"{											\n" +
-				$"{outputs}									\n" +
+				$"{Outputs}									\n" +
 				"};											\n" +
-				$"{functions}								\n" +
+				"/*---------------------------------------*/\n" +
+				" // Variables:								\n" +
+				"bool   p0 = false; // predicate 'register'.\n" +
+				"int    a0 = 0; // address 'register'.		\n" +
+				"float4 aL = 0; // loop 'register'.			\n" +
+				"float4 lc = 0; // loop count.				\n" +
+				"float4 ps = 0; // previous scalar result,	\n" +
+				"float4 pv = 0; // previous vector result.	\n" +
+				"/*---------------------------------------*/\n" +
+				" // Functions:								\n" +
+				$"{Functions}								\n" +
+				"/*---------------------------------------*/\n" +
+				" // Main:									\n" +
 				"OUTPUT main ( INPUT In )					\n" +
 				"{											\n" +
-				"	bool p0 = false;						\n" +
-				"	int a0 = 0;								\n" +
-				"	float4 aL = float4(0, 0, 0, 0);			\n" +
-				"	float4 loop_count = float4(0, 0, 0, 0);	\n" +
-				"	float4 ps = 0.0f;						\n" +
 				"	OUTPUT Out;								\n" +
 				"											\n" +
-				$"{main}									\n" +
+				$"{Main}									\n" +
 				"	return Out;								\n" +
 				"}											";
 

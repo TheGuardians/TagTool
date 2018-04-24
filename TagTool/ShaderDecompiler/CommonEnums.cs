@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.ShaderDecompiler.UcodeDisassembler
+namespace TagTool.ShaderDecompiler
 {
 	public enum Swizzle
 	{
@@ -1046,7 +1046,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		Centroid = 0x00,
 		Center = 0x01,
 	}
-	public enum SurfaceFormat
+	public enum DataFormat
 	{
 		FMT_1_REVERSE = 0x00,
 		FMT_1 = 0x01,
@@ -1109,25 +1109,6 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		FMT_DXT5A = 0x3B,
 		FMT_CTX1 = 0x3C,
 		FMT_DXT3A_AS_1_1_1_1 = 0x3D,
-	}
-	public enum VertexFormat
-	{
-		kUndefined = 0x00,
-		k_8_8_8_8 = 0x06,
-		k_2_10_10_10 = 0x07,
-		k_10_11_11 = 0x10,
-		k_11_11_10 = 0x11,
-		k_16_16 = 0x19,
-		k_16_16_16_16 = 0x1A,
-		k_16_16_FLOAT = 0x1F,
-		k_16_16_16_16_FLOAT = 0x20,
-		k_32 = 0x21,
-		k_32_32 = 0x22,
-		k_32_32_32_32 = 0x23,
-		k_32_FLOAT = 0x24,
-		k_32_32_FLOAT = 0x25,
-		k_32_32_32_32_FLOAT = 0x26,
-		k_32_32_32_FLOAT = 0x39,
 	}
 	public enum TextureDimension
 	{

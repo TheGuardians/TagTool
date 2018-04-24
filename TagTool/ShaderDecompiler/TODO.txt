@@ -4,5 +4,4 @@ Fully reverse Microcode Directives from 'PixelShaderReference.ConstantData byte[
 'VertexShaderReference.ConstantData byte[]' in \TagTool\Shaders\ (probably best to create a new instruction type to 
 hold their data, even though they aren't actual instructions.)
 
-Added HLSL fragments for all Scalar ALU instructions in \TagTool\ShaderDecompiler\Translations\ALU.Scalar() inside the massive
-switch (see \TagTool\ShaderDecompiler\Translations\ALU.Vector().)
+Figure out destination register masking, absolute value on source operands, various others.

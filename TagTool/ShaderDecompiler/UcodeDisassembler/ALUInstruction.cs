@@ -10,28 +10,28 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 	public struct ALUInstruction
 	{
 		public uint vector_dest;
-		public uint vector_dest_rel;
-		public uint abs_constants;
+		private uint vector_dest_rel;
+		private uint abs_constants;
 		public uint scalar_dest;
-		public uint scalar_dest_rel;
-		public uint export_data;
+		private uint scalar_dest_rel;
+		private uint export_data;
 		public Mask vector_write_mask;
 		public Mask scalar_write_mask;
-		public uint vector_clamp;
-		public uint scalar_clamp;
+		private uint vector_clamp;
+		private uint scalar_clamp;
 		public ScalarOpcode scalar_opc;  // instr_scalar_opc_t
 
-		public uint src3_swiz;
-		public uint src2_swiz;
-		public uint src1_swiz;
+		public Swizzle src3_swiz;
+		public Swizzle src2_swiz;
+		public Swizzle src1_swiz;
 		public uint src3_reg_negate;
 		public uint src2_reg_negate;
 		public uint src1_reg_negate;
-		public uint pred_condition;
-		public uint is_predicated;
-		public uint address_absolute;
-		public uint const_1_rel_abs;
-		public uint const_0_rel_abs;
+		private uint pred_condition;
+		private uint is_predicated;
+		private uint address_absolute;
+		private uint const_1_rel_abs;
+		private uint const_0_rel_abs;
 
 		public uint src3_reg;
 		public uint src2_reg;
@@ -42,7 +42,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		public uint src1_sel;
 
 		// Whether data is being exported (or written to local registers).
-		public bool is_export { get => export_data != 0; }
+		public bool Is_export { get => export_data != 0; }
 
 		// Whether the instruction is predicated (or conditional).
 		public bool Is_predicated { get => is_predicated != 0; }
@@ -55,12 +55,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		public bool Is_address_relative { get => address_absolute != 0; }
 
 		// Whether the instruction operates on the vector ALU
-		public bool Has_vector_op { get => vector_write_mask != 0 || is_export; }
+		public bool Has_vector_op { get => vector_write_mask != 0 || Is_export; }
 		public bool Is_vector_dest_relative { get => vector_dest_rel != 0; }
 		public bool Vector_clamp { get => vector_clamp != 0; }
 
 		// Whether the instruction operates on the scalar ALU
-		public bool Has_scalar_op { get => scalar_opc != ScalarOpcode.retain_prev || (!is_export && scalar_write_mask != 0); }
+		public bool Has_scalar_op { get => scalar_opc != ScalarOpcode.retain_prev || (!Is_export && scalar_write_mask != 0); }
 		public bool Is_scalar_dest_relative { get => scalar_dest_rel != 0; }
 		public bool Scalar_clamp { get => scalar_clamp != 0; }
 
@@ -68,7 +68,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		public string GetVectorAsmString()
 		{
 			string asmString = "";
-			asmString += $"{vector_opc}";
+			asmString += $"{vector_opc} {GetVectorDest_Operand()}, {GetSrc1_Operand()}, {GetSrc2_Operand()}, {GetSrc2_Operand()}";
 			return asmString;
 		}
 
@@ -81,47 +81,56 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		}
 
 		// gets the string representation of the full dest operand
-		public string GetDest_Operand()
+		public string GetVectorDest_Operand()
 		{
-			return "";
+			var rtype = Is_export ? "o" : "r";
+			return $"{rtype}{vector_dest}.{(Swizzle)vector_write_mask}";
 		}
-		// gets the string representation of just the dest register
-		public string GetDest_Register()
+		public string GetScalarDest_Operand()
 		{
-			return "";
+			return $"{scalar_dest}.{scalar_write_mask}";
 		}
 
 		// gets the string representation of the full src0 operand
-		public string GetSrc0_Operand()
+		public string GetSrc1_Operand()
 		{
-			return "";
-		}
-		// gets the string representation of just the src0 register
-		public string GetSrc0_Register()
-		{
-			return "";
+			var oprnd = "";
+			if (src3_reg_negate != 0)
+				oprnd += '-';
+			if (src3_sel != 0)
+				oprnd += 'r';
+			else
+				oprnd += 'c';
+			oprnd += src3_reg;
+			return $"{oprnd}.{src3_swiz}";
 		}
 
 		// gets the string representation of the full src1 operand
-		public string GetSrc1_Operand()
+		public string GetSrc2_Operand()
 		{
-			return "";
-		}
-		// gets the string representation of just the src1 register
-		public string GetSrc1_Register()
-		{
-			return "";
+			var oprnd = "";
+			if (src2_reg_negate != 0)
+				oprnd += '-';
+			if (src2_sel != 0)
+				oprnd += 'r';
+			else
+				oprnd += 'c';
+			oprnd += src2_reg;
+			return $"{oprnd}.{src2_swiz}";
 		}
 
 		// gets the string representation of the full src2 operand
-		public string GetSrc2_Operand()
+		public string GetSrc3_Operand()
 		{
-			return "";
-		}
-		// gets the string representation of just the src2 register
-		public string GetSrc2_Register()
-		{
-			return "";
+			var oprnd = "";
+			if (src3_reg_negate != 0)
+				oprnd += '-';
+			if (src3_sel != 0)
+				oprnd += 'r';
+			else
+				oprnd += 'c';
+			oprnd += src3_reg;
+			return $"{oprnd}.{src3_swiz}";
 		}
 	}
 }
