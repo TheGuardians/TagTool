@@ -456,31 +456,20 @@ namespace TagTool.Commands.Porting
             {
                 var effect = (Effect)blamDefinition;
 
-                if (BlamCache.Version != CacheVersion.HaloReach)
+                if (BlamCache.Version == CacheVersion.Halo3Retail)
                     foreach (var even in effect.Events)
                         foreach (var particle in even.ParticleSystems)
                             particle.Unknown7 = 1.0f / particle.Unknown7;
-
-
-                if(BlamCache.Version == CacheVersion.Halo3Retail)
-                {
-                    foreach(var events in effect.Events)
-                    {
-                        foreach(var particle in events.ParticleSystems)
-                        {
-                            particle.Unknown7 = 1.0f / particle.Unknown7;
-                        }
-                    }
-                }
             }
 
-            if(groupTag == "prt3")
+            if (groupTag == "prt3")
             {
                 var particle = (Particle)blamDefinition;
 
                 if(BlamCache.Version == CacheVersion.Halo3Retail)
                 {
-                    particle.Flags *= 2;
+                    // Shift all flags above 2 by 1.
+                    particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC)<<1);
                 }
 
             }
