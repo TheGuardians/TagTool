@@ -25,30 +25,37 @@ namespace TagTool.ShaderDecompiler
 		public Queue<InstructionContext> Children { get; set; }
 
 
-		public string PreText { get; set; }
+		public string ContextPrefix { get; set; }
+		public string ContextOpen { get; set; }
 
-		public string ChildrenText
+		private string childrenContexts;
+		public string ChildrenContexts
 		{
 			get
 			{
-				var childText = "";
 				while (Children.Count > 0)
-					ChildrenText += Children.Dequeue().GetHLSL;
-				return childText;
+					ChildrenContexts += Children.Dequeue().GetCode;
+				return childrenContexts;
 			}
-			set { }
+			set
+			{
+				childrenContexts = value;
+			}
 		}
 
-		public string PostText { get; set; }
+		public string ContextClose { get; set; }
+		public string ContextPostfix { get; set; }
 
-		public string GetHLSL
+		public string GetCode
 		{
 			get
 			{
 				return 
-					PreText +
-					ChildrenText +
-					PostText;
+					ContextPrefix +
+					ContextOpen +
+					ChildrenContexts +
+					ContextClose +
+					ContextPostfix;
 			}
 		}
 

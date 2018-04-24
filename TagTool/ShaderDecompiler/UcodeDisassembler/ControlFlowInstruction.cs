@@ -233,11 +233,11 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 					this.opcode == ControlFlowOpcode.cexece_pred_clean;
 		}
 
-		// This is used to determine if an `Executes()` instruction executes Fetch instructions.
-		// index == index of instruction executed by `Executes()` instruction.
-		public bool ExecuteIndexIsFetch(int index)
+		// True if the given control flow opcode creates a context block
+		// (code surrounded with curly-braces).
+		public bool CreatesContext
 		{
-			return (exec.serialize & (1 << (index * 2))) != 0;
+			get => this.opcode == ControlFlowOpcode.loop;
 		}
 	}
 }
