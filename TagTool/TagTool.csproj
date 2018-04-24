@@ -375,6 +375,7 @@
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
     <Compile Include="ShaderDecompiler\Decompiler.cs" />
@@ -382,7 +383,6 @@
     <Compile Include="ShaderDecompiler\PreFixups.cs" />
     <Compile Include="ShaderDecompiler\Translations\Fetch.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\ALUInstruction.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\ControlFlowInstruction.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\Disassembler.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\FetchInstruction.cs" />
