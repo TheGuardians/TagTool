@@ -292,7 +292,6 @@ namespace TagTool.Commands.Porting
                     H3att.NotificationScale = 1.2f;
                     H3att.NotificationLineSpacing = 30.0f;
                     H3att.NotificationOffsetY_HO = 0.65f;
-                    H3att.WarpAngle = -1.0f;
                 }
 
                 /*
