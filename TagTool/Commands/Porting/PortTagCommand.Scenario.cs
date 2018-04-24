@@ -207,6 +207,12 @@ namespace TagTool.Commands.Porting
                     pitch = -13.68f;
                     break;
 
+                case "levels\\dlc\\armory\\armory":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(-33.057f, -17.607f, -7.658f);
+                    yaw = 48.44f;
+                    pitch = -2.48f;
+                    break;
             }
 
             if(createPrematchCamera)
