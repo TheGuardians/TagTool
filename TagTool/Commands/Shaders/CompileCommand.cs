@@ -61,7 +61,7 @@ namespace TagTool.Commands.Shaders
             else
             {
                 var profile = IsVertexShader ? "vs_3_0" : "ps_3_0";
-                new Compile(shader_code, "main", profile, out string errors, out bytecode);
+                new Compile(shader_code, "main", profile, 0, out string errors, out bytecode);
 
 				new PrintError(shader_code, errors, out bool isError);
                 if (isError)

@@ -6,6 +6,7 @@ using TagTool.Serialization;
 using TagTool.ShaderDecompiler;
 using TagTool.Tags.Definitions;
 using TagTool.Direct3D.Functions;
+using TagTool.Direct3D.Enums;
 
 namespace TagTool.Commands.Porting
 {
@@ -20,10 +21,10 @@ namespace TagTool.Commands.Porting
 			"DecompileShader",
 			"Test command for xbox360 shader decompilation.",
 
-			"DecompileShader <shader_index> <tag_name>",
+			"DecompileShader <shader_index> <pixl_tag_name>",
 
 			"shader_index - index into the Shaders block of the shader you wish to decompile.\n" +
-			"tag_name - the name of the tag which contains the shader you wish to decompile.")
+			"pixl_tag_name - the name of the pixl tag which contains the shader you wish to decompile.")
 		{
 			CacheContext = cacheContext;
 			BlamCache = blamCache;
@@ -59,7 +60,9 @@ namespace TagTool.Commands.Porting
 
 			var hlsl = Decompiler.Decompile(shaderData);
 
-			new Compile(hlsl, "main", "ps_3_0", out string errors, out byte[] pcShaderData);
+			var flags1 = CompileConstants.ENABLE_BACKWARDS_COMPATIBILITY;
+
+			new Compile(hlsl, "main", "ps_3_0", flags1, out string errors, out byte[] pcShaderData);
 			new PrintError(hlsl, errors, out bool isError);
 
 			if (!isError)

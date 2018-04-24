@@ -383,6 +383,7 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="Direct3D\Functions\PrintError.cs" />
     <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
+    <Compile Include="ShaderDecompiler\InstructionContext.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />

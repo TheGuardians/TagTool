@@ -273,6 +273,14 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		D_Vector = 0x08, // Vector destination mask
 	}
 
+	public enum InstructionType
+	{
+		Directive, // not an actual shader instruction, but we should treat it like one for conversion purposes.
+		ControlFlow,
+		ALU,
+		Fetch
+	}
+
 	public enum ControlFlowOpcode : uint
 	{
 		// No-op - used to fill space.

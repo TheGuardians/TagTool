@@ -19,14 +19,14 @@ namespace TagTool.Direct3D.Functions
 		/// <param name="profile"> Shader profile to compile the source against (i.e. ps_3_0). </param>
 		/// <param name="errors">Pointer to a string to receive error messages. Will be set to <c>null</c> if errors are not available.</param>
 		/// <returns>The bytecode for the shader if successful, or <c>null</c> otherwise.</returns>
-		public Compile(string code, string main, string profile, out string errors, out byte[] data)
+		public Compile(string code, string main, string profile, CompileConstants options, out string errors, out byte[] data)
 		{
 			ID3DBlob codeBlob = null, errorBlob = null;
 			errors = null;
 
 			try
 			{
-				var result = D3DCompile(code, (uint)code.Length, null, IntPtr.Zero, IntPtr.Zero, main, profile, 0, 0, out codeBlob, out errorBlob);
+				var result = D3DCompile(code, (uint)code.Length, null, IntPtr.Zero, IntPtr.Zero, main, profile, options, 0, out codeBlob, out errorBlob);
 				if (result != (int)ReturnCode.S_OK || codeBlob == null)
 				{
 					if (errorBlob == null)
@@ -63,7 +63,7 @@ namespace TagTool.Direct3D.Functions
 			IntPtr pInclude,
 			[MarshalAs(UnmanagedType.LPStr)] string pEntrypoint,
 			[MarshalAs(UnmanagedType.LPStr)] string pTarget,
-			uint Flags1,
+			CompileConstants Flags1,
 			uint Flags2,
 			out ID3DBlob ppCode,
 			out ID3DBlob ppErrorMsgs

@@ -19,7 +19,6 @@ namespace TagTool.ShaderDecompiler
 			public static string Main = "";
 			public static string INDENT = "	";
 
-
 		public static string Decompile(byte[] shader_data)
 		{
 			var instructions = Disassembler.Disassemble(shader_data);
@@ -56,6 +55,7 @@ namespace TagTool.ShaderDecompiler
 				{
 					Main += $"{INDENT}// {cf_instr.opcode}\n";
 
+					// Handle CF instructions which execute ALU/Fetch instructions
 					if (cf_instr.Executes)
 					{
 						var executes = instructions.Skip((int)cf_instr.exec.address).Take((int)cf_instr.exec.count).ToArray();
