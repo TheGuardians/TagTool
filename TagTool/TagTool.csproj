@@ -383,7 +383,8 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="Direct3D\Functions\PrintError.cs" />
     <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
-    <Compile Include="ShaderDecompiler\Directives\UPDB.cs" />
+    <Compile Include="ShaderDecompiler\Shaderpdb\Definition.cs" />
+    <Compile Include="ShaderDecompiler\Shaderpdb\Generator.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
@@ -731,6 +732,7 @@
     <None Include="ShaderDecompiler\UcodeDisassembler\ReadMe.txt" />
     <Content Include="ShaderDecompiler\ReadMe_ShaderPortingPipeline.txt" />
     <Content Include="ShaderDecompiler\TODO.txt" />
+    <Content Include="ShaderDecompiler\Shaderpdb\ReadMe.txt" />
     <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

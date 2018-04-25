@@ -1,15 +1,12 @@
-﻿/* 
- Licensed under the Apache License, Version 2.0
-
- http://www.apache.org/licenses/LICENSE-2.0
- */
-using System;
+﻿using System;
 using System.Xml.Serialization;
 using System.Collections.Generic;
-namespace Xml2CSharp
+
+
+namespace TagTool.ShaderDecompiler.UPDB
 {
 	[XmlRoot(ElementName = "file")]
-	public class File
+	public class IncludedFile
 	{
 		[XmlAttribute(AttributeName = "id")]
 		public string Id { get; set; }
@@ -22,10 +19,10 @@ namespace Xml2CSharp
 	}
 
 	[XmlRoot(ElementName = "files")]
-	public class Files
+	public class IncludedFiles
 	{
 		[XmlElement(ElementName = "file")]
-		public File File { get; set; }
+		public IncludedFile File { get; set; }
 	}
 
 	[XmlRoot(ElementName = "argument")]
@@ -141,9 +138,8 @@ namespace Xml2CSharp
 	public class Shaderpdb
 	{
 		[XmlElement(ElementName = "files")]
-		public Files Files { get; set; }
+		public IncludedFiles Files { get; set; }
 		[XmlElement(ElementName = "tool")]
-
 		public Tool Tool { get; set; }
 		[XmlElement(ElementName = "shaders")]
 		public Shaders Shaders { get; set; }
