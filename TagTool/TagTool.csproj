@@ -383,6 +383,7 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="Direct3D\Functions\PrintError.cs" />
     <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
+    <Compile Include="ShaderDecompiler\Directives\UPDB.cs" />
     <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
@@ -1005,6 +1006,7 @@
       <Name>TagToolUtilities</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
