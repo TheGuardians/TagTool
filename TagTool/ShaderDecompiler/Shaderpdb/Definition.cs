@@ -1,53 +1,48 @@
-﻿using System;
-using System.Xml.Serialization;
+﻿/* 
+ Licensed under the Apache License, Version 2.0
+
+ http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+ using System.Xml.Serialization;
 using System.Collections.Generic;
 
 
+// TODO: this needs a LOT of cleanup
+
 namespace TagTool.ShaderDecompiler.UPDB
 {
-	[XmlRoot(ElementName = "file")]
-	public class IncludedFile
-	{
-		[XmlAttribute(AttributeName = "id")]
-		public string Id { get; set; }
-		[XmlAttribute(AttributeName = "path")]
-		public string Path { get; set; }
-		[XmlAttribute(AttributeName = "time")]
-		public string Time { get; set; }
-		[XmlText]
-		public string Text { get; set; }
-	}
-
-	[XmlRoot(ElementName = "files")]
-	public class IncludedFiles
-	{
-		[XmlElement(ElementName = "file")]
-		public IncludedFile File { get; set; }
-	}
-
-	[XmlRoot(ElementName = "argument")]
-	public class Argument
+	[XmlRoot(ElementName = "type")]
+	public class Type
 	{
 		[XmlAttribute(AttributeName = "name")]
 		public string Name { get; set; }
-		[XmlAttribute(AttributeName = "value")]
-		public string Value { get; set; }
+		[XmlAttribute(AttributeName = "class")]
+		public string Class { get; set; }
+		[XmlAttribute(AttributeName = "type")]
+		public string _type { get; set; }
+		[XmlAttribute(AttributeName = "rows")]
+		public string Rows { get; set; }
+		[XmlAttribute(AttributeName = "columns")]
+		public string Columns { get; set; }
 	}
 
-	[XmlRoot(ElementName = "arguments")]
-	public class Arguments
+	[XmlRoot(ElementName = "constant")]
+	public class Constant
 	{
-		[XmlElement(ElementName = "argument")]
-		public List<Argument> Argument { get; set; }
+		[XmlElement(ElementName = "type")]
+		public Type Type { get; set; }
+		[XmlAttribute(AttributeName = "register")]
+		public string Register { get; set; }
+		[XmlAttribute(AttributeName = "count")]
+		public string Count { get; set; }
 	}
 
-	[XmlRoot(ElementName = "tool")]
-	public class Tool
+	[XmlRoot(ElementName = "constanttable")]
+	public class Constanttable
 	{
-		[XmlElement(ElementName = "arguments")]
-		public Arguments Arguments { get; set; }
-		[XmlAttribute(AttributeName = "name")]
-		public string Name { get; set; }
+		[XmlElement(ElementName = "constant")]
+		public Constant Constant { get; set; }
 	}
 
 	[XmlRoot(ElementName = "statement")]
@@ -72,35 +67,13 @@ namespace TagTool.ShaderDecompiler.UPDB
 		public List<Statement> Statement { get; set; }
 	}
 
-	[XmlRoot(ElementName = "Float")]
-	public class Float
-	{
-		[XmlAttribute(AttributeName = "Register")]
-		public string Register { get; set; }
-		[XmlAttribute(AttributeName = "value0")]
-		public string Value0 { get; set; }
-		[XmlAttribute(AttributeName = "value1")]
-		public string Value1 { get; set; }
-		[XmlAttribute(AttributeName = "value2")]
-		public string Value2 { get; set; }
-		[XmlAttribute(AttributeName = "value3")]
-		public string Value3 { get; set; }
-	}
-
-	[XmlRoot(ElementName = "LiteralFloats")]
-	public class LiteralFloats
-	{
-		[XmlElement(ElementName = "Float")]
-		public List<Float> Float { get; set; }
-	}
-
 	[XmlRoot(ElementName = "shader")]
 	public class Shader
 	{
 		[XmlElement(ElementName = "constanttable")]
-		public string Constanttable { get; set; }
+		public List<Constant> Constanttable { get; set; }
 		[XmlElement(ElementName = "sourcemap")]
-		public Sourcemap Sourcemap { get; set; }
+		public List<Statement> Sourcemap { get; set; }
 		[XmlElement(ElementName = "variables")]
 		public string Variables { get; set; }
 		[XmlElement(ElementName = "variableDebugInfo")]
@@ -116,15 +89,13 @@ namespace TagTool.ShaderDecompiler.UPDB
 		[XmlElement(ElementName = "InterpolatorInfo")]
 		public string InterpolatorInfo { get; set; }
 		[XmlElement(ElementName = "LiteralFloats")]
-		public LiteralFloats LiteralFloats { get; set; }
+		public string LiteralFloats { get; set; }
 		[XmlElement(ElementName = "LiteralInts")]
 		public string LiteralInts { get; set; }
 		[XmlElement(ElementName = "LiteralBools")]
 		public string LiteralBools { get; set; }
 		[XmlAttribute(AttributeName = "ZPass")]
 		public string ZPass { get; set; }
-		[XmlAttribute(AttributeName = "pdbHint")]
-		public string PdbHint { get; set; }
 	}
 
 	[XmlRoot(ElementName = "shaders")]
@@ -137,15 +108,7 @@ namespace TagTool.ShaderDecompiler.UPDB
 	[XmlRoot(ElementName = "shader-pdb")]
 	public class Shaderpdb
 	{
-		[XmlElement(ElementName = "files")]
-		public IncludedFiles Files { get; set; }
-		[XmlElement(ElementName = "tool")]
-		public Tool Tool { get; set; }
 		[XmlElement(ElementName = "shaders")]
-		public Shaders Shaders { get; set; }
-		[XmlAttribute(AttributeName = "pdbHint")]
-		public string PdbHint { get; set; }
-		[XmlAttribute(AttributeName = "version")]
-		public string Version { get; set; }
+		public List<Shader> Shaders { get; set; }
 	}
 }

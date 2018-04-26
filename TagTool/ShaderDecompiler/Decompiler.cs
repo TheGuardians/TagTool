@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.ShaderDecompiler.Translations;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
+using TagTool.ShaderDecompiler.UPDB;
 
 namespace TagTool.ShaderDecompiler
 {
@@ -19,9 +20,11 @@ namespace TagTool.ShaderDecompiler
 		public static string Main = "";
 		public static string INDENT = "	";
 
-		public static string Decompile(byte[] shader_data)
+		public static string Decompile(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
-			var instructions = Disassembler.Disassemble(shader_data);
+			var shaderPdb = Generator.GetShaderpdb(debugData, constantData, shaderData);
+			var instructions = Disassembler.Disassemble(shaderData);
+
 			Constants = "";
 			Parameters = "";
 			Inputs = "";

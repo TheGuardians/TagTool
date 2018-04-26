@@ -32,31 +32,36 @@ namespace TagTool.Commands.Porting
 
 		public override object Execute(List<string> args)
 		{
-			if (args.Count != 2)
+			if (args.Count != 1 && args.Count != 2)
 				return false;
 
 			int.TryParse(args[0], out int shaderIndex);
-			var tagName = args[1];
 
 			PixelShader pixl = new PixelShader();
 			foreach (var tag in BlamCache.IndexItems)
 			{
-				if (tag.ClassCode != "pixl" || tag.Filename != tagName)
+				if (tag.ClassCode != "pixl" || (args.Count == 2 && tag.Filename != args[1]))
 					continue;
 
 				var blamContext = new CacheSerializationContext(BlamCache, tag);
 				pixl = BlamCache.Deserializer.Deserialize<PixelShader>(blamContext);
 
+				var debugData = pixl.Shaders[shaderIndex].XboxShaderReference.DebugData;
+				var constantData = pixl.Shaders[shaderIndex].XboxShaderReference.ConstantData;
 				var shaderData = pixl.Shaders[shaderIndex].XboxShaderReference.ShaderData;
 
-				var hlsl = Decompiler.Decompile(shaderData);
+				var hlsl = Decompiler.Decompile(debugData, constantData, shaderData);
 
 				var flags1 = CompileConstants.ENABLE_BACKWARDS_COMPATIBILITY;
 
 				new Compile(hlsl, "main", "ps_3_0", flags1, out string errors, out byte[] pcShaderData);
 				new PrintError(hlsl, errors, out bool isError);
 
-				if (!isError)
+				if (isError)
+				{
+					Console.ReadLine();
+				}
+				else
 				{
 					Console.WriteLine("Shader successfully recompiled for DX9!");
 					Console.WriteLine("(further processing needed to very they are 1:1 with the original)");

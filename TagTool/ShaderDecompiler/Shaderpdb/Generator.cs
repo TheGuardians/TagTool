@@ -4,27 +4,46 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using TagTool.Tools;
 
 namespace TagTool.ShaderDecompiler.UPDB
 {
-	public class Generator
+	public static class Generator
 	{
-		public Shaderpdb GetShaderpdb(byte[] debugData, byte[] constantData, byte[] shaderData)
+		public static Shaderpdb GetShaderpdb(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
-			var pdb = new Shaderpdb();
 			var fullShader = new byte[debugData.Length + constantData.Length + shaderData.Length];
 			Array.Copy(debugData, 0, fullShader, 0, debugData.Length);
 			Array.Copy(constantData, 0, fullShader, debugData.Length, constantData.Length);
 			Array.Copy(shaderData, 0, fullShader, debugData.Length + constantData.Length, shaderData.Length);
 
-			var shaderFile = Path.GetTempFileName();
-		    File.WriteAllBytes(shaderFile, fullShader);
+			var shaderTemp = Path.GetTempFileName();
+		    File.WriteAllBytes(shaderTemp, fullShader);
 
-			// Disassemble using xsd.exe
-			// Reassemble using psa.exe with the /XZi argument to generate a UPDB file
+			// Disassemble using xsd.exe with the /o argument to name the output file
+			var asmTemp = Path.GetTempFileName();
+			new Tool($"/o {asmTemp} {shaderTemp}", "xsd.exe");
+			// Reassemble using psa.exe with the /XZi argument to generate a UPDB file, and /Xfd to name it.
+			var updbTemp = Path.GetTempFileName();
+			new Tool($"/XZi /XFd {updbTemp} {asmTemp}", "psa.exe");
+			
+			// This line is only printed to help work out all the XML fields
+			Console.WriteLine(File.ReadAllText(updbTemp));
+
 			// Deserialize the UPDB file (it's in XML format)
+			var shaderPdb = new Shaderpdb();
+			using (var updbReader = new StreamReader(updbTemp))
+			{
+				var xmlSerializer = new XmlSerializer(typeof(Shaderpdb));
+				shaderPdb = (Shaderpdb)xmlSerializer.Deserialize(updbReader);
+			}
 
-			return pdb;
+			File.Delete(shaderTemp);
+			File.Delete(asmTemp);
+			File.Delete(updbTemp);
+
+			return shaderPdb;
 		}
 	}
 }
