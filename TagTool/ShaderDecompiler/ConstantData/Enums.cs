@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderDecompiler.ConstantData
 {
-	// Interpolator byte values
-	public enum Interpolator
+	// Semantic byte values
+	public enum Semantic
 	{
 		POSITION0 = 0x00,
 		POSITION1 = 0x01,

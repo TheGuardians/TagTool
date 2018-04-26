@@ -6,74 +6,79 @@
 
  using System.Xml.Serialization;
 using System.Collections.Generic;
+using TagTool.ShaderDecompiler.ConstantData;
 
 
 // TODO: this needs a LOT of cleanup
 
 namespace TagTool.ShaderDecompiler.UPDB
 {
-	[XmlRoot(ElementName = "type")]
-	public class Type
+	[XmlRoot(ElementName = "Interpolator")]
+	public class Interpolator
 	{
-		[XmlAttribute(AttributeName = "name")]
-		public string Name { get; set; }
-		[XmlAttribute(AttributeName = "class")]
-		public string Class { get; set; }
-		[XmlAttribute(AttributeName = "type")]
-		public string _type { get; set; }
-		[XmlAttribute(AttributeName = "rows")]
-		public string Rows { get; set; }
-		[XmlAttribute(AttributeName = "columns")]
-		public string Columns { get; set; }
+		[XmlElement(ElementName = "Register")]
+		public int Register { get; set; }
+		[XmlAttribute(AttributeName = "Semantic")]
+		public Semantic Semantic { get; set; }
+		[XmlAttribute(AttributeName = "Mask")]
+		public string Mask { get; set; }
 	}
 
-	[XmlRoot(ElementName = "constant")]
-	public class Constant
+	[XmlRoot(ElementName = "Float")]
+	public class Float
 	{
-		[XmlElement(ElementName = "type")]
-		public Type Type { get; set; }
-		[XmlAttribute(AttributeName = "register")]
-		public string Register { get; set; }
-		[XmlAttribute(AttributeName = "count")]
-		public string Count { get; set; }
+		[XmlElement(ElementName = "Register")]
+		public int Register { get; set; }
+		[XmlAttribute(AttributeName = "value0")]
+		public float Value0 { get; set; }
+		[XmlAttribute(AttributeName = "value1")]
+		public float Value1 { get; set; }
+		[XmlAttribute(AttributeName = "value2")]
+		public float Value2 { get; set; }
+		[XmlAttribute(AttributeName = "value3")]
+		public float Value3 { get; set; }
 	}
 
-	[XmlRoot(ElementName = "constanttable")]
-	public class Constanttable
+	[XmlRoot(ElementName = "Int")]
+	public class Int
 	{
-		[XmlElement(ElementName = "constant")]
-		public Constant Constant { get; set; }
+		[XmlElement(ElementName = "Register")]
+		public int Register { get; set; }
+		[XmlAttribute(AttributeName = "Count")]
+		public int Count { get; set; }
+		[XmlAttribute(AttributeName = "Start")]
+		public int Start { get; set; }
+		[XmlAttribute(AttributeName = "Inc")]
+		public int Increment { get; set; }
 	}
 
-	[XmlRoot(ElementName = "statement")]
-	public class Statement
+	[XmlRoot(ElementName = "Bool")]
+	public class Bool
 	{
-		[XmlAttribute(AttributeName = "pc")]
-		public string Pc { get; set; }
-		[XmlAttribute(AttributeName = "file")]
-		public string File { get; set; }
-		[XmlAttribute(AttributeName = "line")]
-		public string Line { get; set; }
-		[XmlAttribute(AttributeName = "scope")]
-		public string Scope { get; set; }
-		[XmlAttribute(AttributeName = "lastinstruction")]
-		public string Lastinstruction { get; set; }
+		[XmlElement(ElementName = "Register")]
+		public int Register { get; set; }
+		[XmlAttribute(AttributeName = "Value")]
+		public bool Value { get; set; }
 	}
 
-	[XmlRoot(ElementName = "sourcemap")]
-	public class Sourcemap
+	[XmlRoot(ElementName = "vfetch")]
+	public class Vfetch
 	{
-		[XmlElement(ElementName = "statement")]
-		public List<Statement> Statement { get; set; }
+		[XmlElement(ElementName = "Address")]
+		public int Address { get; set; }
+		[XmlAttribute(AttributeName = "Register")]
+		public bool Register { get; set; }
+		[XmlAttribute(AttributeName = "DestSwizzle")]
+		public string DestSwizzle { get; set; }
+		[XmlAttribute(AttributeName = "Semantic")]
+		public Semantic Semantic { get; set; }
+		[XmlAttribute(AttributeName = "End")]
+		public bool End { get; set; }
 	}
 
 	[XmlRoot(ElementName = "shader")]
 	public class Shader
 	{
-		[XmlElement(ElementName = "constanttable")]
-		public List<Constant> Constanttable { get; set; }
-		[XmlElement(ElementName = "sourcemap")]
-		public List<Statement> Sourcemap { get; set; }
 		[XmlElement(ElementName = "variables")]
 		public string Variables { get; set; }
 		[XmlElement(ElementName = "variableDebugInfo")]
@@ -85,15 +90,15 @@ namespace TagTool.ShaderDecompiler.UPDB
 		[XmlElement(ElementName = "funcEntryExitInfo")]
 		public string FuncEntryExitInfo { get; set; }
 		[XmlElement(ElementName = "VfetchInfo")]
-		public string VfetchInfo { get; set; }
+		public List<Vfetch> VfetchInfo { get; set; }
 		[XmlElement(ElementName = "InterpolatorInfo")]
-		public string InterpolatorInfo { get; set; }
+		public List<Interpolator> InterpolatorInfo { get; set; }
 		[XmlElement(ElementName = "LiteralFloats")]
-		public string LiteralFloats { get; set; }
+		public List<Float> LiteralFloats { get; set; }
 		[XmlElement(ElementName = "LiteralInts")]
-		public string LiteralInts { get; set; }
+		public List<Int> LiteralInts { get; set; }
 		[XmlElement(ElementName = "LiteralBools")]
-		public string LiteralBools { get; set; }
+		public List<Bool> LiteralBools { get; set; }
 		[XmlAttribute(AttributeName = "ZPass")]
 		public string ZPass { get; set; }
 	}
