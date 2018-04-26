@@ -229,5 +229,7 @@ namespace TagTool.ShaderDecompiler.ConstantData
 		SAMPLE13 = 0xDD,
 		SAMPLE14 = 0xDE,
 		SAMPLE15 = 0xDF,
+
+		UNKNOWN = 0xFF
 	}
 }

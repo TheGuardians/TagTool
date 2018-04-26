@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.ShaderDecompiler.ConstantData;
 using TagTool.ShaderDecompiler.Translations;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
 using TagTool.ShaderDecompiler.UPDB;
@@ -20,10 +21,10 @@ namespace TagTool.ShaderDecompiler
 		public static string Main = "";
 		public static string INDENT = "	";
 
-		public static HashSet<int> AllocatedTemps = new HashSet<int> { };
-		public static HashSet<int> AllocatedConsts = new HashSet<int> { };
-		public static HashSet<int> AllocatedBools = new HashSet<int> { };
-		public static HashSet<int> AllocatedInts = new HashSet<int> { };
+		public static HashSet<string> AllocatedTemps =	new HashSet<string> { };
+		public static HashSet<string> AllocatedConsts =	new HashSet<string> { };
+		public static HashSet<string> AllocatedBools =	new HashSet<string> { };
+		public static HashSet<string> AllocatedInts =	new HashSet<string> { };
 
 		public static string Decompile(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
@@ -55,29 +56,29 @@ namespace TagTool.ShaderDecompiler
 				"sampler s[16];\n";
 
 			// Add fields from our generated UPDB into HLSL
-			foreach (var shader in shaderPdb.Shaders)
+
+			var shader = shaderPdb.Shaders.Shader;
+			Console.WriteLine(shader.ZPass);
+			// TODO: Solve why none of these lists inside 'shader' have any elements...
+			foreach (var intrp in shader.InterpolatorInfo.Interpolator)
 			{
-				// TODO: Solve why none of these lists inside 'shader' have any elements...
-				foreach (var interpolator in shader.InterpolatorInfo)
-				{
-					Inputs += $"float{interpolator.Mask.Length} r{interpolator.Register} : {interpolator.Semantic};";
-					AllocatedTemps.Add(interpolator.Register);
-				}
-				foreach (var literalFloat in shader.LiteralFloats)
-				{
-					Constants += $"float4 c{literalFloat.Register} = float4({literalFloat.Value0}, {literalFloat.Value1}, {literalFloat.Value2}, {literalFloat.Value3});";
-					AllocatedTemps.Add(literalFloat.Register);
-				}
-				foreach (var literalBool in shader.LiteralBools)
-				{
-					Constants += $"bool b{literalBool.Register} = {literalBool.Value};";
-					AllocatedBools.Add(literalBool.Register);
-				}
-				foreach (var literalInt in shader.LiteralInts)
-				{
-					Constants += $"int3 i{literalInt.Register} = int3({literalInt.Count}, {literalInt.Start}, {literalInt.Count});";
-					AllocatedInts.Add(literalInt.Register);
-				}
+				Inputs += $"{INDENT}float{intrp.Mask.Length} r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+				AllocatedTemps.Add(intrp.Register);
+			}
+			foreach (var Float in shader.LiteralFloats.Float)
+			{
+				Constants += $"float4 c{Float.Register} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
+				AllocatedTemps.Add(Float.Register);
+			}
+			foreach (var Bool in shader.LiteralBools.Bool)
+			{
+				Constants += $"bool b{Bool.Register} = {Bool.Value};\n";
+				AllocatedBools.Add(Bool.Register);
+			}
+			foreach (var Int in shader.LiteralInts.Int)
+			{
+				Constants += $"int3 i{Int.Register} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
+				AllocatedInts.Add(Int.Register);
 			}
 
 			// Much more work is needed here.

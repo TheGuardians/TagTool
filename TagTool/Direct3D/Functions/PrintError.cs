@@ -25,50 +25,60 @@ namespace TagTool.Direct3D.Functions
 				isError = true;
 			}
 
-			int.TryParse(errorLocation[0], out int errorLine);
-			var errorRange = errorLocation[1].Split('-');
-			int.TryParse(errorRange[0], out int errorStart);
-			int.TryParse(errorRange[1], out int errorEnd);
-
-			using (StringReader sr = new StringReader(code))
+			try
 			{
-				string line;
+				int.TryParse(errorLocation[0], out int errorLine);
+				var errorRange = errorLocation[1].Split('-');
+				int.TryParse(errorRange[0], out int errorStart);
+				int.TryParse(errorRange[1], out int errorEnd);
 
-				int i = 1;
-				while ((line = sr.ReadLine()) != null)
+				using (StringReader sr = new StringReader(code))
 				{
-					if (isError == true && i == errorLine)
+					string line;
+
+					int i = 1;
+					while ((line = sr.ReadLine()) != null)
 					{
-						Console.ForegroundColor = ConsoleColor.Cyan;
-						Console.WriteLine(error);
-						Console.CursorTop = Console.CursorTop - 1;
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.Write($"{i}: ");
-							
-						for (var j = 0; j < line.Length; j++)
+						if (isError == true && i == errorLine)
 						{
-							if (j >= errorStart - 1 && j <= errorEnd - 1)
+							Console.ForegroundColor = ConsoleColor.Cyan;
+							Console.WriteLine(error);
+							Console.CursorTop = Console.CursorTop - 1;
+							Console.ForegroundColor = ConsoleColor.Red;
+							Console.Write($"{i}: ");
+
+							for (var j = 0; j < line.Length; j++)
 							{
-								Console.ForegroundColor = ConsoleColor.Yellow;
-								Console.Write(line[j]);
+								if (j >= errorStart - 1 && j <= errorEnd - 1)
+								{
+									Console.ForegroundColor = ConsoleColor.Yellow;
+									Console.Write(line[j]);
+								}
+								else
+								{
+									Console.ForegroundColor = ConsoleColor.White;
+									Console.Write(line[j]);
+								}
 							}
-							else
-							{
-								Console.ForegroundColor = ConsoleColor.White;
-								Console.Write(line[j]);
-							}
+							Console.WriteLine();
 						}
-						Console.WriteLine();
+						else
+						{
+							Console.ForegroundColor = ConsoleColor.DarkGray;
+							Console.Write($"{i}: ");
+							Console.ForegroundColor = ConsoleColor.White;
+							Console.WriteLine(line);
+						}
+						i++;
 					}
-					else
-					{
-						Console.ForegroundColor = ConsoleColor.DarkGray;
-						Console.Write($"{i}: ");
-						Console.ForegroundColor = ConsoleColor.White;
-						Console.WriteLine(line);
-					}
-					i++;
 				}
+			}
+			catch
+			{
+				Console.ForegroundColor = ConsoleColor.Cyan;
+				Console.WriteLine(error);
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(code);
 			}
 
 			Console.ForegroundColor = startForegroundColor;
