@@ -398,9 +398,10 @@
     <Compile Include="Damage\DamageReportingType.cs" />
     <Compile Include="Direct3D\Functions\PrintError.cs" />
     <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
+    <Compile Include="ShaderDecompiler\ConstantData\Enums.cs" />
     <Compile Include="ShaderDecompiler\ShaderPdb\Definition.cs" />
     <Compile Include="ShaderDecompiler\ShaderPdb\Generator.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\CommonEnums.cs" />
+    <Compile Include="ShaderDecompiler\UcodeDisassembler\Enums.cs" />
     <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
     <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
     <Compile Include="ShaderDecompiler\Decompiler.cs" />
