@@ -21,10 +21,10 @@ namespace TagTool.ShaderDecompiler
 		public static string Main = "";
 		public static string INDENT = "	";
 
-		public static HashSet<string> AllocatedTemps =	new HashSet<string> { };
-		public static HashSet<string> AllocatedConsts =	new HashSet<string> { };
-		public static HashSet<string> AllocatedBools =	new HashSet<string> { };
-		public static HashSet<string> AllocatedInts =	new HashSet<string> { };
+		public static Dictionary<int, int> AllocTemps = new Dictionary<int, int> { };
+		public static Dictionary<int, int> AllocConsts = new Dictionary<int, int> { };
+		public static Dictionary<int, int> AllocBools = new Dictionary<int, int> { };
+		public static Dictionary<int, int> AllocInts = new Dictionary<int, int> { };
 
 		public static string Decompile(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
@@ -50,7 +50,7 @@ namespace TagTool.ShaderDecompiler
 			// Example: if we disassemble an instruction 'adds r0, c19.xy', we can replace that in HLSL with
 			// r0 = c[19].x + c[19].y - VERY SIMPLE!
 			Parameters +=
-				"float4 c[256];\n" +
+				"float4 c[224];\n" +
 				"int i[16];	   \n" +
 				"bool b[16];   \n" +
 				"sampler s[16];\n";
@@ -61,24 +61,24 @@ namespace TagTool.ShaderDecompiler
 				var shader = shaderPdb.Shaders.Shader;
 				foreach (var intrp in shader.InterpolatorInfo.Interpolator)
 				{
-					Inputs += $"{INDENT}float4 r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
-					Main += $"{INDENT}r[{intrp.Register}] = In.r{intrp.Register};\n";
-					AllocatedTemps.Add(intrp.Register);
+					var index = GetTempIndex(intrp.Register);
+					Inputs += $"{INDENT}float4 r{index} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+					Main += $"{INDENT}r[{index}] = In.r{index};\n";
 				}
 				foreach (var Float in shader.LiteralFloats.Float)
 				{
-					Constants += $"float4 c{Float.Register} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
-					AllocatedTemps.Add(Float.Register);
+					var index = GetConstIndex(Float.Register);
+					Constants += $"float4 c{index} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
 				}
 				foreach (var Bool in shader.LiteralBools.Bool)
 				{
-					Constants += $"bool b{Bool.Register} = {Bool.Value};\n";
-					AllocatedBools.Add(Bool.Register);
+					var index = GetBoolIndex(Bool.Register);
+					Constants += $"bool b{index} = {Bool.Value};\n";
 				}
 				foreach (var Int in shader.LiteralInts.Int)
 				{
-					Constants += $"int3 i{Int.Register} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
-					AllocatedInts.Add(Int.Register);
+					var index = GetIntIndex(Int.Register);
+					Constants += $"int3 i{index} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
 				}
 			}
 
@@ -158,6 +158,58 @@ namespace TagTool.ShaderDecompiler
 				"}											";
 
 			return PostFixups.Apply(hlsl);
+		}
+
+		// allocates/gets a r# register.
+		public static int GetTempIndex(int index)
+		{
+			if (!AllocTemps.ContainsKey(index))
+				for (var i = 0; i < 32; i++)
+					if (!AllocTemps.ContainsValue(i))
+					{
+						AllocTemps[index] = i;
+						break;
+					}
+			return AllocTemps[index];
+		}
+
+		// allocates/gets a c# register.
+		public static int GetConstIndex(int index)
+		{
+			if (!AllocConsts.ContainsKey(index))
+				for (var i = 0; i < 224; i++)
+					if (!AllocConsts.ContainsValue(i))
+					{
+						AllocConsts[index] = i;
+						break;
+					}
+			return AllocConsts[index];
+		}
+
+		// allocates/gets a b# register.
+		public static int GetBoolIndex(int index)
+		{
+			if (!AllocBools.ContainsKey(index))
+				for (var i = 0; i < 16; i++)
+					if (!AllocBools.ContainsValue(i))
+					{
+						AllocBools[index] = i;
+						break;
+					}
+			return AllocBools[index];
+		}
+
+		// allocates/gets a i# register.
+		public static int GetIntIndex(int index)
+		{
+			if (!AllocInts.ContainsKey(index))
+				for (var i = 0; i < 16; i++)
+					if (!AllocInts.ContainsValue(i))
+					{
+						AllocInts[index] = i;
+						break;
+					}
+			return AllocInts[index];
 		}
 	}
 }

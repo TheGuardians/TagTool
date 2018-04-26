@@ -7,15 +7,15 @@ namespace TagTool.ShaderDecompiler.UPDB
 	public class Vfetch
 	{
 		[XmlElement(ElementName = "Address")]
-		public string Address = "";
+		public string Address { get; set; }
 		[XmlAttribute(AttributeName = "Register")]
-		public string Register = "";
+		public int Register { get; set; }
 		[XmlAttribute(AttributeName = "DestSwizzle")]
-		public string DestSwizzle = "";
+		public string DestSwizzle { get; set; }
 		[XmlAttribute(AttributeName = "string")]
-		public string String = "";
+		public string String { get; set; }
 		[XmlAttribute(AttributeName = "End")]
-		public string End = "";
+		public string End { get; set; }
 	}
 	[XmlRoot(ElementName = "VfetchInfo")]
 	public class VfetchInfo
@@ -28,7 +28,7 @@ namespace TagTool.ShaderDecompiler.UPDB
 	public class Interpolator
 	{
 		[XmlAttribute(AttributeName = "Register")]
-		public string Register { get; set; }
+		public int Register { get; set; } 
 		[XmlAttribute(AttributeName = "Semantic")]
 		public string Semantic { get; set; }
 		[XmlAttribute(AttributeName = "Mask")]
@@ -45,7 +45,7 @@ namespace TagTool.ShaderDecompiler.UPDB
 	public class Float
 	{
 		[XmlAttribute(AttributeName = "Register")]
-		public string Register { get; set; }
+		public int Register = -1;
 		[XmlAttribute(AttributeName = "value0")]
 		public string Value0 { get; set; }
 		[XmlAttribute(AttributeName = "value1")]
@@ -66,13 +66,13 @@ namespace TagTool.ShaderDecompiler.UPDB
 	public class Int
 	{
 		[XmlElement(ElementName = "Register")]
-		public string Register = "";
+		public int Register { get; set; }
 		[XmlAttribute(AttributeName = "Count")]
-		public string Count = "";
+		public string Count { get; set; }
 		[XmlAttribute(AttributeName = "Start")]
-		public string Start = "";
+		public string Start { get; set; }
 		[XmlAttribute(AttributeName = "Inc")]
-		public string Increment = "";
+		public string Increment { get; set; }
 	}
 	[XmlRoot(ElementName = "LiteralInts")]
 	public class LiteralInts
@@ -85,7 +85,7 @@ namespace TagTool.ShaderDecompiler.UPDB
 	public class Bool
 	{
 		[XmlElement(ElementName = "Register")]
-		public string Register = "";
+		public int Register { get; set; }
 		[XmlAttribute(AttributeName = "Value")]
 		public string Value = "";
 	}
