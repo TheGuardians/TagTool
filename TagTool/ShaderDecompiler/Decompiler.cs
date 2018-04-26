@@ -20,6 +20,11 @@ namespace TagTool.ShaderDecompiler
 		public static string Main = "";
 		public static string INDENT = "	";
 
+		public static HashSet<int> AllocatedTemps = new HashSet<int> { };
+		public static HashSet<int> AllocatedConsts = new HashSet<int> { };
+		public static HashSet<int> AllocatedBools = new HashSet<int> { };
+		public static HashSet<int> AllocatedInts = new HashSet<int> { };
+
 		public static string Decompile(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
 			var shaderPdb = Generator.GetShaderpdb(debugData, constantData, shaderData);
@@ -48,6 +53,32 @@ namespace TagTool.ShaderDecompiler
 				"int i[16];	   \n" +
 				"bool b[16];   \n" +
 				"sampler s[16];\n";
+
+			// Add fields from our generated UPDB into HLSL
+			foreach (var shader in shaderPdb.Shaders)
+			{
+				// TODO: Solve why none of these lists inside 'shader' have any elements...
+				foreach (var interpolator in shader.InterpolatorInfo)
+				{
+					Inputs += $"float{interpolator.Mask.Length} r{interpolator.Register} : {interpolator.Semantic};";
+					AllocatedTemps.Add(interpolator.Register);
+				}
+				foreach (var literalFloat in shader.LiteralFloats)
+				{
+					Constants += $"float4 c{literalFloat.Register} = float4({literalFloat.Value0}, {literalFloat.Value1}, {literalFloat.Value2}, {literalFloat.Value3});";
+					AllocatedTemps.Add(literalFloat.Register);
+				}
+				foreach (var literalBool in shader.LiteralBools)
+				{
+					Constants += $"bool b{literalBool.Register} = {literalBool.Value};";
+					AllocatedBools.Add(literalBool.Register);
+				}
+				foreach (var literalInt in shader.LiteralInts)
+				{
+					Constants += $"int3 i{literalInt.Register} = int3({literalInt.Count}, {literalInt.Start}, {literalInt.Count});";
+					AllocatedInts.Add(literalInt.Register);
+				}
+			}
 
 			// Much more work is needed here.
 			// TODO: handle all ControlFlowInstruction types.
