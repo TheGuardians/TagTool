@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagTool", "TagTool\TagTool.csproj", "{42814DEE-5A94-4901-BDA9-28AFD2D4F5AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C26E8204-0025-4484-955E-A669425FE9D7} = {C26E8204-0025-4484-955E-A669425FE9D7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TagToolUtilities", "TagToolUtilities\TagToolUtilities.vcxproj", "{C26E8204-0025-4484-955E-A669425FE9D7}"
 EndProject

@@ -448,7 +448,7 @@ namespace TagTool.Geometry
                         if (rsrcDef.IndexBuffers.Count == 0 || mesh.IndexBuffers[0] == ushort.MaxValue)
                             continue;
 
-                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + mesh.IndexBuffers[0]].Offset;
+                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * (2 + mesh.IndexBuffers[0])].Offset;
 
                         var indexStream = new IndexBufferStream(blamResourceStream, EndianFormat.BigEndian);
                         var indexBuffer = rsrcDef.IndexBuffers[0].Definition;
