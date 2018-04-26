@@ -50,33 +50,36 @@ namespace TagTool.ShaderDecompiler
 			// Example: if we disassemble an instruction 'adds r0, c19.xy', we can replace that in HLSL with
 			// r0 = c[19].x + c[19].y - VERY SIMPLE!
 			Parameters +=
-				"float4 c[224];\n" +
+				"float4 c[256];\n" +
 				"int i[16];	   \n" +
 				"bool b[16];   \n" +
 				"sampler s[16];\n";
 
 			// Add fields from our generated UPDB into HLSL
-			var shader = shaderPdb.Shaders.Shader;
-			foreach (var intrp in shader.InterpolatorInfo.Interpolator)
+			if (shaderPdb.Shaders != null)
 			{
-				Inputs += $"{INDENT}float4 r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
-				Main += $"{INDENT}r[{intrp.Register}] = In.r{intrp.Register};\n";
-				AllocatedTemps.Add(intrp.Register);
-			}
-			foreach (var Float in shader.LiteralFloats.Float)
-			{
-				Constants += $"float4 c{Float.Register} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
-				AllocatedTemps.Add(Float.Register);
-			}
-			foreach (var Bool in shader.LiteralBools.Bool)
-			{
-				Constants += $"bool b{Bool.Register} = {Bool.Value};\n";
-				AllocatedBools.Add(Bool.Register);
-			}
-			foreach (var Int in shader.LiteralInts.Int)
-			{
-				Constants += $"int3 i{Int.Register} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
-				AllocatedInts.Add(Int.Register);
+				var shader = shaderPdb.Shaders.Shader;
+				foreach (var intrp in shader.InterpolatorInfo.Interpolator)
+				{
+					Inputs += $"{INDENT}float4 r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+					Main += $"{INDENT}r[{intrp.Register}] = In.r{intrp.Register};\n";
+					AllocatedTemps.Add(intrp.Register);
+				}
+				foreach (var Float in shader.LiteralFloats.Float)
+				{
+					Constants += $"float4 c{Float.Register} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
+					AllocatedTemps.Add(Float.Register);
+				}
+				foreach (var Bool in shader.LiteralBools.Bool)
+				{
+					Constants += $"bool b{Bool.Register} = {Bool.Value};\n";
+					AllocatedBools.Add(Bool.Register);
+				}
+				foreach (var Int in shader.LiteralInts.Int)
+				{
+					Constants += $"int3 i{Int.Register} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
+					AllocatedInts.Add(Int.Register);
+				}
 			}
 
 			// Much more work is needed here.

@@ -265,12 +265,15 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		zxyz = 0xFE,
 		wxyz = 0xFF,
 	}
+
+	[Flags]
 	public enum Mask
 	{
-		A_Vector = 0x01, // Vector destination mask
-		B_Vector = 0x02, // Vector destination mask
-		C_Vector = 0x04, // Vector destination mask
-		D_Vector = 0x08, // Vector destination mask
+		_ = 0x00, // write no output
+		x = 0x01, // Vector destination mask
+		y = 0x02, // Vector destination mask
+		z = 0x04, // Vector destination mask
+		w = 0x08, // Vector destination mask
 	}
 
 	public enum InstructionType

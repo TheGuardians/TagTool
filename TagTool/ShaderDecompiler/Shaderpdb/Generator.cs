@@ -27,16 +27,24 @@ namespace TagTool.ShaderDecompiler.UPDB
 			// Reassemble using psa.exe with the /XZi argument to generate a UPDB file, and /Xfd to name it.
 			var updbTemp = Path.GetTempFileName();
 			new Tool($"/XZi /XFd {updbTemp} {asmTemp}", "psa.exe");
-			
+
 			// This line is only printed to help work out all the XML fields
-			// Console.WriteLine(File.ReadAllText(updbTemp));
+			Console.WriteLine(File.ReadAllText(asmTemp));
 
 			// Deserialize the UPDB file (it's in XML format)
 			var shaderPdb = new Shaderpdb();
 			using (var updbReader = new StreamReader(updbTemp))
 			{
-				var xmlSerializer = new XmlSerializer(typeof(Shaderpdb));
-				shaderPdb = (Shaderpdb)xmlSerializer.Deserialize(updbReader);
+				try
+				{
+					var xmlSerializer = new XmlSerializer(typeof(Shaderpdb));
+					shaderPdb = (Shaderpdb)xmlSerializer.Deserialize(updbReader);
+				}
+				catch
+				{
+					Console.WriteLine(File.ReadAllText(updbTemp));
+					Console.ReadLine();
+				}
 			}
 
 			File.Delete(shaderTemp);
