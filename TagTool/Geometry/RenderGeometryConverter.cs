@@ -485,7 +485,7 @@ namespace TagTool.Geometry
 
                 for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
+                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * (2 + i)].Offset;
                     ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
                 }
 
