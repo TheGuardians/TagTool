@@ -56,13 +56,11 @@ namespace TagTool.ShaderDecompiler
 				"sampler s[16];\n";
 
 			// Add fields from our generated UPDB into HLSL
-
 			var shader = shaderPdb.Shaders.Shader;
-			Console.WriteLine(shader.ZPass);
-			// TODO: Solve why none of these lists inside 'shader' have any elements...
 			foreach (var intrp in shader.InterpolatorInfo.Interpolator)
 			{
-				Inputs += $"{INDENT}float{intrp.Mask.Length} r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+				Inputs += $"{INDENT}float4 r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+				Main += $"{INDENT}r[{intrp.Register}] = In.r{intrp.Register};\n";
 				AllocatedTemps.Add(intrp.Register);
 			}
 			foreach (var Float in shader.LiteralFloats.Float)
@@ -142,6 +140,7 @@ namespace TagTool.ShaderDecompiler
 				"float4 lc = 0; // loop count.				\n" +
 				"float4 ps = 0; // previous scalar result,	\n" +
 				"float4 pv = 0; // previous vector result.	\n" +
+				"float4 r[32];  // temp 'registers'			\n" +
 				"\n" +
 				" // Functions:								\n" +
 				$"{Functions}								\n" +

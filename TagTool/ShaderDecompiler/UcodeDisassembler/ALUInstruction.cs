@@ -83,26 +83,27 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		// gets the string representation of the full dest operand
 		public string GetVectorDest_Operand()
 		{
-			var rtype = Is_export ? "o" : "r";
-			return $"{rtype}{vector_dest}.{(Swizzle)vector_write_mask}";
+			var rtype = Is_export ? "o" : "r"; // TODO: find the proper way to check output register type
+			return $"{rtype}[{vector_dest}]"; // TODO: masking
 		}
 		public string GetScalarDest_Operand()
 		{
-			return $"{scalar_dest}.{scalar_write_mask}";
+			var rtype = Is_export ? "o" : "r"; // TODO: find the proper way to check output register type
+			return $"{rtype}[{scalar_dest}]";
 		}
 
 		// gets the string representation of the full src0 operand
 		public string GetSrc1_Operand()
 		{
 			var oprnd = "";
-			if (src3_reg_negate != 0)
+			if (src1_reg_negate != 0)
 				oprnd += '-';
-			if (src3_sel != 0)
+			if (src1_sel != 0)
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src3_reg;
-			return $"{oprnd}.{src3_swiz}";
+			oprnd += $"[{src1_reg}]";
+			return $"{oprnd}.{src1_swiz}";
 		}
 
 		// gets the string representation of the full src1 operand
@@ -115,7 +116,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src2_reg;
+			oprnd += $"[{src2_reg}]";
 			return $"{oprnd}.{src2_swiz}";
 		}
 
@@ -129,7 +130,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src3_reg;
+			oprnd += $"[{src3_reg}]";
 			return $"{oprnd}.{src3_swiz}";
 		}
 	}

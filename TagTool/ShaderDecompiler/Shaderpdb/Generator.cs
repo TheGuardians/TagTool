@@ -29,7 +29,7 @@ namespace TagTool.ShaderDecompiler.UPDB
 			new Tool($"/XZi /XFd {updbTemp} {asmTemp}", "psa.exe");
 			
 			// This line is only printed to help work out all the XML fields
-			Console.WriteLine(File.ReadAllText(updbTemp));
+			// Console.WriteLine(File.ReadAllText(updbTemp));
 
 			// Deserialize the UPDB file (it's in XML format)
 			var shaderPdb = new Shaderpdb();
