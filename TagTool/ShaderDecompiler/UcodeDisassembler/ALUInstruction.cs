@@ -10,15 +10,15 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 	public struct ALUInstruction
 	{
 		public uint vector_dest;
-		private uint vector_dest_rel;
-		private uint abs_constants;
+		public uint vector_dest_rel;
+		public uint abs_constants;
 		public uint scalar_dest;
-		private uint scalar_dest_rel;
-		private uint export_data;
+		public uint scalar_dest_rel;
+		public uint export_data;
 		public Mask vector_write_mask;
 		public Mask scalar_write_mask;
-		private uint vector_clamp;
-		private uint scalar_clamp;
+		public uint vector_clamp;
+		public uint scalar_clamp;
 		public ScalarOpcode scalar_opc;  // instr_scalar_opc_t
 
 		public Swizzle src3_swiz;
@@ -27,11 +27,11 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		public uint src3_reg_negate;
 		public uint src2_reg_negate;
 		public uint src1_reg_negate;
-		private uint pred_condition;
-		private uint is_predicated;
-		private uint address_absolute;
-		private uint const_1_rel_abs;
-		private uint const_0_rel_abs;
+		public uint pred_condition;
+		public uint is_predicated;
+		public uint address_absolute;
+		public uint const_1_rel_abs;
+		public uint const_0_rel_abs;
 
 		public uint src3_reg;
 		public uint src2_reg;
@@ -83,26 +83,37 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		// gets the string representation of the full dest operand
 		public string GetVectorDest_Operand()
 		{
-			var rtype = Is_export ? "o" : "r";
-			return $"{rtype}{vector_dest}.{(Swizzle)vector_write_mask}";
+			var rtype = "r"; // TODO: find the proper way to check dest register type
+			var index = vector_dest;
+			var mask = vector_write_mask.ToString().Replace(",", "").Replace(" ", "");
+			if (mask == "_")
+				return "";
+
+			return $"{rtype}[{index}].{mask} = ";
 		}
 		public string GetScalarDest_Operand()
 		{
-			return $"{scalar_dest}.{scalar_write_mask}";
+			var rtype = "r"; // TODO: find the proper way to check dest register type
+			var index = scalar_dest;
+			var mask = scalar_write_mask.ToString().Replace(",", "").Replace(" ", "");
+			if (mask == "_")
+				return "";
+
+			return $"{rtype}[{index}].{mask} = ";
 		}
 
 		// gets the string representation of the full src0 operand
 		public string GetSrc1_Operand()
 		{
 			var oprnd = "";
-			if (src3_reg_negate != 0)
+			if (src1_reg_negate != 0)
 				oprnd += '-';
-			if (src3_sel != 0)
+			if (src1_sel != 0)
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src3_reg;
-			return $"{oprnd}.{src3_swiz}";
+			oprnd += $"[{src1_reg}]";
+			return $"{oprnd}.{src1_swiz}";
 		}
 
 		// gets the string representation of the full src1 operand
@@ -115,7 +126,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src2_reg;
+			oprnd += $"[{src2_reg}]";
 			return $"{oprnd}.{src2_swiz}";
 		}
 
@@ -129,7 +140,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 				oprnd += 'r';
 			else
 				oprnd += 'c';
-			oprnd += src3_reg;
+			oprnd += $"[{src3_reg}]";
 			return $"{oprnd}.{src3_swiz}";
 		}
 	}

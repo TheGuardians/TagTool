@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
+using static TagTool.ShaderDecompiler.Decompiler;
 
 namespace TagTool.ShaderDecompiler.Translations
 {
@@ -28,7 +29,7 @@ namespace TagTool.ShaderDecompiler.Translations
 		// Translates a VFetch type instruction into an HLSL fragment.
 		private static string Vfetch(Instruction instruction)
 		{
-			string translation = "";
+			string translation = INDENT;
 
 			translation += $"// {instruction.fetch_instr.opcode.ToString()}";
 
@@ -38,7 +39,7 @@ namespace TagTool.ShaderDecompiler.Translations
 		// Translates a TFetch type instruction into an HLSL fragment.
 		private static string Tfetch(Instruction instruction)
 		{
-			string translation = "";
+			string translation = INDENT;
 
 			switch (instruction.fetch_instr.opcode)
 			{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,10 +29,30 @@ namespace TagTool.ShaderDecompiler.Translations
 		{
 			PreFixups.Apply(ref instruction.alu_instr);
 
+			// ALU instruction predication opening.... this doesn't seem to be used, or I'm doing it wrong...
+			if (instruction.alu_instr.Is_predicated)
+			{
+				Main += $"{INDENT}if (p0 == {instruction.alu_instr.Pred_condition}) {{\n";
+				INDENT += "	";
+			}
+
 			if (instruction.alu_instr.Has_vector_op)
+			{
+				Main += $"{INDENT}// {instruction.alu_instr.vector_opc}\n";
 				Vector(instruction);
+			}
 			if (instruction.alu_instr.Has_scalar_op)
+			{
+				Main += $"{INDENT}// {instruction.alu_instr.scalar_opc}\n";
 				Scalar(instruction);
+			}
+
+			// ALU instruction predication closing.... this doesn't seem to be used, or I'm doing it wrong...
+			if (instruction.alu_instr.Is_predicated)
+			{
+				INDENT.Remove(INDENT.Length - 1);
+				Main += $"{INDENT}}}\n";
+			}
 		}
 
 		// Translates the Vector portions of an ALU instruction into HLSL fragments.
@@ -47,47 +68,47 @@ namespace TagTool.ShaderDecompiler.Translations
 			{
 				case VectorOpcode.add:
 					main +=
-						$"{dest} = {src1} + {src2};";
+						$"{dest}{src1} + {src2};";
 					break;
 				case VectorOpcode.cndeq:
 					main +=
-						$"{dest} = ({src1} == 0.0f) ? {src2} : {src3};";
+						$"{dest}({src1} == 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndge:
 					main +=
-						$"{dest} = ({src1} ?= 0.0f) ? {src2} : {src3};";
+						$"{dest}({src1} ?= 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cndgt:
 					main +=
-						$"{dest} = ({src1} > 0.0f) ? {src2} : {src3};";
+						$"{dest}({src1} > 0.0f) ? {src2} : {src3};";
 					break;
 				case VectorOpcode.cube:
 					main +=
-						$"// {instruction.alu_instr.GetVectorAsmString()}\n";
+						$"{instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 				case VectorOpcode.dp2add:
 					main +=
-						$"{dest} = dot({src1}, {src2}) + {src3};";
+						$"{dest}dot({src1}, {src2}) + {src3};";
 					break;
 				case VectorOpcode.dp3:
 					main +=
-						$"{dest} = dot({src1}, {src2});";
+						$"{dest}dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dp4:
 					main +=
-						$"{dest} = dot({src1}, {src2});";
+						$"{dest}dot({src1}, {src2});";
 					break;
 				case VectorOpcode.dst:
 					main +=
-						$"{dest} = dst({src1}, {src2});";
+						$"{dest}dst({src1}, {src2});";
 					break;
 				case VectorOpcode.floor:
 					main +=
-						$"{dest} = floor({src1});";
+						$"{dest}floor({src1});";
 					break;
 				case VectorOpcode.frc:
 					main +=
-						$"{dest} = frac({src1});";
+						$"{dest}frac({src1});";
 					break;
 
 					// TODO: these kill instructions need to be moved to a per-component function.
@@ -96,36 +117,36 @@ namespace TagTool.ShaderDecompiler.Translations
 					   $" if ( {src1} == {src2}) {{\n"+
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest} = 0.0f;";
+						$" {dest}0.0f;";
 					break;
 				case VectorOpcode.kill_ge:
 					main +=
 						$" if ( {src1} >= {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest} = 0.0f;";
+						$" {dest}0.0f;";
 					break;
 				case VectorOpcode.kill_gt:
 					main +=
 						$" if ( {src1} > {src2}) {{	\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest} = 0.0f;";
+						$" {dest}0.0f;";
 					break;
 				case VectorOpcode.kill_ne:
 					main +=
 						$" if ( {src1} != {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest} = 0.0f;";
+						$" {dest}0.0f;";
 					break;
 				case VectorOpcode.mad:
 					main +=
-						$"{dest} = ({src1} * {src2}) + {src3};";
+						$"{dest}({src1} * {src2}) + {src3};";
 					break;
 				case VectorOpcode.max:
 					main +=
-						$"{dest} = max({src1}, {src2});";
+						$"{dest}max({src1}, {src2});";
 					break;
 				case VectorOpcode.max4:
 					function =
@@ -133,7 +154,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return max(src1.x, (max(src1.y, max(src1.z, src1.w)));\n" +
 						"}";
 					main +=
-						$"{dest} = max4_func({src1});";
+						$"{dest}max4_func({src1});";
 					break;
 				case VectorOpcode.maxa:
 					function =
@@ -142,19 +163,19 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return max(src1, src2);\n" +
 						"}";
 					main +=
-						$"{dest} = maxa_func({src1}, {src2});";
+						$"{dest}maxa_func({src1}, {src2});";
 					break;
 				case VectorOpcode.min:
 					main +=
-						$"{dest} = min({src1}, {src2});";
+						$"{dest}min({src1}, {src2});";
 					break;
 				case VectorOpcode.mul:
 					main +=
-						$"{dest} = {src1} * {src2};";
+						$"{dest}{src1} * {src2};";
 					break;
 				case VectorOpcode.seq:
 					main +=
-						$"{dest} = ({src1} == {src1}) ? 1.0f : 0.0f;";
+						$"{dest}({src1} == {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.setp_eq_push:
 					function =
@@ -163,7 +184,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return float4(src1.x == 0.0 && src2.x == 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
 					main +=
-						$"{dest} = setp_eq_push_func({src1}, {src2});";
+						$"{dest}setp_eq_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ge_push:
 					function =
@@ -172,7 +193,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return float4(src1.x == 0.0 && src2.x >= 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
 					main +=
-						$"{dest} = setp_ge_push_func({src1}, {src2});";
+						$"{dest}setp_ge_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_gt_push:
 					function =
@@ -181,7 +202,7 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return float4(src1.x == 0.0 && src2.x > 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
 					main +=
-						$"{dest} = setp_gt_push_func({src1}, {src2});";
+						$"{dest}setp_gt_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.setp_ne_push:
 					function =
@@ -190,37 +211,38 @@ namespace TagTool.ShaderDecompiler.Translations
 						"	return float4(src1.x == 0.0 && src2.x != 0.0 ? 0.0 : src1.x + 1.0);\n" +
 						"}";
 					main +=
-						$"{dest} = setp_ne_push_func({src1}, {src2});";
+						$"{dest}setp_ne_push_func({src1}, {src2});";
 					break;
 				case VectorOpcode.sge:
 					main +=
-						$"{dest} = ({src1} >= {src1}) ? 1.0f : 0.0f;";
+						$"{dest}({src1} >= {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sgt:
 					main +=
-						$"{dest} = ({src1} > {src1}) ? 1.0f : 0.0f;";
+						$"{dest}({src1} > {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.sne:
 					main +=
-						$"{dest} = ({src1} != {src1}) ? 1.0f : 0.0f;";
+						$"{dest}({src1} != {src1}) ? 1.0f : 0.0f;";
 					break;
 				case VectorOpcode.trunc:
 					main += 
-						$"{dest} = trunc({src1});";
-					break;
-				case VectorOpcode.opcode_30:
-				case VectorOpcode.opcode_31:
-					main += $"// {instruction.alu_instr.GetVectorAsmString()}\n";
+						$"{dest}trunc({src1});";
 					break;
 				default:
-					main += $"// *DEFAULTED* {instruction.alu_instr.GetVectorAsmString()}\n";
+					main += $"{instruction.alu_instr.GetVectorAsmString()}\n";
 					break;
 			}
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
 
-			Main += $"{INDENT}{main}\n";
+			using (var sr = new StringReader(main))
+			{
+				string line;
+				while ((line = sr.ReadLine()) != null)
+					Main += $"{INDENT}{line}\n";
+			}
 		}
 
 		// Translates the Scalar portions of an ALU instruction into HLSL fragments
@@ -236,120 +258,142 @@ namespace TagTool.ShaderDecompiler.Translations
 			switch (instruction.alu_instr.scalar_opc)
 			{
 				case ScalarOpcode.adds:
-					Functions +=
+					function =
 						"float4 adds_func(float4 src1) {\n" +
 						"	return ps = src1.x + src1.y;\n" +
 						"}";
 					main +=
-						$"{dest} = adds_func({src1});";
+						$"{dest}adds_func({src1});";
 					break;
 				case ScalarOpcode.addsc0:
 				case ScalarOpcode.addsc1:
-					Functions +=
+					function =
 						"float4 addsc_func(float4 src1, float4 src2) {\n" +
 						"	return ps = src1.x + src2.x;\n" +
 						"}";
 					main +=
-						$"{dest} = addsc_func({src1}, {src2});";
+						$"{dest}addsc_func({src1}, {src2});";
 					break;
 				case ScalarOpcode.adds_prev:
-					Functions +=
+					function =
 						"float4 adds_prev_func(float4 src1) {\n" +
 						"	return ps = src1.x + ps;\n" +
 						"}";
 					main +=
-						$"{dest} = adds_prev_func({src1});";
+						$"{dest}adds_prev_func({src1});";
 					break;
 				case ScalarOpcode.cos:
-					Functions +=
+					function =
 						"float4 cos_func(float4 src1) {\n" +
 						"	return ps = cos(src1.x);\n" +
 						"}";
 					main +=
-						$"{dest} = cos_func({src1});";
+						$"{dest}cos_func({src1});";
 					break;
 				case ScalarOpcode.exp:
-					Functions +=
+					function =
 						"float4 exp_func(float4 src1) {\n" +
 						"	return ps = pow(2, src1.x);\n" +
 						"}";
 					main +=
-						$"{dest} = exp_func({src1});";
+						$"{dest}exp_func({src1});";
 					break;
 				case ScalarOpcode.floors:
-					Functions +=
+					function =
 						"float4 floors_func(float4 src1) {\n" +
 						"	return ps = floor(src1.x);\n" +
 						"}";
 					main +=
-						$"{dest} = floors_func({src1});";
+						$"{dest}floors_func({src1});";
 					break;
 				case ScalarOpcode.frcs:
-					Functions +=
+					function =
 						"float4 frcs_func(float4 src1) {\n" +
 						"	return ps = src1.x - floor(src1.x);\n" +
 						"}";
 					main +=
-						$"{dest} = frcs_func({src1});";
+						$"{dest}frcs_func({src1});";
 					break;
 				case ScalarOpcode.killseq:
+					function =
+						"float4 killseq_func(float4 src1) {\n" +
+						"	if (src1.x == 0) {" +
+						"		clip(-1);" +
+						"	}\n" +
+						$"	return ps = 0.0f;" +
+						"}";
 					main +=
-						" ps = dest = 0.0f;" +
-						" if ( src0.x == 0 )\n" +
-						" {					\n" +
-						" 	ps = dest= 1.0f;\n" +
-						" }					\n" +
-						" clip(-pv);		  ";
+						$"{dest}killseq_func({src1});";
 					break;
 				case ScalarOpcode.killsge:
+					function =
+						"float4 killsge_func(float4 src1) {\n" +
+						"	if (src1.x >= 0) {" +
+						"		clip(-1);" +
+						"	}\n" +
+						$"	return ps = 0.0f;" +
+						"}";
 					main +=
-						" ps = dest = 0.0f;" +
-						" if ( src0.x >= 0 )\n" +
-						" {					\n" +
-						" 	ps = dest = 1.0f;\n" +
-						" }					\n" +
-						" clip(-pv);		  "; break;
+						$"{dest}killsge_func({src1});";
+					break;
 				case ScalarOpcode.killsgt:
+					function =
+						"float4 killsgt_func(float4 src1) {\n" +
+						"	if (src1.x > 0) {" +
+						"		clip(-1);" +
+						"	}\n" +
+						$"	return ps = 0.0f;" +
+						"}";
 					main +=
-						" ps = dest = 0.0f;" +
-						" if ( src0.x > 0 )\n" +
-						" {					\n" +
-						" 	ps = dest = 1.0f;\n" +
-						" }					\n" +
-						" clip(-pv);		  "; break;
+						$"{dest}killsgt_func({src1});";
+					break;
 				case ScalarOpcode.killsne:
+					function =
+						"float4 killsne_func(float4 src1) {\n" +
+						"	if (src1.x != 0) {" +
+						"		clip(-1);" +
+						"	}\n" +
+						$"	return ps = 0.0f;" +
+						"}";
 					main +=
-						" ps = dest = 0.0f;" +
-						" if ( src0.x != 0 )\n" +
-						" {					\n" +
-						" 	ps = dest = 1.0f;\n" +
-						" }					\n" +
-						" clip(-pv);		  "; break;
+						$"{dest}killsne_func({src1});";
+					break;
 				case ScalarOpcode.killsone:
+					function =
+						"float4 killsone_func(float4 src1) {\n" +
+						"	if (src1.x == 1) {" +
+						"		clip(-1);" +
+						"	}\n" +
+						$"	return ps = 0.0f;" +
+						"}";
 					main +=
-						" ps = dest = 0.0f;" +
-						" if ( src0.x == 1 )\n" +
-						" {					\n" +
-						"	ps = dest = 1.0f;\n" +
-						" }					\n" +
-						" clip(-pv);		  "; break;
+						$"{dest}killsone_func({src1});";
+					break;
 				case ScalarOpcode.log:
+					function =
+						"float4 log_func(float4 src1) {\n" +
+						$"	return ps = log(src1.x) / log(2);\n" +
+						"}";
 					main +=
-						"ps = dest = log( src0.x ) / log( 2 );";
+						$"{dest}log_func({src1});";
 					break;
 				case ScalarOpcode.logc:
+					function =
+						"float4 logc_func(float4 src1) {\n" +
+						"	ps = log(src1.x) / log(2);  \n" +
+						"	ps = ps == -INFINITY ? -MAX_FLOAT : ps;" +
+						"}";
 					main +=
-						$"{dest} = log( src0.x ) / log( 2 );	\n"+
-						"if (dest == -INFINITY)				\n" +
-						"{									\n" +
-						"	dest = -MAX_FLOAT;				\n" +
-						"}									  " +
-						"ps = dest;";
+						$"{dest}logc_func({src1});";
 					break;
 				case ScalarOpcode.maxas:
+					function =
+						"float4 maxas_func(float4 src1) {\n" +
+						"	a0 = src1.x;" +
+						"	ps = max(src1.x, src1.y);\n" +
+						"}";
 					main +=
-						"a0 = src0.x; \n" +
-						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
+						$"{dest}maxas_func({src1});";
 					break;
 				case ScalarOpcode.maxasf:
 					main +=
@@ -366,8 +410,12 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest = ( src0.x >= src0.y ) ? src0.x : src0.y;";
 					break;
 				case ScalarOpcode.maxs:
+					function =
+						"float4 maxs_func(float4 src1) {\n" +
+						"	return ps = max(src1.x, src1.y);\n" +
+						"}";
 					main +=
-						"ps = dest = max(src0.x, src0.y);";
+						$"{dest}maxs_func({src1});";
 					break;
 				case ScalarOpcode.mins:
 					main +=
@@ -379,12 +427,20 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.mulsc0:
 				case ScalarOpcode.mulsc1:
+					function =
+						"float4 mulsc_func(float4 src1, float4 src2) {\n" +
+						"	return ps = src1.x * src2.y;\n" +
+						"}";
 					main +=
-						"ps = dest = src0.x * {src1}.y;";
+						$"{dest}mulsc_func({src1}, {src2});";
 					break;
 				case ScalarOpcode.muls_prev:
+					function =
+						"float4 muls_prev_func(float4 src1) {\n" +
+						"	return ps = src1.x * ps;\n" +
+						"}";
 					main +=
-						"ps = dest = src0.x * ps;";
+						$"{dest}muls_prev_func({src1});";
 					break;
 				case ScalarOpcode.muls_prev2:
 					main +=
@@ -392,12 +448,16 @@ namespace TagTool.ShaderDecompiler.Translations
 						"src0.y <= 0.0 ? -MAX_FLOAT : src0.x * ps;";
 					break;
 				case ScalarOpcode.rcp:
+					function =
+						"float4 rcp_func(float4 src1) {\n" +
+						"	return ps = 1.0f / src1.x;\n" +
+						"}";
 					main +=
-						"ps = dest = 1.0f / src0.x;";
+						$"{dest}rcp_func({src1});";
 					break;
 				case ScalarOpcode.rcpc:
 					main +=
-						$"{dest} = 1.0f / src0.x;				\n" +
+						$"{dest}1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
 						"	dest = -MAX_FLOAT;				\n" +
@@ -410,7 +470,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.rcpf:
 					main +=
-						$"{dest} = 1.0f / src0.x;				\n" +
+						$"{dest}1.0f / src0.x;				\n" +
 						"if (dest == -INFINITY)				\n" +
 						"{									\n" +
 						"	dest = -ZERO;					\n" +
@@ -419,7 +479,8 @@ namespace TagTool.ShaderDecompiler.Translations
 						"{									\n" +
 						"	dest = ZERO;					\n" +
 						"}									\n" +
-						"ps = dest;"; break;
+						"ps = dest;";
+					break;
 				case ScalarOpcode.retain_prev:
 					main += 
 						"ps = dest = ps;";
@@ -430,7 +491,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.rsqc:
 					main +=
-						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
+						$"{dest}1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)			\n" +
 						"{										\n" +
 						"	dest = -MAX_FLOAT;			\n" +
@@ -443,7 +504,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.rsqf:
 					main +=
-						$"{dest} = 1.0f / sqrt ( src0.x );			\n" +
+						$"{dest}1.0f / sqrt ( src0.x );			\n" +
 						"if (dest == -INFINITY)					\n" +
 						"{										\n" +
 						"	dest = -ZERO;						\n" +
@@ -542,7 +603,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.setppop:
 					main +=
-						$"{dest} = src0.x - 1.0f;	\n" +
+						$"{dest}src0.x - 1.0f;	\n" +
 						"if (dest <= 0.0f)		\n" +
 						"{						\n" +
 						"	dest = 0.0f;		\n" +
@@ -556,7 +617,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.setprstr:
 					main +=
-						$"{dest} = src0.x;			\n" +
+						$"{dest}src0.x;			\n" +
 						"if (dest == 0.0f)		\n" +
 						"{						\n" +
 						"	p0 = true;			\n" +
@@ -584,12 +645,20 @@ namespace TagTool.ShaderDecompiler.Translations
 						"ps = dest = ( src0.x != 0.0f ) ? 1.0f : 0.0f;";
 					break;
 				case ScalarOpcode.sqrt:
+					function =
+						"float4 sqrt_func(float4 src1) {\n" +
+						"	return ps = sqrt(src1.x);\n" +
+						"}";
 					main +=
-						"ps = dest = sqrt(src0.x);";
+						$"{dest}sqrt_func({src1});";
 					break;
 				case ScalarOpcode.subs:
+					function =
+						"float4 subs_func(float4 src1) {\n" +
+						"	return ps = src1.x - src1.y;\n" +
+						"}";
 					main +=
-						"ps = dest = src0.x - src0.y;";
+						$"{dest}subs_func({src1});";
 					break;
 				case ScalarOpcode.subsc0:
 				case ScalarOpcode.subsc1:
@@ -604,30 +673,20 @@ namespace TagTool.ShaderDecompiler.Translations
 					main +=
 						"ps = dest = trunc( src0.x );";
 					break;
-				case ScalarOpcode.opcode_41:
-				case ScalarOpcode.opcode_51:
-				case ScalarOpcode.opcode_52:
-				case ScalarOpcode.opcode_53:
-				case ScalarOpcode.opcode_54:
-				case ScalarOpcode.opcode_55:
-				case ScalarOpcode.opcode_56:
-				case ScalarOpcode.opcode_57:
-				case ScalarOpcode.opcode_58:
-				case ScalarOpcode.opcode_59:
-				case ScalarOpcode.opcode_60:
-				case ScalarOpcode.opcode_61:
-				case ScalarOpcode.opcode_62:
-				case ScalarOpcode.opcode_63:
-					main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
-					break;
 				default:
-					main += $"// {instruction.alu_instr.GetScalarAsmString()}\n";
+					main += $"{instruction.alu_instr.GetScalarAsmString()}\n";
 					break;
 			}
 
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
-			Main += $"{INDENT}{main}\n";
+
+			using (var sr = new StringReader(main))
+			{
+				string line;
+				while ((line = sr.ReadLine()) != null)
+					Main += $"{INDENT}{line}\n";
+			}
 		}
 	}
 }

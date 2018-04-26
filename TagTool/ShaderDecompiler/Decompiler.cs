@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.ShaderDecompiler.ConstantData;
 using TagTool.ShaderDecompiler.Translations;
 using TagTool.ShaderDecompiler.UcodeDisassembler;
+using TagTool.ShaderDecompiler.UPDB;
 
 namespace TagTool.ShaderDecompiler
 {
@@ -19,9 +21,16 @@ namespace TagTool.ShaderDecompiler
 		public static string Main = "";
 		public static string INDENT = "	";
 
-		public static string Decompile(byte[] shader_data)
+		public static HashSet<string> AllocatedTemps =	new HashSet<string> { };
+		public static HashSet<string> AllocatedConsts =	new HashSet<string> { };
+		public static HashSet<string> AllocatedBools =	new HashSet<string> { };
+		public static HashSet<string> AllocatedInts =	new HashSet<string> { };
+
+		public static string Decompile(byte[] debugData, byte[] constantData, byte[] shaderData)
 		{
-			var instructions = Disassembler.Disassemble(shader_data);
+			var shaderPdb = Generator.GetShaderpdb(debugData, constantData, shaderData);
+			var instructions = Disassembler.Disassemble(shaderData);
+
 			Constants = "";
 			Parameters = "";
 			Inputs = "";
@@ -41,10 +50,37 @@ namespace TagTool.ShaderDecompiler
 			// Example: if we disassemble an instruction 'adds r0, c19.xy', we can replace that in HLSL with
 			// r0 = c[19].x + c[19].y - VERY SIMPLE!
 			Parameters +=
-				"float4 c[224];\n" +
+				"float4 c[256];\n" +
 				"int i[16];	   \n" +
 				"bool b[16];   \n" +
 				"sampler s[16];\n";
+
+			// Add fields from our generated UPDB into HLSL
+			if (shaderPdb.Shaders != null)
+			{
+				var shader = shaderPdb.Shaders.Shader;
+				foreach (var intrp in shader.InterpolatorInfo.Interpolator)
+				{
+					Inputs += $"{INDENT}float4 r{intrp.Register} : {(Semantic)Convert.ToInt32(intrp.Semantic, 16)};\n";
+					Main += $"{INDENT}r[{intrp.Register}] = In.r{intrp.Register};\n";
+					AllocatedTemps.Add(intrp.Register);
+				}
+				foreach (var Float in shader.LiteralFloats.Float)
+				{
+					Constants += $"float4 c{Float.Register} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
+					AllocatedTemps.Add(Float.Register);
+				}
+				foreach (var Bool in shader.LiteralBools.Bool)
+				{
+					Constants += $"bool b{Bool.Register} = {Bool.Value};\n";
+					AllocatedBools.Add(Bool.Register);
+				}
+				foreach (var Int in shader.LiteralInts.Int)
+				{
+					Constants += $"int3 i{Int.Register} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
+					AllocatedInts.Add(Int.Register);
+				}
+			}
 
 			// Much more work is needed here.
 			// TODO: handle all ControlFlowInstruction types.
@@ -107,6 +143,7 @@ namespace TagTool.ShaderDecompiler
 				"float4 lc = 0; // loop count.				\n" +
 				"float4 ps = 0; // previous scalar result,	\n" +
 				"float4 pv = 0; // previous vector result.	\n" +
+				"float4 r[32];  // temp 'registers'			\n" +
 				"\n" +
 				" // Functions:								\n" +
 				$"{Functions}								\n" +
