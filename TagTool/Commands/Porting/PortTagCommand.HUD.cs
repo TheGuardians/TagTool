@@ -129,50 +129,17 @@ namespace TagTool.Commands.Porting
 
                     //get stringid text for patch targeting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
-
-                    //fixup for ammo charge meter widgets
-                    if (bitmapwidgetname == "meter")
-                    {
-                            //check these two offsets to make sure only the correct meters are targeted
-                            if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X == -7 && chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y == 47)
-                            {
-                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 0.58f;
-                                chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 0.58f;
-                            }                       
-                    }
-                    //fixup for corners_720 Spartan HUD widgets rendering offscreen to the left and right
-                    if (bitmapwidgetname == "corners_720" && widgetname == "in_helmet_top")
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Anchor = ChudDefinition.HudWidget.PlacementDatum.AnchorValue.TopEdge;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 3.57f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -16f;            
-                    }
-                    //fixup for center_720 Elite HUD widgets rendering too far offset from top and bottom
-                    if (bitmapwidgetname == "center_720" && widgetname == "in_helmet")
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.Y = 7.05f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.0f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 1.2f;
-                    }
-                    //fixup for upper_corners_720 Elite HUD widgets rendering too far offset from center
-                    if (bitmapwidgetname == "upper_corners_720" && widgetname == "in_helmet")
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -2.22f;
-                    }
-                    //fixup for lower_corners_720 Elite HUD widgets rendering too far offset from center
-                    if (bitmapwidgetname == "lower_corners_720" && widgetname == "in_helmet")
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = -2.9f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = -100.0f;
-                    }
                     //fixup for red warning flashes not scaling with HUD
                     if (widgetname.Contains("warning_flashes_spartan") && BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X = -96.0f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 102.0f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.42f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 1.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.43f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 2.43f;
                     }
+                    //fixup for shield depleted flash
+                    if (bitmapwidgetname == "flahsy")
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 15.0f;
                     //fixup ODST waypoint lightup
                     if (widgetname == "waypoint_light_bottom720")
                     {
@@ -180,22 +147,22 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.02f;
                     }
-
-                    for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex] = ConvertTextWidget(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex]);
-
-                        for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData.Count; stateDatumIndex++)
-                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex]);
-                        for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
-                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
-                    }
                 }
+
+                for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
+                {
+                    chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex] = ConvertTextWidget(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex]);
+                    for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData.Count; stateDatumIndex++)
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex]);
+                    for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
+                }
+                
                 //scale all widget groups by 1.5 to match 720p > 1080p conversion
                 for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count; placementDatumIndex++)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X;
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y;
                     //HUD X-Scale Fixup
                     if (widgetname == "in_helmet_bottom" && BlamCache.Version == CacheVersion.Halo3ODST)
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.0f;
@@ -204,9 +171,7 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y = -110.0f;
                     //fixup for ODST Grenade Placement
                     if (widgetname.Contains("grenade") && BlamCache.Version == CacheVersion.Halo3ODST)
-                    {
                         chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y;
-                    }
                 }               
             }
             return chudDefinition;

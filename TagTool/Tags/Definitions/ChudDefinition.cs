@@ -711,7 +711,7 @@ namespace TagTool.Tags.Definitions
 					VitalityMeterHeavyDamage = 1 << 2,
 					Bit3 = 1 << 3,
 					Bit4 = 1 << 4,
-					Bit5 = 1 << 5,
+					HasNoShields = 1 << 5,
 					HasFragGrenades = 1 << 6,
 					HasPlasmaGrenades = 1 << 7,
 					HasSpikeGrenades = 1 << 8,
@@ -729,7 +729,7 @@ namespace TagTool.Tags.Definitions
 				{
 					None,
 					Bit0 = 1 << 0,
-					Bit1 = 1 << 1,
+					HasNoShields = 1 << 1,
 					HasFragGrenades = 1 << 2,
 					HasPlasmaGrenades = 1 << 3,
 					HasSpikeGrenades = 1 << 4,
