@@ -41,10 +41,6 @@ namespace TagTool.Direct3D.Functions
 					{
 						if (isError == true && i == errorLine)
 						{
-							Console.ForegroundColor = ConsoleColor.White;
-							Console.WriteLine();
-							Console.WriteLine($"// {error}");
-							Console.CursorTop = Console.CursorTop - 1;
 							Console.ForegroundColor = ConsoleColor.Magenta;
 							Console.Write($"/*{i}*/	");
 
@@ -73,13 +69,20 @@ namespace TagTool.Direct3D.Functions
 						i++;
 					}
 				}
+
+				if (isError)
+				{
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.WriteLine();
+					Console.WriteLine($"// {error}");
+				}
 			}
 			catch
 			{
-				Console.ForegroundColor = ConsoleColor.Cyan;
-				Console.WriteLine(error);
 				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine(code);
+				Console.ForegroundColor = ConsoleColor.Cyan;
+				Console.WriteLine(error);
 			}
 
 			Console.ForegroundColor = startForegroundColor;

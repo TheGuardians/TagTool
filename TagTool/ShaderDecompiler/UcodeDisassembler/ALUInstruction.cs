@@ -112,10 +112,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			if (src1_sel != 0)
 				oprnd += 'r';
 			else
-			{
-				src1_reg = (uint)Decompiler.GetConstIndex((int)src1_reg);
 				oprnd += 'c';
-			}
 			oprnd += $"[{src1_reg}]";
 			return $"{oprnd}.{src1_swiz}";
 		}
@@ -129,10 +126,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			if (src2_sel != 0)
 				oprnd += 'r';
 			else
-			{
-				src2_reg = (uint)Decompiler.GetConstIndex((int)src2_reg);
 				oprnd += 'c';
-			}
 			oprnd += $"[{src2_reg}]";
 			return $"{oprnd}.{src2_swiz}";
 		}
@@ -146,10 +140,7 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			if (src3_sel != 0)
 				oprnd += 'r';
 			else
-			{
-				src3_reg = (uint)Decompiler.GetConstIndex((int)src3_reg);
 				oprnd += 'c';
-			}
 			oprnd += $"[{src3_reg}]";
 			return $"{oprnd}.{src3_swiz}";
 		}

@@ -93,7 +93,8 @@ extern "C"
 		alui->address_absolute = aluu.alu.address_absolute;
 		alui->const_0_rel_abs = aluu.alu.const_0_rel_abs;
 		alui->const_1_rel_abs = aluu.alu.const_1_rel_abs;
-		alui->export_data = aluu.alu.is_predicated;
+		alui->export_data = aluu.alu.export_data;
+		alui->is_predicated = aluu.alu.is_predicated;
 		alui->pred_condition = aluu.alu.pred_condition;
 		alui->scalar_clamp = aluu.alu.scalar_clamp;
 		alui->scalar_dest = aluu.alu.scalar_dest;

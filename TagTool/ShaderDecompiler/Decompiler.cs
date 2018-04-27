@@ -160,6 +160,14 @@ namespace TagTool.ShaderDecompiler
 			return PostFixups.Apply(hlsl);
 		}
 
+
+		// Parameter registers from tags should be allocated using the below functions BEFORE
+		// calling Decompile(). These ensure legal register indices are always used. It will
+		// try to allocate registers at their original index from xbox first. If that index
+		// falls out of the legal range for dx9, the first available/unused register will be
+		// allocated. If a register already has an allocated index, this will not change.
+		//	After allocation is done, returns the allocated index for the register.
+
 		// allocates/gets a r# register.
 		public static int GetTempIndex(int index)
 		{

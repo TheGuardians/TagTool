@@ -117,28 +117,28 @@ namespace TagTool.ShaderDecompiler.Translations
 					   $" if ( {src1} == {src2}) {{\n"+
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest}0.0f;";
+						$"{dest}0.0f;";
 					break;
 				case VectorOpcode.kill_ge:
 					main +=
 						$" if ( {src1} >= {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest}0.0f;";
+						$"{dest}0.0f;";
 					break;
 				case VectorOpcode.kill_gt:
 					main +=
 						$" if ( {src1} > {src2}) {{	\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest}0.0f;";
+						$"{dest}0.0f;";
 					break;
 				case VectorOpcode.kill_ne:
 					main +=
 						$" if ( {src1} != {src2}) {{\n" +
 						" 	clip(-1);		\n" +
 						" }					\n" +
-						$" {dest}0.0f;";
+						$"{dest}0.0f;";
 					break;
 				case VectorOpcode.mad:
 					main +=
@@ -237,6 +237,7 @@ namespace TagTool.ShaderDecompiler.Translations
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
 
+			// indent all our lines and add to "main"
 			using (var sr = new StringReader(main))
 			{
 				string line;
@@ -681,6 +682,7 @@ namespace TagTool.ShaderDecompiler.Translations
 			if (!Functions.Contains(function))
 				Functions += $"{function}\n";
 
+			// indent all our lines and add to "main"
 			using (var sr = new StringReader(main))
 			{
 				string line;
