@@ -68,17 +68,17 @@ namespace TagTool.ShaderDecompiler
 				foreach (var Float in shader.LiteralFloats.Float)
 				{
 					var index = GetConstIndex(Float.Register);
-					Constants += $"float4 c{index} = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
+					Main += $"{INDENT}c[{index}] = float4({Float.Value0}, {Float.Value1}, {Float.Value2}, {Float.Value3});\n";
 				}
 				foreach (var Bool in shader.LiteralBools.Bool)
 				{
 					var index = GetBoolIndex(Bool.Register);
-					Constants += $"bool b{index} = {Bool.Value};\n";
+					Main += $"{INDENT}b[{index}] = {Bool.Value};\n";
 				}
 				foreach (var Int in shader.LiteralInts.Int)
 				{
 					var index = GetIntIndex(Int.Register);
-					Constants += $"int3 i{index} = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
+					Main += $"{INDENT}i[{index}] = int3({Int.Count}, {Int.Start}, {Int.Increment});\n";
 				}
 			}
 
@@ -164,7 +164,10 @@ namespace TagTool.ShaderDecompiler
 		public static int GetTempIndex(int index)
 		{
 			if (!AllocTemps.ContainsKey(index))
-				for (var i = 0; i < 32; i++)
+				if (index < 32)
+					AllocTemps[index] = index;
+				else
+					for (var i = 0; i < 32; i++)
 					if (!AllocTemps.ContainsValue(i))
 					{
 						AllocTemps[index] = i;
@@ -177,12 +180,15 @@ namespace TagTool.ShaderDecompiler
 		public static int GetConstIndex(int index)
 		{
 			if (!AllocConsts.ContainsKey(index))
-				for (var i = 0; i < 224; i++)
-					if (!AllocConsts.ContainsValue(i))
-					{
-						AllocConsts[index] = i;
-						break;
-					}
+				if (index < 224)
+					AllocConsts[index] = index;
+				else
+					for (var i = 0; i < 224; i++)
+						if (!AllocConsts.ContainsValue(i))
+						{
+							AllocConsts[index] = i;
+							break;
+						}
 			return AllocConsts[index];
 		}
 
@@ -190,7 +196,10 @@ namespace TagTool.ShaderDecompiler
 		public static int GetBoolIndex(int index)
 		{
 			if (!AllocBools.ContainsKey(index))
-				for (var i = 0; i < 16; i++)
+				if (index < 16)
+					AllocBools[index] = index;
+				else
+					for (var i = 0; i < 16; i++)
 					if (!AllocBools.ContainsValue(i))
 					{
 						AllocBools[index] = i;
@@ -203,7 +212,10 @@ namespace TagTool.ShaderDecompiler
 		public static int GetIntIndex(int index)
 		{
 			if (!AllocInts.ContainsKey(index))
-				for (var i = 0; i < 16; i++)
+				if (index < 16)
+					AllocInts[index] = index;
+				else
+					for (var i = 0; i < 16; i++)
 					if (!AllocInts.ContainsValue(i))
 					{
 						AllocInts[index] = i;
