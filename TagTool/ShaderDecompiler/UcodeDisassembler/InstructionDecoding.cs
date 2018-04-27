@@ -44,13 +44,13 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 
 		// Function imports (these are written in C++ to take advantage of the language's built in bitfields,
 		// and also allows some amount of copy-paste from xenia)
-		[DllImport("TagToolUtilities.dll")]
+		[DllImport("TagToolUtilities", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void decodeCF(uint dword0, uint dword1, ref ControlFlowInstruction cfi);
 
-		[DllImport("TagToolUtilities.dll")]
+		[DllImport("TagToolUtilities", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void decodeALU(uint dword0, uint dword1, uint dword2, ref ALUInstruction alui);
 
-		[DllImport("TagToolUtilities.dll")]
+		[DllImport("TagToolUtilities", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void decodeFetch(uint dword0, uint dword1, uint dword2, ref FetchInstruction fi);
 	}
 }
