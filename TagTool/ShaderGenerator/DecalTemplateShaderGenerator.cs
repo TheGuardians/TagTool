@@ -38,7 +38,9 @@ namespace TagTool.ShaderGenerator
 
         protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
         {
-
+            {typeof(Albedo), Albedo.DiffuseOnly },
+            {typeof(Bump_Mapping), Bump_Mapping.Leave },
+            {typeof(Bump_Mapping), Bump_Mapping.Standard }
         };
 
         #endregion
@@ -87,16 +89,16 @@ namespace TagTool.ShaderGenerator
         #endregion
 
         #region Uniforms/Registers
-        //   fade           c32      1
-        //   bump_map_xform c58      1
-        //   base_map       s2       1
-        //   bump_map       s3       1
+
         protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
+            // Unsure if this is specifically part of diffuse only
             {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "fade", ShaderParameter.RType.Vector) {SpecificOffset = 32 } },
+
             {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
             {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
-            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+
+            { Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
 
             {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map_xform", ShaderParameter.RType.Vector) },
