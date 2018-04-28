@@ -43,7 +43,7 @@ namespace TagTool.Commands.Shaders
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 0) return false;
+            if (args.Count <= 0) return false;
 
             ListType(args[0]);
 
@@ -65,7 +65,9 @@ namespace TagTool.Commands.Shaders
                         continue;
 
                     var tag_index = CacheContext.TagCache.Index.ToList().IndexOf(instance);
-                    var name = CacheContext.TagNames[tag_index];
+
+                    var name = CacheContext.TagNames.ContainsKey(tag_index) ? CacheContext.TagNames[tag_index] : null;
+                    if (name == null) continue;
                     if (!name.Contains("\\")) continue; // Probbaly an unnamed tag
                     var template_type = name.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries)[1];
                     if (_template_type != "*" && template_type != _template_type) continue;

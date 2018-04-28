@@ -29,22 +29,45 @@ namespace TagTool.ShaderGenerator
             Parallax parallax,
             Misc misc,
             Distortion distortion,
-            Soft_Fade soft_fade)
+            Soft_Fade soft_fade) : base(
+                albedo,
+                bump_mapping,
+                alpha_test,
+                specular_mask,
+                material_model,
+                environment_mapping,
+                self_illumination,
+                blend_mode,
+                parallax,
+                misc,
+                distortion,
+                soft_fade)
         {
+
             this.CacheContext = cacheContext;
-            this.albedo = albedo;
-            this.bump_mapping = bump_mapping;
-            this.alpha_test = alpha_test;
-            this.specular_mask = specular_mask;
-            this.material_model = material_model;
-            this.environment_mapping = environment_mapping;
-            this.self_illumination = self_illumination;
-            this.blend_mode = blend_mode;
-            this.parallax = parallax;
-            this.misc = misc;
-            this.distortion = distortion;
-            this.soft_fade = soft_fade;
         }
+
+        #region Implemented Features Check
+
+        protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+        {
+            {typeof(Albedo), Albedo.Default },
+            {typeof(Albedo), Albedo.Detail_Blend },
+            {typeof(Albedo), Albedo.Constant_Color },
+            {typeof(Albedo), Albedo.Two_Change_Color },
+            {typeof(Albedo), Albedo.Four_Change_Color },
+            {typeof(Albedo), Albedo.Two_Detail_Overlay },
+            {typeof(Albedo), Albedo.Three_Detail_Blend },
+            {typeof(Albedo), Albedo.Two_Detail },
+            {typeof(Albedo), Albedo.Color_Mask },
+            {typeof(Albedo), Albedo.Two_Detail_Black_Point },
+            {typeof(Bump_Mapping), Bump_Mapping.Standard },
+            {typeof(Bump_Mapping), Bump_Mapping.Detail },
+            {typeof(Bump_Mapping), Bump_Mapping.Off },
+            {typeof(Blend_Mode), Blend_Mode.Opaque },
+        };
+
+        #endregion
 
         #region TemplateShaderGenerator
 
@@ -87,158 +110,14 @@ namespace TagTool.ShaderGenerator
             return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
         }
 
-        public override List<TemplateParameter> GetShaderParametersList(object key)
-        {
-            Type type = key.GetType();
-            if (Uniforms.ContainsKey((object)key))
-            {
-                var list = Uniforms[(object)key].Cast<TemplateParameter>().ToList();
-                list = list.Where(param => param.Target_Type == type).ToList();
-                return list;
-            }
-            return new List<TemplateParameter>();
-        }
-
-        #endregion
-
-        #region Implemented Features Check
-
-        public static MultiValueDictionary<Type, object> ImplementedEnums = new MultiValueDictionary<Type, object>
-        {
-            {typeof(Albedo), Albedo.Default },
-            {typeof(Albedo), Albedo.Detail_Blend },
-            {typeof(Albedo), Albedo.Constant_Color },
-            {typeof(Albedo), Albedo.Two_Change_Color },
-            {typeof(Albedo), Albedo.Four_Change_Color },
-            {typeof(Albedo), Albedo.Two_Detail_Overlay },
-            {typeof(Albedo), Albedo.Three_Detail_Blend },
-            {typeof(Albedo), Albedo.Two_Detail },
-            {typeof(Albedo), Albedo.Color_Mask },
-            {typeof(Albedo), Albedo.Two_Detail_Black_Point },
-            {typeof(Bump_Mapping), Bump_Mapping.Standard },
-            {typeof(Bump_Mapping), Bump_Mapping.Detail },
-            {typeof(Bump_Mapping), Bump_Mapping.Off },
-            {typeof(Blend_Mode), Blend_Mode.Opaque },
-        };
-
-        private static void CheckImplementedParameters(params object[] values)
-        {
-            foreach (var value in values)
-            {
-                if (ImplementedEnums.ContainsKey(value.GetType()))
-                    if (ImplementedEnums[value.GetType()].Contains(value)) continue;
-                Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
-            }
-        }
-
-        private void CheckImplementedParameters()
-        {
-            CheckImplementedParameters(
-                albedo,
-                bump_mapping,
-                alpha_test,
-                specular_mask,
-                material_model,
-                environment_mapping,
-                self_illumination,
-                blend_mode,
-                parallax,
-                misc,
-                distortion,
-                soft_fade
-            );
-        }
-
-        #endregion
-
-        #region HLSL Generation
-
-
-
-        private List<DirectX.MacroDefine> GenerateFunctionDefinition()
-        {
-            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-
-            definitions.Add(GenerateEnumFuncDefinition(albedo));
-            definitions.Add(GenerateEnumFuncDefinition(bump_mapping));
-            definitions.Add(GenerateEnumFuncDefinition(alpha_test));
-            definitions.Add(GenerateEnumFuncDefinition(specular_mask));
-            definitions.Add(GenerateEnumFuncDefinition(material_model));
-            definitions.Add(GenerateEnumFuncDefinition(environment_mapping));
-            definitions.Add(GenerateEnumFuncDefinition(self_illumination));
-            definitions.Add(GenerateEnumFuncDefinition(blend_mode));
-            definitions.Add(GenerateEnumFuncDefinition(parallax));
-            definitions.Add(GenerateEnumFuncDefinition(misc));
-            definitions.Add(GenerateEnumFuncDefinition(distortion));
-            definitions.Add(GenerateEnumFuncDefinition(soft_fade));
-
-            return definitions;
-        }
-
-        private List<DirectX.MacroDefine> GenerateCompilationFlagDefinitions()
-        {
-            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-
-            definitions.Add(GenerateEnumFlagDefinition(albedo));
-            definitions.Add(GenerateEnumFlagDefinition(bump_mapping));
-            definitions.Add(GenerateEnumFlagDefinition(alpha_test));
-            definitions.Add(GenerateEnumFlagDefinition(specular_mask));
-            definitions.Add(GenerateEnumFlagDefinition(material_model));
-            definitions.Add(GenerateEnumFlagDefinition(environment_mapping));
-            definitions.Add(GenerateEnumFlagDefinition(self_illumination));
-            definitions.Add(GenerateEnumFlagDefinition(blend_mode));
-            definitions.Add(GenerateEnumFlagDefinition(parallax));
-            definitions.Add(GenerateEnumFlagDefinition(misc));
-            definitions.Add(GenerateEnumFlagDefinition(distortion));
-            definitions.Add(GenerateEnumFlagDefinition(soft_fade));
-
-            return definitions;
-        }
-
-        private List<ShaderParameter> GenerateShaderParameters()
-        {
-            return GenerateShaderParameters(
-                typeof(Albedo),
-                typeof(Bump_Mapping),
-                typeof(Alpha_Test),
-                typeof(Specular_Mask),
-                typeof(Material_Model),
-                typeof(Environment_Mapping),
-                typeof(Self_Illumination),
-                typeof(Blend_Mode),
-                typeof(Parallax),
-                typeof(Misc),
-                typeof(Distortion),
-                typeof(Soft_Fade)
-            );
-        }
-
-        private static IEnumerable<DirectX.MacroDefine> GenerateHLSLEnumDefinitions()
-        {
-            return GenerateHLSLEnumDefinitions(
-                typeof(Albedo),
-                typeof(Bump_Mapping),
-                typeof(Alpha_Test),
-                typeof(Specular_Mask),
-                typeof(Material_Model),
-                typeof(Environment_Mapping),
-                typeof(Self_Illumination),
-                typeof(Blend_Mode),
-                typeof(Parallax),
-                typeof(Misc),
-                typeof(Distortion),
-                typeof(Soft_Fade)
-            );
-        }
-
         #endregion
 
         #region Uniforms/Registers
 
-        public static MultiValueDictionary<object, object> Uniforms = new MultiValueDictionary<object, object>
+        protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -246,7 +125,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -322,7 +201,6 @@ namespace TagTool.ShaderGenerator
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "color_mask_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "neutral_gray", ShaderParameter.RType.Vector) },
 
-
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
@@ -331,9 +209,6 @@ namespace TagTool.ShaderGenerator
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map2_xform", ShaderParameter.RType.Vector) }, // Manually added
-            
-
-
 
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
@@ -342,6 +217,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "secondary_change_color", ShaderParameter.RType.Vector) },
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "primary_change_color_anim", ShaderParameter.RType.Vector) },
             {Albedo.Two_Change_Color_Anim_Overlay,  new TemplateParameter(typeof(Albedo), "secondary_change_color_anim", ShaderParameter.RType.Vector) },
+
             {Albedo.Chameleon,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Chameleon,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Chameleon,  new TemplateParameter(typeof(Albedo), "chameleon_color0", ShaderParameter.RType.Vector) },
@@ -394,7 +270,7 @@ namespace TagTool.ShaderGenerator
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_mask_map", ShaderParameter.RType.Sampler) },
             {Bump_Mapping.Detail_Masked,  new TemplateParameter(typeof(Bump_Mapping),"bump_detail_coefficient", ShaderParameter.RType.Vector) },
 
-            { Alpha_Test.Simple,  new TemplateParameter(typeof(Alpha_Test),"alpha_test_map", ShaderParameter.RType.Sampler) },
+            {Alpha_Test.Simple,  new TemplateParameter(typeof(Alpha_Test),"alpha_test_map", ShaderParameter.RType.Sampler) },
             {Specular_Mask.From_Texture,  new TemplateParameter(typeof(Specular_Mask),"specular_mask_texture", ShaderParameter.RType.Sampler) },
             {Specular_Mask.From_Color_Texture,  new TemplateParameter(typeof(Specular_Mask),"specular_mask_texture", ShaderParameter.RType.Sampler) },
             {Material_Model.Diffuse_Only,  new TemplateParameter(typeof(Material_Model),"no_dynamic_lights", ShaderParameter.RType.Boolean) },
@@ -597,18 +473,18 @@ namespace TagTool.ShaderGenerator
 
         #region Enums
 
-        public Albedo albedo;
-        public Bump_Mapping bump_mapping;
-        public Alpha_Test alpha_test;
-        public Specular_Mask specular_mask;
-        public Material_Model material_model;
-        public Environment_Mapping environment_mapping;
-        public Self_Illumination self_illumination;
-        public Blend_Mode blend_mode;
-        public Parallax parallax;
-        public Misc misc;
-        public Distortion distortion;
-        public Soft_Fade soft_fade;
+        public Albedo albedo => (Albedo)EnumValues[0];
+        public Bump_Mapping bump_mapping => (Bump_Mapping)EnumValues[1];
+        public Alpha_Test alpha_test => (Alpha_Test)EnumValues[2];
+        public Specular_Mask specular_mask => (Specular_Mask)EnumValues[3];
+        public Material_Model material_model => (Material_Model)EnumValues[4];
+        public Environment_Mapping environment_mapping => (Environment_Mapping)EnumValues[5];
+        public Self_Illumination self_illumination => (Self_Illumination)EnumValues[6];
+        public Blend_Mode blend_mode => (Blend_Mode)EnumValues[7];
+        public Parallax parallax => (Parallax)EnumValues[8];
+        public Misc misc => (Misc)EnumValues[9];
+        public Distortion distortion => (Distortion)EnumValues[10];
+        public Soft_Fade soft_fade => (Soft_Fade)EnumValues[11];
 
         public enum Albedo
         {

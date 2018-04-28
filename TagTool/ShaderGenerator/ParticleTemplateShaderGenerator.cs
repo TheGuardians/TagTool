@@ -13,11 +13,11 @@ namespace TagTool.ShaderGenerator
         public enum Albedo
         {
             Diffuse_Only,
-            diffuse_plus_billboard_alpha,
-            palettized,
-            palettized_plus_billboard_alpha,
-            diffuse_plus_sprite_alpha,
-            palettized_plus_sprite_alpha
+            Diffuse_Plus_Billboard_Alpha,
+            Palettized,
+            Palettized_Plus_Billboard_Alpha,
+            Diffuse_Plus_Sprite_Alpha,
+            Palettized_Plus_Sprite_Alpha
         }
 
         public enum Blend_Mode

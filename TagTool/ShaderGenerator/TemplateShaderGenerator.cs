@@ -12,10 +12,38 @@ namespace TagTool.ShaderGenerator
 {
     public abstract class TemplateShaderGenerator : IShaderGenerator
     {
+
+        protected TemplateShaderGenerator(params object[] enums)
+        {
+            this.EnumValues = enums;
+            this.EnumTypes = new Type[enums.Length];
+            for(var i=0;i<enums.Length;i++)
+            {
+                EnumTypes[i] = enums[i].GetType();
+            }
+        }
+
         public GameCacheContext CacheContext { get; internal set; }
         
         public abstract ShaderGeneratorResult Generate();
-        public abstract List<TemplateParameter> GetShaderParametersList(object key);
+
+        protected object[] EnumValues { get; set; }
+        protected Type[] EnumTypes { get; set; }
+
+        abstract protected MultiValueDictionary<Type, object> ImplementedEnums { get; set; }
+        abstract protected MultiValueDictionary<object, object> Uniforms { get; set; }
+
+        public List<TemplateParameter> GetShaderParametersList(object key)
+        {
+            Type type = key.GetType();
+            if (Uniforms.ContainsKey((object)key))
+            {
+                var list = Uniforms[(object)key].Cast<TemplateParameter>().ToList();
+                list = list.Where(param => param.Target_Type == type).ToList();
+                return list;
+            }
+            return new List<TemplateParameter>();
+        }
 
         private static IEnumerable<DirectX.MacroDefine> GenerateEnumDefinitions(Type _enum)
         {
@@ -120,7 +148,7 @@ namespace TagTool.ShaderGenerator
             List<IEnumerable<TemplateParameter>> parameter_lists = new List<IEnumerable<TemplateParameter>>();
             foreach (var type in types)
             {
-                var value = this.GetType().GetField(type.Name.ToLower()).GetValue(this);
+                var value = this.GetType().GetProperty(type.Name.ToLower()).GetValue(this);
                 if (value == null) throw new Exception("Value should never be null");
                 var _params = GetShaderParametersList(value);
                 parameter_lists.Add(_params);
@@ -200,5 +228,62 @@ namespace TagTool.ShaderGenerator
             }
             return parameters;
         }
+
+        #region Implemented Features Check
+
+        protected void CheckImplementedParameters(params object[] values)
+        {
+            foreach (var value in values)
+            {
+                if (ImplementedEnums.ContainsKey(value.GetType()))
+                    if (ImplementedEnums[value.GetType()].Contains(value)) continue;
+                Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
+            }
+        }
+
+        protected void CheckImplementedParameters()
+        {
+            CheckImplementedParameters(EnumValues);
+        }
+
+        #endregion
+
+        #region HLSL Generation
+
+        protected List<DirectX.MacroDefine> GenerateFunctionDefinition()
+        {
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+
+            foreach (var _enum in EnumValues)
+            {
+                definitions.Add(GenerateEnumFuncDefinition(_enum));
+            }
+
+            return definitions;
+        }
+
+        protected List<DirectX.MacroDefine> GenerateCompilationFlagDefinitions()
+        {
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+
+            foreach (var _enum in EnumValues)
+            {
+                definitions.Add(GenerateEnumFlagDefinition(_enum));
+            }
+
+            return definitions;
+        }
+
+        protected List<ShaderParameter> GenerateShaderParameters()
+        {
+            return GenerateShaderParameters(EnumTypes);
+        }
+
+        protected IEnumerable<DirectX.MacroDefine> GenerateHLSLEnumDefinitions()
+        {
+            return GenerateHLSLEnumDefinitions(EnumTypes);
+        }
+
+        #endregion
     }
 }
