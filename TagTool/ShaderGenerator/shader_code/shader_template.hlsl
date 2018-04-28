@@ -34,8 +34,6 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
     float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
     float alpha = albedo.w;
 
-
-
     PS_OUTPUT output;
     output.Diffuse = Blend_Mode(float4(color, albedo.w));
     output.Normal = Blend_Mode(float4(NormalExport(normal), albedo.w));

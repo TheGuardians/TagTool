@@ -29,7 +29,7 @@ namespace TagTool.ShaderGenerator
             Opaque,
             Additive,
             Multiply,
-            Alpha_Mlend,
+            Alpha_Blend,
             Double_Multiply,
             Maximum,
             Multiply_Add,

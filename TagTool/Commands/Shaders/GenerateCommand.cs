@@ -114,20 +114,31 @@ namespace TagTool.Commands.Shaders
             ShaderGeneratorResult shader_gen_result;
             switch(type)
             {
-				case "shader_templates":
-					shader_gen_result = shader_template_gen(args.Skip(2).ToList());
+                case "shader_templates":
+                case "shader_template":
+                    shader_gen_result = shader_template_gen(args.Skip(2).ToList());
                     break;
-				case "beam_templates":
-				case "contrail_templates":
-				case "cortana_templates":
-				case "decal_templates":
-				case "foliage_templates":
-				case "halogram_templates":
-				case "light_volume_templates":
-				case "particle_templates":
-				case "terrain_templates":
-				case "water_templates":
-				default:
+                case "beam_templates":
+                case "beam_template":
+                case "contrail_templates":
+                case "contrail_template":
+                case "cortana_templates":
+                case "cortana_template":
+                case "decal_templates":
+                case "decal_template":
+                case "foliage_templates":
+                case "foliage_template":
+                case "halogram_templates":
+                case "halogram_template":
+                case "light_volume_templates":
+                case "light_volume_template":
+                case "particle_templates":
+                case "particle_template":
+                case "terrain_templates":
+                case "terrain_template":
+                case "water_templates":
+                case "water_template":
+                default:
                     Console.WriteLine($"{type} is not implemented");
                     return false;
             }
