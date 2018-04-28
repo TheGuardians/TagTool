@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Direct3D.Functions;
 using TagTool.ShaderGenerator.Types;
+using TagTool.Shaders;
 using TagTool.Util;
 
 namespace TagTool.ShaderGenerator
@@ -50,7 +51,7 @@ namespace TagTool.ShaderGenerator
             CheckImplementedParameters();
 #endif
 
-            var shader_parameters = GenerateShaderParameters();
+            var shader_parameters = GenerateShaderParameters(58, 0, 0);
             Dictionary<string, string> file_overrides = new Dictionary<string, string>()
             {
                 { "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
@@ -86,10 +87,19 @@ namespace TagTool.ShaderGenerator
         #endregion
 
         #region Uniforms/Registers
-
+        //   fade           c32      1
+        //   bump_map_xform c58      1
+        //   base_map       s2       1
+        //   bump_map       s3       1
         protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
-            
+            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "fade", ShaderParameter.RType.Vector) {SpecificOffset = 32 } },
+            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+
+            {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
+            {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map_xform", ShaderParameter.RType.Vector) },
         };
 
         #endregion

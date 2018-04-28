@@ -77,7 +77,7 @@ namespace TagTool.ShaderGenerator
             CheckImplementedParameters();
 #endif
 
-            var shader_parameters = GenerateShaderParameters();
+            var shader_parameters = GenerateShaderParameters(58, 0, 0);
             Dictionary<string, string> file_overrides = new Dictionary<string, string>()
             {
                 { "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
@@ -117,7 +117,7 @@ namespace TagTool.ShaderGenerator
         protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_color", ShaderParameter.RType.Vector) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -125,7 +125,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -137,7 +137,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Constant_Color,  new TemplateParameter(typeof(Albedo), "debug_tint", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Change_Color,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -160,7 +160,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Four_Change_Color,  new TemplateParameter(typeof(Albedo), "quaternary_change_color", ShaderParameter.RType.Vector) },
 
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map2", ShaderParameter.RType.Sampler) },
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -170,7 +170,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Three_Detail_Blend,  new TemplateParameter(typeof(Albedo), "detail_map3_xform", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -181,7 +181,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Two_Detail_Overlay,  new TemplateParameter(typeof(Albedo), "detail_map_overlay_xform", ShaderParameter.RType.Vector) }, // Manually added
 
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added
@@ -202,7 +202,7 @@ namespace TagTool.ShaderGenerator
             {Albedo.Color_Mask,  new TemplateParameter(typeof(Albedo), "neutral_gray", ShaderParameter.RType.Vector) },
 
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
-            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {enabled = false } }, // Manually added (Unknown bitmap)
+            {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) {Enabled = false } }, // Manually added (Unknown bitmap)
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map", ShaderParameter.RType.Sampler) },
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "base_map_xform", ShaderParameter.RType.Vector) }, // Manually added
             {Albedo.Two_Detail_Black_Point,  new TemplateParameter(typeof(Albedo), "detail_map_xform", ShaderParameter.RType.Vector) }, // Manually added

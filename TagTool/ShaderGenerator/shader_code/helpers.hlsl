@@ -40,6 +40,8 @@ float2 ApplyXForm(float2 texcoord, float4 xform)
     return texcoord * xform.xy + xform.zw;
 }
 
+#ifdef shader_template
+
 float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
 {
     float4 r0 = float4(color, 0);
@@ -61,6 +63,8 @@ float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
 
     return r2.xyz >= 0 ? r0.xyz : r1.xyz;
 }
+
+#endif
 
 
 #endif

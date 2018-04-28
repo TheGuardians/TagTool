@@ -143,7 +143,7 @@ namespace TagTool.ShaderGenerator
             return defs;
         }
 
-        protected List<ShaderParameter> GenerateShaderParameters(params Type[] types)
+        protected List<ShaderParameter> GenerateShaderParameters(int vector_start, int sampler_start, int boolean_start, params Type[] types)
         {
             List<IEnumerable<TemplateParameter>> parameter_lists = new List<IEnumerable<TemplateParameter>>();
             foreach (var type in types)
@@ -154,7 +154,7 @@ namespace TagTool.ShaderGenerator
                 parameter_lists.Add(_params);
             }
 
-            IndicesManager indices = new IndicesManager();
+            IndicesManager indices = new IndicesManager { vector_index = vector_start, sampler_index = sampler_start, boolean_index = boolean_start };
             List<ShaderParameter> parameters = new List<ShaderParameter>();
 
             foreach (var _params in parameter_lists)
@@ -187,39 +187,38 @@ namespace TagTool.ShaderGenerator
                 switch (param.Type)
                 {
                     case ShaderParameter.RType.Vector:
-                        if (param.enabled)
+                        var vector_index = param.SpecificOffset == -1 ? indices.vector_index++ : param.SpecificOffset;
+                        if (param.Enabled)
                             parameters.Add(new ShaderParameter()
                             {
                                 ParameterName = cacheContext.GetStringId(param.Name),
                                 RegisterCount = 1,
                                 RegisterType = ShaderParameter.RType.Vector,
-                                RegisterIndex = (ushort)indices.vector_index
+                                RegisterIndex = (ushort)vector_index
                             });
-                        indices.vector_index++;
                         break;
 
                     case ShaderParameter.RType.Sampler:
-                        if (param.enabled)
+                        var sampler_index = param.SpecificOffset == -1 ? indices.sampler_index++ : param.SpecificOffset;
+                        if (param.Enabled)
                             parameters.Add(new ShaderParameter()
                             {
                                 ParameterName = cacheContext.GetStringId(param.Name),
                                 RegisterCount = 1,
                                 RegisterType = ShaderParameter.RType.Sampler,
-                                RegisterIndex = (ushort)indices.sampler_index
+                                RegisterIndex = (ushort)sampler_index
                             });
-                        indices.sampler_index++;
                         break;
-
                     case ShaderParameter.RType.Boolean:
-                        if (param.enabled)
+                        var boolean_index = param.SpecificOffset == -1 ? indices.boolean_index++ : param.SpecificOffset;
+                        if (param.Enabled)
                             parameters.Add(new ShaderParameter()
                             {
                                 ParameterName = cacheContext.GetStringId(param.Name),
                                 RegisterCount = 1,
                                 RegisterType = ShaderParameter.RType.Boolean,
-                                RegisterIndex = (ushort)indices.boolean_index
+                                RegisterIndex = (ushort)boolean_index
                             });
-                        indices.boolean_index++;
                         break;
 
                     default:
@@ -274,9 +273,9 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        protected List<ShaderParameter> GenerateShaderParameters()
+        protected List<ShaderParameter> GenerateShaderParameters(int vector_start, int sampler_start, int boolean_start)
         {
-            return GenerateShaderParameters(EnumTypes);
+            return GenerateShaderParameters(vector_start, sampler_start, boolean_start, EnumTypes);
         }
 
         protected IEnumerable<DirectX.MacroDefine> GenerateHLSLEnumDefinitions()

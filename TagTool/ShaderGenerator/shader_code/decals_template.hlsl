@@ -3,9 +3,6 @@
 #include "decal_template_methods/template_includes.hlsl"
 #include "parameters.hlsl"
 
-uniform sampler2D base_map : register(s2);
-uniform sampler2D bump_map : register(s3);
-
 struct VS_OUTPUT
 {
     float4 TexCoord : TEXCOORD;
@@ -38,7 +35,8 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 
 	float4 albedo = Albedo(texcoord);
 	float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
-	float alpha = albedo.w * fade;
+	float3 color = albedo.xyz;
+	float alpha = albedo.w * fade.x;
 
 	PS_OUTPUT output;
 
@@ -49,6 +47,6 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	output.Normal = Blend_Mode(float4(NormalExport(normal), alpha));
 #endif
 
-	output.Unknown = float4(unknown);
+	output.Unknown = unknown.xxxx;
 	return output;
 }
