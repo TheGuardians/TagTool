@@ -741,6 +741,249 @@
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ShaderGenerator\shader_code\decals_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\editor_only.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\helpers.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\parameters.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\chameleon.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\chameleon_albedo_masked.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\chameleon_masked.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\color_mask.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\color_mask_hard_light.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\constant_color.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\default.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\detail_blend.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\four_change_color.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\three_detail_blend.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_change_color.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_change_color_anim_overlay.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_change_color_chameleon.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_change_color_tex_overlay.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_detail.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_detail_black_point.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo\two_detail_overlay.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\alpha_test\none.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\alpha_test\simple.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\additive.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\alpha_blend.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\double_multiply.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\multiply.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\opaque.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode\pre_multiplied_alpha.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping\detail.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping\detail_masked.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping\detail_plus_detail_masked.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping\off.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping\standard.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\distortion\off.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\distortion\on.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\custom_map.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\diffuse_only.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\dynamic.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\from_flat_texture.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\none.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping\per_pixel.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\car_paint.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\cook_torrance.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\diffuse_only.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\foliage.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\glass.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\hair.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\none.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\organism.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\single_lobe_phong.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode\two_lobe_phong.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\misc\first_person_always.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\misc\first_person_never.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\misc\first_person_never_with_rotating_bitmaps.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\misc\first_person_sometimes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\parallax\interpolated.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\parallax\off.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\parallax\simple.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\parallax\simple_detail.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\3_channel_self_illum.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\from_diffuse.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\illum_detail.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\illum_detail_world_space_four_cc.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\meter.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\off.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\plasma.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\self_illum_times_diffuse.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\simple.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\simple_four_change_color.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination\simple_with_alpha_mask.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\soft_fade\off.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\soft_fade\on.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\specular_mask\no_specular_mask.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\specular_mask\specular_mask_from_color_texture.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\specular_mask\specular_mask_from_diffuse.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\specular_mask\specular_mask_from_texture.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\template_default_defs.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\template_includes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\zanzibar_water_awesome.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Tools\fxc.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -762,247 +1005,6 @@
     <Content Include="ShaderDecompiler\ReadMe_ShaderPortingPipeline.txt" />
     <Content Include="ShaderDecompiler\TODO.txt" />
     <Content Include="ShaderDecompiler\ShaderPdb\ReadMe.txt" />
-    <Content Include="ShaderGenerator\shader_code\albedo\chameleon.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\chameleon_albedo_masked.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\chameleon_masked.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\color_mask.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\color_mask_hard_light.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\constant_color.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\default.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\detail_blend.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\four_change_color.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\three_detail_blend.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_change_color.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_change_color_anim_overlay.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_change_color_chameleon.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_change_color_tex_overlay.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_detail.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_detail_black_point.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo\two_detail_overlay.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\alpha_test\none.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\alpha_test\simple.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\additive.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\alpha_blend.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\double_multiply.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\multiply.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\opaque.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode\pre_multiplied_alpha.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping\detail.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping\detail_masked.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping\detail_plus_detail_masked.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping\off.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping\standard.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\decals_template.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\distortion\off.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\distortion\on.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\editor_only.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\custom_map.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\diffuse_only.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\dynamic.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\from_flat_texture.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\none.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping\per_pixel.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\helpers.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\car_paint.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\cook_torrance.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\diffuse_only.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\foliage.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\glass.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\hair.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\none.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\organism.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\single_lobe_phong.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_mode\two_lobe_phong.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\misc\first_person_always.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\misc\first_person_never.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\misc\first_person_never_with_rotating_bitmaps.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\misc\first_person_sometimes.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parallax\interpolated.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parallax\off.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parallax\simple.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parallax\simple_detail.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\3_channel_self_illum.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\from_diffuse.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\illum_detail.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\illum_detail_world_space_four_cc.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\meter.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\off.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\plasma.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\self_illum_times_diffuse.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\simple.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\simple_four_change_color.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination\simple_with_alpha_mask.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\soft_fade\off.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\soft_fade\on.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\specular_mask\no_specular_mask.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_color_texture.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_diffuse.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\specular_mask\specular_mask_from_texture.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\template_default_defs.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\template_includes.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parameters.hlsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\zanzibar_water_awesome.hlsl" />
     <Content Include="TagTool.ico" />
     <None Include="App.config" />
     <None Include="packages.config" />

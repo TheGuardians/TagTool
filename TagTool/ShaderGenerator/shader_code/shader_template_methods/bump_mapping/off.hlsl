@@ -1,5 +1,5 @@
 #include "../parameters.hlsl"
-#include "../helpers.hlsl"
+#include "../../helpers.hlsl"
 
 #ifdef flag_bump_mapping_off
 

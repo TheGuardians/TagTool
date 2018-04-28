@@ -1,6 +1,6 @@
 #define shader_template
-#include "template_default_defs.hlsl"
-#include "template_includes.hlsl"
+#include "shader_template_methods/template_default_defs.hlsl"
+#include "shader_template_methods/template_includes.hlsl"
 #include "parameters.hlsl"
 #include "helpers.hlsl"
 

@@ -1,4 +1,4 @@
-#include "../helpers.hlsl"
+#include "../../helpers.hlsl"
 
 #ifdef flag_albedo_color_mask_hard_light
 
