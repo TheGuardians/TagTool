@@ -87,6 +87,41 @@ namespace TagTool.Commands.Shaders
             return generator?.Generate();
         }
 
+        private ShaderGeneratorResult decals_template_gen(List<string> args)
+        {
+            int arg_pos = 0;
+
+            DecalTemplateShaderGenerator generator = null;
+            try
+            {
+                var albedo = (DecalTemplateShaderGenerator.Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var blend_mode = (DecalTemplateShaderGenerator.Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var render_pass = (DecalTemplateShaderGenerator.Render_Pass)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var specular = (DecalTemplateShaderGenerator.Specular)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var bump_mapping = (DecalTemplateShaderGenerator.Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var tinting = (DecalTemplateShaderGenerator.Tinting)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+
+                // constructs a generator using the enum values that were gotten above.
+                generator = new DecalTemplateShaderGenerator(
+                    CacheContext,
+                    albedo,
+                    blend_mode,
+                    render_pass,
+                    specular,
+                    bump_mapping,
+                    tinting
+                );
+
+            }
+            catch
+            {
+                Console.WriteLine("Invalid arguments");
+            }
+
+            // generates HLSL and a List<Parameters> using the generator
+            return generator?.Generate();
+        }
+
         public override object Execute(List<string> args)
         {
             if (args.Count <= 0)
@@ -118,14 +153,16 @@ namespace TagTool.Commands.Shaders
                 case "shader_template":
                     shader_gen_result = shader_template_gen(args.Skip(2).ToList());
                     break;
+                case "decal_templates":
+                case "decal_template":
+                    shader_gen_result = decals_template_gen(args.Skip(2).ToList());
+                    break;
                 case "beam_templates":
                 case "beam_template":
                 case "contrail_templates":
                 case "contrail_template":
                 case "cortana_templates":
                 case "cortana_template":
-                case "decal_templates":
-                case "decal_template":
                 case "foliage_templates":
                 case "foliage_template":
                 case "halogram_templates":

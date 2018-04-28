@@ -1,5 +1,6 @@
-﻿#include "template_default_defs.hlsl"
-#include "template_includes.hlsl"
+﻿#define decal_template
+#include "decal_template_methods/template_default_defs.hlsl"
+#include "decal_template_methods/template_includes.hlsl"
 #include "parameters.hlsl"
 
 uniform sampler2D base_map : register(s2);
