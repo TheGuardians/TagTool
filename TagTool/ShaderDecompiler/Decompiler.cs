@@ -13,7 +13,6 @@ namespace TagTool.ShaderDecompiler
 	// Class for generating HLSL code from a List<Instruction>
 	public static class Decompiler
 	{
-		public static string Constants = "";
 		public static string Parameters = "";
 		public static string Inputs = "";
 		public static string Outputs = "";
@@ -31,7 +30,6 @@ namespace TagTool.ShaderDecompiler
 			var shaderPdb = Generator.GetShaderpdb(debugData, constantData, shaderData);
 			var instructions = Disassembler.Disassemble(shaderData);
 
-			Constants = "";
 			Parameters = "";
 			Inputs = "";
 			Outputs = "";
@@ -39,11 +37,19 @@ namespace TagTool.ShaderDecompiler
 			Main = "";
 
 			// Constants that are commonly used by instructions.
-			Constants +=
-				"#define MAX_FLOAT 3.402823466e+38F		\n" +
-				"#define INFINITY (1 / 0)				\n" +
-				"#define NaN (0 / 0)					\n" +
-				"#define ZERO 0							\n";
+			Functions +=
+				"float4 MAX_FLOAT() {\n" +
+				"	return 3.402823466e+38F;\n" +
+				"}\n" +
+				"float4 INFINITY() {\n" +
+				"	return 1 / 0;\n" +
+				"}\n" +
+				"float4 NaN() {\n" +
+				"	return 0 / 0;\n" +
+				"}\n" +
+				"float4 ZERO() {\n" +
+				"	return 0;\n" +
+				"}";
 
 			// declaring these as arrays lets us not even worry about parameters on the HLSL side
 			// and they will point to the correct register index that the game stores values in.
@@ -110,16 +116,13 @@ namespace TagTool.ShaderDecompiler
 					}
 
 					if (cf_instr.EndsShader)
-						goto EndOfShader;
+						goto FINISH_UP;
 				}
 			}
-			EndOfShader:
 
+			FINISH_UP:
 			string hlsl =
 				"// Decompiled with Jabukufo's ucode Decompiler \n" +
-				"\n" +
-				" // Constants:								\n" +
-				$"{Constants}								\n" +
 				"\n" +
 				" // Parameters:							\n" +
 				$"{Parameters}								\n" +
@@ -176,11 +179,11 @@ namespace TagTool.ShaderDecompiler
 					AllocTemps[index] = index;
 				else
 					for (var i = 0; i < 32; i++)
-					if (!AllocTemps.ContainsValue(i))
-					{
-						AllocTemps[index] = i;
-						break;
-					}
+						if (!AllocTemps.ContainsValue(i))
+						{
+							AllocTemps[index] = i;
+							break;
+						}
 			return AllocTemps[index];
 		}
 
@@ -208,11 +211,11 @@ namespace TagTool.ShaderDecompiler
 					AllocBools[index] = index;
 				else
 					for (var i = 0; i < 16; i++)
-					if (!AllocBools.ContainsValue(i))
-					{
-						AllocBools[index] = i;
-						break;
-					}
+						if (!AllocBools.ContainsValue(i))
+						{
+							AllocBools[index] = i;
+							break;
+						}
 			return AllocBools[index];
 		}
 
@@ -224,11 +227,11 @@ namespace TagTool.ShaderDecompiler
 					AllocInts[index] = index;
 				else
 					for (var i = 0; i < 16; i++)
-					if (!AllocInts.ContainsValue(i))
-					{
-						AllocInts[index] = i;
-						break;
-					}
+						if (!AllocInts.ContainsValue(i))
+						{
+							AllocInts[index] = i;
+							break;
+						}
 			return AllocInts[index];
 		}
 	}
