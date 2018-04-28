@@ -35,6 +35,11 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
+		/// <summary>
+		/// Generates a shader from shader args. ex: 0_1_0_0_0_2_3_0
+		/// </summary>
+		/// <param name="args"> 0, 1, 0, 0, 0, 2, 3, 0 </param>
+		/// <returns></returns>
         private ShaderGeneratorResult shader_template_gen(List<string> args)
         {
             int arg_pos = 0;
@@ -42,6 +47,7 @@ namespace TagTool.Commands.Shaders
             ShaderTemplateShaderGenerator generator = null;
             try
             {
+				// gets enum values for each shader arg (args are the numbers in the tagname)
                 var albedo = (ShaderTemplateShaderGenerator.Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
                 var bump_mapping = (ShaderTemplateShaderGenerator.Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
                 var alpha_test = (ShaderTemplateShaderGenerator.Alpha_Test)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
@@ -55,6 +61,7 @@ namespace TagTool.Commands.Shaders
                 var distortion = (ShaderTemplateShaderGenerator.Distortion)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
                 var soft_fade = (ShaderTemplateShaderGenerator.Soft_Fade)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
 
+				// constructs a generator using the enum values that were gotten above.
                 generator = new ShaderTemplateShaderGenerator(
                     CacheContext,
                     albedo,
@@ -76,6 +83,7 @@ namespace TagTool.Commands.Shaders
                 Console.WriteLine("Invalid arguments");
             }
 
+			// generates HLSL and a List<Parameters> using the generator
             return generator?.Generate();
         }
 
@@ -102,15 +110,24 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
             
+			// runs the appropriate shader-generator for the template type.
             ShaderGeneratorResult shader_gen_result;
             switch(type)
             {
-                case "shader_template":
-                    shader_gen_result = shader_template_gen(args.Skip(2).ToList());
+				case "shader_templates":
+					shader_gen_result = shader_template_gen(args.Skip(2).ToList());
                     break;
-                //case "decals_template":
-                //    break;
-                default:
+				case "beam_templates":
+				case "contrail_templates":
+				case "cortana_templates":
+				case "decal_templates":
+				case "foliage_templates":
+				case "halogram_templates":
+				case "light_volume_templates":
+				case "particle_templates":
+				case "terrain_templates":
+				case "water_templates":
+				default:
                     Console.WriteLine($"{type} is not implemented");
                     return false;
             }
