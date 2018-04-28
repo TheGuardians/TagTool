@@ -382,7 +382,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					function =
 						"float4 logc_func(float4 src1) {\n" +
 						"	ps = log(src1.x) / log(2);  \n" +
-						"	ps = ps == -INFINITY ? -MAX_FLOAT : ps;" +
+						"	ps = ps == -INFINITY() ? -MAX_FLOAT() : ps;" +
 						"}";
 					main +=
 						$"{dest}logc_func({src1});";
@@ -445,8 +445,8 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.muls_prev2:
 					main +=
-						"ps = dest = ps == -MAX_FLOAT || isinf(ps) || isnan(ps) || isnan(src0.y) || " +
-						"src0.y <= 0.0 ? -MAX_FLOAT : src0.x * ps;";
+						"ps = dest = ps == -MAX_FLOAT() || isinf(ps) || isNaN()(ps) || isNaN()(src0.y) || " +
+						"src0.y <= 0.0 ? -MAX_FLOAT() : src0.x * ps;";
 					break;
 				case ScalarOpcode.rcp:
 					function =
@@ -459,26 +459,26 @@ namespace TagTool.ShaderDecompiler.Translations
 				case ScalarOpcode.rcpc:
 					main +=
 						$"{dest}1.0f / src0.x;				\n" +
-						"if (dest == -INFINITY)				\n" +
+						"if (dest == -INFINITY())				\n" +
 						"{									\n" +
-						"	dest = -MAX_FLOAT;				\n" +
+						"	dest = -MAX_FLOAT();				\n" +
 						"}									\n" +
-						"else if (dest == INFINITY)			\n" +
+						"else if (dest == INFINITY())			\n" +
 						"{									\n" +
-						"	dest = MAX_FLOAT;				\n" +
+						"	dest = MAX_FLOAT();				\n" +
 						"}									\n" +
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rcpf:
 					main +=
 						$"{dest}1.0f / src0.x;				\n" +
-						"if (dest == -INFINITY)				\n" +
+						"if (dest == -INFINITY())				\n" +
 						"{									\n" +
-						"	dest = -ZERO;					\n" +
+						"	dest = -ZERO();					\n" +
 						"}									\n" +
-						"else if (dest == INFINITY)			\n" +
+						"else if (dest == INFINITY())			\n" +
 						"{									\n" +
-						"	dest = ZERO;					\n" +
+						"	dest = ZERO();					\n" +
 						"}									\n" +
 						"ps = dest;";
 					break;
@@ -493,26 +493,26 @@ namespace TagTool.ShaderDecompiler.Translations
 				case ScalarOpcode.rsqc:
 					main +=
 						$"{dest}1.0f / sqrt ( src0.x );			\n" +
-						"if (dest == -INFINITY)			\n" +
+						"if (dest == -INFINITY())			\n" +
 						"{										\n" +
-						"	dest = -MAX_FLOAT;			\n" +
+						"	dest = -MAX_FLOAT();			\n" +
 						"}										\n" +
-						"else if (dest == INFINITY)		\n" +
+						"else if (dest == INFINITY())		\n" +
 						"{										\n" +
-						"	dest = MAX_FLOAT;			\n" +
+						"	dest = MAX_FLOAT();			\n" +
 						"}										\n" +
 						"ps = dest;";
 					break;
 				case ScalarOpcode.rsqf:
 					main +=
 						$"{dest}1.0f / sqrt ( src0.x );			\n" +
-						"if (dest == -INFINITY)					\n" +
+						"if (dest == -INFINITY())					\n" +
 						"{										\n" +
-						"	dest = -ZERO;						\n" +
+						"	dest = -ZERO();						\n" +
 						"}										\n" +
-						"else if (dest == +INFINITY)			\n" +
+						"else if (dest == +INFINITY())			\n" +
 						"{										\n" +
-						"	dest = +ZERO;						\n" +
+						"	dest = +ZERO();						\n" +
 						"}										\n" +
 						"ps = dest;";
 					break;
@@ -522,7 +522,7 @@ namespace TagTool.ShaderDecompiler.Translations
 					break;
 				case ScalarOpcode.setpclr:
 					main +=
-						"ps = dest = +MAX_FLOAT; \n" +
+						"ps = dest = +MAX_FLOAT(); \n" +
 						"p0 = false; ";
 					break;
 				case ScalarOpcode.setpeq:

@@ -6,6 +6,29 @@ using System.Threading.Tasks;
 
 namespace TagTool.ShaderDecompiler.UcodeDisassembler
 {
+	public enum DestType
+	{
+		// Result is not stored.
+		NONE,
+		// Result is stored to a temporary register indexed by storage_index [0-31].
+		r,
+		// Result is stored into a vertex shader interpolant export [0-15].
+		o,
+		// Result is stored to the position export.
+		POSITION,
+		// Result is stored to the point size export.
+		PSIZE,
+		// Result is stored as memexport destination address.
+		// [physical >> 2, ??, ??, ??]
+		eA,
+		// Result is stored to memexport destination data.
+		eM,
+		// Result is stored to a color target export indexed by storage_index [0-3].
+		COLOR,
+		// Result is stored to the depth export.
+		DEPTH,
+	}
+
 	public enum Swizzle
 	{
 		xyzw = 0x00,

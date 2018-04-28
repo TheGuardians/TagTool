@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using static TagTool.ShaderDecompiler.Decompiler;
 
 /* WARNING: DO NOT TOUCH THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING, AND ALSO MAKE THE APPROPRIATE
  CHANGES TO THE MATCHING FILE IN THE `TagToolUtilities` PROJECT */
@@ -64,6 +65,62 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		public bool Is_scalar_dest_relative { get => scalar_dest_rel != 0; }
 		public bool Scalar_clamp { get => scalar_clamp != 0; }
 
+		// Gets the destination type for Pixel shaders.
+		public string GetDest(bool isVector)
+		{
+			var destNum = isVector ? vector_dest : scalar_dest;
+
+			var destType = DestType.r;
+			string dest = $"r[{vector_dest}]";
+			if (Is_export)
+			{
+				switch (destNum)
+				{
+					case 63:  // ? masked?
+						destNum = 0;
+						destType = DestType.COLOR;
+						dest = $"Out.COLOR{destNum}";
+						break;
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+						destType = DestType.COLOR;
+						dest = $"Out.COLOR{destNum}";
+						break;
+					case 32:
+						destType = DestType.eA;
+						dest = $"eA";
+						break;
+					case 33:
+					case 34:
+					case 35:
+					case 36:
+					case 37:
+						destNum -= 33;
+						destType = DestType.eM;
+						dest = $"eM[{destNum}]";
+						break;
+					case 61:
+						destType = DestType.DEPTH;
+						dest = $"Out.DEPTH";
+						break;
+					default:
+						destType = DestType.NONE;
+						dest = $"Out.NONE{destNum}";
+						break;
+				}
+
+				// add to outputs if not already there.
+				if ((destType == DestType.COLOR || destType == DestType.DEPTH || destType == DestType.NONE) && 
+					!Outputs.Contains($"{destType}{destNum}"))
+				{
+					Outputs += $"	float4 {destType}{destNum} : {destType}{destNum};\n";
+				}
+			}
+			return dest;
+		}
+
 		// Gets the string representation of the Vector portion of the ALU instruction.
 		public string GetVectorAsmString()
 		{
@@ -83,24 +140,19 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 		// gets the string representation of the full dest operand
 		public string GetVectorDest_Operand()
 		{
-			var rtype = "r"; // TODO: find the proper way to check dest register type
-			var index = vector_dest;
 			var mask = vector_write_mask.ToString().Replace(",", "").Replace(" ", "");
 			if (mask == "_")
 				return "";
 
-			return $"{rtype}[{index}].{mask} = ";
+			return $"{GetDest(true)}.{mask} = ";
 		}
 		public string GetScalarDest_Operand()
 		{
-			var rtype = "r"; // TODO: find the proper way to check dest register type
-			var index = scalar_dest;
 			var mask = scalar_write_mask.ToString().Replace(",", "").Replace(" ", "");
-
 			if (mask == "_")
 				return "";
 
-			return $"{rtype}[{index}].{mask} = ";
+			return $"{GetDest(false)}.{mask} = ";
 		}
 
 		// gets the string representation of the full src0 operand
@@ -109,11 +161,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			var oprnd = "";
 			if (src1_reg_negate != 0)
 				oprnd += '-';
+
 			if (src1_sel != 0)
-				oprnd += 'r';
+				oprnd += $"r[{GetTempIndex((int)src1_reg)}]";
 			else
-				oprnd += 'c';
-			oprnd += $"[{src1_reg}]";
+				oprnd += $"c[{GetConstIndex((int)src1_reg)}]";
+
 			return $"{oprnd}.{src1_swiz}";
 		}
 
@@ -123,11 +176,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			var oprnd = "";
 			if (src2_reg_negate != 0)
 				oprnd += '-';
+
 			if (src2_sel != 0)
-				oprnd += 'r';
+				oprnd += $"r[{GetTempIndex((int)src2_reg)}]";
 			else
-				oprnd += 'c';
-			oprnd += $"[{src2_reg}]";
+				oprnd += $"c[{GetConstIndex((int)src2_reg)}]";
+
 			return $"{oprnd}.{src2_swiz}";
 		}
 
@@ -137,11 +191,12 @@ namespace TagTool.ShaderDecompiler.UcodeDisassembler
 			var oprnd = "";
 			if (src3_reg_negate != 0)
 				oprnd += '-';
+
 			if (src3_sel != 0)
-				oprnd += 'r';
+				oprnd += $"r[{GetTempIndex((int)src3_reg)}]";
 			else
-				oprnd += 'c';
-			oprnd += $"[{src3_reg}]";
+				oprnd += $"c[{GetConstIndex((int)src3_reg)}]";
+
 			return $"{oprnd}.{src3_swiz}";
 		}
 	}
