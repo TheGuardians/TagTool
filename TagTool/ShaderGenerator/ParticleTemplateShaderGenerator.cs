@@ -12,7 +12,7 @@ namespace TagTool.ShaderGenerator
 {
     public class ParticleTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/particle_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/particle_templates/particle_template.hlsl";
 
 		public ParticleTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
