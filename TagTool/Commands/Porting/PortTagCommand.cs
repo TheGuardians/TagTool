@@ -395,34 +395,36 @@ namespace TagTool.Commands.Porting
 
             var blamContext = new CacheSerializationContext(BlamCache, blamTag);
             var blamDefinition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
-            
+
             //
             // Perform pre-conversion fixups to the Blam tag definition
             //
 
-            if (blamDefinition is ScenarioStructureBsp bsp)
+            switch (blamDefinition)
             {
-                foreach (var instance in bsp.InstancedGeometryInstances)
-                    instance.Name = StringId.Invalid;
-            }
+                case ChudGlobalsDefinition chgd:
+                    chgd.HudShaders.Clear();
+                    for (int hudGlobalsIndex = 0; hudGlobalsIndex < chgd.HudGlobals.Count; hudGlobalsIndex++)
+                        chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
+                    break;
 
-            if (blamDefinition is Scenario scenario && NoForgePalette)
-            {
-                scenario.SandboxEquipment.Clear();
-                scenario.SandboxGoalObjects.Clear();
-                scenario.SandboxScenery.Clear();
-                scenario.SandboxSpawning.Clear();
-                scenario.SandboxTeleporters.Clear();
-                scenario.SandboxVehicles.Clear();
-                scenario.SandboxWeapons.Clear();
-            }
+                case Scenario scenario:
+                    if (NoForgePalette)
+                    {
+                        scenario.SandboxEquipment.Clear();
+                        scenario.SandboxGoalObjects.Clear();
+                        scenario.SandboxScenery.Clear();
+                        scenario.SandboxSpawning.Clear();
+                        scenario.SandboxTeleporters.Clear();
+                        scenario.SandboxVehicles.Clear();
+                        scenario.SandboxWeapons.Clear();
+                    }
+                    break;
 
-            if (blamDefinition is ChudGlobalsDefinition chgd)
-            {
-                chgd.HudShaders.Clear();
-
-                for (int hudGlobalsIndex = 0; hudGlobalsIndex < chgd.HudGlobals.Count; hudGlobalsIndex++)
-                    chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
+                case ScenarioStructureBsp bsp:
+                    foreach (var instance in bsp.InstancedGeometryInstances)
+                        instance.Name = StringId.Invalid;
+                    break;
             }
             
             //
@@ -435,151 +437,177 @@ namespace TagTool.Commands.Porting
             // Perform post-conversion fixups to Blam data
             //
 
-            if (blamDefinition is Bitmap bitm)
-                blamDefinition = ConvertBitmap(bitm);
-            
-            if (blamDefinition is Character character)
-                blamDefinition = ConvertCharacter(character);
-
-            if (blamDefinition is ChudDefinition chdt)
-                blamDefinition = ConvertChudDefinition(chdt);
-
-            if (blamDefinition is ChudGlobalsDefinition chudGlobals)
-                blamDefinition = ConvertChudGlobalsDefinition(cacheStream, chudGlobals, blamTag, edTag);
-
-            if (blamDefinition is Cinematic cine)
-                blamDefinition = ConvertCinematic(cine);
-
-            if (blamDefinition is CinematicScene cisc)
-                blamDefinition = ConvertCinematicScene(cisc);
-
-            if (blamDefinition is CortanaEffectDefinition crte)
-                blamDefinition = ConvertCortanaEffect(crte);
-
-            if (blamDefinition is Effect effect)
+            switch (blamDefinition)
             {
-                if (BlamCache.Version == CacheVersion.Halo3Retail)
-                {
+                case Bitmap bitm:
+                    blamDefinition = ConvertBitmap(bitm);
+                    break;
+
+                case Character character:
+                    blamDefinition = ConvertCharacter(character);
+                    break;
+
+                case ChudDefinition chdt:
+                    blamDefinition = ConvertChudDefinition(chdt);
+                    break;
+
+                case ChudGlobalsDefinition chudGlobals:
+                    blamDefinition = ConvertChudGlobalsDefinition(cacheStream, chudGlobals, blamTag, edTag);
+                    break;
+
+                case Cinematic cine:
+                    blamDefinition = ConvertCinematic(cine);
+                    break;
+
+                case CinematicScene cisc:
+                    blamDefinition = ConvertCinematicScene(cisc);
+                    break;
+
+                case CortanaEffectDefinition crte:
+                    blamDefinition = ConvertCortanaEffect(crte);
+                    break;
+
+                case Effect effect:
+                    if (BlamCache.Version != CacheVersion.Halo3Retail)
+                        break;
                     foreach (var even in effect.Events)
                         foreach (var particleSystem in even.ParticleSystems)
                             particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
-                }
-            }
+                    break;
 
-            if (blamDefinition is Particle particle)
-            {
-                if (BlamCache.Version == CacheVersion.Halo3Retail)
-                {
+                case Particle particle:
+                    if (BlamCache.Version != CacheVersion.Halo3Retail)
+                        break;
                     // Shift all flags above 2 by 1.
                     particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
-                }
-            }
+                    break;
 
-            if (blamDefinition is GlobalPixelShader glps && UseShaderTest)
-                blamDefinition = ConvertGlobalPixelShader(glps);
+                case GlobalPixelShader glps:
+                    if (UseShaderTest)
+                        blamDefinition = ConvertGlobalPixelShader(glps);
+                    break;
 
-            if (blamDefinition is GlobalVertexShader glvs && UseShaderTest)
-                blamDefinition = ConvertGlobalVertexShader(glvs);
+                case GlobalVertexShader glvs:
+                    if (UseShaderTest)
+                        blamDefinition = ConvertGlobalVertexShader(glvs);
+                    break;
 
-            if (blamDefinition is ModelAnimationGraph jmad)
-                blamDefinition = ConvertModelAnimationGraph(cacheStream, jmad);
+                case ModelAnimationGraph jmad:
+                    blamDefinition = ConvertModelAnimationGraph(cacheStream, jmad);
+                    break;
 
-            if (blamDefinition is ScenarioLightmapBspData Lbsp)
-                blamDefinition = ConvertScenarionLightmapBspData(Lbsp);
+                case ScenarioLightmapBspData Lbsp:
+                    blamDefinition = ConvertScenarionLightmapBspData(Lbsp);
+                    break;
 
-            if (blamDefinition is LensFlare lens)
-                blamDefinition = ConvertLensFlare(lens);
+                case LensFlare lens:
+                    blamDefinition = ConvertLensFlare(lens);
+                    break;
 
-            if (blamDefinition is SoundLooping lsnd)
-                blamDefinition = ConvertSoundLooping(lsnd);
+                case SoundLooping lsnd:
+                    blamDefinition = ConvertSoundLooping(lsnd);
+                    break;
 
-            if (blamDefinition is Globals matg)
-                blamDefinition = ConvertGlobals(matg, cacheStream);
+                case Globals matg:
+                    blamDefinition = ConvertGlobals(matg, cacheStream);
+                    break;
 
-            if (blamDefinition is RenderModel mode)
-            {
-                // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-                if (mode.Geometry.Resource.Page.Index == -1)
-                    blamDefinition = null;
-            }
+                case RenderModel mode:
+                    // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
+                    if (mode.Geometry.Resource.Page.Index == -1)
+                        blamDefinition = null;
+                    break;
 
-            if (blamDefinition is PhysicsModel phmo)
-                blamDefinition = ConvertPhysicsModel(phmo);
+                case PhysicsModel phmo:
+                    blamDefinition = ConvertPhysicsModel(phmo);
+                    break;
 
-            if (blamDefinition is PixelShader pixl && UseShaderTest)
-                blamDefinition = ConvertPixelShader(pixl);
+                case PixelShader pixl:
+                    if (UseShaderTest)
+                        blamDefinition = ConvertPixelShader(pixl);
+                    break;
 
-            if (blamDefinition is VertexShader vtsh && UseShaderTest)
-                blamDefinition = ConvertVertexShader(vtsh);
+                case VertexShader vtsh:
+                    if (UseShaderTest)
+                        blamDefinition = ConvertVertexShader(vtsh);
+                    break;
 
-            if (blamDefinition is Projectile proj)
-                blamDefinition = ConvertProjectile(proj);
+                case Projectile proj:
+                    blamDefinition = ConvertProjectile(proj);
+                    break;
 
-            if (blamDefinition is RasterizerGlobals rasg)
-                blamDefinition = ConvertRasterizerGlobals(rasg);
+                case RasterizerGlobals rasg:
+                    blamDefinition = ConvertRasterizerGlobals(rasg);
+                    break;
 
-            if (blamDefinition is ScenarioStructureBsp sbsp)
-                blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag);
+                case ScenarioStructureBsp sbsp:
+                    blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag);
+                    break;
 
-            if (blamDefinition is Scenario scnr)
-                blamDefinition = ConvertScenario(scnr, blamTag.Filename);
+                case Scenario scnr:
+                    blamDefinition = ConvertScenario(scnr, blamTag.Filename);
+                    break;
 
-            if (blamDefinition is StructureDesign sddt)
-                blamDefinition = ConvertStructureDesign(sddt);
+                case StructureDesign sddt:
+                    blamDefinition = ConvertStructureDesign(sddt);
+                    break;
 
-            if (blamDefinition is AreaScreenEffect sefc)
-            {
-                if (blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui")
-                {
+                case AreaScreenEffect sefc:
+                    if (blamTag.Filename != "levels\\ui\\mainmenu\\sky\\ui")
+                        break;
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
                         screenEffect.MaximumDistance = float.MaxValue;
                         screenEffect.Duration = float.MaxValue;
                     }
-                }
+                    break;
+
+                case SkyAtmParameters skya:
+                    // Decrease secondary fog intensity (it's quite sickening in ms23)
+                    foreach (var atmosphere in skya.AtmosphereProperties)
+                        atmosphere.FogIntensity2 /= 36.0f;
+                    break;
+
+                case ScenarioLightmap sLdT:
+                    blamDefinition = ConvertScenarioLightmap(cacheStream, blamTag.Filename, sLdT);
+                    break;
+
+                case Sound sound:
+                    blamDefinition = ConvertSound(sound);
+                    break;
+
+                case SoundMix snmx:
+                    blamDefinition = ConvertSoundMix(snmx);
+                    break;
+
+                case Style style:
+                    blamDefinition = ConvertStyle(style);
+                    break;
+
+                case Dialogue udlg:
+                    blamDefinition = ConvertDialogue(cacheStream, udlg);
+                    break;
+
+                case MultilingualUnicodeStringList unic:
+                    blamDefinition = ConvertMultilingualUnicodeStringList(unic);
+                    break;
+
+                case Weapon weapon:
+                    foreach (var attach in weapon.Attachments)
+                        if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
+                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                    break;
             }
 
-            if (blamDefinition is SkyAtmParameters skya)
-            {
-                // Decrease secondary fog intensity (it's quite sickening in ms23)
-                foreach (var atmosphere in skya.AtmosphereProperties)
-                    atmosphere.FogIntensity2 /= 36.0f;
-            }
-
-            if (blamDefinition is ScenarioLightmap sLdT)
-                blamDefinition = ConvertScenarioLightmap(cacheStream, blamTag.Filename, sLdT);
-
-            if (blamDefinition is Sound sound)
-                blamDefinition = ConvertSound(sound);
-
-            if (blamDefinition is SoundMix snmx)
-                blamDefinition = ConvertSoundMix(snmx);
-
-            if (blamDefinition is Style style)
-                blamDefinition = ConvertStyle(style);
-
-            if (blamDefinition is Dialogue udlg)
-                blamDefinition = ConvertDialogue(cacheStream, udlg);
-
-            if (blamDefinition is MultilingualUnicodeStringList unic)
-                blamDefinition = ConvertMultilingualUnicodeStringList(unic);
-
-            if (blamDefinition is Weapon weapon)
-            {
-                foreach (var attach in weapon.Attachments)
-                    if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
-                        attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
-            }
+            //
+            // Finalize and serialize the new ElDorado tag definition
+            //
 
             if (groupTag == "foot")
             {
                 IsReplacing = wasReplacing;
                 IsNew = wasNew;
             }
-
-            //
-            // Serialize new ElDorado tag definition
-            //
 
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
