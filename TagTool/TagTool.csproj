@@ -762,6 +762,9 @@
     <Content Include="ShaderGenerator\shader_code\halogram_template_methods\self_illumination.hlsl" />
     <Content Include="ShaderGenerator\shader_code\halogram_template_methods\warp.hlsl" />
     <Content Include="ShaderGenerator\shader_code\light_volume_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\fog.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

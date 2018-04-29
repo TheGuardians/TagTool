@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
 	public class ContrailTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/beam_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/contrail_template.hlsl";
 
 		public ContrailTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),

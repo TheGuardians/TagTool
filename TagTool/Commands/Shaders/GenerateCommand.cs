@@ -92,7 +92,8 @@ namespace TagTool.Commands.Shaders
 					break;
                 case "light_volume_templates":
                 case "light_volume_template":
-					goto default;
+					shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
 				case "particle_templates":
                 case "particle_template":
 					goto default;

@@ -12,7 +12,7 @@ namespace TagTool.ShaderGenerator
 {
     public class HalogramTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/beam_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/halogram_template.hlsl";
 
 		public HalogramTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
