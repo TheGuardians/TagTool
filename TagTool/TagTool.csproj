@@ -750,6 +750,9 @@
     <Content Include="ShaderGenerator\shader_code\contrail_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\cortana_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\foliage_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\foliage_template_methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\foliage_template_methods\alpha_test.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\foliage_template_methods\material_model.hlsl" />
     <Content Include="ShaderGenerator\shader_code\halogram_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\light_volume_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template.hlsl" />

@@ -76,7 +76,7 @@ namespace TagTool.Commands.Shaders
 					break;
                 case "cortana_templates":
                 case "cortana_template":
-					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "decal_templates":
                 case "decal_template":
@@ -84,7 +84,8 @@ namespace TagTool.Commands.Shaders
                     break;
                 case "foliage_templates":
                 case "foliage_template":
-					goto default;
+					shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
                 case "halogram_templates":
                 case "halogram_template":
 					goto default;
