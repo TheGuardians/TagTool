@@ -48,7 +48,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 
 	
 #ifndef flag_bump_mapping_leave
-	output.Normal = Blend_Mode(float4(NormalExport(normal), alpha));
+	output.Normal = Blend_Mode(float4(normal_export(normal), alpha));
 	output.Unknown = unknown.xxxx;
 #endif
 	return output;

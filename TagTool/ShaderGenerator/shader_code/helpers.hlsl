@@ -4,7 +4,7 @@
 #include "parameters.hlsl"
 #include "editor_only.hlsl"
 
-float3 NormalExport(float3 normal)
+float3 normal_export(float3 normal)
 {
     return normal * 0.5 + 0.5;
 }
@@ -37,7 +37,7 @@ float3 normal_x2reconstruct_sample(sampler map, float2 texture_coordinate)
 	return reconstruct_x2_normal(normal_x2_sample(map, texture_coordinate));
 }
 
-float3 TangentSpaceToModelSpace(
+float3 normal_transform(
     float3 tangentspace_x,
     float3 tangentspace_y,
     float3 tangentspace_z,
@@ -51,14 +51,14 @@ float3 TangentSpaceToModelSpace(
     return result;
 }
 
-float2 ApplyXForm(float2 texcoord, float4 xform)
+float2 apply_xform(float2 texcoord, float4 xform)
 {
     return texcoord * xform.xy + xform.zw;
 }
 
 #if defined(shader_template) || defined(terrain_template)
 
-float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
+float3 bungie_color_processing(float3 color)
 {
 	float4 r0 = float4(color, 0);
 	float4 r1 = float4(0, 0, 0, 0);

@@ -4,8 +4,8 @@
 
 float4 albedo_default(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -19,9 +19,9 @@ float4 albedo_default(float2 texcoord)
 
 float4 albedo_detail_blend(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 detail_map2_texcoord = ApplyXForm(texcoord, detail_map2_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 detail_map2_texcoord = apply_xform(texcoord, detail_map2_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -47,9 +47,9 @@ float4 albedo_constant_color(float2 texture_coordinate)
 
 float4 albedo_two_change_color(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 change_color_map_texcoord = ApplyXForm(texcoord, change_color_map_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 change_color_map_texcoord = apply_xform(texcoord, change_color_map_xform);
 
 	float4 base_map_sample = tex2D(base_map, detail_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -74,9 +74,9 @@ float4 albedo_two_change_color(float2 texcoord)
 
 float4 albedo_four_change_color(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 change_color_map_texcoord = ApplyXForm(texcoord, change_color_map_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 change_color_map_texcoord = apply_xform(texcoord, change_color_map_xform);
 
 	float4 base_map_sample = tex2D(base_map, detail_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -103,10 +103,10 @@ float4 albedo_four_change_color(float2 texcoord)
 
 float4 albedo_three_detail_blend(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 detail_map2_texcoord = ApplyXForm(texcoord, detail_map2_xform);
-	float2 detail_map3_texcoord = ApplyXForm(texcoord, detail_map3_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 detail_map2_texcoord = apply_xform(texcoord, detail_map2_xform);
+	float2 detail_map3_texcoord = apply_xform(texcoord, detail_map3_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -134,10 +134,10 @@ float4 albedo_three_detail_blend(float2 texcoord)
 
 float4 albedo_two_detail_overlay(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 detail_map2_texcoord = ApplyXForm(texcoord, detail_map2_xform);
-	float2 detail_map_overlay_texcoord = ApplyXForm(texcoord, detail_map_overlay_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 detail_map2_texcoord = apply_xform(texcoord, detail_map2_xform);
+	float2 detail_map_overlay_texcoord = apply_xform(texcoord, detail_map_overlay_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -159,9 +159,9 @@ float4 albedo_two_detail_overlay(float2 texcoord)
 
 float4 albedo_two_detail(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 detail_map2_texcoord = ApplyXForm(texcoord, detail_map2_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 detail_map2_texcoord = apply_xform(texcoord, detail_map2_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -178,9 +178,9 @@ float4 albedo_two_detail(float2 texcoord)
 
 float4 albedo_color_mask(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 color_mask_map_texcoord = ApplyXForm(texcoord, color_mask_map_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 color_mask_map_texcoord = apply_xform(texcoord, color_mask_map_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
@@ -210,9 +210,9 @@ float4 albedo_color_mask(float2 texcoord)
 
 float4 albedo_two_detail_black_point(float2 texcoord)
 {
-	float2 base_map_texcoord = ApplyXForm(texcoord, base_map_xform);
-	float2 detail_map_texcoord = ApplyXForm(texcoord, detail_map_xform);
-	float2 detail_map2_texcoord = ApplyXForm(texcoord, detail_map2_xform);
+	float2 base_map_texcoord = apply_xform(texcoord, base_map_xform);
+	float2 detail_map_texcoord = apply_xform(texcoord, detail_map_xform);
+	float2 detail_map2_texcoord = apply_xform(texcoord, detail_map2_xform);
 
 	float4 base_map_sample = tex2D(base_map, base_map_texcoord);
 	float4 detail_map_sample = tex2D(detail_map, detail_map_texcoord);
