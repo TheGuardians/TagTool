@@ -748,6 +748,10 @@
     <Content Include="ShaderGenerator\shader_code\beam_template_methods\blend_mode.hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_template_methods\fog.hlsl" />
     <Content Include="ShaderGenerator\shader_code\contrail_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_template_methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_template_methods\black_point.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_template_methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_template_methods\fog.hlsl" />
     <Content Include="ShaderGenerator\shader_code\cortana_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\foliage_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\foliage_template_methods\albedo.hlsl" />
@@ -951,7 +955,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ShaderGenerator\shader_code\cortana_template_methods\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
