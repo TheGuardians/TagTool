@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
     public class TerrainTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/terrain_template.hlsl";
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/terrain_templates/terrain_template.hlsl";
 
         public TerrainTemplateShaderGenerator( GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
                 (Blending)(args.Length == arg_pos ? 0 : args[arg_pos++]),
