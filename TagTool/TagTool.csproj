@@ -754,6 +754,13 @@
     <Content Include="ShaderGenerator\shader_code\foliage_template_methods\alpha_test.hlsl" />
     <Content Include="ShaderGenerator\shader_code\foliage_template_methods\material_model.hlsl" />
     <Content Include="ShaderGenerator\shader_code\halogram_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\edge_fade.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\misc.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\overlay.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\self_illumination.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\halogram_template_methods\warp.hlsl" />
     <Content Include="ShaderGenerator\shader_code\light_volume_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
