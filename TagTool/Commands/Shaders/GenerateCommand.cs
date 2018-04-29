@@ -57,26 +57,30 @@ namespace TagTool.Commands.Shaders
                 Console.WriteLine("Invalid index and type combination");
                 return false;
             }
-            
+
+			int[] shader_args;
+			try { shader_args = Array.ConvertAll(args.ToArray(), Int32.Parse); }
+			catch { Console.WriteLine("Invalid shader arguments!"); return false; }
+
 			// runs the appropriate shader-generator for the template type.
-            ShaderGeneratorResult shader_gen_result;
+			ShaderGeneratorResult shader_gen_result;
             switch(type)
             {
                 case "beam_templates":
                 case "beam_template":
-					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, args.Skip(2).ToList())?.Generate();
+					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
                 case "shader_templates":
                 case "shader_template":
-					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, args.Skip(2).ToList())?.Generate();
+					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
                 case "decal_templates":
                 case "decal_template":
-					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, args.Skip(2).ToList())?.Generate();
+					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
                 case "terrain_templates":
                 case "terrain_template":
-					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, args.Skip(2).ToList())?.Generate();
+					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
 				case "contrail_templates":
                 case "contrail_template":

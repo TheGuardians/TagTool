@@ -16,19 +16,19 @@ namespace TagTool.ShaderGenerator
     {
         static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_template.hlsl";
 
-		public ShaderTemplateShaderGenerator(GameCacheContext cacheContext, List<string> args, int arg_pos = 0) : base(
-				(Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Alpha_Test)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Specular_Mask)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Material_Model)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Environment_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Self_Illumination)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Parallax)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Misc)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Distortion)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Soft_Fade)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
+		public ShaderTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
+				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Bump_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Alpha_Test)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Specular_Mask)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_Model)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Environment_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Self_Illumination)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Parallax)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Misc)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Distortion)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Soft_Fade)(args.Length == arg_pos ? 0 : args[arg_pos++]))
 		{
 			this.CacheContext = cacheContext;
 		}

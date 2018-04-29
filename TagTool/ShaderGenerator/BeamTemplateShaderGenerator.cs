@@ -15,11 +15,11 @@ namespace TagTool.ShaderGenerator
     {
 		static string ShaderFile { get; } = "ShaderGenerator/shader_code/beam_template.hlsl";
 
-		public BeamTemplateShaderGenerator(GameCacheContext cacheContext, List<string> args, int arg_pos = 0) : base(
-				(Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Black_Point)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-				(Fog)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
+		public BeamTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
+				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Black_Point)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Fog)(args.Length == arg_pos ? 0 : args[arg_pos++]))
 		{
 			this.CacheContext = cacheContext;
 		}

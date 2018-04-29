@@ -15,13 +15,13 @@ namespace TagTool.ShaderGenerator
     {
         static string ShaderFile { get; } = "ShaderGenerator/shader_code/terrain_template.hlsl";
 
-        public TerrainTemplateShaderGenerator( GameCacheContext cacheContext, List<string> args, int arg_pos = 0) : base(
-                (Blending)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-                (Environment_Map)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-                (Material_0)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-                (Material_1)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-                (Material_2)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-                (Material_3)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
+        public TerrainTemplateShaderGenerator( GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
+                (Blending)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Environment_Map)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_0)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_1)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_2)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_3)(args.Length == arg_pos ? 0 : args[arg_pos++]))
         {
             this.CacheContext = cacheContext;
         }

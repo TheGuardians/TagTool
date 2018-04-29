@@ -15,13 +15,13 @@ namespace TagTool.ShaderGenerator
     {
         static string ShaderFile { get; } = "ShaderGenerator/shader_code/decals_template.hlsl";
 
-		public DecalTemplateShaderGenerator(GameCacheContext cacheContext, List<string> args, int arg_pos = 0) : base(
-		 (Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-		 (Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-		 (Render_Pass)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-		 (Specular)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-		 (Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
-		 (Tinting)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
+		public DecalTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
+		 (Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Render_Pass)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Specular)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Bump_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Tinting)(args.Length == arg_pos ? 0 : args[arg_pos++]))
 		{
 			this.CacheContext = cacheContext;
 		}
