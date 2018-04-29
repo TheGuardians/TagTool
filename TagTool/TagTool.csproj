@@ -767,10 +767,10 @@
     <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\overlay.hlsl" />
     <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\self_illumination.hlsl" />
     <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\warp.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\fog.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\light_volume_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\fog.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template_methods\albedo.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template_methods\black_point.hlsl" />
@@ -964,6 +964,7 @@
     <Folder Include="ShaderGenerator\shader_code\decal_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\foliage_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\halogram_templates\decompiled\" />
+    <Folder Include="ShaderGenerator\shader_code\light_volume_templates\decompiled\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
