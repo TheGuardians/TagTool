@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
     public class DecalTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decals_template.hlsl";
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decal_template.hlsl";
 
 		public DecalTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
 		 (Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),

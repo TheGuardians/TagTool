@@ -742,10 +742,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ShaderGenerator\shader_code\beam_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\decals_template.hlsl">
+    <Content Include="ShaderGenerator\shader_code\decal_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\decal_template_methods\blend_mode.hlsl">
