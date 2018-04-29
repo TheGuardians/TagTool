@@ -12,7 +12,7 @@ namespace TagTool.ShaderGenerator
 {
     public class FoliageTemplateShaderGenerator : TemplateShaderGenerator
     {
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/foliage_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/foliage_templates/foliage_template.hlsl";
 
 		public FoliageTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
