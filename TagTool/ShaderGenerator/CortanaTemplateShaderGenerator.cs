@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
 	public class CortanaTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/cortana_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/cortana_templates/cortana_template.hlsl";
 
 		public CortanaTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				)
