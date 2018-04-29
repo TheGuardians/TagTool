@@ -1,6 +1,6 @@
 ﻿#define cortana_template
 #define _debug_color float4(85, 255, 85, 255) / 255;
-#include "parameters.hlsl"
+#include "../parameters.hlsl"
 
 struct VS_OUTPUT
 {

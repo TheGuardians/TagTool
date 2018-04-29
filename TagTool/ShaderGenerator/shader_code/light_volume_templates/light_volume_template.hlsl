@@ -1,6 +1,6 @@
 ﻿#define light_volume_template
 #define _debug_color float4(170, 0, 170, 255) / 255;
-#include "parameters.hlsl"
+#include "../parameters.hlsl"
 
 struct VS_OUTPUT
 {

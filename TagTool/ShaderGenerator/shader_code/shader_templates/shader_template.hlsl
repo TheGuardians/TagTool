@@ -1,7 +1,7 @@
 #define shader_template
 #define _debug_color float4(85, 255, 255, 255) / 255;
-#include "shader_template/template_default_defs.hlsl"
-#include "shader_template/template_includes.hlsl"
+#include "template_default_defs.hlsl"
+#include "template_includes.hlsl"
 #include "../parameters.hlsl"
 #include "../helpers.hlsl"
 

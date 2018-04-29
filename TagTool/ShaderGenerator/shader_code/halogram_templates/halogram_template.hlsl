@@ -1,6 +1,6 @@
 ﻿#define halogram_template
 #define _debug_color float4(170, 85, 0, 255) / 255;
-#include "parameters.hlsl"
+#include "../parameters.hlsl"
 
 struct VS_OUTPUT
 {

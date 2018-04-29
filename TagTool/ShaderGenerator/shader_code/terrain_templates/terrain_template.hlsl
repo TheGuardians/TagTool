@@ -1,7 +1,7 @@
 ﻿#define terrain_template
 #define _debug_color float4(0, 170, 170, 255) / 255;
-#include "terrain_template_methods/template_default_defs.hlsl"
-#include "terrain_template_methods/template_includes.hlsl"
+#include "template_default_defs.hlsl"
+#include "template_includes.hlsl"
 #include "../helpers.hlsl"
 
 struct VS_OUTPUT
