@@ -101,6 +101,7 @@ namespace TagTool.Commands.Porting
 
                     case "shadertest":
                         UseShaderTest = true;
+                        MatchShaders = false;
                         break;
 
                     case "noshaders":
@@ -529,7 +530,7 @@ namespace TagTool.Commands.Porting
 
                 case PixelShader pixl:
                     if (UseShaderTest)
-                        blamDefinition = ConvertPixelShader(pixl);
+                        blamDefinition = ConvertPixelShader(pixl, blamTag);
                     break;
 
                 case VertexShader vtsh:
