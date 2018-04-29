@@ -122,6 +122,41 @@ namespace TagTool.Commands.Shaders
             return generator?.Generate();
         }
 
+        private ShaderGeneratorResult terrain_template_gen(List<string> args)
+        {
+            int arg_pos = 0;
+
+            TerrainTemplateShaderGenerator generator = null;
+            try
+            {
+                var blending = (TerrainTemplateShaderGenerator.Blending)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var environment_map = (TerrainTemplateShaderGenerator.Environment_Map)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var material_0 = (TerrainTemplateShaderGenerator.Material_0)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var material_1 = (TerrainTemplateShaderGenerator.Material_1)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var material_2 = (TerrainTemplateShaderGenerator.Material_2)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+                var material_3 = (TerrainTemplateShaderGenerator.Material_3)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]);
+
+                // constructs a generator using the enum values that were gotten above.
+                generator = new TerrainTemplateShaderGenerator(
+                    CacheContext,
+                    blending,
+                    environment_map,
+                    material_0,
+                    material_1,
+                    material_2,
+                    material_3
+                );
+
+            }
+            catch
+            {
+                Console.WriteLine("Invalid arguments");
+            }
+
+            // generates HLSL and a List<Parameters> using the generator
+            return generator?.Generate();
+        }
+
         public override object Execute(List<string> args)
         {
             if (args.Count <= 0)
@@ -157,6 +192,10 @@ namespace TagTool.Commands.Shaders
                 case "decal_template":
                     shader_gen_result = decals_template_gen(args.Skip(2).ToList());
                     break;
+                case "terrain_templates":
+                case "terrain_template":
+                    shader_gen_result = terrain_template_gen(args.Skip(2).ToList());
+                    break;
                 case "beam_templates":
                 case "beam_template":
                 case "contrail_templates":
@@ -171,8 +210,6 @@ namespace TagTool.Commands.Shaders
                 case "light_volume_template":
                 case "particle_templates":
                 case "particle_template":
-                case "terrain_templates":
-                case "terrain_template":
                 case "water_templates":
                 case "water_template":
                 default:

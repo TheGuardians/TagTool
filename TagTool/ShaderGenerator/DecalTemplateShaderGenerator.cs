@@ -41,6 +41,7 @@ namespace TagTool.ShaderGenerator
             {typeof(Albedo), Albedo.DiffuseOnly },
             {typeof(Albedo), Albedo.Palettized_Plus_Alpha },
             {typeof(Albedo), Albedo.Diffuse_Plus_Alpha },
+            {typeof(Albedo), Albedo.Change_Color },
 
             {typeof(Bump_Mapping), Bump_Mapping.Leave },
             {typeof(Bump_Mapping), Bump_Mapping.Standard },
@@ -54,8 +55,11 @@ namespace TagTool.ShaderGenerator
             {typeof(Blend_Mode), Blend_Mode.Double_Multiply },
 
             {typeof(Render_Pass), Render_Pass.Pre_Lighting},
+
             {typeof(Tinting), Tinting.None },
             {typeof(Tinting), Tinting.Unmodulated },
+            {typeof(Tinting), Tinting.Fully_Modulated },
+
             {typeof(Specular), Specular.Leave },
             {typeof(Specular), Specular.Modulate },
         };
