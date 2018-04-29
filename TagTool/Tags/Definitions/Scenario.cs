@@ -1695,11 +1695,7 @@ namespace TagTool.Tags.Definitions
             
             public short ObjectiveIndex;
 
-            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short ObjectiveRoleIndex;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short InitialTaskIndex;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short EditorFolderIndex;

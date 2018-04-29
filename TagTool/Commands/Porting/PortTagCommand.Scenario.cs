@@ -174,6 +174,9 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            if (NoSquads)
+                scnr.Squads = new List<Scenario.Squad>();
+
             //
             // Add prematch camera position
             //
