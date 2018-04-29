@@ -14,6 +14,8 @@ using TagTool.Tags;
 using TagTool.Shaders;
 using System.Diagnostics;
 using System.Text;
+using TagTool.ShaderGenerator;
+using TagTool.ShaderGenerator.Types;
 
 namespace TagTool.Commands.Porting
 {
@@ -106,37 +108,108 @@ namespace TagTool.Commands.Porting
             return glvs;*/
         }
 
-        private PixelShader ConvertPixelShader(PixelShader pixl)
+        private PixelShader ConvertPixelShader(PixelShader pixl, CacheFile.IndexItem blamTag)
         {
-            foreach (var shader in pixl.Shaders)
+            var name = blamTag.Filename;
+
+            string[] nameParts = name.Split('\\');
+            string arguments = nameParts[nameParts.Length - 1];
+            arguments = arguments.Substring(1, arguments.Length - 1);
+            string type = nameParts[nameParts.Length - 2];
+
+            string[] shaderArgs = arguments.Split('_');
+
+            Int32[] shader_args;
+            try { shader_args = Array.ConvertAll(shaderArgs, Int32.Parse); }
+            catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return null; }
+
+            for (int i = 0; i < pixl.Shaders.Count; i++)
             {
-                var shader_parser = new XboxShaderParser(pixl, shader, CacheContext);
+                //
+                // Parse Blam tag name to extract type and arguments
+                //
 
-                if (!shader_parser.IsValid) continue;
+                var shader = pixl.Shaders[i];
 
-                Console.WriteLine(shader_parser.Disassemble());
-
-#if !DEBUG
                 try
                 {
-#endif
-                    shader.PCShaderBytecode = shader_parser.ProcessShader();
-                    shader.PCParameters = shader.XboxParameters;
-                    shader.XboxShaderReference = null;
+                    if(i != 0)
+                    {
+                        throw new Exception($"Unsupported shader index {i}.");
+                    }
 
-                    Console.WriteLine("written shader binary for glps");
-                #if !DEBUG
+                    ShaderGeneratorResult shader_gen_result;
+                    switch (type)
+                    {
+                        case "beam_templates":
+                            shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "contrail_templates":
+                            shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "cortana_templates":
+                            shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "decal_templates":
+                            shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "foliage_templates":
+                            shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "halogram_templates":
+                            shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "light_volume_templates":
+                            shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "particle_templates":
+                            shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "shader_templates":
+                            shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "terrain_templates":
+                            shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        case "water_templates":
+                            shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            break;
+
+                        default:
+                            Console.WriteLine($"{type} is not implemented");
+                            return null;
+                    }
+
+                    if (shader_gen_result == null) return null;
+
+                    shader.PCShaderBytecode = shader_gen_result.ByteCode;
+                    shader.PCParameters = shader_gen_result.Parameters;
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine("ConvertPixelShader Errors:");
                     Console.WriteLine(e.Message);
+                    Console.WriteLine($"Something happened when converting  {type} {shaderArgs} index: {i}. Setting shader bytecote and registers to null");
+                    shader.PCShaderBytecode = null;
+                    shader.PCParameters = new List<ShaderParameter>();
                 }
-#endif
             }
 
             return pixl;
         }
+
+
+
+
 
         private VertexShader ConvertVertexShader(VertexShader vtsh)
         {

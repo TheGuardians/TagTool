@@ -31,13 +31,13 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
     
     float4 albedo = Albedo(texcoord);
 
-    float3 color = Unknown_Crazy_Bungie_Color_Processing(albedo.xyz);
+    float3 color = bungie_color_processing(albedo.xyz);
     float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
     float alpha = albedo.w;
 
     PS_OUTPUT output;
     output.Diffuse = Blend_Mode(float4(color, albedo.w));
-    output.Normal = Blend_Mode(float4(NormalExport(normal), albedo.w));
+    output.Normal = Blend_Mode(float4(normal_export(normal), albedo.w));
 
     output.Unknown = unknown.xxxx;
     return output;
