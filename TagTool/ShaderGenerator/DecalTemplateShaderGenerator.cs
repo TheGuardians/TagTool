@@ -13,26 +13,18 @@ namespace TagTool.ShaderGenerator
 {
     public class DecalTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decals_template.hlsl";
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decal_template.hlsl";
 
-        public DecalTemplateShaderGenerator(
-            GameCacheContext cacheContext,
-            Albedo albedo,
-            Blend_Mode blend_mode,
-            Render_Pass render_pass,
-            Specular specular,
-            Bump_Mapping bump_mapping,
-            Tinting tinting) : base(
-                albedo,
-                blend_mode,
-                render_pass,
-                specular,
-                bump_mapping,
-                tinting)
-        {
-
-            this.CacheContext = cacheContext;
-        }
+		public DecalTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
+		 (Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Render_Pass)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Specular)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Bump_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+		 (Tinting)(args.Length == arg_pos ? 0 : args[arg_pos++]))
+		{
+			this.CacheContext = cacheContext;
+		}
 
         #region Implemented Features Check
 

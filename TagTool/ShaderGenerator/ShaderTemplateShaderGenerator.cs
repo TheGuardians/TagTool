@@ -16,40 +16,26 @@ namespace TagTool.ShaderGenerator
     {
         static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_template.hlsl";
 
-        public ShaderTemplateShaderGenerator(
-            GameCacheContext cacheContext,
-            Albedo albedo,
-            Bump_Mapping bump_mapping,
-            Alpha_Test alpha_test,
-            Specular_Mask specular_mask,
-            Material_Model material_model,
-            Environment_Mapping environment_mapping,
-            Self_Illumination self_illumination,
-            Blend_Mode blend_mode,
-            Parallax parallax,
-            Misc misc,
-            Distortion distortion,
-            Soft_Fade soft_fade) : base(
-                albedo,
-                bump_mapping,
-                alpha_test,
-                specular_mask,
-                material_model,
-                environment_mapping,
-                self_illumination,
-                blend_mode,
-                parallax,
-                misc,
-                distortion,
-                soft_fade)
-        {
+		public ShaderTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
+				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Bump_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Alpha_Test)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Specular_Mask)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Material_Model)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Environment_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Self_Illumination)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Parallax)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Misc)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Distortion)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+				(Soft_Fade)(args.Length == arg_pos ? 0 : args[arg_pos++]))
+		{
+			this.CacheContext = cacheContext;
+		}
 
-            this.CacheContext = cacheContext;
-        }
+		#region Implemented Features Check
 
-        #region Implemented Features Check
-
-        protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+		protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.Default },
             {typeof(Albedo), Albedo.Detail_Blend },
