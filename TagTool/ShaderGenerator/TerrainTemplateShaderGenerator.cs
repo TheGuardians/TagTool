@@ -23,7 +23,6 @@ namespace TagTool.ShaderGenerator
                 (Material_2)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
                 (Material_3)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
         {
-
             this.CacheContext = cacheContext;
         }
 
