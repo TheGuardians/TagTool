@@ -108,7 +108,8 @@ namespace TagTool.Commands.Shaders
                     break;
                 case "water_templates":
                 case "water_template":
-					goto default;
+					shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
 				default:
                     Console.WriteLine($"{type} is not implemented");
                     return false;

@@ -871,6 +871,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\water_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\appearance.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\bank_alpha.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\foam.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\global_shape.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\reflection.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\refraction.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\water_color.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_template_methods\wave_shape.hlsl" />
     <Content Include="ShaderGenerator\shader_code\zanzibar_water_awesome.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
