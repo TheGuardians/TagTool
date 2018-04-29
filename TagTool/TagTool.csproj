@@ -744,7 +744,13 @@
     <Content Include="ShaderGenerator\shader_code\decals_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\blend_mode.hlsl">
+    <Content Include="ShaderGenerator\shader_code\decal_template_methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\decal_template_methods\specular.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\decal_template_methods\albedo.hlsl">
@@ -757,6 +763,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\decal_template_methods\template_includes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\decal_template_methods\tinting.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\editor_only.hlsl" />

@@ -45,6 +45,18 @@ namespace TagTool.ShaderGenerator
             return new List<TemplateParameter>();
         }
 
+        public List<TemplateParameter> GetGenericShaderParametersList()
+        {
+            List<TemplateParameter> list = new List<TemplateParameter>();
+            if (Uniforms.ContainsKey(0))
+            {
+                var null_list = Uniforms[0].Cast<TemplateParameter>().ToList();
+                null_list = null_list.Where(param => param.Target_Type == typeof(Int32)).ToList();
+                list.AddRange(null_list);
+            }
+            return list;
+        }
+
         private static IEnumerable<DirectX.MacroDefine> GenerateEnumDefinitions(Type _enum)
         {
             List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
@@ -146,6 +158,10 @@ namespace TagTool.ShaderGenerator
         protected List<ShaderParameter> GenerateShaderParameters(int vector_start, int sampler_start, int boolean_start, params Type[] types)
         {
             List<IEnumerable<TemplateParameter>> parameter_lists = new List<IEnumerable<TemplateParameter>>();
+
+            var generic_params = GetGenericShaderParametersList();
+            parameter_lists.Add(generic_params);
+
             foreach (var type in types)
             {
                 var value = this.GetType().GetProperty(type.Name.ToLower()).GetValue(this);
@@ -230,19 +246,24 @@ namespace TagTool.ShaderGenerator
 
         #region Implemented Features Check
 
-        protected void CheckImplementedParameters(params object[] values)
+        protected bool CheckImplementedParameters(params object[] values)
         {
+            bool supported = true;
+
             foreach (var value in values)
             {
                 if (ImplementedEnums.ContainsKey(value.GetType()))
                     if (ImplementedEnums[value.GetType()].Contains(value)) continue;
                 Console.WriteLine($"{value.GetType().Name} has not implemented {value}");
+                supported = false;
             }
+
+            return supported;
         }
 
-        protected void CheckImplementedParameters()
+        public bool CheckImplementedParameters()
         {
-            CheckImplementedParameters(EnumValues);
+            return CheckImplementedParameters(EnumValues);
         }
 
         #endregion

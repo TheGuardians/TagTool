@@ -5,7 +5,7 @@
 #include "material_mode.hlsl"
 #include "environment_mapping.hlsl"
 #include "self_illumination.hlsl"
-#include "../blend_mode.hlsl"
+#include "blend_mode.hlsl"
 #include "parallax.hlsl"
 #include "misc.hlsl"
 #include "distortion.hlsl"

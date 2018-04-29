@@ -39,8 +39,25 @@ namespace TagTool.ShaderGenerator
         protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.DiffuseOnly },
+            {typeof(Albedo), Albedo.Palettized_Plus_Alpha },
+            {typeof(Albedo), Albedo.Diffuse_Plus_Alpha },
+
             {typeof(Bump_Mapping), Bump_Mapping.Leave },
-            {typeof(Bump_Mapping), Bump_Mapping.Standard }
+            {typeof(Bump_Mapping), Bump_Mapping.Standard },
+
+            //{typeof(Blend_Mode), Blend_Mode.Opaque },
+            //{typeof(Blend_Mode), Blend_Mode.Additive },
+            //{typeof(Blend_Mode), Blend_Mode.Pre_Multiplied_Alpha },
+            
+            {typeof(Blend_Mode), Blend_Mode.Multiply },
+            {typeof(Blend_Mode), Blend_Mode.Alpha_Blend },
+            {typeof(Blend_Mode), Blend_Mode.Double_Multiply },
+
+            {typeof(Render_Pass), Render_Pass.Pre_Lighting},
+            {typeof(Tinting), Tinting.None },
+            {typeof(Tinting), Tinting.Unmodulated },
+            {typeof(Specular), Specular.Leave },
+            {typeof(Specular), Specular.Modulate },
         };
 
         #endregion
@@ -92,16 +109,41 @@ namespace TagTool.ShaderGenerator
 
         protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
-            // Unsure if this is specifically part of diffuse only
-            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "fade", ShaderParameter.RType.Vector) {SpecificOffset = 32 } },
+            // These appear to be apart of some kind of global structure
+            {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 0 } },
+            {0, new TemplateParameter(typeof(Int32), "g_alt_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 12 } },
+            {0, new TemplateParameter(typeof(Int32), "fade", ShaderParameter.RType.Vector) {SpecificOffset = 32 } },
 
-            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
-            {Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
 
-            { Albedo.DiffuseOnly,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "alpha_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "palette", ShaderParameter.RType.Sampler) },
 
-            {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
-            {Bump_Mapping.Standard,  new TemplateParameter(typeof(Bump_Mapping), "bump_map_xform", ShaderParameter.RType.Vector) },
+            {Albedo.Diffuse_Plus_Alpha, new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Diffuse_Plus_Alpha, new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Diffuse_Plus_Alpha, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Diffuse_Plus_Alpha, new TemplateParameter(typeof(Albedo), "alpha_map", ShaderParameter.RType.Sampler) },
+
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "unknown_sampler0", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "unknown_sampler1", ShaderParameter.RType.Sampler) {Enabled = false } },
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "change_color_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "primary_change_color", ShaderParameter.RType.Vector) },
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "secondary_change_color", ShaderParameter.RType.Vector) },
+            {Albedo.Change_Color, new TemplateParameter(typeof(Albedo), "tertiary_change_color", ShaderParameter.RType.Vector) },
+
+            {Bump_Mapping.Standard, new TemplateParameter(typeof(Bump_Mapping), "bump_map", ShaderParameter.RType.Sampler) },
+            {Bump_Mapping.Standard, new TemplateParameter(typeof(Bump_Mapping), "bump_map_xform", ShaderParameter.RType.Vector) },
+
+            {Tinting.Unmodulated, new TemplateParameter(typeof(Tinting), "tint_color", ShaderParameter.RType.Vector) },
+            {Tinting.Unmodulated, new TemplateParameter(typeof(Tinting), "intensity", ShaderParameter.RType.Vector) },
+
+            {Tinting.Fully_Modulated, new TemplateParameter(typeof(Tinting), "tint_color", ShaderParameter.RType.Vector) },
+            {Tinting.Fully_Modulated, new TemplateParameter(typeof(Tinting), "intensity", ShaderParameter.RType.Vector) },
         };
 
         #endregion

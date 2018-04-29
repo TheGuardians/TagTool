@@ -35,6 +35,11 @@
 #define flag_blend_mode_pre_multiplied_alpha
 
 
+
+#define flag_render_pass_pre_lighting
+#define flag_render_pass_post_lighting
+
+
 //TODO There are more of these
 
 

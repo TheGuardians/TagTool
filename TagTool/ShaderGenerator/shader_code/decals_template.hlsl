@@ -15,14 +15,11 @@ struct VS_OUTPUT
 struct PS_OUTPUT
 {
     float4 Diffuse;
+#ifndef flag_bump_mapping_leave
     float4 Normal;
     float4 Unknown;
+#endif
 };
-
-float4 GetBaseMap(float2 texcoord)
-{
-    return tex2D(base_map, texcoord);
-}
 
 PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
@@ -36,17 +33,22 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	float4 albedo = Albedo(texcoord);
 	float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
 	float3 color = albedo.xyz;
-	float alpha = albedo.w * fade.x;
+	float alpha = albedo.w;
 
 	PS_OUTPUT output;
 
-	output.Diffuse = Blend_Mode(float4(color, alpha));
-#ifdef flag_bump_mapping_leave
-	output.Normal = float4(0.0);
+#ifdef flag_render_pass_pre_lighting
+	output.Diffuse = Specular(Blend_Mode(Tinting(float4(color, alpha))));
 #else
-	output.Normal = Blend_Mode(float4(NormalExport(normal), alpha));
+	output.Diffuse.xyz = albedo.xyz * tint_color.xyz * intensity.x;
+	output.Diffuse.w = albedo.w;
 #endif
 
+
+	
+#ifndef flag_bump_mapping_leave
+	output.Normal = Blend_Mode(float4(NormalExport(normal), alpha));
 	output.Unknown = unknown.xxxx;
+#endif
 	return output;
 }
