@@ -792,7 +792,7 @@
     <Content Include="ShaderGenerator\shader_code\decal_templates\methods\specular.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\blend_mode.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\blend_mode.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\decal_templates\methods\albedo.hlsl">
@@ -817,46 +817,46 @@
     <Content Include="ShaderGenerator\shader_code\parameters.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\shader_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\albedo.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\albedo.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\alpha_test.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\alpha_test.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\bump_mapping.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\bump_mapping.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\distortion.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\distortion.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\environment_mapping.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\environment_mapping.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\material_mode.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\material_mode.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\misc.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\misc.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\parallax.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\parallax.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\self_illumination.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\self_illumination.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\soft_fade.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\soft_fade.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\specular_mask.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\methods\specular_mask.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\template_default_defs.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\template_default_defs.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\shader_template_methods\template_includes.hlsl">
+    <Content Include="ShaderGenerator\shader_code\shader_templates\template_includes.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\terrain_template_methods\environment_map.hlsl">
@@ -964,6 +964,7 @@
     <Folder Include="ShaderGenerator\shader_code\halogram_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\light_volume_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\particle_templates\decompiled\" />
+    <Folder Include="ShaderGenerator\shader_code\shader_templates\decompiled\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

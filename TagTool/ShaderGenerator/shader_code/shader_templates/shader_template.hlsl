@@ -1,9 +1,9 @@
 #define shader_template
 #define _debug_color float4(85, 255, 255, 255) / 255;
-#include "shader_template_methods/template_default_defs.hlsl"
-#include "shader_template_methods/template_includes.hlsl"
-#include "parameters.hlsl"
-#include "helpers.hlsl"
+#include "shader_template/template_default_defs.hlsl"
+#include "shader_template/template_includes.hlsl"
+#include "../parameters.hlsl"
+#include "../helpers.hlsl"
 
 struct VS_OUTPUT
 {

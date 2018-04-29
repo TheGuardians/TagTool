@@ -14,7 +14,7 @@ namespace TagTool.ShaderGenerator
 {
     public class ShaderTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_template.hlsl";
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_templates/shader_template.hlsl";
 
 		public ShaderTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
