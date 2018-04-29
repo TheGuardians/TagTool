@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.IO;
 
 namespace TagTool.Audio
 {
@@ -177,5 +178,17 @@ namespace TagTool.Audio
     {
         uint LengthSamples;
         uint LengthCompressedBytes;
+
+        public void WriteSampleHeader(EndianWriter writer)
+        {
+            writer.Write(LengthSamples);
+            writer.Write(LengthCompressedBytes);
+        }
+
+        public void ReadSampleHeader(EndianReader reader)
+        {
+            LengthSamples = reader.ReadUInt32();
+            LengthCompressedBytes = reader.ReadUInt32();
+        }
     }
 }

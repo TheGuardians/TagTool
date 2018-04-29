@@ -37,6 +37,7 @@ namespace TagTool.Commands.Porting
         private bool UseShaderTest = false;
         private bool MatchShaders = true;
         private bool ConvertScripts = true;
+        private bool NoSquads = false;
 
         public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -112,6 +113,10 @@ namespace TagTool.Commands.Porting
 
                     case "noforgepalette":
                         NoForgePalette = true;
+                        break;
+
+                    case "nosquads":
+                        NoSquads = true;
                         break;
 
                     default:
