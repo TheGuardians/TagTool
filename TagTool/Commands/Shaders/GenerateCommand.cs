@@ -59,7 +59,7 @@ namespace TagTool.Commands.Shaders
             }
 
 			Int32[] shader_args;
-			try { shader_args = Array.ConvertAll(args.ToArray(), Int32.Parse); }
+			try { shader_args = Array.ConvertAll(args.Skip(2).ToArray(), Int32.Parse); }
 			catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
 
 			// runs the appropriate shader-generator for the template type.
