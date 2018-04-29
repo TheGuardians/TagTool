@@ -416,6 +416,7 @@
     <Compile Include="ShaderDecompiler\UcodeDisassembler\InstructionDecoding.cs" />
     <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />
+    <Compile Include="ShaderGenerator\CortanaTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\DecalTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\FoliageTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\HalogramTemplateShaderGenerator.cs" />
@@ -743,6 +744,7 @@
   <ItemGroup>
     <Content Include="ShaderGenerator\shader_code\beam_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\contrail_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\cortana_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

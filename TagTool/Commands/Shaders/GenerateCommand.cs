@@ -46,11 +46,11 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
-            int index;
+            Int32 index;
             string type;
             try
             {
-                index = int.Parse(args[0]);
+                index = Int32.Parse(args[0]);
                 type = args[1].ToLower();
             } catch
             {
@@ -74,31 +74,37 @@ namespace TagTool.Commands.Shaders
                 case "contrail_template":
 					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
-                case "shader_templates":
-                case "shader_template":
-					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
-                    break;
-                case "decal_templates":
+                case "cortana_templates":
+                case "cortana_template":
+					goto default;
+				case "decal_templates":
                 case "decal_template":
 					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                    break;
+                case "foliage_templates":
+                case "foliage_template":
+					goto default;
+                case "halogram_templates":
+                case "halogram_template":
+					goto default;
+                case "light_volume_templates":
+                case "light_volume_template":
+					goto default;
+				case "particle_templates":
+                case "particle_template":
+					goto default;
+				case "shader_templates":
+                case "shader_template":
+					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
                 case "terrain_templates":
                 case "terrain_template":
 					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
-                case "cortana_templates":
-                case "cortana_template":
-                case "foliage_templates":
-                case "foliage_template":
-                case "halogram_templates":
-                case "halogram_template":
-                case "light_volume_templates":
-                case "light_volume_template":
-                case "particle_templates":
-                case "particle_template":
                 case "water_templates":
                 case "water_template":
-                default:
+					goto default;
+				default:
                     Console.WriteLine($"{type} is not implemented");
                     return false;
             }
