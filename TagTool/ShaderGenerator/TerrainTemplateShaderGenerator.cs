@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Direct3D.Functions;
 using TagTool.ShaderGenerator.Types;
+using TagTool.Shaders;
 using TagTool.Util;
 
 namespace TagTool.ShaderGenerator
 {
     public class TerrainTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decals_template.hlsl";
+        static string ShaderFile { get; } = "ShaderGenerator/shader_code/terrain_template.hlsl";
 
         public TerrainTemplateShaderGenerator(
             GameCacheContext cacheContext,
@@ -89,7 +90,83 @@ namespace TagTool.ShaderGenerator
 
         protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
         {
-            
+            {Blending.Morph, new TemplateParameter(typeof(Blending), "debug_tint", ShaderParameter.RType.Vector) },
+            {Blending.Morph, new TemplateParameter(typeof(Blending), "blend_map_xform", ShaderParameter.RType.Vector) },
+            {Blending.Morph, new TemplateParameter(typeof(Blending), "global_albedo_tint", ShaderParameter.RType.Vector) },
+            {Blending.Morph, new TemplateParameter(typeof(Blending), "blend_map", ShaderParameter.RType.Sampler) },
+            {Blending.Morph, new TemplateParameter(typeof(Blending), "unknown_map0", ShaderParameter.RType.Sampler) { Enabled = false } },
+
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_0.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_1.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_2.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Only, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
+
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0", ShaderParameter.RType.Sampler) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "base_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "bump_map_m_0_xform", ShaderParameter.RType.Vector) },
+            {Material_3.Diffuse_Plus_Specular, new TemplateParameter(typeof(Blending), "detail_bump_m_0_xform", ShaderParameter.RType.Vector) },
         };
 
         #endregion
