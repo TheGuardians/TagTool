@@ -601,6 +601,12 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Weapon weapon:
+                    // Fix shotgun reloading
+                    if (blamTag.Filename == "objects\\weapons\\rifle\\shotgun\\shotgun")
+                    {
+                        weapon.Unknown24 = 1 << 16;
+                    }
+
                     foreach (var attach in weapon.Attachments)
                         if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
