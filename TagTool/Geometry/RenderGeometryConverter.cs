@@ -351,8 +351,6 @@ namespace TagTool.Geometry
             using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
             using (var rsrcDefReader = new EndianReader(rsrcDefStream, EndianFormat.BigEndian))
             {
-                var dataContext = new DataSerializationContext(rsrcDefReader, null, CacheAddressType.Definition);
-
                 rsrcDefReader.SeekTo(rsrcDefEntry.FixupInformationOffset + (rsrcDefEntry.FixupInformationLength - 24));
 
                 var vertexBufferCount = rsrcDefReader.ReadInt32();
@@ -448,10 +446,10 @@ namespace TagTool.Geometry
                         if (rsrcDef.IndexBuffers.Count == 0 || mesh.IndexBuffers[0] == ushort.MaxValue)
                             continue;
 
-                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * (2 + mesh.IndexBuffers[0])].Offset;
+                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + mesh.IndexBuffers[0]].Offset;
 
                         var indexStream = new IndexBufferStream(blamResourceStream, EndianFormat.BigEndian);
-                        var indexBuffer = rsrcDef.IndexBuffers[0].Definition;
+                        var indexBuffer = rsrcDef.IndexBuffers[mesh.IndexBuffers[0]].Definition;
                         var indexCount = indexBuffer.Data.Size / 2;
                         var indices = new List<int>();
 
@@ -485,7 +483,7 @@ namespace TagTool.Geometry
 
                 for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * (2 + i)].Offset;
+                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
                     ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
                 }
 
