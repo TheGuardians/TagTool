@@ -9,7 +9,6 @@ struct VS_OUTPUT
     float4 TexCoord1 : TEXCOORD1;
     float4 TexCoord2 : TEXCOORD2;
     float4 TexCoord3 : TEXCOORD3;
-    float4 TexCoord4 : TEXCOORD4;
 };
 
 struct PS_OUTPUT
@@ -23,32 +22,23 @@ struct PS_OUTPUT
 
 PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
-	float2 texcoord_tiled = input.TexCoord.xy;
-	float2 texcoord = input.TexCoord.zw;
-	float3 tangentspace_x = input.TexCoord2.xyz;
-	float3 tangentspace_y = input.TexCoord3.xyz;
-	float3 tangentspace_z = input.TexCoord4.xyz;
-	float unknown = input.TexCoord1.x;
+	float2 texcoord = input.TexCoord.xy;
+	// Untested, its possible these tangents are reversed
+	float3 tangentspace_x = input.TexCoord1.xyz;
+	float3 tangentspace_y = input.TexCoord2.xyz;
+	float3 tangentspace_z = input.TexCoord3.xyz;
+	float unknown = input.TexCoord1.w;
 
-	float4 albedo = Albedo(texcoord);
-	float3 normal = Bump_Mapping(tangentspace_x, tangentspace_y, tangentspace_z, texcoord);
+	float4 albedo = float4(1.0, 0.0, 0.0, 1.0);
+	float3 normal = tangentspace_z;
 	float3 color = albedo.xyz;
 	float alpha = albedo.w;
 
 	PS_OUTPUT output;
 
-#ifdef flag_render_pass_pre_lighting
-	output.Diffuse = Specular(Blend_Mode(Tinting(float4(color, alpha))));
-#else
-	output.Diffuse.xyz = albedo.xyz * tint_color.xyz * intensity.x;
-	output.Diffuse.w = albedo.w;
-#endif
-
-
-	
-#ifndef flag_bump_mapping_leave
-	output.Normal = Blend_Mode(float4(NormalExport(normal), alpha));
+	output.Diffuse = float4(color, alpha);
+	output.Normal = float4(NormalExport(normal), alpha);
 	output.Unknown = unknown.xxxx;
-#endif
+
 	return output;
 }
