@@ -70,6 +70,10 @@ namespace TagTool.Commands.Shaders
                 case "beam_template":
 					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
+				case "contrail_templates":
+                case "contrail_template":
+					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
                 case "shader_templates":
                 case "shader_template":
 					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
@@ -82,8 +86,6 @@ namespace TagTool.Commands.Shaders
                 case "terrain_template":
 					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
-				case "contrail_templates":
-                case "contrail_template":
                 case "cortana_templates":
                 case "cortana_template":
                 case "foliage_templates":
