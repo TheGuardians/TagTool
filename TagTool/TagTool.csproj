@@ -766,6 +766,16 @@
     <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\blend_mode.hlsl" />
     <Content Include="ShaderGenerator\shader_code\light_volume_template_methods\fog.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\albedo.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\black_point.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\depth_fade.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\fog.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\lighting.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\render_targets.hlsl">
+      <SubType>Form</SubType>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_template_methods\specialized_rendering.hlsl" />
     <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -903,8 +913,10 @@
       <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>

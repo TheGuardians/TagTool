@@ -96,7 +96,8 @@ namespace TagTool.Commands.Shaders
 					break;
 				case "particle_templates":
                 case "particle_template":
-					goto default;
+					shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
 				case "shader_templates":
                 case "shader_template":
 					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
