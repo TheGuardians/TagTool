@@ -780,7 +780,7 @@
     <Content Include="ShaderGenerator\shader_code\particle_templates\methods\lighting.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_templates\methods\render_targets.hlsl" />
     <Content Include="ShaderGenerator\shader_code\particle_templates\methods\specialized_rendering.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\terrain_template.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\decal_templates\decal_template.hlsl">
@@ -859,19 +859,19 @@
     <Content Include="ShaderGenerator\shader_code\shader_templates\template_includes.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain_template_methods\environment_map.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\methods\environment_map.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain_template_methods\blending.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\methods\blending.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain_template_methods\material.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\methods\material.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain_template_methods\template_default_defs.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\template_default_defs.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain_template_methods\template_includes.hlsl">
+    <Content Include="ShaderGenerator\shader_code\terrain_templates\template_includes.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ShaderGenerator\shader_code\water_template.hlsl" />
@@ -965,6 +965,7 @@
     <Folder Include="ShaderGenerator\shader_code\light_volume_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\particle_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\shader_templates\decompiled\" />
+    <Folder Include="ShaderGenerator\shader_code\terrain_templates\decompiled\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

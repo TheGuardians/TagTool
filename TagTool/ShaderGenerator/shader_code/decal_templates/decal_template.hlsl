@@ -2,7 +2,7 @@
 #define _debug_color float4(255, 85, 85, 255) / 255;
 #include "template_default_defs.hlsl"
 #include "template_includes.hlsl"
-#include "parameters.hlsl"
+#include "../parameters.hlsl"
 
 struct VS_OUTPUT
 {

@@ -1,4 +1,4 @@
-﻿#include "../parameters.hlsl"
+﻿#include "../../parameters.hlsl"
 
 /*
 ** These blending parameters take into account for the fade parameter

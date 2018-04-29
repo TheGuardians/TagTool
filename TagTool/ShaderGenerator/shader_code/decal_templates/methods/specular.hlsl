@@ -1,4 +1,4 @@
-﻿#include "../parameters.hlsl"
+﻿#include "../../parameters.hlsl"
 
 #ifdef flag_specular_leave
 

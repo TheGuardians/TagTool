@@ -1,4 +1,4 @@
-﻿#include "../helpers.hlsl"
+﻿#include "../../helpers.hlsl"
 
 float4 material_diffuse_only(
 	float2 texcoord,
