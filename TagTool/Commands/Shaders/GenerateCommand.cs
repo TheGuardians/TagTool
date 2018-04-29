@@ -60,7 +60,7 @@ namespace TagTool.Commands.Shaders
 
 			Int32[] shader_args;
 			try { shader_args = Array.ConvertAll(args.ToArray(), Int32.Parse); }
-			catch { Console.WriteLine("Invalid shader arguments!"); return false; }
+			catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
 
 			// runs the appropriate shader-generator for the template type.
 			ShaderGeneratorResult shader_gen_result;
@@ -76,7 +76,8 @@ namespace TagTool.Commands.Shaders
 					break;
                 case "cortana_templates":
                 case "cortana_template":
-					goto default;
+					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
 				case "decal_templates":
                 case "decal_template":
 					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();

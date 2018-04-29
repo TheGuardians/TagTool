@@ -1,5 +1,5 @@
-﻿#define beam_template
-#define _debug_color float4(255, 255, 85, 255) / 255;
+﻿#define foliage_template
+#define _debug_color float4(170, 0, 0, 255) / 255;
 #include "parameters.hlsl"
 
 struct VS_OUTPUT
