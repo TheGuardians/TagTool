@@ -1,7 +1,7 @@
 ﻿#define decal_template
 #define _debug_color float4(255, 85, 85, 255) / 255;
-#include "decal_template_methods/template_default_defs.hlsl"
-#include "decal_template_methods/template_includes.hlsl"
+#include "template_default_defs.hlsl"
+#include "template_includes.hlsl"
 #include "parameters.hlsl"
 
 struct VS_OUTPUT
