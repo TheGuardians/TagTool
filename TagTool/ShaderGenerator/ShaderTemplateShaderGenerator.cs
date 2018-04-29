@@ -16,40 +16,26 @@ namespace TagTool.ShaderGenerator
     {
         static string ShaderFile { get; } = "ShaderGenerator/shader_code/shader_template.hlsl";
 
-        public ShaderTemplateShaderGenerator(
-            GameCacheContext cacheContext,
-            Albedo albedo,
-            Bump_Mapping bump_mapping,
-            Alpha_Test alpha_test,
-            Specular_Mask specular_mask,
-            Material_Model material_model,
-            Environment_Mapping environment_mapping,
-            Self_Illumination self_illumination,
-            Blend_Mode blend_mode,
-            Parallax parallax,
-            Misc misc,
-            Distortion distortion,
-            Soft_Fade soft_fade) : base(
-                albedo,
-                bump_mapping,
-                alpha_test,
-                specular_mask,
-                material_model,
-                environment_mapping,
-                self_illumination,
-                blend_mode,
-                parallax,
-                misc,
-                distortion,
-                soft_fade)
-        {
+		public ShaderTemplateShaderGenerator(GameCacheContext cacheContext, List<string> args, int arg_pos = 0) : base(
+				(Albedo)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Bump_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Alpha_Test)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Specular_Mask)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Material_Model)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Environment_Mapping)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Self_Illumination)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Blend_Mode)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Parallax)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Misc)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Distortion)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]),
+				(Soft_Fade)Int32.Parse(args.Count == arg_pos ? "0" : args[arg_pos++]))
+		{
+			this.CacheContext = cacheContext;
+		}
 
-            this.CacheContext = cacheContext;
-        }
+		#region Implemented Features Check
 
-        #region Implemented Features Check
-
-        protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+		protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.Default },
             {typeof(Albedo), Albedo.Detail_Blend },
