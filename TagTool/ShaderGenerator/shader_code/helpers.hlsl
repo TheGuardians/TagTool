@@ -9,16 +9,32 @@ float3 NormalExport(float3 normal)
     return normal * 0.5 + 0.5;
 }
 
-float3 NormalMapSample(sampler map, float2 texture_coordinate)
+float2 normal_x2_sample(sampler map, float2 texture_coordinate)
 {
     float4 normal_map = tex2D(map, texture_coordinate);
-
     float2 normal_xy = normal_map.xy * 2.00787401 + -1.00787401;
-    float2 normal_xy2 = normal_xy * normal_xy;
-    float remainder = 1.0 - saturate(normal_xy2.x + normal_xy2.y);
-    float normal_z = sqrt(remainder);
+    return normal_xy;
+}
 
-    return float3(normal_xy, normal_z);
+float3 normal_x3_sample(sampler map, float2 texture_coordinate)
+{
+	float4 normal_map = tex2D(map, texture_coordinate);
+	float3 normal_xyz = normal_map.xyz * 2.00787401 + -1.00787401;
+	return normal_xyz;
+}
+
+float3 reconstruct_x2_normal(float2 normal_xy)
+{
+	float2 normal_xy2 = normal_xy * normal_xy;
+	float remainder = 1.0 - saturate(dot(normal_xy2, normal_xy2));
+	float normal_z = sqrt(remainder);
+
+	return float3(normal_xy, normal_z);
+}
+
+float3 normal_x2reconstruct_sample(sampler map, float2 texture_coordinate)
+{
+	return reconstruct_x2_normal(normal_x2_sample(map, texture_coordinate));
 }
 
 float3 TangentSpaceToModelSpace(
@@ -40,28 +56,28 @@ float2 ApplyXForm(float2 texcoord, float4 xform)
     return texcoord * xform.xy + xform.zw;
 }
 
-#ifdef shader_template
+#if defined(shader_template) || defined(terrain_template)
 
 float3 Unknown_Crazy_Bungie_Color_Processing(float3 color)
 {
-    float4 r0 = float4(color, 0);
-    float4 r1 = float4(0, 0, 0, 0);
-    float4 r2 = float4(0, 0, 0, 0);
+	float4 r0 = float4(color, 0);
+	float4 r1 = float4(0, 0, 0, 0);
+	float4 r2 = float4(0, 0, 0, 0);
 
-    // BEGIN RETARDED CODE
-    r1.xyz = color.xyz * 4.59478998;
-    r1.w = 4.59478998;
-    r0.xyz = r0.xyz * -r1.xyz + debug_tint.xyz;
-    r0.xyz = debug_tint.www * r0.xyz + r1.xyz;
-    r1.xyz = log(r0.xyz);
-    r1.xyz = r1.xyz * (5.0 / 12.0); // 5/12
-    r2.xyz = exp(r1.xyz);
-    r1.xyz = r2.xyz * 1.055 -0.055;
-    r2.xyz = (-r0.xyz) * 12.92;
-    r0.xyz = r0.xyz * 12.92;
-    // END RETARDED CODE
+	// BEGIN RETARDED CODE
+	r1.xyz = color.xyz * 4.59478998;
+	r1.w = 4.59478998;
+	r0.xyz = r0.xyz * -r1.xyz + debug_tint.xyz;
+	r0.xyz = debug_tint.www * r0.xyz + r1.xyz;
+	r1.xyz = log(r0.xyz);
+	r1.xyz = r1.xyz * (5.0 / 12.0); // 5/12
+	r2.xyz = exp(r1.xyz);
+	r1.xyz = r2.xyz * 1.055 - 0.055;
+	r2.xyz = (-r0.xyz) * 12.92;
+	r0.xyz = r0.xyz * 12.92;
+	// END RETARDED CODE
 
-    return r2.xyz >= 0 ? r0.xyz : r1.xyz;
+	return r2.xyz >= 0 ? r0.xyz : r1.xyz;
 }
 
 #endif
