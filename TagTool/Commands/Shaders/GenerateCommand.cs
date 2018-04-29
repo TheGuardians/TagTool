@@ -58,7 +58,7 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
-			int[] shader_args;
+			Int32[] shader_args;
 			try { shader_args = Array.ConvertAll(args.ToArray(), Int32.Parse); }
 			catch { Console.WriteLine("Invalid shader arguments!"); return false; }
 

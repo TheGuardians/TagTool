@@ -15,7 +15,7 @@ namespace TagTool.ShaderGenerator
     {
 		static string ShaderFile { get; } = "ShaderGenerator/shader_code/beam_template.hlsl";
 
-		public BeamTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, int arg_pos = 0) : base(
+		public BeamTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
 				(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
 				(Black_Point)(args.Length == arg_pos ? 0 : args[arg_pos++]),
