@@ -416,6 +416,7 @@
     <Compile Include="ShaderDecompiler\UcodeDisassembler\InstructionDecoding.cs" />
     <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />
+    <Compile Include="ShaderGenerator\CustomTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\CortanaTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\DecalTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\FoliageTemplateShaderGenerator.cs" />
@@ -787,6 +788,45 @@
     <Content Include="ShaderGenerator\shader_code\cortana_templates\cortana_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\custom_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\alpha_test.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\bump_mapping.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\environment_mapping.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\material_model.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\parallax.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\self_illumination.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\specular_mask.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\methods\misc.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\template_default_defs.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\custom_templates\template_includes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\foliage_templates\foliage_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1082,6 +1122,7 @@
   <ItemGroup>
     <Folder Include="ShaderGenerator\shader_code\cortana_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\cortana_templates\methods\" />
+    <Folder Include="ShaderGenerator\shader_code\custom_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\decal_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\foliage_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\halogram_templates\decompiled\" />

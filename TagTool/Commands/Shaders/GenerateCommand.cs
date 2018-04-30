@@ -74,9 +74,13 @@ namespace TagTool.Commands.Shaders
                 case "contrail_template": // we already have all contrail_templates from H3 MP
 					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
-                case "cortana_templates":
-                case "cortana_template": // we already have all cortana_templates from H3 MP
+				case "cortana_templates":
+				case "cortana_template": // we already have all cortana_templates from H3 MP
 					shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
+				case "custom_templates":
+				case "custom_template":
+					shader_gen_result = new CustomTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "decal_templates":
                 case "decal_template":
