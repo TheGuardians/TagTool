@@ -63,7 +63,7 @@ namespace TagTool.Commands.Shaders
 			catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
 
 			// runs the appropriate shader-generator for the template type.
-			ShaderGeneratorResult shader_gen_result;
+			var shader_gen_result = new ShaderGeneratorResult();
             switch(type)
             {
                 case "beam_templates":
@@ -71,11 +71,11 @@ namespace TagTool.Commands.Shaders
 					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "contrail_templates":
-                case "contrail_template":
+                case "contrail_template": // we already have all contrail_templates from H3 MP
 					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
                 case "cortana_templates":
-                case "cortana_template":
+                case "cortana_template": // we already have all cortana_templates from H3 MP
 					shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "decal_templates":
@@ -83,7 +83,7 @@ namespace TagTool.Commands.Shaders
 					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
                     break;
                 case "foliage_templates":
-                case "foliage_template":
+                case "foliage_template": // we already have all foliage_templates from H3 MP
 					shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
                 case "halogram_templates":
@@ -91,7 +91,7 @@ namespace TagTool.Commands.Shaders
 					shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
                 case "light_volume_templates":
-                case "light_volume_template":
+                case "light_volume_template": // we already have all light_volume_templates from H3 MP
 					shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "particle_templates":
