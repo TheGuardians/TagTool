@@ -21,19 +21,6 @@ struct PS_OUTPUT
 #endif
 };
 
-float4 sample_texture(sampler _sampler, float2 texcoord, float4 xform)
-{
-	return tex2D(_sampler, apply_xform(texcoord, xform));
-}
-
-float4 sample_material(sampler _base_map, sampler _detail_map, float2 texcoord, float4 _base_xform, float4 _detail_xform)
-{
-	float4 base_map_sample = sample_texture(_base_map, texcoord, _base_xform);
-	float4 detail_map_sample = sample_texture(_detail_map, texcoord, _detail_xform);
-	float4 color = base_map_sample * detail_map_sample;
-	return color;
-}
-
 float3 bungie_color_processing_terrain(float3 color)
 {
 	float4 c0 = float4(2.00787401, -1.00787401, 0, 1);
@@ -71,100 +58,76 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
 	float2 texcoord = input.TexCoord.xy;
 	// Untested, its possible these tangents are reversed
-	float3 tangentspace_x = input.TexCoord3.xyz;
-	float3 tangentspace_y = input.TexCoord2.xyz;
-	float3 tangentspace_z = input.TexCoord1.xyz;
+	float3 tangentspace_x = normalize(input.TexCoord3.xyz);
+	float3 tangentspace_y = normalize(input.TexCoord2.xyz);
+	float3 tangentspace_z = normalize(input.TexCoord1.xyz);
 	float unknown = input.TexCoord1.w;
 
-	float4 albedo = float4(1.0, 0.0, 0.0, 1.0);
-	float3 normal = tangentspace_z;
-	float3 color = albedo.xyz;
-	float alpha = albedo.w;
-
-	//mad r0.xy, v0, c70, c70.zwzw
-	//texld r0, r0, s11
-	//mad r1.xy, v0, c71, c71.zwzw
-	//texld r1, r1, s12
-	//mul r0, r0, r1
-	float4 albedo_m_3 = sample_material(base_map_m_3, detail_map_m_3, texcoord, base_map_m_3_xform, detail_map_m_3_xform);
-	//mad r1.xy, v0, c67, c67.zwzw
-	//texld r1, r1, s8
-	//mad r2.xy, v0, c68, c68.zwzw
-	//texld r2, r2, s9
-	//mul r1, r1, r2
-	float4 albedo_m_2 = sample_material(base_map_m_2, detail_map_m_2, texcoord, base_map_m_2_xform, detail_map_m_2_xform);
-	//mad r2.xy, v0, c64, c64.zwzw
-	//texld r2, r2, s5
-	//mad r3.xy, v0, c65, c65.zwzw
-	//texld r3, r3, s6
-	//mul r2, r2, r3
-	float4 albedo_m_1 = sample_material(base_map_m_1, detail_map_m_1, texcoord, base_map_m_1_xform, detail_map_m_1_xform);
-	//mad r3.xy, v0, c61, c61.zwzw
-	//texld r3, r3, s2
-	//mad r4.xy, v0, c62, c62.zwzw
-	//texld r4, r4, s3
-	//mul r3, r3, r4
-	float4 albedo_m_0 = sample_material(base_map_m_0, detail_map_m_0, texcoord, base_map_m_0_xform, detail_map_m_0_xform);
-
-	//mad r4.xy, v0, c59, c59.zwzw
-	//texld r4, r4, s0
-	float4 blend_weights = sample_texture(blend_map, texcoord, blend_map_xform);
-
-	//add r5.x, r4.y, r4.x
-	//add r5.x, r4.z, r5.x
-	//add r5.x, r4.w, r5.x
+	float4 blend_weights = tex2D(blend_map, apply_xform(texcoord, blend_map_xform));
 	float weights_aggregate = blend_weights.x + blend_weights.y + blend_weights.z + blend_weights.w;
-
-	//rcp r5.x, r5.x
 	float inverse_weights_aggregate = 1.0 / weights_aggregate;
-
-	//NOTE: The total weights size of blend_weights equals 1. x + y + z + w = 1.0
-	//mul r4, r4, r5.x
 	blend_weights *= inverse_weights_aggregate;
 
-	float4 color_aggregate;
-	{
-		// mul r3, r3, r4.x
-		// cmp r3, -r4.x, c0.z, r3
+	float4 color_aggregate = float4(0.0, 0.0, 0.0, 0.0);
+	float3 normal_aggregate = tangentspace_z;
 
-		float4 color_m_0 = albedo_m_0 * blend_weights.x;
-		color_m_0 = -blend_weights.x >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_0;
+#ifndef flag_material_0_off
+	MATERIAL_RESULT material_0 = Material_0(texcoord);
 
-		color_aggregate = color_m_0;
-	}
-	{
-		// mad r2, r2, r4.y, r3
-		// cmp r2, -r4.y, r3, r2
+	float4 color_m_0 = material_0.Color * blend_weights.x;
+	color_m_0 = -blend_weights.x >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_0;
+	color_aggregate = color_m_0;
 
-		float4 color_m_1 = albedo_m_1 * blend_weights.y;
-		color_m_1 = -blend_weights.y >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_1;
+	float3 normal_m_0 = material_0.Normal * blend_weights.x;
+	normal_m_0 = -blend_weights.x >= 0 ? float3(0.0, 0.0, 0.0) : normal_m_0;
+	normal_aggregate = normal_m_0;
 
-		color_aggregate += color_m_1;
-	}
-	{
-		// mad r1, r1, r4.z, r2
-		// cmp r1, -r4.z, r2.wxyz, r1.wxyz
+#endif
+#ifndef flag_material_1_off
+	MATERIAL_RESULT material_1 = Material_1(texcoord);
 
-		float4 color_m_2 = albedo_m_2 * blend_weights.z;
-		color_m_2 = -blend_weights.z >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_2;
+	float4 color_m_1 = material_1.Color * blend_weights.y;
+	color_m_1 = -blend_weights.y >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_1;
+	color_aggregate += color_m_1;
 
-		color_aggregate += color_m_2;
-	}
-	{
-		//mad r0, r0.wxyz, r4.w, r1
-		//cmp r2.xyz, -r4.w, r1.yzww, r0.yzww
-		float4 color_m_3 = albedo_m_3 * blend_weights.w;
-		color_m_3 = -blend_weights.w >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_3;
+	float3 normal_m_1 = material_1.Normal * blend_weights.y;
+	normal_m_1 = -blend_weights.y >= 0 ? float3(0.0, 0.0, 0.0) : normal_m_1;
+	normal_aggregate += normal_m_1;
 
-		color_aggregate += color_m_3;
-	}
+#endif
+#ifndef flag_material_2_off
+	MATERIAL_RESULT material_2 = Material_2(texcoord);
+
+	float4 color_m_2 = material_2.Color * blend_weights.z;
+	color_m_2 = -blend_weights.z >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_2;
+	color_aggregate += color_m_2;
+
+	float3 normal_m_2 = material_2.Normal * blend_weights.z;
+	normal_m_2 = -blend_weights.z >= 0 ? float3(0.0, 0.0, 0.0) : normal_m_2;
+	normal_aggregate += normal_m_2;
+
+#endif
+//#ifndef flag_material_3_off
+	MATERIAL_RESULT material_3 = Material_3(texcoord);
+
+	float4 color_m_3 = material_3.Color * blend_weights.w;
+	color_m_3 = -blend_weights.w >= 0 ? float4(0.0, 0.0, 0.0, 0.0) : color_m_3;
+	color_aggregate += color_m_3;
+
+	float3 normal_m_3 = material_3.Normal * blend_weights.w;
+	normal_m_3 = -blend_weights.w >= 0 ? float3(0.0, 0.0, 0.0) : normal_m_3;
+	normal_aggregate += normal_m_3;
+
+//#endif
 
 	color_aggregate.xyz = bungie_color_processing_terrain(color_aggregate.xyz);
+
+	normal_aggregate = normalize(normal_aggregate);
 
 	PS_OUTPUT output;
 
 	output.Diffuse = color_aggregate;
-	output.Normal = float4(normal_export(tangentspace_z), 1.0);
+	output.Normal = float4(normal_export(normal_transform(tangentspace_x, tangentspace_y, tangentspace_z, normal_aggregate)), 1.0);
 	output.Unknown = unknown.xxxx;
 
 	return output;

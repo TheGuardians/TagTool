@@ -31,7 +31,7 @@ namespace TagTool.ShaderGenerator
         protected Type[] EnumTypes { get; set; }
 
         abstract protected MultiValueDictionary<Type, object> ImplementedEnums { get; set; }
-        abstract protected MultiValueDictionary<object, object> Uniforms { get; set; }
+        abstract protected MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; }
 
         public List<TemplateParameter> GetShaderParametersList(object key)
         {
