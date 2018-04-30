@@ -220,7 +220,7 @@ namespace TagTool.Commands.Porting
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
-            if (!IsNew)
+            if (!IsNew || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -675,8 +675,20 @@ namespace TagTool.Commands.Porting
 
                 case RenderMethod renderMethod:
                     var rm = (RenderMethod)data;
-                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
-                    return ConvertRenderMethod(cacheStream, rm, blamTagName);
+                    
+                    if (MatchShaders)
+                    {
+                        ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
+                        return ConvertRenderMethod(cacheStream, rm, blamTagName);
+                    }
+                    else
+                    {
+                        // Convert structure before applying fixups
+                        if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+                            data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
+
+                        return  ConvertRenderMethodGenerated(cacheStream, rm, blamTagName);
+                    }
 
                 case CollisionMoppCode collisionMopp:
                     collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
