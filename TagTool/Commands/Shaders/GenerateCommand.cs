@@ -95,8 +95,12 @@ namespace TagTool.Commands.Shaders
 					shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "particle_templates":
-                case "particle_template":
+				case "particle_template":
 					shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					break;
+				case "screen_templates":
+				case "screen_template":
+					shader_gen_result = new ScreenTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
 					break;
 				case "shader_templates":
                 case "shader_template":

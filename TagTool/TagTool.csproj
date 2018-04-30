@@ -423,6 +423,7 @@
     <Compile Include="ShaderGenerator\IShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\LightVolumeTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ParticleTemplateShaderGenerator.cs" />
+    <Compile Include="ShaderGenerator\ScreenTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\ShaderTemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\TemplateShaderGenerator.cs" />
     <Compile Include="ShaderGenerator\TerrainTemplateShaderGenerator.cs" />
@@ -861,6 +862,18 @@
     <Content Include="ShaderGenerator\shader_code\particle_templates\methods\specialized_rendering.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\base.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\blend_mode.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\overlay_a.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\overlay_b.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\warp.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\screen_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\template_default_defs.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\screen_templates\template_includes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\terrain_templates\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1062,6 +1075,7 @@
     <Folder Include="ShaderGenerator\shader_code\halogram_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\light_volume_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\particle_templates\decompiled\" />
+    <Folder Include="ShaderGenerator\shader_code\screen_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\shader_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\terrain_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\water_templates\decompiled\" />
