@@ -1,13 +1,4 @@
-﻿// Registers:
-//
-//   Name         Reg   Size
-//   ------------ ----- ----
-//   g_exposure   c0       1
-//   base_map     s0       1
-//   palette      s1       1
-//   alpha_map    s2       1
-
-uniform float4 g_exposure : register(c0);
+﻿uniform float4 g_exposure : register(c0);
 uniform sampler2D base_map : register(s0);
 uniform sampler2D palette : register(s1);
 uniform sampler2D alpha_map : register(s2);

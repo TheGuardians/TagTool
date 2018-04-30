@@ -743,9 +743,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ShaderGenerator\shader_code\beam_templates\beam_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_7_0_0[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_8_0_0[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_2_8_0_0[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\decompiled\_0_3_1_0.pixel_shader.Shaders[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_7_0_0.pixel_shader.Shaders[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_8_0_0.pixel_shader.Shaders[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_2_8_0_0.pixel_shader.Shaders[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\albedo.hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\black_point.hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\blend_mode.hlsl" />
@@ -957,7 +958,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ShaderGenerator\shader_code\contrail_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\cortana_templates\decompiled\" />
     <Folder Include="ShaderGenerator\shader_code\cortana_templates\methods\" />
     <Folder Include="ShaderGenerator\shader_code\decal_templates\decompiled\" />

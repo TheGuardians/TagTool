@@ -3,14 +3,14 @@ uniform sampler2D base_map : register(s0);
 
 struct VS_OUTPUT
 {
-	float4 Color : COLOR;
+	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
-	float4 TexCoord : TEXCOORD;
+	float4 TexCoord0 : TEXCOORD0;
 };
 
 struct PS_OUTPUT
 {
-	float4 Color : COLOR;
+	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
 };
 
@@ -33,7 +33,7 @@ PS_OUTPUT main(VS_OUTPUT In) : COLOR
 	oC0.xyz = r0.xyz; // mov oC0.xyz, r0
 
 	PS_OUTPUT Out;
-	Out.Color = oC0;
+	Out.Color0 = oC0;
 	Out.Color1 = oC1;
 	return Out;
 }
