@@ -862,7 +862,7 @@
     <Content Include="ShaderGenerator\shader_code\particle_templates\methods\specialized_rendering.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\base.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\screen_templates\methods\_base.hlsl" />
     <Content Include="ShaderGenerator\shader_code\screen_templates\methods\blend_mode.hlsl" />
     <Content Include="ShaderGenerator\shader_code\screen_templates\methods\overlay_a.hlsl" />
     <Content Include="ShaderGenerator\shader_code\screen_templates\methods\overlay_b.hlsl" />

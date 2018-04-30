@@ -17,7 +17,7 @@ namespace TagTool.ShaderGenerator
 
 		public ScreenTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 			(Warp)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-			(Base)(args.Length == arg_pos ? 0 : args[arg_pos++]),
+			(_Base)(args.Length == arg_pos ? 0 : args[arg_pos++]),
 			(Overlay_A)(args.Length == arg_pos ? 0 : args[arg_pos++]),
 			(Overlay_B)(args.Length == arg_pos ? 0 : args[arg_pos++]),
 			(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]))
@@ -89,7 +89,7 @@ namespace TagTool.ShaderGenerator
 		#region Enums
 
 		public Warp warp => (Warp)EnumValues[0];
-		public Base _base => (Base)EnumValues[1];
+		public _Base _base => (_Base)EnumValues[1];
 		public Overlay_A overlay_a => (Overlay_A)EnumValues[2];
 		public Overlay_B overlay_b => (Overlay_B)EnumValues[3];
 		public Blend_Mode blend_mode => (Blend_Mode)EnumValues[4];
@@ -101,7 +101,7 @@ namespace TagTool.ShaderGenerator
 			Screen_Space
 		}
 
-		public enum Base
+		public enum _Base
 		{
 			Single_Screen_Space,
 			Single_Pixel_Space
