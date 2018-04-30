@@ -81,7 +81,7 @@ namespace TagTool.ShaderGenerator
 
 		#region Uniforms/Registers
 
-		protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
+		protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
 		{
 
 		};

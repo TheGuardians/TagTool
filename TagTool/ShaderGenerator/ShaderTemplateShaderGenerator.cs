@@ -100,7 +100,7 @@ namespace TagTool.ShaderGenerator
 
         #region Uniforms/Registers
 
-        protected override MultiValueDictionary<object, object> Uniforms { get; set; } = new MultiValueDictionary<object, object>
+        protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
         {
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
             {Albedo.Default,  new TemplateParameter(typeof(Albedo), "albedo_unknown_s1", ShaderParameter.RType.Sampler) { Enabled = false } }, // Manually added (Unknown bitmap)
