@@ -30,7 +30,19 @@ namespace TagTool.ShaderGenerator
 
         protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
         {
-
+            {typeof(Blending), Blending.Morph },
+            {typeof(Material_0), Material_0.Off },
+            {typeof(Material_0), Material_0.Diffuse_Only },
+            {typeof(Material_0), Material_0.Diffuse_Plus_Specular },
+            {typeof(Material_1), Material_1.Off },
+            {typeof(Material_1), Material_1.Diffuse_Only },
+            {typeof(Material_1), Material_1.Diffuse_Plus_Specular },
+            {typeof(Material_2), Material_2.Off },
+            {typeof(Material_2), Material_2.Diffuse_Only },
+            {typeof(Material_2), Material_2.Diffuse_Plus_Specular },
+            {typeof(Material_3), Material_3.Off },
+            {typeof(Material_3), Material_3.Diffuse_Only },
+            {typeof(Material_3), Material_3.Diffuse_Plus_Specular },
         };
 
         #endregion
