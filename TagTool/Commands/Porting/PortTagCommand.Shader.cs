@@ -24,6 +24,7 @@ namespace TagTool.Commands.Porting
 
         private GlobalPixelShader ConvertGlobalPixelShader(GlobalPixelShader glps)
         {
+            /*
             Directory.CreateDirectory(@"Temp");
 
             if (!File.Exists(@"Tools\xsd.exe"))
@@ -85,14 +86,14 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("written shader binary for glps");
 
             }
-
+            */
             //add conversion code when ready
             return glps;
         }
 
         private GlobalVertexShader ConvertGlobalVertexShader(GlobalVertexShader glvs)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
 
             /*foreach (var shader in glvs.Shaders)
             {
@@ -104,8 +105,8 @@ namespace TagTool.Commands.Porting
 
             }
 
-            //add conversion code when ready
-            return glvs;*/
+            //add conversion code when ready */
+            return glvs;
         }
 
         private PixelShader ConvertPixelShader(PixelShader pixl, CacheFile.IndexItem blamTag)
@@ -198,7 +199,7 @@ namespace TagTool.Commands.Porting
                 catch(Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    Console.WriteLine($"Something happened when converting  {type} {shaderArgs} index: {i}. Setting shader bytecote and registers to null");
+                    Console.WriteLine($"Something happened when converting  {type} {arguments} index: {i}. Setting shader bytecote and registers to null");
                     shader.PCShaderBytecode = null;
                     shader.PCParameters = new List<ShaderParameter>();
                 }
@@ -206,10 +207,6 @@ namespace TagTool.Commands.Porting
 
             return pixl;
         }
-
-
-
-
 
         private VertexShader ConvertVertexShader(VertexShader vtsh)
         {
@@ -228,6 +225,18 @@ namespace TagTool.Commands.Porting
                 rasg.Unknown6HO = rasg.Unknown6;
             }
             return rasg;
+        }
+
+        private RenderMethod ConvertRenderMethodGenerated(Stream cacheStream, RenderMethod renderMethod, string blamTagName)
+        {
+            //
+            // Remove shader function (overlays) until they are fixed
+            //
+
+            renderMethod.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
+            renderMethod.ShaderProperties[0].Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
+
+            return renderMethod;
         }
 
         private static bool debugUseEDFunctions;

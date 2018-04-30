@@ -220,7 +220,7 @@ namespace TagTool.Commands.Porting
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
-            if (!IsNew)
+            if (!IsNew || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -474,11 +474,12 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Effect effect:
-                    if (BlamCache.Version != CacheVersion.Halo3Retail)
-                        break;
-                    foreach (var even in effect.Events)
-                        foreach (var particleSystem in even.ParticleSystems)
-                            particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
+                    {
+                        foreach (var even in effect.Events)
+                            foreach (var particleSystem in even.ParticleSystems)
+                                particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+                    }
                     break;
 
                 case Particle particle:
@@ -559,12 +560,13 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case AreaScreenEffect sefc:
-                    if (blamTag.Filename != "levels\\ui\\mainmenu\\sky\\ui")
-                        break;
-                    foreach (var screenEffect in sefc.ScreenEffects)
+                    if (blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui")
                     {
-                        screenEffect.MaximumDistance = float.MaxValue;
-                        screenEffect.Duration = float.MaxValue;
+                        foreach (var screenEffect in sefc.ScreenEffects)
+                        {
+                            screenEffect.MaximumDistance = float.MaxValue;
+                            screenEffect.Duration = float.MaxValue;
+                        }
                     }
                     break;
 
@@ -599,6 +601,12 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Weapon weapon:
+                    // Fix shotgun reloading
+                    if (blamTag.Filename == "objects\\weapons\\rifle\\shotgun\\shotgun")
+                    {
+                        weapon.Unknown24 = 1 << 16;
+                    }
+
                     foreach (var attach in weapon.Attachments)
                         if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
@@ -667,8 +675,20 @@ namespace TagTool.Commands.Porting
 
                 case RenderMethod renderMethod:
                     var rm = (RenderMethod)data;
-                    ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
-                    return ConvertRenderMethod(cacheStream, rm, blamTagName);
+                    
+                    if (MatchShaders)
+                    {
+                        ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
+                        return ConvertRenderMethod(cacheStream, rm, blamTagName);
+                    }
+                    else
+                    {
+                        // Convert structure before applying fixups
+                        if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+                            data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
+
+                        return  ConvertRenderMethodGenerated(cacheStream, rm, blamTagName);
+                    }
 
                 case CollisionMoppCode collisionMopp:
                     collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);

@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
 	public class WaterTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/light_volume_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/water_templates/water_template.hlsl";
 
 		public WaterTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Wave_Shape)(args.Length == arg_pos ? 0 : args[arg_pos++]),

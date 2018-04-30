@@ -13,7 +13,7 @@ namespace TagTool.ShaderGenerator
 {
     public class LightVolumeTemplateShaderGenerator : TemplateShaderGenerator
 	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/light_volume_template.hlsl";
+		static string ShaderFile { get; } = "ShaderGenerator/shader_code/light_volume_templates/light_volume_template.hlsl";
 
 		public LightVolumeTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
 				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
