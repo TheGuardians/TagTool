@@ -3,25 +3,23 @@ uniform sampler2D base_map : register(s0);
 
 struct VS_OUTPUT
 {
-	float4 Color : COLOR;
+	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
-	float4 TexCoord : TEXCOORD;
+	float4 TexCoord0 : TEXCOORD0;
 };
 
 struct PS_OUTPUT
 {
-	float4 Color : COLOR;
+	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
-	float4 Color2 : COLOR2;
 };
 
 PS_OUTPUT main(VS_OUTPUT In) : COLOR
 {
-	float4 c1 = float4(0, 0, 0, 0); // def c1, 0, 0, 0, 0
-	float4 r0, r1, oC0, oC1, oC2;
+	float4 r0, r1, oC0, oC1;
 
 	// Albedo.DiffuseOnly
-	// Blend_Mode.Inv_Alpha_Blend
+	// Blend_Mode.Add_Src_Times_DstAlpha
 	// BlackPoint.Off
 	// Fog.Off
 	r0 = tex2Dlod(base_map, In.TexCoord); // texld r0, v2, s0							   
@@ -33,11 +31,9 @@ PS_OUTPUT main(VS_OUTPUT In) : COLOR
 	r0.w = 1.0f / g_exposure.y; // rcp r0.w, c0.y
 	oC1.xyz = (r0.wwww * r0.xyzw).xyz; // mul oC1.xyz, r0.w, r0
 	oC0.xyz = r0.xyz; // mov oC0.xyz, r0
-	oC2 = c1.xxxx; // mov oC2, c1.x
 
 	PS_OUTPUT Out;
-	Out.Color = oC0;
+	Out.Color0 = oC0;
 	Out.Color1 = oC1;
-	Out.Color2 = oC2;
 	return Out;
 }
