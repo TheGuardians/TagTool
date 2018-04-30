@@ -28,8 +28,14 @@ namespace TagTool.ShaderGenerator
 
 		protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
 		{
-
-		};
+            {typeof(Albedo), Albedo.DiffuseOnly },
+            {typeof(Albedo), Albedo.Palettized_Plus_Alpha },
+            {typeof(Black_Point), Black_Point.Off },
+            {typeof(Blend_Mode), Blend_Mode.Opaque },
+            {typeof(Blend_Mode), Blend_Mode.Add_Src_Times_DstAlpha },
+            {typeof(Blend_Mode), Blend_Mode.Add_Src_Times_SrcAlpha },
+            {typeof(Blend_Mode), Blend_Mode.Pre_Multiplied_Alpha },
+        };
 
 		#endregion
 
@@ -80,14 +86,25 @@ namespace TagTool.ShaderGenerator
 
 		protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
 		{
+            {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 0 } },
 
-		};
+            {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
 
-		#endregion
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "palette", ShaderParameter.RType.Sampler) },
+            {Albedo.Palettized_Plus_Alpha, new TemplateParameter(typeof(Albedo), "alpha_map", ShaderParameter.RType.Sampler) },
+        };
 
-		#region Enums
+        #endregion
 
-		public enum Albedo
+        #region Enums
+
+        public Albedo albedo => (Albedo)EnumValues[0];
+        public Blend_Mode blend_mode => (Blend_Mode)EnumValues[1];
+        public Black_Point black_point => (Black_Point)EnumValues[2];
+        public Fog fog => (Fog)EnumValues[3];
+
+        public enum Albedo
         {
             DiffuseOnly,
             Palettized,

@@ -1,7 +1,7 @@
 ﻿#define terrain_template
 #define _debug_color float4(0, 170, 170, 255) / 255;
-#include "terrain_template_methods/template_default_defs.hlsl"
-#include "terrain_template_methods/template_includes.hlsl"
+#include "template_default_defs.hlsl"
+#include "template_includes.hlsl"
 #include "../helpers.hlsl"
 
 struct VS_OUTPUT
@@ -57,7 +57,6 @@ float3 bungie_color_processing_terrain(float3 color)
 PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
 	float2 texcoord = input.TexCoord.xy;
-	// Untested, its possible these tangents are reversed
 	float3 tangentspace_x = normalize(input.TexCoord3.xyz);
 	float3 tangentspace_y = normalize(input.TexCoord2.xyz);
 	float3 tangentspace_z = normalize(input.TexCoord1.xyz);

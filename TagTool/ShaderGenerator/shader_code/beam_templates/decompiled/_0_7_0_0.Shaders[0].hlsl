@@ -5,7 +5,7 @@ struct VS_OUTPUT
 {
 	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
-	float4 TexCoord0 : TEXCOORD0;
+	float4 TexCoord : TEXCOORD;
 };
 
 struct PS_OUTPUT
@@ -22,9 +22,9 @@ PS_OUTPUT main(VS_OUTPUT In) : COLOR
 	// Blend_Mode.Add_Src_Times_DstAlpha
 	// BlackPoint.Off
 	// Fog.Off
-	r0 = tex2Dlod(base_map, In.TexCoord); // texld r0, v2, s0							   
-	r0.w = r0.w * In.Color.w; // mul r0.w, r0.w, v0.w
-	r1.xyz = In.Color.xyz; // mov r1.xyz, v0
+	r0 = tex2D(base_map, In.TexCoord); // texld r0, v2, s0							   
+	r0.w = r0.w * In.Color0.w; // mul r0.w, r0.w, v0.w
+	r1.xyz = In.Color0.xyz; // mov r1.xyz, v0
 	r0.xyz = ((r0 * r1) + In.Color1).xyz; // mad r0.xyz, r0, r1, v1
 	oC0.w = r0.w * g_exposure.w; // mul oC0.w, r0.w, c0.w
 	oC1.w = r0.w * g_exposure.z; // mul oC1.w, r0.w, c0.z

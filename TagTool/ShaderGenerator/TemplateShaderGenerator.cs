@@ -164,7 +164,8 @@ namespace TagTool.ShaderGenerator
 
             foreach (var type in types)
             {
-                var value = this.GetType().GetProperty(type.Name.ToLower()).GetValue(this);
+                var this_type = this.GetType();
+                var value = this_type.GetProperty(type.Name.ToLower()).GetValue(this);
                 if (value == null) throw new Exception("Value should never be null");
                 var _params = GetShaderParametersList(value);
                 parameter_lists.Add(_params);

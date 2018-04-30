@@ -7,7 +7,7 @@ struct VS_OUTPUT
 {
 	float4 Color0 : COLOR0;
 	float4 Color1 : COLOR1;
-	float4 TexCoord0 : TEXCOORD0;
+	float4 TexCoord : TEXCOORD;
 };
 
 struct PS_OUTPUT
@@ -27,13 +27,13 @@ PS_OUTPUT main(VS_OUTPUT In) : COLOR
 	// Blend_Mode.Inv_Alpha_Blend
 	// BlackPoint.Off
 	// Fog.Off
-	r0 = tex2Dlod(alpha_map, In.TexCoord0); // texld r0, v2, s2					   
+	r0 = tex2D(alpha_map, In.TexCoord0); // texld r0, v2, s2					   
 	r0.x = r0.w * In.Color0.w; // mul r0.x, r0.w, v0.w
 	oC0.w = r0.x * g_exposure.w; // mul oC0.w, r0.x, c0.w
 	oC1.w = r0.x * g_exposure.z; // mul oC1.w, r0.x, c0.z
-	r0 = tex2Dlod(base_map, In.TexCoord0); // texld r0, v2, s0
+	r0 = tex2D(base_map, In.TexCoord0); // texld r0, v2, s0
 	r0.y = In.TexCoord0.z; // mov r0.y, v2.z
-	r0 = tex2Dlod(palette, r0); // texld r0, r0, s1
+	r0 = tex2D(palette, r0); // texld r0, r0, s1
 	r1.xyz = In.Color0.xyz; // mov r1.xyz, v0
 	r0.xyz = ((r0 * r1) + In.Color1).xyz;// mad r0.xyz, r0, r1, v1
 	r0.w = 1.0f / g_exposure.y; // rcp r0.w, c0.y
