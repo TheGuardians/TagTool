@@ -743,8 +743,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ShaderGenerator\shader_code\beam_templates\beam_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_7_0_0.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_8_0_0.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_7_0_0[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_8_0_0[0].hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_2_8_0_0[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\albedo.hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\black_point.hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\blend_mode.hlsl" />
