@@ -29,7 +29,7 @@ namespace TagTool.Commands.Files
                   "UpdateMapFiles",
                   "Updates the game's .map files to contain valid scenario indices.",
 
-                  "UpdateMapFiles",
+                  "UpdateMapFiles [MapInfo Directory]",
 
                   "Updates the game's .map files to contain valid scenario indices.")
         {
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Files
         
         public override object Execute(List<string> args)
         {
-            if (args.Count != 0)
+            if (args.Count > 1)
                 return false;
             
             var scenarioIndices = new Dictionary<int, (ScenarioMapType, int)>();
@@ -76,6 +76,11 @@ namespace TagTool.Commands.Files
                 if (!mapFile.Exists)
                     mapFile = ((entry.Value.Item1 == ScenarioMapType.Multiplayer) ? guardianMapFile : mainmenuMapFile).CopyTo(mapFile.FullName);
 
+                DirectoryInfo mapInfoDir = null;
+
+                if (args.Count == 1)
+                    mapInfoDir = new DirectoryInfo(args[0]);
+
                 using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
                 using (var reader = new BinaryReader(stream))
                 using (var writer = new BinaryWriter(stream))
@@ -96,6 +101,71 @@ namespace TagTool.Commands.Files
 
                     stream.Position = ScenarioTagIndexOffset;
                     writer.Write(entry.Value.Item2);
+
+                    if (mapInfoDir != null)
+                    {
+                        var mapInfoFiles = mapInfoDir.GetFiles(mapName + ".mapinfo");
+
+                        if (mapInfoFiles != null && mapInfoFiles.Length > 0)
+                        {
+                            var mapInfoFile = mapInfoFiles[0];
+
+                            using (var infoStream = mapInfoFile.OpenRead())
+                            using (var infoReader = new BinaryReader(infoStream))
+                            {
+                                var mapNames = new char[12][];
+
+                                infoStream.Position = 0x44;
+                                for (var i = 0; i < 12; i++)
+                                    mapNames[i] = infoReader.ReadChars(0x40);
+
+                                stream.Position = 0x33D4;
+                                foreach (var mapNameUnicode in mapNames)
+                                {
+                                    for (var c = 0; c < mapNameUnicode.Length; c += 2)
+                                    {
+                                        var temp = mapNameUnicode[c];
+                                        mapNameUnicode[c] = mapNameUnicode[c + 1];
+                                        mapNameUnicode[c + 1] = temp;
+                                    }
+
+                                    writer.Write(mapNameUnicode);
+                                }
+
+                                var mapDescriptions = new byte[12][];
+
+                                infoStream.Position = 0x344;
+                                for (var i = 0; i < 12; i++)
+                                {
+                                    mapDescriptions[i] = infoReader.ReadBytes(0x100);
+                                }
+
+                                stream.Position = 0x36D4;
+                                foreach (var mapDescription in mapDescriptions)
+                                {
+                                    for (var c = 0; c < mapDescription.Length; c += 2)
+                                    {
+                                        var temp = mapDescription[c];
+                                        mapDescription[c] = mapDescription[c + 1];
+                                        mapDescription[c + 1] = temp;
+                                    }
+
+                                    writer.Write(mapDescription);
+                                }
+
+                                stream.Position = 0xBD88;
+                                writer.Write(mapNames[0], 0, 32);
+
+                                var description = new string(mapDescriptions[0].Select(i => Convert.ToChar(i)).ToArray()).Replace("\0", "");
+
+                                stream.Position = 0xBDA8;
+                                writer.Write(description.ToArray());
+
+                                for (var i = 0; i < (0x80 - description.Length); i++)
+                                    writer.Write('\0');
+                            }
+                        }
+                    }
 
                     if (entry.Value.Item1 == ScenarioMapType.Multiplayer)
                     {
