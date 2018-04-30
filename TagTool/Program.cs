@@ -41,7 +41,10 @@ namespace TagTool.Commands
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
-				if (File.Exists(tagCacheFile))
+                //sometimes drag&drop files have quotes placed around them, remove the quotes
+                tagCacheFile = tagCacheFile.Replace("\"", "").Replace("\'", "");
+
+                if (File.Exists(tagCacheFile))
 					fileInfo = new FileInfo(tagCacheFile);
 				else
 					Console.WriteLine("Invalid path to 'tags.dat'!");
