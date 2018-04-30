@@ -48,15 +48,28 @@ namespace TagTool.Commands.Geometry
 
             if (args.Count == 2)
             {
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(args[1]), EndianFormat.LittleEndian))
+                using (var edResourceStream = new MemoryStream())
+                using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
-                    using (var edResourceStream = new MemoryStream())
-                    using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+                    var directory = args[1];
+                    if (!Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+
+                    var dataOutDir = directory;
+
+                    for (var i = 0; i < definition.VertexBuffers.Count; i++)
                     {
-                        CacheContext.ExtractResource(Geometry.Resource, edResourceStream);
-                        edResourceStream.Position = 0;
-                        byte[] data = edResourceReader.ReadBytes((int)edResourceStream.Length);
-                        output.WriteBlock(data);
+                        edResourceStream.Position = definition.VertexBuffers[i].Definition.Data.Address.Offset;
+
+                        var vertexBuffer = definition.VertexBuffers[i].Definition;
+
+                        dataOutDir = Path.Combine(directory, $"{i}_{vertexBuffer.Format}_{vertexBuffer.Count}");
+
+                        using (EndianWriter output = new EndianWriter(File.OpenWrite(dataOutDir), EndianFormat.LittleEndian))
+                        {
+                            byte[] data = edResourceReader.ReadBytes((int)vertexBuffer.Data.Size);
+                            output.WriteBlock(data);
+                        }
                     }
                 }
             }
