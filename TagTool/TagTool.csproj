@@ -768,37 +768,99 @@
     <Content Include="ShaderGenerator\shader_code\beam_templates\methods\fog.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\contrail_templates\contrail_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\cortana_templates\cortana_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\foliage_templates\foliage_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\alpha_test.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\material_model.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\halogram_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\edge_fade.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\misc.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\overlay.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\self_illumination.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\warp.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_templates\light_volume_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\particle_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\depth_fade.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\lighting.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\render_targets.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\specialized_rendering.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\contrail_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\black_point.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\fog.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\cortana_templates\cortana_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\foliage_templates\foliage_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\alpha_test.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\foliage_templates\methods\material_model.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\halogram_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\edge_fade.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\misc.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\overlay.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\self_illumination.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\halogram_templates\methods\warp.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\light_volume_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\light_volume_templates\methods\fog.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\particle_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\black_point.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\depth_fade.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\fog.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\lighting.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\render_targets.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\particle_templates\methods\specialized_rendering.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\terrain_templates\terrain_template.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -893,15 +955,33 @@
     <Content Include="ShaderGenerator\shader_code\terrain_templates\template_includes.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\water_templates\water_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\appearance.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\bank_alpha.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\foam.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\global_shape.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\reflection.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\refraction.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\water_color.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\water_templates\methods\wave_shape.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\water_templates\water_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\appearance.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\bank_alpha.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\foam.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\global_shape.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\reflection.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\refraction.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\water_color.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\water_templates\methods\wave_shape.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\zanzibar_water_awesome.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
