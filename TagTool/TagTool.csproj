@@ -742,16 +742,32 @@
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ShaderGenerator\shader_code\beam_templates\beam_template.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\beam_template.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\beam_templates\template_default_defs.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\beam_templates\template_includes.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\contrail_templates\decompiled\_0_3_0_0.Shaders[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\contrail_templates\decompiled\_0_3_1_0.Shaders[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_7_0_0.Shaders[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_0_8_0_0.Shaders[0].hlsl" />
     <Content Include="ShaderGenerator\shader_code\beam_templates\decompiled\_2_8_0_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\fog.hlsl" />
+    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\albedo.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\black_point.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\blend_mode.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\beam_templates\methods\fog.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ShaderGenerator\shader_code\contrail_templates\contrail_template.hlsl" />
     <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\albedo.hlsl" />
     <Content Include="ShaderGenerator\shader_code\contrail_templates\methods\black_point.hlsl" />

@@ -57,7 +57,6 @@ float3 bungie_color_processing_terrain(float3 color)
 PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
 	float2 texcoord = input.TexCoord.xy;
-	// Untested, its possible these tangents are reversed
 	float3 tangentspace_x = normalize(input.TexCoord3.xyz);
 	float3 tangentspace_y = normalize(input.TexCoord2.xyz);
 	float3 tangentspace_z = normalize(input.TexCoord1.xyz);
