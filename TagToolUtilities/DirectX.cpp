@@ -26,33 +26,43 @@ void DirectX::SetCompilerFileOverrides(System::Collections::Generic::Dictionary<
 	FileOverrides = file_overrides;
 }
 
-array<Byte>^ DirectX::AssemblePCShader(String ^ source)
-{
-	throw gcnew System::NotImplementedException();
+/* With <3 Squaresome */
+HRESULT WINAPI D3DAssemble(
+	const void *data,
+	SIZE_T datasize,
+	const char *filename,
+	const D3D_SHADER_MACRO *defines,
+	ID3DInclude *include,
+	UINT flags,
+	ID3DBlob **shader,
+	ID3DBlob **error_messages
+);
 
-	//	if (_source == nullptr) throw gcnew Exception("source is null");
-	//
-	//	std::string source = MarshalStringA(_source);
-	//
-	//	LPD3DXBUFFER buffer = nullptr;
-	//	LPD3DXBUFFER errors = nullptr;
-	//
-	//	HRESULT result = D3DXAssembleShader(source.c_str(), (UINT)source.length(), NULL, NULL, 0, &buffer, &errors);
-	//
-	//	if (result != S_OK) {
-	//
-	//		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
-	//		throw gcnew Exception(errors_str);
-	//
-	//	}
-	//
-	//	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
-	//	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
-	//	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
-	//		arr[i] = ptr[i];
-	//	}
-	//
-	//	return arr;
+array<Byte>^ DirectX::AssemblePCShader(String ^ _source)
+{
+	if (_source == nullptr) throw gcnew Exception("source is null");
+	
+	std::string source = Helpers::MarshalStringA(_source);
+
+	LPD3DBLOB buffer = nullptr;
+	LPD3DBLOB errors = nullptr;
+	
+	HRESULT result = D3DAssemble(source.c_str(), (UINT)source.length(), NULL, NULL, NULL, 0, &buffer, &errors);
+	
+	if (result != S_OK) {
+	
+		String^ errors_str = gcnew String(reinterpret_cast<char*>(errors->GetBufferPointer()));
+		throw gcnew Exception(errors_str);
+	
+	}
+	
+	auto arr = gcnew array<Byte>(buffer->GetBufferSize());
+	auto ptr = reinterpret_cast<char*>(buffer->GetBufferPointer());
+	for (DWORD i = 0; i < buffer->GetBufferSize(); i++) {
+		arr[i] = ptr[i];
+	}
+	
+	return arr;
 
 }
 
