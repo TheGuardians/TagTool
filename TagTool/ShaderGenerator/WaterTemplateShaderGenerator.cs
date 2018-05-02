@@ -87,10 +87,20 @@ namespace TagTool.ShaderGenerator
 
 		};
 
-		#endregion
-		#region Enums
+        #endregion
 
-		public enum Wave_Shape
+        #region Enums
+
+        public Wave_Shape wave_shape => (Wave_Shape)EnumValues[0];
+        public Water_Color water_color => (Water_Color)EnumValues[1];
+        public Reflection reflection => (Reflection)EnumValues[2];
+        public Refraction refraction => (Refraction)EnumValues[3];
+        public Bank_Alpha bank_alpha => (Bank_Alpha)EnumValues[4];
+        public Appearance appearance => (Appearance)EnumValues[5];
+        public Global_Shape global_shape => (Global_Shape)EnumValues[6];
+        public Foam foam => (Foam)EnumValues[7];
+
+        public enum Wave_Shape
         {
             Default,
             None,
