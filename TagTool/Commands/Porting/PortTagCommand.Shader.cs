@@ -346,7 +346,7 @@ namespace TagTool.Commands.Porting
                 var shaderInvalid = ArgumentParser.ParseTagName(CacheContext, $"shaders\\invalid.rmsh");
 
                 if (shaderInvalid == null)
-                    shaderInvalid = CacheContext.GetTag(0x101F);
+                    shaderInvalid = CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
 
                 var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
 

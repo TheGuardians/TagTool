@@ -16,7 +16,7 @@ namespace TagTool.Commands.Files
     {
         public GameCacheContext CacheContext { get; }
         private Dictionary<int, CachedTagInstance> ConvertedTags { get; } = new Dictionary<int, CachedTagInstance>();
-        private Dictionary<ResourceLocation, Dictionary<int, PageableResource>> ConvertedResources { get; } = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
+        private Dictionary<ResourceLocation, Dictionary<int, PageableResource>> CopiedResources { get; } = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
         private MultiplayerGlobals MulgDefinition { get; set; } = null;
         private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
         private bool NoVariants { get; set; } = false;
@@ -55,7 +55,7 @@ namespace TagTool.Commands.Files
             }
 
             ConvertedTags.Clear();
-            ConvertedResources.Clear();
+            CopiedResources.Clear();
 
             var destDirectory = new DirectoryInfo(args[0]);
 
@@ -73,6 +73,9 @@ namespace TagTool.Commands.Files
                 ResourceCache resourceCache = null;
                 var location = (ResourceLocation)value;
 
+                if (location == ResourceLocation.None)
+                    continue;
+
                 try
                 {
                     resourceCache = CacheContext.GetResourceCache(location);
@@ -82,7 +85,7 @@ namespace TagTool.Commands.Files
                     continue;
                 }
 
-                ConvertedResources[location] = new Dictionary<int, PageableResource>();
+                CopiedResources[location] = new Dictionary<int, PageableResource>();
 
                 srcResourceCaches[location] = resourceCache;
                 destResourceCaches[location] = CacheContext.CreateResourceCache(destDirectory, location);
@@ -93,66 +96,18 @@ namespace TagTool.Commands.Files
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
-                ConvertTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
+                CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
 
                 foreach (var scnrTag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
-                    ConvertTag(scnrTag, CacheContext, srcStream, destCacheContext, destStream);
+                    CopyTag(scnrTag, CacheContext, srcStream, destCacheContext, destStream);
             }
 
             destCacheContext.SaveTagNames();
-
-            foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
-            {
-                try
-                {
-                    using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                    using (var reader = new EndianReader(stream))
-                    using (var writer = new EndianWriter(stream))
-                    {
-                        if (reader.ReadInt32() != new Tag("head").Value)
-                        {
-                            Console.Error.WriteLine("Invalid map file");
-                            return true;
-                        }
-
-                        reader.BaseStream.Position = 0x2DEC;
-                        var mapId = reader.ReadInt32();
-
-                        if (MapScenarios.ContainsKey(mapId))
-                        {
-                            var mapIndex = MapScenarios[mapId];
-
-                            writer.BaseStream.Position = 0x2DF0;
-                            writer.Write(mapIndex);
-
-                            Console.WriteLine($"Scenario tag index for {mapFile.Name}: {mapIndex:X8}");
-
-                            var dataContext = new DataSerializationContext(reader, writer);
-
-                            stream.Seek(0xBD80, SeekOrigin.Begin);
-                            var mapVariant = CacheContext.Deserializer.Deserialize<MapVariant>(dataContext);
-
-                            foreach (var entry in mapVariant.BudgetEntries)
-                                if (ConvertedTags.ContainsKey(entry.TagIndex))
-                                    entry.TagIndex = ConvertedTags[entry.TagIndex].Index;
-
-                            stream.Seek(0xBD80, SeekOrigin.Begin);
-                            CacheContext.Serializer.Serialize(dataContext, mapVariant);
-
-                            stream.SetLength(stream.Position);
-                        }
-                    }
-                }
-                catch (IOException)
-                {
-                    Console.Error.WriteLine($"Unable to open \"{mapFile.Name}.{mapFile.Extension}\" for reading.");
-                }
-            }
-
+            
             return true;
         }
 
-        private CachedTagInstance ConvertTag(CachedTagInstance srcTag, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private CachedTagInstance CopyTag(CachedTagInstance srcTag, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
         {
             if (srcTag == null)
                 return null;
@@ -183,8 +138,8 @@ namespace TagTool.Commands.Files
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index))
                 destCacheContext.TagNames[destTag.Index] = srcCacheContext.TagNames[srcTag.Index];
 
-            if (NoVariants && srcTag.IsInGroup("mulg"))
-                CleanMultiplayerGlobals((MultiplayerGlobals)tagData);
+            if (NoVariants && tagData is MultiplayerGlobals mulg)
+                CleanMultiplayerGlobals(mulg);
 
             if (structureType == typeof(Scenario))
             {
@@ -197,10 +152,10 @@ namespace TagTool.Commands.Files
                     CleanScenario(srcStream, scenario);
             }
 
-            tagData = ConvertData(tagData, srcCacheContext, srcStream, destCacheContext, destStream);
+            tagData = CopyData(tagData, srcCacheContext, srcStream, destCacheContext, destStream);
 
             if (structureType == typeof(Scenario))
-                ConvertScenario((Scenario)tagData);
+                CopyScenario((Scenario)tagData);
 
             var destContext = new TagSerializationContext(destStream, destCacheContext, destTag);
             destCacheContext.Serializer.Serialize(destContext, tagData);
@@ -212,7 +167,7 @@ namespace TagTool.Commands.Files
             return destTag;
         }
 
-        private object ConvertData(object data, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyData(object data, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
         {
             if (data == null)
                 return null;
@@ -223,24 +178,24 @@ namespace TagTool.Commands.Files
                 return data;
 
             if (type == typeof(CachedTagInstance))
-                return ConvertTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream);
+                return CopyTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream);
 
             if (type == typeof(PageableResource))
-                return ConvertResource((PageableResource)data, srcCacheContext, destCacheContext);
+                return CopyResource((PageableResource)data, srcCacheContext, destCacheContext);
             
             if (type.IsArray)
-                return ConvertArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream);
+                return CopyArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream);
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
+                return CopyList(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
+                return CopyStructure(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
 
             return data;
         }
 
-        private Array ConvertArray(Array array, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private Array CopyArray(Array array, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -248,14 +203,14 @@ namespace TagTool.Commands.Files
             for (var i = 0; i < array.Length; i++)
             {
                 var oldValue = array.GetValue(i);
-                var newValue = ConvertData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
                 array.SetValue(newValue, i);
             }
 
             return array;
         }
 
-        private object ConvertList(object list, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyList(object list, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -267,7 +222,7 @@ namespace TagTool.Commands.Files
             for (var i = 0; i < count; i++)
             {
                 var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
 
                 setItem.Invoke(list, new object[] { i, newValue });
             }
@@ -275,21 +230,21 @@ namespace TagTool.Commands.Files
             return list;
         }
 
-        private object ConvertStructure(object data, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyStructure(object data, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
         {
             var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, destCacheContext.Version));
 
             while (enumerator.Next())
             {
                 var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
                 enumerator.Field.SetValue(data, newValue);
             }
             
             return data;
         }
 
-        private PageableResource ConvertResource(PageableResource resource, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
+        private PageableResource CopyResource(PageableResource resource, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
         {
             if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
@@ -298,13 +253,13 @@ namespace TagTool.Commands.Files
             {
                 var index = resource.Page.Index;
 
-                if (ConvertedResources[location].ContainsKey(index))
-                    return ConvertedResources[location][index];
+                if (CopiedResources[location].ContainsKey(index))
+                    return CopiedResources[location][index];
 
                 var data = srcCacheContext.ExtractRawResource(resource);
                 destCacheContext.AddRawResource(resource, location, data);
 
-                ConvertedResources[location][index] = resource;
+                CopiedResources[location][index] = resource;
             }
 
             return resource;
@@ -333,7 +288,7 @@ namespace TagTool.Commands.Files
             }
         }
 
-        private void ConvertScriptTagReferenceExpressionData(ScriptExpression expr)
+        private void CopyScriptTagReferenceExpressionData(ScriptExpression expr)
         {
             var srcTagIndex = BitConverter.ToInt32(expr.Data, 0);
             var destTagIndex = srcTagIndex == -1 ? -1 : ConvertedTags[srcTagIndex].Index;
@@ -663,7 +618,7 @@ namespace TagTool.Commands.Files
             scnrDefinition.SandboxWeapons = sandboxWeapons;
         }
 
-        private void ConvertScenario(Scenario scnrDefinition)
+        private void CopyScenario(Scenario scnrDefinition)
         {
             foreach (var expr in scnrDefinition.ScriptExpressions)
             {
@@ -689,7 +644,7 @@ namespace TagTool.Commands.Files
                     case ScriptValueType.HaloOnlineValue.BinkDefinition:
                     case ScriptValueType.HaloOnlineValue.AnyTag:
                     case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
-                        ConvertScriptTagReferenceExpressionData(expr);
+                        CopyScriptTagReferenceExpressionData(expr);
                         break;
 
                     default:

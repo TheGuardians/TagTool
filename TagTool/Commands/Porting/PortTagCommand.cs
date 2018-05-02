@@ -301,55 +301,11 @@ namespace TagTool.Commands.Porting
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return null;
                 case "rmct": // Cortana shaders have no example in HO, they need a real port
-                    return CacheContext.GetTag(0x101F);
+                    return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
-                    return CacheContext.GetTag(0x101F);
+                    return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
             }
-
-            //
-            // Handle shader tags when not porting or matching shaders
-            //
-
-            if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
-                (!UseShaderTest && !MatchShaders))
-            {
-                switch (groupTag.ToString())
-                {
-                    case "rmhg":
-                        return CacheContext.GetTag(0x2647);
-
-                    case "rmtr":
-                        return CacheContext.GetTag(0x3AAD);
-
-                    case "rmd ":
-                        return CacheContext.GetTag(0x1BA2);
-
-                    case "rmfl":
-                        return CacheContext.GetTag(0x4CA9);
-
-                    case "rmsh":
-                    case "rmss":
-                    case "rmrd":
-                    case "rmcs":
-                        return CacheContext.GetTag(0x101F);
-
-                    case "beam":
-                        return CacheContext.GetTag(0x18B5);
-
-                    case "cntl":
-                        return CacheContext.GetTag(0x528);
-
-                    case "ltvl":
-                        return CacheContext.GetTag(0x594);
-
-                    case "decs":
-                        return CacheContext.GetTag(0x3A4);
-
-                    case "prt3":
-                        return CacheContext.GetTag(0x29E);
-                }
-            }
-
+            
             //
             // Handle tags that are not ready to be ported
             //
@@ -359,16 +315,16 @@ namespace TagTool.Commands.Porting
                 switch (groupTag.ToString())
                 {
                     case "foot":
-                        return CacheContext.GetTag(0xC0D);
+                        return CacheContext.GetTagInstance<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
 
                     case "shit":
-                        return CacheContext.GetTag(0x139C);
+                        return CacheContext.GetTagInstance<ShieldImpact>(@"globals\global_shield_impact_settings");
 
                     case "effe":
-                        return CacheContext.GetTag(0x12FE);
+                        return CacheContext.GetTagInstance<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
 
                     case "sncl":
-                        return CacheContext.GetTag(0x019F);
+                        return CacheContext.GetTagInstance<SoundClasses>(@"sound\sound_classes");
                 }    
             }
 

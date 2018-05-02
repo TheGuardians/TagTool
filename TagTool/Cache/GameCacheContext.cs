@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -175,7 +176,25 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="index">The index of the tag.</param>
         /// <returns></returns>
-        public CachedTagInstance GetTag(int index) => index > 0 ? TagCache.Index[index] : null;
+        public CachedTagInstance GetTag(int index) => index > 0 ? TagCache.Index[index] : throw new KeyNotFoundException(index.ToString());
+
+        public CachedTagInstance GetTagInstance<T>(string name)
+        {
+            var groupTag = TagDefinition.Types.First(entry => entry.Value == typeof(T)).Key;
+
+            foreach (var entry in TagNames)
+            {
+                if (entry.Value != name)
+                    continue;
+
+                var instance = TagCache.Index[entry.Key];
+
+                if (instance.IsInGroup(groupTag))
+                    return instance;
+            }
+
+            throw new KeyNotFoundException($"'{groupTag}' tag \"{name}\"");
+        }
 
         /// <summary>
         /// Loads tag file names from the appropriate tagnames.csv file.
