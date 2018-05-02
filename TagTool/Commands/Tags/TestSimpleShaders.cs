@@ -48,20 +48,20 @@ namespace TagTool.Commands.Tags
 
 				// foreach rmsh tag:
 				var groups = new List<Tag> { };
-				groups.Add(new Tag("rmsh"));
+				groups.Add(new Tag("rmtr"));
 				foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups(groups))
 				{
 					tagContext = new TagSerializationContext(tagsStream, CacheContext, tag);
-					var rmsh = CacheContext.Deserializer.Deserialize<Shader>(tagContext);
+					var rmtr = CacheContext.Deserializer.Deserialize<ShaderTerrain>(tagContext);
 
-					if (rmsh.ShaderProperties.Count > 0 && 
-						rmsh.ShaderProperties[0].ShaderMaps.Count > 0 &&
+					if (rmtr.ShaderProperties.Count > 0 && 
+						rmtr.ShaderProperties[0].ShaderMaps.Count > 0 &&
 						!Omits.Contains(tag.Index))
 					{
 						// get average color of the first bitm in the shader.
 						float[] color;
 						var extractor = new BitmapDdsExtractor(CacheContext);
-						tagContext = new TagSerializationContext(tagsStream, CacheContext, rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap);
+						tagContext = new TagSerializationContext(tagsStream, CacheContext, rmtr.ShaderProperties[0].ShaderMaps[0].Bitmap);
 						var bitmap = CacheContext.Deserializer.Deserialize<Bitmap>(tagContext);
 						using (var outStream = new MemoryStream())
 						{
@@ -74,16 +74,16 @@ namespace TagTool.Commands.Tags
 
 						// deserialize our NEW rmsh (at the same index as before
 						tagContext = new TagSerializationContext(tagsStream, CacheContext, tag);
-						rmsh = CacheContext.Deserializer.Deserialize<Shader>(tagContext);
+						rmtr = CacheContext.Deserializer.Deserialize<ShaderTerrain>(tagContext);
 
 						// setup or color from above into the albedo_color arguments of our new rmsh
-						rmsh.ShaderProperties[0].Arguments[2].Arg1 = color[0];
-						rmsh.ShaderProperties[0].Arguments[2].Arg2 = color[1];
-						rmsh.ShaderProperties[0].Arguments[2].Arg3 = color[2];
-						rmsh.ShaderProperties[0].Arguments[2].Arg4 = color[3];
+						rmtr.ShaderProperties[0].Arguments[2].Arg1 = color[0];
+						rmtr.ShaderProperties[0].Arguments[2].Arg2 = color[1];
+						rmtr.ShaderProperties[0].Arguments[2].Arg3 = color[2];
+						rmtr.ShaderProperties[0].Arguments[2].Arg4 = color[3];
 
 						// serialize our rmsh
-						CacheContext.Serialize(tagContext, rmsh);
+						CacheContext.Serialize(tagContext, rmtr);
 						Console.WriteLine($"Updated 0x{tag.Index.ToString("X4")}.rmsh");
 					}
 				}

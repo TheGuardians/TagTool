@@ -53,7 +53,7 @@ namespace TagTool.Commands.CollisionModels
                             {
                                 _writer.Write("f");
                                 foreach (var index in entry.Value)
-                                    _writer.Write($" {index}");
+                                    _writer.Write($" {index + 1}");
                                 _writer.WriteLine();
                             }
                         }
