@@ -300,12 +300,58 @@ namespace TagTool.Commands.Porting
             {
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return null;
+
                 case "rmct": // Cortana shaders have no example in HO, they need a real port
                     return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
+
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
             }
-            
+
+            //
+            // Handle shader tags when not porting or matching shaders
+            //
+
+            if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
+                (!UseShaderTest && !MatchShaders))
+            {
+                switch (groupTag.ToString())
+                {
+                    case "rmhg":
+                        return CacheContext.GetTagInstance<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+
+                    case "rmtr":
+                        return CacheContext.GetTagInstance<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+
+                    case "rmd ":
+                        return CacheContext.GetTagInstance<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+
+                    case "rmfl":
+                        return CacheContext.GetTagInstance<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+
+                    case "rmsh":
+                    case "rmss":
+                    case "rmrd":
+                    case "rmcs":
+                        return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
+
+                    case "beam":
+                        return CacheContext.GetTagInstance<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
+
+                    case "cntl":
+                        return CacheContext.GetTagInstance<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+
+                    case "ltvl":
+                        return CacheContext.GetTagInstance<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+
+                    case "decs":
+                        return CacheContext.GetTagInstance<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+
+                    case "prt3":
+                        return CacheContext.GetTagInstance<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
+                }
+            }
+
             //
             // Handle tags that are not ready to be ported
             //
