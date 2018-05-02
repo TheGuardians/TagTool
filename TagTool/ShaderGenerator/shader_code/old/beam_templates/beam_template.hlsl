@@ -31,6 +31,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 
 	PS_OUTPUT output;
 
+
 	// High Frequency
 	output.Color0 = Black_Point(float4(color, alpha * g_exposure.w));
 

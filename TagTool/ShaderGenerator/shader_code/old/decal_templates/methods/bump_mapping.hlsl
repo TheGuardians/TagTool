@@ -3,15 +3,7 @@
 #ifdef flag_bump_mapping_leave
 
 //NOTE: This should not be set to output but actually never set the output result at all.
-float3 bump_mapping_leave(
-	float3 tangentspace_x,
-	float3 tangentspace_y,
-	float3 tangentspace_z,
-	float2 texcoord
-)
-{
-	return float3(0.0, 0.0, 0.0);
-}
+#define bump_mapping_leave(tangentspace_x, tangentspace_y, tangentspace_z, texcoord) ()
 
 #endif
 

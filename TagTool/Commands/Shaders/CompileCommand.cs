@@ -53,6 +53,22 @@ namespace TagTool.Commands.Shaders
 
             int index = use_assembly_compiler ? int.Parse(args[1]) : int.Parse(args[0]);
 
+            if (!use_assembly_compiler)
+            {
+                using (var reader = new StringReader(shader_code))
+                {
+                    for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
+                    {
+                        var str = line.Trim();
+                        if (str == "ps_3_0" || str == "vs_3_0")
+                        {
+                            use_assembly_compiler = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             byte[] bytecode = null;
             if (use_assembly_compiler)
             {
@@ -70,6 +86,7 @@ namespace TagTool.Commands.Shaders
 
 			new Disassemble(bytecode, out string disassembly);
 
+            Console.WriteLine(disassembly);
 
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))

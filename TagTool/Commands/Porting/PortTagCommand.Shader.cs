@@ -139,51 +139,53 @@ namespace TagTool.Commands.Porting
                         throw new Exception($"Unsupported shader index {i}.");
                     }
 
+                    var drawmode = TemplateShaderGenerator.Drawmode.Default;
+
                     ShaderGeneratorResult shader_gen_result;
                     switch (type)
                     {
                         case "beam_templates":
-                            shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "contrail_templates":
-                            shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "cortana_templates":
-                            shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "decal_templates":
-                            shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "foliage_templates":
-                            shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "halogram_templates":
-                            shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "light_volume_templates":
-                            shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "particle_templates":
-                            shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "shader_templates":
-                            shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "terrain_templates":
-                            shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         case "water_templates":
-                            shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+                            shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                             break;
 
                         default:

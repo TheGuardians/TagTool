@@ -21,39 +21,6 @@ struct PS_OUTPUT
 #endif
 };
 
-float3 bungie_color_processing_terrain(float3 color)
-{
-	float4 c0 = float4(2.00787401, -1.00787401, 0, 1);
-	float4 c1 = float4(4.59478998, 0.00313080009, 12.9200001, 0.416666657);
-	float4 c2 = float4(1.05499995, -0.0549999997, 0.5, 0);
-
-	float4 r2, r3, r5;
-
-	r2.xyz = color;
-
-	r3.x = c1.x; //mov r3.x, c1.x
-	r2.w = r3.x * global_albedo_tint.x; //mul r2.w, r3.x, c60.x
-	r3.xyz = r2.xyz * r2.w; //mul r3.xyz, r2.w, r2
-	r2.xyz = r2.xyz * -r2.w + debug_tint.xyz; //mad r2.xyz, r2, -r2.w, c58
-	r2.xyz = r2.xyz * debug_tint.w + r3.xyz; //mad r2.xyz, c58.w, r2, r3
-											 //log r3.x, r2.x
-											 //log r3.y, r2.y
-											 //log r3.z, r2.z
-	r3.xyz = log(r2.xyz);
-	r3.xyz = r3.xyz * c1.w; //mul r3.xyz, r3, c1.w
-							//exp r5.x, r3.x
-							//exp r5.y, r3.y
-							//exp r5.z, r3.z
-	r5.xyz = exp(r3.xyz);
-	r3.xyz = r5.xyz * c2.x + c2.y; //mad r3.xyz, r5, c2.x, c2.y
-	r5.xyz = -r2.xyz + c1.y; //add r5.xyz, -r2, c1.y
-	r2.xyz = r2.xyz * c1.z; //mul r2.xyz, r2, c1.z
-							//cmp oC0.xyz, r5, r2, r3
-	float3 result = r5.xyz >= 0 ? r2.xyz : r3.xyz;
-
-	return result;
-}
-
 PS_OUTPUT main(VS_OUTPUT input) : COLOR
 {
 	float2 texcoord = input.TexCoord.xy;
@@ -106,7 +73,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	normal_aggregate += normal_m_2;
 
 #endif
-	//#ifndef flag_material_3_off
+#ifndef flag_material_3_off
 	MATERIAL_RESULT material_3 = Material_3(texcoord);
 
 	float4 color_m_3 = material_3.Color * blend_weights.w;
@@ -117,7 +84,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	normal_m_3 = -blend_weights.w >= 0 ? float3(0.0, 0.0, 0.0) : normal_m_3;
 	normal_aggregate += normal_m_3;
 
-	//#endif
+#endif
 
 	color_aggregate.xyz = bungie_color_processing_terrain(color_aggregate.xyz);
 

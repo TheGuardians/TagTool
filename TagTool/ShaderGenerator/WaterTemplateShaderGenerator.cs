@@ -12,85 +12,58 @@ using TagTool.Util;
 namespace TagTool.ShaderGenerator
 {
 	public class WaterTemplateShaderGenerator : TemplateShaderGenerator
-	{
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/water_templates/water_template.hlsl";
+    {
+        protected override string ShaderFile { get; } = "ShaderGenerator/shader_code/water.hlsl";
+        protected override string ShaderGeneratorType => "water_template";
+        protected override List<DirectX.MacroDefine> TemplateDefinitions => new List<DirectX.MacroDefine>
+        {
+            new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
+        };
 
-		public WaterTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
-				(Wave_Shape)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Water_Color)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Reflection)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Refraction)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Bank_Alpha)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Appearance)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Global_Shape)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Foam)(args.Length == arg_pos ? 0 : args[arg_pos++]))
+        public WaterTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+                drawmode,
+                (Wave_Shape)GetNextTemplateArg(args, ref arg_pos),
+				(Water_Color)GetNextTemplateArg(args, ref arg_pos),
+				(Reflection)GetNextTemplateArg(args, ref arg_pos),
+				(Refraction)GetNextTemplateArg(args, ref arg_pos),
+				(Bank_Alpha)GetNextTemplateArg(args, ref arg_pos),
+				(Appearance)GetNextTemplateArg(args, ref arg_pos),
+				(Global_Shape)GetNextTemplateArg(args, ref arg_pos),
+				(Foam)GetNextTemplateArg(args, ref arg_pos))
 		{
 			this.CacheContext = cacheContext;
 		}
 
 		#region Implemented Features Check
 
-		protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+		protected override MultiValueDictionary<Type, object> ImplementedEnums => new MultiValueDictionary<Type, object>
 		{
 
 		};
 
 		#endregion
-
-		#region TemplateShaderGenerator
-
-		public override ShaderGeneratorResult Generate()
-		{
-#if DEBUG
-			CheckImplementedParameters();
-#endif
-
-			var shader_parameters = GenerateShaderParameters(58, 0, 0);
-			Dictionary<string, string> file_overrides = new Dictionary<string, string>()
-			{
-				{ "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
-			};
-
-			List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-			definitions.AddRange(GenerateFunctionDefinition());
-			definitions.AddRange(GenerateCompilationFlagDefinitions());
-
-			var compiler = new Util.DirectX();
-			compiler.SetCompilerFileOverrides(file_overrides);
-			var result = compiler.CompilePCShaderFromFile(
-				ShaderFile,
-				definitions.ToArray(),
-				"main",
-				"ps_3_0",
-				0,
-				0,
-				out byte[] ShaderBytecode,
-				out string ErrorMsgs
-			);
-			if (!result) throw new Exception(ErrorMsgs);
-
-			new Disassemble(ShaderBytecode, out string disassembly);
-
-			Console.WriteLine();
-			Console.WriteLine(disassembly);
-			Console.WriteLine();
-
-			return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
-		}
-
-		#endregion
-
+        
 		#region Uniforms/Registers
 
-		protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
+		protected override MultiValueDictionary<object, TemplateParameter> Uniforms => new MultiValueDictionary<object, TemplateParameter>
 		{
 
 		};
 
-		#endregion
-		#region Enums
+        #endregion
 
-		public enum Wave_Shape
+        #region Enums
+
+        public Wave_Shape wave_shape => (Wave_Shape)EnumValues[0];
+        public Water_Color water_color => (Water_Color)EnumValues[1];
+        public Reflection reflection => (Reflection)EnumValues[2];
+        public Refraction refraction => (Refraction)EnumValues[3];
+        public Bank_Alpha bank_alpha => (Bank_Alpha)EnumValues[4];
+        public Appearance appearance => (Appearance)EnumValues[5];
+        public Global_Shape global_shape => (Global_Shape)EnumValues[6];
+        public Foam foam => (Foam)EnumValues[7];
+
+        public enum Wave_Shape
         {
             Default,
             None,

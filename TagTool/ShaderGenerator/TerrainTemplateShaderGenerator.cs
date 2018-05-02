@@ -13,22 +13,56 @@ namespace TagTool.ShaderGenerator
 {
     public class TerrainTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/terrain_templates/terrain_template.hlsl";
+        protected override string ShaderGeneratorType => "terrain_template";
 
-        public TerrainTemplateShaderGenerator( GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
-                (Blending)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Environment_Map)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Material_0)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Material_1)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Material_2)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Material_3)(args.Length == arg_pos ? 0 : args[arg_pos++]))
+        bool use_detail_bumps
+        {
+            get
+            {
+                int number_of_detail_bumps = 0;
+                if (material_0 != Material_0.Off) number_of_detail_bumps++;
+                if (material_1 != Material_1.Off) number_of_detail_bumps++;
+                if (material_2 != Material_2.Off) number_of_detail_bumps++;
+                if (material_3 != Material_3.Off) number_of_detail_bumps++;
+
+                return number_of_detail_bumps <= 3;
+            }
+        }
+
+        protected override List<DirectX.MacroDefine> TemplateDefinitions
+        {
+            get
+            {
+                var definitions = new List<DirectX.MacroDefine>
+                {
+                    new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" },
+                    new DirectX.MacroDefine {Name = "Albedo", Definition = "albedo_terrain"},
+                    new DirectX.MacroDefine {Name = "Bump_Mapping", Definition = "bump_mapping_terrain"}
+                };
+
+                if(use_detail_bumps)
+                    definitions.Add(new DirectX.MacroDefine { Name = "flag_use_detail_bumps", Definition = "1" });
+
+                return definitions;
+            }
+        }
+
+
+        public TerrainTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+                drawmode,
+                (Blending)GetNextTemplateArg(args, ref arg_pos),
+                (Environment_Map)GetNextTemplateArg(args, ref arg_pos),
+                (Material_0)GetNextTemplateArg(args, ref arg_pos),
+                (Material_1)GetNextTemplateArg(args, ref arg_pos),
+                (Material_2)GetNextTemplateArg(args, ref arg_pos),
+                (Material_3)GetNextTemplateArg(args, ref arg_pos))
         {
             this.CacheContext = cacheContext;
         }
 
         #region Implemented Features Check
 
-        protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+        protected override MultiValueDictionary<Type, object> ImplementedEnums => new MultiValueDictionary<Type, object>
         {
             {typeof(Blending), Blending.Morph },
             {typeof(Material_0), Material_0.Off },
@@ -47,71 +81,11 @@ namespace TagTool.ShaderGenerator
 
         #endregion
 
-        #region TemplateShaderGenerator
-
-        public override ShaderGeneratorResult Generate()
-        {
-#if DEBUG
-            CheckImplementedParameters();
-#endif
-            int number_of_detail_bumps = 0;
-            if (material_0 != Material_0.Off) number_of_detail_bumps++;
-            if (material_1 != Material_1.Off) number_of_detail_bumps++;
-            if (material_2 != Material_2.Off) number_of_detail_bumps++;
-            if (material_3 != Material_3.Off) number_of_detail_bumps++;
-
-
-            // detail_bump_maps are only avaliable when using an environment_map
-            bool use_detail_bumps = number_of_detail_bumps <= 3;
-            if (!use_detail_bumps)
-            {
-                //TODO: This is super hacky we should come up with a better solution for removing these uniforms
-                Uniforms = Uniforms_No_Detail_Bump;
-            }
-
-            var shader_parameters = GenerateShaderParameters(58, 0, 0);
-            Dictionary<string, string> file_overrides = new Dictionary<string, string>()
-            {
-                { "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
-            };
-
-            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-            definitions.AddRange(GenerateFunctionDefinition());
-            definitions.AddRange(GenerateCompilationFlagDefinitions());
-
-            if(use_detail_bumps)
-            {
-                definitions.Add(new DirectX.MacroDefine { Name = "flag_use_detail_bumps", Definition = "1"});
-            }
-
-            var compiler = new Util.DirectX();
-            compiler.SetCompilerFileOverrides(file_overrides);
-            var result = compiler.CompilePCShaderFromFile(
-                ShaderFile,
-                definitions.ToArray(),
-                "main",
-                "ps_3_0",
-                0,
-                0,
-                out byte[] ShaderBytecode,
-                out string ErrorMsgs
-            );
-            if (!result) throw new Exception(ErrorMsgs);
-
-            new Disassemble(ShaderBytecode, out string disassembly);
-
-            Console.WriteLine();
-            Console.WriteLine(disassembly);
-            Console.WriteLine();
-
-            return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
-        }
-
-        #endregion
-
         #region Uniforms/Registers
 
-        protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
+        protected override MultiValueDictionary<object, TemplateParameter> Uniforms => use_detail_bumps ? Uniforms_With_Detail_Bump : Uniforms_No_Detail_Bump;
+
+        protected MultiValueDictionary<object, TemplateParameter> Uniforms_With_Detail_Bump => new MultiValueDictionary<object, TemplateParameter>
         {
             {Blending.Morph, new TemplateParameter(typeof(Blending), "debug_tint", ShaderParameter.RType.Vector) },
             {Blending.Morph, new TemplateParameter(typeof(Blending), "blend_map_xform", ShaderParameter.RType.Vector) },

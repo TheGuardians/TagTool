@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace TagTool.Commands.Shaders
 {
-    class GenerateCommand<T> : Command
+    class GenerateShader<T> : Command
     {
         private GameCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
@@ -22,12 +22,12 @@ namespace TagTool.Commands.Shaders
         public static bool IsVertexShader => typeof(T) == typeof(GlobalVertexShader) || typeof(T) == typeof(VertexShader);
         public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
-        public GenerateCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public GenerateShader(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
             base(CommandFlags.Inherit,
 
                 "Generate",
                 "Compiles HLSL source file from scratch :D",
-                "Generate <index> <shader_type> <parameters...>",
+                "Generate <index> <shader_type> <drawmode> <parameters...>",
                 "Compiles HLSL source file from scratch :D")
         {
             CacheContext = cacheContext;
@@ -48,18 +48,49 @@ namespace TagTool.Commands.Shaders
 
             Int32 index;
             string type;
+            string drawmode_str;
             try
             {
                 index = Int32.Parse(args[0]);
                 type = args[1].ToLower();
+                drawmode_str = args[2].ToLower();
             } catch
             {
-                Console.WriteLine("Invalid index and type combination");
+                Console.WriteLine("Invalid index, type, and drawmode combination");
                 return false;
             }
 
-			Int32[] shader_args;
-			try { shader_args = Array.ConvertAll(args.Skip(2).ToArray(), Int32.Parse); }
+            var drawmode = TemplateShaderGenerator.Drawmode.Default;
+            {
+                bool found_drawmode = false;
+                var drawmode_enums = Enum.GetValues(typeof(TemplateShaderGenerator.Drawmode)).Cast<TemplateShaderGenerator.Drawmode>();
+                foreach (var drawmode_enum in drawmode_enums)
+                {
+                    var enum_name = Enum.GetName(typeof(TemplateShaderGenerator.Drawmode), drawmode_enum).ToLower();
+                    if (drawmode_str == enum_name)
+                    {
+                        drawmode = drawmode_enum;
+                        found_drawmode = true;
+                        break;
+                    }
+                }
+
+                if (!found_drawmode)
+                {
+                    //try
+                    //{
+                    //    drawmode = (TemplateShaderGenerator.Drawmode)Int32.Parse(drawmode_str);
+                    //}
+                    //catch
+                    {
+                        Console.WriteLine("Invalid shader arguments! (could not parse to drawmode)");
+                        return false;
+                    }
+                }
+            }
+
+            Int32[] shader_args;
+			try { shader_args = Array.ConvertAll(args.Skip(3).ToArray(), Int32.Parse); }
 			catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
 
 			// runs the appropriate shader-generator for the template type.
@@ -68,55 +99,55 @@ namespace TagTool.Commands.Shaders
             {
                 case "beam_templates":
                 case "beam_template":
-					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "contrail_templates":
                 case "contrail_template": // we already have all contrail_templates from H3 MP
-					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "cortana_templates":
 				case "cortana_template": // we already have all cortana_templates from H3 MP
-					shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "custom_templates":
 				case "custom_template":
-					shader_gen_result = new CustomTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new CustomTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "decal_templates":
                 case "decal_template":
-					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                     break;
                 case "foliage_templates":
                 case "foliage_template": // we already have all foliage_templates from H3 MP
-					shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
                 case "halogram_templates":
                 case "halogram_template":
-					shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
                 case "light_volume_templates":
                 case "light_volume_template": // we already have all light_volume_templates from H3 MP
-					shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "particle_templates":
 				case "particle_template":
-					shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "screen_templates":
 				case "screen_template":
-					shader_gen_result = new ScreenTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new ScreenTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				case "shader_templates":
                 case "shader_template":
-					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                     break;
                 case "terrain_templates":
                 case "terrain_template":
-					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
                     break;
                 case "water_templates":
                 case "water_template":
-					shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, shader_args)?.Generate();
+					shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
 					break;
 				default:
                     Console.WriteLine($"{type} is not implemented");

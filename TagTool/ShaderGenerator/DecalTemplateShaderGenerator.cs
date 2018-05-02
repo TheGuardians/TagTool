@@ -13,22 +13,27 @@ namespace TagTool.ShaderGenerator
 {
     public class DecalTemplateShaderGenerator : TemplateShaderGenerator
     {
-        static string ShaderFile { get; } = "ShaderGenerator/shader_code/decal_templates/decal_template.hlsl";
+        protected override string ShaderGeneratorType => "decal_template";
+        protected override List<DirectX.MacroDefine> TemplateDefinitions => new List<DirectX.MacroDefine>
+        {
+            new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
+        };
 
-		public DecalTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
-		 (Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-		 (Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-		 (Render_Pass)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-		 (Specular)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-		 (Bump_Mapping)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-		 (Tinting)(args.Length == arg_pos ? 0 : args[arg_pos++]))
+        public DecalTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+                drawmode,
+         (Albedo)GetNextTemplateArg(args, ref arg_pos),
+		 (Blend_Mode)GetNextTemplateArg(args, ref arg_pos),
+		 (Render_Pass)GetNextTemplateArg(args, ref arg_pos),
+		 (Specular)GetNextTemplateArg(args, ref arg_pos),
+		 (Bump_Mapping)GetNextTemplateArg(args, ref arg_pos),
+		 (Tinting)GetNextTemplateArg(args, ref arg_pos))
 		{
 			this.CacheContext = cacheContext;
 		}
 
         #region Implemented Features Check
 
-        protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
+        protected override MultiValueDictionary<Type, object> ImplementedEnums => new MultiValueDictionary<Type, object>
         {
             {typeof(Albedo), Albedo.DiffuseOnly },
             {typeof(Albedo), Albedo.Palettized_Plus_Alpha },
@@ -57,53 +62,10 @@ namespace TagTool.ShaderGenerator
         };
 
         #endregion
-
-        #region TemplateShaderGenerator
-
-        public override ShaderGeneratorResult Generate()
-        {
-#if DEBUG
-            CheckImplementedParameters();
-#endif
-
-            var shader_parameters = GenerateShaderParameters(58, 0, 0);
-            Dictionary<string, string> file_overrides = new Dictionary<string, string>()
-            {
-                { "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
-            };
-
-            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-            definitions.AddRange(GenerateFunctionDefinition());
-            definitions.AddRange(GenerateCompilationFlagDefinitions());
-
-            var compiler = new Util.DirectX();
-            compiler.SetCompilerFileOverrides(file_overrides);
-            var result = compiler.CompilePCShaderFromFile(
-                ShaderFile,
-                definitions.ToArray(),
-                "main",
-                "ps_3_0",
-                0,
-                0,
-                out byte[] ShaderBytecode,
-                out string ErrorMsgs
-            );
-            if (!result) throw new Exception(ErrorMsgs);
-
-            new Disassemble(ShaderBytecode, out string disassembly);
-
-            Console.WriteLine();
-            Console.WriteLine(disassembly);
-            Console.WriteLine();
-
-            return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
-        }
-
-        #endregion
-
+        
         #region Uniforms/Registers
 
-        protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
+        protected override MultiValueDictionary<object, TemplateParameter> Uniforms => new MultiValueDictionary<object, TemplateParameter>
         {
             // These appear to be apart of some kind of global structure
             {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 0 } },
