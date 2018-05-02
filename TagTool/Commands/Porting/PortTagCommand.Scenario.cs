@@ -746,6 +746,10 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x391; // cinematic_object_get
                         return true;
 
+                    case 0x354: //cinematic_scripting_create_and_animate_object_no_animation
+                        expr.Opcode = 0x3A7; // ^
+                        return true;
+
                     default:
                         return false;
                 }
