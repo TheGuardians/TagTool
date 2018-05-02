@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Direct3D.Functions;
 using TagTool.ShaderGenerator.Types;
 using TagTool.Shaders;
 using TagTool.Util;
@@ -12,26 +13,105 @@ namespace TagTool.ShaderGenerator
 {
     public abstract class TemplateShaderGenerator : IShaderGenerator
     {
-
-        protected TemplateShaderGenerator(params object[] enums)
+        public enum Drawmode
         {
+            Default,
+            Albedo,
+            Static_Default,
+            Static_Per_Pixel,
+            Static_Per_Vertex,
+            Static_Sh,
+            Static_Prt_Ambient,
+            Static_Prt_Linear,
+            Static_Prt_Quadratic,
+            Dynamic_Light,
+            Shadow_Generate,
+            Shadow_Apply,
+            Active_Camo,
+            Lightmap_Debug_Mode,
+            Static_Per_Vertex_Color,
+            Water_Tessellation,
+            Water_Shading,
+            Dynamic_Light_Cinematic,
+            Z_Only,
+            Sfx_Distort
+        }
+        protected Drawmode drawMode { get; set; }
+
+        protected TemplateShaderGenerator(Drawmode drawmode, params object[] enums)
+        {
+            this.drawMode = drawmode;
             this.EnumValues = enums;
             this.EnumTypes = new Type[enums.Length];
-            for(var i=0;i<enums.Length;i++)
+            for (var i = 0; i < enums.Length; i++)
             {
                 EnumTypes[i] = enums[i].GetType();
             }
         }
 
+        protected static int GetNextTemplateArg(Int32[] args, ref Int32 arg_pos)
+        {
+            return arg_pos >= args.Length ? 0 : args[arg_pos++];
+        }
+
         public GameCacheContext CacheContext { get; internal set; }
-        
-        public abstract ShaderGeneratorResult Generate();
 
-        protected object[] EnumValues { get; set; }
-        protected Type[] EnumTypes { get; set; }
+        protected virtual string ShaderFile { get; } = "ShaderGenerator/shader_code/entry_points.hlsl";
+        abstract protected string ShaderGeneratorType { get; }
 
-        abstract protected MultiValueDictionary<Type, object> ImplementedEnums { get; set; }
-        abstract protected MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; }
+        protected object[] EnumValues { get; }
+        protected Type[] EnumTypes { get; }
+
+        abstract protected List<DirectX.MacroDefine> TemplateDefinitions { get; }
+        abstract protected MultiValueDictionary<Type, object> ImplementedEnums { get; }
+        abstract protected MultiValueDictionary<object, TemplateParameter> Uniforms { get; }
+
+        public ShaderGeneratorResult Generate()
+        {
+
+#if DEBUG
+            CheckImplementedParameters();
+#endif
+
+            var shader_parameters = GenerateShaderParameters(58, 0, 0);
+            var parameters_hlsl = GenerateUniformsFile(shader_parameters);
+            Dictionary<string, string> file_overrides = new Dictionary<string, string>()
+            {
+                { "parameters.hlsl", parameters_hlsl}
+            };
+
+            List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
+            definitions.AddRange(GenerateFunctionDefinition());
+            definitions.AddRange(GenerateCompilationFlagDefinitions());
+            definitions.AddRange(GenerateParameterDefinitions(shader_parameters));
+            definitions.Add(new DirectX.MacroDefine { Name = ShaderGeneratorType, Definition="1" });
+            definitions.AddRange(TemplateDefinitions);
+
+            var entrypoint = $"{Enum.GetName(drawMode.GetType(), drawMode).ToLower()}_ps";
+            definitions.Add(new DirectX.MacroDefine { Name = $"entry_{entrypoint}", Definition = "1" });
+
+            var compiler = new Util.DirectX();
+            compiler.SetCompilerFileOverrides(file_overrides);
+            var result = compiler.CompilePCShaderFromFile(
+                ShaderFile,
+                definitions.ToArray(),
+                entrypoint,
+                "ps_3_0",
+                0,
+                0,
+                out byte[] ShaderBytecode,
+                out string ErrorMsgs
+            );
+            if (!result) throw new Exception(ErrorMsgs);
+
+            new Disassemble(ShaderBytecode, out string disassembly);
+
+            Console.WriteLine();
+            Console.WriteLine(disassembly);
+            Console.WriteLine();
+
+            return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
+        }
 
         public List<TemplateParameter> GetShaderParametersList(object key)
         {
@@ -290,6 +370,18 @@ namespace TagTool.ShaderGenerator
             foreach (var _enum in EnumValues)
             {
                 definitions.Add(GenerateEnumFlagDefinition(_enum));
+            }
+
+            return definitions;
+        }
+
+        protected List<DirectX.MacroDefine> GenerateParameterDefinitions(List<ShaderParameter> parameters)
+        {
+            var definitions = new List<DirectX.MacroDefine>();
+
+            foreach (var param in parameters)
+            {
+                definitions.Add(new DirectX.MacroDefine { Name = $"param_{CacheContext.GetString(param.ParameterName).ToLower()}", Definition="1" });
             }
 
             return definitions;

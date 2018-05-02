@@ -136,6 +136,10 @@ namespace TagTool.Commands.Editing
                 case "rmdf":
                     commandContext.AddCommand(new ListMethodOptionParameters(cacheContext, tag, (RenderMethodDefinition)definition));
                     break;
+
+                case "rmt2":
+                    Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
+                    break;
             }
 
             var structure = new TagStructureInfo(TagDefinition.Find(tag.Group.Tag));

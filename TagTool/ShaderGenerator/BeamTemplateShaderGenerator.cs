@@ -13,21 +13,26 @@ namespace TagTool.ShaderGenerator
 {
     public class BeamTemplateShaderGenerator : TemplateShaderGenerator
     {
-		static string ShaderFile { get; } = "ShaderGenerator/shader_code/beam_templates/beam_template.hlsl";
+        protected override string ShaderGeneratorType => "beam_template";
+        protected override List<DirectX.MacroDefine> TemplateDefinitions => new List<DirectX.MacroDefine>
+        {
+            new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
+        };
 
-		public BeamTemplateShaderGenerator(GameCacheContext cacheContext, Int32[] args, Int32 arg_pos = 0) : base(
-				(Albedo)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Blend_Mode)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Black_Point)(args.Length == arg_pos ? 0 : args[arg_pos++]),
-				(Fog)(args.Length == arg_pos ? 0 : args[arg_pos++]))
-		{
-			this.CacheContext = cacheContext;
-		}
+        public BeamTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+                drawmode,
+                (Albedo)GetNextTemplateArg(args, ref arg_pos),
+                (Blend_Mode)GetNextTemplateArg(args, ref arg_pos),
+                (Black_Point)GetNextTemplateArg(args, ref arg_pos),
+                (Fog)GetNextTemplateArg(args, ref arg_pos))
+        {
+            this.CacheContext = cacheContext;
+        }
 
-		#region Implemented Features Check
+        #region Implemented Features Check
 
-		protected override MultiValueDictionary<Type, object> ImplementedEnums { get; set; } = new MultiValueDictionary<Type, object>
-		{
+        protected override MultiValueDictionary<Type, object> ImplementedEnums => new MultiValueDictionary<Type, object>
+        {
             {typeof(Albedo), Albedo.DiffuseOnly },
             {typeof(Albedo), Albedo.Palettized_Plus_Alpha },
             {typeof(Black_Point), Black_Point.Off },
@@ -37,55 +42,12 @@ namespace TagTool.ShaderGenerator
             {typeof(Blend_Mode), Blend_Mode.Pre_Multiplied_Alpha },
         };
 
-		#endregion
+        #endregion
 
-		#region TemplateShaderGenerator
+        #region Uniforms/Registers
 
-		public override ShaderGeneratorResult Generate()
-		{
-#if DEBUG
-			CheckImplementedParameters();
-#endif
-
-			var shader_parameters = GenerateShaderParameters(58, 0, 0);
-			Dictionary<string, string> file_overrides = new Dictionary<string, string>()
-			{
-				{ "parameters.hlsl", GenerateUniformsFile(shader_parameters)}
-			};
-
-			List<DirectX.MacroDefine> definitions = new List<DirectX.MacroDefine>();
-			definitions.AddRange(GenerateFunctionDefinition());
-			definitions.AddRange(GenerateCompilationFlagDefinitions());
-
-			var compiler = new Util.DirectX();
-			compiler.SetCompilerFileOverrides(file_overrides);
-			var result = compiler.CompilePCShaderFromFile(
-				ShaderFile,
-				definitions.ToArray(),
-				"main",
-				"ps_3_0",
-				0,
-				0,
-				out byte[] ShaderBytecode,
-				out string ErrorMsgs
-			);
-			if (!result) throw new Exception(ErrorMsgs);
-
-			new Disassemble(ShaderBytecode, out string disassembly);
-
-			Console.WriteLine();
-			Console.WriteLine(disassembly);
-			Console.WriteLine();
-
-			return new ShaderGeneratorResult { ByteCode = ShaderBytecode, Parameters = shader_parameters };
-		}
-
-		#endregion
-
-		#region Uniforms/Registers
-
-		protected override MultiValueDictionary<object, TemplateParameter> Uniforms { get; set; } = new MultiValueDictionary<object, TemplateParameter>
-		{
+        protected override MultiValueDictionary<object, TemplateParameter> Uniforms => new MultiValueDictionary<object, TemplateParameter>
+        {
             {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 0 } },
 
             {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
