@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
 
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-        private List<Tag> OtherTagGroups = new List<Tag> {new Tag("shit"), new Tag("sncl") };    //foot and effe may be added to this list
+        private List<Tag> OtherTagGroups = new List<Tag> { new Tag("effe"), new Tag("foot"), new Tag("shit"), new Tag("sncl") };
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
@@ -210,13 +210,7 @@ namespace TagTool.Commands.Porting
 
             var wasReplacing = IsReplacing;
             var wasNew = IsNew;
-
-            if (groupTag == "foot" && IsReplacing && BlamCache.Version == CacheVersion.Halo3Retail)
-            {
-                IsReplacing = false;
-                IsNew = true;
-            } 
-
+            
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -360,14 +354,14 @@ namespace TagTool.Commands.Porting
             {
                 switch (groupTag.ToString())
                 {
+                    case "effe":
+                        return CacheContext.GetTagInstance<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
+
                     case "foot":
                         return CacheContext.GetTagInstance<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
 
                     case "shit":
                         return CacheContext.GetTagInstance<ShieldImpact>(@"globals\global_shield_impact_settings");
-
-                    case "effe":
-                        return CacheContext.GetTagInstance<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
 
                     case "sncl":
                         return CacheContext.GetTagInstance<SoundClasses>(@"sound\sound_classes");
@@ -618,13 +612,7 @@ namespace TagTool.Commands.Porting
             //
             // Finalize and serialize the new ElDorado tag definition
             //
-
-            if (groupTag == "foot")
-            {
-                IsReplacing = wasReplacing;
-                IsNew = wasNew;
-            }
-
+            
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 Console.WriteLine($"Something happened when converting  {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))}, returning null tag reference.");

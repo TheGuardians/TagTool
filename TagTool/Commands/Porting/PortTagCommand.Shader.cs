@@ -282,7 +282,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            // Name rmdf tags if one of them is not named
+            /* Name rmdf tags if one of them is not named
             foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
             {
                 if (!CacheContext.TagNames.ContainsKey(tag.Index))
@@ -312,7 +312,7 @@ namespace TagTool.Commands.Porting
                     CacheContext.SaveTagNames();
                     break;
                 }
-            }
+            }*/
 
             // Loop only once trough all ED rmt2 tags and store them globally, string lists of their bitmaps and arguments
             if (CacheContext.Rmt2TagsInfo.Count == 0)
@@ -333,13 +333,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = GetShaderPresets(CacheContext, blamTagName);
-
-            if (edRmt2Instance == null)
-                edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2);
-            else
-                if (edRmt2Instance.Index == 0)
-                edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2);
+            var edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2);
 
             if (edRmt2Instance == null) // should never happen
             {
@@ -378,11 +372,11 @@ namespace TagTool.Commands.Porting
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
             foreach (var a in edMaps)
             {
-                var newBitmap = DefaultBitmapsTags(a);
+                var newBitmap = GetDefaultBitmapTag(a);
                 if (!CacheContext.TagCache.Index.Contains(pRmt2))
-                    newBitmap = 0x0343; // would only happen for removed shaders
+                    newBitmap = @"shaders\default_bitmaps\bitmaps\default_detail"; // would only happen for removed shaders
 
-                newShaderProperty.ShaderMaps.Add(new RenderMethod.ShaderProperty.ShaderMap { Bitmap = CacheContext.GetTag(newBitmap) });
+                newShaderProperty.ShaderMaps.Add(new RenderMethod.ShaderProperty.ShaderMap { Bitmap = CacheContext.GetTagInstance<Bitmap>(newBitmap) });
             }
 
             foreach (var a in edArgs)
@@ -414,7 +408,7 @@ namespace TagTool.Commands.Porting
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
                 if (a.Bitmap == null)
-                    a.Bitmap = CacheContext.GetTag(DefaultBitmapsTags(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
+                    a.Bitmap = CacheContext.GetTagInstance<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
 
             return finalRm;
         }
@@ -879,7 +873,7 @@ namespace TagTool.Commands.Porting
             return res;
         }
 
-        private static int DefaultBitmapsTags(string type)
+        private static string GetDefaultBitmapTag(string type)
         {
             switch (type)
             {
@@ -903,7 +897,7 @@ namespace TagTool.Commands.Porting
                 case "subsurface_map":
                 case "self_illum_detail_map":
                 case "warp_map":
-                    return 0x02B7;
+                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
 
                 case "change_color_map":
                 case "material_texture":
@@ -916,10 +910,10 @@ namespace TagTool.Commands.Porting
                 case "specular_map":
                 case "specular_mask_texture":
                 case "transparence_map":
-                    return 0x02B9;
+                    return @"shaders\default_bitmaps\bitmaps\color_white";
 
                 case "color_mask_map":
-                    return 0x0375;
+                    return @"shaders\default_bitmaps\bitmaps\reference_grids";
 
                 case "bump_map":
                 case "bump_map_m_0":
@@ -934,95 +928,23 @@ namespace TagTool.Commands.Porting
                 case "alpha_test_map":
                 case "height_map":
                 case "overlay_multiply_map":
-                    return 0x0376; // WARNING engine's toast, anything bump map related is busted
+                    return @"shaders\default_bitmaps\bitmaps\default_vector"; // WARNING engine's toast, anything bump map related is busted
 
                 case "self_illum_map":
-                    return 0x0377;
+                    return @"shaders\default_bitmaps\bitmaps\default_alpha_test";
 
                 case "detail_mask_a":
-                    return 0x037A;
+                    return @"shaders\default_bitmaps\bitmaps\color_red";
 
                 case "alpha_mask_map":
-                    return 0x037B;
+                    return @"shaders\default_bitmaps\bitmaps\alpha_white";
 
                 default:
-                    return 0x02B7;
+                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
                     // throw new NotImplementedException($"Useless exception. Bitmaps table requires an update for {type}.");
             }
         }
-
-        private CachedTagInstance GetShaderPresets(GameCacheContext CacheContext, string tagname)
-        {
-            var pEdArgs = new Dictionary<string, float[]>();
-
-            switch (tagname)
-            {
-                // All these need to be redone, and manually checked
-                case "Example":
-                    // Use a forced shader tag index
-                    // pRmsh = 0x3AB0;
-
-                    // Use a forced shader tag name
-                    // pRmsh = ArgumentParser.ParseTagName(CacheContext, @"levels\multi\guardian\shaders\guardian_metal_b").Index;
-
-                    // Use a forced rmt2 tag index
-                    // pRmt2 = 0x02A7;
-
-                    // Use a forced rmt2 tag name
-                    // pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_0_0_0_0_0_0_3_0_0_0.rmt2").Index;
-
-                    // Use forced shader arguments TODO
-                    // pEdArgs.Add("roughness", new float[4] { 0f, 1f, 2f, 3.4f });
-
-                    // Or force various debug stuf
-                    // debugUseEDFunctions = false;
-                    break;
-
-                    // // Snowbound:
-                    // case @"levels\multi\snowbound\shaders\cov_battery":
-                    // case @"levels\multi\snowbound\shaders\cov_metalplates_icy":
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_1_0_0_1_2_0_1_0_0_0.rmt2").Index;
-                    //     pEdArgs.Add("albedo_color", new float[] { 0.8f, 0.2f, 0.3f, 1f }); // 2
-                    //     pEdArgs.Add("env_tint_color", new float[] { 0.05f, 0.05f, 0.4f, 1f }); // 23
-                    //     break;
-                    // 
-                    // case @"levels\multi\snowbound\shaders\terrain_snow":
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\terrain_templates\_0_0_1_1_0_0.rmt2").Index;
-                    //     pEdArgs.Add("diffuse_coefficient_m_0", new float[] { 2f, 0, 0, 0 }); // 14
-                    //     break;
-                    // 
-                    // case @"levels\multi\snowbound\shaders\cov_glass_window_opaque":
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_0_3_0_3_1_4_0_0_0_1.rmt2").Index;
-                    //     pEdArgs.Add("env_roughness_scale", new float[] { 0.1f, 0, 0, 0 });
-                    //     pEdArgs.Add("env_tint_color", new float[] { 0.02f, 0.01f, 0, 0 });
-                    //     break;
-                    // 
-                    // // Weapons
-                    // // compass 0x0EEA
-                    // // tens 0x0EEC
-                    // // ones 0x0EEB
-                    // case @"objects\weapons\rifle\assault_rifle\shaders\ones":
-                    // case @"objects\weapons\rifle\battle_rifle\shaders\ones":
-                    //     // pRmsh = 0x0EEB;
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
-                    //     debugUseEDFunctions = true;
-                    //     break;
-                    // case @"objects\weapons\rifle\assault_rifle\shaders\tens":
-                    // case @"objects\weapons\rifle\battle_rifle\shaders\tens":
-                    //     // pRmsh = 0x0EEC;
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_1_1_0_1.rmt2").Index;
-                    //     debugUseEDFunctions = true;
-                    //     break;
-                    // case @"objects\weapons\rifle\assault_rifle\shaders\compass":
-                    //     // pRmsh = 0x0EEA;
-                    //     pRmt2 = ArgumentParser.ParseTagName(CacheContext, @"shaders\shader_templates\_2_0_0_0_0_0_8_1_0_1.rmt2").Index;
-                    //     debugUseEDFunctions = true;
-                    //     break;
-            }
-
-            return CacheContext.GetTag(0x0);
-        }
-
+        
         private CachedTagInstance FixRmt2Reference(GameCacheContext CacheContext, CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
         {
             // Find existing rmt2 tags
@@ -1227,10 +1149,10 @@ namespace TagTool.Commands.Porting
                     tags.Add(tag);
             }
 
-            if (edRmt2Instance.Index < 0x4455) // last ms23 tag
+            //if (edRmt2Instance.Index < 0x4455) // last ms23 tag
                 finalRm.BaseRenderMethod = tags.First(); // match ms23 rmdf with ms23 rmt2
-            else
-                finalRm.BaseRenderMethod = tags.Last();
+            //else
+                //finalRm.BaseRenderMethod = tags.Last();
         }
 
         private RenderMethod FixFunctions(CacheFile blamCache, GameCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
