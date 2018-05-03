@@ -48,7 +48,7 @@ namespace TagTool.ShaderGenerator
 
         protected override MultiValueDictionary<object, TemplateParameter> Uniforms => new MultiValueDictionary<object, TemplateParameter>
         {
-            {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) {SpecificOffset = 0 } },
+            {0, new TemplateParameter(typeof(Int32), "g_exposure", ShaderParameter.RType.Vector) { SpecificOffset = 0 } },
 
             {Albedo.DiffuseOnly, new TemplateParameter(typeof(Albedo), "base_map", ShaderParameter.RType.Sampler) },
 

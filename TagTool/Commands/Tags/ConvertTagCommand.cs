@@ -554,13 +554,13 @@ namespace TagTool.Commands.Tags
         {
             FixDrawModeList(template.DrawModes);
             if (template.DrawModes.Count > 18)
-                template.DrawModes[18].UnknownBlock2Pointer = 0; // Disable z_only
+                template.DrawModes[18].PixelShaderMode = RenderMethodTemplate.ShaderMode.Default; // Use default z-only
 
             // Rebuild the bitmask of valid draw modes
             template.DrawModeBitmask = 0;
             for (var i = 0; i < template.DrawModes.Count; i++)
             {
-                if (template.DrawModes[i].UnknownBlock2Pointer != 0)
+                if (template.DrawModes[i].PixelShaderMode != RenderMethodTemplate.ShaderMode.Default)
                     template.DrawModeBitmask |= (uint)(1 << i);
             }
         }
