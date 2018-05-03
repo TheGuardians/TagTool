@@ -57,6 +57,7 @@ namespace TagTool.Commands.Files
                 { "listtags", "Listtags with a simplified output." },
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
                 { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
+                { "namermt2", "Name all rmt2 tags based on their parent render method." },
                 { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache."}
             };
 
@@ -72,6 +73,7 @@ namespace TagTool.Commands.Files
                 case "temp": return Temp(args);
                 case "shadowfix": return ShadowFix(args);
                 case "comparetags": return CompareTags(args);
+                case "namermt2": return NameRmt2();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -1167,6 +1169,149 @@ namespace TagTool.Commands.Files
                         break;
                 }
             }
+        }
+        
+        public bool NameRmt2()
+        {
+            var validShaders = new List<string> { "rmsh", "rmtr", "rmhg", "rmfl", "rmcs", "rmss", "rmd ", "rmw ", "rmzo", "ltvl", "prt3", "beam", "decs", "cntl", "rmzo", "rmct", "rmbk" };
+            var newlyNamedRmt2 = new List<int>();
+            var type = "invalid";
+            var rmt2Instance = -1;
+
+            // Unname rmt2 tags
+            foreach (var edInstance in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
+                CacheContext.TagNames[edInstance.Index] = "blank";
+
+            foreach (var edInstance in CacheContext.TagCache.Index.NonNull())
+            {
+                object rm = null;
+                RenderMethod renderMethod = null;
+
+                // ignore tag groups not in validShaders
+                if (!validShaders.Contains(edInstance.Group.Tag.ToString()))
+                    continue;
+
+                // Console.WriteLine($"Checking 0x{edInstance:x4} {edInstance.Group.Tag.ToString()}");
+
+                // Get the tagname type per tag group
+                switch (edInstance.Group.Tag.ToString())
+                {
+                    case "rmsh": type = "shader"; break;
+                    case "rmtr": type = "terrain"; break;
+                    case "rmhg": type = "halogram"; break;
+                    case "rmfl": type = "foliage"; break;
+                    case "rmss": type = "screen"; break;
+                    case "rmcs": type = "custom"; break;
+                    case "prt3": type = "particle"; break;
+                    case "beam": type = "beam"; break;
+                    case "cntl": type = "contrail"; break;
+                    case "decs": type = "decal"; break;
+                    case "ltvl": type = "light_volume"; break;
+                    case "rmct": type = "cortana"; break;
+                    case "rmbk": type = "black"; break;
+                    case "rmzo": type = "zonly"; break;
+                    case "rmd ": type = "decal"; break;
+                    case "rmw ": type = "water"; break;
+                }
+
+                switch (edInstance.Group.Tag.ToString())
+                {
+                    case "rmsh":
+                    case "rmhg":
+                    case "rmtr":
+                    case "rmcs":
+                    case "rmfl":
+                    case "rmss":
+                    case "rmct":
+                    case "rmzo":
+                    case "rmbk":
+                    case "rmd ":
+                    case "rmw ":
+                        using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                        {
+                            var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var rm2 = CacheContext.Deserializer.Deserialize<RenderMethodFast>(edContext);
+                            renderMethod = new RenderMethod();
+                            renderMethod.Unknown = rm2.Unknown;
+                            if (renderMethod.Unknown.Count == 0)
+                                continue;
+                        }
+
+                        foreach (var a in edInstance.Dependencies)
+                            if (CacheContext.GetTag(a).Group.ToString() == "rmt2")
+                                rmt2Instance = CacheContext.GetTag(a).Index;
+
+                        if (rmt2Instance == 0)
+                            throw new Exception();
+
+                        NameRmt2Part(type, renderMethod, edInstance, rmt2Instance, newlyNamedRmt2);
+
+                        continue;
+
+                    default:
+                        break;
+                }
+
+                using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                {
+                    var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                    rm = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
+                }
+
+                switch (edInstance.Group.Tag.ToString())
+                {
+                    case "prt3": var e = (Particle)rm; NameRmt2Part(type, e.RenderMethod, edInstance, e.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+                    case "beam": var a = (BeamSystem)rm; foreach (var f in a.Beam) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+                    case "cntl": var b = (ContrailSystem)rm; foreach (var f in b.Contrail) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+                    case "decs": var c = (DecalSystem)rm; foreach (var f in c.DecalSystem2) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+                    case "ltvl": var d = (LightVolumeSystem)rm; foreach (var f in d.LightVolume) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+
+                    default:
+                        break;
+                }
+            }
+
+
+            return true;
+        }
+
+
+        private void NameRmt2Part(string type, RenderMethod renderMethod, CachedTagInstance edInstance, int rmt2Instance, List<int> newlyNamedRmt2)
+        {
+            if (renderMethod.Unknown.Count == 0) // invalid shaders, most likely caused by ported shaders
+                return;
+
+            if (newlyNamedRmt2.Contains(rmt2Instance))
+                return;
+            else
+                newlyNamedRmt2.Add(rmt2Instance);
+
+            var newTagName = $"shaders\\{type}_templates\\";
+
+            var rmdfRefValues = "";
+
+            for (int i = 0; i < renderMethod.Unknown.Count; i++)
+            {
+                if (edInstance.Group.Tag.ToString() == "rmsh" && i > 9) // for better H3/ODST name matching
+                    break;
+
+                if (edInstance.Group.Tag.ToString() == "rmhg" && i > 6) // for better H3/ODST name matching
+                    break;
+
+                rmdfRefValues = $"{rmdfRefValues}_{renderMethod.Unknown[i].Unknown}";
+            }
+
+            newTagName = $"{newTagName}{rmdfRefValues}";
+
+            CacheContext.TagNames[rmt2Instance] = newTagName;
+            // Console.WriteLine($"0x{rmt2Instance:X4} {newTagName}");
+        }
+
+        [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x20)]
+        public class RenderMethodFast
+        {
+            public CachedTagInstance BaseRenderMethod;
+            public List<RenderMethod.UnknownBlock> Unknown;
         }
     }
 }
