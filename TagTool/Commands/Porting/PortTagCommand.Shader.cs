@@ -401,7 +401,7 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].ShaderMaps = newShaderProperty.ShaderMaps;
             finalRm.ShaderProperties[0].Arguments = newShaderProperty.Arguments;
 
-            FixRmdfTagRef(finalRm, edRmt2Instance);
+            FixRmdfTagRef(finalRm);
 
             FixFunctions(BlamCache, CacheContext, cacheStream, finalRm, edRmt2, bmRmt2);
 
@@ -555,7 +555,16 @@ namespace TagTool.Commands.Porting
 
             var edRmt2BestStatsSorted = edRmt2BestStats.OrderBy(x => x.rmdfValuesMatchingCount);
 
-            return edRmt2BestStatsSorted.Count() > 0 ? CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex) : null;
+            if (edRmt2BestStats.Count == 0)
+            {
+                var tempRmt2 = ArgumentParser.ParseTagSpecifier(CacheContext, @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0.rmt2");
+
+                if (tempRmt2 != null)
+                    return tempRmt2;
+                else return CacheContext.TagCache.Index.FindFirstInGroup("rmt2");
+            }
+
+            return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
         }
 
         private class Arguments
@@ -1133,26 +1142,19 @@ namespace TagTool.Commands.Porting
             public TagTool.Shaders.ShaderParameter.RType RegisterType;
         }
 
-        private void FixRmdfTagRef(RenderMethod finalRm, CachedTagInstance edRmt2Instance)
+        private void FixRmdfTagRef(RenderMethod finalRm)
         {
             // Set rmdf
             var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Filename;
 
-            var tags = new List<CachedTagInstance>();
-            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
+            try
             {
-                if (!CacheContext.TagNames.ContainsKey(tag.Index))
-                    continue;
-
-                var name = CacheContext.TagNames[tag.Index];
-                if (name == rmdfName)
-                    tags.Add(tag);
+                finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(rmdfName);
             }
-
-            //if (edRmt2Instance.Index < 0x4455) // last ms23 tag
-                finalRm.BaseRenderMethod = tags.First(); // match ms23 rmdf with ms23 rmt2
-            //else
-                //finalRm.BaseRenderMethod = tags.Last();
+            catch
+            {
+                finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader"); // all ms23 rmdf tags need to exist, using rmsh's rmdf for all rm's is a bad idea
+            }
         }
 
         private RenderMethod FixFunctions(CacheFile blamCache, GameCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
