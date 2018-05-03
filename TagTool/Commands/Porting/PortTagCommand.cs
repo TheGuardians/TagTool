@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
 
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-        private List<Tag> OtherTagGroups = new List<Tag> {new Tag("shit"), new Tag("sncl") };    //foot and effe may be added to this list
+        private List<Tag> OtherTagGroups = new List<Tag> { /*new Tag("effe"), new Tag("foot"),*/ new Tag("shit"), new Tag("sncl") };
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
@@ -210,13 +210,7 @@ namespace TagTool.Commands.Porting
 
             var wasReplacing = IsReplacing;
             var wasNew = IsNew;
-
-            if (groupTag == "foot" && IsReplacing && BlamCache.Version == CacheVersion.Halo3Retail)
-            {
-                IsReplacing = false;
-                IsNew = true;
-            } 
-
+            
             if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
                 return null;
 
@@ -300,10 +294,12 @@ namespace TagTool.Commands.Porting
             {
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return null;
+
                 case "rmct": // Cortana shaders have no example in HO, they need a real port
-                    return CacheContext.GetTag(0x101F);
+                    return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
+
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
-                    return CacheContext.GetTag(0x101F);
+                    return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
             }
 
             //
@@ -316,37 +312,37 @@ namespace TagTool.Commands.Porting
                 switch (groupTag.ToString())
                 {
                     case "rmhg":
-                        return CacheContext.GetTag(0x2647);
+                        return CacheContext.GetTagInstance<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
                     case "rmtr":
-                        return CacheContext.GetTag(0x3AAD);
+                        return CacheContext.GetTagInstance<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
 
                     case "rmd ":
-                        return CacheContext.GetTag(0x1BA2);
+                        return CacheContext.GetTagInstance<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
 
                     case "rmfl":
-                        return CacheContext.GetTag(0x4CA9);
+                        return CacheContext.GetTagInstance<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
 
                     case "rmsh":
                     case "rmss":
                     case "rmrd":
                     case "rmcs":
-                        return CacheContext.GetTag(0x101F);
+                        return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
 
                     case "beam":
-                        return CacheContext.GetTag(0x18B5);
+                        return CacheContext.GetTagInstance<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
 
                     case "cntl":
-                        return CacheContext.GetTag(0x528);
+                        return CacheContext.GetTagInstance<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
 
                     case "ltvl":
-                        return CacheContext.GetTag(0x594);
+                        return CacheContext.GetTagInstance<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
 
                     case "decs":
-                        return CacheContext.GetTag(0x3A4);
+                        return CacheContext.GetTagInstance<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
 
                     case "prt3":
-                        return CacheContext.GetTag(0x29E);
+                        return CacheContext.GetTagInstance<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
                 }
             }
 
@@ -358,17 +354,17 @@ namespace TagTool.Commands.Porting
             {
                 switch (groupTag.ToString())
                 {
+                    case "effe":
+                        return CacheContext.GetTagInstance<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
+
                     case "foot":
-                        return CacheContext.GetTag(0xC0D);
+                        return CacheContext.GetTagInstance<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
 
                     case "shit":
-                        return CacheContext.GetTag(0x139C);
-
-                    case "effe":
-                        return CacheContext.GetTag(0x12FE);
+                        return CacheContext.GetTagInstance<ShieldImpact>(@"globals\global_shield_impact_settings");
 
                     case "sncl":
-                        return CacheContext.GetTag(0x019F);
+                        return CacheContext.GetTagInstance<SoundClasses>(@"sound\sound_classes");
                 }    
             }
 
@@ -616,13 +612,7 @@ namespace TagTool.Commands.Porting
             //
             // Finalize and serialize the new ElDorado tag definition
             //
-
-            if (groupTag == "foot")
-            {
-                IsReplacing = wasReplacing;
-                IsNew = wasNew;
-            }
-
+            
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 Console.WriteLine($"Something happened when converting  {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))}, returning null tag reference.");
@@ -668,10 +658,10 @@ namespace TagTool.Commands.Porting
 
                 case RenderGeometry renderGeometry:
                     if (definition is ScenarioStructureBsp sbsp)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry, sbsp.Materials);
+                        return GeometryConverter.Convert(cacheStream, renderGeometry);
                     if (definition is RenderModel mode)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry, mode.Materials);
-                    return GeometryConverter.Convert(cacheStream, renderGeometry, null);
+                        return GeometryConverter.Convert(cacheStream, renderGeometry);
+                    return GeometryConverter.Convert(cacheStream, renderGeometry);
 
                 case RenderMethod renderMethod:
                     var rm = (RenderMethod)data;

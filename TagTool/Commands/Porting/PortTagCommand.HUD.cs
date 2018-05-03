@@ -180,7 +180,7 @@ namespace TagTool.Commands.Porting
 		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, ChudGlobalsDefinition H3Definition, CacheFile.IndexItem blamTag, Cache.CachedTagInstance edTag)
 		{
             //get HO tag
-            var srcTag = CacheContext.GetTag(0x01BD);
+            var srcTag = CacheContext.GetTagInstance<ChudGlobalsDefinition>(@"ui\chud\globals");
             var srcContext = new TagSerializationContext(cacheStream, CacheContext, srcTag);
             ChudGlobalsDefinition HODefinition = CacheContext.Deserializer.Deserialize<ChudGlobalsDefinition>(srcContext);
 

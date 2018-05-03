@@ -284,52 +284,6 @@ namespace TagTool.Commands.Porting
             edModeDefinition.Materials = materials;
 
             //
-            // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
-            //
-
-            var ms30Vertices = new Dictionary<int, List<int>>();
-
-            if (materials != null)
-            {
-                var ms30Materials = new List<bool>();
-
-                using (var cacheStream = CacheContext.OpenTagCacheRead())
-                {
-                    foreach (var material in materials)
-                    {
-                        if (material.RenderMethod == null)
-                            continue;
-
-                        var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
-                        var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
-
-                        ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
-                    }
-                }
-
-                foreach (var mesh in edModeDefinition.Geometry.Meshes)
-                {
-                    var ms30Indices = new List<int>();
-                    var partStartVertex = 0;
-
-                    foreach (var part in mesh.Parts)
-                    {
-                        if (part.IndexCount > 0)
-                        {
-                            if (part.MaterialIndex > 0 && part.MaterialIndex < ms30Materials.Count && ms30Materials[part.MaterialIndex])
-                                for (var i = partStartVertex; i < part.VertexCount; i++)
-                                    ms30Indices.Add(i);
-                        }
-
-
-                        partStartVertex += part.VertexCount;
-                    }
-
-                    ms30Vertices[mesh.VertexBuffers[0]] = ms30Indices;
-                }
-            }
-
-            //
             // Load Blam resource data
             //
 
@@ -441,7 +395,7 @@ namespace TagTool.Commands.Porting
                         blamResourceStream.Position = definitionEntry.ResourceFixups[i].Offset;
                         if (i > 0)
                             previousVertexBufferCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count;
-                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
+                        GeometryConverter.ConvertVertexBuffer(resourceDefinition, blamResourceStream, edResourceStream, i, previousVertexBufferCount);
                     }
 
                     Console.WriteLine("done.");

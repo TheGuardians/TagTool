@@ -352,6 +352,7 @@
     <Compile Include="Commands\Tags\TagCacheContextFactory.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
+    <Compile Include="Commands\Tags\TestSimpleShaders.cs" />
     <Compile Include="Commands\Unicode\GetStringCommand.cs" />
     <Compile Include="Commands\Unicode\ListStringsCommand.cs" />
     <Compile Include="Commands\Unicode\RemoveStringCommand.cs" />
@@ -1028,6 +1029,12 @@
     <Reference Include="AssimpNet, Version=3.3.2.0, Culture=neutral, PublicKeyToken=3edc10cb77b1bca2, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.3.3.2\lib\net45\AssimpNet.dll</HintPath>
     </Reference>
+    <Reference Include="CSharpImageLibrary, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpImageLibrary.4.2.0\lib\net462\CSharpImageLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="DirectXTexNet, Version=1.0.0.2, Culture=neutral, PublicKeyToken=67e4f5ed452a4f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\DirectXTexNet.1.0.0-rc2\lib\net40\DirectXTexNet.dll</HintPath>
+    </Reference>
     <Reference Include="JsonMoppNet, Version=1.0.6331.34855, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\packages\JsonToMopp.1.0.1\lib\JsonToMopp\JsonMoppNet.dll</HintPath>
     </Reference>
@@ -1037,12 +1044,28 @@
     <Reference Include="Microsoft.Experimental.Collections, Version=1.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
+    <Reference Include="UsefulThings, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UsefulCSharpThings.1.7.3\lib\net462\UsefulThings.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -1094,6 +1117,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.3.3.2\build\AssimpNet.targets'))" />
     <Error Condition="!Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets'))" />
+    <Error Condition="!Exists('..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets'))" />
   </Target>
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
@@ -1108,6 +1132,7 @@ xcopy "$(SolutionDir)Tools" "Tools" /e /i /h /Y</PostBuildEvent>
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
+  <Import Project="..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets" Condition="Exists('..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
