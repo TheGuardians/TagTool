@@ -26,11 +26,35 @@ namespace TagTool.Tags.Definitions
         [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
+        public enum ShaderMode : sbyte
+        {
+            Default,
+            Albedo,
+            Static_Default,
+            Static_Per_Pixel,
+            Static_Per_Vertex,
+            Static_Sh,
+            Static_Prt_Ambient,
+            Static_Prt_Linear,
+            Static_Prt_Quadratic,
+            Dynamic_Light,
+            Shadow_Generate,
+            Shadow_Apply,
+            Active_Camo,
+            Lightmap_Debug_Mode,
+            Static_Per_Vertex_Color,
+            Water_Tessellation,
+            Water_Shading,
+            Dynamic_Light_Cinematic,
+            Z_Only,
+            Sfx_Distort
+        }
+
         [TagStructure(Size = 0x2)]
         public class DrawMode
         {
-            // rmt2 uses these pointers in both this block and UnknownBlock2.
-            public ushort UnknownBlock2Pointer;
+            public ShaderMode PixelShaderMode;
+            public ShaderMode VertexShaderMode;
         }
 
         [TagStructure(Size = 0x1C)]
