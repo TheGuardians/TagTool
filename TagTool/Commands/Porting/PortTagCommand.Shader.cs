@@ -1142,7 +1142,7 @@ namespace TagTool.Commands.Porting
             public TagTool.Shaders.ShaderParameter.RType RegisterType;
         }
 
-        private void FixRmdfTagRef(RenderMethod finalRm, CachedTagInstance edRmt2Instance)
+        private void FixRmdfTagRef(RenderMethod finalRm)
         {
             // Set rmdf
             var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Filename;
