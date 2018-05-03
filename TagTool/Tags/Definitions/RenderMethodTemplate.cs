@@ -75,8 +75,8 @@ namespace TagTool.Tags.Definitions
 
             public ushort ShaderMapSamplers_Count { get => GetCount(ShaderMapSamplers); set => SetCount(ref ShaderMapSamplers, value); }
             public ushort ShaderMapSamplers_Offset { get => GetOffset(ShaderMapSamplers); set => SetOffset(ref ShaderMapSamplers, value); }
-            public ushort UnknownVectorRegisters_Count { get => GetCount(RegistersMapping1); set => SetCount(ref RegistersMapping1, value); }
-            public ushort UnknownVectorRegisters_Offset { get => GetOffset(RegistersMapping1); set => SetOffset(ref RegistersMapping1, value); }
+            public ushort UnknownVectorRegisters_Count { get => GetCount(UnknownVectorRegisters); set => SetCount(ref UnknownVectorRegisters, value); }
+            public ushort UnknownVectorRegisters_Offset { get => GetOffset(UnknownVectorRegisters); set => SetOffset(ref UnknownVectorRegisters, value); }
             public ushort RegistersMapping2_Count { get => GetCount(RegistersMapping2); set => SetCount(ref RegistersMapping2, value); }
             public ushort RegistersMapping2_Offset { get => GetOffset(RegistersMapping2); set => SetOffset(ref RegistersMapping2, value); }
             public ushort RegistersMapping3_Count { get => GetCount(RegistersMapping3); set => SetCount(ref RegistersMapping3, value); }
@@ -103,7 +103,7 @@ namespace TagTool.Tags.Definitions
             public ushort RegistersMapping13_Offset { get => GetOffset(RegistersMapping13); set => SetOffset(ref RegistersMapping13, value); }
 
             public ushort ShaderMapSamplers; // Unknown1
-            public ushort RegistersMapping1; // Unknown2
+            public ushort UnknownVectorRegisters; // Unknown2
             public ushort RegistersMapping2; // Unknown3
             public ushort RegistersMapping3; // Unknown4
             public ushort ArgumentsVectorRegisters; // Unknown5
