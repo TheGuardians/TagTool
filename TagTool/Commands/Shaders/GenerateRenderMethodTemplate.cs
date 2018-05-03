@@ -11,6 +11,7 @@ using TagTool.Common;
 using TagTool.ShaderGenerator;
 using TagTool.ShaderGenerator.Types;
 using System.Linq;
+using static TagTool.Tags.Definitions.RenderMethodTemplate.DrawModeRegisterOffsetBlock;
 
 namespace TagTool.Commands.Shaders
 {
@@ -33,8 +34,37 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
+        class Mapping
+        {
+            public readonly ShaderParameter.RType ExpectedType;
+            public string Name;
 
+            public Mapping(string name, ShaderParameter.RType expectedtype, DrawModeRegisterOffsetTypeBits supported_registers)
+            {
+                Name = name;
+                ExpectedType = expectedtype;
+            }
+        }
 
+        static Mapping[] MappingsSource = new Mapping[]
+        {
+            
+        };
+
+        static Dictionary<string, Mapping> MappingsLookup = SetupMappings();
+
+        private static Dictionary<string, Mapping> SetupMappings()
+        {
+            Dictionary<string, Mapping> dictionary = new Dictionary<string, Mapping>();
+
+            foreach(var mapping in MappingsSource)
+            {
+                if (dictionary.ContainsKey(mapping.Name)) throw new Exception("Duplicate Mapping! Bad!");
+                dictionary[mapping.Name] = mapping;
+            }
+
+            return dictionary;
+        }
 
         public override object Execute(List<string> args)
         {

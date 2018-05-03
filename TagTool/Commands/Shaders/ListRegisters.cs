@@ -23,7 +23,7 @@ namespace TagTool.Commands.Shaders
                 "ListRegisters",
                 "List Registers",
 
-                "ListRegisters <type>",
+                "ListRegisters <template_type>",
                 "List Registers")
         {
             CacheContext = cacheContext;
@@ -63,6 +63,9 @@ namespace TagTool.Commands.Shaders
                 {
                     if (instance == null)
                         continue;
+                    
+                    var type = TagDefinition.Find(instance.Group.Tag);
+                    if (type != typeof(PixelShader)) continue;
 
                     var tag_index = CacheContext.TagCache.Index.ToList().IndexOf(instance);
 
@@ -73,10 +76,6 @@ namespace TagTool.Commands.Shaders
                     if (_template_type != "*" && template_type != _template_type) continue;
 
                     var context = new TagSerializationContext(stream, CacheContext, instance);
-                    var type = TagDefinition.Find(instance.Group.Tag);
-                    if (type != typeof(PixelShader)) continue;
-
-
                     var definition = CacheContext.Deserializer.Deserialize(context, type);
 
                     if (instance == null) continue;

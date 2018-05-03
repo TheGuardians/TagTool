@@ -561,7 +561,7 @@ namespace TagTool.Commands.Tags
             for (var i = 0; i < template.DrawModes.Count; i++)
             {
                 if (template.DrawModes[i].PixelShaderMode != RenderMethodTemplate.ShaderMode.Default)
-                    template.DrawModeBitmask |= (uint)(1 << i);
+                    template.DrawModeBitmask |= (RenderMethodTemplate.ShaderModeBitmask)(1 << i);
             }
         }
 
