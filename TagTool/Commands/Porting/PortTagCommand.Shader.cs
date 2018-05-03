@@ -555,8 +555,7 @@ namespace TagTool.Commands.Porting
 
             var edRmt2BestStatsSorted = edRmt2BestStats.OrderBy(x => x.rmdfValuesMatchingCount);
 
-            return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
-
+            return edRmt2BestStatsSorted.Count() > 0 ? CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex) : null;
         }
 
         private class Arguments
@@ -1037,8 +1036,9 @@ namespace TagTool.Commands.Porting
                         {
                             var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
                             var rm2 = CacheContext.Deserializer.Deserialize<RenderMethodFast>(edContext);
-                            renderMethod = new RenderMethod();
-                            renderMethod.Unknown = rm2.Unknown;
+
+                            renderMethod = new RenderMethod { Unknown = rm2.Unknown };
+
                             if (renderMethod.Unknown.Count == 0) // used to name the rmt2 tag
                                 continue;
                         }

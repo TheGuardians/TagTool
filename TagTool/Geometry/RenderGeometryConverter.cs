@@ -29,7 +29,7 @@ namespace TagTool.Geometry
                 writeVertex(readVertex(), i);
         }
 
-        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount, List<int> ms30Indices)
+        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount)
         {
             var vertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
 
@@ -46,10 +46,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                     ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
                     {
-                        if (ms30Indices.Contains(i))
-                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        //v.Tangent = new RealQuaternion(0,0,0,0);
                         outVertexStream.WriteWorldVertex(v);
                     });
                     break;
@@ -57,10 +54,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Rigid:
                     ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
                     {
-                        if (ms30Indices.Contains(i))
-                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteRigidVertex(v);
                     });
                     break;
@@ -68,10 +62,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Skinned:
                     ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
                     {
-                        if (ms30Indices.Contains(i))
-                            v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                         v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        //v.Tangent = new RealQuaternion(0, 0, 0, 0);
                         outVertexStream.WriteSkinnedVertex(v);
                     });
                     break;
@@ -206,7 +197,7 @@ namespace TagTool.Geometry
             return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
 
-        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, List<RenderMaterial> materials)
+        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry)
         {
             //
             // Convert byte[] of UnknownBlock
@@ -410,75 +401,13 @@ namespace TagTool.Geometry
             using (var blamResourceStream = new MemoryStream(rsrcData))
             {
                 //
-                // Create a dictionary of vertex indices that require ms30 shader fixups for each vertex buffer
-                //
-                
-                var ms30Vertices = new Dictionary<int, List<int>>();
-
-                if (materials != null)
-                {
-                    var ms30Materials = new List<bool>();
-
-                    foreach (var material in materials)
-                    {
-                        if (material.RenderMethod == null)
-                            continue;
-
-                        var context = new TagSerializationContext(cacheStream, CacheContext, material.RenderMethod);
-                        var definition = CacheContext.Deserialize(context, TagDefinition.Find(material.RenderMethod.Group.Tag)) as RenderMethod ?? null;
-
-                        ms30Materials.Add(definition?.ShaderProperties[0]?.Template?.Index > 0x4440);
-                    }
-
-                    foreach (var mesh in geometry.Meshes)
-                    {
-                        var ms30Indices = new List<int>();
-
-                        foreach (var part in mesh.Parts)
-                        {
-                            if (part.MaterialIndex < 0 || part.MaterialIndex >= ms30Materials.Count || !ms30Materials[part.MaterialIndex])
-                                continue;
-
-                            for (var i = part.FirstIndex; i < (part.FirstIndex + part.IndexCount); i++)
-                                ms30Indices.Add(i);
-                        }
-
-                        if (rsrcDef.IndexBuffers.Count == 0 || mesh.IndexBuffers[0] == ushort.MaxValue)
-                            continue;
-
-                        blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + mesh.IndexBuffers[0]].Offset;
-
-                        var indexStream = new IndexBufferStream(blamResourceStream, EndianFormat.BigEndian);
-                        var indexBuffer = rsrcDef.IndexBuffers[mesh.IndexBuffers[0]].Definition;
-                        var indexCount = indexBuffer.Data.Size / 2;
-                        var indices = new List<int>();
-
-                        for (var i = 0; i < indexCount; i++)
-                        {
-                            var index = indexStream.ReadIndex();
-
-                            if (ms30Indices.Contains(i))
-                                indices.Add(index);
-                        }
-
-                        foreach (var vertexBufferIndex in mesh.VertexBuffers)
-                        {
-                            if (vertexBufferIndex == ushort.MaxValue || ms30Vertices.ContainsKey(vertexBufferIndex))
-                                continue;
-
-                            ms30Vertices[vertexBufferIndex] = indices;
-                        }
-                    }
-                }
-
-                //
                 // Convert Blam render_geometry_api_resource_definition
                 //
 
                 for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                 {
                     blamResourceStream.Position = rsrcDefEntry.ResourceFixups[i].Offset;
-                    ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount, ms30Vertices.ContainsKey(i) ? ms30Vertices[i] : new List<int>());
+                    ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount);
                 }
 
                 for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)

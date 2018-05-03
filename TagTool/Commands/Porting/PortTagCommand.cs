@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
 
         private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-        private List<Tag> OtherTagGroups = new List<Tag> { new Tag("effe"), new Tag("foot"), new Tag("shit"), new Tag("sncl") };
+        private List<Tag> OtherTagGroups = new List<Tag> { /*new Tag("effe"), new Tag("foot"),*/ new Tag("shit"), new Tag("sncl") };
 
         private bool IsReplacing = false;
         private bool IsRecursive = true;
@@ -658,10 +658,10 @@ namespace TagTool.Commands.Porting
 
                 case RenderGeometry renderGeometry:
                     if (definition is ScenarioStructureBsp sbsp)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry, sbsp.Materials);
+                        return GeometryConverter.Convert(cacheStream, renderGeometry);
                     if (definition is RenderModel mode)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry, mode.Materials);
-                    return GeometryConverter.Convert(cacheStream, renderGeometry, null);
+                        return GeometryConverter.Convert(cacheStream, renderGeometry);
+                    return GeometryConverter.Convert(cacheStream, renderGeometry);
 
                 case RenderMethod renderMethod:
                     var rm = (RenderMethod)data;
