@@ -1355,7 +1355,7 @@ namespace TagTool.Commands.Porting
                     finalRm.ShaderProperties[0].Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
                     finalRm.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
                     finalRm.ShaderProperties[0].Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
-                    foreach (var b in edRmt2.Unknown3) // stops crashing for some shaders if the drawmodes count is still the same
+                    foreach (var b in edRmt2.DrawModeRegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same
                         finalRm.ShaderProperties[0].Unknown3.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
 
                     return finalRm;

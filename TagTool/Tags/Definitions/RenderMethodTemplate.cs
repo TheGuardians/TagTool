@@ -9,23 +9,6 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
     public class RenderMethodTemplate
     {
-        public CachedTagInstance VertexShader;
-        public CachedTagInstance PixelShader;
-        public uint DrawModeBitmask;
-        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
-        public List<UnknownBlock2> Unknown3;
-        public List<ArgumentMapping> ArgumentMappings;
-        public List<Argument> Arguments;
-        public List<UnknownBlock4> Unknown5;
-        public List<UnknownBlock5> Unknown6;
-        public List<ShaderMap> ShaderMaps;
-        public uint Unknown7;
-        public uint Unknown8;
-        public uint Unknown9;
-
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
-
         public enum ShaderMode : sbyte
         {
             Default,
@@ -50,6 +33,47 @@ namespace TagTool.Tags.Definitions
             Sfx_Distort
         }
 
+        public enum ShaderModeBitmask : uint
+        {
+            Default = 1 << 0,
+            Albedo = 1 << 1,
+            Static_Default = 1 << 2,
+            Static_Per_Pixel = 1 << 3,
+            Static_Per_Vertex = 1 << 4,
+            Static_Sh = 1 << 5,
+            Static_Prt_Ambient = 1 << 6,
+            Static_Prt_Linear = 1 << 7,
+            Static_Prt_Quadratic = 1 << 8,
+            Dynamic_Light = 1 << 9,
+            Shadow_Generate = 1 << 10,
+            Shadow_Apply = 1 << 11,
+            Active_Camo = 1 << 12,
+            Lightmap_Debug_Mode = 1 << 13,
+            Static_Per_Vertex_Color = 1 << 14,
+            Water_Tessellation = 1 << 15,
+            Water_Shading = 1 << 16,
+            Dynamic_Light_Cinematic = 1 << 17,
+            Z_Only = 1 << 18,
+            Sfx_Distort = 1 << 19,
+        }
+
+        public CachedTagInstance VertexShader;
+        public CachedTagInstance PixelShader;
+        public ShaderModeBitmask DrawModeBitmask;
+        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
+        public List<DrawModeRegisterOffsetBlock> DrawModeRegisterOffsets;
+        public List<ArgumentMapping> ArgumentMappings;
+        public List<ShaderArgument> Arguments;
+        public List<ShaderArgument> Unknown5;
+        public List<ShaderArgument> GlobalArguments;
+        public List<ShaderArgument> ShaderMaps;
+        public uint Unknown7;
+        public uint Unknown8;
+        public uint Unknown9;
+
+        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        public byte[] Unused;
+
         [TagStructure(Size = 0x2)]
         public class DrawMode
         {
@@ -58,8 +82,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class UnknownBlock2
+        public class DrawModeRegisterOffsetBlock
         {
+            public enum DrawModeRegisterOffsetType
+            {
+
+            }
+
+
+
             static ushort GetCount(ushort value) => (ushort)(value >> 10);
             static ushort GetOffset(ushort value) => (ushort)(value & 0x3FFu);
             static void SetCount(ref ushort destination, ushort count)
@@ -139,25 +170,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class Argument
-        {
-            public StringId Name;
-        }
-
-        [TagStructure(Size = 0x4)]
-        public class UnknownBlock4
-        {
-            public StringId Unknown;
-        }
-
-        [TagStructure(Size = 0x4)]
-        public class UnknownBlock5
-        {
-            public StringId Unknown;
-        }
-
-        [TagStructure(Size = 0x4)]
-        public class ShaderMap
+        public class ShaderArgument
         {
             public StringId Name;
         }

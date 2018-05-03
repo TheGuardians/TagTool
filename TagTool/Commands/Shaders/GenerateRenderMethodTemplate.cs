@@ -33,6 +33,9 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
+
+
+
         public override object Execute(List<string> args)
         {
             if (args.Count <= 0)
@@ -70,7 +73,39 @@ namespace TagTool.Commands.Shaders
 
                         //TODO: Figure out the rest of RMT2 rip
 
+                        Definition.DrawModeBitmask = 0;
+                        Definition.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Default;
 
+                        //TODO: Replace Vertex and Pixl Shaders
+                        //VertexShader;
+                        //PixelShader
+
+                        Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+                        Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
+                        Definition.DrawModeRegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+
+                        Definition.Arguments = new List<RenderMethodTemplate.ShaderArgument>();
+                        Definition.Unknown5 = new List<RenderMethodTemplate.ShaderArgument>();
+                        Definition.GlobalArguments = new List<RenderMethodTemplate.ShaderArgument>();
+                        Definition.ShaderMaps = new List<RenderMethodTemplate.ShaderArgument>();
+                        
+                        
+
+
+        //                        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
+        //                        public List<UnknownBlock2> Unknown3;
+        //                        public List<ArgumentMapping> ArgumentMappings;
+        //                        public List<Argument> Arguments;
+        //                        public List<UnknownBlock4> Unknown5;
+        //                        public List<UnknownBlock5> Unknown6;
+        //                        public List<ShaderMap> ShaderMaps;
+
+
+
+
+
+
+        //Definition.ShaderMaps = new List<RenderMethodTemplate.ShaderMap>();
 
 
 
