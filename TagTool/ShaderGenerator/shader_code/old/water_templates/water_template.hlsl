@@ -171,7 +171,10 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	float4 c80 = water_murkiness;
 	float4 c81 = bankalpha_infuence_depth;
 	float4 c210 = p_lightmap_compress_constant_0;
-	float4 c213 = k_ps_water_view_xform_inverse;
+	float4 c213 = k_ps_water_view_xform_inverse[0];
+	float4 c214 = k_ps_water_view_xform_inverse[1];
+	float4 c215 = k_ps_water_view_xform_inverse[2];
+	float4 c216 = k_ps_water_view_xform_inverse[3];
 	float4 c217 = k_ps_water_view_depth_constant;
 	float4 c218 = k_ps_water_player_view_constant;
 

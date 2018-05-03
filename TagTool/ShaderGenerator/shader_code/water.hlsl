@@ -173,7 +173,10 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	float4 c80 = water_murkiness;
 	float4 c81 = bankalpha_infuence_depth;
 	float4 c210 = p_lightmap_compress_constant_0;
-	float4 c213 = k_ps_water_view_xform_inverse;
+	float4 c213 = k_ps_water_view_xform_inverse[0];
+	float4 c214 = k_ps_water_view_xform_inverse[1];
+	float4 c215 = k_ps_water_view_xform_inverse[2];
+	float4 c216 = k_ps_water_view_xform_inverse[3];
 	float4 c217 = k_ps_water_view_depth_constant;
 	float4 c218 = k_ps_water_player_view_constant;
 
@@ -322,13 +325,16 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 		r4.xy = v0.xy * wave_displacement_array_xform.xy + wave_displacement_array_xform.zw; //mad r4.xy, v0, c11, c11.zwzw
 		r4 = tex3D(s5, r4.xyz); //texld r4, r4, s5
 	}
-	
-	r3.yz = (r4.xxyw * c2.z + c2.w).xy; //mad r3.yz, r4.xxyw, c2.z, c2.w
-	r1.xy = (r3.yzzw * r1 + r2).xy; //mad r1.xy, r3.yzzw, r1, r2
-	r2.xy = (r1 * r3.x + r1.zwzw).xy; //mad r2.xy, r1, r3.x, r1.zwzw
-	r2.xy = (r0 + r2).xy; //add r2.xy, r0, r2
-	r2.xy = (r2 * v4.yxzw).xy; //mul r2.xy, r2, v4.yxzw
-	r2.xy = (r2 * refraction_texcoord_shift.x).xy; //mul r2.xy, r2, c70.x
+
+	r3.yz = r4.xx * c2.z + c2.w; //mad r3.yz, r4.xxyw, c2.z, c2.w
+	r1.xy = r3.yz * r1.xy + r2.xy; //mad r1.xy, r3.yzzw, r1, r2
+	r2.xy = r1.xy * r3.x + r1.zw; //mad r2.xy, r1, r3.x, r1.zwzw
+	r2.xy = r0.xy + r2.xy; //add r2.xy, r0, r2
+	r2.xy = r2.xy * v4.yx; //mul r2.xy, r2, v4.yxzw
+	r2.xy = r2.xy * c70.x; //mul r2.xy, r2, c70.x
+
+	oC0.xyz = float3(r1.xyz);
+
 	r2.w = v0.w - c1.x; //add r2.w, -c1.x, v0.w
 	r3.x = 1.0 / v0.w; //rcp r3.x, v0.w
 	r2.w = r2.w >= 0 ? r3.x : c1.x; //cmp r2.w, r2.w, r3.x, c1.x
@@ -342,6 +348,9 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	r3.xyw = (r4.zxzy * v1.yzzx).xyz; //mul r3.xyw, r4.zxzy, v1.yzzx
 	r3.xyw = (r4.yzzx * v1.zxzy - r3).xyz; //mad r3.xyw, r4.yzzx, v1.zxzy, -r3
 	r4.xyz = normalize((r3.xyww).xyz); //nrm r4.xyz, r3.xyww
+
+
+
 	r1.xyz = r3.z, -r4, r1; //mad r1.xyz, r3.z, -r4, r1
 	r0.x = 1.0 / v3.w; //rcp r0.x, v3.w
 	r2.zw = (r0.x * v3.xyxy).xy; //mul r2.zw, r0.x, v3.xyxy
@@ -351,45 +360,52 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 	r4 = tex2D(s4, r3.xy); //texld r4, r3, s4
 
 	
+	// CLEAN
+	r0.y = 1.0 / r4.x; //rcp r0.y, r4.x
+	r4.z = c217.x * r0.y + c217.y; //mad r4.z, c217.x, r0.y, c217.y
+	r4.xyw = (r2.zwzz * c1.xxzy + c1.yyzx).xyz; //mad r4.xyw, r2.zwzz, c1.xxzy, c1.yyzx
+	r0.y = dot(r4, c216); //dp4 r0.y, r4, c216
+	r0.y = 1.0 / r0.y; //rcp r0.y, r0.y
+	r5.x = dot(r4, c213); //dp4 r5.x, r4, c213
+	r5.y = dot(r4, c214); //dp4 r5.y, r4, c214
+	r5.z = dot(r4, c215); //dp4 r5.z, r4, c215
+	r4.xyz = r5 * r0.y - v5; //mad r4.xyz, r5, r0.y, -v5
+	// END CLEAN
 
-    //rcp r0.y, r4.x
-    //mad r4.z, c217.x, r0.y, c217.y
-    //mad r4.xyw, r2.zwzz, c1.xxzy, c1.yyzx
-    //dp4 r0.y, r4, c216
-    //rcp r0.y, r0.y
-    //dp4 r5.x, r4, c213
-    //dp4 r5.y, r4, c214
-    //dp4 r5.z, r4, c215
-    //mad r4.xyz, r5, r0.y, -v5
-    //dp3 r0.y, r4, r4
+	r0.y = dot(r4.xyz, r4.xyz); //dp3 r0.y, r4, r4
     //rsq r0.y, r0.y
     //rcp r0.y, r0.y
+	r0.y = sqrt(r0.y);
     //mul_sat r0.y, r0.y, c4.z
-    //mul r2.xy, r0.y, r2
-    //rcp r0.y, v4.w
-    //add_sat r0.y, r0.y, r0.y
-    //mul r2.xy, r0.y, r2
-    //mul r2.xy, r2, c218.zwzw
-    //mad r2.xy, r2, r0.w, r3
-    //mov r4.xzw, c4
-    //add r2.zw, r4.w, c218.xyxy
-    //max r3.zw, r2.xyxy, r2
-    //add r2.xy, c218.zwzw, c218
-    //add r2.xy, r2, -c4.w
-    //min r4.yw, r2.xxzy, r3.xzzw
-    //texld r2, r4.ywzw, s4
-    //rcp r0.y, r2.x
-    //mad r0.y, c217.x, r0.y, c217.y
-    //mad r0.x, v3.z, -r0.x, r0.y
-    //cmp r2.xy, r0.x, r3, r4.ywzw
-    //add r2.z, -r2.y, c1.x
-    //mad r3.xy, r2.xzzw, c5.x, c5.y
-    //texld r5, r2, s4
-    //rcp r0.x, r5.x
-    //mad r3.z, c217.x, r0.x, c217.y
-    //mov r3.w, c1.x
-    //dp4 r0.x, r3, c216
-    //nrm r5.xyz, r1
+	r0.y = saturate(r0.y * c4.z);
+	r2.xy = r2.xy * r0.y; //mul r2.xy, r0.y, r2
+	r0.y = 1.0 / v4.w; //rcp r0.y, v4.w
+	r0.y = saturate(r0.y + r0.y); //add_sat r0.y, r0.y, r0.y
+	r2.xy = r2.xy * r0.y; //mul r2.xy, r0.y, r2
+	r2.xy = r2.xy * k_ps_water_player_view_constant.zw; //mul r2.xy, r2, c218.zwzw
+	r2.xy = (r2 * r0.w + r3).xy; //mad r2.xy, r2, r0.w, r3
+	r4.xzw = c4.xyz; //mov r4.xzw, c4
+	r2.zw = c218.xy + r4.w; //add r2.zw, r4.w, c218.xyxy
+	r3.zw = max(r2.xyxy, r2).xy; //max r3.zw, r2.xyxy, r2
+	r2.xy = (c218.zwzw + c218).xy; //add r2.xy, c218.zwzw, c218
+	r2.xy = (r2 - c4.w).xy; //add r2.xy, r2, -c4.w
+	r4.yw = min(r2.xxzy, r3.xzzw).xy;//min r4.yw, r2.xxzy, r3.xzzw
+	r2 = tex2D(s4, r4.ywzw); //texld r2, r4.ywzw, s4
+
+	
+
+	r0.y = 1.0 / r2.x; //rcp r0.y, r2.x
+	r0.y = r0.y * c217.x + c217.y; //mad r0.y, c217.x, r0.y, c217.y
+	r0.x = v3.z * (-r0.x) + r0.y; //mad r0.x, v3.z, -r0.x, r0.y
+	r2.xy = (r0.xxxx >= 0 ? r3 : r4.ywzw).xy; //cmp r2.xy, r0.x, r3, r4.ywzw
+	r2.z = (-r2.y) + c1.x; //add r2.z, -r2.y, c1.x
+	r3.xy = r2.xzzw * c5.x + c5.y; //mad r3.xy, r2.xzzw, c5.x, c5.y
+	r5 = tex2D(s4, r2); //texld r5, r2, s4
+	r0.x = 1.0 / r5.x; //rcp r0.x, r5.x
+	r3.z = r0.x * c217.x + c217.y; //mad r3.z, c217.x, r0.x, c217.y
+	r3.w = c1.x; //mov r3.w, c1.x
+	r0.x = dot(r3, c216); //dp4 r0.x, r3, c216
+	r5.xyz = normalize(r1.xyz); //nrm r5.xyz, r1
 
 	//NOTE: This is global illumination below
 	//if b0
@@ -408,7 +424,7 @@ PS_OUTPUT main(VS_OUTPUT input) : COLOR
 
 	r1.xyz = sample_lightprobe_texture_array(lightprobe_texture_array, v7.xy);
 
-	oC0.xyz = r1.xyz;
+	
 
     //rcp r0.x, r0.x
     //dp4 r6.x, r3, c213
