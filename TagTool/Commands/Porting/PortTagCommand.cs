@@ -289,7 +289,10 @@ namespace TagTool.Commands.Porting
             //
             // Handle shaders that do not exist (either in code or in tags)
             //
-
+            
+            if (groupTag == "rmcs")
+                return CacheContext.GetTagInstance<Shader>(@"shaders\invalid"); // there are no rmcs tags in ms23, disable completely for now
+            
             switch (groupTag.ToString())
             {
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
