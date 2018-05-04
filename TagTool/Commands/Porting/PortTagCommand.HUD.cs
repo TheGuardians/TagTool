@@ -120,6 +120,13 @@ namespace TagTool.Commands.Porting
                     chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].StateData[stateDatumIndex]);
                 for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].RenderData.Count; renderDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex]);
+
+                //fixup for binoculars
+                if (widgetname == "binoculars_wide_fullscreen")
+                {
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 0.0f;
+                }
+
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDatumIndex++)
@@ -133,8 +140,6 @@ namespace TagTool.Commands.Porting
                     //fixup for widgets without global placement data
                     if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X *= 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.Y *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
@@ -149,11 +154,21 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex]);
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
+                    //get stringid text for patch targeting
+                    var textwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].Name);
+
+                    //fixup for 'budget' label
+                    if (textwidgetname == "budget_meter_name")
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                    }
+
                     //fixup for widgets without global placement data
                     if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].MirrorOffset.X *= 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].MirrorOffset.Y *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
@@ -168,8 +183,6 @@ namespace TagTool.Commands.Porting
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.X *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y *= 1.5f;
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].MirrorOffset.X *= 1.5f;
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].MirrorOffset.Y *= 1.5f;
                 }               
             }
             return chudDefinition;
@@ -244,8 +257,8 @@ namespace TagTool.Commands.Porting
                     //more fixups
                     H3att.ResolutionWidth = 1920;
                     H3att.ResolutionHeight = 1080;
-                    H3att.MotionSensorOffset.X = 1.5f * H3att.MotionSensorOffset.X;
-                    H3att.MotionSensorOffset.Y = 1.5f * H3att.MotionSensorOffset.Y;
+                    H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
+                    H3att.MotionSensorOffset.Y = (float)Math.Floor((double)(1.5f * H3att.MotionSensorOffset.Y));
                     H3att.MotionSensorRadius = 1.5f * H3att.MotionSensorRadius;
                     H3att.MotionSensorScale = 1.5f * H3att.MotionSensorScale;
                     H3att.HorizontalScale = 1.0f;
