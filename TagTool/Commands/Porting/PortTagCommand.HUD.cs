@@ -129,23 +129,16 @@ namespace TagTool.Commands.Porting
 
                     //get stringid text for patch targeting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
-                    //fixup for red warning flashes not scaling with HUD
-                    if (widgetname.Contains("warning_flashes_spartan") && BlamCache.Version == CacheVersion.Halo3Retail)
+                    
+                    //fixup for widgets without global placement data
+                    if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X = -126.0f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 109.0f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.04f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 2.04f;
-                    }
-                    //fixup for shield depleted flash
-                    if (bitmapwidgetname == "flahsy")
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 15.0f;
-                    //fixup ODST waypoint lightup
-                    if (widgetname == "waypoint_light_bottom720")
-                    {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 310.0f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y = 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X = 2.02f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.Y *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
                     }
                 }
 
@@ -156,22 +149,27 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].StateData[stateDatumIndex]);
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData.Count; renderDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[renderDatumIndex]);
+                    //fixup for widgets without global placement data
+                    if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0)
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].MirrorOffset.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].MirrorOffset.Y *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                    }
                 }
                 
                 //scale all widget groups by 1.5 to match 720p > 1080p conversion
                 for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count; placementDatumIndex++)
                     {
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X;
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y;
-                    //HUD X-Scale Fixup
-                    if (widgetname == "in_helmet_bottom" && BlamCache.Version == CacheVersion.Halo3ODST)
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X = 1.0f;
-                    //HUD Y-Offset Top Fixup
-                    if (widgetname == "in_helmet_top" && BlamCache.Version == CacheVersion.Halo3ODST)
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y = -110.0f;
-                    //fixup for ODST Grenade Placement
-                    if (widgetname.Contains("grenade") && BlamCache.Version == CacheVersion.Halo3ODST)
-                        chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 1.5f * chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X *= 1.5f;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y *= 1.5f;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.X *= 1.5f;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y *= 1.5f;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].MirrorOffset.X *= 1.5f;
+                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].MirrorOffset.Y *= 1.5f;
                 }               
             }
             return chudDefinition;
@@ -257,6 +255,20 @@ namespace TagTool.Commands.Porting
                     H3att.NotificationScale = 1.2f;
                     H3att.NotificationLineSpacing = 30.0f;
                     H3att.NotificationOffsetY_HO = 0.65f;
+
+                    //loop through unset fields and set them to HO values
+                    foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal.HudAttribute).GetFields())
+                    {
+                        object H3FieldValue = H3FieldInfo.GetValue(H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex]);
+                        object HOFieldValue = H3FieldInfo.GetValue(HODefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex]);
+                        object zeroint = (int)0;
+                        object zerofloat = 0.0f;
+                        object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
+                        object zerotag = new CachedTagInstance(-1);
+
+                        if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
+                            H3FieldInfo.SetValue(H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex], HOFieldValue);
+                    }
                 }
 
                 /*
