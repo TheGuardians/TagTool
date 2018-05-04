@@ -190,12 +190,26 @@ namespace TagTool.Commands.Shaders
             stream.Close();
 
             //Create the file.
-            using (FileStream fs = File.Create("listregistersrmt2_output.csv"))
+            try
             {
-                foreach(var line in strings)
+                using (FileStream fs = File.Create("listregistersrmt2_output.csv"))
                 {
-                    byte[] info = new UTF8Encoding(true).GetBytes($"{line}\n");
-                    fs.Write(info, 0, info.Length);
+                    foreach (var line in strings)
+                    {
+                        byte[] info = new UTF8Encoding(true).GetBytes($"{line}\n");
+                        fs.Write(info, 0, info.Length);
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Failed to export file");
+            }
+            if(specific_tag)
+            {
+                foreach (var line in strings)
+                {
+                    Console.WriteLine(line);
                 }
             }
             Console.WriteLine($"found {strings.Count}");
