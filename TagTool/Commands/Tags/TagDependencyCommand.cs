@@ -129,7 +129,11 @@ namespace TagTool.Commands.Tags
 
                 Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{CacheContext.GetString(dependency.Group.Name)}");
             }
-
+            
+            foreach (var instance in tag.Dependencies)
+                if (!CacheContext.TagCache.Index.Contains(instance))
+                    Console.WriteLine($"WARNING: dependency is an inexistent tag: 0x{instance:X4}");
+                    
             return true;
         }
 
