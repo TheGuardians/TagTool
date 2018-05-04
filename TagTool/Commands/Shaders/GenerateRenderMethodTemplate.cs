@@ -26,7 +26,7 @@ namespace TagTool.Commands.Shaders
 
                 "Generate",
                 "Compiles HLSL source file from scratch :D",
-                "Generate <index> <shader_type> <drawmode> <parameters...>",
+                "Generate <shader_type> <parameters...>",
                 "Compiles HLSL source file from scratch :D")
         {
             CacheContext = cacheContext;
@@ -34,37 +34,7 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
-        class Mapping
-        {
-            public readonly ShaderParameter.RType ExpectedType;
-            public string Name;
 
-            public Mapping(string name, ShaderParameter.RType expectedtype, DrawModeRegisterOffsetTypeBits supported_registers)
-            {
-                Name = name;
-                ExpectedType = expectedtype;
-            }
-        }
-
-        static Mapping[] MappingsSource = new Mapping[]
-        {
-            
-        };
-
-        static Dictionary<string, Mapping> MappingsLookup = SetupMappings();
-
-        private static Dictionary<string, Mapping> SetupMappings()
-        {
-            Dictionary<string, Mapping> dictionary = new Dictionary<string, Mapping>();
-
-            foreach(var mapping in MappingsSource)
-            {
-                if (dictionary.ContainsKey(mapping.Name)) throw new Exception("Duplicate Mapping! Bad!");
-                dictionary[mapping.Name] = mapping;
-            }
-
-            return dictionary;
-        }
 
         public override object Execute(List<string> args)
         {
@@ -77,12 +47,10 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
-            Int32 index;
-            string type;
+            string shader_type;
             try
             {
-                index = Int32.Parse(args[0]);
-                type = args[1].ToLower();
+                shader_type = args[0].ToLower();
             } catch
             {
                 Console.WriteLine("Invalid index, type, and drawmode combination");
@@ -90,11 +58,11 @@ namespace TagTool.Commands.Shaders
             }
 
             Int32[] shader_args;
-			try { shader_args = Array.ConvertAll(args.Skip(2).ToArray(), Int32.Parse); }
+			try { shader_args = Array.ConvertAll(args.Skip(1).ToArray(), Int32.Parse); }
 			catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
 
 			// runs the appropriate shader-generator for the template type.
-            switch(type)
+            switch(shader_type)
             {
                 case "beam_templates":
                 case "beam_template":
@@ -118,6 +86,22 @@ namespace TagTool.Commands.Shaders
                         Definition.Unknown5 = new List<RenderMethodTemplate.ShaderArgument>();
                         Definition.GlobalArguments = new List<RenderMethodTemplate.ShaderArgument>();
                         Definition.ShaderMaps = new List<RenderMethodTemplate.ShaderArgument>();
+
+                        foreach(var param in result_default.Parameters)
+                        {
+                            var param_name = CacheContext.GetString(param.ParameterName);
+
+                            var mapping = GlobalUniformMappings.GetMapping(param_name, param.RegisterType, RenderMethodTemplate.ShaderMode.Default);
+
+                            if(mapping != null)
+                            {
+                                Console.WriteLine($"SUCCESS: Found parameter {param_name} register_index:{param.RegisterIndex} argument_index:{mapping.ArgumentIndex}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("WARNING: Missing parameter " + param_name);
+                            }
+                        }
                         
                         
 
@@ -165,10 +149,10 @@ namespace TagTool.Commands.Shaders
                 case "terrain_template":
                 case "water_templates":
                 case "water_template":
-                    Console.WriteLine($"{type} is not implemented");
+                    Console.WriteLine($"{shader_type} is not implemented");
                     return false;
                 default:
-                    Console.WriteLine($"Unknown template {type}");
+                    Console.WriteLine($"Unknown template {shader_type}");
                     return false;
             }
 

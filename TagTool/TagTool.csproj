@@ -318,6 +318,7 @@
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Shaders\GenerateRenderMethodTemplate.cs" />
+    <Compile Include="Commands\Shaders\GlobalUniformMappings.cs" />
     <Compile Include="Commands\Shaders\ListMethodOptionParameters.cs" />
     <Compile Include="Commands\Shaders\ListRegisters.cs" />
     <Compile Include="Commands\Shaders\CompileCommand.cs" />

@@ -25,7 +25,7 @@ namespace TagTool.Commands.Shaders
                 "ListRegistersRMT2",
                 "List Registers using RMT2 tags",
 
-                "ListRegistersRMT2 tag",
+                "ListRegistersRMT2 [tag <tag_id>] <template_type>",
                 "List Registers using RMT2 tags")
         {
             CacheContext = cacheContext;
@@ -45,7 +45,24 @@ namespace TagTool.Commands.Shaders
 
         public override object Execute(List<string> args)
         {
-            ListRegisters(args.Count > 0 ? args[0] : null);
+            string template = null;
+            if (args.Count % 2 == 1) template = args[args.Count - 1];
+
+            bool specific_tag = false;
+            string specific_tag_id = "";
+
+            for (int i=0;i<args.Count;i++)
+            {
+                switch (args[i])
+                {
+                    case "tag":
+                        specific_tag = true;
+                        specific_tag_id = args[++i];
+                        break;
+                }
+            }
+
+            ListRegisters(specific_tag, specific_tag_id, template);
 
             return true;
         }
@@ -83,22 +100,48 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        public void ListRegisters(string _template_type)
+        public void ListRegisters(bool specific_tag, string specific_tag_id, string _template_type)
         {
             var stream = CacheContext.OpenTagCacheRead();
 
             HashSet<string> strings = new HashSet<string>();
-            strings.Add($"name,register_index,register_type,argument_index,offset_name,array_size");
+            strings.Add($"name,register_index,register_type,argument_index,offset_name,array_size,shader_mode,tag_name");
 
-            foreach (var instance in CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == typeof(RenderMethodTemplate)))
+            IEnumerable<CachedTagInstance> tags;
+
+            if(specific_tag)
+            {
+                tags = new CachedTagInstance[] { CacheContext.TagCache.Index[Convert.ToInt32(specific_tag_id, 16)] };
+            }
+            else
+            {
+                tags = CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == typeof(RenderMethodTemplate));
+            }
+
+            foreach (var instance in tags)
             {
                 //if (instance == null)
                 //    continue;
 
-                //var type = TagDefinition.Find(instance.Group.Tag);
-                //if (type != typeof(RenderMethodTemplate)) continue;
+                var type = TagDefinition.Find(instance.Group.Tag);
+                if (type != typeof(RenderMethodTemplate)) throw new Exception("Invalid tag");
 
                 var rmt2 = (RenderMethodTemplate)CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, instance), typeof(RenderMethodTemplate));
+
+                string tag_name;
+                {
+                    var tag_index = CacheContext.TagCache.Index.ToList().IndexOf(instance);
+                    var name = CacheContext.TagNames.ContainsKey(tag_index) ? CacheContext.TagNames[tag_index] : null;
+                    if(_template_type != null)
+                    {
+                        if (name == null) continue;
+                        if (!name.Contains("\\")) continue; // Probbaly an unnamed tag
+                        var template_type = name.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                        if (_template_type != "*" && template_type != _template_type) continue;
+                    }
+                    tag_name = name;
+                }
+
                 var pixl = (PixelShader)CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, rmt2.PixelShader), typeof(PixelShader));
 
                 var shader_modes = GetShaderModes(rmt2.DrawModeBitmask);
@@ -133,9 +176,10 @@ namespace TagTool.Commands.Shaders
                                     var argument_index = argument.ArgumentIndex;
                                     var offset_name = offset_type.ToString();
                                     var array_size = param.RegisterCount;
+                                    var shader_mode_str = shader_mode.ToString();
 
 
-                                    strings.Add($"{name},{register_index},{register_type},{argument_index},{offset_name},{array_size}");
+                                    strings.Add($"{name},{register_index},{register_type},{argument_index},{offset_name},{array_size},{shader_mode_str},{tag_name}");
                                 }
                             }
                         }
@@ -145,9 +189,14 @@ namespace TagTool.Commands.Shaders
 
             stream.Close();
 
-            foreach(var param in strings)
+            //Create the file.
+            using (FileStream fs = File.Create("listregistersrmt2_output.csv"))
             {
-                Console.WriteLine(param);
+                foreach(var line in strings)
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes($"{line}\n");
+                    fs.Write(info, 0, info.Length);
+                }
             }
             Console.WriteLine($"found {strings.Count}");
         }

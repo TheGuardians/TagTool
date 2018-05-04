@@ -68,7 +68,6 @@ namespace TagTool.Commands.Shaders
                     if (type != typeof(PixelShader)) continue;
 
                     var tag_index = CacheContext.TagCache.Index.ToList().IndexOf(instance);
-
                     var name = CacheContext.TagNames.ContainsKey(tag_index) ? CacheContext.TagNames[tag_index] : null;
                     if (name == null) continue;
                     if (!name.Contains("\\")) continue; // Probbaly an unnamed tag
