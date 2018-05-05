@@ -882,6 +882,20 @@ namespace TagTool.Commands.Porting
                 "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
                 "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
+                                
+                // engine globals, thanks zedd
+                // Can and should be automatized
+                "00002196,EC070894,EC080895,0005,3C84FFFF,GlobalsReference,Boolean,and,  // global_playtest_mode",
+                "00005345,F85414E1,F85514E2,0005,1A85FFFF,GlobalsReference,Boolean,and,  // survival_performance_mode",
+                "00017846,A92A45B6,FFFFFFFF,0007,9083FFFF,GlobalsReference,Short,+,      // ai_movement_flee",
+                "00019797,B0C94D55,FFFFFFFF,0013,FB82FFFF,GlobalsReference,Ai,<=,        // ai_current_actor",
+                "00022826,BC9E592A,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
+                "00022898,BCE65972,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
+                "00022973,BD3159BD,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
+                "00023042,BD765A02,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
+                // "00025500,C710639C,C711639D,FFFF,EB80FFFF,GlobalsReference,Real,,        // render_near_clip_distance", breaks
+                "00030064,D8E47570,D8E57571,FFFF,BE80FFFF,GlobalsReference,Boolean,,     // render_lightmap_shadows",
+                "00030246,D99A7626,D99B7627,FFFF,BE80FFFF,GlobalsReference,Boolean,,     // render_lightmap_shadows",
             },
 
             ["h100"] = new List<string>
