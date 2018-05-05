@@ -6,7 +6,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
-
+using TagTool.Tags;
 using ResourceLocation = TagTool.Common.ResourceLocation;
 
 namespace TagTool.Commands.Editing
@@ -98,47 +98,69 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
-            var fieldType = field.FieldType;
-            var fieldValue = ParseArgs(field.FieldType, args.Skip(1).ToList());
-
-            if (fieldValue != null && fieldValue.Equals(false))
-            {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
-                return false;
-            }
-
-            if (field.FieldType == typeof(PageableResource))
-            {
-                var pageable = (PageableResource)field.GetValue(Owner);
-
-                if (pageable != null)
-                    field.SetValue(Owner, fieldValue != null ?
-                        SetResourceData(pageable, (FileInfo)fieldValue) : null);
-            }
-            else
-            {
-                field.SetValue(Owner, fieldValue);
-            }
+            var fieldType = enumerator.Field.FieldType;
+            var fieldValue = enumerator.Field.GetValue(Owner);
 
             var typeString =
                 fieldType.IsGenericType ?
                     $"{fieldType.Name}<{fieldType.GenericTypeArguments[0].Name}>" :
                 fieldType.Name;
 
-            var valueString =
-                fieldType == typeof(StringId) ?
-                    CacheContext.GetString((StringId)fieldValue) :
-                fieldType.GetInterface(typeof(IList).Name) != null ?
-                    (((IList)fieldValue).Count != 0 ?
-                        $"{{...}}[{((IList)fieldValue).Count}]" :
-                    "null") :
-                fieldValue == null ?
-                    "null" :
-                fieldValue.ToString();
+            string valueString;
 
-            Console.WriteLine("{0}: {1} = {2}", field.Name, typeString, valueString);
+#if !DEBUG
+            try
+            {
+#endif
+                if (fieldValue == null)
+                    valueString = "null";
+                else if (fieldType.GetInterface(typeof(IList).Name) != null)
+                    valueString =
+                        ((IList)fieldValue).Count != 0 ?
+                            $"{{...}}[{((IList)fieldValue).Count}]" :
+                        "null";
+                else if (fieldType == typeof(StringId))
+                    valueString = CacheContext.GetString((StringId)fieldValue);
+                else if (fieldType == typeof(CachedTagInstance))
+                {
+                    var instance = (CachedTagInstance)fieldValue;
+
+                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
+                        CacheContext.TagNames[instance.Index] :
+                        $"0x{instance.Index:X4}";
+
+                    valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
+                }
+                else if (fieldType == typeof(TagFunction))
+                {
+                    var function = (TagFunction)fieldValue;
+                    valueString = "";
+                    foreach (var datum in function.Data)
+                        valueString += datum.ToString("X2");
+                }
+                else if (fieldType == typeof(PageableResource))
+                {
+                    var pageable = (PageableResource)fieldValue;
+                    pageable.GetLocation(out var location);
+                    valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
+                }
+                else
+                    valueString = fieldValue.ToString();
+#if !DEBUG
+            }
+            catch (Exception e)
+            {
+                valueString = $"<ERROR MESSAGE=\"{e.Message}\" />";
+            }
+#endif
+
+            var fieldFullName = $"{enumerator.Field.DeclaringType.FullName}.{enumerator.Field.Name}".Replace("+", ".");
+            var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldFullName}')]");
+
+            Console.WriteLine("{0}: {1} = {2} {3}", enumerator.Field.Name, typeString, valueString,
+                documentationNode != null ?
+                    $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
+                    "");
 
             while (ContextStack.Context != previousContext) ContextStack.Pop();
             Owner = previousOwner;

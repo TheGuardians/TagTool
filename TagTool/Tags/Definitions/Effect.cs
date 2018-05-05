@@ -128,9 +128,12 @@ namespace TagTool.Tags.Definitions
             {
                 public CreateInEnvironmentValue CreateInEnvironment;
                 public CreateInDispositionValue CreateInDisposition;
+
                 public short LocationIndex;
-                public short Unknown;
-                public float Acceleration2;
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused;
+
+                public float AccelerationAmount;
                 public float InnerConeAngle;
                 public float OuterConeAngle;
 
@@ -139,14 +142,14 @@ namespace TagTool.Tags.Definitions
                     AnyEnvironment,
                     AirOnly,
                     WaterOnly,
-                    SpaceOnly,
+                    SpaceOnly
                 }
 
                 public enum CreateInDispositionValue : short
                 {
                     EitherMode,
                     ViolentModeOnly,
-                    NonviolentModeOnly,
+                    NonviolentModeOnly
                 }
             }
 
@@ -154,8 +157,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ParticleSystem
             {
-                public sbyte Unknown;
-                public sbyte Unknown2;
+                public PriorityValue Priority;
+                public sbyte GameMode;
                 public sbyte Unknown3;
                 public sbyte Unknown4;
                 public CachedTagInstance Particle;
@@ -191,6 +194,15 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
 
+                public enum PriorityValue : sbyte
+                {
+                    Low,
+                    Normal,
+                    AboveNormal,
+                    High,
+                    VeryHigh,
+                    Essential
+                }
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
@@ -199,13 +211,19 @@ namespace TagTool.Tags.Definitions
                 {
                     public StringId Name;
                     public byte Version;
-                    public byte EmitterSettings;
-                    public short EmissionShape;
+                    public EmissionShapeValue EmissionShape;
+
+                    [TagField(Padding = true, Length = 1)]
+                    public byte[] Unused;
+
+                    public FlagsValue EmitterFlags;
+
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public float Unknown2;
 
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public CachedTagInstance CustomEmitterPoints;
+                    public CachedTagInstance CustomShape;
+
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public CachedTagInstance BoatHull;
 
@@ -213,26 +231,40 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown4;
                     public uint Unknown5;
                     public uint Unknown6;
+
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public uint Unknown7;
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public uint Unknown8;
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public uint Unknown9;
-                    public TagMapping Function1;
-                    public uint Unknown10;
-                    public uint Unknown11;
-                    public uint Unknown12;
-                    public uint Unknown13;
-                    public uint Unknown14;
-                    public uint Unknown15;
-                    public TagMapping Function2;
-                    public uint Unknown19;
-                    public uint Unknown20;
-                    public uint Unknown21;
-                    public uint Unknown22;
-                    public uint Unknown23;
-                    public uint Unknown24;
+
+                    /// <summary>
+                    /// XYZ controls that offset the emitter's origin from the original location
+                    /// </summary>
+                    public TranslationalOffsetData TranslationalOffset;
+
+                    [TagStructure(Size = 0x38)]
+                    public struct TranslationalOffsetData
+                    {
+                        public TagMapping Mapping;
+                        public RealPoint3d StartingInterpolant;
+                        public RealPoint3d EndingInterpolant;
+                    }
+
+                    /// <summary>
+                    /// yaw/pitch that changes the initial rotation of the emitter
+                    /// </summary>
+                    public RelativeDirectionData RelativeDirection;
+
+                    [TagStructure(Size = 0x38)]
+                    public struct RelativeDirectionData
+                    {
+                        public TagMapping Mapping;
+                        public RealEulerAngles3d DirectionAt0;
+                        public RealEulerAngles3d DirectionAt1;
+                    }
+
                     public TagMapping Function3;
                     public TagMapping Function4;
                     public TagMapping Function5;
@@ -270,6 +302,40 @@ namespace TagTool.Tags.Definitions
                     public List<UnknownBlock2> Unknown80;
                     public List<CompiledFunction> CompiledFunctions;
                     public List<CompiledColorValue> CompiledColorValues;
+
+                    public enum EmissionShapeValue : sbyte
+                    {
+                        Sprayer,
+                        Disc,
+                        Globe,
+                        Implode,
+                        Tube,
+                        Halo,
+                        ImpactContour,
+                        ImpactArea,
+                        Debris,
+                        Line,
+                        CustomPoints,
+                        BoatHullSurface,
+                        Cube,
+                        Cylinder,
+                        UnweightedLine,
+                        Plane,
+                        Jetwash,
+                        PlanarOrbit,
+                        SphereOrbit,
+                        PlaneSpray
+                    }
+
+                    [Flags]
+                    public enum FlagsValue : byte
+                    {
+                        None,
+                        VolumeEmitterParticleVelocitiesAreRandom = 1 << 0,
+                        ClampParticleVelocities = 1 << 1,
+                        ParticleEmittedInsideShape = 1 << 2,
+                        OverrideParticleDirection = 1 << 3
+                    }
 
                     [TagStructure(Size = 0x18)]
                     public class UnknownBlock

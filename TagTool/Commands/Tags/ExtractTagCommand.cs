@@ -16,7 +16,7 @@ namespace TagTool.Commands.Tags
                   "ExtractTag",
                   "",
 
-                  "ExtractTag [all] <index|group> <path>",
+                  "ExtractTag <Tag> <Path>",
 
                   "")
         {
