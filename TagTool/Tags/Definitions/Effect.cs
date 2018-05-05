@@ -361,7 +361,6 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
                     public struct ParticleMovementData
                     {
-                        [TagField(ValidTags = new[] { "pmov" })]
                         public CachedTagInstance Template;
 
                         public FlagsValue Flags;
