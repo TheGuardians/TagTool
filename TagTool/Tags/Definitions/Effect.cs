@@ -106,7 +106,7 @@ namespace TagTool.Tags.Definitions
                 public short PrimaryLocation;
                 public short SecondaryLocation;
                 public EffectEventPartFlags Flags;
-                public EffectEventPartPriority Priority;
+                public EffectEventPriority Priority;
                 public EffectEventPartCameraMode CameraMode;
                 public Tag RuntimeBaseGroupTag;
                 [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloReach)]
@@ -157,7 +157,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ParticleSystem
             {
-                public PriorityValue Priority;
+                public EffectEventPriority Priority;
                 public sbyte GameMode;
                 public sbyte Unknown3;
                 public sbyte Unknown4;
@@ -193,17 +193,7 @@ namespace TagTool.Tags.Definitions
                 public float Unknown16;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
-
-                public enum PriorityValue : sbyte
-                {
-                    Low,
-                    Normal,
-                    AboveNormal,
-                    High,
-                    VeryHigh,
-                    Essential
-                }
-
+                
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
                 [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
@@ -296,14 +286,25 @@ namespace TagTool.Tags.Definitions
                     [TagField(Format = "World Units Per Second Per Second")]
                     public ParticleSelfAccelerationData ParticleSelfAcceleration;
                     
-                    public TagMapping Function11;
-                    public TagMapping Function12;
-                    public TagMapping Function13;
-                    public TagMapping Function14;
-                    public TagMapping Function15;
-                    public TagMapping Function16;
-                    public TagMapping Function17;
-                    public TagMapping Function18;
+                    [TagField(Format = "World Units Per Second")]
+                    public TagMapping ParticleVelocity;
+
+                    [TagField(Format = "360 Degree Rotations Per Second")]
+                    public TagMapping ParticleAngularVelocity;
+
+                    public TagMapping ParticleMass;
+                    public TagMapping ParticleDragCoefficient;
+
+                    [TagField(Format = "World Units")]
+                    public TagMapping ParticleSize;
+
+                    [TagField(Format = "RGB")]
+                    public TagMapping ParticleTint;
+
+                    public TagMapping ParticleAlpha;
+
+                    [TagField(Format = "0 = Normal, 1 = Clamped")]
+                    public TagMapping ParticleAlphaBlackPoint;
 
                     public RuntimeMGpuData RuntimeMGpu;
 
@@ -564,7 +565,7 @@ namespace TagTool.Tags.Definitions
         UseDynamicDirection = 1 << 13
     }
 
-    public enum EffectEventPartPriority : sbyte
+    public enum EffectEventPriority : sbyte
     {
         Low,
         Normal,
