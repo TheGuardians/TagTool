@@ -240,54 +240,62 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown9;
 
                     /// <summary>
-                    /// XYZ controls that offset the emitter's origin from the original location
+                    /// XYZ controls that offset the emitter's origin from the original location.
                     /// </summary>
+                    [TagField(Format = "World Units")]
                     public TranslationalOffsetData TranslationalOffset;
 
-                    [TagStructure(Size = 0x38)]
-                    public struct TranslationalOffsetData
-                    {
-                        public TagMapping Mapping;
-                        public RealPoint3d StartingInterpolant;
-                        public RealPoint3d EndingInterpolant;
-                    }
-
                     /// <summary>
-                    /// yaw/pitch that changes the initial rotation of the emitter
+                    /// Yaw/Pitch that changes the initial rotation of the emitter.
                     /// </summary>
                     public RelativeDirectionData RelativeDirection;
 
-                    [TagStructure(Size = 0x38)]
-                    public struct RelativeDirectionData
-                    {
-                        public TagMapping Mapping;
-                        public RealEulerAngles3d DirectionAt0;
-                        public RealEulerAngles3d DirectionAt1;
-                    }
+                    /// <summary>
+                    /// Defines the size of the emitter.
+                    /// </summary>
+                    [TagField(Format = "World Units")]
+                    public TagMapping EmissionRadius;
 
-                    public TagMapping Function3;
-                    public TagMapping Function4;
-                    public TagMapping Function5;
-                    public TagMapping Function6;
-                    public TagMapping Function7;
-                    public TagMapping Function8;
-                    public TagMapping Function9;
+                    /// <summary>
+                    /// Determines the angle at which particles are emitted.
+                    /// </summary>
+                    [TagField(Format = "Degrees")]
+                    public TagMapping EmissionAngle;
 
-                    public CachedTagInstance ParticlePhysics;
+                    /// <summary>
+                    /// Number of particles that are spawned at the birth of the effect.
+                    /// </summary>
+                    public TagMapping ParticleStartingCount;
 
-                    public uint Unknown46;
+                    /// <summary>
+                    /// Max number of particles allowed to exist at one time.
+                    /// </summary>
+                    [TagField(Format = "0 = Unlimited")]
+                    public TagMapping ParticleMaxCount;
 
-                    public List<UnknownBlock> Unknown47;
+                    /// <summary>
+                    /// Number of particles that are spawned every second from the emitters.
+                    /// </summary>
+                    [TagField(Format = "Particles Per Second")]
+                    public TagMapping ParticleEmissionRate;
 
-                    [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public CachedTagInstance TurbulenceTexture;
-                    public TagMapping Function10;
-                    public uint Unknown51;
-                    public uint Unknown52;
-                    public uint Unknown53;
-                    public uint Unknown54;
-                    public uint Unknown55;
-                    public uint Unknown56;
+                    /// <summary>
+                    /// Number of particles that are spawned every world unit of motion from the emitters.
+                    /// </summary>
+                    [TagField(Format = "Particles Per World Unit")]
+                    public TagMapping ParticleEmissionPerDistance;
+
+                    /// <summary>
+                    /// Number of seconds a particle will live after emission.
+                    /// </summary>
+                    [TagField(Format = "Seconds")]
+                    public TagMapping ParticleLifespan;
+
+                    public ParticleMovementData ParticleMovement;
+
+                    [TagField(Format = "World Units Per Second Per Second")]
+                    public ParticleSelfAccelerationData ParticleSelfAcceleration;
+                    
                     public TagMapping Function11;
                     public TagMapping Function12;
                     public TagMapping Function13;
@@ -296,12 +304,8 @@ namespace TagTool.Tags.Definitions
                     public TagMapping Function16;
                     public TagMapping Function17;
                     public TagMapping Function18;
-                    public int Unknown77;
-                    public int Unknown78;
-                    public int Unknown79;
-                    public List<UnknownBlock2> Unknown80;
-                    public List<CompiledFunction> CompiledFunctions;
-                    public List<CompiledColorValue> CompiledColorValues;
+
+                    public RuntimeMGpuData RuntimeMGpu;
 
                     public enum EmissionShapeValue : sbyte
                     {
@@ -337,58 +341,133 @@ namespace TagTool.Tags.Definitions
                         OverrideParticleDirection = 1 << 3
                     }
 
-                    [TagStructure(Size = 0x18)]
-                    public class UnknownBlock
+                    [TagStructure(Size = 0x38)]
+                    public struct TranslationalOffsetData
                     {
-                        public short Unknown1;
-                        public short Unknown2;
-                        public List<UnknownBlock2> Unknown3;
-                        public int Unknown4;
-                        public uint Unknown5;
+                        public TagMapping Mapping;
+                        public RealPoint3d StartingInterpolant;
+                        public RealPoint3d EndingInterpolant;
+                    }
 
-                        [TagStructure(Size = 0x24)]
-                        public class UnknownBlock2
+                    [TagStructure(Size = 0x38)]
+                    public struct RelativeDirectionData
+                    {
+                        public TagMapping Mapping;
+                        public RealEulerAngles3d DirectionAt0;
+                        public RealEulerAngles3d DirectionAt1;
+                    }
+
+                    [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
+                    [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
+                    public struct ParticleMovementData
+                    {
+                        [TagField(ValidTags = new[] { "pmov" })]
+                        public CachedTagInstance Template;
+
+                        public FlagsValue Flags;
+
+                        public List<Movement> Movements;
+
+                        [TagField(ValidTags = new[] { "bitm" }, MinVersion = CacheVersion.HaloReach)]
+                        public CachedTagInstance TurbulenceTexture;
+
+                        [Flags]
+                        public enum FlagsValue : int
                         {
-                            public int Unknown;
-                            public TagMapping Function;
+                            None,
+                            Physics = 1 << 0,
+                            CollideWithStructure = 1 << 1,
+                            CollideWithWater = 1 << 2,
+                            CollideWithScenery = 1 << 3,
+                            CollideWithVehicles = 1 << 4,
+                            CollideWithBipeds = 1 << 5,
+                            AlwaysCollideEveryFrame = 1 << 6,
+                            Swarm = 1 << 7,
+                            Wind = 1 << 8,
+                            Turbulence = 1 << 9,
+                            GlobalForce = 1 << 10,
+                            DisableSwarmCollision = 1 << 11,
+                        }
+
+                        [TagStructure(Size = 0x18)]
+                        public class Movement
+                        {
+                            public TypeValue Tyoe;
+                            public FlagsValue Flags;
+
+                            [TagField(Padding = true, Length = 1)]
+                            public byte[] Unused;
+
+                            public List<Parameter> Parameters;
+
+                            public int RuntimeMConstantParameters;
+                            public int RuntimeMUsedParticleStates;
+
+                            public enum TypeValue : short
+                            {
+                                Physics,
+                                Collider,
+                                Swarm,
+                                Wind,
+                                Turbulence,
+                                GlobalForce,
+                            }
+
+                            [Flags]
+                            public enum FlagsValue : byte
+                            {
+                                Sphere,
+                                Cylinder,
+                                Plane
+                            }
+
+                            [TagStructure(Size = 0x24)]
+                            public class Parameter
+                            {
+                                public int ParameterId;
+                                public TagMapping Property;
+                            }
                         }
                     }
 
-                    [TagStructure(Size = 0x10)]
-                    public class UnknownBlock2
+                    [TagStructure(Size = 0x38)]
+                    public struct ParticleSelfAccelerationData
                     {
-                        public uint Unknown;
-                        public uint Unknown2;
-                        public uint Unknown3;
-                        public uint Unknown4;
+                        public TagMapping Mapping;
+                        public RealVector3d StartingInterpolant;
+                        public RealVector3d EndingInterpolant;
                     }
 
-                    [TagStructure(Size = 0x40)]
-                    public class CompiledFunction
+                    [TagStructure(Size = 0x30)]
+                    public struct RuntimeMGpuData
                     {
-                        public uint Unknown;
-                        public uint Unknown2;
-                        public uint Unknown3;
-                        public uint Unknown4;
-                        public uint Unknown5;
-                        public uint Unknown6;
-                        public uint Unknown7;
-                        public uint Unknown8;
-                        public uint Unknown9;
-                        public uint Unknown10;
-                        public uint Unknown11;
-                        public uint Unknown12;
-                        public uint Unknown13;
-                        public uint Unknown14;
-                        public uint Unknown15;
-                        public uint Unknown16;
-                    }
+                        public int ConstantPerParticleProperties;
+                        public int ConstantOverTimeProperties;
+                        public int UsedParticleStates;
+                        public List<Property> Properties;
+                        public List<Function> Functions;
+                        public List<Color> Colors;
 
-                    [TagStructure(Size = 0x10)]
-                    public class CompiledColorValue
-                    {
-                        public RealRgbColor Color;
-                        public float Magnitude;
+                        [TagStructure(Size = 0x10)]
+                        public struct Property
+                        {
+                            [TagField(Length = 4)]
+                            public float[] Data;
+                        }
+
+                        [TagStructure(Size = 0x40)]
+                        public struct Function
+                        {
+                            [TagField(Length = 16)]
+                            public float[] Data;
+                        }
+
+                        [TagStructure(Size = 0x10)]
+                        public struct Color
+                        {
+                            [TagField(Length = 4)]
+                            public float[] Data;
+                        }
                     }
                 }
             }
