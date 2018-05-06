@@ -45,13 +45,10 @@ namespace TagTool.Tags.Definitions
         public float NeverPlayDistance;
         public float RuntimeLightprobeDeathDelay;
         public float RuntimeLocalSpaceDeathDelay;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock> Unknown14;
-
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloReach)]
-        public byte[] Unused;
+        public List<ConicalDistribution> ConicalDistributions;
+        
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused2;
+        public byte[] Unused;
 
         [TagStructure(Size = 0xC)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
@@ -474,11 +471,12 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class UnknownBlock
+        public class ConicalDistribution
         {
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
+            public short ProjectionYawCount;
+            public short ProjectionPitchCount;
+            public float DistributionExponent;
+            public Angle Spread;
         }
 
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
