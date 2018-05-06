@@ -176,7 +176,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="index">The index of the tag.</param>
         /// <returns></returns>
-        public CachedTagInstance GetTag(int index) => index > 0 ? TagCache.Index[index] : throw new KeyNotFoundException(index.ToString());
+        public CachedTagInstance GetTag(int index) => index >= 0 ? TagCache.Index[index] : throw new KeyNotFoundException(index.ToString());
 
         public CachedTagInstance GetTagInstance<T>(string name)
         {

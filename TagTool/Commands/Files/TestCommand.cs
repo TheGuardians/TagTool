@@ -58,7 +58,8 @@ namespace TagTool.Commands.Files
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
                 { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
-                { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache."}
+                { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache." },
+                { "findconicaleffects", "" },
             };
 
             switch (name)
@@ -74,6 +75,7 @@ namespace TagTool.Commands.Files
                 case "shadowfix": return ShadowFix(args);
                 case "comparetags": return CompareTags(args);
                 case "namermt2": return NameRmt2();
+                case "findconicaleffects": return FindConicalEffects();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -82,7 +84,36 @@ namespace TagTool.Commands.Files
                     return false;
             }
         }
-        
+
+        private bool FindConicalEffects()
+        {
+            using (var stream = CacheContext.TagCacheFile.OpenRead())
+            using (var reader = new BinaryReader(stream))
+            {
+                for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
+                {
+                    var tag = CacheContext.GetTag(i);
+
+                    if (tag == null || !tag.IsInGroup("effe"))
+                        continue;
+
+                    stream.Position = tag.HeaderOffset + tag.DefinitionOffset + 0x5C;
+                    var conicalDistributionCount = reader.ReadInt32();
+
+                    if (conicalDistributionCount <= 0)
+                        continue;
+
+                    var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
+                        $"0x{tag.Index:X4} - {CacheContext.TagNames[tag.Index]}" :
+                        $"0x{tag.Index:X4}";
+
+                    Console.WriteLine($"{tagName}.effect - {conicalDistributionCount} {(conicalDistributionCount == 1 ? "distribution" : "distributions")}");
+                }
+            }
+
+            return true;
+        }
+
         public void CsvDumpQueueToFile(List<string> in_, string file)
         {
             var fileOut = new FileInfo(file);
