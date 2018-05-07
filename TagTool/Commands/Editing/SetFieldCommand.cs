@@ -98,8 +98,8 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
-            var fieldType = enumerator.Field.FieldType;
-            var fieldValue = enumerator.Field.GetValue(Owner);
+            var fieldType = field.FieldType;
+            var fieldValue = field.GetValue(Owner);
 
             var typeString =
                 fieldType.IsGenericType ?
@@ -154,10 +154,10 @@ namespace TagTool.Commands.Editing
             }
 #endif
 
-            var fieldFullName = $"{enumerator.Field.DeclaringType.FullName}.{enumerator.Field.Name}".Replace("+", ".");
+            var fieldFullName = $"{field.DeclaringType.FullName}.{field.Name}".Replace("+", ".");
             var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldFullName}')]");
 
-            Console.WriteLine("{0}: {1} = {2} {3}", enumerator.Field.Name, typeString, valueString,
+            Console.WriteLine("{0}: {1} = {2} {3}", field.Name, typeString, valueString,
                 documentationNode != null ?
                     $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
                     "");
