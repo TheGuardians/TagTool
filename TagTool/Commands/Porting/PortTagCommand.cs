@@ -414,6 +414,8 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Scenario scenario:
+                    if (NoSquads)
+                        scenario.Squads = new List<Scenario.Squad>();
                     if (NoForgePalette)
                     {
                         scenario.SandboxEquipment.Clear();
@@ -571,8 +573,8 @@ namespace TagTool.Commands.Porting
 
                 case SkyAtmParameters skya:
                     // Decrease secondary fog intensity (it's quite sickening in ms23)
-                    foreach (var atmosphere in skya.AtmosphereProperties)
-                        atmosphere.FogIntensity2 /= 36.0f;
+                    // foreach (var atmosphere in skya.AtmosphereProperties)
+                        // atmosphere.FogIntensity2 /= 36.0f;
                     break;
 
                 case ScenarioLightmap sLdT:

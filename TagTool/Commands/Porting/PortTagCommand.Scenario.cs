@@ -174,9 +174,6 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (NoSquads)
-                scnr.Squads = new List<Scenario.Squad>();
-
             //
             // Add prematch camera position
             //
@@ -221,7 +218,6 @@ namespace TagTool.Commands.Porting
             if(createPrematchCamera)
                 scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, yaw, pitch) };
             
-
             //
             // Convert scripts
             //

@@ -99,7 +99,29 @@ namespace TagTool.Commands.Editing
             }
 
             var fieldType = field.FieldType;
-            var fieldValue = field.GetValue(Owner);
+            var fieldValue = ParseArgs(field.FieldType, args.Skip(1).ToList());
+
+            if (fieldValue != null && fieldValue.Equals(false))
+            {
+                while (ContextStack.Context != previousContext) ContextStack.Pop();
+                Owner = previousOwner;
+                Structure = previousStructure;
+                return false;
+            }
+
+            if (field.FieldType == typeof(PageableResource))
+            {
+                var pageable = (PageableResource)field.GetValue(Owner);
+
+                if (pageable != null)
+                    field.SetValue(Owner, fieldValue != null ?
+                        SetResourceData(pageable, (FileInfo)fieldValue) : null);
+            }
+            else
+            {
+                field.SetValue(Owner, fieldValue);
+            }
+
 
             var typeString =
                 fieldType.IsGenericType ?
