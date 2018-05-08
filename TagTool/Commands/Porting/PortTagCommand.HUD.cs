@@ -214,7 +214,7 @@ namespace TagTool.Commands.Porting
                 H3globs.NeutralReticule = ConvertColor(H3globs.NeutralReticule);
                 H3globs.HostileReticule = ConvertColor(H3globs.HostileReticule);
                 H3globs.FriendlyReticule = ConvertColor(H3globs.FriendlyReticule);
-                H3globs.GlobalDyanamic7_UnknownBlip = ConvertColor(H3globs.GlobalDyanamic7_UnknownBlip);
+                H3globs.GlobalDynamic7_UnknownBlip = ConvertColor(H3globs.GlobalDynamic7_UnknownBlip);
                 H3globs.NeutralBlip = ConvertColor(H3globs.NeutralBlip);
                 H3globs.HostileBlip = ConvertColor(H3globs.HostileBlip);
                 H3globs.FriendlyPlayerBlip = ConvertColor(H3globs.FriendlyPlayerBlip);
@@ -223,9 +223,12 @@ namespace TagTool.Commands.Porting
                 H3globs.WaypointBlip = ConvertColor(H3globs.WaypointBlip);
                 H3globs.DistantWaypointBlip = ConvertColor(H3globs.DistantWaypointBlip);
                 H3globs.FriendlyWaypoint = ConvertColor(H3globs.FriendlyWaypoint);
-                H3globs.NeutralWaypoint = ConvertColor(H3globs.NeutralWaypoint);
-                H3globs.HostileWaypoint = ConvertColor(H3globs.HostileWaypoint);
-                H3globs.DeadWaypoint = ConvertColor(H3globs.DeadWaypoint);
+
+                H3globs.TextFadeIn_HO = ConvertColor(H3globs.TextFadeIn);
+                H3globs.GlobalDynamic21_HO = ConvertColor(H3globs.GlobalDynamic21);
+                H3globs.GlobalDynamic23_HO = ConvertColor(H3globs.GlobalDynamic23);
+                H3globs.GlobalDynamic24_HO = ConvertColor(H3globs.GlobalDynamic24);
+                H3globs.GlobalDynamic25_UnknownWaypoint_HO = ConvertColor(H3globs.GlobalDynamic25);
 
                 //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
@@ -252,6 +255,7 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
                         H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
+                        H3att.WarpAngle = Angle.FromDegrees(5.7f);
                     }
                     
                     //more fixups
