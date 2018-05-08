@@ -138,7 +138,9 @@ namespace TagTool.Commands.Porting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
                     
                     //fixup for widgets without global placement data
-                    if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0)
+                    if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0
+                        || (BlamCache.Version == CacheVersion.Halo3ODST && widgetname.Contains("vitality_meter"))
+                        || (BlamCache.Version == CacheVersion.Halo3ODST && widgetname.Contains("compass")))
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
@@ -361,8 +363,6 @@ namespace TagTool.Commands.Porting
                 object zerotag = new CachedTagInstance(-1);
 
                 if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
-                    H3FieldInfo.SetValue(H3Definition, HOFieldValue);
-                if (H3FieldInfo.FieldType == typeof(TagFunction))
                     H3FieldInfo.SetValue(H3Definition, HOFieldValue);
             }
             return H3Definition;

@@ -88,7 +88,7 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown26;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public byte[] Unknown27;
+		public TagFunction Unknown27;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown28;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -122,7 +122,7 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown43;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public byte[] Unknown44;
+		public TagFunction Unknown44;
 
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float SprintFOVMultiplier;
@@ -149,9 +149,9 @@ namespace TagTool.Tags.Definitions
 		public float Unknown55;
 
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public byte[] Unknown56;
+		public TagFunction Unknown56;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public byte[] Unknown57;
+		public TagFunction Unknown57;
 
 		[TagField(MaxVersion = CacheVersion.Halo3ODST)]
 		public CachedTagInstance Unknown58;
@@ -159,23 +159,23 @@ namespace TagTool.Tags.Definitions
 		public float Unknown59;
 
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown60;
+		public TagFunction Unknown60;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown61;
+		public TagFunction Unknown61;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unknown62;
+        public TagFunction Unknown62;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown63;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unknown64;
+        public TagFunction Unknown64;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown65;
+		public TagFunction Unknown65;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown66;
+		public TagFunction Unknown66;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown67;
+		public TagFunction Unknown67;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public byte[] Unknown68;
+		public TagFunction Unknown68;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public CachedTagInstance Unknown69;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -461,9 +461,9 @@ namespace TagTool.Tags.Definitions
 				public float Unknown25;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown26;
+
 				//From here, fields have been moved around a bit.
-				//I'm not too familiar with tag definition conventions, so I'm following the lens tag, which has the same problem.
-				//In other words, this could probably be cleaner! - Alex-231 17/7/17
+
 				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 				public float NotificationOffsetX_H3;
 				[TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -669,7 +669,7 @@ namespace TagTool.Tags.Definitions
 					public BipedTypeValue_HO BipedType_HO;
 
                     [TagField(MaxVersion = CacheVersion.Halo3ODST, Padding = true, Length = 3)]
-                    public byte[] Unused;
+                    public TagFunction Unused;
 
 					public CachedTagInstance Sound;
 
