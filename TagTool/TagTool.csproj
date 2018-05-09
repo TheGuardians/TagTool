@@ -291,6 +291,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.HUD.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Lighting.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Physics.cs" />
+    <Compile Include="Commands\Porting\PortTagCommand.Shader2.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Scenario.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
