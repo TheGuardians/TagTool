@@ -52,6 +52,8 @@ namespace TagTool.Commands.Porting
 			// the pre-converted data, so we can use it later in rm__ porting.
 			Rmt2Tags.Add(index, rmt2);
 
+			var tag_name = CacheContext.TagNames[index];
+
 			//
 			//	Convert/Generate rmt2 here
 			//
@@ -59,8 +61,10 @@ namespace TagTool.Commands.Porting
 			return rmt2;
 		}
 
-		public PixelShader ConvertPixelShader_2(Stream cacheStream, PixelShader pixl)
+		public PixelShader ConvertPixelShader_2(Stream cacheStream, PixelShader pixl, int index)
 		{
+			var tag_name = CacheContext.TagNames[index];
+
 			//
 			//	Convert/Generate pixl here
 			//
