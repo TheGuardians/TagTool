@@ -23,9 +23,10 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-		// index, pre-converted rmt2.
+		// <index, pre-conversion rmt2>
 		private Dictionary<int, RenderMethodTemplate> OldRenderMethodTemplates = new Dictionary<int, RenderMethodTemplate> { };
-		private Dictionary<int, RenderMethodTemplate> Rmt2Tags = new Dictionary<int, RenderMethodTemplate> { };
+		// <tag_name, post-conversion pixl>
+		private Dictionary<string, PixelShader> NewPixelShaders = new Dictionary<string, PixelShader> { };
 
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
@@ -70,64 +71,22 @@ namespace TagTool.Commands.Porting
 
             while (args.Count > 1)
             {
-                var arg = args[0].ToLower();
-
-                switch (arg)
+                switch (args[0].ToLower())
                 {
-                    case "noaudio":
-                        NoAudio = true;
-                        break;
-
-                    case "noreplace":
-                        IsReplacing = false;
-                        break;
-
-                    case "noelites":
-                        NoElites = true;
-                        break;
-
-                    case "replace":
-                        IsReplacing = true;
-                        break;
-
-                    case "new":
-                        IsNew = true;
-                        break;
-
-                    case "single":
-                        IsRecursive = false;
-                        IsNew = true;
-                        break;
-
-                    case "usenull":
-                        UseNull = true;
-                        break;
-
-                    case "shadertest":
-                        UseShaderTest = true;
-                        MatchShaders = false;
-                        break;
-
-                    case "noshaders":
-                        MatchShaders = false;
-                        break;
-
-                    case "noscripts":
-                        ConvertScripts = false;
-                        break;
-
-                    case "noforgepalette":
-                        NoForgePalette = true;
-                        break;
-
-                    case "nosquads":
-                        NoSquads = true;
-                        break;
-
-                    default:
-                        throw new NotImplementedException(args[0]);
-                }
-
+					case "new": IsNew = true; break;
+					case "noaudio": NoAudio = true; break;
+					case "noelites": NoElites = true; break;
+					case "noforgepalette": NoForgePalette = true; break;
+					case "noreplace": IsReplacing = false; break;
+					case "noscripts": ConvertScripts = false; break;
+					case "noshaders": MatchShaders = false; break;
+					case "nosquads": NoSquads = true; break;
+					case "replace": IsReplacing = true; break;
+					case "shadertest": UseShaderTest = true; MatchShaders = false; break;
+					case "single": IsRecursive = false; IsNew = true; break;
+					case "usenull": UseNull = true; break;
+					default: throw new NotImplementedException(args[0]);
+				}
                 args.RemoveAt(0);
             }
             
@@ -138,8 +97,8 @@ namespace TagTool.Commands.Porting
             //
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                foreach (var item in ParseLegacyTag(args[0]))
-                    ConvertTag(cacheStream, item);
+                foreach (var blamTag in ParseLegacyTag(args[0]))
+                    ConvertTag(cacheStream, blamTag);
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
                 using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
@@ -150,44 +109,29 @@ namespace TagTool.Commands.Porting
             return true;
         }
 
-        private List<CacheFile.IndexItem> ParseLegacyTag(string name)
+        private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
         {
-            if (name.Length == 0 || (!char.IsLetter(name[0]) && !name.Contains('*')) || !name.Contains('.'))
-                throw new Exception($"Invalid tag name: {name}");
+            if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
+                throw new Exception($"Invalid tag name: {tagSpecifier}");
 
-            var namePieces = name.Split('.');
+            var tagIdentifiers = tagSpecifier.Split('.');
 
-            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, namePieces[1]);
+            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, tagIdentifiers[1]);
             if (groupTag == Tag.Null)
-                throw new Exception($"Invalid tag name: {name}");
+                throw new Exception($"Invalid tag name: {tagSpecifier}");
 
-            var tagName = namePieces[0];
+            var tagName = tagIdentifiers[0];
 
             List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
 
-            foreach (var item in BlamCache.IndexItems)
-            {
-                if(tagName == "*")
-                {
-                    if(item != null && groupTag == item.ClassCode)
-                        result.Add(item);
-                }
-                  
-                else
-                {
-                    if (item == null || item.Filename != tagName)
-                        continue;
+			// find the CacheFile.IndexItem(s)
+			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
+				item => item != null && groupTag == item.ClassCode);
+			else result.Add( BlamCache.IndexItems.Find(
+				item => item != null && groupTag == item.ClassCode && tagName == item.Filename));
 
-                    if (groupTag == item.ClassCode)
-                    {
-                        result.Add(item);
-                        break;
-                    }    
-                }
-            }
-
-            if(result.Count == 0)
-                Console.WriteLine($"Invalid tag name: {name}");
+			if (result.Count == 0)
+                Console.WriteLine($"Invalid tag name: {tagSpecifier}");
 
             return result;
         }
@@ -215,7 +159,7 @@ namespace TagTool.Commands.Porting
             var wasReplacing = IsReplacing;
             var wasNew = IsNew;
             
-            if (NoElites && (groupTag == "bipd") && blamTag.Filename.Contains("elite"))
+            if (NoElites && groupTag == "bipd" && blamTag.Filename.Contains("elite"))
                 return null;
 
             if (!IsNew || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
@@ -318,11 +262,20 @@ namespace TagTool.Commands.Porting
             {
                 switch (groupTag.ToString())
                 {
-                    case "rmhg":
-                        return CacheContext.GetTagInstance<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+                    case "beam":
+                        return CacheContext.GetTagInstance<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
 
-                    case "rmtr":
-                        return CacheContext.GetTagInstance<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+                    case "cntl":
+                        return CacheContext.GetTagInstance<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+
+                    case "decs":
+                        return CacheContext.GetTagInstance<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+
+                    case "ltvl":
+                        return CacheContext.GetTagInstance<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+
+                    case "prt3":
+                        return CacheContext.GetTagInstance<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
 
                     case "rmd ":
                         return CacheContext.GetTagInstance<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
@@ -330,26 +283,18 @@ namespace TagTool.Commands.Porting
                     case "rmfl":
                         return CacheContext.GetTagInstance<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
 
+                    case "rmhg":
+                        return CacheContext.GetTagInstance<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+
+                    case "rmtr":
+                        return CacheContext.GetTagInstance<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+
+					case "rmcs":
+                    case "rmrd":
                     case "rmsh":
                     case "rmss":
-                    case "rmrd":
-                    case "rmcs":
                         return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
 
-                    case "beam":
-                        return CacheContext.GetTagInstance<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
-
-                    case "cntl":
-                        return CacheContext.GetTagInstance<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
-
-                    case "ltvl":
-                        return CacheContext.GetTagInstance<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
-
-                    case "decs":
-                        return CacheContext.GetTagInstance<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
-
-                    case "prt3":
-                        return CacheContext.GetTagInstance<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
                 }
             }
 
@@ -381,14 +326,8 @@ namespace TagTool.Commands.Porting
 
             if (edTag == null && UseNull)
             {
-                for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
-                {
-                    if (CacheContext.TagCache.Index[i] == null)
-                    {
-                        CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
-                        break;
-                    }
-                }
+				var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
+				CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
             }
 
             if (edTag == null)
@@ -417,19 +356,17 @@ namespace TagTool.Commands.Porting
                         chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
                     break;
 
-                case Scenario scenario:
-                    if (NoSquads)
-                        scenario.Squads = new List<Scenario.Squad>();
-                    if (NoForgePalette)
-                    {
-                        scenario.SandboxEquipment.Clear();
-                        scenario.SandboxGoalObjects.Clear();
-                        scenario.SandboxScenery.Clear();
-                        scenario.SandboxSpawning.Clear();
-                        scenario.SandboxTeleporters.Clear();
-                        scenario.SandboxVehicles.Clear();
-                        scenario.SandboxWeapons.Clear();
-                    }
+                case Scenario scenario when NoSquads:
+                    scenario.Squads = new List<Scenario.Squad>();
+					break;
+				case Scenario scenario when NoForgePalette:
+                    scenario.SandboxEquipment.Clear();
+                    scenario.SandboxGoalObjects.Clear();
+                    scenario.SandboxScenery.Clear();
+                    scenario.SandboxSpawning.Clear();
+                    scenario.SandboxTeleporters.Clear();
+                    scenario.SandboxVehicles.Clear();
+                    scenario.SandboxWeapons.Clear();
                     break;
 
                 case ScenarioStructureBsp bsp:
@@ -450,7 +387,12 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-                case Bitmap bitm:
+				case AreaScreenEffect sefc when blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui":
+					foreach (var screenEffect in sefc.ScreenEffects)
+						screenEffect.MaximumDistance = screenEffect.Duration = float.MaxValue;
+					break;
+
+				case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm);
                     break;
 
@@ -478,71 +420,52 @@ namespace TagTool.Commands.Porting
                     blamDefinition = ConvertCortanaEffect(crte);
                     break;
 
-                case Effect effect:
-                    if (BlamCache.Version == CacheVersion.Halo3Retail)
-                    {
-                        foreach (var even in effect.Events)
-                            foreach (var particleSystem in even.ParticleSystems)
-                                particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
-                    }
+                case Dialogue udlg:
+                    blamDefinition = ConvertDialogue(cacheStream, udlg);
                     break;
 
-                case Particle particle:
-                    if (BlamCache.Version != CacheVersion.Halo3Retail)
-                        break;
-                    // Shift all flags above 2 by 1.
-                    particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
+                case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
+					foreach (var even in effect.Events)
+						foreach (var particleSystem in even.ParticleSystems)
+							particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+					break;
+
+				case GlobalPixelShader glps when UseShaderTest:
+					blamDefinition = ConvertGlobalPixelShader(glps);
+					break;
+
+                case Globals matg:
+                    blamDefinition = ConvertGlobals(matg, cacheStream);
                     break;
 
-                case GlobalPixelShader glps:
-                    if (UseShaderTest)
-                        blamDefinition = ConvertGlobalPixelShader(glps);
-                    break;
+                case GlobalVertexShader glvs when UseShaderTest:
+					blamDefinition = ConvertGlobalVertexShader(glvs);
+					break;
 
-                case GlobalVertexShader glvs:
-                    if (UseShaderTest)
-                        blamDefinition = ConvertGlobalVertexShader(glvs);
+                case LensFlare lens:
+                    blamDefinition = ConvertLensFlare(lens);
                     break;
 
                 case ModelAnimationGraph jmad:
                     blamDefinition = ConvertModelAnimationGraph(cacheStream, jmad);
                     break;
 
-                case ScenarioLightmapBspData Lbsp:
-                    blamDefinition = ConvertScenarionLightmapBspData(Lbsp);
+                case MultilingualUnicodeStringList unic:
+                    blamDefinition = ConvertMultilingualUnicodeStringList(unic);
                     break;
 
-                case LensFlare lens:
-                    blamDefinition = ConvertLensFlare(lens);
-                    break;
-
-                case SoundLooping lsnd:
-                    blamDefinition = ConvertSoundLooping(lsnd);
-                    break;
-
-                case Globals matg:
-                    blamDefinition = ConvertGlobals(matg, cacheStream);
-                    break;
-
-                case RenderModel mode:
-                    // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-                    if (mode.Geometry.Resource.Page.Index == -1)
-                        blamDefinition = null;
+                case Particle particle when BlamCache.Version == CacheVersion.Halo3Retail:
+                    // Shift all flags above 2 by 1.
+                    particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
                     break;
 
                 case PhysicsModel phmo:
                     blamDefinition = ConvertPhysicsModel(phmo);
                     break;
 
-                case PixelShader pixl:
-                    if (UseShaderTest)
-                        blamDefinition = ConvertPixelShader(pixl, blamTag);
-                    break;
-
-                case VertexShader vtsh:
-                    if (UseShaderTest)
-                        blamDefinition = ConvertVertexShader(vtsh);
-                    break;
+                case PixelShader pixl when UseShaderTest:
+					blamDefinition = ConvertPixelShader(pixl, blamTag);
+					break;
 
                 case Projectile proj:
                     blamDefinition = ConvertProjectile(proj);
@@ -552,27 +475,25 @@ namespace TagTool.Commands.Porting
                     blamDefinition = ConvertRasterizerGlobals(rasg);
                     break;
 
-                case ScenarioStructureBsp sbsp:
-                    blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag);
+                // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
+                case RenderModel mode when mode.Geometry.Resource.Page.Index == -1:
+                    blamDefinition = null;
                     break;
 
                 case Scenario scnr:
                     blamDefinition = ConvertScenario(scnr, blamTag.Filename);
                     break;
 
-                case StructureDesign sddt:
-                    blamDefinition = ConvertStructureDesign(sddt);
+                case ScenarioLightmap sLdT:
+                    blamDefinition = ConvertScenarioLightmap(cacheStream, blamTag.Filename, sLdT);
                     break;
 
-                case AreaScreenEffect sefc:
-                    if (blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui")
-                    {
-                        foreach (var screenEffect in sefc.ScreenEffects)
-                        {
-                            screenEffect.MaximumDistance = float.MaxValue;
-                            screenEffect.Duration = float.MaxValue;
-                        }
-                    }
+                case ScenarioLightmapBspData Lbsp:
+                    blamDefinition = ConvertScenarionLightmapBspData(Lbsp);
+                    break;
+
+                case ScenarioStructureBsp sbsp:
+                    blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag);
                     break;
 
                 case SkyAtmParameters skya:
@@ -581,39 +502,36 @@ namespace TagTool.Commands.Porting
                         // atmosphere.FogIntensity2 /= 36.0f;
                     break;
 
-                case ScenarioLightmap sLdT:
-                    blamDefinition = ConvertScenarioLightmap(cacheStream, blamTag.Filename, sLdT);
-                    break;
-
                 case Sound sound:
                     blamDefinition = ConvertSound(sound);
+                    break;
+
+                case SoundLooping lsnd:
+                    blamDefinition = ConvertSoundLooping(lsnd);
                     break;
 
                 case SoundMix snmx:
                     blamDefinition = ConvertSoundMix(snmx);
                     break;
 
+                case StructureDesign sddt:
+                    blamDefinition = ConvertStructureDesign(sddt);
+                    break;
+
                 case Style style:
                     blamDefinition = ConvertStyle(style);
                     break;
 
-                case Dialogue udlg:
-                    blamDefinition = ConvertDialogue(cacheStream, udlg);
+                case VertexShader vtsh when UseShaderTest:
+                    blamDefinition = ConvertVertexShader(vtsh);
                     break;
 
-                case MultilingualUnicodeStringList unic:
-                    blamDefinition = ConvertMultilingualUnicodeStringList(unic);
-                    break;
-
-                case Weapon weapon:
-                    // Fix shotgun reloading
-                    if (blamTag.Filename == "objects\\weapons\\rifle\\shotgun\\shotgun")
-                    {
-                        weapon.Unknown24 = 1 << 16;
-                    }
-
+                // Fix shotgun reloading
+                case Weapon weapon when blamTag.Filename == "objects\\weapons\\rifle\\shotgun\\shotgun":
+                    weapon.Unknown24 = 1 << 16;
+					break;
+				case Weapon weapon when blamTag.Filename.EndsWith("\\weapon\\warthog_horn"):
                     foreach (var attach in weapon.Attachments)
-                        if (blamTag.Filename == "objects\\vehicles\\warthog\\weapon\\warthog_horn" || blamTag.Filename == "objects\\vehicles\\mongoose\\weapon\\mongoose_horn")
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                     break;
             }
@@ -651,66 +569,57 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
-                case StringId stringId:
-                    return ConvertStringId(stringId);
+				case BipedPhysicsFlags bipedPhysicsFlags:
+					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
-                case CachedTagInstance tag:
-                    if (IsRecursive == false)
-                        return null;
-                    tag = PortTagReference(tag.Index);
-                    if (tag != null && !(IsNew || IsReplacing))
-                        return tag;
-                    return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
+				case CachedTagInstance tag when !IsRecursive:
+					return null;
+				case CachedTagInstance tag when tag != null && !IsNew && !IsReplacing:
+					tag = PortTagReference(tag.Index);
+					return tag;
+				case CachedTagInstance tag:
+					tag = PortTagReference(tag.Index);
+					return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
-                case TagFunction tagFunction:
-                    return ConvertTagFunction(tagFunction);
+				case CollisionMoppCode collisionMopp:
+					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
+					return collisionMopp;
 
-                case RenderGeometry renderGeometry:
-                    if (definition is ScenarioStructureBsp sbsp)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry);
-                    if (definition is RenderModel mode)
-                        return GeometryConverter.Convert(cacheStream, renderGeometry);
-                    return GeometryConverter.Convert(cacheStream, renderGeometry);
+				case DamageReportingType damageReportingType:
+					return ConvertDamageReportingType(damageReportingType);
 
-                case RenderMethod renderMethod:
-                    var rm = (RenderMethod)data;
-                    
-                    if (MatchShaders)
-                    {
-                        ConvertData(cacheStream, rm.ShaderProperties[0].ShaderMaps, rm.ShaderProperties[0].ShaderMaps, blamTagName);
-                        return ConvertRenderMethod(cacheStream, rm, blamTagName);
-                    }
-                    else
-                    {
-                        // Convert structure before applying fixups
-                        if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                            data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
+				case GameObjectType gameObjectType:
+					return ConvertGameObjectType(gameObjectType);
 
-                        return  ConvertRenderMethodGenerated(cacheStream, rm, blamTagName);
-                    }
+				case ObjectTypeFlags objectTypeFlags:
+					return ConvertObjectTypeFlags(objectTypeFlags);
 
-                case CollisionMoppCode collisionMopp:
-                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-                    return collisionMopp;
+				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp:
+					return GeometryConverter.Convert(cacheStream, renderGeometry);
+				case RenderGeometry renderGeometry when definition is RenderModel mode:
+					return GeometryConverter.Convert(cacheStream, renderGeometry);
+				case RenderGeometry renderGeometry:
+					return GeometryConverter.Convert(cacheStream, renderGeometry);
 
-                case DamageReportingType damageReportingType:
-                    return ConvertDamageReportingType(damageReportingType);
+				case RenderMethod renderMethod when MatchShaders:
+					ConvertData(cacheStream, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
+					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
+				case RenderMethod renderMethod when !MatchShaders && type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0:
+					data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
+					return ConvertRenderMethodGenerated(cacheStream, renderMethod, blamTagName);
 
-                case SoundClass soundClass:
-                    return soundClass.ConvertSoundClass(BlamCache.Version);
+				case ScenarioObjectType scenarioObjectType:
+					return ConvertScenarioObjectType(scenarioObjectType);
 
-                case GameObjectType gameObjectType:
-                    return ConvertGameObjectType(gameObjectType);
+				case SoundClass soundClass:
+					return soundClass.ConvertSoundClass(BlamCache.Version);
 
-                case ObjectTypeFlags objectTypeFlags:
-                    return ConvertObjectTypeFlags(objectTypeFlags);
+				case StringId stringId:
+					return ConvertStringId(stringId);
 
-                case ScenarioObjectType scenarioObjectType:
-                    return ConvertScenarioObjectType(scenarioObjectType);
-
-                case BipedPhysicsFlags bipedPhysicsFlags:
-                    return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
-            }
+				case TagFunction tagFunction:
+					return ConvertTagFunction(tagFunction);
+			}
 
             if (type.IsArray)
                 return ConvertArray(cacheStream, (Array)data, definition, blamTagName);
@@ -749,17 +658,17 @@ namespace TagTool.Commands.Porting
 
             switch (BlamCache.Version)
             {
-                case CacheVersion.Halo2Xbox:
                 case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
                     value = damageReportingType.Halo2Retail.ToString();
-                    break;
-
-                case CacheVersion.Halo3Retail:
-                    value = damageReportingType.Halo3Retail.ToString();
                     break;
 
                 case CacheVersion.Halo3ODST:
                     value = damageReportingType.Halo3ODST.ToString();
+                    break;
+
+                case CacheVersion.Halo3Retail:
+                    value = damageReportingType.Halo3Retail.ToString();
                     break;
             }
 

@@ -16,7 +16,7 @@ namespace TagTool.Commands.Tags
                   "ListTags",
                   "Lists tag instances that are of the specified tag group.",
 
-                  "ListTags [Named | Unnamed] <group tag 1> ... <group tag n>",
+                  "ListTags [Named | Unnamed] [search_term] <group tag 1> ... <group tag n>",
 
                   "Lists tag instances that are of the specified tag group." +
                   "Multiple group tags to list tags from can be specified.\n" +
@@ -36,9 +36,11 @@ namespace TagTool.Commands.Tags
 
             var named = false;
             var unnamed = false;
+			var search_term = "";
 
-            if (args.Count > 0)
+            while (args.Count > 0)
             {
+
                 switch (args[0].ToLower())
                 {
                     case "named":
@@ -49,6 +51,10 @@ namespace TagTool.Commands.Tags
                     case "unnamed":
                         unnamed = true;
                         args.RemoveAt(0);
+						break;
+					default:
+						search_term = args[0];
+						args.RemoveAt(0);
                         break;
                 }
             }
