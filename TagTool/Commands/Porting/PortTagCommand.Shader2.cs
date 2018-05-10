@@ -53,7 +53,7 @@ namespace TagTool.Commands.Porting
 			Rmt2Tags.Add(index, rmt2);
 
 			var tag_name = CacheContext.TagNames[index];
-
+			var pixl = CacheContext;
 			//
 			//	Convert/Generate rmt2 here
 			//
@@ -66,7 +66,7 @@ namespace TagTool.Commands.Porting
 			var tag_name = CacheContext.TagNames[index];
 
 			//
-			//	Convert/Generate pixl here
+			//	pixl = GeneratePixlShader(tag_name);
 			//
 
 			return pixl;

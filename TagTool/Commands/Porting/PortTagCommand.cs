@@ -22,7 +22,9 @@ namespace TagTool.Commands.Porting
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
+
 		// index, pre-converted rmt2.
+		private Dictionary<int, RenderMethodTemplate> OldRenderMethodTemplates = new Dictionary<int, RenderMethodTemplate> { };
 		private Dictionary<int, RenderMethodTemplate> Rmt2Tags = new Dictionary<int, RenderMethodTemplate> { };
 
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
