@@ -36,7 +36,6 @@ namespace TagTool.Commands.Tags
 
             var named = false;
             var unnamed = false;
-			var search_term = "";
 
             if (args.Count > 0)
             {

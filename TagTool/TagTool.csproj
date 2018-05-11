@@ -275,6 +275,10 @@
     <Compile Include="Commands\Porting\ListBspMoppCodesCommand.cs" />
     <Compile Include="Commands\Porting\ListFieldsCommand.cs" />
     <Compile Include="Commands\Porting\MatchShadersCommand.cs" />
+    <Compile Include="Commands\Porting\MergeCommand.AiDialogueGlobals.cs" />
+    <Compile Include="Commands\Porting\MergeCommand.Globals.cs" />
+    <Compile Include="Commands\Porting\MergeCommand.cs" />
+    <Compile Include="Commands\Porting\MergeCommand.MultiplayerGlobals.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
     <Compile Include="Commands\Porting\PortingContextFactory.cs" />

@@ -66,7 +66,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
             context.AddCommand(new ListRegisters(cacheContext));
             context.AddCommand(new ListRegistersRMT2(cacheContext));
-            context.AddCommand(new TestSimpleShadersCommand(cacheContext));
+			context.AddCommand(new TestSimpleShadersCommand(cacheContext));
 
 			return context;
         }
