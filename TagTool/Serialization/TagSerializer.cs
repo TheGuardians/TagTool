@@ -199,7 +199,7 @@ namespace TagTool.Serialization
                 block.Writer.Write(((CacheAddress)value).Value);
             else if (valueType == typeof(byte[]))
             {
-                if (valueInfo.Padding == true)
+                if (valueInfo.Padding == true || value == null)
                     block.Writer.Write(new byte[valueInfo.Length]);
                 else if (valueInfo.Length != 0)
                     block.Writer.Write((byte[])value);
