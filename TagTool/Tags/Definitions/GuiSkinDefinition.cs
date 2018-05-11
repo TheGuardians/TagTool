@@ -5,12 +5,15 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_skin_definition", Tag = "skn3", Size = 0x28)]
+    [TagStructure(Name = "gui_skin_definition", Tag = "skn3", Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "gui_skin_definition", Tag = "skn3", Size = 0x28, MinVersion = CacheVersion.Halo3ODST)]
     public class GuiSkinDefinition
     {
         public uint Unknown;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ModelWidget> ModelWidgets;
 
         [TagStructure(Size = 0x4C)]

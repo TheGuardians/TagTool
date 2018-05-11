@@ -27,10 +27,10 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public List<Halo3ArmorCustomizationBlock> ArmorCustomization;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]
             public List<HaloOnlineArmorCustomizationBlock> SpartanArmorCustomization;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]
             public List<HaloOnlineArmorCustomizationBlock> EliteArmorCustomization;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]

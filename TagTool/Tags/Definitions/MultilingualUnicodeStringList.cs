@@ -26,7 +26,8 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// Array of ushorts, comes in pair, in each block of 2 is made of an index and string count. Only used by H3 and ODST
         /// </summary>
-        [TagField(Length = 24)] public ushort[] OffsetCounts;
+        [TagField(Length = 24)]
+        public ushort[] OffsetCounts;
 
         [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
@@ -106,14 +107,16 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// The stringID's string value. Can be empty.
         /// </summary>
-        [TagField(Length = 0x20)] public string StringIDStr;
+        [TagField(Length = 0x20)]
+        public string StringIDStr;
 
         /// <summary>
         /// The array of offsets for each language.
         /// If an offset is -1, then the string is not available.
         /// There must be 12 of these (one offset per language).
         /// </summary>
-        [TagField(Length = 12)] public int[] Offsets;
+        [TagField(Length = 12)]
+        public int[] Offsets;
 
         public LocalizedString()
         {

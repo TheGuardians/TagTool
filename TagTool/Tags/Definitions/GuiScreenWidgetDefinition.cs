@@ -60,10 +60,9 @@ namespace TagTool.Tags.Definitions
             public List<BitmapWidget> BitmapWidgets;
             public List<ModelWidget> ModelWidgets;
 
-            [TagStructure(Size = 0x80)]
-            public class ListWidget
+            [TagStructure(Size = 0x2C)]
+            public struct WidgetData
             {
-                public CachedTagInstance Parent;
                 public uint Flags;
                 public StringId Name;
                 public short Unknown;
@@ -77,6 +76,13 @@ namespace TagTool.Tags.Definitions
                 public short StandardYUnknown;
                 public short StandardXUnknown;
                 public CachedTagInstance Animation;
+            }
+
+            [TagStructure(Size = 0x80)]
+            public class ListWidget
+            {
+                public CachedTagInstance Parent;
+                public WidgetData Data;
                 public StringId DataSourceName;
                 public CachedTagInstance Skin;
                 public int Unknown2;
@@ -87,19 +93,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x30)]
                 public class ListWidgetItem
                 {
-                    public uint Flags;
-                    public StringId Name;
-                    public short Unknown;
-                    public short Layer;
-                    public short WidescreenYOffset;
-                    public short WidescreenXOffset;
-                    public short WidescreenYUnknown;
-                    public short WidescreenXUnknown;
-                    public short StandardYOffset;
-                    public short StandardXOffset;
-                    public short StandardYUnknown;
-                    public short StandardXUnknown;
-                    public CachedTagInstance Animation;
+                    public WidgetData Data;
                     public StringId Target;
                 }
             }
@@ -108,19 +102,7 @@ namespace TagTool.Tags.Definitions
             public class TextWidget
             {
                 public CachedTagInstance Parent;
-                public uint Flags;
-                public StringId Name;
-                public short Unknown;
-                public short Layer;
-                public short WidescreenYBoundsMin;
-                public short WidescreenXBoundsMin;
-                public short WidescreenYBoundsMax;
-                public short WidescreenXBoundsMax;
-                public short StandardYBoundsMin;
-                public short StandardXBoundsMin;
-                public short StandardYBoundsMax;
-                public short StandardXBoundsMax;
-                public CachedTagInstance Animation;
+                public WidgetData Data;
                 public StringId DataSourceName;
                 public StringId TextString;
                 public StringId TextColor;
@@ -132,19 +114,7 @@ namespace TagTool.Tags.Definitions
             public class BitmapWidget
             {
                 public CachedTagInstance Parent;
-                public uint Flags;
-                public StringId Name;
-                public short Unknown;
-                public short Layer;
-                public short WidescreenYBoundsMin;
-                public short WidescreenXBoundsMin;
-                public short WidescreenYBoundsMax;
-                public short WidescreenXBoundsMax;
-                public short StandardYBoundsMin;
-                public short StandardXBoundsMin;
-                public short StandardYBoundsMax;
-                public short StandardXBoundsMax;
-                public CachedTagInstance Animation;
+                public WidgetData Data;
                 public CachedTagInstance Bitmap;
                 public CachedTagInstance Unknown2;
                 public BlendMethodValue BlendMethod;
@@ -173,48 +143,87 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x94)]
+            [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x94, MinVersion = CacheVersion.Halo3ODST)]
             public class ModelWidget
             {
                 public CachedTagInstance Parent;
-                public uint Flags;
-                public StringId Name;
-                public short Unknown;
-                public short Unknown2;
-                public short WidescreenYBoundsMin;
-                public short WidescreenXBoundsMin;
-                public short WidescreenYBoundsMax;
-                public short WidescreenXBoundsMax;
-                public short StandardYBoundsMin;
-                public short StandardXBoundsMin;
-                public short StandardYBoundsMax;
-                public short StandardXBoundsMax;
-                public CachedTagInstance Animation;
-                public List<UnknownBlock> Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public List<UnknownBlock2> Unknown11;
-                public short Unknown12;
-                public short Unknown13;
-                public short Unknown14;
-                public short Unknown15;
-                public short Unknown16;
-                public short Unknown17;
-                public short Unknown18;
-                public short Unknown19;
-                public short Unknown20;
-                public short Unknown21;
-                public short Unknown22;
-                public short Unknown23;
-                public List<UnknownBlock3> Unknown24;
+                public WidgetData Data;
 
-                [TagStructure(Size = 0xA0)]
-                public class UnknownBlock
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public List<CameraRefinementOld> CameraRefinementsOld;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public List<CameraRefinementNew> CameraRefinementsNew;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public ModelWidgetData ModelData;
+
+                [TagStructure(Size = 0x4C)]
+                public struct ModelWidgetData
+                {
+                    public uint Unknown4;
+                    public uint Unknown5;
+                    public uint Unknown6;
+                    public uint Unknown7;
+                    public uint Unknown8;
+                    public uint Unknown9;
+                    public uint Unknown10;
+                    public List<UnknownBlock1> Unknown11;
+                    public short Unknown12;
+                    public short Unknown13;
+                    public short Unknown14;
+                    public short Unknown15;
+                    public short Unknown16;
+                    public short Unknown17;
+                    public short Unknown18;
+                    public short Unknown19;
+                    public short Unknown20;
+                    public short Unknown21;
+                    public short Unknown22;
+                    public short Unknown23;
+                    public List<UnknownBlock2> Unknown24;
+
+                    [TagStructure(Size = 0x14)]
+                    public class UnknownBlock1
+                    {
+                        public byte[] Unknown;
+                    }
+
+                    [TagStructure(Size = 0x14)]
+                    public class UnknownBlock2
+                    {
+                        public StringId Unknown;
+                        public uint Unknown2;
+                        public uint Unknown3;
+                        public uint Unknown4;
+                        public uint Unknown5;
+                    }
+                }
+
+                [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
+                public class CameraRefinementOld
+                {
+                    public StringId Biped;
+                    public float Unknown;
+                    public float Unknown2;
+                    public float Unknown3;
+                    public float Unknown4;
+                    public float Unknown5;
+                    public float Unknown6;
+                    public float Unknown7;
+                    public float Unknown8;
+                    public List<ZoomData> ZoomData1;
+                    public List<ZoomData> ZoomData2;
+
+                    [TagStructure(Size = 0x14)]
+                    public class ZoomData
+                    {
+                        public byte[] Unknown;
+                    }
+                }
+
+                [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
+                public class CameraRefinementNew
                 {
                     public StringId Biped;
                     public uint Unknown;
@@ -241,7 +250,7 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown22;
                     public uint Unknown23;
                     public uint Unknown24;
-                    public List<UnknownBlock2> Unknown25;
+                    public List<UnknownBlock> Unknown25;
                     public uint Unknown26;
                     public uint Unknown27;
                     public Angle Unknown28;
@@ -253,26 +262,10 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown34;
 
                     [TagStructure(Size = 0x14)]
-                    public class UnknownBlock2
+                    public class UnknownBlock
                     {
                         public byte[] Unknown;
                     }
-                }
-
-                [TagStructure(Size = 0x14)]
-                public class UnknownBlock2
-                {
-                    public byte[] Unknown;
-                }
-
-                [TagStructure(Size = 0x14)]
-                public class UnknownBlock3
-                {
-                    public StringId Unknown;
-                    public uint Unknown2;
-                    public uint Unknown3;
-                    public uint Unknown4;
-                    public uint Unknown5;
                 }
             }
         }
