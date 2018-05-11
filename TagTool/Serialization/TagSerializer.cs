@@ -199,9 +199,9 @@ namespace TagTool.Serialization
                 block.Writer.Write(((CacheAddress)value).Value);
             else if (valueType == typeof(byte[]))
             {
-                if (valueInfo.Padding == true || value == null)
+                if (valueInfo.Padding == true || (value == null && valueInfo.Length > 0))
                     block.Writer.Write(new byte[valueInfo.Length]);
-                else if (valueInfo.Length != 0)
+                else if (valueInfo.Length > 0)
                     block.Writer.Write((byte[])value);
                 else
                     SerializeDataReference(tagStream, block, (byte[])value, valueInfo);

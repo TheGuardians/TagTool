@@ -60,6 +60,7 @@ namespace TagTool.Commands.Files
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
                 { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache." },
                 { "findconicaleffects", "" },
+                { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." }
             };
 
             switch (name)
@@ -76,6 +77,7 @@ namespace TagTool.Commands.Files
                 case "comparetags": return CompareTags(args);
                 case "namermt2": return NameRmt2();
                 case "findconicaleffects": return FindConicalEffects();
+                case "mergeglobaltags": return MergeGlobalTags(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -83,6 +85,60 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private Globals MergeGlobals(List<Globals> matgs)
+        {
+            var matg = matgs[0];
+
+            return matg;
+        }
+
+        private MultiplayerGlobals MergeMultiplayerGlobals(List<MultiplayerGlobals> mulgs)
+        {
+            var mulg = mulgs[0];
+
+            return mulg;
+        }
+
+        private object MergeGlobalTags(List<string> args)
+        {
+            // initialize serialization contexts.
+            var tagsContext = new TagSerializationContext(null, null, null);
+
+            // find global tags
+            var matg_tags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("matg")).ToList();
+            var mulg_tags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("mulg")).ToList();
+
+            using (var tagsStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var matgs = new List<Globals> { };
+                var mulgs = new List<MultiplayerGlobals> { };
+
+                // deserialize halo-online globals.
+                foreach (var matg_tag in matg_tags)
+                {
+                    tagsContext = new TagSerializationContext(tagsStream, CacheContext, matg_tag);
+                    matgs.Add(CacheContext.Deserializer.Deserialize<Globals>(tagsContext));
+                }
+                foreach (var mulg_tag in mulg_tags)
+                {
+                    tagsContext = new TagSerializationContext(tagsStream, CacheContext, mulg_tag);
+                    mulgs.Add(CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(tagsContext));
+                }
+
+                // merge global tags into the first global tag
+                var matg = MergeGlobals(matgs);
+                var mulg = MergeMultiplayerGlobals(mulgs);
+
+                // serialize global tags
+                tagsContext = new TagSerializationContext(tagsStream, CacheContext, matg_tags[0]);
+                CacheContext.Serialize(tagsContext, matg);
+                tagsContext = new TagSerializationContext(tagsStream, CacheContext, mulg_tags[0]);
+                CacheContext.Serialize(tagsContext, mulg);
+            }
+
+            return true;
         }
 
         private bool FindConicalEffects()
