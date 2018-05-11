@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x8C, MinVersion = CacheVersion.HaloOnline106708)]
     public class GameEngineSettingsDefinition
     {
-        public FlagBits Flags;
+        public FlagsValue Flags;
         public List<TraitProfile> TraitProfiles;
         public List<SlayerVariant> SlayerVariants;
         public List<OddballVariant> OddballVariants;
@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown2;
 
         [Flags]
-        public enum FlagBits : int
+        public enum FlagsValue : int
         {
             None,
             Unused = 1 << 0
@@ -70,7 +70,7 @@ namespace TagTool.Tags.Definitions
                     _500,
                     _1000,
                     _2000,
-                    Invulnerable,
+                    Invulnerable
                 }
 
                 public enum ShieldMultiplierValue : sbyte
@@ -80,7 +80,7 @@ namespace TagTool.Tags.Definitions
                     NormalShields,
                     _2xOvershields,
                     _3xOvershields,
-                    _4xOvershields,
+                    _4xOvershields
                 }
 
                 public enum ShieldRechargeRateValue : sbyte
@@ -94,14 +94,14 @@ namespace TagTool.Tags.Definitions
                     _90,
                     _100,
                     _110,
-                    _200,
+                    _200
                 }
 
                 public enum HeadshotImmunityValue : sbyte
                 {
                     Unchanged,
                     Enabled,
-                    Disabled,
+                    Disabled
                 }
 
                 public enum ShieldVampirismValue : sbyte
@@ -111,7 +111,7 @@ namespace TagTool.Tags.Definitions
                     _10,
                     _25,
                     _50,
-                    _100,
+                    _100
                 }
             }
 
@@ -142,35 +142,35 @@ namespace TagTool.Tags.Definitions
                     _150,
                     _200,
                     _300,
-                    InstantKill,
+                    InstantKill
                 }
 
                 public enum GrenadeRegenerationValue : sbyte
                 {
                     Unchanged,
                     Enabled,
-                    Disabled,
+                    Disabled
                 }
 
                 public enum WeaponPickupValue : sbyte
                 {
                     Unchanged,
                     Enabled,
-                    Disabled,
+                    Disabled
                 }
 
                 public enum InfiniteAmmoValue : sbyte
                 {
                     Unchanged,
                     Disabled,
-                    Enabled,
+                    Enabled
                 }
 
                 public enum GrenadeCountValue : short
                 {
                     Unchanged,
                     MapDefault,
-                    None,
+                    None
                 }
             }
 
@@ -194,7 +194,7 @@ namespace TagTool.Tags.Definitions
                     _125,
                     _150,
                     _200,
-                    _300,
+                    _300
                 }
 
                 public enum PlayerGravityValue : sbyte
@@ -204,7 +204,7 @@ namespace TagTool.Tags.Definitions
                     _75,
                     _100,
                     _150,
-                    _200,
+                    _200
                 }
 
                 public enum VehicleUseValue : sbyte
@@ -212,7 +212,7 @@ namespace TagTool.Tags.Definitions
                     Unchanged,
                     None,
                     PassengerOnly,
-                    FullUse,
+                    FullUse
                 }
             }
 
@@ -230,7 +230,7 @@ namespace TagTool.Tags.Definitions
                     Disabled,
                     BadCamo,
                     PoorCamo,
-                    GoodCamo,
+                    GoodCamo
                 }
 
                 public enum WaypointValue : sbyte
@@ -238,7 +238,7 @@ namespace TagTool.Tags.Definitions
                     Unchanged,
                     None,
                     VisibleToAllies,
-                    VisibleToEveryone,
+                    VisibleToEveryone
                 }
 
                 public enum AuraValue : sbyte
@@ -247,7 +247,7 @@ namespace TagTool.Tags.Definitions
                     Disabled,
                     Team,
                     Black,
-                    White,
+                    White
                 }
 
                 public enum ForcedColorValue : sbyte
@@ -265,7 +265,7 @@ namespace TagTool.Tags.Definitions
                     White,
                     Black,
                     Zombie,
-                    PinkUnused,
+                    PinkUnused
                 }
             }
 
@@ -281,7 +281,7 @@ namespace TagTool.Tags.Definitions
                     Disabled,
                     AllyMovement,
                     PlayerMovement,
-                    PlayerLocations,
+                    PlayerLocations
                 }
 
                 public enum MotionTrackerRangeValue : int
@@ -293,23 +293,138 @@ namespace TagTool.Tags.Definitions
                     _50m,
                     _75m,
                     _100m,
-                    _150m,
+                    _150m
                 }
             }
         }
 
-        [TagStructure(Size = 0x70)]
-        public class SlayerVariant
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnline106708)]
+        public abstract class BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
+            [TagField(Label = true, Length = 32, MinVersion = CacheVersion.HaloOnline106708)]
+            public string NameAscii;
+            [TagField(Label = true)]
             public StringId Name;
             public StringId Description;
             public List<GeneralSetting> GeneralSettings;
             public List<RespawnSetting> RespawnSettings;
             public List<SocialSetting> SocialSettings;
             public List<MapOverride> MapOverrides;
+
+            [TagStructure(Size = 0x8)]
+            public class GeneralSetting
+            {
+                public FlagsValue Flags;
+                public sbyte TimeLimit;
+                public sbyte NumberOfRounds;
+                public sbyte EarlyVictoryWinCount;
+                public RoundResetsValue RoundResets;
+
+                [Flags]
+                public enum FlagsValue : int
+                {
+                    None,
+                    TeamsEnabled = 1 << 0,
+                    RoundResetsPlayers = 1 << 1,
+                    RoundResetsMap = 1 << 2
+                }
+
+                public enum RoundResetsValue : sbyte
+                {
+                    Nothing,
+                    PlayersOnly,
+                    Everything,
+                }
+            }
+
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+            public class RespawnSetting
+            {
+                public FlagsValue Flags;
+                public sbyte LivesPerRound;
+                public sbyte SharedTeamLives;
+                public byte RespawnTime;
+                public byte SuicidePenalty;
+                public byte BetrayalPenalty;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public byte UnknownPenalty;
+                public byte RespawnTimeGrowth;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public sbyte Unknown;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public sbyte Unknown2;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public sbyte Unknown3;
+                public StringId RespawnTraitProfile;
+                public sbyte RespawnTraitDuration;
+                public sbyte Unknown4;
+                public sbyte Unknown5;
+                public sbyte Unknown6;
+
+                [Flags]
+                public enum FlagsValue : ushort
+                {
+                    None,
+                    InheritRespawnTime = 1 << 0,
+                    RespawnWithTeam = 1 << 1,
+                    RespawnAtLocation = 1 << 2,
+                    RespawnOnKills = 1 << 3
+                }
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class SocialSetting
+            {
+                public FlagsValue Flags;
+
+                [Flags]
+                public enum FlagsValue : int
+                {
+                    None,
+                    ObserversEnabled = 1 << 0,
+                    TeamChangingEnabled = 1 << 1,
+                    BalancedTeamChanging = 1 << 2,
+                    FriendlyFireEnabled = 1 << 3,
+                    BetrayalBootingEnabled = 1 << 4,
+                    EnemyVoiceEnabled = 1 << 5,
+                    OpenChannelVoiceEnabled = 1 << 6,
+                    DeadPlayerVoiceEnabled = 1 << 7
+                }
+            }
+
+            [TagStructure(Size = 0x20)]
+            public class MapOverride
+            {
+                public FlagsValue Flags;
+                public StringId BasePlayerTraitProfile;
+                public StringId WeaponSet;
+                public StringId VehicleSet;
+                public StringId OvershieldTraitProfile;
+                public StringId ActiveCamoTraitProfile;
+                public StringId CustomPowerupTraitProfile;
+                public sbyte OvershieldTraitDuration;
+                public sbyte ActiveCamoTraitDuration;
+                public sbyte CustomPowerupTraitDuration;
+                public sbyte Unknown;
+
+                [Flags]
+                public enum FlagsValue : int
+                {
+                    None,
+                    GrenadesOnMap,
+                    IndestructableVehicles
+                }
+            }
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class SlayerVariant : BaseVariant
+        {
             public TeamScoringValue TeamScoring;
             public short PointsToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public sbyte KillPoints;
             public sbyte AssistPoints;
@@ -325,90 +440,28 @@ namespace TagTool.Tags.Definitions
             public sbyte SplatterBonus;
             public sbyte SpreeBonus;
             public sbyte Unknown2;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown3;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown4;
             public StringId LeaderTraitProfile;
-
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
-            {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
-            }
 
             public enum TeamScoringValue : short
             {
                 SumOfTeam,
                 MinimumScore,
                 MaximumScore,
-                Default,
+                Default
             }
         }
 
-        [TagStructure(Size = 0x70)]
-        public class OddballVariant
+        [TagStructure(Size = 0x18)]
+        public class OddballVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public TeamScoringValue TeamScoring;
             public short PointsToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public sbyte CarryingPoints;
             public sbyte KillPoints;
@@ -416,68 +469,20 @@ namespace TagTool.Tags.Definitions
             public sbyte BallCarrierKillPoints;
             public sbyte BallCount;
             public sbyte Unknown2;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown3;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown4;
             public short InitialBallDelay;
             public short BallRespawnDelay;
             public StringId BallCarrierTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                AutopickupEnabled = 1 << 0,
+                BallEffectEnabled = 1 << 1
             }
 
             public enum TeamScoringValue : short
@@ -485,89 +490,34 @@ namespace TagTool.Tags.Definitions
                 SumOfTeam,
                 MinimumScore,
                 MaximumScore,
-                Default,
+                Default
             }
         }
 
-        [TagStructure(Size = 0x70)]
-        public class CaptureTheFlagVariant
+        [TagStructure(Size = 0x18)]
+        public class CaptureTheFlagVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public HomeFlagWaypointValue HomeFlagWaypoint;
             public GameModeValue GameMode;
             public RespawnOnCaptureValue RespawnOnCapture;
             public short FlagReturnTime;
             public short SuddenDeathTime;
             public short ScoreToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public short FlagResetTime;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown1;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown2;
             public StringId FlagCarrierTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                FlagAtHomeToScore = 1 << 0
             }
 
             public enum HomeFlagWaypointValue : short
@@ -575,14 +525,14 @@ namespace TagTool.Tags.Definitions
                 Unknown1,
                 Unknown2,
                 Unknown3,
-                NotInSingle,
+                NotInSingle
             }
 
             public enum GameModeValue : short
             {
                 Multiple,
                 Single,
-                Neutral,
+                Neutral
             }
 
             public enum RespawnOnCaptureValue : short
@@ -590,29 +540,27 @@ namespace TagTool.Tags.Definitions
                 Disabled,
                 OnAllyCapture,
                 OnEnemyCapture,
-                OnAnyCapture,
+                OnAnyCapture
             }
         }
 
-        [TagStructure(Size = 0x80)]
-        public class AssaultVariant
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
+        public class AssaultVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public RespawnOnCaptureValue RespawnOnCapture;
             public GameModeValue GameMode;
             public EnemyBombWaypointValue EnemyBombWaypoint;
             public short SuddenDeathTime;
             public short DetonationsToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown3;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown4;
             public short BombResetTime;
             public short BombArmingTime;
@@ -622,64 +570,11 @@ namespace TagTool.Tags.Definitions
             public StringId BombCarrierTraitProfile;
             public StringId UnknownTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                ResetOnDisarm = 1 << 0
             }
 
             public enum RespawnOnCaptureValue : short
@@ -687,14 +582,14 @@ namespace TagTool.Tags.Definitions
                 Disabled,
                 OnAllyCapture,
                 OnEnemyCapture,
-                OnAnyCapture,
+                OnAnyCapture
             }
 
             public enum GameModeValue : short
             {
                 Multiple,
                 Single,
-                Neutral,
+                Neutral
             }
 
             public enum EnemyBombWaypointValue : short
@@ -702,21 +597,14 @@ namespace TagTool.Tags.Definitions
                 Unknown1,
                 Unknown2,
                 Unknown3,
-                NotInSingle,
+                NotInSingle
             }
         }
 
-        [TagStructure(Size = 0x7C)]
-        public class InfectionVariant
+        [TagStructure(Size = 0x24)]
+        public class InfectionVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public SafeHavensValue SafeHavens;
             public NextZombieValue NextZombie;
             public short InitialZombieCount;
@@ -734,71 +622,18 @@ namespace TagTool.Tags.Definitions
             public StringId OnHavenTraitProfile;
             public StringId LastHumanTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                RespawnOnHavenMove = 1 << 0
             }
 
             public enum SafeHavensValue : short
             {
                 None,
                 Random,
-                Sequence,
+                Sequence
             }
 
             public enum NextZombieValue : short
@@ -806,26 +641,22 @@ namespace TagTool.Tags.Definitions
                 MostPoints,
                 FirstInfected,
                 Unchanged,
-                Random,
+                Random
             }
         }
 
-        [TagStructure(Size = 0x70)]
-        public class KingOfTheHillVariant
+        [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
+        public class KingOfTheHillVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public short ScoreToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public TeamScoringValue TeamScoring;
             public HillMovementValue HillMovement;
             public HillMovementOrderValue HillMovementOrder;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown2;
             public sbyte OnHillPoints;
             public sbyte UncontestedControlPoints;
@@ -833,64 +664,11 @@ namespace TagTool.Tags.Definitions
             public sbyte KillPoints;
             public StringId OnHillTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                OpaqueHill = 1 << 0
             }
 
             public enum TeamScoringValue : short
@@ -898,7 +676,7 @@ namespace TagTool.Tags.Definitions
                 Sum,
                 Minimum,
                 Maximum,
-                Default,
+                Default
             }
 
             public enum HillMovementValue : short
@@ -911,27 +689,20 @@ namespace TagTool.Tags.Definitions
                 After2Minutes,
                 After3Minutes,
                 After4Minutes,
-                After5Minutes,
+                After5Minutes
             }
 
             public enum HillMovementOrderValue : short
             {
                 Random,
-                Sequence,
+                Sequence
             }
         }
 
-        [TagStructure(Size = 0x6C)]
-        public class TerritoriesVariant
+        [TagStructure(Size = 0x14)]
+        public class TerritoriesVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public RespawnOnCaptureValue RespawnOnCapture;
             public short TerritoryCaptureTime;
             public short SuddenDeathTime;
@@ -939,64 +710,12 @@ namespace TagTool.Tags.Definitions
             public StringId DefenderTraitProfile;
             public StringId AttackerTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                OneSided = 1 << 0,
+                LockAfterFirstCapture = 1 << 1
             }
 
             public enum RespawnOnCaptureValue : short
@@ -1004,26 +723,20 @@ namespace TagTool.Tags.Definitions
                 Disabled,
                 OnAllyCapture,
                 OnEnemyCapture,
-                OnAnyCapture,
+                OnAnyCapture
             }
         }
 
-        [TagStructure(Size = 0x74)]
-        public class JuggernautVariant
+        [TagStructure(Size = 0x1C)]
+        public class JuggernautVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public FirstJuggernautValue FirstJuggernaut;
             public NextJuggernautValue NextJuggernaut;
             public GoalZoneMovementValue GoalZoneMovement;
             public GoalZoneOrderValue GoalZoneOrder;
             public short ScoreToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public sbyte KillPoints;
             public sbyte TakedownPoints;
@@ -1033,66 +746,19 @@ namespace TagTool.Tags.Definitions
             public sbyte BetrayalPoints;
             public sbyte NextJuggernautDelay;
             public sbyte Unknown2;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown3;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown4;
             public StringId JuggernautTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                AlliedAgainstJuggernaut = 1 << 0,
+                RespawnOnLoneJuggernaut = 1 << 1,
+                GoalZonesEnabled = 1 << 2
             }
 
             public enum FirstJuggernautValue : short
@@ -1132,18 +798,12 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x7C)]
-        public class VipVariant
+        [TagStructure(Size = 0x24)]
+        public class VipVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public short ScoreToWin;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public short Unknown;
             public NextVipValue NextVip;
             public GoalZoneMovementValue GoalZoneMovement;
@@ -1158,68 +818,21 @@ namespace TagTool.Tags.Definitions
             public sbyte BetrayalPoints;
             public sbyte VipProximityTraitRadius;
             public sbyte Unknown2;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown3;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public sbyte Unknown4;
             public StringId VipTeamTraitProfile;
             public StringId VipProximityTraitProfile;
             public StringId VipTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                SingleVip = 1 << 0,
+                GoalZonesEnabled = 1 << 1,
+                EndRoundOnVipDeath = 1 << 2
             }
 
             public enum NextVipValue : short
@@ -1252,85 +865,25 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x64)]
-        public class SandboxEditorVariant
+        [TagStructure(Size = 0xC)]
+        public class SandboxEditorVariant : BaseVariant
         {
-            [TagField(Label = true, Length = 32)] public string NameAscii;
-            public StringId Name;
-            public StringId Description;
-            public List<GeneralSetting> GeneralSettings;
-            public List<RespawnSetting> RespawnSettings;
-            public List<SocialSetting> SocialSettings;
-            public List<MapOverride> MapOverrides;
-            public uint Flags;
+            public FlagsValue Flags;
             public EditModeValue EditMode;
             public short EditorRespawnTime;
             public StringId EditorTraitProfile;
 
-            [TagStructure(Size = 0x8)]
-            public class GeneralSetting
+            [Flags]
+            public enum FlagsValue : int
             {
-                public uint Flags;
-                public sbyte TimeLimit;
-                public sbyte NumberOfRounds;
-                public sbyte EarlyVictoryWinCount;
-                public RoundResetsValue RoundResets;
-
-                public enum RoundResetsValue : sbyte
-                {
-                    Nothing,
-                    PlayersOnly,
-                    Everything,
-                }
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class RespawnSetting
-            {
-                public ushort Flags;
-                public sbyte LivesPerRound;
-                public sbyte SharedTeamLives;
-                public byte RespawnTime;
-                public byte SuicidePenalty;
-                public byte BetrayalPenalty;
-                public byte UnknownPenalty;
-                public byte RespawnTimeGrowth;
-                public sbyte Unknown;
-                public sbyte Unknown2;
-                public sbyte Unknown3;
-                public StringId RespawnTraitProfile;
-                public sbyte RespawnTraitDuration;
-                public sbyte Unknown4;
-                public sbyte Unknown5;
-                public sbyte Unknown6;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
-                public uint Flags;
-            }
-
-            [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
-                public uint Flags;
-                public StringId BasePlayerTraitProfile;
-                public StringId WeaponSet;
-                public StringId VehicleSet;
-                public StringId OvershieldTraitProfile;
-                public StringId ActiveCamoTraitProfile;
-                public StringId CustomPowerupTraitProfile;
-                public sbyte OvershieldTraitDuration;
-                public sbyte ActiveCamoTraitDuration;
-                public sbyte CustomPowerupTraitDuration;
-                public sbyte Unknown;
+                None,
+                OpenChannelVoiceEnabled = 1 << 0
             }
 
             public enum EditModeValue : short
             {
                 Everyone,
-                LeaderOnly,
+                LeaderOnly
             }
         }
     }
