@@ -144,11 +144,25 @@ namespace TagTool.Commands.Porting
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, entry, scenarioLightmap, blamTagName);
                 IsReplacing = wasReplacing;
 
-                var edTag = this.CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("Lbsp")]);
-                this.CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
+                CachedTagInstance edTag = null;
+                TagGroup edGroup = null;
 
-                var edContext = new TagSerializationContext(cacheStream, this.CacheContext, edTag);
-                this.CacheContext.Serializer.Serialize(edContext, Lbsp);
+                var groupTag = new Tag("Lbsp");
+
+                if (TagGroup.Instances.ContainsKey(groupTag))
+                {
+                    edGroup = TagGroup.Instances[groupTag];
+                }
+                else
+                {
+                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.GetStringId("scenario_lightmap_bsp_data"));
+                }
+
+                edTag = CacheContext.TagCache.AllocateTag(edGroup);
+                CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
+
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
+                CacheContext.Serializer.Serialize(edContext, Lbsp);
 
                 scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference
                 {

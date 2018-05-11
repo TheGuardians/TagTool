@@ -332,7 +332,40 @@ namespace TagTool.Commands.Porting
             }
 
             if (edTag == null)
-                edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+            {
+                TagGroup edGroup = null;
+
+                if (TagGroup.Instances.ContainsKey(groupTag))
+                {
+                    edGroup = TagGroup.Instances[groupTag];
+                }
+                else
+                {
+                    var blamGroup = BlamCache.IndexItems.ClassList[blamTag.ClassIndex];
+
+                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
+                    for (var i = 0; i < blamGroup.ClassCode.Length; i++)
+                        groupTagChars[i] = blamGroup.ClassCode[i];
+
+                    var tag1 = new Tag(new string(groupTagChars));
+
+                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
+                    for (var i = 0; i < blamGroup.Parent.Length; i++)
+                        groupTagChars[i] = blamGroup.Parent[i];
+
+                    var tag2 = new Tag(new string(groupTagChars));
+
+                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
+                    for (var i = 0; i < blamGroup.Parent2.Length; i++)
+                        groupTagChars[i] = blamGroup.Parent2[i];
+
+                    var tag3 = new Tag(new string(groupTagChars));
+
+                    edGroup = new TagGroup(tag1, tag2, tag3, CacheContext.GetStringId(BlamCache.Strings.GetItemByID(blamGroup.StringID)));
+                }
+
+                edTag = CacheContext.TagCache.AllocateTag(edGroup);
+            }
 
             CacheContext.TagNames[edTag.Index] = blamTag.Filename;
 
