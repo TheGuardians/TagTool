@@ -114,6 +114,7 @@ namespace TagTool.Commands.Porting
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
+			Console.WriteLine(tagSpecifier);
             var tagIdentifiers = tagSpecifier.Split('.');
 
             var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, tagIdentifiers[1]);
@@ -572,13 +573,21 @@ namespace TagTool.Commands.Porting
 				case BipedPhysicsFlags bipedPhysicsFlags:
 					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
-				case CachedTagInstance tag when !IsRecursive:
-					return null;
-				case CachedTagInstance tag when tag != null && !IsNew && !IsReplacing:
-					tag = PortTagReference(tag.Index);
-					return tag;
+				// case CachedTagInstance tag when !IsRecursive:
+				// 	return null;
+				// case CachedTagInstance tag when tag != null && !IsNew || !IsReplacing:
+				// 	tag = PortTagReference(tag.Index);
+				// 	return tag;
+				// case CachedTagInstance tag:
+				// 	tag = PortTagReference(tag.Index);
+				// 	return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
+
 				case CachedTagInstance tag:
+					if (IsRecursive == false)
+						return null;
 					tag = PortTagReference(tag.Index);
+					if (tag != null && !(IsNew || IsReplacing))
+						return tag;
 					return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
 				case CollisionMoppCode collisionMopp:
