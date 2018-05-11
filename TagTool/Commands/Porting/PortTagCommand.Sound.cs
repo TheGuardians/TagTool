@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using TagTool.Tags;
 using TagTool.Audio;
+using System.Threading;
 
 namespace TagTool.Commands.Porting
 {
@@ -110,19 +111,30 @@ namespace TagTool.Commands.Porting
             string loopMP3 = @"Temp\permutationTruncated.mp3";
             string tempMP3 = @"Temp\permutation.mp3";
 
-            //If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
-            if (File.Exists(tempXMA))
-                File.Delete(tempXMA);
-            if (File.Exists(tempWAV))
-                File.Delete(tempWAV);
-            if (File.Exists(fixedWAV))
-                File.Delete(fixedWAV);
-            if (File.Exists(loopMP3))
-                File.Delete(loopMP3);
-            if (File.Exists(tempMP3))
-                File.Delete(tempMP3);
+			//If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
 
-            try
+			CLEAN_FILES:
+			try
+			{
+				if (File.Exists(tempXMA))
+					File.Delete(tempXMA);
+				if (File.Exists(tempWAV))
+					File.Delete(tempWAV);
+				if (File.Exists(fixedWAV))
+					File.Delete(fixedWAV);
+				if (File.Exists(loopMP3))
+					File.Delete(loopMP3);
+				if (File.Exists(tempMP3))
+					File.Delete(tempMP3);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				Thread.Sleep(100);
+				goto CLEAN_FILES;
+			}
+
+			try
             {
                 using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
                 {
