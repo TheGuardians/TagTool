@@ -10,10 +10,11 @@ namespace TagTool.Commands.Porting
 {
 	partial class MergeCommand
 	{
-		Globals MergeGlobals(Globals ho, Globals blam)
+		Globals MergeGlobals(List<Globals> matgs)
 		{
+			var matg = matgs[0];
 
-			return ho;
+			return matg;
 		}
 	}
 }

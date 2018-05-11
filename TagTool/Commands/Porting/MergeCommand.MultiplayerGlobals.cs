@@ -10,10 +10,11 @@ namespace TagTool.Commands.Porting
 {
 	partial class MergeCommand
 	{
-		MultiplayerGlobals MergeMultiplayerGlobals(MultiplayerGlobals ho, MultiplayerGlobals blam)
+		MultiplayerGlobals MergeMultiplayerGlobals(List<MultiplayerGlobals> mulgs)
 		{
-			
-			return ho;
+			var mulg = mulgs[0];
+
+			return mulg;
 		}
 	}
 }
