@@ -10,11 +10,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class ListArgumentsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderMethod Definition { get; }
 
-        public ListArgumentsCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public ListArgumentsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
             : base(CommandFlags.Inherit,
 
                  "ListArguments",

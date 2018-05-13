@@ -54,7 +54,7 @@ namespace TagTool.ShaderGenerator
             return arg_pos >= args.Length ? 0 : args[arg_pos++];
         }
 
-        public GameCacheContext CacheContext { get; internal set; }
+        public HaloOnlineCacheContext CacheContext { get; internal set; }
 
         protected virtual string ShaderFile { get; } = "ShaderGenerator/shader_code/entry_points.hlsl";
         abstract protected string ShaderGeneratorType { get; }
@@ -155,7 +155,7 @@ namespace TagTool.ShaderGenerator
             return definitions;
         }
 
-        public static string ShaderParameter_ToString(ShaderParameter param, GameCacheContext cacheContext)
+        public static string ShaderParameter_ToString(ShaderParameter param, HaloOnlineCacheContext cacheContext)
         {
             if (param.RegisterCount == 1)
             {
@@ -208,7 +208,7 @@ namespace TagTool.ShaderGenerator
             };
         }
 
-        public static string GenerateUniformsFile(List<ShaderParameter> parameters, GameCacheContext cacheContext)
+        public static string GenerateUniformsFile(List<ShaderParameter> parameters, HaloOnlineCacheContext cacheContext)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -270,7 +270,7 @@ namespace TagTool.ShaderGenerator
 
         public static List<ShaderParameter> GenerateShaderParameters(
             ShaderParameter.RType target_type,
-            GameCacheContext cacheContext,
+            HaloOnlineCacheContext cacheContext,
             IEnumerable<TemplateParameter> _params,
             IndicesManager indices)
         {

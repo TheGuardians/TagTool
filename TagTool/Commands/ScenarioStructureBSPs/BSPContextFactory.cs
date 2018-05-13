@@ -8,7 +8,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 {
     static class BSPContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp bsp)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp bsp)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -20,7 +20,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             return context;
         }
 
-        public static void Populate(CommandContext commandContext, GameCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp bsp)
+        public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp bsp)
         {
             commandContext.AddCommand(new CollisionTestCommand(cacheContext, tag, bsp));
             commandContext.AddCommand(new ResourceDataCommand(cacheContext, tag, bsp));

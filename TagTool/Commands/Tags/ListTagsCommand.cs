@@ -8,9 +8,9 @@ namespace TagTool.Commands.Tags
 {
     class ListTagsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ListTagsCommand(GameCacheContext cacheContext)
+        public ListTagsCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "ListTags",

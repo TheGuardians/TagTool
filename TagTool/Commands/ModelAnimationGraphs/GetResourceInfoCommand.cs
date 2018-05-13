@@ -8,11 +8,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
 {
     class GetResourceInfoCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private ModelAnimationGraph Definition { get; }
 
-        public GetResourceInfoCommand(GameCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
+        public GetResourceInfoCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
             : base(CommandFlags.None,
 
                   "GetResourceInfo",

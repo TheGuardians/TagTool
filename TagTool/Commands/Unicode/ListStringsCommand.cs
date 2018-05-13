@@ -9,10 +9,10 @@ namespace TagTool.Commands.Unicode
 {
     class ListStringsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private MultilingualUnicodeStringList Definition { get; }
 
-        public ListStringsCommand(GameCacheContext cacheContext, MultilingualUnicodeStringList definition)
+        public ListStringsCommand(HaloOnlineCacheContext cacheContext, MultilingualUnicodeStringList definition)
             : base(CommandFlags.Inherit,
                   "ListStrings",
                   "Lists the unicode strings belonging to a certain language.",

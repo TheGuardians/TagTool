@@ -14,10 +14,10 @@ namespace TagTool.Geometry
 {
     public class RenderGeometryConverter
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public RenderGeometryConverter(GameCacheContext cacheContext, CacheFile blamCache)
+        public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
@@ -452,7 +452,8 @@ namespace TagTool.Geometry
 
                 var resourceContext = new ResourceSerializationContext(geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
-                CacheContext.AddResource(geometry.Resource, ResourceLocation.ResourcesB, edResourceStream);
+                geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(geometry.Resource, edResourceStream);
             }
 
             return geometry;

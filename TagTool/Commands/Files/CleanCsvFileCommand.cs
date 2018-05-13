@@ -9,9 +9,9 @@ namespace TagTool.Commands.Files
 {
     class CleanCsvFileCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public CleanCsvFileCommand(GameCacheContext cacheContext) :
+        public CleanCsvFileCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
 
                 "CleanCsvFile",

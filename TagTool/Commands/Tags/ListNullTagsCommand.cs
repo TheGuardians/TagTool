@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ListNullTagsCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public ListNullTagsCommand(GameCacheContext cacheContext)
+        public ListNullTagsCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
                   
                   "ListNullTags",

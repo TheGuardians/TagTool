@@ -13,11 +13,11 @@ namespace TagTool.Commands.Bitmaps
 {
     class ImportBitmapCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ImportBitmapCommand(GameCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ImportBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
             : base(CommandFlags.None,
 
                   "ImportBitmap",

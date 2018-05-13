@@ -12,11 +12,11 @@ namespace TagTool.Commands.RenderModels
 {
     class ExtractBitmapsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderModel Definition { get; }
 
-        public ExtractBitmapsCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
+        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
             : base(CommandFlags.Inherit,
                   
                   "ExtractBitmaps",

@@ -6,7 +6,7 @@ namespace TagTool.Commands.Models
 {
     static class ModelContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, Model model)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Model model)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Models
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, Model model)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Model model)
         {
             context.AddCommand(new ListVariantsCommand(cacheContext, model));
             context.AddCommand(new ExtractModelCommand(cacheContext, model));

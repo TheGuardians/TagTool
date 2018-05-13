@@ -16,11 +16,11 @@ namespace TagTool.Commands.Porting
 {
     public class PortArmorVariantCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
         private RenderGeometryConverter GeometryConverter { get; }
 
-        public PortArmorVariantCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public PortArmorVariantCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "PortArmorVariant",
@@ -443,7 +443,8 @@ namespace TagTool.Commands.Porting
 
                 var resourceContext = new ResourceSerializationContext(edModeDefinition.Geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
-                CacheContext.AddResource(edModeDefinition.Geometry.Resource, ResourceLocation.ResourcesB, edResourceStream);
+                edModeDefinition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(edModeDefinition.Geometry.Resource, edResourceStream);
 
                 Console.WriteLine("done.");
             }

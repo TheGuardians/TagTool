@@ -12,7 +12,7 @@ namespace TagTool.Cache
 {
     public class CacheFileGen3 : CacheFile
     {
-        public CacheFileGen3(GameCacheContext cacheContext, FileInfo file, CacheVersion version)
+        public CacheFileGen3(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version)
             : base(cacheContext, file, version)
         {
             if (Header.Interop.ResourceBaseAddress == 0)

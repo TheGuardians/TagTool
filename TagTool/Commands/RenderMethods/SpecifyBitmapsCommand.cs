@@ -10,11 +10,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class SpecifyBitmapsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderMethod Definition { get; }
 
-        public SpecifyBitmapsCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public SpecifyBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
             : base(CommandFlags.Inherit,
 
                  "SpecifyBitmaps",

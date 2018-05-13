@@ -11,9 +11,9 @@ namespace TagTool.Commands.Bitmaps
 {
     class ExtractBitmapsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ExtractBitmapsCommand(GameCacheContext cacheContext) :
+        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
                 
                 "ExtractBitmaps",

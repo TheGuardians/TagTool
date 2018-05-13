@@ -8,9 +8,9 @@ namespace TagTool.Commands.Editing
     class EditTagCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public EditTagCommand(CommandContextStack contextStack, GameCacheContext cacheContext) : base(
+        public EditTagCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) : base(
             CommandFlags.None,
 
             "EditTag",

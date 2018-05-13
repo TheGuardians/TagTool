@@ -10,11 +10,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class ResourceDataCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public ResourceDataCommand(GameCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp definition)
+        public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp definition)
             : base(CommandFlags.None,
 
                   "ResourceData",
@@ -53,7 +53,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             }
         }
 
-        private static bool ExtractResource(ScenarioStructureBsp Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ExtractResource(ScenarioStructureBsp Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
             if (args.Count < 1)
                 return false;
@@ -116,7 +116,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             return true;
         }
 
-        private static bool ImportResource(ScenarioStructureBsp Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ImportResource(ScenarioStructureBsp Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
             if (args.Count != 4)
                 return false;
@@ -160,19 +160,23 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 switch (resourceType)
                 {
                     case "geometry":
-                        CacheContext.AddResource(Definition.Geometry.Resource, resourceLocation, stream);
+                        Definition.Geometry.Resource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.Geometry.Resource, stream);
                         Console.WriteLine($"New Geometry resource index = {Definition.Geometry.Resource.Page.Index:X4}; {Definition.Geometry.Resource.Page.Index:D4}");
                         break;
                     case "geometry2":
-                        CacheContext.AddResource(Definition.Geometry2.Resource, resourceLocation, stream);
+                        Definition.Geometry2.Resource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.Geometry2.Resource, stream);
                         Console.WriteLine($"New Geometry2 resource index = {Definition.Geometry2.Resource.Page.Index:X4}; {Definition.Geometry2.Resource.Page.Index:D4}");
                         break;
                     case "collisionbspresource":
-                        CacheContext.AddResource(Definition.CollisionBspResource, resourceLocation, stream);
+                        Definition.CollisionBspResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.CollisionBspResource, stream);
                         Console.WriteLine($"New CollisionBspResource resource index = {Definition.CollisionBspResource.Page.Index:X4}; {Definition.CollisionBspResource.Page.Index:D4}");
                         break;
                     case "pathfindingresource":
-                        CacheContext.AddResource(Definition.PathfindingResource, resourceLocation, stream);
+                        Definition.PathfindingResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.PathfindingResource, stream);
                         Console.WriteLine($"New PathfindingResource resource index = {Definition.PathfindingResource.Page.Index:X4}; {Definition.PathfindingResource.Page.Index:D4}");
                         break;
                     default:

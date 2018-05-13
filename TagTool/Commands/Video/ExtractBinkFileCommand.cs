@@ -11,11 +11,11 @@ namespace TagTool.Commands.Video
 {
     class ExtractBinkFileCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Bink Definition { get; }
 
-        public ExtractBinkFileCommand(GameCacheContext cacheContext, CachedTagInstance tag, Bink definition)
+        public ExtractBinkFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bink definition)
             : base(CommandFlags.None,
                   
                   "ExtractBinkFile",

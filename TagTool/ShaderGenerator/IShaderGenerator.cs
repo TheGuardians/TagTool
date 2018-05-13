@@ -9,6 +9,6 @@ namespace TagTool.ShaderGenerator
 {
     public interface IShaderGenerator
     {
-        GameCacheContext CacheContext { get; }
+        HaloOnlineCacheContext CacheContext { get; }
     }
 }

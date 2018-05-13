@@ -9,10 +9,10 @@ namespace TagTool.Commands.Porting
 {
     public class DumpScriptInfoCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public DumpScriptInfoCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public DumpScriptInfoCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "DumpScriptInfo",

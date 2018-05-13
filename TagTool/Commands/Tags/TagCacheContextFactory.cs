@@ -17,7 +17,7 @@ namespace TagTool.Commands.Tags
 {
     public static class TagCacheContextFactory
     {
-        public static CommandContext Create(CommandContextStack stack, GameCacheContext cacheContext)
+        public static CommandContext Create(CommandContextStack stack, HaloOnlineCacheContext cacheContext)
         {
             var context = new CommandContext(stack.Context, "tags");
 

@@ -18,7 +18,7 @@ namespace TagTool.ShaderGenerator
             new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
         };
 
-        public ParticleTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+        public ParticleTemplateShaderGenerator(HaloOnlineCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
                 drawmode,
                 (Albedo)GetNextTemplateArg(args, ref arg_pos),
 				(Blend_Mode)GetNextTemplateArg(args, ref arg_pos),

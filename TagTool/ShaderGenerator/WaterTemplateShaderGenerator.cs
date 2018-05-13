@@ -20,7 +20,7 @@ namespace TagTool.ShaderGenerator
             new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
         };
 
-        public WaterTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+        public WaterTemplateShaderGenerator(HaloOnlineCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
                 drawmode,
                 (Wave_Shape)GetNextTemplateArg(args, ref arg_pos),
 				(Water_Color)GetNextTemplateArg(args, ref arg_pos),

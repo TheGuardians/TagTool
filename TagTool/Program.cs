@@ -52,13 +52,13 @@ namespace TagTool.Commands
                 Console.WriteLine();
             }
 
-            GameCacheContext cacheContext = null;
+            HaloOnlineCacheContext cacheContext = null;
 
 #if !DEBUG
             try
             {
 #endif
-                cacheContext = new GameCacheContext(fileInfo.Directory);
+                cacheContext = new HaloOnlineCacheContext(fileInfo.Directory);
 #if !DEBUG
             }
             catch (Exception e)

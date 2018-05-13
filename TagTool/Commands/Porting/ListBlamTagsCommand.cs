@@ -7,10 +7,10 @@ namespace TagTool.Commands.Porting
 {
     public class ListBlamTagsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public ListBlamTagsCommand(GameCacheContext cacheContext, CacheFile blamCache)
+        public ListBlamTagsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
             : base(CommandFlags.None,
 
                   "ListBlamTags",

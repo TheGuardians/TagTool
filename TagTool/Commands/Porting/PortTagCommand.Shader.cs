@@ -413,7 +413,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private static void GetRmt2Info(Stream cacheStream, GameCacheContext cacheContext)
+        private static void GetRmt2Info(Stream cacheStream, HaloOnlineCacheContext cacheContext)
         {
             if (cacheContext.Rmt2TagsInfo.Count != 0)
                 return;
@@ -950,7 +950,7 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(GameCacheContext CacheContext, CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
+        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
         {
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
@@ -1154,7 +1154,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private RenderMethod FixFunctions(CacheFile blamCache, GameCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
+        private RenderMethod FixFunctions(CacheFile blamCache, HaloOnlineCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)

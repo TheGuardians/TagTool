@@ -13,10 +13,10 @@ namespace TagTool.Commands.Porting
 {
     public class ListBspMoppCodesCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public ListBspMoppCodesCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public ListBspMoppCodesCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "ListBspMoppCodes",

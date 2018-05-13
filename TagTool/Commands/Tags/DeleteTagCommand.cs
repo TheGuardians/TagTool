@@ -7,7 +7,7 @@ namespace TagTool.Commands.Tags
 {
     class DeleteTagCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
         private HashSet<int> AudioResourceIndices { get; } = new HashSet<int>();
         private HashSet<int> TexturesResourceIndices { get; } = new HashSet<int>();
@@ -23,7 +23,7 @@ namespace TagTool.Commands.Tags
             0x580, 0x587, 0x6B9, 0x6ED, 0x6EE
         };
 
-        public DeleteTagCommand(GameCacheContext cacheContext)
+        public DeleteTagCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
 
                   "DeleteTag",

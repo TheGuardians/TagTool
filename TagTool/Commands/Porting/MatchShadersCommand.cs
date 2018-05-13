@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
 {
     public class MatchShadersCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
         public CacheFile BlamCache { get; }
         public static int rmPreset = 0x0;
         public static int rmt2Preset = 0x0;
@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting
         public static List<string> h3Arguments = new List<string>();
         public static Dictionary<string, float[]> edArgPreset;
 
-        public MatchShadersCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public MatchShadersCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "MatchShaders",
@@ -51,7 +51,7 @@ namespace TagTool.Commands.Porting
             BlamCache = blamCache;
         }
 
-        public static CachedTagInstance PortShaderTag(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, CacheFile.IndexItem h3Tag)
+        public static CachedTagInstance PortShaderTag(Stream stream, HaloOnlineCacheContext cacheContext, CacheFile blamCache, CacheFile.IndexItem h3Tag)
         {
             WriteLine($"[{h3Tag.ClassCode}] {h3Tag.Filename} processing...");
 
@@ -251,7 +251,7 @@ namespace TagTool.Commands.Porting
             return true;
         }
 
-        public static List<RenderMaterial> RestoreH3Shaders(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, List<RenderMaterial> materials)
+        public static List<RenderMaterial> RestoreH3Shaders(Stream stream, HaloOnlineCacheContext cacheContext, CacheFile blamCache, List<RenderMaterial> materials)
         {
             int i = -1;
             WriteLine("Default shaders:");
@@ -418,7 +418,7 @@ namespace TagTool.Commands.Porting
 
         }
 
-        public static CachedTagInstance MatchShader7(Stream stream, GameCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
+        public static CachedTagInstance MatchShader7(Stream stream, HaloOnlineCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
             var blamContext = new CacheSerializationContext(BlamCache, h3ShaderTag);
@@ -641,7 +641,7 @@ namespace TagTool.Commands.Porting
             return newTag;
         }
 
-        public static int MatchRenderMethodTemplateByName(GameCacheContext CacheContext, CacheFile BlamCache, CachedTagInstance blamRmt2)
+        public static int MatchRenderMethodTemplateByName(HaloOnlineCacheContext CacheContext, CacheFile BlamCache, CachedTagInstance blamRmt2)
         {
             // Get blamrmt2 name
             // Loop trough all ED tags till the ed filename contains blam rmt2 filename
@@ -720,7 +720,7 @@ namespace TagTool.Commands.Porting
             return edRmt2index;
         }
 
-        public static void GetRmt2Info(Stream stream, GameCacheContext cacheContext)
+        public static void GetRmt2Info(Stream stream, HaloOnlineCacheContext cacheContext)
         {
             if (cacheContext.Rmt2TagsInfo.Count == 0)
             {
@@ -743,7 +743,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public static int MatchRenderMethodTemplate2(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
+        public static int MatchRenderMethodTemplate2(Stream stream, HaloOnlineCacheContext cacheContext, CacheFile blamCache, List<string> h3Bitmaps, List<string> h3Args, string blamRmt2Name, string blamShaderName)
         {
             // Make a new dictionary with rmt2 of the same shader type
             List<ShaderTemplateItem> edRmt2SameType = new List<ShaderTemplateItem>();
@@ -1056,7 +1056,7 @@ namespace TagTool.Commands.Porting
             return _0.ShaderTemplateTagIndex;
         }
 
-        public static Shader.ShaderProperty PortShaderProperty(Stream stream, GameCacheContext cacheContext, CacheFile blamCache, Shader.ShaderProperty h3Property, Shader.ShaderProperty edProperty)
+        public static Shader.ShaderProperty PortShaderProperty(Stream stream, HaloOnlineCacheContext cacheContext, CacheFile blamCache, Shader.ShaderProperty h3Property, Shader.ShaderProperty edProperty)
         {
             // Loop trough all the common bitmaps, match or port
             int blamBitmI2 = -1;
@@ -1256,7 +1256,7 @@ namespace TagTool.Commands.Porting
             return edProperty;
         }
 
-        public static CachedTagInstance PortTagReference(GameCacheContext cacheContext, CacheFile blamCache, int index, int maxIndex = 0xFFFF)
+        public static CachedTagInstance PortTagReference(HaloOnlineCacheContext cacheContext, CacheFile blamCache, int index, int maxIndex = 0xFFFF)
         {
             if (index == -1)
                 return null;
@@ -1292,7 +1292,7 @@ namespace TagTool.Commands.Porting
             csvQueue.Add(output);
         }
 
-        public static void GetShaderPresets(GameCacheContext CacheContext, string tagname)
+        public static void GetShaderPresets(HaloOnlineCacheContext CacheContext, string tagname)
         {
             edArgPreset = new Dictionary<string, float[]>();
             /*if (tagname.Contains("ext_metal_trim_red"))

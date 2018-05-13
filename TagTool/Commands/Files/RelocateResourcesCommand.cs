@@ -13,11 +13,11 @@ namespace TagTool.Commands.Files
 {
     class RelocateResourcesCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private ResourceCache ResourcesB { get; set; }
         private ResourceCache Resources { get; set; }
 
-        public RelocateResourcesCommand(GameCacheContext cacheContext) :
+        public RelocateResourcesCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
 
                 "RelocateResources",

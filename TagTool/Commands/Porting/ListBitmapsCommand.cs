@@ -8,10 +8,10 @@ namespace TagTool.Commands.Porting
 {
     public class ListBitmapsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public ListBitmapsCommand(GameCacheContext cacheContext, CacheFile blamCache)
+        public ListBitmapsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
             : base(CommandFlags.None,
 
                   "ListBitmaps",

@@ -14,11 +14,11 @@ namespace TagTool.Commands.RenderModels
 {
     class ReplaceRenderGeometryCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderModel Definition { get; }
 
-        public ReplaceRenderGeometryCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
+        public ReplaceRenderGeometryCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
             base(CommandFlags.None,
 
                 "ReplaceRenderGeometry",
@@ -245,7 +245,9 @@ namespace TagTool.Commands.RenderModels
                 Definition.Materials = newDefinition.Materials;
                 
                 resourceStream.Position = 0;
-                CacheContext.AddResource(Definition.Geometry.Resource, ResourceLocation.ResourcesB, resourceStream);
+
+                Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(Definition.Geometry.Resource, resourceStream);
 
                 Console.WriteLine("done.");
             }

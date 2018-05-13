@@ -6,7 +6,7 @@ namespace TagTool.Commands.Files
 {
     static class VFilesContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Files
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
         {
             context.AddCommand(new ListFilesCommand(definition));
             context.AddCommand(new ExtractFileCommand(definition));

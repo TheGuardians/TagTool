@@ -12,10 +12,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class ExtractRenderGeometryCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public ExtractRenderGeometryCommand(GameCacheContext cacheContext, ScenarioStructureBsp definition)
+        public ExtractRenderGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition)
             : base(CommandFlags.Inherit,
 
                   "ExtractRenderGeometry",

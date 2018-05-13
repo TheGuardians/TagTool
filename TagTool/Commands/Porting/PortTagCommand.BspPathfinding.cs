@@ -371,7 +371,9 @@ namespace TagTool.Commands.Porting
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.PathfindingResource), resourceDefinition);
                 resourceWriter.BaseStream.Position = 0;
                 edResourceStream.Position = 0;
-                CacheContext.AddResource(bsp.PathfindingResource, ResourceLocation.ResourcesB, edResourceStream);
+
+                bsp.PathfindingResource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(bsp.PathfindingResource, edResourceStream);
             }
 
             if (BlamCache.Version < CacheVersion.Halo3ODST)

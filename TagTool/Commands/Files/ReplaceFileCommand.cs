@@ -10,11 +10,11 @@ namespace TagTool.Commands.Files
 {
     class ReplaceFileCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private VFilesList Definition { get; }
 
-        public ReplaceFileCommand(GameCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
+        public ReplaceFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
             : base(CommandFlags.None,
 
                   "ReplaceFile",

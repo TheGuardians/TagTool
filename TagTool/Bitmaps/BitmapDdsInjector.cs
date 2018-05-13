@@ -12,9 +12,9 @@ namespace TagTool.Bitmaps
 {
     public class BitmapDdsInjector
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         
-        public BitmapDdsInjector(GameCacheContext cacheContext)
+        public BitmapDdsInjector(HaloOnlineCacheContext cacheContext)
         {
             CacheContext = cacheContext;
         }
@@ -95,7 +95,10 @@ namespace TagTool.Bitmaps
 
             // If creating a new image, then add a new resource, otherwise replace the existing one
             if (newResource)
-                CacheContext.AddResource(resource, location, ddsStream);
+            {
+                resource.ChangeLocation(location);
+                CacheContext.AddResource(resource, ddsStream);
+            }
             else
                 CacheContext.ReplaceResource(resource, ddsStream);
 

@@ -9,9 +9,9 @@ namespace TagTool.Commands.Files
 {
     class CleanCacheFilesCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public CleanCacheFilesCommand(GameCacheContext cacheContext)
+        public CleanCacheFilesCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
 
                   "CleanCacheFiles",

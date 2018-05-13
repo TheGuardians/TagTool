@@ -13,9 +13,9 @@ namespace TagTool.Commands.Definitions
 {
     class ConvertPluginsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ConvertPluginsCommand(GameCacheContext cacheContext)
+        public ConvertPluginsCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "ConvertPlugins",

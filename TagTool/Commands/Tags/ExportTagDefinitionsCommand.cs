@@ -12,9 +12,9 @@ namespace TagTool.Commands.Tags
 {
     class ExportTagDefinitionsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ExportTagDefinitionsCommand(GameCacheContext cacheContext) :
+        public ExportTagDefinitionsCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
                 
                 "ExportTagDefinitions",

@@ -12,11 +12,11 @@ namespace TagTool.Commands.Unicode
 {
     class SetStringCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private MultilingualUnicodeStringList Definition { get; }
 
-        public SetStringCommand(GameCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
+        public SetStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
             : base(CommandFlags.None,
 
                   "SetString",

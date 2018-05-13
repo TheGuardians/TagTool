@@ -8,10 +8,10 @@ namespace TagTool.Runtime
 {
     public class RuntimeSerializationContext : ISerializationContext
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private ProcessMemoryStream ProcessStream { get; }
 
-        public RuntimeSerializationContext(GameCacheContext cacheContext, ProcessMemoryStream processStream)
+        public RuntimeSerializationContext(HaloOnlineCacheContext cacheContext, ProcessMemoryStream processStream)
         {
             CacheContext = cacheContext;
             ProcessStream = processStream;

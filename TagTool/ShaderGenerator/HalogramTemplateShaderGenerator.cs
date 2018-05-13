@@ -18,7 +18,7 @@ namespace TagTool.ShaderGenerator
             new DirectX.MacroDefine {Name = "_debug_color", Definition = "float4(1, 0, 0, 0)" }
         };
 
-        public HalogramTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+        public HalogramTemplateShaderGenerator(HaloOnlineCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
                 drawmode,
                 (Albedo)GetNextTemplateArg(args, ref arg_pos),
 				(Self_Illumination)GetNextTemplateArg(args, ref arg_pos),

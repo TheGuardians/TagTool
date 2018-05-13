@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class GetTagInfoCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public GetTagInfoCommand(GameCacheContext cacheContext)
+        public GetTagInfoCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
             "GetTagInfo",

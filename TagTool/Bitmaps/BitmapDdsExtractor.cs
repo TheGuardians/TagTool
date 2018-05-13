@@ -12,9 +12,9 @@ namespace TagTool.Bitmaps
 {
     public class BitmapDdsExtractor
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public BitmapDdsExtractor(GameCacheContext cacheContext)
+        public BitmapDdsExtractor(HaloOnlineCacheContext cacheContext)
         {
             CacheContext = cacheContext;
         }

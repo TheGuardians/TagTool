@@ -6,7 +6,7 @@ namespace TagTool.Commands.Unicode
 {
     static class UnicodeContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Unicode
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
         {
             if (cacheContext.StringIdCache == null)
                 return;

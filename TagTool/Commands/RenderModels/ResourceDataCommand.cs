@@ -10,11 +10,11 @@ namespace TagTool.Commands.RenderModels
 {
     class ResourceDataCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderModel Definition { get; }
 
-        public ResourceDataCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
+        public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
             : base(CommandFlags.Inherit,
 
                   "ResourceData",
@@ -55,7 +55,7 @@ namespace TagTool.Commands.RenderModels
             }
         }
 
-        private static bool ExtractResource(RenderModel Definition, GameCacheContext CacheContext, string filePath, string cacheType)
+        private static bool ExtractResource(RenderModel Definition, HaloOnlineCacheContext CacheContext, string filePath, string cacheType)
         {
             int resourceIndex = 0;
             uint compressedSize = 0;
@@ -100,7 +100,7 @@ namespace TagTool.Commands.RenderModels
             return true;
         }
 
-        private static bool ImportResource(RenderModel Definition, GameCacheContext CacheContext, string filePath, string cacheType)
+        private static bool ImportResource(RenderModel Definition, HaloOnlineCacheContext CacheContext, string filePath, string cacheType)
         {
 
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite))
@@ -110,7 +110,8 @@ namespace TagTool.Commands.RenderModels
                     case "resources":
                         try
                         {
-                            CacheContext.AddResource(Definition.Geometry.Resource, ResourceLocation.Resources, stream);
+                            Definition.Geometry.Resource.ChangeLocation(ResourceLocation.Resources);
+                            CacheContext.AddResource(Definition.Geometry.Resource, stream);
                         }
                         catch (Exception ex)
                         {
@@ -121,7 +122,8 @@ namespace TagTool.Commands.RenderModels
                     case "resources_b":
                         try
                         {
-                            CacheContext.AddResource(Definition.Geometry.Resource, ResourceLocation.ResourcesB, stream);
+                            Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                            CacheContext.AddResource(Definition.Geometry.Resource, stream);
                         }
                         catch (Exception ex)
                         {

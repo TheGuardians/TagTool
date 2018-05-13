@@ -6,7 +6,7 @@ namespace TagTool.Commands.Scenarios
 {
     static class ScnrContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, Scenario scenario)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario scenario)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Scenarios
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, Scenario scenario)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario scenario)
         {
             context.AddCommand(new CopyForgePaletteCommand(cacheContext, scenario));
             context.AddCommand(new ExtractScriptsCommand(cacheContext, tag, scenario));

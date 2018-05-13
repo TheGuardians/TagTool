@@ -10,10 +10,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class DumpMoppCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public DumpMoppCommand(GameCacheContext cacheContext, ScenarioStructureBsp bsp) :
+        public DumpMoppCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp bsp) :
             base(CommandFlags.Inherit,
 
                 "DumpMopp",

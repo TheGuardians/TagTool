@@ -10,7 +10,7 @@ namespace TagTool.Commands.Editing
     class CopyBlockElementsCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private TagStructureInfo Structure { get; set; }
         private object Owner { get; set; }
@@ -18,7 +18,7 @@ namespace TagTool.Commands.Editing
         public static Type ElementType { get; set; } = null;
         public static List<object> Elements { get; set; } = null;
 
-        public CopyBlockElementsCommand(CommandContextStack contextStack, GameCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public CopyBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
             : base(CommandFlags.None,
 
                   "CopyBlockElements",

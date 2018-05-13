@@ -10,9 +10,9 @@ namespace TagTool.Commands.Strings
 {
     class ListAllStringsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ListAllStringsCommand(GameCacheContext cacheContext) : base(
+        public ListAllStringsCommand(HaloOnlineCacheContext cacheContext) : base(
             CommandFlags.Inherit,
 
             "ListAllStrings",

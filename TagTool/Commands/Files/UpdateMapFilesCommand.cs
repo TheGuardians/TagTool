@@ -21,9 +21,9 @@ namespace TagTool.Commands.Files
         private const int ContentMapNameOffset = 0x43D4;
         private static readonly int[] ContentMapIdOffsets = new[] { 0x33CC, 0xBE60, 0xBE80 };
 
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public UpdateMapFilesCommand(GameCacheContext cacheContext)
+        public UpdateMapFilesCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "UpdateMapFiles",

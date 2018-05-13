@@ -12,9 +12,9 @@ namespace TagTool.Commands.Tags
 {
     class CreateTagCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public CreateTagCommand(GameCacheContext cacheContext)
+        public CreateTagCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "CreateTag",

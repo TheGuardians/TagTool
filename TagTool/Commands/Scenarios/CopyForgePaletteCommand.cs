@@ -9,10 +9,10 @@ namespace TagTool.Commands.Scenarios
 {
     class CopyForgePaletteCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private Scenario Definition { get; }
 
-        public CopyForgePaletteCommand(GameCacheContext cacheContext, Scenario definition)
+        public CopyForgePaletteCommand(HaloOnlineCacheContext cacheContext, Scenario definition)
             : base(CommandFlags.Inherit,
 
                  "CopyForgePalette",

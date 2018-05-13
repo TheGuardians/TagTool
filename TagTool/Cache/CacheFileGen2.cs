@@ -8,7 +8,7 @@ namespace TagTool.Cache
 {
     public class CacheFileGen2 : CacheFile
     {
-        public CacheFileGen2(GameCacheContext cacheContext, FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
+        public CacheFileGen2(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
             base(cacheContext, file, version)
         {
             IndexHeader = new CacheIndexHeader(this);

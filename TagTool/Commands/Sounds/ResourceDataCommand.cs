@@ -10,11 +10,11 @@ namespace TagTool.Commands.Sounds
 {
     class ResourceDataCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Sound Definition { get; }
 
-        public ResourceDataCommand(GameCacheContext cacheContext, CachedTagInstance tag, Sound definition)
+        public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition)
             : base(CommandFlags.None,
 
                   "ResourceData",
@@ -50,7 +50,7 @@ namespace TagTool.Commands.Sounds
             }
         }
 
-        private static bool ExtractResource(Sound Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ExtractResource(Sound Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
             if (args.Count != 1)
                 return false;
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Sounds
             return true;
         }
 
-        private static bool ImportResource(Sound Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ImportResource(Sound Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
             if (args.Count != 2)
                 return false;
@@ -130,7 +130,8 @@ namespace TagTool.Commands.Sounds
             {
                 using (var stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite))
                 {
-                    CacheContext.AddResource(Definition.Resource, resourceLocation, stream);
+                    Definition.Resource.ChangeLocation(resourceLocation);
+                    CacheContext.AddResource(Definition.Resource, stream);
                     Console.WriteLine($"New Geometry resource index = 0x{Definition.Resource.Page.Index:X4}, {Definition.Resource.Page.Index:D4}");
                 }
 

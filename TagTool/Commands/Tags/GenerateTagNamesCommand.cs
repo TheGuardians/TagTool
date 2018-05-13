@@ -13,10 +13,10 @@ namespace TagTool.Commands.Tags
 {
     class GenerateTagNamesCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private Dictionary<int, object> LoadedDefinitions { get; } = new Dictionary<int, object>();
 
-        public GenerateTagNamesCommand(GameCacheContext cacheContext)
+        public GenerateTagNamesCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
                   
                   "GenerateTagNames",

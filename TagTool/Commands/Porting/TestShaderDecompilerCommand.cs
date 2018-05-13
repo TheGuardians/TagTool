@@ -13,9 +13,9 @@ namespace TagTool.Commands.Porting
 	class TestShaderDecompilerCommand : Command
 	{
 		private CacheFile BlamCache { get; }
-		private GameCacheContext CacheContext { get; }
+		private HaloOnlineCacheContext CacheContext { get; }
 
-		public TestShaderDecompilerCommand(GameCacheContext cacheContext, CacheFile blamCache) : base(
+		public TestShaderDecompilerCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) : base(
 			CommandFlags.None,
 
 			"DecompileShader",

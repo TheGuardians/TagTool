@@ -10,9 +10,9 @@ namespace TagTool.Commands.Strings
 {
     class StringIdCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public StringIdCommand(GameCacheContext cacheContext) : base(
+        public StringIdCommand(HaloOnlineCacheContext cacheContext) : base(
             CommandFlags.Inherit,
 
             "StringId",

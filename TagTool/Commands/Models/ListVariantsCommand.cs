@@ -9,10 +9,10 @@ namespace TagTool.Commands.Models
 {
     class ListVariantsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private Model Definition { get; }
 
-        public ListVariantsCommand(GameCacheContext cacheContext, Model model)
+        public ListVariantsCommand(HaloOnlineCacheContext cacheContext, Model model)
             : base(CommandFlags.Inherit,
                   
                   "ListVariants",

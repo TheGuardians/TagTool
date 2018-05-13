@@ -12,13 +12,13 @@ namespace TagTool.Shaders.SM3
     {
         public SM3ExtShaderParser Parser { get; }
         public List<ShaderParameter> Parameters;
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
         public string TextureTemporaryRegister = null;
         public List<SM3Instruction> Instructions = new List<SM3Instruction>();
         protected List<int> AllocatedRegister = new List<int>();
         protected List<int> AllocatedConstant = new List<int>();
 
-        public SM3ShaderConverter(SM3ExtShaderParser parser, GameCacheContext context, List<ShaderParameter> shader_parameters)
+        public SM3ShaderConverter(SM3ExtShaderParser parser, HaloOnlineCacheContext context, List<ShaderParameter> shader_parameters)
         {
             Parser = parser;
             Parameters = shader_parameters;

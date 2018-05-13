@@ -11,9 +11,9 @@ namespace TagTool.Commands.CollisionModels
 {
     class CollisionModelTestCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public CollisionModelTestCommand(GameCacheContext cacheContext)
+        public CollisionModelTestCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
                   
                   "CollisionModelTest",

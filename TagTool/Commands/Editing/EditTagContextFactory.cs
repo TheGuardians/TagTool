@@ -26,7 +26,7 @@ namespace TagTool.Commands.Editing
     {
         public static XmlDocument Documentation { get; } = new XmlDocument();
 
-        public static CommandContext Create(CommandContextStack contextStack, GameCacheContext cacheContext, CachedTagInstance tag)
+        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag)
         {
             var documentationPath = $"{new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName}\\TagTool.xml";
 

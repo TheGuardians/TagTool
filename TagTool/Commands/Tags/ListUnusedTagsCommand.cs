@@ -9,9 +9,9 @@ namespace TagTool.Commands.Tags
 {
     class ListUnusedTagsCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public ListUnusedTagsCommand(GameCacheContext cacheContext)
+        public ListUnusedTagsCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
 
                   "ListUnusedTags",

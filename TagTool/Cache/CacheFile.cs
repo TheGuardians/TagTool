@@ -12,7 +12,7 @@ namespace TagTool.Cache
 {
     public abstract class CacheFile
     {
-        public GameCacheContext CacheContext { get; set; }
+        public HaloOnlineCacheContext CacheContext { get; set; }
 
         public FileInfo File;
         public EndianReader Reader;
@@ -36,7 +36,6 @@ namespace TagTool.Cache
 
         public XmlNode BuildInfo => GetBuildNode(Build);
         public XmlNode VersionInfo => GetVersionNode(BuildInfo.Attributes["version"].Value);
-        public XmlNode VertexInfo => GetVertexNode(BuildInfo.Attributes["vertDef"].Value);
 
         public string LocalesKey => BuildInfo.Attributes["localesKey"].Value;
         public string StringsKey => BuildInfo.Attributes["stringsKey"].Value;
@@ -44,7 +43,7 @@ namespace TagTool.Cache
         public string NetworkKey => BuildInfo.Attributes["networkKey"].Value;
         public string StringMods => BuildInfo.Attributes["stringMods"].Value;
 
-        public CacheFile(GameCacheContext cacheContext, FileInfo file, CacheVersion version)
+        public CacheFile(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version)
         {
             CacheContext = cacheContext;
             File = file;

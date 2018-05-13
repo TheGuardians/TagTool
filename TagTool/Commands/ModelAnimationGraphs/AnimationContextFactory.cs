@@ -6,7 +6,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 {
     static class AnimationContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext info, CachedTagInstance tag, ModelAnimationGraph animation)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext info, CachedTagInstance tag, ModelAnimationGraph animation)
         {
             var groupName = info.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext info, CachedTagInstance tag, ModelAnimationGraph animation)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext info, CachedTagInstance tag, ModelAnimationGraph animation)
         {
             context.AddCommand(new GetResourceInfoCommand(info, tag, animation));
             context.AddCommand(new ResourceDataCommand(info, tag, animation));

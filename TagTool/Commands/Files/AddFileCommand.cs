@@ -10,11 +10,11 @@ namespace TagTool.Commands.Files
 {
     class AddFileCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private VFilesList Definition { get; }
 
-        public AddFileCommand(GameCacheContext cacheContext, CachedTagInstance tag, VFilesList definition) :
+        public AddFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition) :
             base(CommandFlags.Inherit,
                 
                 "AddFile",

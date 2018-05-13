@@ -69,7 +69,7 @@ namespace TagTool.Commands
             return results;
         }
 
-        public static CachedTagInstance ParseTagName(GameCacheContext info, string name)
+        public static CachedTagInstance ParseTagName(HaloOnlineCacheContext info, string name)
         {
             if (name.Length == 0 || !char.IsLetter(name[0]) || !name.Contains('.'))
                 throw new Exception($"Invalid tag name: {name}");
@@ -97,7 +97,7 @@ namespace TagTool.Commands
             return null;
         }
 
-        public static CachedTagInstance ParseTagSpecifier(GameCacheContext info, string arg)
+        public static CachedTagInstance ParseTagSpecifier(HaloOnlineCacheContext info, string arg)
         {
             if (arg.Length == 0 || !(arg == "*" || arg == "null" || char.IsLetter(arg[0]) || arg.StartsWith("0x")))
             {

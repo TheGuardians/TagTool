@@ -16,10 +16,10 @@ namespace TagTool.Commands.Porting
 {
     public class DumpBspGeometryCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public DumpBspGeometryCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public DumpBspGeometryCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "DumpBspGeometry",

@@ -48,7 +48,7 @@ namespace TagTool.ShaderGenerator
         }
 
 
-        public TerrainTemplateShaderGenerator(GameCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
+        public TerrainTemplateShaderGenerator(HaloOnlineCacheContext cacheContext, TemplateShaderGenerator.Drawmode drawmode, Int32[] args, Int32 arg_pos = 0) : base(
                 drawmode,
                 (Blending)GetNextTemplateArg(args, ref arg_pos),
                 (Environment_Map)GetNextTemplateArg(args, ref arg_pos),

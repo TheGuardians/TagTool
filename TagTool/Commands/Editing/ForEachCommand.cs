@@ -11,13 +11,13 @@ namespace TagTool.Commands.Editing
     class ForEachCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
 
-        public ForEachCommand(CommandContextStack contextStack, GameCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public ForEachCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
             : base(CommandFlags.Inherit,
 
                   "ForEach",

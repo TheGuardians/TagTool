@@ -8,11 +8,11 @@ namespace TagTool.Commands.RenderModels
 {
     class GetResourceInfoCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderModel Definition { get; }
 
-        public GetResourceInfoCommand(GameCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
+        public GetResourceInfoCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
             : base(CommandFlags.None,
 
                   "GetResourceInfo",

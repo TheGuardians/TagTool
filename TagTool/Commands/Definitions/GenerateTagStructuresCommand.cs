@@ -13,9 +13,9 @@ namespace TagTool.Commands.Definitions
 {
     class GenerateTagStructuresCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public GenerateTagStructuresCommand(GameCacheContext cacheFile) : base(
+        public GenerateTagStructuresCommand(HaloOnlineCacheContext cacheFile) : base(
             CommandFlags.Inherit,
 
             "GenerateTagStructures",

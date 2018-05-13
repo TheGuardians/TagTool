@@ -11,11 +11,11 @@ namespace TagTool.Commands.Bitmaps
 {
     class ExtractBitmapCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ExtractBitmapCommand(GameCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ExtractBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
             : base(CommandFlags.None,
 
                   "ExtractBitmap",

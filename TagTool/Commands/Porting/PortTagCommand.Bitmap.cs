@@ -248,12 +248,13 @@ namespace TagTool.Commands.Porting
                 texture.Format = imageData.Format;
                 texture.Curve = bitmap.Images[imageIndex].Curve;
                 texture.Flags = bitmap.Images[imageIndex].Flags;
-                
+
                 //
                 // Serialize the new resource definition
                 //
 
-                CacheContext.AddResource(resource, ResourceLocation.ResourcesB, dataStream);
+                resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(resource, dataStream);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             }
 

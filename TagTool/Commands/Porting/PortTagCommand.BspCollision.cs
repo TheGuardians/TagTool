@@ -594,7 +594,9 @@ namespace TagTool.Commands.Porting
                 edResourceStream.Position = 0;
 
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
-                CacheContext.AddResource(bsp.CollisionBspResource, ResourceLocation.ResourcesB, edResourceStream);
+
+                bsp.CollisionBspResource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(bsp.CollisionBspResource, edResourceStream);
             }
             
             return bsp.CollisionBspResource;

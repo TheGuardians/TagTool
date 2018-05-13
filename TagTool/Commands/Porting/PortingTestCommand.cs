@@ -16,10 +16,10 @@ namespace TagTool.Commands.Porting
 {
     public class PortingTestCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
 
-        public PortingTestCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public PortingTestCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "PortingTest",

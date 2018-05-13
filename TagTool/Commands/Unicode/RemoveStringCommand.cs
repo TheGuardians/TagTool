@@ -8,11 +8,11 @@ namespace TagTool.Commands.Unicode
 {
     class RemoveStringCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private MultilingualUnicodeStringList Definition { get; set; }
 
-        public RemoveStringCommand(GameCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList definition) :
+        public RemoveStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList definition) :
             base(CommandFlags.None,
                 
                 "RemoveString",

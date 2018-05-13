@@ -15,9 +15,9 @@ namespace TagTool.Commands.Tags
 {
 	class TestSimpleShadersCommand : Command
 	{
-		public GameCacheContext CacheContext { get; }
+		public HaloOnlineCacheContext CacheContext { get; }
 
-		public TestSimpleShadersCommand(GameCacheContext cacheContext)
+		public TestSimpleShadersCommand(HaloOnlineCacheContext cacheContext)
 			: base(CommandFlags.Inherit,
 
 				  "SimplifyShaders",

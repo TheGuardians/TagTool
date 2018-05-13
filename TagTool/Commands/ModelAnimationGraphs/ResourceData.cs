@@ -5,16 +5,17 @@ using TagTool.Commands;
 using TagTool.Tags.Definitions;
 using System.IO;
 using System.Linq;
+using TagTool.Common;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
     class ResourceDataCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private ModelAnimationGraph Definition { get; }
 
-        public ResourceDataCommand(GameCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
+        public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
             : base(CommandFlags.None,
 
                   "ResourceData",
@@ -57,7 +58,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             }
         }
 
-        private static bool ExtractResource(ModelAnimationGraph Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ExtractResource(ModelAnimationGraph Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
             int groupIndex = -1;
             if (!Int32.TryParse(args[0], out groupIndex))
@@ -92,9 +93,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
             return true;
         }
 
-        private static bool ImportResource(ModelAnimationGraph Definition, GameCacheContext CacheContext, IReadOnlyList<string> args)
+        private static bool ImportResource(ModelAnimationGraph Definition, HaloOnlineCacheContext CacheContext, IReadOnlyList<string> args)
         {
-            var resourceType = args[0].Split(".".ToCharArray()).First().ToLower();
+            var locationName = args[0].Split(".".ToCharArray()).First().ToLower();
 
             int index = -1;
             if (!Int32.TryParse(args[1], out index))
@@ -113,33 +114,45 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite))
             {
-                switch (resourceType)
+                var location = ResourceLocation.None;
+
+                switch (locationName)
                 {
                     case "textures":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.Textures, stream);
+                        location = ResourceLocation.Textures;
                         break;
+
                     case "textures_b":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.TexturesB, stream);
+                        location = ResourceLocation.TexturesB;
                         break;
+
                     case "resources":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.Resources, stream);
+                        location = ResourceLocation.Resources;
                         break;
+
                     case "resources_b":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.ResourcesB, stream);
+                        location = ResourceLocation.ResourcesB;
                         break;
+
                     case "audio":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.Audio, stream);
+                        location = ResourceLocation.Audio;
                         break;
+
                     case "lightmaps":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.Lightmaps, stream);
+                        location = ResourceLocation.Lightmaps;
                         break;
+
                     case "render_models":
-                        CacheContext.AddResource(Definition.ResourceGroups[index].Resource, TagTool.Common.ResourceLocation.RenderModels, stream);
+                        location = ResourceLocation.RenderModels;
                         break;
+
                     default:
-                        Console.WriteLine("ERROR: cache type.");
+                        Console.WriteLine($"ERROR: invalid resource location: {locationName}");
                         break;
                 }
+
+                Definition.ResourceGroups[index].Resource.ChangeLocation(location);
+                CacheContext.AddResource(Definition.ResourceGroups[index].Resource, stream);
 
                 Console.WriteLine($"New resource info: " +
                     $"Index 0x{Definition.ResourceGroups[index].Resource.Page.Index:X4}, " +

@@ -19,12 +19,12 @@ namespace TagTool.Commands.Files
 {
     class TestCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private static bool debugConsoleWrite = true;
         private static List<string> csvQueue1 = new List<string>();
         private static List<string> csvQueue2 = new List<string>();
 
-        public TestCommand(GameCacheContext cacheContext) :
+        public TestCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
                 
                 "Test",
@@ -354,7 +354,7 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        private static CachedTagInstance PortTagReference(GameCacheContext cacheContext, CacheFile blamCache, int index)
+        private static CachedTagInstance PortTagReference(HaloOnlineCacheContext cacheContext, CacheFile blamCache, int index)
         {
             if (index == -1)
                 return null;
@@ -1004,11 +1004,11 @@ namespace TagTool.Commands.Files
 
             csvQueue1 = new List<string>();
 
-            GameCacheContext CacheContext2 = null;
+            HaloOnlineCacheContext CacheContext2 = null;
 
             if (args[0].Contains(".dat"))
             {
-                CacheContext2 = new GameCacheContext(new FileInfo(args[0]).Directory);
+                CacheContext2 = new HaloOnlineCacheContext(new FileInfo(args[0]).Directory);
                 args.RemoveAt(0);
             }
             else
@@ -1073,7 +1073,7 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        public static void CompareBlocks(object leftData, object rightData, GameCacheContext CacheContext, GameCacheContext CacheContext2, String name)
+        public static void CompareBlocks(object leftData, object rightData, HaloOnlineCacheContext CacheContext, HaloOnlineCacheContext CacheContext2, String name)
         {
             var dumpMatch = false;
 

@@ -11,13 +11,13 @@ namespace TagTool.Commands.Editing
     class EditBlockCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
         
-        public EditBlockCommand(CommandContextStack contextStack, GameCacheContext cacheContext, CachedTagInstance tag, object value)
+        public EditBlockCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
             : base(CommandFlags.Inherit,
 
                   "EditBlock",

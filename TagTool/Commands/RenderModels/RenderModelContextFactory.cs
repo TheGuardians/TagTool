@@ -8,7 +8,7 @@ namespace TagTool.Commands.RenderModels
 {
     static class RenderModelContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext info, CachedTagInstance tag, RenderModel renderModel)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext info, CachedTagInstance tag, RenderModel renderModel)
         {
             var groupName = info.GetString(tag.Group.Name);
 
@@ -20,7 +20,7 @@ namespace TagTool.Commands.RenderModels
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, RenderModel renderModel)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel renderModel)
         {
             context.AddCommand(new SpecifyShadersCommand(cacheContext, tag, renderModel));
             context.AddCommand(new GetResourceInfoCommand(cacheContext, tag, renderModel));

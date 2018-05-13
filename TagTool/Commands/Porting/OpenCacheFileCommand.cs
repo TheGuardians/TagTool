@@ -10,9 +10,9 @@ namespace TagTool.Commands.Porting
     public class OpenCacheFileCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public OpenCacheFileCommand(CommandContextStack contextStack, GameCacheContext cacheContext)
+        public OpenCacheFileCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
 
                   "OpenCacheFile",

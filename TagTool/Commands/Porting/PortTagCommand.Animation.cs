@@ -402,7 +402,9 @@ namespace TagTool.Commands.Porting
                     edResourceStream.Position = 0;
 
                     CacheContext.Serializer.Serialize(new ResourceSerializationContext(group.Resource), resourceDefinition[resDefIndex]);
-                    CacheContext.AddResource(group.Resource, ResourceLocation.ResourcesB, edResourceStream);
+
+                    group.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                    CacheContext.AddResource(group.Resource, edResourceStream);
                 }
             }
 

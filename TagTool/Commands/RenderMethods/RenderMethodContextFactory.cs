@@ -6,7 +6,7 @@ namespace TagTool.Commands.RenderMethods
 {
     static class RenderMethodContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
         {
             var groupName = info.GetString(tag.Group.Name);
 
@@ -18,7 +18,7 @@ namespace TagTool.Commands.RenderMethods
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
         {
             context.AddCommand(new ListArgumentsCommand(info, tag, renderMethod));
             context.AddCommand(new SetArgumentCommand(info, tag, renderMethod));

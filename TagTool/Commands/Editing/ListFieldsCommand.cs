@@ -11,11 +11,11 @@ namespace TagTool.Commands.Editing
 {
     class ListFieldsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private TagStructureInfo Structure { get; }
         private object Value { get; }
         
-        public ListFieldsCommand(GameCacheContext cacheContext, TagStructureInfo structure, object value)
+        public ListFieldsCommand(HaloOnlineCacheContext cacheContext, TagStructureInfo structure, object value)
             : base(CommandFlags.Inherit,
 
                   "ListFields",

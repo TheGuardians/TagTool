@@ -31,9 +31,9 @@ namespace TagTool.Commands.Tags
             400, // shrine
         };
 
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public MatchTagsCommand(GameCacheContext cacheContext) : base(
+        public MatchTagsCommand(HaloOnlineCacheContext cacheContext) : base(
             CommandFlags.Inherit,
 
             "MatchTags",
@@ -56,13 +56,13 @@ namespace TagTool.Commands.Tags
             var outputPath = args[0];
 
             // Load each file and do version detection
-            var infos = new List<GameCacheContext>();
+            var infos = new List<HaloOnlineCacheContext>();
             foreach (var path in args.Skip(1))
             {
                 Console.WriteLine("Loading {0}...", path);
 
                 // Load the cache file
-                var cacheContext = new GameCacheContext(new FileInfo(path).Directory);
+                var cacheContext = new HaloOnlineCacheContext(new FileInfo(path).Directory);
                 infos.Add(cacheContext);
             }
 
@@ -221,7 +221,7 @@ namespace TagTool.Commands.Tags
             }
         }
 
-        private static List<QueuedTag> FindScenarios(GameCacheContext info, Stream stream)
+        private static List<QueuedTag> FindScenarios(HaloOnlineCacheContext info, Stream stream)
         {
             // Get a dictionary of scenarios by map ID
             var scenarios = new Dictionary<int, QueuedTag>();

@@ -14,10 +14,10 @@ namespace TagTool.Commands.Models
 {
     class ExtractModelCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private Model Definition { get; }
 
-        public ExtractModelCommand(GameCacheContext cacheContext, Model model)
+        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, Model model)
             : base(CommandFlags.Inherit,
 
                   "ExtractModel",

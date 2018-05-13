@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
 {
     public partial class PortTagCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache { get; }
         private RenderGeometryConverter GeometryConverter { get; }
 
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Porting
         private bool ConvertScripts = true;
         private bool NoSquads = false;
 
-        public PortTagCommand(GameCacheContext cacheContext, CacheFile blamCache) :
+        public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
 
                 "PortTag",

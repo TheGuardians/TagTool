@@ -6,9 +6,9 @@ namespace TagTool.Commands.Tags
 {
     class SaveTagNamesCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public SaveTagNamesCommand(GameCacheContext cacheContext) :
+        public SaveTagNamesCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
 
                 "SaveTagNames",

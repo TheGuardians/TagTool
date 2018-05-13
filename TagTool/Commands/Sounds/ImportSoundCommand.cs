@@ -14,11 +14,11 @@ namespace TagTool.Commands.Sounds
 {
     class ImportSoundCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Sound Definition { get; }
 
-        public ImportSoundCommand(GameCacheContext cacheContext, CachedTagInstance tag, Sound definition) :
+        public ImportSoundCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition) :
             base(CommandFlags.Inherit,
                 
                 "ImportSound",
@@ -84,7 +84,8 @@ namespace TagTool.Commands.Sounds
                 };
                 Definition.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
-                CacheContext.AddResource(Definition.Resource, ResourceLocation.ResourcesB, dataStream);
+                Definition.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(Definition.Resource, dataStream);
 
                 Definition.Resource.Resource.DefinitionData = new byte[20];
 

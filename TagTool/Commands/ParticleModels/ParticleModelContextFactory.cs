@@ -8,7 +8,7 @@ namespace TagTool.Commands.RenderModels
 {
     static class ParticleModelContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext info, CachedTagInstance tag, ParticleModel particleModel)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext info, CachedTagInstance tag, ParticleModel particleModel)
         {
             var groupName = info.GetString(tag.Group.Name);
 
@@ -20,7 +20,7 @@ namespace TagTool.Commands.RenderModels
             return context;
         }
 
-        public static void Populate(CommandContext context, GameCacheContext cacheContext, CachedTagInstance tag, ParticleModel particleModel)
+        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ParticleModel particleModel)
         {
             context.AddCommand(new DumpRenderGeometryCommand(cacheContext, particleModel.Geometry, "particle"));
         }

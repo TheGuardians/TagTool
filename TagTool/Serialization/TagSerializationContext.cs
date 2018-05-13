@@ -17,7 +17,7 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 4;
 
         private Stream Stream { get; }
-        private GameCacheContext Context { get; }
+        private HaloOnlineCacheContext Context { get; }
         private CachedTagData Data { get; set; }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace TagTool.Serialization
         /// <param name="stream">The stream to write to.</param>
         /// <param name="context">The game cache context.</param>
         /// <param name="tag">The tag to overwrite.</param>
-        public TagSerializationContext(Stream stream, GameCacheContext context, CachedTagInstance tag)
+        public TagSerializationContext(Stream stream, HaloOnlineCacheContext context, CachedTagInstance tag)
         {
             Stream = stream;
             Context = context;

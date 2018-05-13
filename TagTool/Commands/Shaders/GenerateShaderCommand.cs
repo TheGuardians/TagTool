@@ -16,13 +16,13 @@ namespace TagTool.Commands.Shaders
 {
     class GenerateShader<T> : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private T Definition { get; }
         public static bool IsVertexShader => typeof(T) == typeof(GlobalVertexShader) || typeof(T) == typeof(VertexShader);
         public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
-        public GenerateShader(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public GenerateShader(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, T definition) :
             base(CommandFlags.Inherit,
 
                 "Generate",

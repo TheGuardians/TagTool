@@ -673,7 +673,8 @@ namespace TagTool.Commands.Porting
                 };
                 sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
-                CacheContext.AddResource(sound.Resource, ResourceLocation.ResourcesB, dataStream);
+                sound.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(sound.Resource, dataStream);
 
                 for (int i = 0; i < 4; i++)
                 {

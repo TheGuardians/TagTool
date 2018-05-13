@@ -14,11 +14,11 @@ namespace TagTool.Commands.Editing
 {
     class PokeTagChangesCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private object Value { get; }
 
-        public PokeTagChangesCommand(GameCacheContext cacheContext, CachedTagInstance tag, object value)
+        public PokeTagChangesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
             : base(CommandFlags.Inherit,
 
                   "PokeTagChanges",

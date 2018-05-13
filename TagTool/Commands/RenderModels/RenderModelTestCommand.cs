@@ -14,9 +14,9 @@ namespace TagTool.Commands.RenderModels
 {
     class RenderModelTestCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public RenderModelTestCommand(GameCacheContext cacheContext)
+        public RenderModelTestCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "RenderModelTest",
@@ -322,7 +322,9 @@ namespace TagTool.Commands.RenderModels
             Console.Write("Writing render_geometry resource data...");
 
             resourceStream.Position = 0;
-            CacheContext.AddResource(renderModel.Geometry.Resource, resourceLocation, resourceStream);
+
+            renderModel.Geometry.Resource.ChangeLocation(resourceLocation);
+            CacheContext.AddResource(renderModel.Geometry.Resource, resourceStream);
 
             Console.WriteLine("done.");
 

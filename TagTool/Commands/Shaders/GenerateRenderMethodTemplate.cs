@@ -17,11 +17,11 @@ namespace TagTool.Commands.Shaders
 {
     class GenerateRenderMethodTemplate : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderMethodTemplate Definition { get; }
 
-        public GenerateRenderMethodTemplate(GameCacheContext cacheContext, CachedTagInstance tag, RenderMethodTemplate definition) :
+        public GenerateRenderMethodTemplate(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethodTemplate definition) :
             base(CommandFlags.Inherit,
 
                 "Generate",

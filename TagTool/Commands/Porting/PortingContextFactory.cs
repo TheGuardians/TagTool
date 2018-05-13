@@ -7,7 +7,7 @@ namespace TagTool.Commands.Porting
 {
     static class PortingContextFactory
     {
-        public static CommandContext Create(CommandContextStack contextStack, GameCacheContext cacheContext, CacheFile blamCache)
+        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             var context = new CommandContext(contextStack.Context, blamCache.Header.ScenarioPath);
 
@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting
             return context;
         }
 
-        public static CacheFileResourceGestalt LoadResourceGestalt(GameCacheContext cacheContext, CacheFile blamCache)
+        public static CacheFileResourceGestalt LoadResourceGestalt(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheFile.IndexItem blamTag = null;
 
@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             return blamCache.Deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
         }
 
-        public static SoundCacheFileGestalt LoadSoundGestalt(GameCacheContext cacheContext, CacheFile blamCache)
+        public static SoundCacheFileGestalt LoadSoundGestalt(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheFile.IndexItem blamTag = null;
 
@@ -62,7 +62,7 @@ namespace TagTool.Commands.Porting
             return ugh;
         }
 
-        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCacheContext cacheContext, CacheFile blamCache)
+        public static void Populate(CommandContextStack contextStack, CommandContext context, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             context.AddCommand(new EditTagCommand(contextStack, blamCache));
             context.AddCommand(new DumpBspGeometryCommand(cacheContext, blamCache));

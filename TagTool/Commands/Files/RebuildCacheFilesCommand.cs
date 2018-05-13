@@ -14,14 +14,14 @@ namespace TagTool.Commands.Files
 {
     class RebuildCacheFilesCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
         private Dictionary<int, CachedTagInstance> ConvertedTags { get; } = new Dictionary<int, CachedTagInstance>();
         private Dictionary<ResourceLocation, Dictionary<int, PageableResource>> CopiedResources { get; } = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
         private MultiplayerGlobals MulgDefinition { get; set; } = null;
         private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
         private bool NoVariants { get; set; } = false;
 
-        public RebuildCacheFilesCommand(GameCacheContext cacheContext)
+        public RebuildCacheFilesCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
 
                   "RebuildCacheFiles",
@@ -91,7 +91,7 @@ namespace TagTool.Commands.Files
                 destResourceCaches[location] = CacheContext.CreateResourceCache(destDirectory, location);
             }
 
-            var destCacheContext = new GameCacheContext(destDirectory);
+            var destCacheContext = new HaloOnlineCacheContext(destDirectory);
 
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
@@ -107,7 +107,7 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        private CachedTagInstance CopyTag(CachedTagInstance srcTag, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
             if (srcTag == null)
                 return null;
@@ -167,7 +167,7 @@ namespace TagTool.Commands.Files
             return destTag;
         }
 
-        private object CopyData(object data, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyData(object data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
             if (data == null)
                 return null;
@@ -195,7 +195,7 @@ namespace TagTool.Commands.Files
             return data;
         }
 
-        private Array CopyArray(Array array, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private Array CopyArray(Array array, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -210,7 +210,7 @@ namespace TagTool.Commands.Files
             return array;
         }
 
-        private object CopyList(object list, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyList(object list, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -230,7 +230,7 @@ namespace TagTool.Commands.Files
             return list;
         }
 
-        private object CopyStructure(object data, Type type, GameCacheContext srcCacheContext, Stream srcStream, GameCacheContext destCacheContext, Stream destStream)
+        private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
             var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, destCacheContext.Version));
 
@@ -244,7 +244,7 @@ namespace TagTool.Commands.Files
             return data;
         }
 
-        private PageableResource CopyResource(PageableResource resource, GameCacheContext srcCacheContext, GameCacheContext destCacheContext)
+        private PageableResource CopyResource(PageableResource resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
             if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
@@ -257,7 +257,9 @@ namespace TagTool.Commands.Files
                     return CopiedResources[location][index];
 
                 var data = srcCacheContext.ExtractRawResource(resource);
-                destCacheContext.AddRawResource(resource, location, data);
+
+                resource.ChangeLocation(location);
+                destCacheContext.AddRawResource(resource, data);
 
                 CopiedResources[location][index] = resource;
             }

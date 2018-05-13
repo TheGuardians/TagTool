@@ -11,11 +11,11 @@ namespace TagTool.Commands.Shaders
 {
     class DisassembleCommand<T> : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private T Definition { get; }
 
-        public DisassembleCommand(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public DisassembleCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, T definition) :
             base(CommandFlags.Inherit,
 
                 "Disassemble",

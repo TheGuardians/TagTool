@@ -7,9 +7,9 @@ namespace TagTool.Commands.Files
 {
     class RebuildStringIdsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public RebuildStringIdsCommand(GameCacheContext cacheContext) :
+        public RebuildStringIdsCommand(HaloOnlineCacheContext cacheContext) :
             base(CommandFlags.Inherit,
                 
                 "RebuildStringIds",

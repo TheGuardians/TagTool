@@ -8,7 +8,7 @@ namespace TagTool.Commands.ScenarioLightmaps
 {
     static class LightmapContextFactory
     {
-        public static CommandContext Create(CommandContext parent, GameCacheContext cacheContext, CachedTagInstance tag, ScenarioLightmapBspData Lbsp)
+        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioLightmapBspData Lbsp)
         {
             var groupName = cacheContext.GetString(tag.Group.Name);
 
@@ -20,7 +20,7 @@ namespace TagTool.Commands.ScenarioLightmaps
             return context;
         }
 
-        public static void Populate(CommandContext commandContext, GameCacheContext cacheContext, CachedTagInstance tag, ScenarioLightmapBspData Lbsp)
+        public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioLightmapBspData Lbsp)
         {
             commandContext.AddCommand(new DumpRenderGeometryCommand(cacheContext, Lbsp.Geometry, "Lightmap"));
         }

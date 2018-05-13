@@ -11,7 +11,7 @@ namespace TagTool.Shaders.Converters
 {
     class PixelDecalTemplatesConverter : SM3ShaderConverter
     {
-        public PixelDecalTemplatesConverter(SM3ExtShaderParser parser, GameCacheContext context, List<ShaderParameter> shader_parameters) : base(parser, context, shader_parameters)
+        public PixelDecalTemplatesConverter(SM3ExtShaderParser parser, HaloOnlineCacheContext context, List<ShaderParameter> shader_parameters) : base(parser, context, shader_parameters)
         {
         }
 

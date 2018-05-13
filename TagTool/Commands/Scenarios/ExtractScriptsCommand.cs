@@ -11,11 +11,11 @@ namespace TagTool.Commands.Scenarios
 {
     class ExtractScriptsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Scenario Definition { get; }
 
-        public ExtractScriptsCommand(GameCacheContext cacheContext, CachedTagInstance tag, Scenario definition)
+        public ExtractScriptsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario definition)
             : base(CommandFlags.Inherit,
 
                   "ExtractScripts",

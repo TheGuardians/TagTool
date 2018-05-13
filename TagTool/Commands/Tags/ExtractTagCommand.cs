@@ -8,9 +8,9 @@ namespace TagTool.Commands.Tags
 {
     class ExtractTagCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public ExtractTagCommand(GameCacheContext cacheContext)
+        public ExtractTagCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
 
                   "ExtractTag",

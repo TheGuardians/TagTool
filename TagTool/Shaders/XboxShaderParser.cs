@@ -27,16 +27,16 @@ namespace TagTool.Shaders
         public bool IsPixelShader => Block?.GetType() == typeof(PixelShaderBlock);
         public bool IsValid => !(CacheContext == null || Tag == null || Block == null || ShaderData == null || ShaderData.Length == 0);
 
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
         public object Block { get; set; }
         public object Tag { get; set; }
 
-        public XboxShaderParser(VertexShader tag, VertexShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
-        public XboxShaderParser(PixelShader tag, PixelShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
-        public XboxShaderParser(GlobalVertexShader tag, VertexShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
-        public XboxShaderParser(GlobalPixelShader tag, PixelShaderBlock block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
-        public XboxShaderParser(object tag, object block, GameCacheContext gamecachecontext, UPDBParser updb_parser = null)
+        public XboxShaderParser(VertexShader tag, VertexShaderBlock block, HaloOnlineCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
+        public XboxShaderParser(PixelShader tag, PixelShaderBlock block, HaloOnlineCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
+        public XboxShaderParser(GlobalVertexShader tag, VertexShaderBlock block, HaloOnlineCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
+        public XboxShaderParser(GlobalPixelShader tag, PixelShaderBlock block, HaloOnlineCacheContext gamecachecontext, UPDBParser updb_parser = null) : this((object)tag, (object)block, gamecachecontext, updb_parser) { }
+        public XboxShaderParser(object tag, object block, HaloOnlineCacheContext gamecachecontext, UPDBParser updb_parser = null)
         {
             CacheContext = gamecachecontext;
             Block = block;

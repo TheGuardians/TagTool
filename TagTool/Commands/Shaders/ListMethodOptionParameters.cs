@@ -12,11 +12,11 @@ namespace TagTool.Commands.Shaders
 {
     class ListMethodOptionParameters : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private RenderMethodDefinition Definition { get; }
 
-        public ListMethodOptionParameters(GameCacheContext cacheContext, CachedTagInstance tag, RenderMethodDefinition definition) :
+        public ListMethodOptionParameters(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethodDefinition definition) :
             base(CommandFlags.Inherit,
 
                 "ListMethodOptionParameters",

@@ -12,10 +12,10 @@ namespace TagTool.Commands.Geometry
 {
     class DumpRenderGeometryCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private RenderGeometry Geometry { get; }
 
-        public DumpRenderGeometryCommand(GameCacheContext cacheContext, RenderGeometry geometry, string title = "") :
+        public DumpRenderGeometryCommand(HaloOnlineCacheContext cacheContext, RenderGeometry geometry, string title = "") :
             base(CommandFlags.Inherit,
 
                 $"Dump{title}RenderGeometry",

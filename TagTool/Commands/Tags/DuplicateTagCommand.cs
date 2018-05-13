@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class DuplicateTagCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
 
-        public DuplicateTagCommand(GameCacheContext cacheContext)
+        public DuplicateTagCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.None,
                   
                   "DuplicateTag",

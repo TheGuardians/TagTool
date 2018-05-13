@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class NameTagCommand : Command
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
 
-        public NameTagCommand(GameCacheContext cacheContext)
+        public NameTagCommand(HaloOnlineCacheContext cacheContext)
             : base(CommandFlags.Inherit,
                   
                   "NameTag",

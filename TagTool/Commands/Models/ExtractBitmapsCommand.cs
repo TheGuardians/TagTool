@@ -12,11 +12,11 @@ namespace TagTool.Commands.Models
 {
     class ExtractBitmapsCommand : Command
     {
-        private GameCacheContext CacheContext { get; }
+        private HaloOnlineCacheContext CacheContext { get; }
         private CachedTagInstance Tag { get; }
         private Model Definition { get; }
 
-        public ExtractBitmapsCommand(GameCacheContext cacheContext, CachedTagInstance tag, Model definition)
+        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Model definition)
             : base(CommandFlags.Inherit,
                   
                   "ExtractBitmaps",
