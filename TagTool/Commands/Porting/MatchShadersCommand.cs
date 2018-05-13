@@ -619,8 +619,8 @@ namespace TagTool.Commands.Porting
                         {
                             var a = edShader.ShaderProperties[0].Arguments[edBitmI];
                             var b = h3Shader.ShaderProperties[0].Arguments[blamBitmI];
-                            WriteLine($"ED:{edBitmapName} {a.Arg1}, {a.Arg2}, {a.Arg3}, {a.Arg4}");
-                            WriteLine($"H3:{blamBitmapName} {b.Arg1}, {b.Arg2}, {b.Arg3}, {b.Arg4}");
+                            WriteLine($"ED:{edBitmapName} {a.Values[0]}, {a.Values[1]}, {a.Values[2]}, {a.Values[3]}");
+                            WriteLine($"H3:{blamBitmapName} {b.Values[0]}, {b.Values[1]}, {b.Values[2]}, {b.Values[3]}");
                         }
                     }
                 }
@@ -1193,10 +1193,10 @@ namespace TagTool.Commands.Porting
                 if (!h3Arguments.Contains(edArg))
                 {
                     var a = DefaultArgument(edArguments[edArgIndex]);
-                    edProperty.Arguments[edArgIndex].Arg1 = a.Alpha;
-                    edProperty.Arguments[edArgIndex].Arg2 = a.Red;
-                    edProperty.Arguments[edArgIndex].Arg3 = a.Green;
-                    edProperty.Arguments[edArgIndex].Arg4 = a.Blue;
+                    edProperty.Arguments[edArgIndex].Values[0] = a.Alpha;
+                    edProperty.Arguments[edArgIndex].Values[1] = a.Red;
+                    edProperty.Arguments[edArgIndex].Values[2] = a.Green;
+                    edProperty.Arguments[edArgIndex].Values[3] = a.Blue;
                 }
             }
 
@@ -1240,10 +1240,10 @@ namespace TagTool.Commands.Porting
                     i++;
                     if (a.Key == b)
                     {
-                        edProperty.Arguments[i].Arg1 = a.Value[0];
-                        edProperty.Arguments[i].Arg2 = a.Value[1];
-                        edProperty.Arguments[i].Arg3 = a.Value[2];
-                        edProperty.Arguments[i].Arg4 = a.Value[3];
+                        edProperty.Arguments[i].Values[0] = a.Value[0];
+                        edProperty.Arguments[i].Values[1] = a.Value[1];
+                        edProperty.Arguments[i].Values[2] = a.Value[2];
+                        edProperty.Arguments[i].Values[3] = a.Value[3];
                         break;
                     }
                 }
@@ -1786,15 +1786,7 @@ namespace TagTool.Commands.Porting
             Bitmap = 0,
             Parameter = 1
         }
-
-        public class ArgumentItem
-        {
-            public float Arg1 = 0.0f;
-            public float Arg2 = 0.0f;
-            public float Arg3 = 0.0f;
-            public float Arg4 = 0.0f;
-        }
-
+        
         [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp")]
         public class ScenarioStructureBspMaterials // used to deserialize as fast as possible
         {

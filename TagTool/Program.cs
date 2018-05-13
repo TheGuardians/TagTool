@@ -104,6 +104,12 @@ namespace TagTool.Commands
                     continue;
                 }
 
+                if (commandArgs[0].ToLower() == "cyka")
+                {
+                    Console.WriteLine("blyat!");
+                    continue;
+                }
+
                 // Handle redirection
                 var oldOut = Console.Out;
                 StreamWriter redirectWriter = null;

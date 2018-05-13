@@ -102,10 +102,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10)]
             public class Argument
             {
-                public float Arg1;
-                public float Arg2;
-                public float Arg3;
-                public float Arg4;
+                [TagField(Length = 4)]
+                public float[] Values;
             }
 
             [TagStructure(Size = 0x4)]

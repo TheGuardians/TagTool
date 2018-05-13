@@ -300,6 +300,7 @@
     <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
     <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
+    <Compile Include="Commands\RenderMethods\SetArgumentCommand.cs" />
     <Compile Include="Commands\RenderMethods\SpecifyBitmapsCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\RenderModels\ExtractModelCommand.cs" />

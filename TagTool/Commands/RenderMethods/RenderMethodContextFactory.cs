@@ -21,6 +21,7 @@ namespace TagTool.Commands.RenderMethods
         public static void Populate(CommandContext context, GameCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
         {
             context.AddCommand(new ListArgumentsCommand(info, tag, renderMethod));
+            context.AddCommand(new SetArgumentCommand(info, tag, renderMethod));
             context.AddCommand(new ListBitmapsCommand(info, tag, renderMethod));
             context.AddCommand(new SpecifyBitmapsCommand(info, tag, renderMethod));
         }

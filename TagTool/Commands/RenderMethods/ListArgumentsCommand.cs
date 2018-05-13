@@ -46,11 +46,7 @@ namespace TagTool.Commands.RenderMethods
                     Console.WriteLine("");
 
                     var argumentName = CacheContext.GetString(template.Arguments[i].Name);
-                    var argumentValue = new RealQuaternion(
-                        property.Arguments[i].Arg1,
-                        property.Arguments[i].Arg2,
-                        property.Arguments[i].Arg3,
-                        property.Arguments[i].Arg4);
+                    var argumentValue = new RealQuaternion(property.Arguments[i].Values);
 
                     Console.WriteLine(string.Format("{0}:", argumentName));
 

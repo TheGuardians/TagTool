@@ -873,10 +873,7 @@ namespace TagTool.Commands.Porting
                 default: val = new float[] { 0, 0, 0, 0 }; break;
             }
 
-            res.Arg1 = val[0];
-            res.Arg2 = val[1];
-            res.Arg3 = val[2];
-            res.Arg4 = val[3];
+            res.Values = val;
 
             return res;
         }

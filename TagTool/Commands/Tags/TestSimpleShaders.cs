@@ -76,11 +76,8 @@ namespace TagTool.Commands.Tags
 						tagContext = new TagSerializationContext(tagsStream, CacheContext, tag);
 						rmtr = CacheContext.Deserializer.Deserialize<ShaderTerrain>(tagContext);
 
-						// setup or color from above into the albedo_color arguments of our new rmsh
-						rmtr.ShaderProperties[0].Arguments[2].Arg1 = color[0];
-						rmtr.ShaderProperties[0].Arguments[2].Arg2 = color[1];
-						rmtr.ShaderProperties[0].Arguments[2].Arg3 = color[2];
-						rmtr.ShaderProperties[0].Arguments[2].Arg4 = color[3];
+                        // setup or color from above into the albedo_color arguments of our new rmsh
+                        rmtr.ShaderProperties[0].Arguments[2].Values = color;
 
 						// serialize our rmsh
 						CacheContext.Serialize(tagContext, rmtr);
