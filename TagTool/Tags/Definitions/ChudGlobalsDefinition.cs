@@ -60,7 +60,7 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown13;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public float Unknownundefined;
+		public float Unknown13_2;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown14;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -124,17 +124,7 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public TagFunction Unknown44;
 
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float SprintFOVMultiplier;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float SprintFOVTransitionInTime;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float SprintFOXTransitionOutTime;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public CachedTagInstance ParallaxData;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float Unknown49;
-
+        //ODST VALUES
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public float Unknown50;
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -147,43 +137,54 @@ namespace TagTool.Tags.Definitions
 		public float Unknown54;
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public float Unknown55;
-
-		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public TagFunction Unknown56;
-		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public TagFunction Unknown57;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        public CachedTagInstance Unknown58;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        public float Unknown59;
 
-		[TagField(MaxVersion = CacheVersion.Halo3ODST)]
-		public CachedTagInstance Unknown58;
-		[TagField(MaxVersion = CacheVersion.Halo3ODST)]
-		public float Unknown59;
-
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public TagFunction Unknown60;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        //HO VALUES
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float SprintFOVMultiplier;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float SprintFOVTransitionInTime;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float SprintFOXTransitionOutTime;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public CachedTagInstance ParallaxData;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float Unknown49;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown60;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown61;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown62;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown63;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown64;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public TagFunction Unknown65;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+		public TagFunction Unknown62;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown63;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float Unknown64;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown65;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown66;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown67;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown68;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public CachedTagInstance Unknown69;
+		public TagFunction Unknown69;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float Unknown70;
+		public CachedTagInstance Unknown70;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown71;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown72;
+		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+		public float Unknown73;
 
 		[TagStructure(Size = 0x208, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x23C, MaxVersion = CacheVersion.Halo3ODST)]
@@ -286,30 +287,23 @@ namespace TagTool.Tags.Definitions
 			public CachedTagInstance DamageMicrotexture;
 			public CachedTagInstance DamageNoise;
 			public CachedTagInstance DirectionalArrow;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public CachedTagInstance GrenadeWaypoint;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public CachedTagInstance PinkGradient;
 
-			[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-			public float Unknown2;
-			[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-			public int Unknown3;
-			[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-			public int Unknown4;
-
+			[TagField(MinVersion = CacheVersion.Halo3ODST)]
+			public float Unknown7;
+			[TagField(MinVersion = CacheVersion.Halo3ODST)]
+			public float Unknown8;
+			[TagField(MinVersion = CacheVersion.Halo3ODST)]
+			public float Unknown9;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance GrenadeWaypoint;
+			public float Unknown10;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance PinkGradient;
+			public float Unknown11;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown7;
-			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown8;
-			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown9;
-			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown10;
-			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown11;
-			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public int Unknown12;
+			public float Unknown12;
 
 			public CachedTagInstance ObjectiveWaypoints;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -453,6 +447,8 @@ namespace TagTool.Tags.Definitions
 				public float PickupDialogScale;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public RealPoint2d PickupDialogOffset;
+
+                //these only exist in HO
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown23;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -463,7 +459,6 @@ namespace TagTool.Tags.Definitions
 				public float Unknown26;
 
 				//From here, fields have been moved around a bit.
-
 				[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 				public float NotificationOffsetX_H3;
 				[TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -472,13 +467,11 @@ namespace TagTool.Tags.Definitions
 				public float StateLeftRightOffsetY_H3;
 
 				public float StateCenterOffsetY;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public float Unknown27;
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
 				public float Unknown28;
 				public float Unknown29;
-				public float Unknown30;
+				public float StateScale;
 
+                //HO ONLY
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown31;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -490,36 +483,31 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float Unknown35;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-                public float StateScale; //This may be an unknown in H:O. Perhaps unknown20.
-
                 public float NotificationScale;
 				public float NotificationLineSpacing;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                public RealPoint2d PromptOffset;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public float Unknown35_2;
 
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown36;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float NotificationOffsetX_HO;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float NotificationOffsetY_HO;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown38;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown39;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public float Unknown40;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+				public float Unknown36;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public float Unknown37;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public float Unknown38;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float Unknown39;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float Unknown40;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float Unknown41;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float Unknown42;
-
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown43;
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown44;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public RealPoint2d PromptOffset; //Might not actually be prompt offset in Halo Online, not sure.
 
                 [Flags]
                 public enum ResolutionFlagValue : int
@@ -532,7 +520,7 @@ namespace TagTool.Tags.Definitions
                     WideQuarter = 1 << 4,
                     StandardHalf = 1 << 5,
                     Bite6 = 1 << 6,
-                    StandardQuater = 1 << 7,
+                    StandardQuarter = 1 << 7,
                     Bit8 = 1 << 8,
                     Bit9 = 1 << 9,
                     Bit10 = 1 << 10,

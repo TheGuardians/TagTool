@@ -257,23 +257,22 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
                         H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
-                        H3att.WarpAngle = Angle.FromDegrees(5.7f);
+                        H3att.WarpAngle = Angle.FromDegrees(1.0f);
                     }
                     
                     //more fixups
-                    H3att.ResolutionWidth = 1920;
-                    H3att.ResolutionHeight = 1080;
+                    H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
+                    H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
                     H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
                     H3att.MotionSensorOffset.Y = (float)Math.Floor((double)(1.5f * H3att.MotionSensorOffset.Y));
-                    H3att.MotionSensorRadius = 1.5f * H3att.MotionSensorRadius;
-                    H3att.MotionSensorScale = 1.5f * H3att.MotionSensorScale;
+                    H3att.MotionSensorRadius *= 1.5f;
+                    H3att.MotionSensorScale *= 1.5f;
                     H3att.HorizontalScale = 1.0f;
                     H3att.VerticalScale = 1.0f;
                     H3att.PickupDialogOffset.Y = 0.3f;
                     H3att.PickupDialogScale = 1.2f;
-                    H3att.NotificationScale = 1.2f;
-                    H3att.NotificationLineSpacing = 30.0f;
-                    H3att.NotificationOffsetY_HO = 0.65f;
+                    H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
+                    H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
 
                     //loop through unset fields and set them to HO values
                     foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal.HudAttribute).GetFields())
