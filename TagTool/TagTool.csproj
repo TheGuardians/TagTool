@@ -1014,9 +1014,6 @@
     <Content Include="Tools\vsa.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tools\xsd.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\Builds.xml" />
     <None Include="Resources\Classes_H1.xml" />
     <None Include="Resources\Classes_H2.xml" />
