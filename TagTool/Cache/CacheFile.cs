@@ -181,6 +181,9 @@ namespace TagTool.Cache
 
             public string GetString(StringId stringId)
             {
+                if (Cache.Version < CacheVersion.Halo3Retail)
+                    return GetItemByID((int)stringId.Value);
+
                 var index = Cache.Resolver.StringIDToIndex(stringId);
 
                 return this[index];

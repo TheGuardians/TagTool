@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Geometry;
 using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -22,6 +23,8 @@ namespace TagTool.Commands.Porting
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
                 {
+                    var dataContext = new DataSerializationContext(reader);
+                    var mesh = BlamCache.Deserializer.Deserialize<Mesh>(dataContext);
                     // TODO: Read and convert resource data here.
                 }
             }
