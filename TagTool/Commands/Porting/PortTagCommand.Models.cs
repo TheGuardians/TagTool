@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -15,22 +16,45 @@ namespace TagTool.Commands.Porting
     {
         private object ConvertGen2RenderModel(RenderModel mode)
         {
-            // TODO: Do not use RenderModelBuilder. Kill it. Kill it with fire.
-            var builder = new RenderModelBuilder(CacheContext.Version);
+            mode.Geometry = new RenderGeometry
+            {
+                Meshes = new List<Mesh>()
+            };
 
             foreach (var section in mode.Sections)
             {
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
+                using (var writer = new EndianWriter(stream, BlamCache.Reader.Format))
                 {
+                    foreach (var resource in section.Resources)
+                    {
+                        stream.Position = resource.FieldOffset;
+
+                        switch (resource.Type)
+                        {
+                            case ResourceTypeGen2.TagBlock:
+                                writer.Write(resource.ResoureDataSize / resource.SecondaryLocator);
+                                writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
+                                break;
+
+                            case ResourceTypeGen2.TagData:
+                                writer.Write(resource.ResoureDataSize);
+                                writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
+                                break;
+
+                            case ResourceTypeGen2.VertexBuffer:
+                                // TODO: Load vertex data
+                                break;
+                        }
+                    }
+                    
+                    stream.Position = 0;
                     var dataContext = new DataSerializationContext(reader);
-                    var mesh = BlamCache.Deserializer.Deserialize<Mesh>(dataContext);
-                    // TODO: Read and convert resource data here.
+                    mode.Geometry.Meshes.Add(BlamCache.Deserializer.Deserialize<Mesh>(dataContext));
                 }
             }
-
-            var result = builder.Build(CacheContext.Serializer, null);
-
+            
             // TODO: Set up modifications to the 'mode' variable before returning it.
             return mode;
         }
