@@ -120,7 +120,7 @@ namespace TagTool.Commands.Porting
                     //fixup for waypoint light
                     if (widgetname.Contains("waypoint_light") && BlamCache.Version == CacheVersion.Halo3ODST)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].RenderData[0].Input_HO = ChudDefinition.HudWidget.RenderDatum.InputValue_HO.UnitHealth;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].Input_HO = ChudDefinition.HudWidget.RenderDatum.InputValue_HO.UnitHealth;
                     }
 
                     //fixup for widgets without global placement data
