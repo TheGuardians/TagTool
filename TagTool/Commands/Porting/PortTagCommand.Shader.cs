@@ -952,35 +952,16 @@ namespace TagTool.Commands.Porting
         
         private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
         {
-            // Find existing rmt2 tags
-            // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
-            var edRmt2Instances = new List<CachedTagInstance>();
-            CachedTagInstance edRmt2Instance = null;
+			// Find existing rmt2 tags
+			// If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
+			foreach (var rmt2Tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
+				if (CacheContext.TagNames.ContainsKey(rmt2Tag.Index))
+					if (CacheContext.TagNames[rmt2Tag.Index].StartsWith(bmRmt2Instance.Filename))
+						return rmt2Tag;
 
-            foreach (var a in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                if (CacheContext.TagNames.ContainsKey(a.Index))
-                    if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}")
-                        edRmt2Instances.Add(a);
-
-            if (edRmt2Instances.Count == 0)
-                foreach (var a in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                    if (CacheContext.TagNames.ContainsKey(a.Index))
-                        if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}_0") // legacy
-                            edRmt2Instances.Add(a);
-
-            if (edRmt2Instances.Count == 0)
-                foreach (var a in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                    if (CacheContext.TagNames.ContainsKey(a.Index))
-                        if (CacheContext.TagNames[a.Index] == $"{bmRmt2Instance.Filename}_0_0") // legacy
-                            edRmt2Instances.Add(a);
-
-            if (edRmt2Instances.Count == 0) // if no tagname matches, find rmt2 tags based on the most common values in the name
-                edRmt2Instance = FindEquivalentRmt2(bmRmt2Instance, bmRmt2);
-            else
-                edRmt2Instance = edRmt2Instances.First();
-
-            return edRmt2Instance;
-        }
+			// if no tagname matches, find rmt2 tags based on the most common values in the name
+			return FindEquivalentRmt2(bmRmt2Instance, bmRmt2);
+		}
 
         public bool NameRmt2()
         {
@@ -1363,7 +1344,6 @@ namespace TagTool.Commands.Porting
 
             return finalRm;
         }
-
     }
 }
 
