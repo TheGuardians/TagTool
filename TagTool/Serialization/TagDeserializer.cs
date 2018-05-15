@@ -360,7 +360,7 @@ namespace TagTool.Serialization
         public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
             if (valueInfo == null || !valueInfo.Short)
-                reader.BaseStream.Position += 0xC; // Skip the class name and zero bytes, it's not important
+                reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
             
             var result = context.GetTagByIndex(reader.ReadInt32());
 

@@ -239,11 +239,14 @@ namespace TagTool.Tags.Definitions
             public List<ResourceGen2> Resources;
 
             [TagField(Short = true)]
-            public CachedTagInstance Model;
+            public CachedTagInstance Original;
 
             public short OwnerTagSectionOffset;
-            public short Unknown4;
-            public uint Unknown5;
+            public byte RuntimeLinked;
+            public byte RuntimeLoaded;
+
+            [TagField(Short = true)]
+            public CachedTagInstance Runtime;
         }
 
         [TagStructure(Size = 0xC)]

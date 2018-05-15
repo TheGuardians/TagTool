@@ -19,61 +19,47 @@ namespace TagTool.Cache
         
         new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
-            public CacheIndexHeader(CacheFile Cache)
+            public CacheIndexHeader(CacheFile cache)
             {
-                cache = Cache;
-                var Reader = cache.Reader;
+                var reader = cache.Reader;
+                
+                reader.SeekTo(cache.Header.TagIndexOffset);
 
-                #region Read Values
-                XmlNode indexHeaderNode = cache.VersionInfo.ChildNodes[1];
+                TagGroupsOffset = reader.ReadInt32();
+                cache.Header.Magic = TagGroupsOffset - (cache.Header.TagIndexOffset + 32);
+                TagGroupCount = reader.ReadInt32();
+                TagsOffset = reader.ReadInt32() - cache.Header.Magic;
+                ScenarioHandle = reader.ReadUInt32();
+                GlobalsHandle = reader.ReadUInt32();
+                CRC = reader.ReadInt32();
+                TagCount = reader.ReadInt32();
+                reader.ReadTag(); // 'tags'
 
-                Reader.SeekTo(cache.Header.TagIndexAddress);
-                cache.Header.Magic = (int)(Reader.ReadUInt32() - (cache.Header.TagIndexAddress + 32));
-
-                XmlAttribute attr = indexHeaderNode.Attributes["tagClassCount"];
-                int offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagClassCount = Reader.ReadInt32();
-
-                attr = indexHeaderNode.Attributes["tagInfoOffset"];
-                offset = int.Parse(attr.Value);
-                Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoOffset = Reader.ReadInt32() - cache.Header.Magic;
-
-                tagClassCount = Reader.ReadInt32();
-                tagInfoOffset = Reader.ReadInt32() - cache.Header.Magic;
-
-                Reader.SeekTo(tagInfoOffset + 8);
-                cache.Magic = (int)(Reader.ReadUInt32() - (cache.Header.TagIndexAddress + cache.Header.MemoryBufferSize));
-
-                Reader.SeekTo(cache.Header.TagIndexAddress + 24);
-                tagCount = Reader.ReadInt32();
-                #endregion
+                reader.SeekTo(TagsOffset + 8);
+                cache.Magic = reader.ReadInt32() - (cache.Header.TagIndexOffset + cache.Header.MemoryBufferOffset);
             }
         }
 
         new public class IndexTable : CacheFile.IndexTable
         {
-            public IndexTable(CacheFile Cache)
+            public IndexTable(CacheFile cache)
             {
-                cache = Cache;
-
                 var IH = cache.IndexHeader;
                 var CH = cache.Header;
-                var Reader = cache.Reader;
+                var reader = cache.Reader;
 
                 ClassList = new List<TagClass>();
-
-                #region Read Tags' Info
+                
                 var classDic = new Dictionary<string, int>();
-                int[] sbspOffset = new int[0];
-                int[] sbspMagic = new int[0];
-                int[] sbspID = new int[0];
 
-                Reader.SeekTo(IH.tagInfoOffset);
-                for (int i = 0; i < IH.tagCount; i++)
+                var sbspOffset = new int[0];
+                var sbspMagic = new int[0];
+                var sbspID = new int[0];
+
+                reader.SeekTo(IH.TagsOffset);
+                for (int i = 0; i < IH.TagCount; i++)
                 {
-                    var cname = Reader.ReadString(4);
+                    var cname = reader.ReadString(4);
                     var tname = cname.ToCharArray();
                     Array.Reverse(tname);
                     cname = new string(tname);
@@ -84,20 +70,24 @@ namespace TagTool.Cache
                         classDic.Add(cname, classDic.Count);
                     }
 
-                    IndexItem item = new IndexItem() { Cache = cache };
-                    item.ClassIndex = index;
-                    item.ID = Reader.ReadInt32();
-                    item.Offset = Reader.ReadInt32() - cache.Magic;
-                    Reader.ReadInt32(); //meta size
-                    this.Add(item);
-
+                    var item = new IndexItem
+                    {
+                        Cache = cache,
+                        ClassIndex = index,
+                        ID = reader.ReadInt32(),
+                        Offset = reader.ReadInt32() - cache.Magic,
+                        Size = reader.ReadInt32()
+                    };
+                    
+                    Add(item);
+                    
                     if (cname == "scnr")
                     {
-                        long tempOffset = Reader.Position;
+                        long tempOffset = reader.Position;
 
-                        Reader.SeekTo(item.Offset + 528);
-                        int jCount = Reader.ReadInt32();
-                        int jOffset = Reader.ReadInt32() - cache.Magic;
+                        reader.SeekTo(item.Offset + 528);
+                        int jCount = reader.ReadInt32();
+                        int jOffset = reader.ReadInt32() - cache.Magic;
 
                         sbspOffset = new int[jCount];
                         sbspMagic = new int[jCount];
@@ -105,39 +95,32 @@ namespace TagTool.Cache
 
                         for (int j = 0; j < jCount; j++)
                         {
-                            Reader.SeekTo(jOffset + j * 68);
-                            sbspOffset[j] = Reader.ReadInt32();
-                            Reader.ReadInt32();
-                            sbspMagic[j] = Reader.ReadInt32() - sbspOffset[j];
-                            Reader.SeekTo(jOffset + j * 68 + 20);
-                            sbspID[j] = Reader.ReadInt32();
+                            reader.SeekTo(jOffset + j * 68);
+                            sbspOffset[j] = reader.ReadInt32();
+                            reader.ReadInt32();
+                            sbspMagic[j] = reader.ReadInt32() - sbspOffset[j];
+                            reader.SeekTo(jOffset + j * 68 + 20);
+                            sbspID[j] = reader.ReadInt32();
                         }
-                        Reader.SeekTo(tempOffset);
-                    }
-                }
 
-                for (int i = 0; i < sbspID.Length; i++)
-                {
-                    var tag = GetItemByID(sbspID[i]);
-                    tag.Offset = sbspOffset[i];
-                    tag.Magic = sbspMagic[i];
+                        reader.SeekTo(tempOffset);
+                    }
                 }
 
                 foreach (var pair in classDic)
                     ClassList.Add(new TagClass() { ClassCode = pair.Key });
-                #endregion
 
                 #region Read Indices
 
-                Reader.SeekTo(CH.TagNamesIndicesOffset);
-                var offsets = new int[IH.tagCount];
-                for (int i = 0; i < IH.tagCount; i++)
-                    offsets[i] = Reader.ReadInt32();
+                reader.SeekTo(CH.TagNamesIndicesOffset);
+                var offsets = new int[IH.TagCount];
+                for (int i = 0; i < IH.TagCount; i++)
+                    offsets[i] = reader.ReadInt32();
 
                 #endregion
 
                 #region Read Names
-                Reader.StreamOrigin = CH.TagNamesBufferOffset;
+                reader.StreamOrigin = CH.TagNamesBufferOffset;
 
                 for (int i = 0; i < offsets.Length; i++)
                 {
@@ -146,16 +129,16 @@ namespace TagTool.Cache
                     if (offsets[i] == -1)
                         continue;
 
-                    Reader.SeekTo(offsets[i]);
+                    reader.SeekTo(offsets[i]);
 
                     var name = "";
-                    for (char c; (c = Reader.ReadChar()) != '\0'; name += c) ;
+                    for (char c; (c = reader.ReadChar()) != '\0'; name += c) ;
 
                     if (name.Length > 0)
                         this[i].Filename = name;
                 }
 
-                Reader.StreamOrigin = 0;
+                reader.StreamOrigin = 0;
                 #endregion
             }
         }

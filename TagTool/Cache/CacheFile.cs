@@ -6,6 +6,7 @@ using System.Xml;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
@@ -62,15 +63,17 @@ namespace TagTool.Cache
         
         public class CacheIndexHeader
         {
-            public int tagClassCount;
-            public int tagClassIndexOffset;
-            public int tagCount;
-            public int tagInfoOffset;
-            public int tagInfoHeaderCount;
-            public int tagInfoHeaderOffset;
-            public int tagInfoHeaderCount2;
-            public int tagInfoHeaderOffset2;
-            protected CacheFile cache;
+            public int TagGroupsOffset;
+            public int TagGroupCount;
+            public int TagsOffset;
+            public uint ScenarioHandle;
+            public uint GlobalsHandle;
+            public int CRC;
+            public int TagCount;
+            public int TagInfoHeaderCount;
+            public int TagInfoHeaderOffset;
+            public int TagInfoHeaderCount2;
+            public int TagInfoHeaderOffset2;
         }
 
         public class StringTable : List<string>
@@ -293,18 +296,34 @@ namespace TagTool.Cache
                 (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].ClassCode;
 
             public string ClassName =>
-                Cache.Strings.GetItemByID(Cache.IndexItems.ClassList[ClassIndex].StringID);
+                Cache.Version < CacheVersion.Halo3Retail ?
+                    GetGen2GroupName(new Tag(ClassCode)) :
+                    Cache.Strings.GetItemByID(Cache.IndexItems.ClassList[ClassIndex].StringID);
 
             public string ParentClass =>
                 (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].Parent;
 
             public string ParentClass2 =>
                 (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].Parent2;
+            
+            private string GetGen2GroupName(Tag groupTag)
+            {
+                if (!TagDefinition.Types.ContainsKey(groupTag))
+                {
+                    Console.WriteLine($"WARNING: Tag definition not found for group tag '{groupTag}'");
+                    return "<unknown>";
+                }
+
+                var structure = TagDefinition.Types[groupTag].GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute;
+
+                return structure.Name;
+            }
 
             public string Filename;
             public int ID;
             public int Offset;
             public int ClassIndex;
+            public int Size;
             public int metaIndex;
             public int Magic;
 
@@ -316,7 +335,6 @@ namespace TagTool.Cache
 
         public class IndexTable : List<IndexItem>
         {
-            protected CacheFile cache;
             public List<TagClass> ClassList;
 
             public IndexItem GetItemByID(int ID)

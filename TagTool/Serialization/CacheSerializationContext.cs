@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.IO;
 using System;
 using TagTool.Tags;
+using System.Collections.Generic;
 
 namespace TagTool.Serialization
 {
@@ -52,7 +53,11 @@ namespace TagTool.Serialization
             var item = BlamCache.IndexItems.Find(i => i.ID == index);
 
             var group = (item != null) ?
-                new TagGroup(new Tag(item.ClassCode), new Tag(item.ParentClass), new Tag(item.ParentClass2), BlamCache.CacheContext?.GetStringId(item.ClassName) ?? StringId.Invalid) :
+                new TagGroup(
+                    item.ClassCode == null ? Tag.Null : new Tag(item.ClassCode),
+                    item.ParentClass == null ? Tag.Null : new Tag(item.ParentClass),
+                    item.ParentClass2 == null ? Tag.Null : new Tag(item.ParentClass2),
+                    BlamCache.CacheContext?.GetStringId(item.ClassName) ?? StringId.Invalid) :
                 TagGroup.Null;
 
             return new CachedTagInstance(index, group);

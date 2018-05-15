@@ -65,9 +65,8 @@ namespace TagTool.Cache
 
         new public class CacheIndexHeader : CacheFile.CacheIndexHeader
         {
-            public CacheIndexHeader(CacheFile Cache)
+            public CacheIndexHeader(CacheFile cache)
             {
-                cache = Cache;
                 var Reader = cache.Reader;
 
                 #region Read Values
@@ -76,52 +75,50 @@ namespace TagTool.Cache
                 XmlAttribute attr = indexHeaderNode.Attributes["tagClassCount"];
                 int offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagClassCount = Reader.ReadInt32();
+                TagGroupCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoOffset"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoOffset = Reader.ReadInt32() - cache.Magic;
+                TagsOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagClassIndexOffset"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagClassIndexOffset = Reader.ReadInt32() - cache.Magic;
+                TagGroupsOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagCount"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagCount = Reader.ReadInt32();
+                TagCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderCount"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoHeaderCount = Reader.ReadInt32();
+                TagInfoHeaderCount = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderOffset"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoHeaderOffset = Reader.ReadInt32() - cache.Magic;
+                TagInfoHeaderOffset = Reader.ReadInt32() - cache.Magic;
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderCount2"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoHeaderCount2 = Reader.ReadInt32();
+                TagInfoHeaderCount2 = Reader.ReadInt32();
 
                 attr = indexHeaderNode.Attributes["tagInfoHeaderOffset2"];
                 offset = int.Parse(attr.Value);
                 Reader.SeekTo(offset + cache.Header.TagIndexAddress);
-                tagInfoHeaderOffset2 = Reader.ReadInt32() - cache.Magic;
+                TagInfoHeaderOffset2 = Reader.ReadInt32() - cache.Magic;
                 #endregion
             }
         }
 
         new public class IndexTable : CacheFile.IndexTable
         {
-            public IndexTable(CacheFile Cache)
+            public IndexTable(CacheFile cache)
             {
-                cache = Cache;
-
                 var indexHeader = cache.IndexHeader;
                 var cacheHeader = cache.Header;
                 var reader = cache.Reader;
@@ -129,8 +126,8 @@ namespace TagTool.Cache
                 ClassList = new List<TagClass>();
 
                 #region Read Class List
-                reader.SeekTo(indexHeader.tagClassIndexOffset);
-                for (int i = 0; i < indexHeader.tagClassCount; i++)
+                reader.SeekTo(indexHeader.TagGroupsOffset);
+                for (int i = 0; i < indexHeader.TagGroupCount; i++)
                 {
                     var tc = new TagClass()
                     {
@@ -144,8 +141,8 @@ namespace TagTool.Cache
                 #endregion
 
                 #region Read Tags Info
-                reader.SeekTo(indexHeader.tagInfoOffset);
-                for (int i = 0; i < indexHeader.tagCount; i++)
+                reader.SeekTo(indexHeader.TagsOffset);
+                for (int i = 0; i < indexHeader.TagCount; i++)
                 {
                     IndexItem item = new IndexItem() { Cache = cache };
                     item.ClassIndex = reader.ReadInt16();
@@ -158,8 +155,8 @@ namespace TagTool.Cache
 
                 #region Read Indices
                 reader.SeekTo(cacheHeader.TagNamesIndicesOffset);
-                int[] indices = new int[indexHeader.tagCount];
-                for (int i = 0; i < indexHeader.tagCount; i++)
+                int[] indices = new int[indexHeader.TagCount];
+                for (int i = 0; i < indexHeader.TagCount; i++)
                     indices[i] = reader.ReadInt32();
                 #endregion
 
