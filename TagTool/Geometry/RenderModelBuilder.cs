@@ -178,8 +178,8 @@ namespace TagTool.Geometry
                 {
                     Parts = new List<Mesh.Part>(),
                     SubParts = new List<Mesh.SubPart>(),
-                    VertexBuffers = new ushort[8] { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
-                    IndexBuffers = new ushort[2] { 0xFFFF, 0xFFFF },
+                    VertexBufferIndices = new ushort[8] { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
+                    IndexBufferIndices = new ushort[2] { 0xFFFF, 0xFFFF },
                     Flags = MeshFlags.None,
                     PrtType = PrtType.None,
                 },
@@ -446,7 +446,7 @@ namespace TagTool.Geometry
                 var vertexBufferEnd = (int)resourceDataStream.Position;
 
                 // Add a definition for it
-                mesh.Mesh.VertexBuffers[0] = (ushort)definition.VertexBuffers.Count;
+                mesh.Mesh.VertexBufferIndices[0] = (ushort)definition.VertexBuffers.Count;
                 definition.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
@@ -464,7 +464,7 @@ namespace TagTool.Geometry
                 var indexBufferEnd = (int)resourceDataStream.Position;
 
                 // Add a definition for it
-                mesh.Mesh.IndexBuffers[0] = (ushort)definition.IndexBuffers.Count;
+                mesh.Mesh.IndexBufferIndices[0] = (ushort)definition.IndexBuffers.Count;
                 definition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
                 {
                     Definition = new IndexBufferDefinition

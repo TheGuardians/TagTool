@@ -636,6 +636,11 @@ namespace TagTool.Commands.Porting
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
+                case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
+                        throw new NotSupportedException(part.TypeOld.ToString());
+                    break;
+
 				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
 				case RenderGeometry renderGeometry when definition is RenderModel mode:
@@ -643,14 +648,28 @@ namespace TagTool.Commands.Porting
 				case RenderGeometry renderGeometry:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
 
-				case RenderMethod renderMethod when MatchShaders:
+                case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
+                        throw new NotSupportedException(propertyType.Halo2.ToString());
+                    break;
+
+                case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
+                    property.IntValue = property.ShortValue;
+                    break;
+
+                case RenderMethod renderMethod when MatchShaders:
 					ConvertData(cacheStream, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
 					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
 				case RenderMethod renderMethod when !MatchShaders && type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0:
 					data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
 					return ConvertRenderMethodGenerated(cacheStream, renderMethod, blamTagName);
 
-				case ScenarioObjectType scenarioObjectType:
+                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
+                    foreach (var material in renderModel.Materials)
+                        material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+                    break;
+
+                case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
 
 				case SoundClass soundClass:

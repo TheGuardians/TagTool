@@ -232,18 +232,21 @@ namespace TagTool.Tags.Definitions
             [TagField(Padding = true, Length = 8)]
             public byte[] Unused2 = new byte[8]; // "Section Data" block
 
-            public uint BlockOffset;
-            public uint BlockSize;
+            public int BlockOffset;
+            public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
             public List<ResourceGen2> Resources;
 
             [TagField(Short = true)]
-            public CachedTagInstance Model;
+            public CachedTagInstance Original;
 
             public short OwnerTagSectionOffset;
-            public short Unknown4;
-            public uint Unknown5;
+            public byte RuntimeLinked;
+            public byte RuntimeLoaded;
+
+            [TagField(Short = true)]
+            public CachedTagInstance Runtime;
         }
 
         [TagStructure(Size = 0xC)]

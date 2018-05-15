@@ -123,7 +123,7 @@ namespace TagTool.Geometry
             // dependent upon what type of mesh is being loaded. Instead, we
             // can just scan the entire array and bind everything as an
             // approximation.
-            foreach (var bufferIndex in Mesh.VertexBuffers.Where(i => i < Definition.VertexBuffers.Count))
+            foreach (var bufferIndex in Mesh.VertexBufferIndices.Where(i => i < Definition.VertexBuffers.Count))
             {
                 // Use the buffer format to determine the stream index
                 var buffer = Definition.VertexBuffers[bufferIndex].Definition;
@@ -138,11 +138,11 @@ namespace TagTool.Geometry
         /// </summary>
         private void BindIndexBuffers()
         {
-            if (Mesh.IndexBuffers.Length < IndexBuffers.Length)
+            if (Mesh.IndexBufferIndices.Length < IndexBuffers.Length)
                 throw new InvalidOperationException("Mesh has too few index buffers");
             for (var i = 0; i < IndexBuffers.Length; i++)
             {
-                var bufferIndex = Mesh.IndexBuffers[i];
+                var bufferIndex = Mesh.IndexBufferIndices[i];
                 if (bufferIndex < Definition.IndexBuffers.Count)
                     IndexBuffers[i] = Definition.IndexBuffers[bufferIndex].Definition;
             }
