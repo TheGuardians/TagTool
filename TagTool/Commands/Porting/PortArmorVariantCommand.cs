@@ -169,11 +169,11 @@ namespace TagTool.Commands.Porting
                             if (part.MaterialIndex != -1 && !variantMaterials.Contains(part.MaterialIndex))
                                 variantMaterials.Add(part.MaterialIndex);
 
-                        foreach (var vertexBuffer in mesh.VertexBuffers)
+                        foreach (var vertexBuffer in mesh.VertexBufferIndices)
                             if (vertexBuffer != ushort.MaxValue && !variantVertexBuffers.Contains(vertexBuffer))
                                 variantVertexBuffers.Add(vertexBuffer);
 
-                        foreach (var indexBuffer in mesh.IndexBuffers)
+                        foreach (var indexBuffer in mesh.IndexBufferIndices)
                             if (indexBuffer != ushort.MaxValue && !variantIndexBuffers.Contains(indexBuffer))
                                 variantIndexBuffers.Add(indexBuffer);
 
@@ -206,20 +206,20 @@ namespace TagTool.Commands.Porting
             {
                 var mesh = edModeDefinition.Geometry.Meshes[meshIndex];
 
-                for (var i = 0; i < mesh.VertexBuffers.Length; i++)
+                for (var i = 0; i < mesh.VertexBufferIndices.Length; i++)
                 {
-                    if (!variantVertexBuffers.Contains(mesh.VertexBuffers[i]))
-                        mesh.VertexBuffers[i] = ushort.MaxValue;
+                    if (!variantVertexBuffers.Contains(mesh.VertexBufferIndices[i]))
+                        mesh.VertexBufferIndices[i] = ushort.MaxValue;
                     else
-                        mesh.VertexBuffers[i] = (ushort)variantVertexBuffers.IndexOf(mesh.VertexBuffers[i]);
+                        mesh.VertexBufferIndices[i] = (ushort)variantVertexBuffers.IndexOf(mesh.VertexBufferIndices[i]);
                 }
 
-                for (var i = 0; i < mesh.IndexBuffers.Length; i++)
+                for (var i = 0; i < mesh.IndexBufferIndices.Length; i++)
                 {
-                    if (!variantIndexBuffers.Contains(mesh.IndexBuffers[i]))
-                        mesh.IndexBuffers[i] = ushort.MaxValue;
+                    if (!variantIndexBuffers.Contains(mesh.IndexBufferIndices[i]))
+                        mesh.IndexBufferIndices[i] = ushort.MaxValue;
                     else
-                        mesh.IndexBuffers[i] = (ushort)variantIndexBuffers.IndexOf(mesh.IndexBuffers[i]);
+                        mesh.IndexBufferIndices[i] = (ushort)variantIndexBuffers.IndexOf(mesh.IndexBufferIndices[i]);
                 }
             }
 

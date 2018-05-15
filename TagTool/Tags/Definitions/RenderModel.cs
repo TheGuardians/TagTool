@@ -232,8 +232,8 @@ namespace TagTool.Tags.Definitions
             [TagField(Padding = true, Length = 8)]
             public byte[] Unused2 = new byte[8]; // "Section Data" block
 
-            public uint BlockOffset;
-            public uint BlockSize;
+            public int BlockOffset;
+            public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
             public List<ResourceGen2> Resources;

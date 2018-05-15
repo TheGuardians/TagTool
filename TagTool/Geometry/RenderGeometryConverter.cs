@@ -426,7 +426,7 @@ namespace TagTool.Geometry
                     foreach (var part in mesh.Parts)
                         indexCount += part.IndexCount;
 
-                    mesh.IndexBuffers[0] = CreateIndexBuffer(rsrcDef, edResourceStream, indexCount);
+                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, edResourceStream, indexCount);
                 }
                 
                 //

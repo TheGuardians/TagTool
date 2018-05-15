@@ -936,8 +936,8 @@ namespace TagTool.Commands.Files
 
                 modeDefinition.Geometry.Meshes.Add(new Mesh
                 {
-                    VertexBuffers = new ushort[] { (ushort)(geometryResource.VertexBuffers.Count - 2), 0xFFFF, 0xFFFF, (ushort)(geometryResource.VertexBuffers.Count - 1), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
-                    IndexBuffers = new ushort[] { (ushort)(geometryResource.IndexBuffers.Count - 1), 0xFFFF },
+                    VertexBufferIndices = new ushort[] { (ushort)(geometryResource.VertexBuffers.Count - 2), 0xFFFF, 0xFFFF, (ushort)(geometryResource.VertexBuffers.Count - 1), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
+                    IndexBufferIndices = new ushort[] { (ushort)(geometryResource.IndexBuffers.Count - 1), 0xFFFF },
                     Type = VertexType.Rigid,
                     PrtType = PrtType.Ambient,
                     IndexBufferType = PrimitiveType.TriangleStrip,
@@ -948,8 +948,8 @@ namespace TagTool.Commands.Files
                         {
                             TransparentSortingIndex = -1,
                             SubPartCount = 1,
-                            Type = Mesh.Part.PartType.OpaqueShadowCasting,
-                            Flags = Mesh.Part.PartFlags.PerVertexLightmapPart,
+                            TypeNew = Mesh.Part.PartTypeNew.OpaqueShadowCasting,
+                            FlagsNew = Mesh.Part.PartFlagsNew.PerVertexLightmapPart,
                             VertexCount = 3
                         },
                     },
