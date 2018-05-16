@@ -6,11 +6,11 @@ namespace TagTool.Common
     public class ResourceGen2
     {
         public ResourceTypeGen2 Type;
-        public sbyte Unknown1;
-        public short Unknown2;
+        public sbyte AlignmentBit;
+        public short FieldOffset;
         public short PrimaryLocator;
         public short SecondaryLocator;
-        public uint ResoureDataSize;
-        public uint ResourceDataOffset;
+        public int ResoureDataSize;
+        public int ResourceDataOffset;
     }
 }

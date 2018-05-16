@@ -42,30 +42,6 @@ namespace TagTool.Commands.Porting
 
         private ChudDefinition.HudWidget.RenderDatum ConvertRenderData(ChudDefinition.HudWidget.RenderDatum renderData)
         {
-            foreach (FieldInfo haloOnlineFieldInfo in typeof(ChudDefinition.HudWidget.RenderDatum).GetFields())
-            {
-                object haloOnlineFieldValue = haloOnlineFieldInfo.GetValue(renderData);
-                FieldInfo halo3FieldInfo;
-                object halo3FieldValue;
-
-                if (haloOnlineFieldValue is ArgbColor && haloOnlineFieldInfo.Name.Contains("_HO"))
-                {
-                    halo3FieldInfo = typeof(ChudDefinition.HudWidget.RenderDatum).GetField(haloOnlineFieldInfo.Name.Replace("_HO", ""));
-
-                    if (halo3FieldInfo == null)
-                        continue;
-
-                    halo3FieldValue = halo3FieldInfo.GetValue(renderData);
-
-                    if (halo3FieldValue is ArgbColor)
-                    {
-                        var newColor = new ArgbColor();
-                        newColor = ConvertColor((ArgbColor)halo3FieldValue);
-                        haloOnlineFieldInfo.SetValue(renderData, newColor);
-                    }
-                }
-            }
-
             //For some reason, the turbulence shader in H:O only works if the following unknown is 1.
             //So if the turbulance shader is selected, set the following unknown to 1.
             if (renderData.ShaderIndex == ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Turbulence)
@@ -87,6 +63,10 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            renderData.LocalColorA = ConvertColor(renderData.LocalColorA);
+            renderData.LocalColorB = ConvertColor(renderData.LocalColorB);
+            renderData.LocalColorC = ConvertColor(renderData.LocalColorC);
+            renderData.LocalColorD = ConvertColor(renderData.LocalColorD);          
             renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
             renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
             renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
@@ -122,7 +102,7 @@ namespace TagTool.Commands.Porting
                     chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex]);
 
                 //fixup for binoculars
-                if (widgetname == "binoculars_wide_fullscreen")
+                if (widgetname == "binoculars_wide_fullscreen" && BlamCache.Version == CacheVersion.Halo3Retail)
                 {
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 0.0f;
                 }
@@ -136,7 +116,13 @@ namespace TagTool.Commands.Porting
 
                     //get stringid text for patch targeting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
-                    
+
+                    //fixup for waypoint light
+                    if (widgetname.Contains("waypoint_light") && BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].Input_HO = ChudDefinition.HudWidget.RenderDatum.InputValue_HO.UnitHealth;
+                    }
+
                     //fixup for widgets without global placement data
                     if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0
                         || (BlamCache.Version == CacheVersion.Halo3ODST && widgetname.Contains("vitality_meter"))
@@ -369,17 +355,6 @@ namespace TagTool.Commands.Porting
 
         private ArgbColor ConvertColor(ArgbColor oldcolor)
         {
-            if (BlamCache.Version == CacheVersion.Halo3ODST)
-            {
-                var odstcolor = new ArgbColor()
-                {
-                    Alpha = ((ArgbColor)oldcolor).Alpha,
-                    Red = ((ArgbColor)oldcolor).Blue,
-                    Green = ((ArgbColor)oldcolor).Green,
-                    Blue = ((ArgbColor)oldcolor).Red
-                };
-                return odstcolor;
-            }
             var newcolor = new ArgbColor()
             {
                 Alpha = ((ArgbColor)oldcolor).Blue,

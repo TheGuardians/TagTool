@@ -510,7 +510,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-                case RenderModel mode when mode.Geometry.Resource.Page.Index == -1:
+                case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
                     break;
 
@@ -641,11 +641,11 @@ namespace TagTool.Commands.Porting
                         throw new NotSupportedException(part.TypeOld.ToString());
                     break;
 
-				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp:
+				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp && BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
-				case RenderGeometry renderGeometry when definition is RenderModel mode:
+				case RenderGeometry renderGeometry when definition is RenderModel mode && BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
-				case RenderGeometry renderGeometry:
+				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
@@ -667,6 +667,7 @@ namespace TagTool.Commands.Porting
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     foreach (var material in renderModel.Materials)
                         material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+                    data = ConvertGen2RenderModel(renderModel);
                     break;
 
                 case ScenarioObjectType scenarioObjectType:
