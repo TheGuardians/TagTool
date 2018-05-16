@@ -11,6 +11,10 @@ namespace TagTool.Common
         public float K { get; }
         public float W { get; }
 
+        public RealPoint2d XY => new RealPoint2d(I, J);
+
+        public RealPoint3d XYZ => new RealPoint3d(I, J, K);
+
         public RealVector2d IJ => new RealVector2d(I, J);
 
         public RealVector3d IJK => new RealVector3d(I, J, K);
@@ -55,10 +59,10 @@ namespace TagTool.Common
         public RealQuaternion(IEnumerable<float> enumerable)
         {
             var components = enumerable.ToArray();
-            I = components[0];
-            J = components[1];
-            K = components[2];
-            W = components[3];
+            I = components.Count() > 0 ? components[0] : 0.0f;
+            J = components.Count() > 1 ? components[1] : 0.0f;
+            K = components.Count() > 2 ? components[2] : 0.0f;
+            W = components.Count() > 3 ? components[3] : 0.0f;
         }
         
         public float[] ToArray() => new[] { I, J, K, W };

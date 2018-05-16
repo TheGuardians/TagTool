@@ -107,9 +107,19 @@ namespace TagTool.Geometry
             return Reader.ReadByte();
         }
 
+        public float ReadUByteN()
+        {
+            return DenormalizeUnsigned(Reader.ReadByte());
+        }
+
         public short ReadShort()
         {
             return Reader.ReadInt16();
+        }
+
+        public float ReadShortN()
+        {
+            return DenormalizeSigned(Reader.ReadInt16());
         }
 
         public ushort ReadUShort()
@@ -141,7 +151,17 @@ namespace TagTool.Geometry
         {
             return new RealQuaternion(Read(4, Reader.ReadSByte, e => DenormalizeSigned(e)).ToArray());
         }
-        
+
+        public RealQuaternion ReadUByte2N()
+        {
+            return new RealQuaternion(Read(2, Reader.ReadByte, e => DenormalizeUnsigned(e)).ToArray());
+        }
+
+        public RealQuaternion ReadUByte3N()
+        {
+            return new RealQuaternion(Read(3, Reader.ReadByte, e => DenormalizeUnsigned(e)).ToArray());
+        }
+
         public RealQuaternion ReadUByte4N()
         {
             return new RealQuaternion(Read(4, Reader.ReadByte, e => DenormalizeUnsigned(e)).ToArray());
@@ -188,6 +208,16 @@ namespace TagTool.Geometry
             Write(v.ToArray(), 4, e => Writer.Write(NormalizeShort(e)));
         }
 
+        public float ReadUShortN()
+        {
+            return DenormalizeUnsigned(Reader.ReadUInt16());
+        }
+
+        public RealVector2d ReadUShort2()
+        {
+            return new RealVector2d(Read(2, () => (float)Reader.ReadUInt16()));
+        }
+
         public RealVector2d ReadUShort2N()
         {
             return new RealVector2d(Read(2, () => DenormalizeUnsigned(Reader.ReadUInt16())));
@@ -206,6 +236,11 @@ namespace TagTool.Geometry
         public void WriteUShort3N(RealVector3d v)
         {
             Write(v.ToArray(), 3, e => Writer.Write(NormalizeUShort(e)));
+        }
+
+        public RealQuaternion ReadUShort4()
+        {
+            return new RealQuaternion(Read(4, () => (float)Reader.ReadUInt16()));
         }
 
         public RealQuaternion ReadUShort4N()
@@ -252,7 +287,7 @@ namespace TagTool.Geometry
             Writer.Write((x << 22) | (y << 12) | (z << 2));
         }
 
-        public RealVector3d ReadDHenN3()
+        public RealVector3d ReadDHen3N()
         {
             var DHenN3 = Reader.ReadUInt32();
 

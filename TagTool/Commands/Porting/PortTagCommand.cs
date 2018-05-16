@@ -617,7 +617,18 @@ namespace TagTool.Commands.Porting
 
 				case CachedTagInstance tag:
 					if (IsRecursive == false)
-						return null;
+                    {
+                        foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
+                        {
+                            if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
+                                continue;
+
+                            if (CacheContext.TagNames[instance.Index] == blamTagName)
+                                return instance;
+                        }
+
+                        return null;
+                    }
 					tag = PortTagReference(tag.Index);
 					if (tag != null && !(IsNew || IsReplacing))
 						return tag;
