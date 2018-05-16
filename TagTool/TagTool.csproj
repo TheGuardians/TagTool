@@ -795,6 +795,10 @@
     <Content Include="ShaderGenerator\shader_code\diffuse_only.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ShaderGenerator\shader_code\disasm_by_hand\shader_templates\_0_0_0_0_0_0_0_0_0_0\Shaders[0].hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShaderGenerator\shader_code\disasm_by_hand\shader_templates\_0_0_0_0_0_0_0_0_0_0\Shaders[1].hlsl" />
     <Content Include="ShaderGenerator\shader_code\entry.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
