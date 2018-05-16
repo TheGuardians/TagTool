@@ -19,6 +19,9 @@ namespace TagTool.Common
 
         public RealVector3d IJK => new RealVector3d(I, J, K);
 
+        public RealRgbColor RGB => new RealRgbColor(I, J, K);
+
+
         public float LengthSquared => (I * I) + (J * J) + (K * K) + (W * W);
 
         public float Length => (float)Math.Sqrt(LengthSquared);

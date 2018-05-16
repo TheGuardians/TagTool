@@ -557,14 +557,8 @@ namespace TagTool.Commands.Porting
                                 switch (resource.SecondaryLocator) // stream source
                                 {
                                     case 0:
-                                        vertex.Point.NodeWeights[0] = 1.0f;
-                                        vertex.Point.NodeWeights[1] = 0.0f;
-                                        vertex.Point.NodeWeights[2] = 0.0f;
-                                        vertex.Point.NodeWeights[3] = 0.0f;
-                                        vertex.Point.NodeIndices[0] = -1;
-                                        vertex.Point.NodeIndices[1] = -1;
-                                        vertex.Point.NodeIndices[2] = -1;
-                                        vertex.Point.NodeIndices[3] = -1;
+                                        vertex.Point.NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f };
+                                        vertex.Point.NodeIndices = new[] { -1, -1, -1, -1 };
                                         vertex.Point.UseNewNodeIndices = 1;
                                         vertex.Point.AdjustedCompoundNodeIndex = -1;
                                         vertex.SecondaryTexcoord.Y = 1.0f;
@@ -614,36 +608,18 @@ namespace TagTool.Commands.Porting
                                         break;
 
                                     case 3:
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
+                                            vertex.PrimaryLightmapTexcoord = element.XY;
                                         break;
 
                                     case 4:
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
+                                            vertex.PrimaryLightmapIncidentDirection = element.IJK;
                                         break;
 
                                     case 5:
-                                        break;
-
-                                    default:
-                                        /*int x = 2;
-                                        // The following LM vertex sources only have one element, so we can call this here
-                                        stream_reader.GetStreamedElement(0, ref quat);
-                                        if (section_info.SectionLightingFlags.Test(k_lighting_flags_HasLmTexCoords) && stream_source == ++x)
-                                        {
-                                            PrimaryLightmapTexcoord.X = quat.Vector.I;
-                                            PrimaryLightmapTexcoord.Y = quat.Vector.J;
-                                        }
-                                        else if (section_info.SectionLightingFlags.Test(k_lighting_flags_HasLmIncRad) && stream_source == ++x)
-                                        {
-                                            PrimaryLightmapIncidentDirection.I = quat.Vector.I;
-                                            PrimaryLightmapIncidentDirection.J = quat.Vector.J;
-                                            PrimaryLightmapIncidentDirection.K = quat.Vector.K;
-                                        }
-                                        else if (section_info.SectionLightingFlags.Test(k_lighting_flags_HasLmColor) && stream_source == ++x)
-                                        {
-                                            // alpha is quad.W, which LM color doesn't use
-                                            PrimaryLightmapColor.R = quat.Vector.I;
-                                            PrimaryLightmapColor.G = quat.Vector.J;
-                                            PrimaryLightmapColor.B = quat.Vector.K;
-                                        }*/
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
+                                            vertex.PrimaryLightmapColor = element.RGB;
                                         break;
                                 }
                             }
