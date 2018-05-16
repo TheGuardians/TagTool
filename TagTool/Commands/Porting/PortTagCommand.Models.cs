@@ -478,7 +478,7 @@ namespace TagTool.Commands.Porting
         {
             foreach (var section in mode.Sections)
             {
-                var compressor = new VertexCompressor(section.Compression[0]);
+                var compressor = new VertexCompressor(mode.Compression[0]);
 
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
@@ -662,6 +662,13 @@ namespace TagTool.Commands.Porting
                     }
 
                     stream.Position = 0;
+
+                    var dataContext = new DataSerializationContext(reader);
+                    var rawPcaDatum = BlamCache.Deserializer.Deserialize<RenderModel.PrtInfoBlock.RawPcaDatum>(dataContext);
+
+                    section.RawPcaData.Add(rawPcaDatum);
+
+                    // TODO: prt vertex buffers
                 }
             }
             

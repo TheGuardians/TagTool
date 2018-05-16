@@ -423,7 +423,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class RawPcaDatum
             {
-                public float Value;
+                public float PcaData;
             }
         }
 
