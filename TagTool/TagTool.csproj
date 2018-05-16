@@ -295,7 +295,6 @@
     <Compile Include="Commands\Porting\PortTagCommand.Physics.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Scenario.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
-    <Compile Include="Commands\Porting\PortTagCommand.Shader2.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
     <Compile Include="Commands\Porting\TestShaderDecompilerCommand.cs" />
@@ -798,7 +797,6 @@
     <Content Include="ShaderGenerator\shader_code\disasm_by_hand\shader_templates\_0_0_0_0_0_0_0_0_0_0\Shaders[0].hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ShaderGenerator\shader_code\disasm_by_hand\shader_templates\_0_0_0_0_0_0_0_0_0_0\Shaders[1].hlsl" />
     <Content Include="ShaderGenerator\shader_code\entry.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

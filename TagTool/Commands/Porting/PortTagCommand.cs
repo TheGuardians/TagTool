@@ -23,11 +23,6 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-		// <index, pre-conversion rmt2>
-		private Dictionary<int, RenderMethodTemplate> OldRenderMethodTemplates = new Dictionary<int, RenderMethodTemplate> { };
-		// <tag_name, post-conversion pixl>
-		private Dictionary<string, PixelShader> NewPixelShaders = new Dictionary<string, PixelShader> { };
-
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
         private List<Tag> OtherTagGroups = new List<Tag> { /*new Tag("effe"), new Tag("foot"),*/ new Tag("shit"), new Tag("sncl") };
@@ -252,7 +247,14 @@ namespace TagTool.Commands.Porting
 
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-            }
+
+				// Don't port rmfd tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
+				case "rmdf" when UseShaderTest && CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					return CacheContext.GetTagInstance<RenderMethodDefinition>(blamTag.Filename);
+				case "rmdf" when UseShaderTest && !CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Filename}.rmdf`; using `shaders\\shader.rmdf` instead.");
+					return CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader");
+			}
 
             //
             // Handle shader tags when not porting or matching shaders
@@ -464,17 +466,9 @@ namespace TagTool.Commands.Porting
 							particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
 					break;
 
-				case GlobalPixelShader glps when UseShaderTest:
-					blamDefinition = ConvertGlobalPixelShader(glps);
-					break;
-
                 case Globals matg:
                     blamDefinition = ConvertGlobals(matg, cacheStream);
                     break;
-
-                case GlobalVertexShader glvs when UseShaderTest:
-					blamDefinition = ConvertGlobalVertexShader(glvs);
-					break;
 
                 case LensFlare lens:
                     blamDefinition = ConvertLensFlare(lens);
@@ -496,10 +490,6 @@ namespace TagTool.Commands.Porting
                 case PhysicsModel phmo:
                     blamDefinition = ConvertPhysicsModel(phmo);
                     break;
-
-                case PixelShader pixl when UseShaderTest:
-					blamDefinition = ConvertPixelShader(pixl, blamTag);
-					break;
 
                 case Projectile proj:
                     blamDefinition = ConvertProjectile(proj);
@@ -554,10 +544,6 @@ namespace TagTool.Commands.Porting
 
                 case Style style:
                     blamDefinition = ConvertStyle(style);
-                    break;
-
-                case VertexShader vtsh when UseShaderTest:
-                    blamDefinition = ConvertVertexShader(vtsh);
                     break;
 
                 // Fix shotgun reloading
@@ -633,18 +619,29 @@ namespace TagTool.Commands.Porting
 				case GameObjectType gameObjectType:
 					return ConvertGameObjectType(gameObjectType);
 
-				case ObjectTypeFlags objectTypeFlags:
-					return ConvertObjectTypeFlags(objectTypeFlags);
-
                 case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
                         throw new NotSupportedException(part.TypeOld.ToString());
                     break;
 
+				case ObjectTypeFlags objectTypeFlags:
+					return ConvertObjectTypeFlags(objectTypeFlags);
+
+				case PixelShader pixelShader when UseShaderTest && BlamCache.Version >= CacheVersion.Halo3Retail:
+					foreach (var shader in pixelShader.Shaders)
+					{
+						shader.PCParameters = shader.XboxParameters;
+						shader.XboxShaderReference = null;
+						shader.XboxParameters = null;
+					}
+					break;
+
 				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp && BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
+
 				case RenderGeometry renderGeometry when definition is RenderModel mode && BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
+
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					return GeometryConverter.Convert(cacheStream, renderGeometry);
 
@@ -656,15 +653,12 @@ namespace TagTool.Commands.Porting
                 case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
                     property.IntValue = property.ShortValue;
                     break;
-
+				
                 case RenderMethod renderMethod when MatchShaders:
 					ConvertData(cacheStream, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
 					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
-				case RenderMethod renderMethod when !MatchShaders && type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0:
-					data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
-					return ConvertRenderMethodGenerated(cacheStream, renderMethod, blamTagName);
 
-                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
+				case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     foreach (var material in renderModel.Materials)
                         material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
                     data = ConvertGen2RenderModel(renderModel);

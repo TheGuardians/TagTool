@@ -21,201 +21,6 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-
-        private GlobalPixelShader ConvertGlobalPixelShader(GlobalPixelShader glps)
-        {
-            /*
-            Directory.CreateDirectory(@"Temp");
-
-            if (!File.Exists(@"Tools\xsd.exe"))
-            {
-                Console.WriteLine("Missing tools, please install xsd.exe before porting shaders.");
-                return glps;
-            }
-
-            foreach (var shader in glps.Shaders)
-            {
-                var xbox_shader_reference = shader?.XboxShaderReference;
-                var shader_data = xbox_shader_reference?.ShaderData;
-                if (shader_data == null || shader_data.Length == 0) continue;
-
-                string tempSHADER = @"Temp\permutation.shader";
-                string tempSHADERUPDB = @"Temp\permutation.shader.updb";
-
-                if (File.Exists(tempSHADER)) File.Delete(tempSHADER);
-                if (File.Exists(tempSHADERUPDB)) File.Delete(tempSHADERUPDB);
-
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADER), EndianFormat.BigEndian))
-                {
-                    output.WriteBlock(shader_data);
-                }
-
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempSHADERUPDB), EndianFormat.BigEndian))
-                {
-                    output.WriteBlock(xbox_shader_reference.DebugData);
-                }
-
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = @"Tools\xsd.exe",
-                        Arguments = "/rawps permutation.shader",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true,
-                        WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "temp")
-                    }
-                };
-                process.Start();
-
-                //* Read the output (or the error)
-                string proc_output = process.StandardOutput.ReadToEnd();
-                Console.WriteLine(proc_output);
-                string err = process.StandardError.ReadToEnd();
-                Console.WriteLine(err);
-
-                process.WaitForExit();
-
-                if (!String.IsNullOrWhiteSpace(err))
-                {
-                    continue;
-                }
-
-                Console.WriteLine("written shader binary for glps");
-
-            }
-            */
-            //add conversion code when ready
-            return glps;
-        }
-
-        private GlobalVertexShader ConvertGlobalVertexShader(GlobalVertexShader glvs)
-        {
-            //throw new NotImplementedException();
-
-            /*foreach (var shader in glvs.Shaders)
-            {
-                var shader_parser = new XboxShaderParser(glvs, shader, CacheContext);
-
-                if (!shader_parser.IsValid) continue;
-
-                Console.WriteLine("written shader binary for glps");
-
-            }
-
-            //add conversion code when ready */
-            return glvs;
-        }
-
-        private PixelShader ConvertPixelShader(PixelShader pixl, CacheFile.IndexItem blamTag)
-        {
-            var name = blamTag.Filename;
-
-            string[] nameParts = name.Split('\\');
-            string arguments = nameParts[nameParts.Length - 1];
-            arguments = arguments.Substring(1, arguments.Length - 1);
-            string type = nameParts[nameParts.Length - 2];
-
-            string[] shaderArgs = arguments.Split('_');
-
-            Int32[] shader_args;
-            try { shader_args = Array.ConvertAll(shaderArgs, Int32.Parse); }
-            catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return null; }
-
-            for (int i = 0; i < pixl.Shaders.Count; i++)
-            {
-                //
-                // Parse Blam tag name to extract type and arguments
-                //
-
-                var shader = pixl.Shaders[i];
-
-                try
-                {
-                    if(i != 0)
-                    {
-                        throw new Exception($"Unsupported shader index {i}.");
-                    }
-
-                    var drawmode = TemplateShaderGenerator.Drawmode.Default;
-
-                    ShaderGeneratorResult shader_gen_result;
-                    switch (type)
-                    {
-                        case "beam_templates":
-                            shader_gen_result = new BeamTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "contrail_templates":
-                            shader_gen_result = new ContrailTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "cortana_templates":
-                            shader_gen_result = new CortanaTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "decal_templates":
-                            shader_gen_result = new DecalTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "foliage_templates":
-                            shader_gen_result = new FoliageTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "halogram_templates":
-                            shader_gen_result = new HalogramTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "light_volume_templates":
-                            shader_gen_result = new LightVolumeTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "particle_templates":
-                            shader_gen_result = new ParticleTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "shader_templates":
-                            shader_gen_result = new ShaderTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "terrain_templates":
-                            shader_gen_result = new TerrainTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        case "water_templates":
-                            shader_gen_result = new WaterTemplateShaderGenerator(CacheContext, drawmode, shader_args)?.Generate();
-                            break;
-
-                        default:
-                            Console.WriteLine($"{type} is not implemented");
-                            return null;
-                    }
-
-                    if (shader_gen_result == null) return null;
-
-                    shader.PCShaderBytecode = shader_gen_result.ByteCode;
-                    shader.PCParameters = shader_gen_result.Parameters;
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine($"Something happened when converting  {type} {arguments} index: {i}. Setting shader bytecote and registers to null");
-                    shader.PCShaderBytecode = null;
-                    shader.PCParameters = new List<ShaderParameter>();
-                }
-            }
-
-            return pixl;
-        }
-
-        private VertexShader ConvertVertexShader(VertexShader vtsh)
-        {
-            //add conversion code when ready
-            return vtsh;
-        }
-
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
         {
             if (BlamCache.Version == CacheVersion.Halo3ODST)
@@ -227,18 +32,6 @@ namespace TagTool.Commands.Porting
                 rasg.Unknown6HO = rasg.Unknown6;
             }
             return rasg;
-        }
-
-        private RenderMethod ConvertRenderMethodGenerated(Stream cacheStream, RenderMethod renderMethod, string blamTagName)
-        {
-            //
-            // Remove shader function (overlays) until they are fixed
-            //
-
-            renderMethod.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
-            renderMethod.ShaderProperties[0].Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
-
-            return renderMethod;
         }
 
         private static bool debugUseEDFunctions;
@@ -1120,22 +913,21 @@ namespace TagTool.Commands.Porting
             public TagTool.Shaders.ShaderParameter.RType RegisterType;
         }
 
-        private void FixRmdfTagRef(RenderMethod finalRm)
-        {
-            // Set rmdf
-            var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Filename;
+		private void FixRmdfTagRef(RenderMethod finalRm)
+		{
+			// Set rmdf
+			var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Filename;
+			if (CacheContext.TagNames.ContainsValue(rmdfName))
+				finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(rmdfName);
+			else
+			{
+				// all ms23 rmdf tags need to exist, using rmsh's rmdf for all rm's is a bad idea
+				finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader");
+				Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
+			}
+		}
 
-            try
-            {
-                finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(rmdfName);
-            }
-            catch
-            {
-                finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader"); // all ms23 rmdf tags need to exist, using rmsh's rmdf for all rm's is a bad idea
-            }
-        }
-
-        private RenderMethod FixFunctions(CacheFile blamCache, HaloOnlineCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
+		private RenderMethod FixFunctions(CacheFile blamCache, HaloOnlineCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
