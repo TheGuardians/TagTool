@@ -476,13 +476,10 @@ namespace TagTool.Commands.Porting
 
         private object ConvertGen2RenderModel(RenderModel mode)
         {
-            mode.Geometry = new RenderGeometry
-            {
-                Meshes = new List<Mesh>()
-            };
-
             foreach (var section in mode.Sections)
             {
+                var compressor = new VertexCompressor(section.Compression[0]);
+
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
                 using (var writer = new EndianWriter(stream, BlamCache.Reader.Format))
@@ -513,7 +510,7 @@ namespace TagTool.Commands.Porting
                     var dataContext = new DataSerializationContext(reader);
                     var mesh = BlamCache.Deserializer.Deserialize<Mesh>(dataContext);
 
-                    mode.Geometry.Meshes.Add(mesh);
+                    section.Meshes.Add(mesh);
 
                     if (mesh.RawVertices.Count > 0)
                         continue;
@@ -567,6 +564,8 @@ namespace TagTool.Commands.Porting
                                         {
                                             case VertexDeclarationUsage.Position:
                                                 vertex.Point.Position = element.XYZ;
+                                                if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
+                                                    vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
                                                 break;
 
                                             case VertexDeclarationUsage.BlendIndices:
@@ -587,7 +586,12 @@ namespace TagTool.Commands.Porting
 
                                     case 1:
                                         if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
+                                        {
                                             vertex.Texcoord = element.XY;
+
+                                            if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedTexcoord))
+                                                vertex.Texcoord = compressor.DecompressUv(new RealVector2d(vertex.Texcoord.ToArray())).XY;
+                                        }
                                         break;
 
                                     case 2:
@@ -629,8 +633,38 @@ namespace TagTool.Commands.Porting
                     }
                 }
             }
+
+            foreach (var section in mode.PrtInfo)
+            {
+                using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
+                using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
+                using (var writer = new EndianWriter(stream, BlamCache.Reader.Format))
+                {
+                    foreach (var resource in section.Resources)
+                    {
+                        stream.Position = resource.FieldOffset;
+
+                        switch (resource.Type)
+                        {
+                            case ResourceTypeGen2.TagBlock:
+                                writer.Write(resource.ResoureDataSize / resource.SecondaryLocator);
+                                writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
+                                break;
+
+                            case ResourceTypeGen2.TagData:
+                                writer.Write(resource.ResoureDataSize);
+                                writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
+                                break;
+
+                            case ResourceTypeGen2.VertexBuffer:
+                                break;
+                        }
+                    }
+
+                    stream.Position = 0;
+                }
+            }
             
-            // TODO: Set up modifications to the 'mode' variable before returning it.
             return mode;
         }
     }

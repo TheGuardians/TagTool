@@ -34,5 +34,7 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ X: {X}, Y: {Y} }}";
+
+        public float[] ToArray() => new[] { X, Y };
     }
 }
