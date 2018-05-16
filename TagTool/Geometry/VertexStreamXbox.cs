@@ -66,7 +66,7 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = new RealQuaternion(Stream.ReadDHenN3(), 1.0f)
+                Normal = new RealQuaternion(Stream.ReadDHen3N(), 1.0f)
             };
             return vertex;
         }
@@ -82,9 +82,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3()
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N()
             };
         }
 
@@ -94,9 +94,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3(),
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N(),
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
@@ -108,9 +108,9 @@ namespace TagTool.Geometry
             {
                 Position = new RealQuaternion(Stream.ReadFloat3(), 0.0f),
                 Texcoord = Stream.ReadFloat2(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3()
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N()
             };
         }
 
@@ -142,7 +142,7 @@ namespace TagTool.Geometry
             {
                 Position = new RealVector3d(Stream.ReadUShort4N()),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHenN3()
+                Normal = Stream.ReadDHen3N()
             };
         }
 
@@ -175,9 +175,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3()
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N()
             };
         }
 
@@ -213,9 +213,9 @@ namespace TagTool.Geometry
             {
                 Position = Stream.ReadUShort4N(),
                 Texcoord = Stream.ReadUShort2N(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3(),
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N(),
                 BlendIndices = Stream.ReadUByte4(),
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
@@ -282,9 +282,9 @@ namespace TagTool.Geometry
             {
                 Position = new RealQuaternion(Stream.ReadFloat3(), 0.0f),
                 Texcoord = Stream.ReadFloat2(),
-                Normal = Stream.ReadDHenN3(),
-                Tangent = new RealQuaternion(Stream.ReadDHenN3(), 1.0f),
-                Binormal = Stream.ReadDHenN3()
+                Normal = Stream.ReadDHen3N(),
+                Tangent = new RealQuaternion(Stream.ReadDHen3N(), 1.0f),
+                Binormal = Stream.ReadDHen3N()
             };
         }
 

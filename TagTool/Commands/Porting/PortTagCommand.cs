@@ -392,6 +392,11 @@ namespace TagTool.Commands.Porting
                         chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
                     break;
 
+                case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
+                    foreach (var material in mode.Materials)
+                        material.RenderMethod = null;
+                    break;
+
                 case Scenario scenario when NoSquads:
                     scenario.Squads = new List<Scenario.Squad>();
 					break;
@@ -503,6 +508,10 @@ namespace TagTool.Commands.Porting
                 case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
                     break;
+                    
+                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
+                    blamDefinition = ConvertGen2RenderModel(edTag, renderModel);
+                    break;
 
                 case Scenario scnr:
                     blamDefinition = ConvertScenario(scnr, blamTag.Filename);
@@ -603,7 +612,18 @@ namespace TagTool.Commands.Porting
 
 				case CachedTagInstance tag:
 					if (IsRecursive == false)
-						return null;
+                    {
+                        foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
+                        {
+                            if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
+                                continue;
+
+                            if (CacheContext.TagNames[instance.Index] == blamTagName)
+                                return instance;
+                        }
+
+                        return null;
+                    }
 					tag = PortTagReference(tag.Index);
 					if (tag != null && !(IsNew || IsReplacing))
 						return tag;
@@ -658,12 +678,6 @@ namespace TagTool.Commands.Porting
 					ConvertData(cacheStream, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
 					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
 
-				case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
-                    foreach (var material in renderModel.Materials)
-                        material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
-                    data = ConvertGen2RenderModel(renderModel);
-                    break;
-
                 case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
 
@@ -671,6 +685,8 @@ namespace TagTool.Commands.Porting
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
 				case StringId stringId:
+                    if (BlamCache.Version < CacheVersion.Halo3Retail)
+                        return CacheContext.GetStringId(BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)));
 					return ConvertStringId(stringId);
 
 				case TagFunction tagFunction:

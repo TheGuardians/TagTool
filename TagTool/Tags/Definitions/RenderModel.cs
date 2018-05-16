@@ -228,10 +228,7 @@ namespace TagTool.Tags.Definitions
             public SectionLightingFlags LightingFlags;
             public short RigidNode;
             public SectionFlags Flags;
-
-            [TagField(Padding = true, Length = 8)]
-            public byte[] Unused2 = new byte[8]; // "Section Data" block
-
+            public List<Mesh> Meshes;
             public int BlockOffset;
             public int BlockSize;
             public uint SectionDataSize;
@@ -385,22 +382,23 @@ namespace TagTool.Tags.Definitions
             public ushort Unknown;
             public List<LodInfoBlock> LodInfo;
             public List<ClusterBasisBlock> ClusterBasis;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint BlockOffset;
-            public uint BlockSize;
+            public List<RawPcaDatum> RawPcaData;
+            public List<Mesh.VertexBuffer> VertexBuffers;
+            public int BlockOffset;
+            public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
             public List<ResourceGen2> Resources;
 
             [TagField(Short = true)]
-            public CachedTagInstance Model;
+            public CachedTagInstance Original;
 
             public short OwnerTagSectionOffset;
-            public short Unknown6;
-            public uint Unknown7;
+            public byte RuntimeLinked;
+            public byte RuntimeLoaded;
+
+            [TagField(Short = true)]
+            public CachedTagInstance Runtime;
 
             [TagStructure(Size = 0xC)]
             public class LodInfoBlock
@@ -420,6 +418,12 @@ namespace TagTool.Tags.Definitions
             public class ClusterBasisBlock
             {
                 public float BasisData;
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class RawPcaDatum
+            {
+                public float PcaData;
             }
         }
 

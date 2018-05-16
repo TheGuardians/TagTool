@@ -7,6 +7,8 @@ namespace TagTool.Common
         public float X { get; set; }
         public float Y { get; set; }
 
+        public RealVector2d IJ => new RealVector2d(X, Y);
+
         public RealPoint2d(float x, float y)
         {
             X = x;
@@ -34,5 +36,7 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ X: {X}, Y: {Y} }}";
+
+        public float[] ToArray() => new[] { X, Y };
     }
 }

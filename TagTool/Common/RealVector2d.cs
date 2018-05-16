@@ -7,6 +7,8 @@ namespace TagTool.Common
         public float I { get; set; }
         public float J { get; set; }
 
+        public RealPoint2d XY => new RealPoint2d(I, J);
+
         public RealVector2d(float x, float y)
         {
             I = x;

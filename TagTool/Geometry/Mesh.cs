@@ -284,7 +284,7 @@ namespace TagTool.Geometry
         [TagStructure(Size = 0xC4)]
         public class RawVertex
         {
-            public RawPoint Point;
+            public RawPoint Point = new RawPoint();
             public RealPoint2d Texcoord;
             public RealVector3d Normal;
             public RealVector3d Binormal;
