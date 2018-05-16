@@ -691,6 +691,8 @@ namespace TagTool.Commands.Porting
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
 				case StringId stringId:
+                    if (BlamCache.Version < CacheVersion.Halo3Retail)
+                        return CacheContext.GetStringId(BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)));
 					return ConvertStringId(stringId);
 
 				case TagFunction tagFunction:

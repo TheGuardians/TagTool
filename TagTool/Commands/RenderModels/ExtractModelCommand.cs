@@ -79,7 +79,7 @@ namespace TagTool.Commands.RenderModels
                 switch (fileType)
                 {
                     case "obj":
-                        ExtractObj(modelFile, Definition, resourceDefinition, resourceStream);
+                        ExtractObj(variantName, modelFile, Definition, resourceDefinition, resourceStream);
                         break;
                         
                     default:
@@ -92,7 +92,7 @@ namespace TagTool.Commands.RenderModels
             return true;
         }
 
-        private void ExtractObj(FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
+        private void ExtractObj(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
         {
             using (var objFile = new StreamWriter(modelFile.Create()))
             {
@@ -103,11 +103,22 @@ namespace TagTool.Commands.RenderModels
 
                 Console.WriteLine("Extracting {0} mesh(es)...", renderModel.Geometry.Meshes.Count);
 
-                foreach (var mesh in renderModel.Geometry.Meshes)
+                foreach (var region in renderModel.Regions)
                 {
-                    // Create a MeshReader for the mesh and pass it to the obj extractor
-                    var meshReader = new MeshReader(CacheContext.Version, mesh, resourceDefinition);
-                    objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                    foreach (var permutation in region.Permutations)
+                    {
+                        if (variantName != CacheContext.GetString(permutation.Name))
+                            continue;
+
+                        for (var i = 0; i < permutation.MeshCount; i++)
+                        {
+                            var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex + i];
+
+                            // Create a MeshReader for the mesh and pass it to the obj extractor
+                            var meshReader = new MeshReader(CacheContext.Version, mesh, resourceDefinition);
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        }
+                    }
                 }
 
                 objExtractor.Finish();
