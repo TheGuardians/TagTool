@@ -550,5 +550,10 @@ namespace TagTool.Geometry
             uint result = (uint)(Clamp(value, 0.0f, 1.0f)*1023.0f);
             return (result & 0x3FF);
         }
+
+        internal void SeekTo(int offset, SeekOrigin origin)
+        {
+            Reader.BaseStream.Seek(offset, origin);
+        }
     }
 }

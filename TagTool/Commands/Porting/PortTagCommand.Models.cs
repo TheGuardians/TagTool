@@ -9,8 +9,6 @@ using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
-using static TagTool.Commands.Porting.PortTagCommand.VertexDeclarationUsage;
-using static TagTool.Commands.Porting.PortTagCommand.VertexDeclarationType;
 
 namespace TagTool.Commands.Porting
 {
@@ -18,28 +16,15 @@ namespace TagTool.Commands.Porting
     {
         public enum VertexDeclarationUsage : sbyte
         {
-            None = -1,
+            Sample = -1,
             Position,
-            NodeIndices,
-            NodeWeights,
-            TexCoord,
+            BlendIndices,
+            BlendWeight,
+            TextureCoordinate,
             Normal,
             Binormal,
             Tangent,
-            AnisoBinormal,
-            IncidentRadiosity,
-            SecondaryTexCoord,
-            SecondaryPosition,
-            SecondaryNodeIndices,
-            SecondaryNodeWeights,
-            SecondaryIsqSelect,
-            Color,
-            TintFactor,
-            DsqPlane,
-            BillboardOffset,
-            BillboardAxis,
-            PcaClusterId,
-            PcaVertexWeights
+            Color
         }
 
         public enum VertexDeclarationType : sbyte
@@ -52,7 +37,7 @@ namespace TagTool.Commands.Porting
             Float4,
             UByte4,
             UByte4N,
-            RGBA,
+            Color,
             UShort2,
             UShort4,
             UShort2N,
@@ -79,409 +64,410 @@ namespace TagTool.Commands.Porting
             HenD3N
         }
 
-        private (VertexDeclarationUsage, VertexDeclarationType)[][] VertexDeclarations = new[]
+        private (string, VertexDeclarationUsage, VertexDeclarationType, int)[][] VertexDeclarations = new(string, VertexDeclarationUsage, VertexDeclarationType, int)[][]
         {
+            new (string, VertexDeclarationUsage, VertexDeclarationType, int)[0], // 0x00 Null
             new[] // 0x01 model_rigid::uncompressed
-			{
-                (Position, Float3),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
             },
             new[] // 0x02 model_rigid::compressed
-			{
-                (Position, Short3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
             new[] // 0x03 model_rigid_boned1::uncompressed
-			{
-                (Position, Float3),
-                (NodeIndices, UByteN),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
             },
             new[] // 0x04 model_rigid_boned1::compressed
-			{
-                (Position, Short3N),
-                (NodeIndices, UByteN),
-                (None, Skip),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x05 model_skinned2::uncompressed
-			{
-                (Position, Float3),
-                (NodeIndices, UByte2N),
-                (NodeWeights, UByte2N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x06
-			{
-                (Position, Short3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
             new[] // 0x07 model_rigid_boned3::uncompressed
-			{
-                (Position, Float3),
-                (NodeIndices, UByte3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x08 model_skinned3::compressed
-			{
-                (Position, Short3N),
-                (NodeIndices, UByte3N),
-                (NodeWeights, UByte3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x09 model_skinned4::uncompressed
-			{
-                (Position, Float3),
-                (NodeIndices, UByte4N),
-                (NodeWeights, UByte4N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x0A
-			{
-                (Position, Short3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
             new[] // 0x0B
-			{
-                (NodeIndices, UByteN),
+            {
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
             },
             new[] // 0x0C
-			{
-                (NodeIndices, UByte2N),
-                (NodeWeights, UByte2N),
+            {
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x0D
-			{
-                (NodeIndices, UByte3N),
-                (NodeWeights, UByte3N),
+            {
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x0E
-			{
-                (NodeIndices, UByte4N),
-                (NodeWeights, UByte4N),
+            {
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x0F
-			{
-                (SecondaryPosition, Float3),
+            {
+                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
             },
             new[] // 0x10
-			{
-                (SecondaryPosition, Short3N),
+            {
+                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
             },
             new[] // 0x11
-			{
-                (SecondaryPosition, Float3),
-                (SecondaryNodeIndices, UByteN),
+            {
+                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
             },
             new[] // 0x12
-			{
-                (SecondaryPosition, Short3N),
-                (SecondaryNodeIndices, UByteN),
-                (None, Skip),
+            {
+                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
+                ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x13
-			{
-                (SecondaryIsqSelect, UByteN),
+            {
+                ("SecondaryIsqSelect", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.UByteN, 2),
             },
             new[] // 0x14
-			{
-                (Position, Float3),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
             },
             new[] // 0x15
-			{
-                (Position, Short3N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
             new[] // 0x16
-			{
-                (Position, Float3),
-                (NodeIndices, UByteN),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
             },
             new[] // 0x17
-			{
-                (Position, Short3N),
-                (NodeIndices, UByteN),
-                (None, Skip),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x18
-			{
-                (TexCoord, Float2),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x19
-			{
-                (TexCoord, Short2N),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
             },
             new[] // 0x1A
-			{
-                (Normal, Float3),
-                (Binormal, Float3),
-                (Tangent, Float3),
+            {
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
             },
             new[] // 0x1B
-			{
-                (Normal, HenD3N),
-                (Binormal, HenD3N),
-                (Tangent, HenD3N),
+            {
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x1C
-			{
-                (AnisoBinormal, Float3),
+            {
+                ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 1),
             },
             new[] // 0x1D
-			{
-                (AnisoBinormal, HenD3N),
+            {
+                ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 1),
             },
             new[] // 0x1E
-			{
-                (SecondaryTexCoord, Float2),
+            {
+                ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 1),
             },
             new[] // 0x1F
-			{
-                (SecondaryTexCoord, Short2N),
+            {
+                ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 1),
             },
             new[] // 0x20
-			{
-                (TexCoord, Float2),
-                (Normal, HenD3N),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x21
-			{
-                (TexCoord, Short2N),
-                (Normal, HenD3N),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x22
-			{
-                (TexCoord, Float2),
-                (Normal, HenD3N),
-                (Binormal, HenD3N),
-                (Tangent, HenD3N),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x23
-			{
-                (TexCoord, Short2N),
-                (Normal, HenD3N),
-                (Binormal, HenD3N),
-                (Tangent, HenD3N),
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x24
-			{
-                (Position, Float2),
-                (TexCoord, Float2),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float2, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x25
-			{
-                (Position, Float4),
-                (TexCoord, Float2),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x26
-			{
-                (Position, Float4),
-                (NodeIndices, Float2),
-                (NodeWeights, Float2),
-                (TexCoord, Float2),
-                (Normal, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.Float2, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.Float2, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x27
-			{
-                (Position, Float3),
-                (TexCoord, Short2N),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x28
-			{
-                (Position, Float3),
-                (TexCoord, Float2),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x29
-			{
-                (Position, Float3),
-                (TexCoord, Float3),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float3, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x2A dynamic_vertex
-			{
-                (Position, Float4),
-                (NodeIndices, Float3),
-                (NodeWeights, Float1),
-                (TexCoord, Float4),
-                (Normal, Float3),
-                (Binormal, Float2),
-                (Tangent, Float4),
-                (AnisoBinormal, Float4),
-                (SecondaryTexCoord, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.Float3, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.Float1, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float4, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float2, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float4, 0),
+                ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float4, 1),
+                ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Color, 1),
             },
             new[] // 0x2B
-			{
-                (Position, UShort4N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.UShort4N, 0),
             },
             new[] // 0x2C
-			{
-                (Position, Float3),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x2D
-			{
-                (Position, Float3),
-                (TexCoord, Short2N),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
             },
             new[] // 0x2E lightmap_bucket_vertex.color::uncompressed
-			{
-                (Color, RGBA),
+            {
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x2F lightmap_bucket_vertex.color::compressed
-			{
-                (Color, UByte3N),
+            {
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x30 lightmap_bucket_vertex.incident_direction
-			{
-                (IncidentRadiosity, HenD3N),
+            {
+                ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.HenD3N, 1),
             },
             new[] // 0x31
-			{
-                (Position, Float4),
-                (TexCoord, Float2),
-                (Color, RGBA),
-                (TintFactor, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
+                ("TintFactor", VertexDeclarationUsage.Color, VertexDeclarationType.Float2, 2),
             },
             new[] // 0x32 s_decorator_model_vertex::uncompressed
-			{
-                (Position, Float3),
-                (Normal, Float3),
-                (Tangent, Float3),
-                (Binormal, Float3),
-                (TexCoord, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x33 s_decorator_model_vertex::compressed
-			{
-                (Position, Float3),
-                (Normal, HenD3N),
-                (Tangent, HenD3N),
-                (Binormal, HenD3N),
-                (TexCoord, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x34 rasterizer_vertex_decorator_decal
-			{
-                (Position, Float3),
-                (TexCoord, Float2),
-                (SecondaryTexCoord, Float2),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 1),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x35
-			{
-                (Position, Float3),
-                (TexCoord, Short2N),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x36 rasterizer_vertex_decorator_sprite::uncompressed
-			{
-                (Position, Float3),
-                (BillboardOffset, Float3),
-                (BillboardAxis, Float3),
-                (TexCoord, Float2),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("BillboardOffset", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float3, 4),
+                ("BillboardAxis", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float3, 5),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x37 rasterizer_vertex_decorator_sprite::compressed
-			{
-                (Position, Float3),
-                (BillboardOffset, HenD3N),
-                (BillboardAxis, HenD3N),
-                (TexCoord, Short2N),
-                (Color, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("BillboardOffset", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.HenD3N, 4),
+                ("BillboardAxis", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.HenD3N, 5),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x38
-			{
-                (PcaClusterId, Float1),
-                (PcaVertexWeights, Float4),
+            {
+                ("PcaClusterId", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float1, 6),
+                ("PcaVertexWeights", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float4, 7),
             },
             new[] // 0x39
-			{
-                (PcaClusterId, UShortN),
-                (PcaVertexWeights, Short4N),
+            {
+                ("PcaClusterId", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.UShortN, 6),
+                ("PcaVertexWeights", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short4N, 7),
             },
             new[] // 0x3A
-			{
-                (Position, Float2),
-                (NodeIndices, Float2),
-                (Binormal, RGBA),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float2, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.Float2, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Color, 0),
             },
             new[] // 0x3B s_particle_model_vertex::uncompressed
-			{
-                (Position, Float3),
-                (Normal, Float3),
-                (Tangent, Float3),
-                (Binormal, Float3),
-                (TexCoord, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x3C s_particle_model_vertex::uncompressed2
-			{
-                (Position, Float3),
-                (Normal, Float3),
-                (Tangent, Float3),
-                (Binormal, Float3),
-                (TexCoord, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x3D s_particle_model_vertex::compressed?
-			{
-                (Position, Float3),
-                (Normal, HenD3N),
-                (Tangent, HenD3N),
-                (Binormal, HenD3N),
-                (TexCoord, Float2),
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
             new[] // 0x3E
-			{
-                (Position, Float4),
-                (TexCoord, Float2),
-            },
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+            }
         };
 
         private RealQuaternion ReadVertexElement(VertexElementStream stream, VertexDeclarationType type)
         {
             switch (type)
             {
-                case Float1:
+                case VertexDeclarationType.Float1:
                     return new RealQuaternion(stream.ReadFloat1());
-                case Float2:
+                case VertexDeclarationType.Float2:
                     return new RealQuaternion(stream.ReadFloat2().ToArray());
-                case Float3:
+                case VertexDeclarationType.Float3:
                     return new RealQuaternion(stream.ReadFloat3().ToArray());
-                case Float4:
+                case VertexDeclarationType.Float4:
                     return new RealQuaternion(stream.ReadFloat4().ToArray());
-                case UByte4:
+                case VertexDeclarationType.UByte4:
                     return new RealQuaternion(stream.ReadUByte4().Select(i => (float)i));
-                case UByte4N:
+                case VertexDeclarationType.UByte4N:
                     return stream.ReadUByte4N();
-                case RGBA:
+                case VertexDeclarationType.Color:
                     return new RealQuaternion(BitConverter.GetBytes(stream.ReadColor()).Select(i => (float)i));
-                case UShort2:
+                case VertexDeclarationType.UShort2:
                     return new RealQuaternion(stream.ReadUShort2().ToArray());
-                case UShort4:
+                case VertexDeclarationType.UShort4:
                     return stream.ReadUShort4();
-                case UShort2N:
+                case VertexDeclarationType.UShort2N:
                     return new RealQuaternion(stream.ReadUShort2N().ToArray());
-                case UShort4N:
+                case VertexDeclarationType.UShort4N:
                     return stream.ReadUShort4N();
-                case DHen3N:
+                case VertexDeclarationType.DHen3N:
                     return new RealQuaternion(stream.ReadDHen3N().ToArray());
-                case Half2:
+                case VertexDeclarationType.Half2:
                     return new RealQuaternion(stream.ReadFloat16_2().ToArray());
-                case Half4:
+                case VertexDeclarationType.Half4:
                     return stream.ReadFloat16_4();
-                case Dec3N:
+                case VertexDeclarationType.Dec3N:
                     return new RealQuaternion(stream.ReadDec3N().ToArray());
-                case Byte4N:
+                case VertexDeclarationType.Byte4N:
                     return stream.ReadSByte4N();
-                case UByteN:
+                case VertexDeclarationType.UByteN:
                     return new RealQuaternion(stream.ReadUByteN());
-                case UByte2N:
+                case VertexDeclarationType.UByte2N:
                     return stream.ReadUByte2N();
-                case UByte3N:
+                case VertexDeclarationType.UByte3N:
                     return stream.ReadUByte3N();
-                case UShortN:
+                case VertexDeclarationType.UShortN:
                     return new RealQuaternion(stream.ReadUShortN());
-                case UShort3N:
+                case VertexDeclarationType.UShort3N:
                     return new RealQuaternion(stream.ReadUShort3N().ToArray());
-                case ShortN:
+                case VertexDeclarationType.ShortN:
                     return new RealQuaternion(stream.ReadShortN());
-                case Short2N:
+                case VertexDeclarationType.Short2N:
                     return new RealQuaternion(stream.ReadShort2N().ToArray());
-                case Short3N:
+                case VertexDeclarationType.Short3N:
                     return new RealQuaternion(stream.ReadShort3N().ToArray());
-                case Short4N:
+                case VertexDeclarationType.Short4N:
                     return stream.ReadShort4N();
-                case HenD3N:
+                case VertexDeclarationType.HenD3N:
                     return RealQuaternion.FromHenDN3(stream.ReadColor());
                 default:
                     throw new NotSupportedException(type.ToString());
@@ -534,6 +520,9 @@ namespace TagTool.Commands.Porting
 
                     mesh.RawVertices = new List<Mesh.RawVertex>(section.TotalVertexCount);
 
+                    for (var i = 0; i < section.TotalVertexCount; i++)
+                        mesh.RawVertices.Add(new Mesh.RawVertex());
+
                     var currentVertexBuffer = 0;
 
                     foreach (var resource in section.Resources)
@@ -547,7 +536,7 @@ namespace TagTool.Commands.Porting
                             continue;
 
                         var elementStream = new VertexElementStream(stream, BlamCache.Reader.Format);
-                        var declaration = VertexDeclarations[vertexBuffer.TypeIndex - 1];
+                        var declaration = VertexDeclarations[vertexBuffer.TypeIndex];
 
                         stream.Position = 8 + section.SectionDataSize + resource.ResourceDataOffset;
 
@@ -557,68 +546,80 @@ namespace TagTool.Commands.Porting
 
                             foreach (var entry in declaration)
                             {
-                                var item = ReadVertexElement(elementStream, entry.Item2);
+                                if (entry.Item3 == VertexDeclarationType.Skip)
+                                {
+                                    elementStream.SeekTo(entry.Item4, SeekOrigin.Current);
+                                    continue;
+                                }
+
+                                var element = ReadVertexElement(elementStream, entry.Item3);
 
                                 switch (resource.SecondaryLocator) // stream source
                                 {
                                     case 0:
-                                        switch (entry.Item1)
+                                        vertex.Point.NodeWeights[0] = 1.0f;
+                                        vertex.Point.NodeWeights[1] = 0.0f;
+                                        vertex.Point.NodeWeights[2] = 0.0f;
+                                        vertex.Point.NodeWeights[3] = 0.0f;
+                                        vertex.Point.NodeIndices[0] = -1;
+                                        vertex.Point.NodeIndices[1] = -1;
+                                        vertex.Point.NodeIndices[2] = -1;
+                                        vertex.Point.NodeIndices[3] = -1;
+                                        vertex.Point.UseNewNodeIndices = 1;
+                                        vertex.Point.AdjustedCompoundNodeIndex = -1;
+                                        vertex.SecondaryTexcoord.Y = 1.0f;
+
+                                        switch (entry.Item2)
                                         {
-                                            case Position:
-                                                vertex.Point.Position = item.XYZ;
+                                            case VertexDeclarationUsage.Position:
+                                                vertex.Point.Position = element.XYZ;
                                                 break;
 
-                                            // TODO: Add more
+                                            case VertexDeclarationUsage.BlendIndices:
+                                                vertex.Point.NodeIndices = new int[]
+                                                {
+                                                    (int)element.I - 1,
+                                                    (int)element.J - 1,
+                                                    (int)element.K - 1,
+                                                    (int)element.W - 1
+                                                };
+                                                break;
+
+                                            case VertexDeclarationUsage.BlendWeight:
+                                                vertex.Point.NodeWeights = element.ToArray();
+                                                break;
                                         }
-                                        /*if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypePosition, ref quat))
-                                        {
-                                            Point.Position.X = quat.Vector.I;
-                                            Point.Position.Y = quat.Vector.J;
-                                            Point.Position.Z = quat.Vector.K;
-                                        }
-                                        if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeNodeIndices, ref quat))
-                                        {
-                                            Point.NodeIndex[0].Value = ((int)quat.Vector.I) - 1;
-                                            Point.NodeIndex[1].Value = ((int)quat.Vector.J) - 1;
-                                            Point.NodeIndex[2].Value = ((int)quat.Vector.K) - 1;
-                                            Point.NodeIndex[3].Value = ((int)quat.W) - 1;
-                                        }
-                                        if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeNodeWeights, ref quat))
-                                        {
-                                            Point.NodeWeight[0].Value = quat.Vector.I;
-                                            Point.NodeWeight[1].Value = quat.Vector.J;
-                                            Point.NodeWeight[2].Value = quat.Vector.K;
-                                            Point.NodeWeight[3].Value = quat.W;
-                                        }*/
                                         break;
 
                                     case 1:
-                                        /*if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeTexCoord, ref quat))
-                                        {
-                                            Texcoord.X = quat.Vector.I;
-                                            Texcoord.Y = quat.Vector.J;
-                                        }*/
+                                        if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
+                                            vertex.Texcoord = element.XY;
                                         break;
 
                                     case 2:
-                                        /*if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeNormal, ref quat))
+                                        switch (entry.Item2)
                                         {
-                                            Normal.I = quat.Vector.I;
-                                            Normal.J = quat.Vector.J;
-                                            Normal.K = quat.Vector.K;
+                                            case VertexDeclarationUsage.Normal:
+                                                vertex.Normal = element.IJK;
+                                                break;
+
+                                            case VertexDeclarationUsage.Binormal:
+                                                vertex.Binormal = element.IJK;
+                                                break;
+
+                                            case VertexDeclarationUsage.Tangent:
+                                                vertex.Tangent = element.IJK;
+                                                break;
                                         }
-                                        if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeBinormal, ref quat))
-                                        {
-                                            Binormal.I = quat.Vector.I;
-                                            Binormal.J = quat.Vector.J;
-                                            Binormal.K = quat.Vector.K;
-                                        }
-                                        if (stream_reader.FindStreamedElement(BlamLib.Render.VertexBufferInterface.kTypeTangent, ref quat))
-                                        {
-                                            Tangent.I = quat.Vector.I;
-                                            Tangent.J = quat.Vector.J;
-                                            Tangent.K = quat.Vector.K;
-                                        }*/
+                                        break;
+
+                                    case 3:
+                                        break;
+
+                                    case 4:
+                                        break;
+
+                                    case 5:
                                         break;
 
                                     default:
