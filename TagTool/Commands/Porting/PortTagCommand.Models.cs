@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
@@ -64,7 +65,7 @@ namespace TagTool.Commands.Porting
             HenD3N
         }
 
-        private (string, VertexDeclarationUsage, VertexDeclarationType, int)[][] VertexDeclarations = new(string, VertexDeclarationUsage, VertexDeclarationType, int)[][]
+        private (string, VertexDeclarationUsage, VertexDeclarationType, int)[][] VertexDeclarations = new[]
         {
             new (string, VertexDeclarationUsage, VertexDeclarationType, int)[0], // 0x00 Null
             new[] // 0x01 model_rigid::uncompressed
@@ -474,12 +475,12 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private object ConvertGen2RenderModel(RenderModel mode)
+        private object ConvertGen2RenderModel(CachedTagInstance edTag, RenderModel mode)
         {
+            var compressor = new VertexCompressor(mode.Compression[0]);
+
             foreach (var section in mode.Sections)
             {
-                var compressor = new VertexCompressor(mode.Compression[0]);
-
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
                 using (var writer = new EndianWriter(stream, BlamCache.Reader.Format))
@@ -671,7 +672,165 @@ namespace TagTool.Commands.Porting
                     // TODO: prt vertex buffers
                 }
             }
-            
+
+            var builder = new RenderModelBuilder(CacheContext.Version);
+
+            foreach (var node in mode.Nodes)
+                builder.AddNode(node);
+
+            foreach (var material in mode.Materials)
+                builder.AddMaterial(new RenderMaterial { RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid") });
+
+            foreach (var region in mode.Regions)
+            {
+                builder.BeginRegion(region.Name);
+
+                foreach (var permutation in region.Permutations)
+                {
+                    builder.BeginPermutation(permutation.Name);
+
+                    var sectionIndex = -1;
+
+                    foreach (var lodSectionIndex in permutation.LodSectionIndices)
+                        if (lodSectionIndex > 0)
+                            sectionIndex = lodSectionIndex;
+
+                    if (sectionIndex < 0)
+                    {
+                        builder.EndPermutation();
+                        continue;
+                    }
+
+                    var section = mode.Sections[sectionIndex];
+
+                    foreach (var mesh in section.Meshes)
+                    {
+                        builder.BeginMesh();
+
+                        var worldVertices = new List<WorldVertex>();
+                        var rigidVertices = new List<RigidVertex>();
+                        var skinnedVertices = new List<SkinnedVertex>();
+
+                        foreach (var vertex in mesh.RawVertices)
+                        {
+                            switch (section.GeometryClassification)
+                            {
+                                case RenderGeometryClassification.Worldspace:
+                                    worldVertices.Add(new WorldVertex
+                                    {
+                                        Position = new RealQuaternion(vertex.Point.Position.ToArray()),
+                                        Texcoord = vertex.Texcoord.IJ,
+                                        Normal = vertex.Normal,
+                                        Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
+                                        Binormal = vertex.Binormal
+                                    });
+                                    break;
+
+                                case RenderGeometryClassification.Rigid:
+                                    rigidVertices.Add(new RigidVertex
+                                    {
+                                        Position = new RealQuaternion(vertex.Point.Position.ToArray()),
+                                        Texcoord = vertex.Texcoord.IJ,
+                                        Normal = vertex.Normal,
+                                        Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
+                                        Binormal = vertex.Binormal
+                                    });
+                                    break;
+
+                                case RenderGeometryClassification.RigidBoned:
+                                case RenderGeometryClassification.Skinned:
+                                    skinnedVertices.Add(new SkinnedVertex
+                                    {
+                                        Position = new RealQuaternion(vertex.Point.Position.ToArray()),
+                                        Texcoord = vertex.Texcoord.IJ,
+                                        Normal = vertex.Normal,
+                                        Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
+                                        Binormal = vertex.Binormal,
+                                        BlendIndices = vertex.Point.NodeIndices.Select(i => (byte)i).ToArray(),
+                                        BlendWeights = section.GeometryClassification == RenderGeometryClassification.RigidBoned ?
+                                            new[] { 1.0f, 0.0f, 0.0f, 0.0f } :
+                                            vertex.Point.NodeWeights
+                                    });
+                                    break;
+                                    
+                                default:
+                                    throw new NotSupportedException(section.GeometryClassification.ToString());
+                            }
+                        }
+
+                        var indices = new List<ushort>();
+
+                        foreach (var part in mesh.Parts)
+                        {
+                            var partIndices = new HashSet<short>();
+
+                            for (var i = part.FirstIndex; i < part.FirstIndex + part.IndexCount; i++)
+                                if (!partIndices.Contains(mesh.StripIndices[i].Index))
+                                    partIndices.Add(mesh.StripIndices[i].Index);
+
+                            builder.BeginPart(part.MaterialIndex, part.FirstIndex, part.IndexCount, (ushort)partIndices.Count);
+                            
+                            for (var i = 0; i < part.SubPartCount; i++)
+                            {
+                                var subPart = mesh.SubParts[part.FirstSubPartIndex + i];
+                                var subPartIndices = new HashSet<short>();
+
+                                for (var j = subPart.FirstIndex; j < subPart.FirstIndex + subPart.IndexCount; j++)
+                                    if (!subPartIndices.Contains(mesh.StripIndices[j].Index))
+                                        subPartIndices.Add(mesh.StripIndices[j].Index);
+
+                                builder.DefineSubPart(subPart.FirstIndex, subPart.IndexCount, (ushort)subPartIndices.Count);
+                            }
+
+                            builder.EndPart();
+                        }
+
+                        switch (section.GeometryClassification)
+                        {
+                            case RenderGeometryClassification.Worldspace:
+                                builder.BindWorldVertexBuffer(worldVertices);
+                                break;
+
+                            case RenderGeometryClassification.Rigid:
+                                builder.BindRigidVertexBuffer(rigidVertices, (sbyte)section.RigidNode);
+                                break;
+
+                            case RenderGeometryClassification.RigidBoned:
+                            case RenderGeometryClassification.Skinned:
+                                builder.BindSkinnedVertexBuffer(skinnedVertices);
+                                break;
+
+                            default:
+                                throw new NotSupportedException(section.GeometryClassification.ToString());
+                        }
+                        
+                        builder.BindIndexBuffer(mesh.StripIndices.Select(i => (ushort)i.Index), IndexBufferFormat.TriangleStrip);
+
+                        builder.EndMesh();
+                    }
+
+                    builder.EndPermutation();
+                }
+
+                builder.EndRegion();
+            }
+
+            using (var resourceDataStream = new MemoryStream())
+            {
+                var result = builder.Build(CacheContext.Serializer, resourceDataStream);
+                result.MarkerGroups = mode.MarkerGroups;
+
+                foreach (var mesh in result.Geometry.Meshes)
+                    if (mesh.Type == VertexType.Skinned)
+                        mesh.RigidNodeIndex = -1;
+                
+                resourceDataStream.Position = 0;
+                result.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(result.Geometry.Resource, resourceDataStream);
+
+                mode = result;
+            }
+
             return mode;
         }
     }

@@ -390,6 +390,11 @@ namespace TagTool.Commands.Porting
                         chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
                     break;
 
+                case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
+                    foreach (var material in mode.Materials)
+                        material.RenderMethod = null;
+                    break;
+
                 case Scenario scenario when NoSquads:
                     scenario.Squads = new List<Scenario.Squad>();
 					break;
@@ -512,6 +517,10 @@ namespace TagTool.Commands.Porting
                 // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
                 case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
+                    break;
+                    
+                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
+                    blamDefinition = ConvertGen2RenderModel(edTag, renderModel);
                     break;
 
                 case Scenario scnr:
@@ -674,12 +683,6 @@ namespace TagTool.Commands.Porting
 				case RenderMethod renderMethod when !MatchShaders && type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0:
 					data = ConvertStructure(cacheStream, data, type, definition, blamTagName);
 					return ConvertRenderMethodGenerated(cacheStream, renderMethod, blamTagName);
-
-                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
-                    foreach (var material in renderModel.Materials)
-                        material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
-                    data = ConvertGen2RenderModel(renderModel);
-                    break;
 
                 case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
