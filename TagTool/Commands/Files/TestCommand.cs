@@ -363,11 +363,7 @@ namespace TagTool.Commands.Files
 
             if (instance != null)
             {
-                var chars = new char[] { ' ', ' ', ' ', ' ' };
-                for (var i = 0; i < instance.ClassCode.Length; i++)
-                    chars[i] = instance.ClassCode[i];
-
-                var tags = cacheContext.TagCache.Index.FindAllInGroup(new string(chars));
+                var tags = cacheContext.TagCache.Index.FindAllInGroup(instance.GroupTag);
 
                 foreach (var tag in tags)
                 {

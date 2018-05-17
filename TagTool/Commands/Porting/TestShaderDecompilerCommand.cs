@@ -40,7 +40,7 @@ namespace TagTool.Commands.Porting
 			PixelShader pixl = new PixelShader();
 			foreach (var tag in BlamCache.IndexItems)
 			{
-				if (tag.ClassCode != "pixl" || (args.Count == 2 && tag.Filename != args[1]))
+				if (tag.GroupTag != "pixl" || (args.Count == 2 && tag.Filename != args[1]))
 					continue;
 
 				var blamContext = new CacheSerializationContext(BlamCache, tag);

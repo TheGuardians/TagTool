@@ -64,7 +64,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if ((tag.ClassCode == "mode") && (tag.Filename == blamTagName))
+                if ((tag.GroupTag == "mode") && (tag.Filename == blamTagName))
                 {
                     blamTag = tag;
                     break;
@@ -481,7 +481,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if ((tag.ClassCode == "hlmt") && (tag.Filename == blamTagName))
+                    if ((tag.GroupTag == "hlmt") && (tag.Filename == blamTagName))
                     {
                         blamHlmtTag = tag;
                         break;

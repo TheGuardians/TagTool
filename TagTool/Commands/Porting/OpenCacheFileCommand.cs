@@ -81,6 +81,12 @@ namespace TagTool.Commands.Porting
                 {
                     case CacheVersion.Halo2Xbox:
                     case CacheVersion.Halo2Vista:
+                        if (blamCacheFile.Name != "mainmenu.map")
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "mainmenu.map")), version);
+                        if (blamCacheFile.Name != "shared.map")
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "shared.map")), version);
+                        if (blamCacheFile.Name != "single_player_shared.map")
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "single_player_shared.map")), version);
                         blamCache = new CacheFileGen2(CacheContext, blamCacheFile, version);
                         break;
                         

@@ -215,7 +215,7 @@ namespace TagTool.Cache
 
                 int matgOffset = -1;
                 foreach (IndexItem item in cache.IndexItems)
-                    if (item.ClassCode == "matg")
+                    if (item.GroupTag == "matg")
                     {
                         matgOffset = item.Offset;
                         break;
@@ -294,20 +294,26 @@ namespace TagTool.Cache
         {
             public CacheFile Cache;
 
-            public string ClassCode =>
-                (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].ClassCode;
+            public Tag GroupTag =>
+                (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].ClassCode == null) ?
+                    Tag.Null :
+                    new Tag(Cache.IndexItems.ClassList[ClassIndex].ClassCode.ToCharArray());
 
-            public string ClassName =>
+            public string GroupName =>
                 Cache.Version < CacheVersion.Halo3Retail ?
-                    GetGen2GroupName(new Tag(ClassCode)) :
+                    GetGen2GroupName(GroupTag) :
                     Cache.Strings.GetItemByID(Cache.IndexItems.ClassList[ClassIndex].StringID);
 
-            public string ParentClass =>
-                (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].Parent;
+            public Tag ParentGroupTag =>
+                (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].Parent == null) ?
+                    Tag.Null :
+                    new Tag(Cache.IndexItems.ClassList[ClassIndex].Parent.ToCharArray());
 
-            public string ParentClass2 =>
-                (ClassIndex == -1) ? "____" : Cache.IndexItems.ClassList[ClassIndex].Parent2;
-            
+            public Tag GrandparentGroupTag =>
+                (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].Parent2 == null) ?
+                    Tag.Null :
+                    new Tag(Cache.IndexItems.ClassList[ClassIndex].Parent2.ToCharArray());
+
             private string GetGen2GroupName(Tag groupTag)
             {
                 if (!TagDefinition.Types.ContainsKey(groupTag))
@@ -328,10 +334,11 @@ namespace TagTool.Cache
             public int Size;
             public int metaIndex;
             public int Magic;
+            public bool External = false;
 
             public override string ToString()
             {
-                return "[" + ClassCode + "] " + Filename;
+                return "[" + GroupTag + "] " + Filename;
             }
         }
 
@@ -344,6 +351,22 @@ namespace TagTool.Cache
                 if (ID == -1)
                     return null;
                 return this[ID & 0xFFFF];
+            }
+
+            public IndexItem this[Tag groupTag, string tagName]
+            {
+                get
+                {
+                    foreach (var blamTag in this)
+                    {
+                        if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Filename == tagName))
+                        {
+                            return blamTag;
+                        }
+                    }
+
+                    throw new KeyNotFoundException($"[{groupTag}] {tagName}");
+                }
             }
         }
 

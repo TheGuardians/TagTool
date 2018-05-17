@@ -34,9 +34,9 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if (tag.ClassCode == args[0])
+                    if (tag.GroupTag == args[0])
                     {
-                        tagsList.Add("[" + tag.ClassCode.ToString() + "] " + tag.Filename.ToString()); // BlamCache.Header.scenarioName
+                        tagsList.Add("[" + tag.GroupTag.ToString() + "] " + tag.Filename.ToString()); // BlamCache.Header.scenarioName
                     }
                 }
             }
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    tagsList.Add("[" + tag.ClassCode.ToString() + "] " + tag.Filename.ToString());
+                    tagsList.Add("[" + tag.GroupTag.ToString() + "] " + tag.Filename.ToString());
                 }
             }
 

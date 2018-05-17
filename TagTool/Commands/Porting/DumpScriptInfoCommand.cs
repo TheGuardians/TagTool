@@ -39,7 +39,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if (tag.ClassCode == "scnr")
+                if (tag.GroupTag == "scnr")
                 {
                     blamTag = tag;
                     break;

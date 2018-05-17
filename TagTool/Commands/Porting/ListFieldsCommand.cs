@@ -81,7 +81,7 @@ namespace TagTool.Commands.Porting
 
                     var item = BlamCache.IndexItems.GetItemByID(instance.Index);
                     
-                    valueString = item == null ? "<null>" : $"[0x{instance.Index:X8}] {item.Filename}.{item.ClassName}";
+                    valueString = item == null ? "<null>" : $"[0x{instance.Index:X8}] {item.Filename}.{item.GroupName}";
                 }
                 else if (fieldType == typeof(TagFunction))
                 {

@@ -50,7 +50,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if (tag.ClassCode == "sbsp" && tag.Filename == blamTagName)
+                if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
                 {
                     blamTag = tag;
                     break;
@@ -80,7 +80,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if (tag.ClassCode == "sbsp" && tag.Filename == blamTagName)
+                    if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
                     {
                         blamLbspTag = tag;
                         break;
@@ -101,7 +101,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if (tag.ClassCode == "scnr")
+                    if (tag.GroupTag == "scnr")
                     {
                         blamScenarioTag = tag;
                         break;
@@ -128,7 +128,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if (tag.ClassCode == "sLdT")
+                    if (tag.GroupTag == "sLdT")
                     {
                         blamsLdTTag = tag;
                         break;

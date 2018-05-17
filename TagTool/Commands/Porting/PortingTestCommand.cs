@@ -134,7 +134,7 @@ namespace TagTool.Commands.Porting
             
             foreach (var item in BlamCache.IndexItems)
             {
-                if (item.ClassCode == args[0] && item.Filename == args[1])
+                if (item.GroupTag == args[0] && item.Filename == args[1])
                 {
                     blamInstance = item;
                     break;
@@ -145,7 +145,7 @@ namespace TagTool.Commands.Porting
 
             var Value = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
 
-            var Structure = new TagStructureInfo(TagDefinition.Find(blamInstance.ClassCode));
+            var Structure = new TagStructureInfo(TagDefinition.Find(blamInstance.GroupTag));
 
             var match = false;
             var token = "";
@@ -194,7 +194,7 @@ namespace TagTool.Commands.Porting
                         {
                             var blamInstance2 = BlamCache.IndexItems.Find(x => x.ID == instance.Index);
 
-                            valueString = $"{blamInstance2.Filename}.{blamInstance2.ClassCode}";
+                            valueString = $"{blamInstance2.Filename}.{blamInstance2.GroupTag}";
                         }
                     }
                     else
@@ -384,15 +384,15 @@ namespace TagTool.Commands.Porting
             foreach (var tag in tags)
             {
                 if (args.Count == 2)
-                    if (tag.ClassCode.ToString() == args[0] && tag.Filename.Contains(args[1]))
-                        Console.WriteLine($"[{tag.ClassCode}] {tag.Filename}");
+                    if (tag.GroupTag.ToString() == args[0] && tag.Filename.Contains(args[1]))
+                        Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
 
                 if (args.Count == 1)
-                    if (tag.ClassCode.ToString() == args[0])
-                        Console.WriteLine($"[{tag.ClassCode}] {tag.Filename}");
+                    if (tag.GroupTag.ToString() == args[0])
+                        Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
 
                 if (args.Count == 0)
-                    Console.WriteLine($"[{tag.ClassCode}] {tag.Filename}");
+                    Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
             }
 
             return true;
@@ -408,12 +408,12 @@ namespace TagTool.Commands.Porting
             
             foreach (var item in BlamCache.IndexItems)
             {
-                if (item.ClassCode == args[0])
+                if (item.GroupTag == args[0])
                 {
                     var blamContext = new CacheSerializationContext(BlamCache, item);
                     var def = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
 
-                    Console.WriteLine($"Deserialized [{item.ClassCode}] {item.Filename}");
+                    Console.WriteLine($"Deserialized [{item.GroupTag}] {item.Filename}");
 
                     var jmad = (ModelAnimationGraph)def;
                 }

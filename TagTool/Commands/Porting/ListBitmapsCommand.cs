@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if ((tag.ParentClass == "rm") && tag.Filename == shaderName)
+                if ((tag.ParentGroupTag == "rm") && tag.Filename == shaderName)
                 {
                     item = tag;
                     break;

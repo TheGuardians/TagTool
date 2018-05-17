@@ -692,7 +692,7 @@ namespace TagTool.Commands.Porting
                 {
                     builder.BeginPermutation(permutation.Name);
 
-                    var sectionIndex = permutation.LodSectionIndices.Where(i => i > 0).Last();
+                    var sectionIndex = permutation.LodSectionIndices.Where(i => i >= 0).Last();
 
                     if (sectionIndex < 0)
                     {

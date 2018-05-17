@@ -238,7 +238,7 @@ namespace TagTool.Cache
 
             foreach (IndexItem item in IndexItems)
             {
-                if (item.ClassCode == "play")
+                if (item.GroupTag == "play")
                 {
                     var blamContext = new CacheSerializationContext(this, item);
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
@@ -248,7 +248,7 @@ namespace TagTool.Cache
 
             foreach (IndexItem item in IndexItems)
             {
-                if (item.ClassCode == "zone")
+                if (item.GroupTag == "zone")
                 {
                     var blamContext = new CacheSerializationContext(this, item);
                     ResourceGestalt = deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);

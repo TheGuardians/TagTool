@@ -122,9 +122,9 @@ namespace TagTool.Commands.Porting
 
 			// find the CacheFile.IndexItem(s)
 			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
-				item => item != null && groupTag == item.ClassCode);
+				item => item != null && groupTag == item.GroupTag);
 			else result.Add( BlamCache.IndexItems.Find(
-				item => item != null && groupTag == item.ClassCode && tagName == item.Filename));
+				item => item != null && groupTag == item.GroupTag && tagName == item.Filename));
 
 			if (result.Count == 0)
                 Console.WriteLine($"Invalid tag name: {tagSpecifier}");
@@ -136,16 +136,12 @@ namespace TagTool.Commands.Porting
         {
             if (blamTag == null)
                 return null;
-            
+
             //
             // Check to see if the ElDorado tag exists
             //
 
-            var groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
-            for (var i = 0; i < blamTag.ClassCode.Length; i++)
-                groupTagChars[i] = blamTag.ClassCode[i];
-
-            var groupTag = new Tag(new string(groupTagChars));
+            var groupTag = blamTag.GroupTag;
 
             CachedTagInstance edTag = null;
 
@@ -343,27 +339,10 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    var blamGroup = BlamCache.IndexItems.ClassList[blamTag.ClassIndex];
-
-                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
-                    for (var i = 0; i < blamGroup.ClassCode.Length; i++)
-                        groupTagChars[i] = blamGroup.ClassCode[i];
-
-                    var tag1 = new Tag(new string(groupTagChars));
-
-                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
-                    for (var i = 0; i < blamGroup.Parent.Length; i++)
-                        groupTagChars[i] = blamGroup.Parent[i];
-
-                    var tag2 = new Tag(new string(groupTagChars));
-
-                    groupTagChars = new char[] { ' ', ' ', ' ', ' ' };
-                    for (var i = 0; i < blamGroup.Parent2.Length; i++)
-                        groupTagChars[i] = blamGroup.Parent2[i];
-
-                    var tag3 = new Tag(new string(groupTagChars));
-
-                    edGroup = new TagGroup(tag1, tag2, tag3, CacheContext.GetStringId(BlamCache.Strings.GetItemByID(blamGroup.StringID)));
+                    edGroup = new TagGroup(
+                        blamTag.GroupTag,
+                        blamTag.ParentGroupTag,
+                        blamTag.GrandparentGroupTag, CacheContext.GetStringId(blamTag.GroupName));
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
@@ -851,11 +830,7 @@ namespace TagTool.Commands.Porting
 
             if (instance != null)
             {
-                var chars = new char[] { ' ', ' ', ' ', ' ' };
-                for (var i = 0; i < instance.ClassCode.Length; i++)
-                    chars[i] = instance.ClassCode[i];
-
-                var tags = CacheContext.TagCache.Index.FindAllInGroup(new string(chars));
+                var tags = CacheContext.TagCache.Index.FindAllInGroup(instance.GroupTag);
 
                 foreach (var tag in tags)
                 {

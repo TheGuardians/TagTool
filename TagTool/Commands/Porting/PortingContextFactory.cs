@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in blamCache.IndexItems)
             {
-                if (tag.ClassCode == "zone")
+                if (tag.GroupTag == "zone")
                 {
                     blamTag = tag;
                     break;
@@ -42,7 +42,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in blamCache.IndexItems)
             {
-                if (tag.ClassCode == "ugh!")
+                if (tag.GroupTag == "ugh!")
                 {
                     blamTag = tag;
                     break;

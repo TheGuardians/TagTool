@@ -8,9 +8,20 @@ namespace TagTool.Cache
 {
     public class CacheFileGen2 : CacheFile
     {
+        public static CacheFileGen2 MainMenuCache { get; private set; } = null;
+        public static CacheFileGen2 SharedCache { get; private set; } = null;
+        public static CacheFileGen2 SinglePlayerSharedCache { get; private set; } = null;
+
         public CacheFileGen2(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
             base(cacheContext, file, version)
         {
+            if (file.Name == "mainmenu.map" && MainMenuCache?.File.FullName != file.FullName)
+                MainMenuCache = this;
+            else if (file.Name == "shared.map" && SharedCache?.File.FullName != file.FullName)
+                SharedCache = this;
+            else if (file.Name == "single_player_shared.map" && SharedCache?.File.FullName != file.FullName)
+                SinglePlayerSharedCache = this;
+
             IndexHeader = new CacheIndexHeader(this);
             IndexItems = new IndexTable(this);
             Strings = new StringTable(this);
@@ -44,6 +55,8 @@ namespace TagTool.Cache
         {
             public IndexTable(CacheFile cache)
             {
+                Clear();
+
                 var IH = cache.IndexHeader;
                 var CH = cache.Header;
                 var reader = cache.Reader;
@@ -75,13 +88,18 @@ namespace TagTool.Cache
                         Cache = cache,
                         ClassIndex = index,
                         ID = reader.ReadInt32(),
-                        Offset = reader.ReadInt32() - cache.Magic,
+                        Offset = reader.ReadInt32(),
                         Size = reader.ReadInt32()
                     };
+
+                    if (item.Offset == 0 || item.ID == -1)
+                        item.External = true;
+                    else
+                        item.Offset -= cache.Magic;
                     
                     Add(item);
                     
-                    if (cname == "scnr")
+                    if (cname == "scnr" && cache.Version < CacheVersion.Halo2Vista)
                     {
                         long tempOffset = reader.Position;
 

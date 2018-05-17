@@ -647,7 +647,7 @@ namespace TagTool.Commands.Porting
 
                 var edTag = CacheContext.GetTag(entry.Key);
 
-                if (edTag.Group.Tag == blamTag.ClassCode)
+                if (edTag.Group.Tag == blamTag.GroupTag)
                 {
                     expr.Data = BitConverter.GetBytes(entry.Key).ToArray();
                     match = true;
@@ -659,7 +659,7 @@ namespace TagTool.Commands.Porting
             {
                 Console.WriteLine($"ERROR: no tag matches {blamTag.Filename}. Replacing with 0x12FE (GBP)");
 
-                switch (blamTag.ClassCode)
+                switch (blamTag.GroupTag.ToString())
                 {
                     case "effe":
                         expr.Data = new byte[] { 0xFE, 0x12, 0x00, 0x00 };

@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var blamTag in BlamCache.IndexItems)
             {
-                if ((blamTag.ClassCode == groupTag.ToString()) && (blamTag.Filename == blamTagName))
+                if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Filename == blamTagName))
                 {
                     tag = blamTag;
                     break;

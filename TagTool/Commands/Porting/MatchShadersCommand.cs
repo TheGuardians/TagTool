@@ -53,7 +53,7 @@ namespace TagTool.Commands.Porting
 
         public static CachedTagInstance PortShaderTag(Stream stream, HaloOnlineCacheContext cacheContext, CacheFile blamCache, CacheFile.IndexItem h3Tag)
         {
-            WriteLine($"[{h3Tag.ClassCode}] {h3Tag.Filename} processing...");
+            WriteLine($"[{h3Tag.GroupTag}] {h3Tag.Filename} processing...");
 
             var tag = PortTagReference(cacheContext, blamCache, h3Tag.ID);
 
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var instance in BlamCache.IndexItems)
                 {
-                    if (instance.ClassCode == args[0] && instance.Filename == args[1])
+                    if (instance.GroupTag == args[0] && instance.Filename == args[1])
                     {
                         h3Tag = instance;
                         break;
@@ -174,7 +174,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var instance in BlamCache.IndexItems)
             {
-                if ((instance.ClassCode == tagGroup.ToString()) && (instance.Filename == tagName))
+                if ((instance.GroupTag == tagGroup.ToString()) && (instance.Filename == tagName))
                 {
                     h3Tag = instance;
                     break;
@@ -262,7 +262,7 @@ namespace TagTool.Commands.Porting
                 {
 
                     var h3RenderMethod = blamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
-                    WriteLine($"[{i:D3}] [{h3RenderMethod.ClassCode}] {h3RenderMethod.Filename}");
+                    WriteLine($"[{i:D3}] [{h3RenderMethod.GroupTag}] {h3RenderMethod.Filename}");
                 }
                 else
                 {
@@ -286,7 +286,7 @@ namespace TagTool.Commands.Porting
                 var h3RenderMethod = blamCache.IndexItems.GetItemByID(material.RenderMethod.Index);
 
                 WriteLine("");
-                WriteLine($"[{i:D3}] [{h3RenderMethod.ClassCode}] {h3RenderMethod.Filename}");
+                WriteLine($"[{i:D3}] [{h3RenderMethod.GroupTag}] {h3RenderMethod.Filename}");
 
                 // Hardcoded tag indexes or rmt2 tags, called presets
                 GetShaderPresets(cacheContext, h3RenderMethod.Filename);
@@ -361,9 +361,9 @@ namespace TagTool.Commands.Porting
             return materials;
         }
 
-        public static RenderMethod ConvertDefinition(string tagClass, object h3Definition)
+        public static RenderMethod ConvertDefinition(Tag groupTag, object h3Definition)
         {
-            switch (tagClass)
+            switch (groupTag.ToString())
             {
                 case "cntl":
                     var cntl = (ContrailSystem)h3Definition;
@@ -412,7 +412,7 @@ namespace TagTool.Commands.Porting
                 //     return rmbk;
 
                 default:
-                    WriteLine($"ERROR: shader class/group not supported: {tagClass}");
+                    WriteLine($"ERROR: shader class/group not supported: {groupTag}");
                     return null;
             }
 
@@ -422,22 +422,18 @@ namespace TagTool.Commands.Porting
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
             var blamContext = new CacheSerializationContext(BlamCache, h3ShaderTag);
-
-            var blamTagGroupChars = new char[] { ' ', ' ', ' ', ' ' };
-            for (var i = 0; i < h3Tag.ClassCode.Length; i++)
-                blamTagGroupChars[i] = h3Tag.ClassCode[i];
-
+            
             object h3Definition = null;
 
-            if (h3Tag.ClassCode == "rmd")
+            if (h3Tag.GroupTag == "rmd")
                 h3Definition = BlamCache.Deserializer.Deserialize<ShaderDecal>(blamContext);
             // rmw was disabled previously
             // else if (h3Tag.ClassCode == "rmw")
             //     h3Definition = blamDeserializer.Deserialize<ShaderWater>(blamContext);
             else
-                h3Definition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(h3Tag.ClassCode));
+                h3Definition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(h3Tag.GroupTag));
 
-            var h3Shader = ConvertDefinition(h3Tag.ClassCode, h3Definition);
+            var h3Shader = ConvertDefinition(h3Tag.GroupTag, h3Definition);
 
             if (h3Shader == null)
                 return null;
@@ -469,7 +465,7 @@ namespace TagTool.Commands.Porting
             // Find the shader that uses this rmt2 tag. Proceed only for non hardcoded rmt2 tags
             if (rmPreset == 0 && rmt2Preset != 0)
             {
-                foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(new string(blamTagGroupChars)))
+                foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(h3Tag.GroupTag))
                 {
                     if (instance.Dependencies.Contains(rmt2Preset))
                     {
@@ -505,7 +501,7 @@ namespace TagTool.Commands.Porting
             // Find the shader that uses this rmt2 tag. Proceed only for non hardcoded tags
             if (rmPreset == 0 && rmt2Preset != 0)
             {
-                foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(new string(blamTagGroupChars)))
+                foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(h3Tag.GroupTag))
                 {
                     if (instance.Dependencies.Contains(rmt2Preset))
                     {
@@ -535,7 +531,7 @@ namespace TagTool.Commands.Porting
                 return CacheContext.GetTag(0x3AB0);
             }
 
-            var edShader = ConvertDefinition(edTag.Group.Tag.ToString(), edDefinition);
+            var edShader = ConvertDefinition(edTag.Group.Tag, edDefinition);
 
             // Check for errors
             if (edShader == null)
@@ -1104,7 +1100,7 @@ namespace TagTool.Commands.Porting
 
                                 foreach (var tag in blamCache.IndexItems)
                                 {
-                                    if ((tag.ClassCode == "bitm") && (tag.Filename == tagname))
+                                    if ((tag.GroupTag == "bitm") && (tag.Filename == tagname))
                                     {
                                         blamTag = tag;
                                         break;
@@ -1265,11 +1261,7 @@ namespace TagTool.Commands.Porting
 
             if (instance != null)
             {
-                var chars = new char[] { ' ', ' ', ' ', ' ' };
-                for (var i = 0; i < instance.ClassCode.Length; i++)
-                    chars[i] = instance.ClassCode[i];
-
-                var tags = cacheContext.TagCache.Index.FindAllInGroup(new string(chars));
+                var tags = cacheContext.TagCache.Index.FindAllInGroup(instance.GroupTag);
 
                 foreach (var tag in tags)
                 {

@@ -38,6 +38,25 @@ namespace TagTool.Common
         }
 
         /// <summary>
+        /// Constructs a magic number from a character array.
+        /// </summary>
+        /// <param name="str">The character array.</param>
+        public Tag(char[] input)
+        {
+            var chars = new char[4] { ' ', ' ', ' ', ' ' };
+
+            for (var i = 0; i < input.Length; i++)
+                chars[i] = input[i];
+
+            Value = 0;
+            foreach (var c in chars)
+            {
+                Value <<= 8;
+                Value |= c;
+            }
+        }
+
+        /// <summary>
         /// Gets the value of the magic number as an integer.
         /// </summary>
         public readonly int Value;
