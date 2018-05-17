@@ -71,8 +71,10 @@ namespace TagTool.Commands.Porting
                         ((IList)fieldValue).Count != 0 ?
                             $"{{...}}[{((IList)fieldValue).Count}]" :
                         "null";
-                else if (fieldType == typeof(StringId))
-                    valueString = BlamCache.Strings.GetItemByID((int)((StringId)fieldValue).Value);
+                else if (fieldValue is StringId stringId)
+                    valueString = BlamCache.Version < CacheVersion.Halo3Retail ?
+                        BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
+                        BlamCache.Strings.GetString(stringId);
                 else if (fieldType == typeof(CachedTagInstance))
                 {
                     var instance = (CachedTagInstance)fieldValue;
