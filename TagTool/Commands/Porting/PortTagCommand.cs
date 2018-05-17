@@ -750,6 +750,9 @@ namespace TagTool.Commands.Porting
 
         private StringId ConvertStringId(StringId stringId)
         {
+            if (stringId == StringId.Invalid)
+                return stringId;
+
             var value = BlamCache.Version < CacheVersion.Halo3Retail ?
                 BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
                 BlamCache.Strings.GetString(stringId);
