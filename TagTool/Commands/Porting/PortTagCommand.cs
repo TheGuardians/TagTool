@@ -685,8 +685,6 @@ namespace TagTool.Commands.Porting
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
 				case StringId stringId:
-                    if (BlamCache.Version < CacheVersion.Halo3Retail)
-                        return CacheContext.GetStringId(BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)));
 					return ConvertStringId(stringId);
 
 				case TagFunction tagFunction:
@@ -752,16 +750,21 @@ namespace TagTool.Commands.Porting
 
         private StringId ConvertStringId(StringId stringId)
         {
-            var value = BlamCache.Strings.GetString(stringId);
-            var edStringId = CacheContext.StringIdCache.GetStringId(stringId.Set, value);
+            var value = BlamCache.Version < CacheVersion.Halo3Retail ?
+                BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
+                BlamCache.Strings.GetString(stringId);
+
+            var edStringId = BlamCache.Version < CacheVersion.Halo3Retail ?
+                CacheContext.GetStringId(value) :
+                CacheContext.StringIdCache.GetStringId(stringId.Set, value);
 
             if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
                 return edStringId;
 
             if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
-                CacheContext.StringIdCache.AddString(value);
+                return CacheContext.StringIdCache.AddString(value);
 
-            return CacheContext.GetStringId(value);
+            return StringId.Invalid;
         }
 
         private Array ConvertArray(Stream cacheStream, Array array, object definition, string blamTagName)

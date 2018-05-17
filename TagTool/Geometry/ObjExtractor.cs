@@ -42,8 +42,12 @@ namespace TagTool.Geometry
             // Read and write out the triangles for each part
             foreach (var part in reader.Mesh.Parts)
             {
-                var indices = ReadIndices(reader, part, resourceStream);
-                WriteTriangles(indices);
+                try
+                {
+                    var indices = ReadIndices(reader, part, resourceStream);
+                    WriteTriangles(indices);
+                }
+                catch { }
             }
             _baseIndex += (uint)vertices.Count;
         }
