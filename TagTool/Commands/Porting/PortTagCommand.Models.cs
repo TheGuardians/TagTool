@@ -626,6 +626,9 @@ namespace TagTool.Commands.Porting
                                         if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
                                             vertex.PrimaryLightmapColor = element.RGB;
                                         break;
+
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -689,11 +692,7 @@ namespace TagTool.Commands.Porting
                 {
                     builder.BeginPermutation(permutation.Name);
 
-                    var sectionIndex = -1;
-
-                    foreach (var lodSectionIndex in permutation.LodSectionIndices)
-                        if (lodSectionIndex > 0)
-                            sectionIndex = lodSectionIndex;
+                    var sectionIndex = permutation.LodSectionIndices.Where(i => i > 0).Last();
 
                     if (sectionIndex < 0)
                     {

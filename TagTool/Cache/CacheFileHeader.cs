@@ -14,7 +14,7 @@ namespace TagTool.Cache
         public int Version;
         public int FileLength;
         public int Unknown1;
-        [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public int TagIndexOffset;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint TagIndexAddress;
