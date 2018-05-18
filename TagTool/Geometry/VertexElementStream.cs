@@ -332,7 +332,7 @@ namespace TagTool.Geometry
             Write(v.ToArray(), 4, e => Writer.Write(Half.GetBytes(new Half(e))));
         }
 
-        private static T[] Read<T>(int count, Func<T> readFunc)
+        public T[] Read<T>(int count, Func<T> readFunc)
         {
             var c = new T[count];
             for (var i = 0; i < count; i++)
@@ -340,7 +340,7 @@ namespace TagTool.Geometry
             return c;
         }
 
-        private static T2[] Read<T1, T2>(int count, Func<T1> readFunc, Func<T1, T2> convertFunc)
+        public T2[] Read<T1, T2>(int count, Func<T1> readFunc, Func<T1, T2> convertFunc)
         {
             var c = new T2[count];
             for (var i = 0; i < count; i++)

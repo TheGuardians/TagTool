@@ -463,7 +463,7 @@ namespace TagTool.Commands.Porting
                 case VertexDeclarationType.ShortN:
                     return new RealQuaternion(stream.ReadShortN());
                 case VertexDeclarationType.Short2N:
-                    return new RealQuaternion(stream.ReadShort2N().ToArray());
+                    return new RealQuaternion(stream.Read(2, () => ((float)stream.ReadShort() + (float)0x7FFF) / (float)0xFFFF));
                 case VertexDeclarationType.Short3N:
                     return new RealQuaternion(stream.ReadShort3N().ToArray());
                 case VertexDeclarationType.Short4N:
@@ -477,10 +477,24 @@ namespace TagTool.Commands.Porting
 
         private object ConvertGen2RenderModel(CachedTagInstance edTag, RenderModel mode)
         {
-            var compressor = new VertexCompressor(mode.Compression[0]);
-
             foreach (var section in mode.Sections)
             {
+                var compressor = new VertexCompressor(
+                    section.Compression.Count > 0 ?
+                        section.Compression[0] :
+                    mode.Compression.Count > 0 ?
+                        mode.Compression[0] :
+                        new RenderGeometryCompression
+                        {
+                            X = new Bounds<float>(0.0f, 1.0f),
+                            Y = new Bounds<float>(0.0f, 1.0f),
+                            Z = new Bounds<float>(0.0f, 1.0f),
+                            U = new Bounds<float>(0.0f, 1.0f),
+                            V = new Bounds<float>(0.0f, 1.0f),
+                            U2 = new Bounds<float>(0.0f, 1.0f),
+                            V2 = new Bounds<float>(0.0f, 1.0f),
+                        });
+
                 using (var stream = new MemoryStream(BlamCache.GetRawFromID(section.BlockOffset, section.BlockSize)))
                 using (var reader = new EndianReader(stream, BlamCache.Reader.Format))
                 using (var writer = new EndianWriter(stream, BlamCache.Reader.Format))
@@ -536,11 +550,11 @@ namespace TagTool.Commands.Porting
                         var elementStream = new VertexElementStream(stream, BlamCache.Reader.Format);
                         var declaration = VertexDeclarations[vertexBuffer.TypeIndex];
 
-                        stream.Position = 8 + section.SectionDataSize + resource.ResourceDataOffset;
-
                         for (var i = 0; i < section.TotalVertexCount; i++)
                         {
                             var vertex = mesh.RawVertices[i];
+
+                            stream.Position = 8 + section.SectionDataSize + resource.ResourceDataOffset + ((resource.ResoureDataSize / section.TotalVertexCount) * i);
 
                             foreach (var entry in declaration)
                             {
@@ -549,86 +563,102 @@ namespace TagTool.Commands.Porting
                                     elementStream.SeekTo(entry.Item4, SeekOrigin.Current);
                                     continue;
                                 }
-
-                                var element = ReadVertexElement(elementStream, entry.Item3);
-
+                                
                                 switch (resource.SecondaryLocator) // stream source
                                 {
                                     case 0:
-                                        vertex.Point.NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f };
-                                        vertex.Point.NodeIndices = new[] { -1, -1, -1, -1 };
-                                        vertex.Point.UseNewNodeIndices = 1;
-                                        vertex.Point.AdjustedCompoundNodeIndex = -1;
-                                        vertex.SecondaryTexcoord.Y = 1.0f;
-
-                                        switch (entry.Item2)
                                         {
-                                            case VertexDeclarationUsage.Position:
-                                                vertex.Point.Position = element.XYZ;
-                                                if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
-                                                    vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
-                                                break;
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
 
-                                            case VertexDeclarationUsage.BlendIndices:
-                                                vertex.Point.NodeIndices = new int[]
-                                                {
-                                                    (int)element.I - 1,
-                                                    (int)element.J - 1,
-                                                    (int)element.K - 1,
-                                                    (int)element.W - 1
-                                                };
-                                                break;
+                                            vertex.Point.NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f };
+                                            vertex.Point.NodeIndices = new[] { -1, -1, -1, -1 };
+                                            vertex.Point.UseNewNodeIndices = 1;
+                                            vertex.Point.AdjustedCompoundNodeIndex = -1;
+                                            vertex.SecondaryTexcoord.Y = 1.0f;
 
-                                            case VertexDeclarationUsage.BlendWeight:
-                                                vertex.Point.NodeWeights = element.ToArray();
-                                                break;
+                                            switch (entry.Item2)
+                                            {
+                                                case VertexDeclarationUsage.Position:
+                                                    vertex.Point.Position = element.XYZ;
+                                                    if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
+                                                        vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
+                                                    break;
+
+                                                case VertexDeclarationUsage.BlendIndices:
+                                                    vertex.Point.NodeIndices = element.ToArray().Select(x => (int)x).ToArray();
+                                                    break;
+
+                                                case VertexDeclarationUsage.BlendWeight:
+                                                    vertex.Point.NodeWeights = element.ToArray();
+                                                    break;
+                                            }
+                                            break;
                                         }
-                                        break;
 
                                     case 1:
-                                        if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
                                         {
-                                            vertex.Texcoord = element.XY;
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
 
-                                            if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedTexcoord))
-                                                vertex.Texcoord = compressor.DecompressUv(new RealVector2d(vertex.Texcoord.ToArray())).XY;
+                                            if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
+                                            {
+                                                vertex.Texcoord = element.XY;
+
+                                                if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedTexcoord))
+                                                    vertex.Texcoord = compressor.DecompressUv(new RealVector2d(vertex.Texcoord.ToArray())).XY;
+                                            }
+                                            break;
                                         }
-                                        break;
 
                                     case 2:
-                                        switch (entry.Item2)
                                         {
-                                            case VertexDeclarationUsage.Normal:
-                                                vertex.Normal = element.IJK;
-                                                break;
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
 
-                                            case VertexDeclarationUsage.Binormal:
-                                                vertex.Binormal = element.IJK;
-                                                break;
+                                            switch (entry.Item2)
+                                            {
+                                                case VertexDeclarationUsage.Normal:
+                                                    vertex.Normal = element.IJK;
+                                                    break;
 
-                                            case VertexDeclarationUsage.Tangent:
-                                                vertex.Tangent = element.IJK;
-                                                break;
+                                                case VertexDeclarationUsage.Binormal:
+                                                    vertex.Binormal = element.IJK;
+                                                    break;
+
+                                                case VertexDeclarationUsage.Tangent:
+                                                    vertex.Tangent = element.IJK;
+                                                    break;
+                                            }
+                                            break;
                                         }
-                                        break;
 
                                     case 3:
-                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
-                                            vertex.PrimaryLightmapTexcoord = element.XY;
-                                        break;
+                                        {
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
+
+                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
+                                                vertex.PrimaryLightmapTexcoord = element.XY;
+                                            break;
+                                        }
 
                                     case 4:
-                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
-                                            vertex.PrimaryLightmapIncidentDirection = element.IJK;
-                                        break;
+                                        {
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
+
+                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
+                                                vertex.SecondaryLightmapIncidentDirection = element.IJK;
+                                            break;
+                                        }
 
                                     case 5:
-                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
-                                            vertex.PrimaryLightmapColor = element.RGB;
-                                        break;
+                                        {
+                                            var element = ReadVertexElement(elementStream, entry.Item3);
+
+                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
+                                                vertex.PrimaryLightmapColor = element.RGB;
+                                            break;
+                                        }
 
                                     default:
-                                        break;
+                                        throw new Exception();
                                 }
                             }
                         }
