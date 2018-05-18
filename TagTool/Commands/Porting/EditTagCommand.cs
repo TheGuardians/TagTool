@@ -10,7 +10,7 @@ namespace TagTool.Commands.Porting
 {
     class EditTagCommand : Command
     {
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
         private CommandContextStack ContextStack { get; }
 
         public EditTagCommand(CommandContextStack contextStack, CacheFile blamCache) : base(
@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
             var tagType = TagDefinition.Find(groupTag);
             var structure = new TagStructureInfo(tagType);
 
-            var definition = BlamCache.Deserializer.Deserialize(new CacheSerializationContext(BlamCache, tag), tagType);
+            var definition = BlamCache.Deserializer.Deserialize(new CacheSerializationContext(ref BlamCache, tag), tagType);
 
             var oldContext = ContextStack.Context;
 

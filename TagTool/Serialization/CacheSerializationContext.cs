@@ -13,8 +13,56 @@ namespace TagTool.Serialization
         public CacheFile BlamCache { get; private set; }
         public CacheFile.IndexItem BlamTag { get; private set; }
 
-        public CacheSerializationContext(CacheFile blamCache, CacheFile.IndexItem blamTag)
+        public CacheSerializationContext(ref CacheFile blamCache, CacheFile.IndexItem blamTag)
         {
+            if (blamCache.Version < CacheVersion.Halo3Retail)
+            {
+                var oldBlamCache = blamCache;
+                var oldBlamTag = blamTag;
+
+                if (blamTag.External)
+                {
+                    try
+                    {
+                        blamCache = CacheFileGen2.MainMenuCache;
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        blamCache = oldBlamCache;
+                        blamTag = oldBlamTag;
+                    }
+                }
+                if (blamTag.External)
+                {
+                    try
+                    {
+                        blamCache = CacheFileGen2.SharedCache;
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        blamCache = oldBlamCache;
+                        blamTag = oldBlamTag;
+                    }
+                }
+                if (blamTag.External)
+                {
+                    try
+                    {
+                        blamCache = CacheFileGen2.SinglePlayerSharedCache;
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        blamCache = oldBlamCache;
+                        blamTag = oldBlamTag;
+                    }
+                }
+                if (blamTag.External)
+                    throw new KeyNotFoundException($"[{blamTag.GroupTag}] {blamTag.Filename}");
+            }
+
             BlamCache = blamCache;
             BlamTag = blamTag;
         }
@@ -26,54 +74,6 @@ namespace TagTool.Serialization
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
-            if (BlamCache.Version < CacheVersion.Halo3Retail)
-            {
-                var oldBlamCache = BlamCache;
-                var oldBlamTag = BlamTag;
-
-                if (BlamTag.External)
-                {
-                    try
-                    {
-                        BlamCache = CacheFileGen2.MainMenuCache;
-                        BlamTag = BlamCache.IndexItems[BlamTag.GroupTag, BlamTag.Filename];
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        BlamCache = oldBlamCache;
-                        BlamTag = oldBlamTag;
-                    }
-                }
-                if (BlamTag.External)
-                {
-                    try
-                    {
-                        BlamCache = CacheFileGen2.SharedCache;
-                        BlamTag = BlamCache.IndexItems[BlamTag.GroupTag, BlamTag.Filename];
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        BlamCache = oldBlamCache;
-                        BlamTag = oldBlamTag;
-                    }
-                }
-                if (BlamTag.External)
-                {
-                    try
-                    {
-                        BlamCache = CacheFileGen2.SinglePlayerSharedCache;
-                        BlamTag = BlamCache.IndexItems[BlamTag.GroupTag, BlamTag.Filename];
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        BlamCache = oldBlamCache;
-                        BlamTag = oldBlamTag;
-                    }
-                }
-                if (BlamTag.External)
-                    throw new KeyNotFoundException($"[{BlamTag.GroupTag}] {BlamTag.Filename}");
-            }
-
             BlamCache.Reader.BaseStream.Position = BlamTag.Offset;
             return BlamCache.Reader;
         }

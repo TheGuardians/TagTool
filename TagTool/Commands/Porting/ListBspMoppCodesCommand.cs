@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
     public class ListBspMoppCodesCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public ListBspMoppCodesCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Porting
                 return false;
             }
             
-            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
             var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
 
             var blamMoppCodes = new List<byte>();

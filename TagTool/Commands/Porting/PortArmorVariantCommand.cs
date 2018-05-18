@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
     public class PortArmorVariantCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
         private RenderGeometryConverter GeometryConverter { get; }
 
         public PortArmorVariantCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -115,7 +115,7 @@ namespace TagTool.Commands.Porting
                 }
             }
             
-            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
             var edModeDefinition = BlamCache.Deserializer.Deserialize<RenderModel>(blamContext);
 
             var materials = edModeDefinition.Materials.Select(i => new RenderMaterial
@@ -496,7 +496,7 @@ namespace TagTool.Commands.Porting
 
                 Console.WriteLine("done.");
 
-                blamContext = new CacheSerializationContext(BlamCache, blamHlmtTag);
+                blamContext = new CacheSerializationContext(ref BlamCache, blamHlmtTag);
                 edHlmtDefinition = (Model)ConvertData(null, BlamCache.Deserializer.Deserialize<Model>(blamContext), false);
 
                 edHlmtDefinition.RenderModel = edModeTag;

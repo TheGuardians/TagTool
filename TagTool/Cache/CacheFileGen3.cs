@@ -240,7 +240,11 @@ namespace TagTool.Cache
             {
                 if (item.GroupTag == "play")
                 {
-                    var blamContext = new CacheSerializationContext(this, item);
+                    CacheFile cacheFile = this;
+                    var blamContext = new CacheSerializationContext(ref cacheFile, item);
+                    if (cacheFile.File.FullName != File.FullName)
+                        throw new InvalidOperationException();
+
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
                     break;
                 }
@@ -250,7 +254,11 @@ namespace TagTool.Cache
             {
                 if (item.GroupTag == "zone")
                 {
-                    var blamContext = new CacheSerializationContext(this, item);
+                    CacheFile cacheFile = this;
+                    var blamContext = new CacheSerializationContext(ref cacheFile, item);
+                    if (cacheFile.File.FullName != File.FullName)
+                        throw new InvalidOperationException();
+
                     ResourceGestalt = deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
 
                     foreach (var tagresource in ResourceGestalt.TagResources)

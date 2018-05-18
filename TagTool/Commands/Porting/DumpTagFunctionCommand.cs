@@ -8,7 +8,7 @@ namespace TagTool.Commands.Porting
     public class DumpTagFunctionCommand : Command
     {
         public HaloOnlineCacheContext CacheContext { get; }
-        public CacheFile BlamCache { get; }
+        public CacheFile BlamCache;
         public DumpTagFunctionCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
             : base(CommandFlags.Inherit,
                   

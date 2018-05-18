@@ -9,7 +9,7 @@ namespace TagTool.Commands.Porting
     public class ListBitmapsCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public ListBitmapsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
             : base(CommandFlags.None,
@@ -50,13 +50,13 @@ namespace TagTool.Commands.Porting
                 return false;
             }
             
-            var blamContext = new CacheSerializationContext(BlamCache, item);
+            var blamContext = new CacheSerializationContext(ref BlamCache, item);
             var blamShader = BlamCache.Deserializer.Deserialize<RenderMethod>(blamContext);
             
             var templateItem = BlamCache.IndexItems.Find(i =>
                 i.ID == blamShader.ShaderProperties[0].Template.Index);
 
-            blamContext = new CacheSerializationContext(BlamCache, templateItem);
+            blamContext = new CacheSerializationContext(ref BlamCache, templateItem);
             var template = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             for (var i = 0; i < template.ShaderMaps.Count; i++)

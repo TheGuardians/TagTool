@@ -15,28 +15,8 @@ namespace TagTool.Commands.Porting
 
             return context;
         }
-
-        public static CacheFileResourceGestalt LoadResourceGestalt(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
-        {
-            CacheFile.IndexItem blamTag = null;
-
-            foreach (var tag in blamCache.IndexItems)
-            {
-                if (tag.GroupTag == "zone")
-                {
-                    blamTag = tag;
-                    break;
-                }
-            }
-
-            if (blamTag == null)
-                return null;
-
-            var blamContext = new CacheSerializationContext(blamCache, blamTag);
-            return blamCache.Deserializer.Deserialize<CacheFileResourceGestalt>(blamContext);
-        }
-
-        public static SoundCacheFileGestalt LoadSoundGestalt(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        
+        public static SoundCacheFileGestalt LoadSoundGestalt(HaloOnlineCacheContext cacheContext, ref CacheFile blamCache)
         {
             CacheFile.IndexItem blamTag = null;
 
@@ -52,7 +32,7 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
-            var blamContext = new CacheSerializationContext(blamCache, blamTag);
+            var blamContext = new CacheSerializationContext(ref blamCache, blamTag);
             var ugh = blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
 
             //

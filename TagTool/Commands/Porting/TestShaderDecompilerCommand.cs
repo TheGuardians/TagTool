@@ -12,7 +12,7 @@ namespace TagTool.Commands.Porting
 {
 	class TestShaderDecompilerCommand : Command
 	{
-		private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 		private HaloOnlineCacheContext CacheContext { get; }
 
 		public TestShaderDecompilerCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) : base(
@@ -43,7 +43,7 @@ namespace TagTool.Commands.Porting
 				if (tag.GroupTag != "pixl" || (args.Count == 2 && tag.Filename != args[1]))
 					continue;
 
-				var blamContext = new CacheSerializationContext(BlamCache, tag);
+				var blamContext = new CacheSerializationContext(ref BlamCache, tag);
 				pixl = BlamCache.Deserializer.Deserialize<PixelShader>(blamContext);
 
 				if (pixl.Shaders != null && pixl.Shaders.Count > 0)

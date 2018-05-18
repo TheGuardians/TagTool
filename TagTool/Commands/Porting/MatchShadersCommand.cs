@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
     public class MatchShadersCommand : Command
     {
         public HaloOnlineCacheContext CacheContext { get; }
-        public CacheFile BlamCache { get; }
+        public CacheFile BlamCache;
         public static int rmPreset = 0x0;
         public static int rmt2Preset = 0x0;
         public static bool newOnly = false;
@@ -189,7 +189,7 @@ namespace TagTool.Commands.Porting
 
             tagNameShort = tagName.Substring(tagName.LastIndexOf("\\") + 1, tagName.Length - tagName.LastIndexOf("\\") - 1);
             
-            var blamContext = new CacheSerializationContext(BlamCache, h3Tag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, h3Tag);
 
             object definition = null;
 
@@ -421,7 +421,7 @@ namespace TagTool.Commands.Porting
         public static CachedTagInstance MatchShader7(Stream stream, HaloOnlineCacheContext CacheContext, CacheFile BlamCache, CacheFile.IndexItem h3Tag)
         {
             var h3ShaderTag = BlamCache.IndexItems.GetItemByID(h3Tag.ID);
-            var blamContext = new CacheSerializationContext(BlamCache, h3ShaderTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, h3ShaderTag);
             
             object h3Definition = null;
 
@@ -446,7 +446,7 @@ namespace TagTool.Commands.Porting
 
             // Deserialize blam rmt2
             var h3Rmt2Instance = BlamCache.IndexItems.GetItemByID(h3Shader.ShaderProperties[0].Template.Index);
-            blamContext = new CacheSerializationContext(BlamCache, h3Rmt2Instance);
+            blamContext = new CacheSerializationContext(ref BlamCache, h3Rmt2Instance);
             var h3Rmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             // Check for errors

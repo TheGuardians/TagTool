@@ -11,7 +11,7 @@ namespace TagTool.Commands.Porting
 {
     class ListFieldsCommand : Command
     {
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
         private TagStructureInfo Structure { get; }
         private object Value { get; }
         

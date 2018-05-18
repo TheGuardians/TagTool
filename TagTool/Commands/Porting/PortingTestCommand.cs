@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
     public class PortingTestCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public PortingTestCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -141,7 +141,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            var blamContext = new CacheSerializationContext(BlamCache, blamInstance);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamInstance);
 
             var Value = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
 
@@ -410,7 +410,7 @@ namespace TagTool.Commands.Porting
             {
                 if (item.GroupTag == args[0])
                 {
-                    var blamContext = new CacheSerializationContext(BlamCache, item);
+                    var blamContext = new CacheSerializationContext(ref BlamCache, item);
                     var def = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
 
                     Console.WriteLine($"Deserialized [{item.GroupTag}] {item.Filename}");
@@ -467,11 +467,11 @@ namespace TagTool.Commands.Porting
 
             // Blam:
             // Deserialize weap tag
-            var blamContext = new CacheSerializationContext(BlamCache, blamWeapTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamWeapTag);
             Weapon blamWeap = BlamCache.Deserializer.Deserialize<Weapon>(blamContext);
 
             // Deserialize hlmt tag
-            var blamContext2 = new CacheSerializationContext(BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Model.Index));
+            var blamContext2 = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Model.Index));
             var blamHlmt = BlamCache.Deserializer.Deserialize<Model>(blamContext2);
 
             // Get blam FP mode name
@@ -624,7 +624,7 @@ namespace TagTool.Commands.Porting
 
             // Blam:
             // Deserialize weap tag
-            var blamContext = new CacheSerializationContext(BlamCache, blamWeapTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamWeapTag);
             Weapon blamWeap = BlamCache.Deserializer.Deserialize<Weapon>(blamContext);
 
             // Get blam FP mode name
@@ -732,10 +732,10 @@ namespace TagTool.Commands.Porting
 
             // Blam:
             // Deserialize weap tag
-            var blamContext = new CacheSerializationContext(BlamCache, blamWeapTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamWeapTag);
             var blamWeap = BlamCache.Deserializer.Deserialize<Weapon>(blamContext);
 
-            var blamContext2 = new CacheSerializationContext(BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Barrels[0].FiringEffects[0].FiringEffect2.Index));
+            var blamContext2 = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Barrels[0].FiringEffects[0].FiringEffect2.Index));
             var blamEffe = BlamCache.Deserializer.Deserialize<Effect>(blamContext2);
 
             // ED:

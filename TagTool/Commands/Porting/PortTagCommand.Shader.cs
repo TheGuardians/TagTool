@@ -116,7 +116,7 @@ namespace TagTool.Commands.Porting
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = BlamCache.IndexItems.Find(x => x.ID == finalRm.ShaderProperties[0].Template.Index);
-            var blamContext = new CacheSerializationContext(BlamCache, bmRmt2Instance);
+            var blamContext = new CacheSerializationContext(ref BlamCache, bmRmt2Instance);
             var bmRmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
 
             // Get a simple list of H3 bitmaps and arguments names
@@ -942,7 +942,7 @@ namespace TagTool.Commands.Porting
             var pixlTag = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edRmt2.PixelShader), TagDefinition.Find(edRmt2.PixelShader.Group.Tag));
             var edPixl = (PixelShader)pixlTag;
 
-            var blamContext = new CacheSerializationContext(blamCache, blamCache.IndexItems.Find(x => x.ID == bmRmt2.PixelShader.Index));
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamCache.IndexItems.Find(x => x.ID == bmRmt2.PixelShader.Index));
             var bmPixl = BlamCache.Deserializer.Deserialize<PixelShader>(blamContext);
 
             // Make a collection of drawmodes and their DrawModeItem's

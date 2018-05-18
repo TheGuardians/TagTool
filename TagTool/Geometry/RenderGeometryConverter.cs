@@ -15,7 +15,7 @@ namespace TagTool.Geometry
     public class RenderGeometryConverter
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {

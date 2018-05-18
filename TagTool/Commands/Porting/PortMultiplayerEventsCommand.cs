@@ -10,7 +10,7 @@ namespace TagTool.Commands.Porting
     public class PortMultiplayerEventsCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public PortMultiplayerEventsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,

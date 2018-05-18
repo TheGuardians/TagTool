@@ -1314,10 +1314,14 @@ namespace TagTool.Commands.Files
                         {
                             var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
                             var rm2 = CacheContext.Deserializer.Deserialize<RenderMethodFast>(edContext);
-                            renderMethod = new RenderMethod();
-                            renderMethod.Unknown = rm2.Unknown;
-                            if (renderMethod.Unknown.Count == 0)
+
+                            if (rm2.Unknown.Count == 0)
                                 continue;
+
+                            renderMethod = new RenderMethod
+                            {
+                                Unknown = rm2.Unknown
+                            };
                         }
 
                         foreach (var a in edInstance.Dependencies)
@@ -1328,7 +1332,6 @@ namespace TagTool.Commands.Files
                             throw new Exception();
 
                         NameRmt2Part(type, renderMethod, edInstance, rmt2Instance, newlyNamedRmt2);
-
                         continue;
 
                     default:

@@ -297,7 +297,7 @@ namespace TagTool.Commands.Porting
         private Sound ConvertSound(Sound sound)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, BlamCache);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
@@ -691,7 +691,7 @@ namespace TagTool.Commands.Porting
         private SoundLooping ConvertSoundLooping(SoundLooping soundLooping)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, BlamCache);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
             soundLooping.Unused = null;
 
@@ -725,7 +725,7 @@ namespace TagTool.Commands.Porting
         private Dialogue ConvertDialogue(Stream cacheStream, Dialogue dialogue)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, BlamCache);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
             CachedTagInstance edAdlg = null;
             AiDialogueGlobals adlg = null;

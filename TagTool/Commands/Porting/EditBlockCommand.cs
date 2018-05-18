@@ -10,7 +10,7 @@ namespace TagTool.Commands.Porting
 {
     class EditBlockCommand : Command
     {
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
         private CommandContextStack ContextStack { get; }
         private CacheFile.IndexItem Tag { get; }
 

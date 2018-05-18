@@ -10,7 +10,7 @@ namespace TagTool.Commands.Porting
     public class DumpScriptInfoCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
 
         public DumpScriptInfoCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(CommandFlags.Inherit,
@@ -50,7 +50,7 @@ namespace TagTool.Commands.Porting
             // Load the Blam scenario tag
             //
             
-            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
             var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(blamContext);
 
             foreach (var script in blamScenario.Scripts)

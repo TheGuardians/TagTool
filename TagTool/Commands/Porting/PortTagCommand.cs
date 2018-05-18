@@ -18,7 +18,7 @@ namespace TagTool.Commands.Porting
     public partial class PortTagCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private CacheFile BlamCache;
         private RenderGeometryConverter GeometryConverter { get; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
@@ -356,7 +356,7 @@ namespace TagTool.Commands.Porting
 
             Console.WriteLine($"Porting {blamTag.Filename}.{groupTag.ToString()}");
 
-            var blamContext = new CacheSerializationContext(BlamCache, blamTag);
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
             var blamDefinition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));
 
             //
