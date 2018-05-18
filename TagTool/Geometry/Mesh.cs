@@ -34,7 +34,7 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<VertexBuffer> VertexBuffers;
 
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
