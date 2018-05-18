@@ -571,7 +571,7 @@ namespace TagTool.Commands.Porting
                                             var element = ReadVertexElement(elementStream, entry.Item3);
 
                                             vertex.Point.NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f };
-                                            vertex.Point.NodeIndices = new[] { -1, -1, -1, -1 };
+                                            vertex.Point.NodeIndices = new[] { 0, 0, 0, 0 };
                                             vertex.Point.UseNewNodeIndices = 1;
                                             vertex.Point.AdjustedCompoundNodeIndex = -1;
                                             vertex.SecondaryTexcoord.Y = 1.0f;

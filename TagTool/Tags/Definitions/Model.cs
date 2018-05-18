@@ -1,12 +1,13 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Damage;
+using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
 {
+    [TagStructure(Name = "model", Tag = "hlmt", Size = 0x15C, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x188, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1B4, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -14,91 +15,203 @@ namespace TagTool.Tags.Definitions
     public partial class Model
     {
         public CachedTagInstance RenderModel;
+
         public CachedTagInstance CollisionModel;
+
         public CachedTagInstance Animation;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance Physics;
+
         public CachedTagInstance PhysicsModel;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float DisappearDistance;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float BeginFadeDistance;
+
+        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused1;
+
         public float ReduceToL1SuperLow;
         public float ReduceToL2Low;
         public float ReduceToL3Medium;
         public float ReduceToL4High;
         public float ReduceToL5SuperHigh;
+
+        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused2;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public ShadowFadeDistanceValue ShadowFadeDistance;
+
+        [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused3;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance LodModel;
+
         public List<Variant> Variants;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UnknownBlock> Unknown;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<InstanceGroup> InstanceGroups;
+
         public List<Material> Materials;
+
         public List<NewDamageInfoBlock> NewDamageInfo;
+
         public List<Target> Targets;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public List<UnknownTarget> UnknownTargets;
+
         public List<CollisionRegion> CollisionRegions;
+
         public List<Node> Nodes;
-        public uint Unknown2;
+
+        [TagField(Padding = true, Length = 4)]
+        public byte[] Unused4;
+
         public List<ModelObjectDatum> ModelObjectData;
+
         public CachedTagInstance PrimaryDialogue;
+
         public CachedTagInstance SecondaryDialogue;
+
         public FlagsValue Flags;
+
         public StringId DefaultDialogueEffect;
+
         public RenderOnlyNodeFlags1Value RenderOnlyNodeFlags1;
         public RenderOnlyNodeFlags2Value RenderOnlyNodeFlags2;
         public RenderOnlyNodeFlags3Value RenderOnlyNodeFlags3;
         public RenderOnlyNodeFlags4Value RenderOnlyNodeFlags4;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlyNodeFlags5Value RenderOnlyNodeFlags5;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlyNodeFlags6Value RenderOnlyNodeFlags6;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlyNodeFlags7Value RenderOnlyNodeFlags7;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlyNodeFlags8Value RenderOnlyNodeFlags8;
+
         public RenderOnlySectionFlags1Value RenderOnlySectionFlags1;
         public RenderOnlySectionFlags2Value RenderOnlySectionFlags2;
         public RenderOnlySectionFlags3Value RenderOnlySectionFlags3;
         public RenderOnlySectionFlags4Value RenderOnlySectionFlags4;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlySectionFlags5Value RenderOnlySectionFlags5;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlySectionFlags6Value RenderOnlySectionFlags6;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlySectionFlags7Value RenderOnlySectionFlags7;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderOnlySectionFlags8Value RenderOnlySectionFlags8;
+
         public RuntimeFlagsValue RuntimeFlags;
+
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public uint Unknown3; // TODO: Version number
-        public float ScenarioLoadParametersBlock;
-        public float ScenarioLoadParametersBlock2;
-        public float ScenarioLoadParametersBlock3;
+
+        public List<ScenarioLoadParametersBlock> ScenarioLoadParameters;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance HologramShader;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public StringId HologramControlFunction;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown4;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown5;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<UnknownBlock2> Unknown6;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<UnknownBlock3> Unknown7;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<UnknownBlock4> Unknown8;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance ShieldImpactThirdPerson;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance ShieldImpactFirstPerson;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance OvershieldThirdPerson;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance OvershieldFirstPerson;
 
+        public enum ShadowFadeDistanceValue : short
+        {
+            FadeAtSuperHighDetailLevel,
+            FadeAtHighDetailLevel,
+            FadeAtMediumDetailLevel,
+            FadeAtLowDetailLevel,
+            FadeAtSuperLowDetailLevel,
+            FadeNever
+        }
+
+        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x50, MinVersion = CacheVersion.Halo3ODST)]
         public class Variant
         {
             public StringId Name;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CachedTagInstance VariantDialogue;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public StringId DefaultDialogEffect;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public sbyte Unknown;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public sbyte Unknown2;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public sbyte Unknown3;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public sbyte Unknown4;
+
             [TagField(MinVersion = CacheVersion.HaloOnline700123)]
             public StringId SkinName;
+
             [TagField(Length = 16)]
             public sbyte[] ModelRegionIndices = new sbyte[16];
+
             public List<Region> Regions;
             public List<Object> Objects;
             public int InstanceGroupIndex;
             public uint Unknown6;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public StringId DialogueSoundEffect;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public CachedTagInstance Dialogue;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline571627)]
             public uint Unknown7;
 
@@ -108,7 +221,11 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
                 public sbyte RenderModelRegionIndex;
                 public sbyte Unknown;
+                [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+                public short ParentVariant;
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public sbyte Unknown2;
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public sbyte Unknown3;
                 public List<Permutation> Permutations;
                 public SortOrderValue SortOrder;
@@ -118,9 +235,13 @@ namespace TagTool.Tags.Definitions
                 {
                     public StringId Name;
                     public sbyte RenderModelPermutationIndex;
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte Unknown;
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte Unknown2;
                     public FlagsValue Flags;
+                    [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+                    public byte[] Unused;
                     public float Probability;
                     public List<State> States;
                     public uint Unknown3;
@@ -187,11 +308,13 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x1C)]
+            [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
             public class Object
             {
                 public StringId ParentMarker;
                 public StringId ChildMarker;
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public StringId ChildVariant;
                 public CachedTagInstance ChildObject;
             }
@@ -305,13 +428,50 @@ namespace TagTool.Tags.Definitions
         public class Material
         {
             public StringId Name;
-            public short Unknown;
+            public MaterialTypeValue MaterialType;
             public short DamageSectionIndex;
             public short Unknown2;
             public short Unknown3;
             public StringId MaterialName;
             public short GlobalMaterialIndex;
             public short Unknown4;
+
+            public enum MaterialTypeValue : short
+            {
+                Dirt = 0,
+                Sand = 1,
+                Stone = 2,
+                Snow = 3,
+                Wood = 4,
+                Metalhollow = 5,
+                Metalthin = 6,
+                Metalthick = 7,
+                Rubber = 8,
+                Glass = 9,
+                ForceField = 10,
+                Grunt = 11,
+                HunterArmor = 12,
+                HunterSkin = 13,
+                Elite = 14,
+                Jackal = 15,
+                JackalEnergyShield = 16,
+                EngineerSkin = 17,
+                EngineerForceField = 18,
+                FloodCombatForm = 19,
+                FloodCarrierForm = 20,
+                CyborgArmor = 21,
+                CyborgEnergyShield = 22,
+                HumanArmor = 23,
+                HumanSkin = 24,
+                Sentinel = 25,
+                Monitor = 26,
+                Plastic = 27,
+                Water = 28,
+                Leaves = 29,
+                EliteEnergyShield = 30,
+                Ice = 31,
+                HunterShield = 32,
+            }
         }
 
         [TagStructure(Size = 0x100)]
@@ -1421,6 +1581,16 @@ namespace TagTool.Tags.Definitions
             Bit29 = 536870912,
             Bit30 = 1073741824,
             Bit31 = -2147483648,
+        }
+
+        [TagStructure(Size = 0x44)]
+        public class ScenarioLoadParametersBlock
+        {
+            public CachedTagInstance Scenario;
+            public byte[] Data;
+
+            [TagField(Padding = true, Length = 32)]
+            public byte[] Unused;
         }
 
         [TagStructure(Size = 0x8)]
