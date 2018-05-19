@@ -182,8 +182,7 @@ namespace TagTool.Tags.Definitions
             DxDyDyaw,
             DxDyDzDyaw
         }
-
-        [TagStructure(Size = 0x7C, MaxVersion = CacheVersion.Halo2Xbox)]
+        
         [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
         public class Animation
@@ -296,9 +295,6 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public short PreviousVariantSiblingNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown3;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public short NextVariantSiblingNew;
