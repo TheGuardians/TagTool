@@ -127,7 +127,7 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
-        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
         public class AnimationTagReference
         {
@@ -277,7 +277,7 @@ namespace TagTool.Tags.Definitions
             public int ParentGraphBlockOffset;
 
             [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
-            public int ParentGraphStartingPoint;
+            public short ParentGraphStartingPoint;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public short LoopFrameIndexOld;
