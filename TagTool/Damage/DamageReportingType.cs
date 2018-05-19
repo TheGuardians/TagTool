@@ -3,8 +3,7 @@ using TagTool.Serialization;
 
 namespace TagTool.Damage
 {
-    [TagStructure(Size = 0x2, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x1, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x1)]
     public struct DamageReportingType
     {
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -19,7 +18,7 @@ namespace TagTool.Damage
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public HaloOnlineValue HaloOnline;
 
-        public enum Halo2RetailValue : short
+        public enum Halo2RetailValue : sbyte
         {
             Guardians,
             FallingDamage,
