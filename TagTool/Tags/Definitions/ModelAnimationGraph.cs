@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xAC, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xBC, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x104, MinVersion = CacheVersion.Halo3Retail)]
     public class ModelAnimationGraph
     {
@@ -38,6 +38,12 @@ namespace TagTool.Tags.Definitions
         public byte[] LastImportResults;
 
         public List<AdditionalNodeDataBlock> AdditionalNodeData;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public List<CacheBlock> CacheBlocks;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public List<CacheUnknown> CacheUnknowns;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<ResourceGroup> ResourceGroups;
@@ -177,7 +183,8 @@ namespace TagTool.Tags.Definitions
             DxDyDzDyaw
         }
 
-        [TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x7C, MaxVersion = CacheVersion.Halo2Xbox)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
         public class Animation
         {
@@ -200,7 +207,7 @@ namespace TagTool.Tags.Definitions
             public int ImportChecksum;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public ushort PlaybackFlagsNew;
+            public PlaybackFlagsValue PlaybackFlagsNew;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public FrameType TypeOld;
@@ -219,15 +226,10 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public CompressionValue CurrentCompressionNew;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short FrameCountOld;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public sbyte NodeCountNew;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public short FrameCountNew;
+            
+            public sbyte NodeCount;
+            
+            public short FrameCount;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public FrameType TypeNew;
@@ -236,12 +238,19 @@ namespace TagTool.Tags.Definitions
             public FrameMovementDataType FrameInfoTypeNew;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public ushort ProductionFlagsNew;
-            
-            public ushort InternalFlags;
+            public ProductionFlagsNewValue ProductionFlagsNew;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public ushort PlaybackFlagsOld;
+            public InternalFlagsOldValue InternalFlagsOld;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public ProductionFlagsOldValue ProductionFlagsOld;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public InternalFlagsNewValue InternalFlagsNew;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public PlaybackFlagsValue PlaybackFlagsOld;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public CompressionValue DesiredCompressionOld;
@@ -257,6 +266,18 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public int ProductionChecksumNew;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
+            public int ParentGraphIndex;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
+            public int ParentGraphBlockIndex;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
+            public int ParentGraphBlockOffset;
+
+            [TagField(MaxVersion = CacheVersion.Halo2Xbox)]
+            public int ParentGraphStartingPoint;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public short LoopFrameIndexOld;
@@ -283,33 +304,28 @@ namespace TagTool.Tags.Definitions
             public short NextVariantSiblingNew;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short ResourceDataOffset;
+            public byte[] AnimationData;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public short ResourceGroupIndex;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown4;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public short ResourceGroupMemberIndex;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown5;
+            public sbyte StaticNodeFlags;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public sbyte Unknown6;
+            public sbyte AnimatedNodeFlags;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public sbyte Unknown7;
+            public short MovementData;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown8;
+            public short PillOffsetData;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown9;
+            public short DefaultData;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public short Unknown10;
+            public int UncompressedData;
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int Unknown11;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public int Unknown12;
+            public int CompressedData;
 
             public List<FrameEvent> FrameEvents;
             public List<SoundEvent> SoundEvents;
@@ -333,6 +349,65 @@ namespace TagTool.Tags.Definitions
             public float Unknown16;
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public float Unknown17;
+
+            [Flags]
+            public enum InternalFlagsOldValue : byte
+            {
+                None,
+                Unused1 = 1 << 0,
+                WorldRelative = 1 << 1,
+                Unused2 = 1 << 2,
+                Unused3 = 1 << 3,
+                Unused4 = 1 << 4,
+                CompressionDisabled = 1 << 5,
+                OldProductionChecksum = 1 << 6,
+                ValidProductionChecksum = 1 << 7
+            }
+
+            [Flags]
+            public enum InternalFlagsNewValue : ushort
+            {
+                None,
+                Unused1 = 1 << 0,
+                WorldRelative = 1 << 1,
+                Unused2 = 1 << 2,
+                Unused3 = 1 << 3,
+                Unused4 = 1 << 4,
+                CompressionDisabled = 1 << 5,
+                OldProductionChecksum = 1 << 6,
+                ValidProductionChecksum = 1 << 7
+            }
+
+            [Flags]
+            public enum ProductionFlagsOldValue : byte
+            {
+                None,
+                DoNotMonitorChanges = 1 << 0,
+                VerifySoundEvents = 1 << 1,
+                DoNotInheritForPlayerGraphs = 1 << 2
+            }
+
+            [Flags]
+            public enum ProductionFlagsNewValue : ushort
+            {
+                None,
+                DoNotMonitorChanges = 1 << 0,
+                VerifySoundEvents = 1 << 1,
+                DoNotInheritForPlayerGraphs = 1 << 2
+            }
+
+            [Flags]
+            public enum PlaybackFlagsValue : ushort
+            {
+                None,
+                DisableInterpolationIn = 1 << 0,
+                DisableInterpolationOut = 1 << 1,
+                DisableModeIk = 1 << 2,
+                DisableWeaponIk = 1 << 3,
+                DisableWeaponAim1stPerson = 1 << 4,
+                DisableLookScreen = 1 << 5,
+                DisableTransitionAdjustment = 1 << 6
+            }
 
             public enum CompressionValue : sbyte
             {
@@ -746,6 +821,32 @@ namespace TagTool.Tags.Definitions
             public float DefaultScale;
             public RealPoint3d MinimumBounds;
             public RealPoint3d MaximumBounds;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class CacheBlock
+        {
+            [TagField(Short = true)]
+            public CachedTagInstance Owner;
+
+            public int BlockSize;
+            public int BlockOffset;
+
+            public short Unknown1;
+            public byte Unknown2;
+            public byte Unknown3;
+            public int Unknown4;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class CacheUnknown
+        {
+            public int Unknown1;
+            public int Unknown2;
+            public int Unknown3;
+            public int Unknown4;
+            public int Unknown5;
+            public int Unknown6;
         }
 
         [TagStructure(Size = 0xC)]
