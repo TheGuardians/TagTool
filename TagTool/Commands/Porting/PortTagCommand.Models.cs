@@ -533,7 +533,17 @@ namespace TagTool.Commands.Porting
                     mesh.RawVertices = new List<Mesh.RawVertex>(section.TotalVertexCount);
 
                     for (var i = 0; i < section.TotalVertexCount; i++)
-                        mesh.RawVertices.Add(new Mesh.RawVertex());
+                        mesh.RawVertices.Add(new Mesh.RawVertex
+                        {
+                            Point = new Mesh.RawPoint
+                            {
+                                NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f },
+                                NodeIndices = new[] { 0, 0, 0, 0 },
+                                UseNewNodeIndices = 1,
+                                AdjustedCompoundNodeIndex = -1
+                            },
+                            SecondaryTexcoord = new RealPoint2d(1.0f, 1.0f)
+                        });
 
                     var currentVertexBuffer = 0;
 
@@ -563,99 +573,71 @@ namespace TagTool.Commands.Porting
                                     elementStream.SeekTo(entry.Item4, SeekOrigin.Current);
                                     continue;
                                 }
-                                
+
+                                var element = ReadVertexElement(elementStream, entry.Item3);
+
                                 switch (resource.SecondaryLocator) // stream source
                                 {
                                     case 0:
+                                        switch (entry.Item2)
                                         {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
+                                            case VertexDeclarationUsage.Position:
+                                                vertex.Point.Position = element.XYZ;
+                                                if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
+                                                    vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
+                                                break;
 
-                                            vertex.Point.NodeWeights = new[] { 1.0f, 0.0f, 0.0f, 0.0f };
-                                            vertex.Point.NodeIndices = new[] { 0, 0, 0, 0 };
-                                            vertex.Point.UseNewNodeIndices = 1;
-                                            vertex.Point.AdjustedCompoundNodeIndex = -1;
-                                            vertex.SecondaryTexcoord.Y = 1.0f;
+                                            case VertexDeclarationUsage.BlendIndices:
+                                                vertex.Point.NodeIndices = element.ToArray().Select(x => (int)x).ToArray();
+                                                break;
 
-                                            switch (entry.Item2)
-                                            {
-                                                case VertexDeclarationUsage.Position:
-                                                    vertex.Point.Position = element.XYZ;
-                                                    if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
-                                                        vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
-                                                    break;
-
-                                                case VertexDeclarationUsage.BlendIndices:
-                                                    vertex.Point.NodeIndices = element.ToArray().Select(x => (int)x).ToArray();
-                                                    break;
-
-                                                case VertexDeclarationUsage.BlendWeight:
-                                                    vertex.Point.NodeWeights = element.ToArray();
-                                                    break;
-                                            }
-                                            break;
+                                            case VertexDeclarationUsage.BlendWeight:
+                                                vertex.Point.NodeWeights = element.ToArray();
+                                                break;
                                         }
+                                        break;
 
                                     case 1:
+                                        if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
                                         {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
+                                            vertex.Texcoord = element.XY;
 
-                                            if (entry.Item2 == VertexDeclarationUsage.TextureCoordinate)
-                                            {
-                                                vertex.Texcoord = element.XY;
-
-                                                if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedTexcoord))
-                                                    vertex.Texcoord = compressor.DecompressUv(new RealVector2d(vertex.Texcoord.ToArray())).XY;
-                                            }
-                                            break;
+                                            if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedTexcoord))
+                                                vertex.Texcoord = compressor.DecompressUv(new RealVector2d(vertex.Texcoord.ToArray())).XY;
                                         }
+                                        break;
 
                                     case 2:
+                                        switch (entry.Item2)
                                         {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
+                                            case VertexDeclarationUsage.Normal:
+                                                vertex.Normal = element.IJK;
+                                                break;
 
-                                            switch (entry.Item2)
-                                            {
-                                                case VertexDeclarationUsage.Normal:
-                                                    vertex.Normal = element.IJK;
-                                                    break;
+                                            case VertexDeclarationUsage.Binormal:
+                                                vertex.Binormal = element.IJK;
+                                                break;
 
-                                                case VertexDeclarationUsage.Binormal:
-                                                    vertex.Binormal = element.IJK;
-                                                    break;
-
-                                                case VertexDeclarationUsage.Tangent:
-                                                    vertex.Tangent = element.IJK;
-                                                    break;
-                                            }
-                                            break;
+                                            case VertexDeclarationUsage.Tangent:
+                                                vertex.Tangent = element.IJK;
+                                                break;
                                         }
+                                        break;
 
                                     case 3:
-                                        {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
-
-                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
-                                                vertex.PrimaryLightmapTexcoord = element.XY;
-                                            break;
-                                        }
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
+                                            vertex.PrimaryLightmapTexcoord = element.XY;
+                                        break;
 
                                     case 4:
-                                        {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
-
-                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
-                                                vertex.SecondaryLightmapIncidentDirection = element.IJK;
-                                            break;
-                                        }
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
+                                            vertex.SecondaryLightmapIncidentDirection = element.IJK;
+                                        break;
 
                                     case 5:
-                                        {
-                                            var element = ReadVertexElement(elementStream, entry.Item3);
-
-                                            if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
-                                                vertex.PrimaryLightmapColor = element.RGB;
-                                            break;
-                                        }
+                                        if (section.LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
+                                            vertex.PrimaryLightmapColor = element.RGB;
+                                        break;
 
                                     default:
                                         throw new Exception();
