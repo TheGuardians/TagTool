@@ -566,6 +566,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public uint Unknown3;
 
+            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
             public class WeaponClassBlock
@@ -585,13 +586,20 @@ namespace TagTool.Tags.Definitions
                 {
                     [TagField(Label = true)]
                     public StringId Label;
-                    public List<Action> Actions;
-                    public List<Overlay> Overlays;
+
+                    public List<Entry> Actions;
+                    public List<Entry> Overlays;
                     public List<DeathAndDamageBlock> DeathAndDamage;
                     public List<Transition> Transitions;
 
+                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+                    public List<PrecacheListBlock> HighPrecache;
+
+                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+                    public List<PrecacheListBlock> LowPrecache;
+
                     [TagStructure(Size = 0x8)]
-                    public class Action
+                    public class Entry
                     {
                         [TagField(Label = true)]
                         public StringId Label;
@@ -599,23 +607,17 @@ namespace TagTool.Tags.Definitions
                         public short Animation;
                     }
 
-                    [TagStructure(Size = 0x8)]
-                    public class Overlay
-                    {
-                        [TagField(Label = true)]
-                        public StringId Label;
-                        public short GraphIndex;
-                        public short Animation;
-                    }
-
-                    [TagStructure(Size = 0x10)]
+                    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
+                    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
                     public class DeathAndDamageBlock
                     {
                         [TagField(Label = true)]
                         public StringId Label;
+
                         public List<Direction> Directions;
 
-                        [TagStructure(Size = 0xC)]
+                        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+                        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
                         public class Direction
                         {
                             public List<Region> Regions;
@@ -629,7 +631,8 @@ namespace TagTool.Tags.Definitions
                         }
                     }
 
-                    [TagStructure(Size = 0x18)]
+                    [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
+                    [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
                     public class Transition
                     {
                         [TagField(Label = true)]
@@ -663,6 +666,12 @@ namespace TagTool.Tags.Definitions
                                 KeyframeTypeD
                             }
                         }
+                    }
+
+                    [TagStructure(Size = 0x4)]
+                    public class PrecacheListBlock
+                    {
+                        public int CacheBlockIndex;
                     }
                 }
 
@@ -741,9 +750,9 @@ namespace TagTool.Tags.Definitions
             public float FullExtensionGroundDepth;
             public float FullCompressionGroundDepth;
             public StringId RegionName;
-            public float MassPointOffset2;
-            public float ExpressionGroundDepth;
-            public float CompressionGroundDepth;
+            public float DestroyedMassPointOffset;
+            public float DestroyedFullExtensionGroundDepth;
+            public float DestroyedFullCompressionGroundDepth;
         }
 
         [TagStructure(Size = 0x14)]
@@ -777,7 +786,8 @@ namespace TagTool.Tags.Definitions
             TightenNodes = 1 << 0
         }
 
-        [TagStructure(Size = 0x30)]
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail)]
         public class Inheritance
         {
             public CachedTagInstance InheritedGraph;
