@@ -14,27 +14,23 @@ namespace TagTool.Commands.Porting
     {
         private ChudDefinition.HudWidget.StateDatum ConvertStateData(ChudDefinition.HudWidget.StateDatum stateData)
         {
-            //Maybe missile pod should be added...
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
-                    stateData.EngineFlags_HO = GetEquivalentFlags(stateData.EngineFlags_HO, stateData.EngineFlags_H3);
-                    stateData.GamemodeFlags_HO = GetEquivalentFlags(stateData.GamemodeFlags_HO, stateData.GamemodeFlags_H3);
-                    stateData.UntitledFlags1 = GetEquivalentFlags(stateData.UntitledFlags1, stateData.UntitledFlags1_H3);
-                    stateData.UntitledFlags5 = GetEquivalentFlags(stateData.UntitledFlags5, stateData.UntitledFlags5_H3);
-
-                    stateData.ConsumableFlagsC = GetEquivalentFlags(stateData.ConsumableFlagsC, stateData.EngineFlags_H3);
-                    stateData.UntitledFlags5 = GetEquivalentFlags(stateData.UntitledFlags5, stateData.UntitledFlags5_H3);
+                    stateData.EngineFlags = GetEquivalentFlags(stateData.EngineFlags, stateData.EngineFlags_H3);
+                    stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_H3);
+                    stateData.Player_SpecialFlags = GetEquivalentFlags(stateData.Player_SpecialFlags, stateData.Player_SpecialFlags_H3);
                     break;
 
                 case CacheVersion.Halo3ODST:
-                    stateData.EngineFlags_HO = GetEquivalentFlags(stateData.EngineFlags_HO, stateData.EngineFlags_ODST);
+                    stateData.EngineFlags = GetEquivalentFlags(stateData.EngineFlags, stateData.EngineFlags_ODST);
+                    stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_ODST);
                     break;
             }
 
-            stateData.ScoreboardFlags_HO = GetEquivalentFlags(stateData.ScoreboardFlags_HO, stateData.ScoreboardFlags);
-            stateData.ScoreboardFlagsB = GetEquivalentFlags(stateData.ScoreboardFlagsB, stateData.ScoreboardFlags);
-            stateData.UntitledFlags2_HO = GetEquivalentFlags(stateData.UntitledFlags2_HO, stateData.UntitledFlags2);
+            stateData.MultiplayerEventsFlags = GetEquivalentFlags(stateData.MultiplayerEventsFlags, stateData.MultiplayerEventsFlags_H3);
+            stateData.GeneralKudosFlags = GetEquivalentFlags(stateData.GeneralKudosFlags, stateData.GeneralKudosFlags_H3);
+            stateData.UnitGeneralFlags = GetEquivalentFlags(stateData.UnitGeneralFlags, stateData.UnitGeneralFlags_H3);
 
             return stateData;
         }

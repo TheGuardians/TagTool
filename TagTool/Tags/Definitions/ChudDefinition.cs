@@ -58,92 +58,102 @@ namespace TagTool.Tags.Definitions
             public class StateDatum
             {
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public EngineFlagsValue_H3 EngineFlags_H3;
+                public Engine_H3 EngineFlags_H3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public EngineFlagsValue_ODST EngineFlags_ODST;
+                public Engine_ODST EngineFlags_ODST;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public EngineFlagsValue_HO EngineFlags_HO;
-                public BipedFlagsValue BipedFlags;
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-                public GamemodeFlagsValue GamemodeFlags_H3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public GamemodeFlagsValue GamemodeFlags_HO;
+                public Engine EngineFlags;
+
+                public PlayerType PlayerTypeFlags;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public UnknownFlagsValue Unknown1;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public UnknownFlagsValue Unknown2;
-                public ResolutionFlagsValue ResolutionFlags;
+                public PDA PDAFlags;
+
+                public Multiplayer MultiplayerFlags;
+                public Resolution ResolutionFlags;
+
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public ScoreboardFlagsValue ScoreboardFlags;
+                public MultiplayerEvents_H3 MultiplayerEventsFlags_H3;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ScoreboardFlagsValue_HO ScoreboardFlags_HO;
+                public MultiplayerEvents MultiplayerEventsFlags;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public ScoreboardFlagsBValue ScoreboardFlagsB;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public UntitledFlags1Value UntitledFlags1;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public UntitledFlags1Value_H3 UntitledFlags1_H3;
-                public EditorFlagsValue EditorFlags;
-                public MotionTrackerAndMetagameFlagsValue MotionTrackerAndMetageameFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public SkullFlagsValue SkullFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public SurvivalWaveFlagsValue SurvivalWaveFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public SurvivalWaveFlagsBValue SurvivalWaveFlagsB;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public UnknownFlagsValue Unknown6;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public UnknownFlagsValue Unknown7;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public UnknownFlagsValue Unknown8;
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-                public UntitledFlags2Value UntitledFlags2;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public UntitledFlags2Value_HO UntitledFlags2_HO;
-                public ScopeFlagsValue ScopeFlags;
-                public WeaponStateFlagsValue WeaponStateFlags;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public UnknownFlagsValue Unknown9;
-                public UntitledFlags3Value UntitledFlags3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public UnknownFlagsValue Unknown10;
-                public UntitledFlags4Value UntitledFlags4;
-                public WeaponStateFlagsValue WeaponStateFlags2;
-                public AutoaimFlagsValue AutoaimFlags;
-				public MissileLockFlagsValue MissileLockFlags;
-				[TagField(MinVersion = CacheVersion.Halo3ODST)]
-				public UntitledFlags5Value UntitledFlags5;
-				[TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-				public UntitledFlags5Value_H3 UntitledFlags5_H3;
-				public AmmoFlagsValue AmmoFlags;
+                public UnitBase UnitBaseFlags;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public UntitledFlags6Value UntitledFlags6;
-                public ScopeFlagsValue ScopeFlags2;
+                public UnitBase_ODST UnitBaseFlags_ODST;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public UnitBase_H3 UnitBaseFlags_H3;
+
+                public Editor EditorFlags;
+                public EngineGeneral EngineGeneralFlags;               
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public Skulls SkullFlags;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public SurvivalRounds SurvivalRoundFlags;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public SurvivalWaves SurvivalWaveFlags;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public SurvivalLives SurvivalLivesFlags;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public SurvivalDifficulty SurvivalDifficultyFlags;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public short UnusedFlags;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public UnknownFlagsValue Unknown12;
+                public GeneralKudos GeneralKudosFlags;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]         
+                public GeneralKudos_H3 GeneralKudosFlags_H3;
+
+				public UnitZoom UnitZoomFlags;
+                public UnitInventory UnitInventoryFlags;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public ConsumableFlagsAValue ConsumableFlagsA;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public ConsumableFlagsBValue ConsumableFlagsB;
-				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-				public ConsumableFlagsCValue ConsumableFlagsC;
+                public short UnusedFlags2;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public UnknownFlagsValue Unknown13;
-                [TagField(MinVersion = CacheVersion.HaloOnline700123)]
-                public UnknownFlagsValue Unknown14;
-                [TagField(MinVersion = CacheVersion.HaloOnline700123)]
-                public UnknownFlagsValue Unknown15;
+                public UnitGeneral UnitGeneralFlags;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                public UnitGeneral_H3 UnitGeneralFlags_H3;
+
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public short UnusedFlags2_1;
+
+                public WeaponKudos WeaponKudosFlags;
+                public WeaponStatus WeaponStatusFlags;
+                public WeaponTarget WeaponTargetFlags;
+                public WeaponTargetB WeaponTargetBFlags;
+
+                public Player_Special Player_SpecialFlags;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public Player_Special_H3 Player_SpecialFlags_H3;
+
+                public Weapon_Special Weapon_SpecialFlags;
+                public Inverse InverseFlags;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                public PDA2 PDA2Flags;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public short UnusedFlags3;
+
+                //HO EXCLUSIVE FLAGS
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public short UnusedFlags4;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public Consumable ConsumableFlags;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public EnergyMeter EnergyMeterFlags;
 
                 [Flags]
-                public enum EngineFlagsValue_HO : ushort
+                public enum Engine : ushort
                 {
                     None,
-                    Bit0 = 1 << 0,
-                    Bit1 = 1 << 1,
-                    Survival = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Theater = 1 << 4,
+                    CampaignSolo = 1 << 0,
+                    CampaignCoop = 1 << 1,
+                    Survival = 1 << 2, //not sure about this one
+                    Unknown2 = 1 << 3,
+                    Unknown3 = 1 << 4,
                     CTF = 1 << 5,
                     Slayer = 1 << 6,
                     Oddball = 1 << 7,
@@ -154,39 +164,28 @@ namespace TagTool.Tags.Definitions
                     VIP = 1 << 12,
                     Infection = 1 << 13,
                     Editor = 1 << 14,
-                    Bit15 = 1 << 15
+                    Theater = 1 << 15
                 }
 
                 [Flags]
-                public enum EngineFlagsValue_ODST : ushort
+                public enum Engine_ODST : ushort
                 {
                     None,
-                    Bit0 = 1 << 0,
-                    Bit1 = 1 << 1,
+                    CampaignSolo = 1 << 0,
+                    CampaignCoop = 1 << 1,
                     Survival = 1 << 2,
                     Editor = 1 << 3,
                     Theater = 1 << 4,
-                    CTF = 1 << 5,
-                    Slayer = 1 << 6,
-                    Oddball = 1 << 7,
-                    KOTH = 1 << 8,
-                    Juggernaut = 1 << 9,
-                    Territories = 1 << 10,
-                    Assault = 1 << 11,
-                    VIP = 1 << 12,
-                    Infection = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum EngineFlagsValue_H3 : ushort
+                public enum Engine_H3 : ushort
                 {
                     None,
-                    Bit0 = 1 << 0,
-					Bit1 = 1 << 1,
-					Bit2 = 1 << 2,
-					Bit3 = 1 << 3,
+                    CampaignSolo = 1 << 0,
+                    CampaignCoop = 1 << 1,
+                    Teamgame = 1 << 2,
+					FFAgame = 1 << 3,
 					CTF = 1 << 4,
 					Slayer = 1 << 5,
 					Oddball = 1 << 6,
@@ -196,151 +195,128 @@ namespace TagTool.Tags.Definitions
 					Assault = 1 << 10,
 					VIP = 1 << 11,
 					Infection = 1 << 12,
-					Bit13 = 1 << 13,
+					Unused = 1 << 13,
 					Editor = 1 << 14,
 					Theater = 1 << 15
 				}
 
 				[Flags]
-                public enum BipedFlagsValue : ushort
+                public enum PlayerType : ushort
                 {
                     None,
-                    Biped1 = 1 << 0,
-                    Biped2 = 1 << 1,
-                    Biped3 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    Spartan = 1 << 0,
+                    Elite = 1 << 1,
+                    Monitor = 1 << 2,
                 }
 
                 [Flags]
-                public enum GamemodeFlagsValue : ushort
+                public enum PDA : ushort
                 {
                     None,
-                    Offense = 1 << 0,
-                    Defense = 1 << 1,
-                    FreeForAll = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
+                    SplitscreenPDAOpen = 1 << 0,
+                    SplitscreenPDAClose = 1 << 1,
+                    CameraUnknown = 1 << 2,
+                }
+
+                [Flags]
+                public enum PDA2 : ushort
+                {
+                    None,
+                    VisibleInPDA = 1 << 0,
+                }
+
+                [Flags]
+                public enum Multiplayer : ushort
+                {
+                    None,
+                    OffenseTeam = 1 << 0,
+                    DefenseTeam = 1 << 1,
+                    NormalTeam = 1 << 2,
+                    SpecialTeam = 1 << 3,
+                    Extraspecialteam = 1 << 4, //broken?
+                    NoMicrophone = 1 << 5,
                     TalkingDisabled = 1 << 6,
                     TapToTalk = 1 << 7,
                     TalkingEnabled = 1 << 8,
                     NotTalking = 1 << 9,
                     Talking = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum ResolutionFlagsValue : ushort
+                public enum Resolution : ushort
                 {
                     None,
-                    Bit0 = 1 << 0,
-                    Widescreen = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Fullscreen = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    WideFull = 1 << 0,
+                    WideHalf = 1 << 1,
+                    NativeFull = 1 << 2,
+                    StandardFull = 1 << 3,
+                    WideQuarter = 1 << 4,
+                    StandardHalf = 1 << 5,
+                    NativeQuarter = 1 << 6,
+                    StandardQuarter = 1 << 7,
                 }
 
                 [Flags]
-                public enum ScoreboardFlagsValue_HO : ushort
+                public enum MultiplayerEvents : uint
                 {
                     None,
                     HasFriends = 1 << 0,
                     HasEnemies = 1 << 1,
-                    HasVariantName = 1 << 2,
+                    VariantNameValid = 1 << 2,
                     SomeoneIsTalking = 1 << 3,
                     IsArming = 1 << 4,
                     TimeEnabled = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    FriendlyAction = 1 << 8,
-                    EnemyAction = 1 << 9,
+                    FriendsHaveX = 1 << 6,
+                    EnemiesHaveX = 1 << 7,
+                    FriendsAreX = 1 << 8,
+                    EnemiesAreX = 1 << 9,
                     XIsDown = 1 << 10,
                     AttackerBombDropped = 1 << 11,
-                    AttackedBombPickedUp = 1 << 12,
+                    AttackerBombPickedUp = 1 << 12,
                     DefenderTeamIsDead = 1 << 13,
                     AttackerTeamIsDead = 1 << 14,
-                    SummaryEnabled = 1 << 15
+                    Unknown15 = 1 << 15,
+                    SummaryEnabled = 1 << 16,
+                    NetDebugEnabled = 1 << 17
                 }
 
                 [Flags]
-                public enum ScoreboardFlagsValue : ushort
+                public enum MultiplayerEvents_H3 : ushort
                 {
                     None,
                     HasFriends = 1 << 0,
                     HasEnemies = 1 << 1,
-                    HasVariantName = 1 << 2,
+                    VariantNameValid = 1 << 2,
                     SomeoneIsTalking = 1 << 3,
                     IsArming = 1 << 4,
                     TimeEnabled = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    FriendlyAction = 1 << 8,
-                    EnemyAction = 1 << 9,
+                    FriendsHaveX = 1 << 6,
+                    EnemiesHaveX = 1 << 7,
+                    FriendsAreX = 1 << 8,
+                    EnemiesAreX = 1 << 9,
                     XIsDown = 1 << 10,
                     SummaryEnabled = 1 << 11,
-                    NetDebug = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
-                }
-
-                //Although these flags don't seem related to the scoreboard,
-                //They were in the scoreboard flags in ODST.
-                [Flags]
-                public enum ScoreboardFlagsBValue : ushort
-                {
-                    None,
-                    Bit0 = 1 << 0,
-                    NetDebug = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    NetDebugEnabled = 1 << 12,
                 }
 
                 [Flags]
-                public enum UntitledFlags1Value_H3 : ushort
+                public enum UnitBase_H3 : ushort
                 {
                     None,
                     TextureCamEnabled = 1 << 0,
-                    Autoaim = 1 << 1,
+                    BinocularsTargeted = 1 << 1,
+                    Bit2 = 1 << 2,
+                    Bit3 = 1 << 3,
+                    TrainingPrompt = 1 << 4,
+                    ObjectivePrompt = 1 << 5,
+                }
+
+                [Flags]
+                public enum UnitBase_ODST : uint
+                {
+                    None,
+                    TextureCamEnabled = 1 << 0,
+                    BinocularsTargeted = 1 << 1,
                     Bit2 = 1 << 2,
                     Bit3 = 1 << 3,
                     TrainingPrompt = 1 << 4,
@@ -358,95 +334,45 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum UntitledFlags1Value : uint
+                public enum UnitBase : uint
                 {
                     None,
                     TextureCamEnabled = 1 << 0,
-                    Autoaim = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
+                    BinocularsTargeted = 1 << 1,
+                    Bit2 = 1 << 2, //unused?
+                    Bit3 = 1 << 3, //unused?
                     TrainingPrompt = 1 << 4,
                     ObjectivePrompt = 1 << 5,
                     SurvivalState = 1 << 6,
-                    BeaconEnabled = 1 << 7,
-                    UserWaypointEnabled = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Achievement1 = 1 << 10,
-                    Achievement2 = 1 << 11,
-                    Achievement3 = 1 << 12,
-                    Achievement4 = 1 << 13,
-                    Achievement5 = 1 << 14,
-                    ARGEnabled = 1 << 15,
-                    Bit16 = 1 << 16,
-                    Bit17 = 1 << 17,
-                    Bit18 = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20,
-                    Bit21 = 1 << 21,
-                    Bit22 = 1 << 22,
-                    Bit23 = 1 << 23,
-                    Bit24 = 1 << 24,
-                    Bit25 = 1 << 25,
-                    Bit26 = 1 << 26,
-                    Bit27 = 1 << 27,
-                    Bit28 = 1 << 28,
-                    Bit29 = 1 << 29,
-                    Bit30 = 1 << 30,
+                    Unknown1 = 1 << 7,
+                    Unknown2 = 1 << 8,
+                    Unknown3 = 1 << 9,
+                    Unknown4 = 1 << 10,
+                    Unknown5 = 1 << 11,
+                    Unknown6 = 1 << 12,
+                    Unknown7 = 1 << 13, //time?
                 }
 
                 [Flags]
-                public enum UnknownFlagsValue : ushort
-                {
-                    None,
-                    Bit0 = 1 << 0,
-                    Bit1 = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
-                }
-
-                [Flags]
-                public enum EditorFlagsValue : ushort
+                public enum Editor : ushort
                 {
                     None,
                     EditorInactive = 1 << 0,
-                    EditorAcitve = 1 << 1,
+                    EditorActive = 1 << 1,
                     EditorHolding = 1 << 2,
                     EditorNotAllowed = 1 << 3,
                     IsEditorBiped = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum MotionTrackerAndMetagameFlagsValue : ushort
+                public enum EngineGeneral : ushort
                 {
                     None,
                     MotionTracker10M = 1 << 0,
                     MotionTracker25M = 1 << 1,
                     MotionTracker75M = 1 << 2,
                     MotionTracker150M = 1 << 3,
-                    Bit4 = 1 << 4,
+                    MetagameDebugEnabled = 1 << 4,
                     MetagamePlayer2Exists = 1 << 5,
                     Bit6 = 1 << 6,
                     MetagamePlayer3Exists = 1 << 7,
@@ -454,14 +380,14 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer4Exists = 1 << 9,
                     Bit10 = 1 << 10,
                     MetagameScoreAdded = 1 << 11,
-                    Bit12 = 1 << 12,
+                    MetagameMultikill = 1 << 12,
                     MetagameScoreRemoved = 1 << 13,
                     Bit14 = 1 << 14,
                     Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum SkullFlagsValue : ushort
+                public enum Skulls : ushort
                 {
                     None,
                     IronSkullEnabled = 1 << 0,
@@ -483,29 +409,20 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum SurvivalWaveFlagsValue : ushort
+                public enum SurvivalRounds : ushort
                 {
                     None,
-                    Wave1Background = 1 << 0,
-                    Wave2Background = 1 << 1,
-                    Wave3Background = 1 << 2,
-                    Wave4Background = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
+                    Round0 = 1 << 0,
+                    Round1 = 1 << 1,
+                    Round2 = 1 << 2,
+                    Round3 = 1 << 3,
+                    Round4 = 1 << 4,
+                    Round5 = 1 << 5,
                     BonusRound = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum SurvivalWaveFlagsBValue : ushort
+                public enum SurvivalWaves : ushort
                 {
                     None,
                     Wave1 = 1 << 0,
@@ -513,27 +430,59 @@ namespace TagTool.Tags.Definitions
                     Wave3 = 1 << 2,
                     Wave4 = 1 << 3,
                     Wave5 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    Wave6 = 1 << 5,
+                    Wave7 = 1 << 6,
+                    Wave8 = 1 << 7,
+                    Wave9 = 1 << 8,
+                    Wave10 = 1 << 9,
+                    Wave11 = 1 << 10,
+                    Wave12 = 1 << 11,
+                    Wave13 = 1 << 12,
+                    Wave14 = 1 << 13,
+                    Wave15 = 1 << 14,
+                    Wave16 = 1 << 15
                 }
 
                 [Flags]
-                public enum UntitledFlags2Value_HO : ushort
+                public enum SurvivalLives : ushort
                 {
                     None,
-                    PickupGrenades = 1 << 0,
-                    Bit1 = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
+                    lives0 = 1 << 0,
+                    lives1 = 1 << 1,
+                    lives2 = 1 << 2,
+                    lives3 = 1 << 3,
+                    lives4 = 1 << 4,
+                    lives5 = 1 << 5,
+                    lives6 = 1 << 6,
+                    lives7 = 1 << 7,
+                    lives8 = 1 << 8,
+                    lives9 = 1 << 9,
+                    lives10 = 1 << 10,
+                    lives11 = 1 << 11,
+                    lives12 = 1 << 12,
+                    lives13 = 1 << 13,
+                    lives14 = 1 << 14,
+                    lives15 = 1 << 15
+                }
+
+                [Flags]
+                public enum SurvivalDifficulty : ushort
+                {
+                    None,
+                    Easy = 1 << 0,
+                    Normal = 1 << 1,
+                    Heroic = 1 << 2,
+                    Legendary = 1 << 3,
+                }
+
+                [Flags]
+                public enum GeneralKudos : ushort
+                {
+                    None,
+                    PickupFragGrenades = 1 << 0,
+                    PickupPlasmaGrenades = 1 << 1,  
+                    PickupSpikeGrenades = 1 << 2,
+                    PickupFireGrenades = 1 << 3,
                     Bit4 = 1 << 4,
                     LivesAdded = 1 << 5,
                     Consumable1Unknown = 1 << 6,
@@ -548,96 +497,88 @@ namespace TagTool.Tags.Definitions
                     Bit15 = 1 << 15
                 }
 
-				[Flags]
-				public enum UntitledFlags2Value : ushort
+                [Flags]
+                public enum GeneralKudos_H3 : ushort
                 {
                     None,
-                    PickupGrenades = 1 << 0,
-                    Bit1 = 1 << 1,
-                    Bit2 = 1 << 2,
-                    Bit3 = 1 << 3,
+                    PickupFragGrenades = 1 << 0,
+                    PickupPlasmaGrenades = 1 << 1,
+                    PickupSpikeGrenades = 1 << 2,
+                    PickupFireGrenades = 1 << 3,
                     Bit4 = 1 << 4,
-					Bit5 = 1 << 5,
-					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					LivesAdded = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
-				}
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    LivesAdded = 1 << 9,
+                }
 
-				[Flags]
-                public enum ScopeFlagsValue : ushort
+                [Flags]
+                public enum UnitZoom : ushort
                 {
                     None,
                     BinocularsEnabled = 1 << 0,
                     UnitIsZoomedLevel1 = 1 << 1,
                     UnitIsZoomedLevel2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum WeaponStateFlagsValue : ushort
+                public enum UnitInventory : ushort
                 {
-                    None,
-                    PrimaryWeapon = 1 << 0,
-                    SecondaryWeapon = 1 << 1,
-                    Backpack = 1 << 2,
-                    Bit3 = 1 << 3,
-                    WeaponCanBePickedUp = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    None = 1 << 0,
+                    IsSingleWielding = 1 << 1,
+                    IsDualWielding = 1 << 2,
+                    HasSupportWeapon = 1 << 3,
                 }
 
                 [Flags]
-                public enum UntitledFlags3Value : ushort
+                public enum UnitGeneral : uint
                 {
                     None,
                     MotionTrackerEnabled = 1 << 0,
-                    Bit1 = 1 << 1,
+                    MotionTrackerDisabled = 1 << 1,
                     SelectedFragGrenades = 1 << 2,
                     SelectedPlasmaGrenades = 1 << 3,
                     SelectedSpikeGrenades = 1 << 4,
                     SelectedFireGrenades = 1 << 5,
-                    Bit6 = 1 << 6,
-                    VisionWarning = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
+                    BinocularsActive = 1 << 6,
+                    BinocularsNotActive = 1 << 7,
+                    ThirdPersonCamera = 1 << 8,
+                    FirstPersonCamera = 1 << 9,
+                    IsSpeaking = 1 << 10,
+                    IsTappingToTalk = 1 << 11,
                     HasOvershieldLevel1 = 1 << 12,
                     HasOvershieldLevel2 = 1 << 13,
                     HasOvershieldLevel3 = 1 << 14,
-                    HasShields = 1 << 15
+                    HasShields = 1 << 15,
+                    Unknown1 = 1 << 16,
+                    Unknown2 = 1 << 17
                 }
 
-				[Flags]
-				public enum UntitledFlags4Value : ushort
+                [Flags]
+                public enum UnitGeneral_H3 : ushort
+                {
+                    None,
+                    MotionTrackerEnabled = 1 << 0,
+                    MotionTrackerDisabled = 1 << 1,
+                    SelectedFragGrenades = 1 << 2,
+                    SelectedPlasmaGrenades = 1 << 3,
+                    SelectedSpikeGrenades = 1 << 4,
+                    SelectedFireGrenades = 1 << 5,
+                    BinocularsActive = 1 << 6,
+                    BinocularsNotActive = 1 << 7,
+                    ThirdPersonCamera = 1 << 8,
+                    FirstPersonCamera = 1 << 9,
+                    IsSpeaking = 1 << 10,
+                    IsTappingToTalk = 1 << 11,
+                    HasOvershieldLevel1 = 1 << 12,
+                    HasOvershieldLevel2 = 1 << 13,
+                    HasOvershieldLevel3 = 1 << 14,
+                    HasShields = 1 << 15,
+                }
+
+                [Flags]
+				public enum WeaponKudos : ushort
 				{
 					None,
 					Bit0 = 1 << 0,
@@ -659,139 +600,96 @@ namespace TagTool.Tags.Definitions
 				}
 
 				[Flags]
-				public enum AutoaimFlagsValue : ushort
+				public enum WeaponTarget : ushort
 				{
 					None,
-					NotAutoaim = 1 << 0,
-					AutoaimFriendly = 1 << 1,
-					AutoaimEnemy = 1 << 2,
-					AutoaimHeadshot = 1 << 3,
-					Bit4 = 1 << 4,
-					Bit5 = 1 << 5,
-					Bit6 = 1 << 6,
-					PlasmaLockedOn = 1 << 7,
-					Bit8 = 1 << 8,
+					NoTarget = 1 << 0,
+					FriendlyTarget = 1 << 1,
+					EnemyTarget = 1 << 2,
+					HeadshotTarget = 1 << 3,
+					VulnerableTarget = 1 << 4,
+					InvincibleTarget = 1 << 5, //Defunct
+					PlasmaLocked = 1 << 6,
+					PlasmaLocking = 1 << 7,
+					PlasmaLockAvailable = 1 << 8,
 					Bit9 = 1 << 9,
 					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
 				}
 
 				[Flags]
-				public enum MissileLockFlagsValue : ushort
+				public enum WeaponTargetB : ushort
 				{
 					None,
-					Bit0 = 1 << 0,
-					MissileLocked = 1 << 1,
-					MissileLocking = 1 << 2,
-					Bit3 = 1 << 3,
-					Bit4 = 1 << 4,
-					Bit5 = 1 << 5,
-					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
+					HumanLocking = 1 << 0,
+					HumanLocked = 1 << 1,
+					HumanLockAvailable = 1 << 2,
 				}
 
-				[Flags]
-				public enum UntitledFlags5Value : ushort
+                [Flags]
+                public enum WeaponStatus : ushort
+                {
+                    None,
+                    SourceIsPrimaryWeapon = 1 << 0,
+                    SourceIsDualWeapon = 1 << 1,
+                    SourceIsBackpacked = 1 << 2,
+                }
+
+                [Flags]
+				public enum Player_Special : ushort
 				{
 					None,
-					VitalityMeterMinorDamage = 1 << 0,
-					VitalityMeterMediumDamage = 1 << 1,
-					VitalityMeterHeavyDamage = 1 << 2,
-					Bit3 = 1 << 3,
-					Bit4 = 1 << 4,
-					HasNoShields = 1 << 5,
+					HealthMinorDamage = 1 << 0,
+					HealthMediumDamage = 1 << 1,
+					HealthHeavyDamage = 1 << 2,
+                    ShieldsMinorDamage = 1 << 3,
+                    ShieldsMediumDamage = 1 << 4,
+                    ShieldsHeavyDamage = 1 << 5,
 					HasFragGrenades = 1 << 6,
 					HasPlasmaGrenades = 1 << 7,
 					HasSpikeGrenades = 1 << 8,
 					HasFireGrenades = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
+					Unknown1 = 1 << 10,
+					Unknown2 = 1 << 11,
 				}
 
 				[Flags]
-				public enum UntitledFlags5Value_H3 : ushort
+				public enum Player_Special_H3 : ushort
 				{
 					None,
-					Bit0 = 1 << 0,
-					HasNoShields = 1 << 1,
+					ShieldsMediumDamage = 1 << 0,
+                    ShieldsHeavyDamage = 1 << 1,
 					HasFragGrenades = 1 << 2,
 					HasPlasmaGrenades = 1 << 3,
 					HasSpikeGrenades = 1 << 4,
 					HasFireGrenades = 1 << 5,
-					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
+                    Unknown1 = 1 << 6,
+                    Unknown2 = 1 << 7,
 				}
 
 				[Flags]
-				public enum AmmoFlagsValue : ushort
+				public enum Weapon_Special : ushort
 				{
 					None,
-					ClipWarning = 1 << 0,
-					AmmoWarning = 1 << 1,
-					Bit2 = 1 << 2,
-					Bit3 = 1 << 3,
-					LowBattery1 = 1 << 4,
-					LowBattery2 = 1 << 5,
+                    ClipBelowCutoff = 1 << 0,
+					ClipEmpty = 1 << 1,
+					AmmoBelowCutoff = 1 << 2,
+					AmmoEmpty = 1 << 3,
+					BatteryBelowCutoff = 1 << 4,
+					BatteryEmpty = 1 << 5,
 					Overheated = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
 				}
 
 				[Flags]
-				public enum UntitledFlags6Value : ushort
+				public enum Inverse : ushort
 				{
 					None,
-					IsZoomed = 1 << 0,
-					Bit1 = 1 << 1,
-					Bit2 = 1 << 2,
-					Bit3 = 1 << 3,
-					Bit4 = 1 << 4,
-					Bit5 = 1 << 5,
-					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
+					NotZoomedIn = 1 << 0,
+                    NotArmedWithSupportWeapon = 1 << 1,
+					NotFullyArmed = 1 << 2,
 				}
 
                 [Flags]
-				public enum ConsumableFlagsAValue : ushort
+				public enum Consumable : uint
 				{
 					None,
 					Consumable1Low = 1 << 0,
@@ -809,33 +707,19 @@ namespace TagTool.Tags.Definitions
 					Consumable1DisabledA = 1 << 12,
 					Consumable2DisabledA = 1 << 13,
 					Consumable3DisabledA = 1 << 14,
-					Consumable4DisabledA = 1 << 15
-				}
+					Consumable4DisabledA = 1 << 15,
+                    Consumable1DisabledB = 1 << 16,
+                    Consumable2DisabledB = 1 << 17,
+                    Consumable3DisabledB = 1 << 18,
+                    Consumable4DisabledB = 1 << 19,
+                    Consumable1Active = 1 << 20,
+                    Consumable2Active = 1 << 21,
+                    Consumable3Active = 1 << 22,
+                    Consumable4Active = 1 << 23,
+                }
 
                 [Flags]
-                public enum ConsumableFlagsBValue : ushort
-				{
-					None,
-					Consumable1DisabledB = 1 << 0,
-					Consumable2DisabledB = 1 << 1,
-					Consumable3DisabledB = 1 << 2,
-					Consumable4DisabledB = 1 << 3,
-					Consumable1Active = 1 << 4,
-					Consumable2Active = 1 << 5,
-					Consumable3Active = 1 << 6,
-					Consumable4Active = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					Bit12 = 1 << 12,
-					Bit13 = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
-				}
-
-                [Flags]
-                public enum ConsumableFlagsCValue : ushort
+                public enum EnergyMeter : uint
 				{
 					None,
 					EnergyMeter1Full = 1 << 0,
@@ -843,17 +727,6 @@ namespace TagTool.Tags.Definitions
 					EnergyMeter3Full = 1 << 2,
 					EnergyMeter4Full = 1 << 3,
 					EnergyMeter5Full = 1 << 4,
-					Bit5 = 1 << 5,
-					Bit6 = 1 << 6,
-					Bit7 = 1 << 7,
-					Bit8 = 1 << 8,
-					Bit9 = 1 << 9,
-					Bit10 = 1 << 10,
-					Bit11 = 1 << 11,
-					FFA = 1 << 12,
-					Teams = 1 << 13,
-					Bit14 = 1 << 14,
-					Bit15 = 1 << 15
 				}
 			}
 
@@ -914,52 +787,56 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
             public class AnimationDatum
             {
-                //These fields have been identified and should be updated.
-                //In halo 3 and odst, they're enum16's. They probably should be here.
-                public AnimationFlags1Values Animation1Flags;
-                public AnimationFunctionValues Animation1Function;
-                public CachedTagInstance Animation1;
+                //HUD Initialize Animation
+                public AnimationFlags HUDInitializeFlags;
+                public AnimationFunction HUDInitializeFunction;
+                public CachedTagInstance HUDInitialize;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation1Unknown;
+                public float HUDInitializeUnknown;
 
-                public AnimationFlags1Values Animation2Flags;
-                public AnimationFunctionValues Animation2Function;
-                public CachedTagInstance Animation2;
+                //Idle Animation
+                public AnimationFlags IdleFlags;
+                public AnimationFunction IdleFunction;
+                public CachedTagInstance Idle;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation2Unknown;
+                public float IdleUnknown;
 
-                public AnimationFlags1Values Animation3Flags;
-                public AnimationFunctionValues Animation3Function;
-                public CachedTagInstance Animation3;
+                //Special State Animation
+                public AnimationFlags SpecialStateFlags;
+                public AnimationFunction SpecialStateFunction;
+                public CachedTagInstance SpecialState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation3Unknown;
+                public float SpecialStateUnknown;
 
-                public AnimationFlags1Values Animation4Flags;
-                public AnimationFunctionValues Animation4Function;
-                public CachedTagInstance Animation4;
+                //Transition In Animation
+                public AnimationFlags TransitionInFlags;
+                public AnimationFunction TransitionInFunction;
+                public CachedTagInstance TransitionIn;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation4Unknown;
+                public float TransitionInUnknown;
 
-                public AnimationFlags1Values Animation5Flags;
-                public AnimationFunctionValues Animation5Function;
-                public CachedTagInstance Animation5;
+                //Transition Out Animation
+                public AnimationFlags TransitionOutFlags;
+                public AnimationFunction TransitionOutFunction;
+                public CachedTagInstance TransitionOut;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation5Unknown;
+                public float TransitionOutUnknown;
 
-                public AnimationFlags1Values Animation6Flags;
-                public AnimationFunctionValues Animation6Function;
-                public CachedTagInstance Animation6;
+                //Brief State Animation
+                public AnimationFlags BriefStateFlags;
+                public AnimationFunction BriefStateFunction;
+                public CachedTagInstance BriefState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Animation6Unknown;
+                public float BriefStateUnknown;
 
                 [Flags]
-                public enum AnimationFlags1Values : short
+                public enum AnimationFlags : short
                 {
                     None,
                     ReverseFrames = 1 << 0,
                 }
 
-                public enum AnimationFunctionValues : short
+                public enum AnimationFunction : short
                 {
                     Default,
                     UseInput,

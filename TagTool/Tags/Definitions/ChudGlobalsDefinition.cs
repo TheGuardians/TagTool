@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
 	{
 		public List<HudGlobal> HudGlobals;
 		public List<HudShader> HudShaders;
-		public List<UnknownBlock> Unknown;
+		public List<UnusedCortanaEffectBlock> UnusedCortanaEffect;
 		public List<UnknownBlock2> Unknown2;
 		public List<PlayerTrainingDatum> PlayerTrainingData;
 		public CachedTagInstance StartMenuEmblems;
@@ -55,6 +55,8 @@ namespace TagTool.Tags.Definitions
 		public float HealthMajorThreshold;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float HealthCriticalThreshold;
+
+        //POSSIBLY SHADER RELATED
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown12;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -87,8 +89,10 @@ namespace TagTool.Tags.Definitions
 		public float Unknown25;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown26;
+
+        //DAMAGE MASK FUNCTIONS AND VARIABLES
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public TagFunction Unknown27;
+		public TagFunction DamageMaskFunction1;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown28;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -122,9 +126,9 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown43;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public TagFunction Unknown44;
+		public TagFunction DamageMaskFunction2;
 
-        //ODST VALUES
+        //ODST VALUES FOR PDA/BEACON
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public float Unknown50;
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -138,13 +142,9 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
 		public float Unknown55;
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-		public TagFunction Unknown56;
+		public TagFunction PDABeaconFunction1;
 		[TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-		public TagFunction Unknown57;
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown58;
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public float Unknown59;
+		public TagFunction PDABeaconFunction2;
 
         //HO VALUES
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -177,10 +177,12 @@ namespace TagTool.Tags.Definitions
 		public TagFunction Unknown68;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown69;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public CachedTagInstance Unknown70;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float Unknown71;
+
+        //NOT SURE WHAT THIS IS
+		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		public CachedTagInstance Unknown58;
+		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		public float Unknown59;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown72;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -325,8 +327,8 @@ namespace TagTool.Tags.Definitions
 			public CachedTagInstance CortanaChannel;
 			public CachedTagInstance Unknown20;
 			public CachedTagInstance Unknown21;
-			public CachedTagInstance Unknown22;
-			public CachedTagInstance Unknown23;
+			public CachedTagInstance JammerResponse;
+			public CachedTagInstance JammerShieldHit;
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
 			public uint Unknown24;
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -698,8 +700,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-		public class UnknownBlock
-		{
+		public class UnusedCortanaEffectBlock
+        {
 			public uint Unknown;
 			public uint Unknown2;
 			public uint Unknown3;
