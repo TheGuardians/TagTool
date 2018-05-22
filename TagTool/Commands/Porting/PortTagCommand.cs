@@ -77,6 +77,9 @@ namespace TagTool.Commands.Porting
             {
                 var arg = args[0].ToLower();
 
+                if (!flagNames.Contains(arg))
+                    throw new FormatException($"Invalid {typeof(PortingFlags).FullName}: {args[0]}");
+
                 for (var i = 0; i < flagNames.Count(); i++)
                     if (arg == flagNames.ElementAt(i))
                         Flags |= flagValues[i];
