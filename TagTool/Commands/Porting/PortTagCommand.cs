@@ -320,7 +320,7 @@ namespace TagTool.Commands.Porting
             //
 
             if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
-                (!Flags.HasFlag(PortingFlags.ShaderTest | PortingFlags.MatchShaders)))
+                (!Flags.HasFlag(PortingFlags.ShaderTest) && !Flags.HasFlag(PortingFlags.MatchShaders)))
             {
                 switch (groupTag.ToString())
                 {
@@ -667,7 +667,7 @@ namespace TagTool.Commands.Porting
                         return null;
                     }
 					tag = PortTagReference(tag.Index);
-					if (tag != null && !Flags.HasFlag(PortingFlags.New | PortingFlags.Replace))
+					if (tag != null && !(Flags.HasFlag(PortingFlags.New) || Flags.HasFlag(PortingFlags.Replace)))
 						return tag;
 					return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 

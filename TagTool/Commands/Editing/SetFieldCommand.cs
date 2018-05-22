@@ -150,7 +150,7 @@ namespace TagTool.Commands.Editing
 
                         pageable.Page.UncompressedBlockSize = (uint)data.Length;
 
-                        if (oldLocation == newLocation)
+                        if (oldLocation == newLocation && pageable.Page.Index != -1)
                         {
                             using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
                             {
