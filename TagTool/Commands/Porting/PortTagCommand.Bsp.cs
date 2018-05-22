@@ -34,8 +34,6 @@ namespace TagTool.Commands.Porting
                 using (var edResourceStream = new MemoryStream())
                 using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
-                    CacheContext.ExtractResource(sbsp.Geometry.Resource, edResourceStream);
-
                     var pageable = sbsp.Geometry.Resource;
 
                     if (pageable == null)
