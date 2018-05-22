@@ -16,6 +16,7 @@ namespace TagTool.Cache
         public HaloOnlineCacheContext CacheContext { get; set; }
 
         public FileInfo File;
+        public Stream Stream;
         public EndianReader Reader;
 
         public CacheVersion Version;
@@ -51,7 +52,15 @@ namespace TagTool.Cache
             Version = version;
             Deserializer = new TagDeserializer(Version);
 
-            Reader = new EndianReader(file.OpenRead(), EndianFormat.LittleEndian);
+            Stream = new MemoryStream();
+
+            using (var fileStream = file.OpenRead())
+            {
+                fileStream.Seek(0, SeekOrigin.Begin);
+                fileStream.CopyTo(Stream);
+            }
+
+            Reader = new EndianReader(Stream, EndianFormat.LittleEndian);
 
             Reader.SeekTo(0);
             if (Reader.ReadTag() == "daeh")
