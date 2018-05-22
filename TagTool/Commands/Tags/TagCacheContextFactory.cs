@@ -8,7 +8,7 @@ using TagTool.Commands.Definitions;
 using TagTool.Commands.Editing;
 using TagTool.Commands.Files;
 using TagTool.Commands.PhysicsModels;
-using TagTool.Commands.Porting;
+//using TagTool.Commands.Porting;
 using TagTool.Commands.RenderModels;
 using TagTool.Commands.Shaders;
 using TagTool.Commands.Strings;
@@ -63,7 +63,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
             context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new RebuildStringIdsCommand(cacheContext));
-            context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
+            //context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
             context.AddCommand(new ListRegisters(cacheContext));
             context.AddCommand(new ListRegistersRMT2(cacheContext));
 			context.AddCommand(new TestSimpleShadersCommand(cacheContext));

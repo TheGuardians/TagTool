@@ -38,7 +38,7 @@ namespace TagTool.Commands.Tags
 
             var location = ResourceLocation.None;
 
-            switch (args[1])
+            switch (args[1].ToSnakeCase())
             {
                 case "resources":
                     location = ResourceLocation.Resources;
@@ -69,7 +69,7 @@ namespace TagTool.Commands.Tags
                     break;
 
                 default:
-                    Console.WriteLine($"Invalid resource location: {args[0]}");
+                    Console.WriteLine($"Invalid resource location: {args[1]}");
                     return false;
             }
 

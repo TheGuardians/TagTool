@@ -159,7 +159,6 @@ namespace TagTool.Commands.Editing
                         }
                         else
                         {
-                            using (var srcStream = CacheContext.OpenResourceCacheRead(oldLocation))
                             using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
                             {
                                 pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);

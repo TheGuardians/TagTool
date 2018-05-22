@@ -33,17 +33,20 @@ namespace TagTool.Commands.Tags
             if (instance == null)
                 return false;
 
-            var path = args[1];
+            var file = new FileInfo(args[1]);
+
+            if (!file.Directory.Exists)
+                file.Directory.Create();
 
             byte[] data;
 
             using (var stream = CacheContext.OpenTagCacheRead())
                 data = CacheContext.TagCache.ExtractTagRaw(stream, instance);
 
-            using (var outStream = File.Open(path, FileMode.Create, FileAccess.Write))
+            using (var outStream = file.Create())
             {
                 outStream.Write(data, 0, data.Length);
-                Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, path);
+                Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
                 Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
             }
 

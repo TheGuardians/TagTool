@@ -90,14 +90,22 @@ namespace TagTool.Commands.Tags
                 if (args.Count == 2)
                 {
                     var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
+                    var tagIndex = -1;
 
                     if (tag == null)
-                        return false;
+                    {
+                        if (args[1].StartsWith("0x"))
+                            tagIndex = Convert.ToInt32(args[1], 16);
+                        else
+                            return false;
+                    }
+                    else
+                    {
+                        tagIndex = tag.Index;
+                    }
 
-                    var tagIndex = tag.Index;
-
-                    if (tagIndex > CacheContext.TagCache.Index.Count)
-                        return false;
+                    while (tagIndex >= CacheContext.TagCache.Index.Count)
+                        CacheContext.TagCache.AllocateTag();
 
                     if (tagIndex < CacheContext.TagCache.Index.Count)
                     {
