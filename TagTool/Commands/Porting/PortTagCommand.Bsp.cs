@@ -34,8 +34,30 @@ namespace TagTool.Commands.Porting
                 using (var edResourceStream = new MemoryStream())
                 using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
-
                     CacheContext.ExtractResource(sbsp.Geometry.Resource, edResourceStream);
+
+                    var pageable = sbsp.Geometry.Resource;
+
+                    if (pageable == null)
+                        throw new ArgumentNullException("sbsp.Geometry.Resource");
+
+                    if (!edResourceStream.CanWrite)
+                        throw new ArgumentException("The output stream is not open for writing", "outStream");
+                    
+                    pageable.GetLocation(out var resourceLocation);
+
+                    var cache = CacheContext.GetResourceCache(resourceLocation);
+
+                    if (!resourceStreams.ContainsKey(resourceLocation))
+                    {
+                        resourceStreams[resourceLocation] = new MemoryStream();
+
+                        using (var resourceStream = CacheContext.OpenResourceCacheRead(resourceLocation))
+                            resourceStream.CopyTo(resourceStreams[resourceLocation]);
+                    }
+
+                    cache.Decompress(resourceStreams[resourceLocation], pageable.Page.Index, pageable.Page.CompressedBlockSize, edResourceStream);
+
                     var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
 
                     foreach (var cluster in sbsp.Clusters)
