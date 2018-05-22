@@ -51,13 +51,22 @@ namespace TagTool.Commands.Porting
                 "PortTag",
                 
                 "Ports a tag from the current cache file. Options are:" + Environment.NewLine +
-                "    Replace, Recursive, New, UseNull, NoAudio, NoElites, NoForgePalette, NoSquads, Scripts, ShaderTest, MatchShaders" + Environment.NewLine + Environment.NewLine +
+                "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
 
                 "Replace: Use existing matching tag names if available." + Environment.NewLine +
+                "Recursive: Recursively port all tag references available." + Environment.NewLine +
+                "Single: Port the specified tag instance using only existing tag references if available." + Environment.NewLine +
                 "New: Create a new tag after the last index." + Environment.NewLine +
-                "Single: Port a new tag without any reference." + Environment.NewLine +
                 "UseNull: Port a tag using nulled tag indices where available." + Environment.NewLine +
-                "No option: Ports a tag if its name is not present in the tag names.",
+                "NoAudio: Ports everything except for audio tags unless existing tags are available." + Environment.NewLine +
+                "NoElites: Ports everything except elite bipeds." + Environment.NewLine +
+                "NoForgePalette: Clears the forge palette of any scenario tag when porting." + Environment.NewLine +
+                "NoSquads: Clears the squads palette of any scenario tag when porting." + Environment.NewLine +
+                "Scripts: Ports and adjusts scripts where possible." + Environment.NewLine +
+                "NoScripts: Clears the scripts of any scenario tag when porting." + Environment.NewLine +
+                "ShaderTest: TBD." + Environment.NewLine +
+                "MatchShaders: Attempts to match any shader tags using existing render method tags when porting." + Environment.NewLine +
+                "NoShaders: Uses default shader tags when porting.",
 
                 "PortTag [Options] <Tag>",
 
