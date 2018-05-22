@@ -197,7 +197,7 @@ namespace TagTool.Geometry
             return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
 
-        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry)
+        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Convert byte[] of UnknownBlock
@@ -397,7 +397,7 @@ namespace TagTool.Geometry
             // Convert Blam data to ElDorado data
             //
 
-            using (var edResourceStream = new MemoryStream())
+            using (var dataStream = new MemoryStream())
             using (var blamResourceStream = new MemoryStream(rsrcData))
             {
                 //
@@ -407,13 +407,13 @@ namespace TagTool.Geometry
                 for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                 {
                     blamResourceStream.Position = rsrcDefEntry.ResourceFixups[i].Offset;
-                    ConvertVertexBuffer(rsrcDef, blamResourceStream, edResourceStream, i, prevVertCount);
+                    ConvertVertexBuffer(rsrcDef, blamResourceStream, dataStream, i, prevVertCount);
                 }
 
                 for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
                 {
                     blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
-                    ConvertIndexBuffer(rsrcDef, blamResourceStream, edResourceStream, i);
+                    ConvertIndexBuffer(rsrcDef, blamResourceStream, dataStream, i);
                 }
 
                 foreach (var mesh in geometry.Meshes)
@@ -426,7 +426,7 @@ namespace TagTool.Geometry
                     foreach (var part in mesh.Parts)
                         indexCount += part.IndexCount;
 
-                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, edResourceStream, indexCount);
+                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, dataStream, indexCount);
                 }
                 
                 //
@@ -448,12 +448,37 @@ namespace TagTool.Geometry
                     }
                 };
 
-                edResourceStream.Position = 0;
+                dataStream.Position = 0;
 
                 var resourceContext = new ResourceSerializationContext(geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
                 geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(geometry.Resource, edResourceStream);
+                var resource = geometry.Resource;
+
+                if (resource == null)
+                    throw new ArgumentNullException("resource");
+
+                if (!dataStream.CanRead)
+                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+
+                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                {
+                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                }
+
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
             }
 
             return geometry;

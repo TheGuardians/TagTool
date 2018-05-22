@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private Bitmap ConvertBitmap(Bitmap bitmap)
+        private Bitmap ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
             bitmap.UnknownB4 = 0;
@@ -45,7 +45,7 @@ namespace TagTool.Commands.Porting
             {
                 try
                 {
-                    var resource = ConvertBlamBitmap(bitmap, i);
+                    var resource = ConvertBlamBitmap(bitmap, resourceStreams, i);
                     Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
                     {
                         Resource = resource
@@ -119,7 +119,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private PageableResource ConvertBlamBitmap(Bitmap bitmap, int imageIndex)
+        private PageableResource ConvertBlamBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex)
         {
 
             BlamBitmap blamBitmap = new BlamBitmap(bitmap.Images[imageIndex], 0, 0);
@@ -254,7 +254,32 @@ namespace TagTool.Commands.Porting
                 //
 
                 resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(resource, dataStream);
+
+                if (resource == null)
+                    throw new ArgumentNullException("resource");
+
+                if (!dataStream.CanRead)
+                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+
+                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                {
+                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                }
+
+                dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
+
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             }
 

@@ -243,7 +243,7 @@ namespace TagTool.Commands.Porting
             return moppData;
         }
 
-        private PageableResource ConvertStructureBspTagResources(ScenarioStructureBsp bsp)
+        private PageableResource ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
@@ -333,97 +333,97 @@ namespace TagTool.Commands.Porting
             
             using (var blamResourceStream = new MemoryStream(resourceData))
             using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
-            using (var edResourceStream = new MemoryStream())
-            using (var resourceWriter = new EndianWriter(edResourceStream, EndianFormat.LittleEndian))
+            using (var dataStream = new MemoryStream())
+            using (var resourceWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var dataContext = new DataSerializationContext(resourceReader, resourceWriter);
 
                 foreach (var collisionBsp in resourceDefinition.CollisionBsps)
                 {
-                    StreamUtil.Align(edResourceStream, 0x8);
+                    StreamUtil.Align(dataStream, 0x8);
                     blamResourceStream.Position = collisionBsp.Bsp3dNodes.Address.Offset;
-                    collisionBsp.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Bsp3dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp3dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = collisionBsp.Planes.Address.Offset;
-                    collisionBsp.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Planes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Plane>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = collisionBsp.Leaves.Address.Offset;
-                    collisionBsp.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Leaves.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Leaf>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = collisionBsp.Bsp2dReferences.Address.Offset;
-                    collisionBsp.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Bsp2dReferences.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dReference>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = collisionBsp.Bsp2dNodes.Address.Offset;
-                    collisionBsp.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Bsp2dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = collisionBsp.Surfaces.Address.Offset;
-                    collisionBsp.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Surfaces.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Surface>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = collisionBsp.Edges.Address.Offset;
-                    collisionBsp.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Edges.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Edge>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = collisionBsp.Vertices.Address.Offset;
-                    collisionBsp.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    collisionBsp.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Vertices.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Vertex>(dataContext));
                 }
 
                 foreach (var largeCollisionBsp in resourceDefinition.LargeCollisionBsps)
                 {
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = largeCollisionBsp.Bsp3dNodes.Address.Offset;
-                    largeCollisionBsp.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Bsp3dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Bsp3dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = largeCollisionBsp.Planes.Address.Offset;
-                    largeCollisionBsp.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Planes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Plane>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = largeCollisionBsp.Leaves.Address.Offset;
-                    largeCollisionBsp.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Leaves.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Leaf>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = largeCollisionBsp.Bsp2dReferences.Address.Offset;
-                    largeCollisionBsp.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Bsp2dReferences.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Bsp2dReference>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = largeCollisionBsp.Bsp2dNodes.Address.Offset;
-                    largeCollisionBsp.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Bsp2dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Bsp2dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = largeCollisionBsp.Surfaces.Address.Offset;
-                    largeCollisionBsp.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Surfaces.Count; i++)
                     {
                         var surface = BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Surface>(dataContext);
@@ -431,54 +431,54 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext, surface);
                     }
 
-                    StreamUtil.Align(edResourceStream, 0x10); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x10); // 0x4 > 0x10
                     blamResourceStream.Position = largeCollisionBsp.Edges.Address.Offset;
-                    largeCollisionBsp.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Edges.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Edge>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x8);
+                    StreamUtil.Align(dataStream, 0x8);
                     blamResourceStream.Position = largeCollisionBsp.Vertices.Address.Offset;
-                    largeCollisionBsp.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    largeCollisionBsp.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < largeCollisionBsp.Vertices.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.LargeCollisionBspBlock.Vertex>(dataContext));
                 }
 
                 foreach (var instance in resourceDefinition.InstancedGeometry)
                 {
-                    StreamUtil.Align(edResourceStream, 0x8); // 0x8 > 0x10
+                    StreamUtil.Align(dataStream, 0x8); // 0x8 > 0x10
                     blamResourceStream.Position = instance.Bsp3dNodes.Address.Offset;
-                    instance.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Bsp3dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp3dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = instance.Planes.Address.Offset;
-                    instance.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Planes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Plane>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = instance.Leaves.Address.Offset;
-                    instance.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Leaves.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Leaf>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Bsp2dReferences.Address.Offset;
-                    instance.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Bsp2dReferences.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dReference>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = instance.Bsp2dNodes.Address.Offset;
-                    instance.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Bsp2dNodes.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dNode>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4);
+                    StreamUtil.Align(dataStream, 0x4);
                     blamResourceStream.Position = instance.Surfaces.Address.Offset;
-                    instance.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Surfaces.Count; i++)
                     {
                         var surface = BlamCache.Deserializer.Deserialize<CollisionGeometry.Surface>(dataContext);
@@ -486,53 +486,53 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext, surface);
                     }
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Edges.Address.Offset;
-                    instance.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Edges.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Edge>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x10);
+                    StreamUtil.Align(dataStream, 0x10);
                     blamResourceStream.Position = instance.Vertices.Address.Offset;
-                    instance.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Vertices.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Vertex>(dataContext));
 
                     foreach (var collisionGeometry in instance.CollisionGeometries)
                     {
-                        StreamUtil.Align(edResourceStream, 0x8); // 0x8 > 0x10
+                        StreamUtil.Align(dataStream, 0x8); // 0x8 > 0x10
                         blamResourceStream.Position = collisionGeometry.Bsp3dNodes.Address.Offset;
-                        collisionGeometry.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Bsp3dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Bsp3dNodes.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp3dNode>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x10);
+                        StreamUtil.Align(dataStream, 0x10);
                         blamResourceStream.Position = collisionGeometry.Planes.Address.Offset;
-                        collisionGeometry.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Planes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Planes.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Plane>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x4);
+                        StreamUtil.Align(dataStream, 0x4);
                         blamResourceStream.Position = collisionGeometry.Leaves.Address.Offset;
-                        collisionGeometry.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Leaves.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Leaves.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Leaf>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x4);
+                        StreamUtil.Align(dataStream, 0x4);
                         blamResourceStream.Position = collisionGeometry.Bsp2dReferences.Address.Offset;
-                        collisionGeometry.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Bsp2dReferences.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Bsp2dReferences.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dReference>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x10);
+                        StreamUtil.Align(dataStream, 0x10);
                         blamResourceStream.Position = collisionGeometry.Bsp2dNodes.Address.Offset;
-                        collisionGeometry.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Bsp2dNodes.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Bsp2dNodes.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Bsp2dNode>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x4);
+                        StreamUtil.Align(dataStream, 0x4);
                         blamResourceStream.Position = collisionGeometry.Surfaces.Address.Offset;
-                        collisionGeometry.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Surfaces.Count; i++)
                         {
                             var surface = BlamCache.Deserializer.Deserialize<CollisionGeometry.Surface>(dataContext);
@@ -540,39 +540,39 @@ namespace TagTool.Commands.Porting
                             CacheContext.Serializer.Serialize(dataContext, surface);
                         }
 
-                        StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                        StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                         blamResourceStream.Position = collisionGeometry.Edges.Address.Offset;
-                        collisionGeometry.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Edges.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Edges.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Edge>(dataContext));
 
-                        StreamUtil.Align(edResourceStream, 0x10);
+                        StreamUtil.Align(dataStream, 0x10);
                         blamResourceStream.Position = collisionGeometry.Vertices.Address.Offset;
-                        collisionGeometry.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        collisionGeometry.Vertices.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         for (var i = 0; i < collisionGeometry.Vertices.Count; i++)
                             CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Vertex>(dataContext));
                     }
 
                     foreach (var moppCode in instance.CollisionMoppCodes)
                     {
-                        StreamUtil.Align(edResourceStream, 0x4);
+                        StreamUtil.Align(dataStream, 0x4);
                         blamResourceStream.Position = moppCode.Data.Address.Offset;
-                        moppCode.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                        moppCode.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                         var moppData = resourceReader.ReadBytes(moppCode.Data.Count).Select(i => new CollisionMoppCode.Datum { Value = i }).ToList();
                         if (BlamCache.Version < CacheVersion.Halo3ODST)
                             moppData = ConvertCollisionMoppData(moppData);
                         resourceWriter.Write(moppData.Select(i => i.Value).ToArray());
                     }
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Unknown1.Address.Offset;
-                    instance.Unknown1.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Unknown1.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Unknown1.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.InstancedGeometryBlock.Unknown1Block>(dataContext));
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Unknown2.Address.Offset;
-                    instance.Unknown2.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Unknown2.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Unknown2.Count; i++)
                     {
                         var element = BlamCache.Deserializer.Deserialize<StructureBspTagResources.InstancedGeometryBlock.Unknown2Block>(dataContext);
@@ -584,19 +584,44 @@ namespace TagTool.Commands.Porting
                         CacheContext.Serializer.Serialize(dataContext, element);
                     }
 
-                    StreamUtil.Align(edResourceStream, 0x4); // 0x4 > 0x10
+                    StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Unknown3.Address.Offset;
-                    instance.Unknown3.Address = new CacheAddress(CacheAddressType.Resource, (int)edResourceStream.Position);
+                    instance.Unknown3.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Unknown3.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.InstancedGeometryBlock.Unknown3Block>(dataContext));
                 }
 
-                edResourceStream.Position = 0;
+                dataStream.Position = 0;
 
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
 
                 bsp.CollisionBspResource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(bsp.CollisionBspResource, edResourceStream);
+                var resource = bsp.CollisionBspResource;
+
+                if (resource == null)
+                    throw new ArgumentNullException("resource");
+
+                if (!dataStream.CanRead)
+                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+
+                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                {
+                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                }
+
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
             }
             
             return bsp.CollisionBspResource;

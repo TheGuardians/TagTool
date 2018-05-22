@@ -294,7 +294,7 @@ namespace TagTool.Commands.Porting
             return 10.0f * (float)Math.Log10(ratio);
         }
 
-        private Sound ConvertSound(Sound sound)
+        private Sound ConvertSound(Sound sound, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
@@ -674,7 +674,32 @@ namespace TagTool.Commands.Porting
                 sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
                 sound.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(sound.Resource, dataStream);
+                var resource = sound.Resource;
+
+                if (resource == null)
+                    throw new ArgumentNullException("resource");
+
+                if (!dataStream.CanRead)
+                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+
+                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                {
+                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                }
+
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
 
                 for (int i = 0; i < 4; i++)
                 {

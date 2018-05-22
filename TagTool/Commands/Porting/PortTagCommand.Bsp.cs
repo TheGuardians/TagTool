@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -12,10 +13,10 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTagInstance instance)
+        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTagInstance instance, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp);
+            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, resourceStreams);
+            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, resourceStreams);
 
             sbsp.Unknown86 = 1;
 

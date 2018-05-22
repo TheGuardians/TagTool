@@ -51,7 +51,6 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new ListBitmapsCommand(cacheContext, blamCache));
             context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
             context.AddCommand(new ListBspMoppCodesCommand(cacheContext, blamCache));
-            context.AddCommand(new MatchShadersCommand(cacheContext, blamCache));
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
             context.AddCommand(new PortTagCommand(cacheContext, blamCache));

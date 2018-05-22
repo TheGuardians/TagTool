@@ -236,7 +236,9 @@ namespace TagTool.Commands.Porting
             {
                 for (var i = 0; i < materials.Count; i++)
                 {
-                    var material = materials[i];
+                    materials[i].RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+
+                    /*var material = materials[i];
 
                     if (material.RenderMethod.Index == -1)
                         continue;
@@ -277,7 +279,7 @@ namespace TagTool.Commands.Porting
                         Console.WriteLine($"[{i:D3}] [{material.RenderMethod.Group}] 0x{material.RenderMethod.Index:X4} {tagName}");
                     }
                     else
-                        Console.WriteLine($"[{i:D3}] [NULL]");
+                        Console.WriteLine($"[{i:D3}] [NULL]");*/
                 }
             }
 

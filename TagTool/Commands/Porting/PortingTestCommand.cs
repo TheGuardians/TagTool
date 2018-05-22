@@ -44,7 +44,6 @@ namespace TagTool.Commands.Porting
 
             var commandsList = new Dictionary<string, string>
             {
-                { "restoreweaponmodel"      , "Port and replace a weapon's fp and 3rd person model." },
                 { "restoreweaponanimation"  , "Port and replace a weapon's fp animation." },
                 { "restoreweaponfiringsound", "Port and replace a weapon's firing sound." },
                 { "deserializeblam"         , "Deserialize a Blam tag and list all fields (edittag's listfields)" },
@@ -58,7 +57,6 @@ namespace TagTool.Commands.Porting
 
             switch (name)
             {
-                case "restoreweaponmodel": return RestoreWeaponModel(args);
                 case "restoreweaponanimation": return RestoreWeaponAnimation(args);
                 case "restoreweaponfiringsound": return RestoreWeaponFiringSound(args);
                 case "deserializeblam": return DeserializeBlam(args);
@@ -418,165 +416,6 @@ namespace TagTool.Commands.Porting
                     var jmad = (ModelAnimationGraph)def;
                 }
             }
-
-            return true;
-        }
-
-        public bool RestoreWeaponModel(List<string> args)
-        {
-            if (args.Count != 1)
-            {
-                Console.WriteLine("Required: [1] weapon name");
-
-                Console.WriteLine(@"Example: test RestoreWeaponModel objects\weapons\rifle\assault_rifle\assault_rifle");
-
-                return false;
-            }
-
-            string blamWeapName = args[0];
-            
-            var blamWeapTag = BlamCache.IndexItems.Find(x => x.Filename == blamWeapName);
-
-            if (blamWeapTag == null)
-            {
-                Console.WriteLine($"{blamWeapName} does not exist.");
-                return false;
-            }
-
-            // Check if ED has named tags, or has that weapon.
-            if (!CacheContext.TagNames.ContainsValue(blamWeapName))
-            {
-                Console.WriteLine($"{blamWeapName} does not exist or is named incorrectly or tags are not named.");
-                return false;
-            }
-
-            CachedTagInstance edWeapTag = null;
-
-            edWeapTag = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapTag == null)
-            {
-                Console.WriteLine($"{blamWeapName} does not exist or is named incorrectly or tags are not named.");
-                return false;
-            }
-
-            string blamFPmodeName = null;
-            string blam3DmodeName = null;
-            string edFPmodeName = null;
-            string ed3DmodeName = null;
-
-            // Blam:
-            // Deserialize weap tag
-            var blamContext = new CacheSerializationContext(ref BlamCache, blamWeapTag);
-            Weapon blamWeap = BlamCache.Deserializer.Deserialize<Weapon>(blamContext);
-
-            // Deserialize hlmt tag
-            var blamContext2 = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Model.Index));
-            var blamHlmt = BlamCache.Deserializer.Deserialize<Model>(blamContext2);
-
-            // Get blam FP mode name
-            blamFPmodeName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.FirstPerson[0].FirstPersonModel.Index).Filename;
-
-            // Get blam 3D mode name
-            blam3DmodeName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.Model.Index).Filename;
-
-            // ED:
-            // Find weapon
-            var edWeapInstance = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapInstance == null)
-                throw new Exception($"Failed to find ED weapon {blamWeapName}");
-
-            // Deserialize weap tag
-            Weapon edWeap;
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeapInstance);
-                edWeap = CacheContext.Deserializer.Deserialize<Weapon>(edContext);
-            }
-
-            // Deserialize hlmt tag
-            Model edModel;
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeap.Model);
-                edModel = CacheContext.Deserializer.Deserialize<Model>(edContext);
-            }
-
-            // Cheap checks, only convert weapons that have a first person model, and third person model.
-            // This will break on turrets, good because they need additional fixes.
-            if (blamWeap.FirstPerson.Count == 0)
-                throw new Exception($"Unsupported weapon due to missing first person model: {blamWeapName}");
-
-            if (blamWeap.FirstPerson[0].FirstPersonModel == null || (uint)blamWeap.FirstPerson[0].FirstPersonModel.Index == 0xFFFFFFFF)
-                throw new Exception($"Unsupported weapon due to missing first person model: {blamWeapName}");
-
-            if (blamWeap.Model == null || (uint)blamWeap.Model.Index == 0xFFFFFFFF)
-                throw new Exception($"Unsupported weapon due to missing third person model: {blamWeapName}");
-
-            // Rename FP mode tag
-            edFPmodeName = CacheContext.TagNames.ContainsKey(edWeap.FirstPerson[0].FirstPersonModel.Index) ? CacheContext.TagNames[edWeap.FirstPerson[0].FirstPersonModel.Index] : null;
-            if (edFPmodeName != null)
-                CacheContext.TagNames[edWeap.FirstPerson[0].FirstPersonModel.Index] = $"{CacheContext.TagNames[edWeap.FirstPerson[0].FirstPersonModel.Index]}_HO";
-
-            // Rename 3D mode tag
-            ed3DmodeName = CacheContext.TagNames.ContainsKey(edModel.RenderModel.Index) ? CacheContext.TagNames[edModel.RenderModel.Index] : null;
-            if (ed3DmodeName != null)
-                CacheContext.TagNames[edModel.RenderModel.Index] = $"{CacheContext.TagNames[edModel.RenderModel.Index]}_HO";
-
-            // Port FP mode
-            var portTagCommand = new PortTagCommand(CacheContext, BlamCache);
-            portTagCommand.Execute(new List<string> { "replace", "mode", blamFPmodeName });
-            // RestoreBlamShaderSet(new List<string> { "new", args[0], blamFPmodeName, blamFPmodeName + ".mode" });
-            var matchShadersCommand = new MatchShadersCommand(CacheContext, BlamCache);
-            matchShadersCommand.Execute(new List<string> { blamFPmodeName + ".mode" });
-
-            // Port 3D mode
-            portTagCommand.Execute(new List<string> { "replace", "mode", blam3DmodeName });
-            // RestoreBlamShaderSet(new List<string> { args[0], blam3DmodeName, blam3DmodeName + ".mode" });
-            matchShadersCommand.Execute(new List<string> { blam3DmodeName + ".mode" });
-
-            // Set new models
-            edWeap.FirstPerson[0].FirstPersonModel = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamFPmodeName}.mode");
-            edModel.RenderModel = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blam3DmodeName}.mode");
-
-            if (edWeap.FirstPerson[0].FirstPersonModel == null)
-            {
-                Console.WriteLine($"Failed to find the ported mode tag: {blamFPmodeName}");
-                return false;
-            }
-
-            if (edModel.RenderModel == null)
-            {
-                Console.WriteLine($"Failed to find the ported mode tag: {blamWeapName}");
-                return false;
-            }
-
-            edModel.LodModel = null;
-
-            // Serialize ED weap tag
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context = new TagSerializationContext(stream, CacheContext, edWeapInstance);
-                CacheContext.Serializer.Serialize(context, edWeap);
-            }
-
-            // Serialize ED hlmt tag
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context = new TagSerializationContext(stream, CacheContext, edWeap.Model);
-                CacheContext.Serializer.Serialize(context, edModel);
-            }
-
-            // DEBUG: Test
-            var edFPmodeTag = edWeap.FirstPerson[0].FirstPersonModel;
-            var ed3DmodeTag = edModel.RenderModel;
-
-            edFPmodeName = CacheContext.TagNames.ContainsKey(edFPmodeTag.Index) ? CacheContext.TagNames[edFPmodeTag.Index] : null;
-            ed3DmodeName = CacheContext.TagNames.ContainsKey(ed3DmodeTag.Index) ? CacheContext.TagNames[ed3DmodeTag.Index] : null;
-
-            Console.WriteLine($"DEBUG: Test: FP: [{edFPmodeTag.Group}] 0x{edFPmodeTag.Index:X4} {edFPmodeName}");
-            Console.WriteLine($"DEBUG: Test: 3D: [{ed3DmodeTag.Group}] 0x{ed3DmodeTag.Index:X4} {ed3DmodeName}");
 
             return true;
         }

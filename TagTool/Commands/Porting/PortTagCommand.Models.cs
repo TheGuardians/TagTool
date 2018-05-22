@@ -475,7 +475,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private object ConvertGen2RenderModel(CachedTagInstance edTag, RenderModel mode)
+        private object ConvertGen2RenderModel(CachedTagInstance edTag, RenderModel mode, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             foreach (var section in mode.Sections)
             {
@@ -826,18 +826,43 @@ namespace TagTool.Commands.Porting
                 builder.EndRegion();
             }
 
-            using (var resourceDataStream = new MemoryStream())
+            using (var dataStream = new MemoryStream())
             {
-                var result = builder.Build(CacheContext.Serializer, resourceDataStream);
+                var result = builder.Build(CacheContext.Serializer, dataStream);
                 result.MarkerGroups = mode.MarkerGroups;
 
                 foreach (var mesh in result.Geometry.Meshes)
                     if (mesh.Type == VertexType.Skinned)
                         mesh.RigidNodeIndex = -1;
                 
-                resourceDataStream.Position = 0;
+                dataStream.Position = 0;
                 result.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(result.Geometry.Resource, resourceDataStream);
+                var resource = result.Geometry.Resource;
+
+                if (resource == null)
+                    throw new ArgumentNullException("resource");
+
+                if (!dataStream.CanRead)
+                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+
+                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                {
+                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                }
+
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
 
                 mode = result;
             }

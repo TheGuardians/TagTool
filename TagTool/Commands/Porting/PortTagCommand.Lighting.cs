@@ -129,7 +129,7 @@ namespace TagTool.Commands.Porting
             return lensFlare;
         }
 
-        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, string blamTagName, ScenarioLightmap scenarioLightmap)
+        private ScenarioLightmap ConvertScenarioLightmap(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
             if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return scenarioLightmap;
@@ -141,7 +141,7 @@ namespace TagTool.Commands.Porting
                 var wasReplacing = IsReplacing;
 
                 IsReplacing = false;
-                var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, entry, scenarioLightmap, blamTagName);
+                var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
                 IsReplacing = wasReplacing;
 
                 CachedTagInstance edTag = null;
@@ -173,7 +173,7 @@ namespace TagTool.Commands.Porting
             return scenarioLightmap;
         }
 
-        private ScenarioLightmapBspData ConvertScenarionLightmapBspData(ScenarioLightmapBspData Lbsp)
+        private ScenarioLightmapBspData ConvertScenarioLightmapBspData(ScenarioLightmapBspData Lbsp)
         {
             //Test
             return Lbsp;
