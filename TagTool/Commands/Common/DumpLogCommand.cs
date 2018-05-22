@@ -8,7 +8,7 @@ namespace TagTool.Commands.Common
     class DumpLogCommand : Command
     {
         public DumpLogCommand()
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "DumpLog",
                   "Dumps the current log into the logs directory.",

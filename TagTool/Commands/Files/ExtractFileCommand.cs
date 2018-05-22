@@ -11,7 +11,7 @@ namespace TagTool.Commands.Files
         private VFilesList Definition { get; }
 
         public ExtractFileCommand(VFilesList definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ExtractFile",
                   "Extract a file from the tag.",

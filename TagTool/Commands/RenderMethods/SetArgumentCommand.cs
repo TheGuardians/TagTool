@@ -15,7 +15,7 @@ namespace TagTool.Commands.RenderMethods
         private RenderMethod Definition { get; }
 
         public SetArgumentCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                  "SetArgument",
                  "Sets the value(s) of the specified argument in the render_method.",

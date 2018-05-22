@@ -18,7 +18,7 @@ namespace TagTool.Commands.Models
         private Model Definition { get; }
 
         public ExtractModelCommand(HaloOnlineCacheContext cacheContext, Model model)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ExtractModel",
                   "Extracts a render model from the current model definition.",

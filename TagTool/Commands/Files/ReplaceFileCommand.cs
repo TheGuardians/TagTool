@@ -15,7 +15,7 @@ namespace TagTool.Commands.Files
         private VFilesList Definition { get; }
 
         public ReplaceFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ReplaceFile",
                   "Replace a file stored in the tag",

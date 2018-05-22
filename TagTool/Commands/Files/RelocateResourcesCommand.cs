@@ -18,7 +18,7 @@ namespace TagTool.Commands.Files
         private ResourceCache Resources { get; set; }
 
         public RelocateResourcesCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "RelocateResources",
                 "Moves all resource out of resources_b.dat and into resources.dat.",

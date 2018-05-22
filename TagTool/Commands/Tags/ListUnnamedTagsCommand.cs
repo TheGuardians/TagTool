@@ -12,7 +12,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ListUnnamedTagsCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "ListUnnamedTags",
                 "Lists any non-null tag indices that do not have names assigned to them.",

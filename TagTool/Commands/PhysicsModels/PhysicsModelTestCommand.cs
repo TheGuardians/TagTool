@@ -14,7 +14,7 @@ namespace TagTool.Commands.PhysicsModels
         private HaloOnlineCacheContext CacheContext { get; }
 
         public PhysicsModelTestCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
                   
                   "PhysicsModelTest",
                   "Physics model import command (Test)",

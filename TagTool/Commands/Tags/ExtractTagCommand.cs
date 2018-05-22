@@ -11,7 +11,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ExtractTagCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ExtractTag",
                   "",

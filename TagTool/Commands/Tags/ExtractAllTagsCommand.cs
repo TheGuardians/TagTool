@@ -11,7 +11,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public ExtractAllTagsCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ExtractAllTags",
                   "Extracts all tags in the current tag cache to a specific directory.",

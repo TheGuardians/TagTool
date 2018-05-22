@@ -16,7 +16,7 @@ namespace TagTool.Commands.Geometry
         private RenderGeometry Geometry { get; }
 
         public DumpRenderGeometryCommand(HaloOnlineCacheContext cacheContext, RenderGeometry geometry, string title = "") :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 $"Dump{title}RenderGeometry",
                 $"Dumps {title.ToLower()} render geometry in ascii format.",

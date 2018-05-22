@@ -22,7 +22,7 @@ namespace TagTool.Commands.Shaders
         private RenderMethodTemplate Definition { get; }
 
         public GenerateRenderMethodTemplate(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethodTemplate definition) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "Generate",
                 "Compiles HLSL source file from scratch :D",

@@ -13,7 +13,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationGraph Definition { get; }
 
         public GetResourceInfoCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "GetResourceInfo",
                   "Gets information about a model_animation_graph's resources.",

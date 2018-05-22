@@ -12,7 +12,7 @@ namespace TagTool.Commands.Files
         public HaloOnlineCacheContext CacheContext { get; }
 
         public CleanCacheFilesCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "CleanCacheFiles",
                   "Nulls and removes unused tags and resources from cache.",

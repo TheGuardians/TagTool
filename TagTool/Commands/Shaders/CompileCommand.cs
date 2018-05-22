@@ -21,7 +21,7 @@ namespace TagTool.Commands.Shaders
         public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
         public CompileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, T definition) :
-			base(CommandFlags.Inherit,
+			base(true,
 
 				"Compile",
 				"Compiles HLSL source file against shader profile vs_3_0",

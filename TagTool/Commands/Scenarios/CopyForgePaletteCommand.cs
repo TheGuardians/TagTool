@@ -13,7 +13,7 @@ namespace TagTool.Commands.Scenarios
         private Scenario Definition { get; }
 
         public CopyForgePaletteCommand(HaloOnlineCacheContext cacheContext, Scenario definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                  "CopyForgePalette",
                  "Copies the forge palette from the current scenario to another scenario.",

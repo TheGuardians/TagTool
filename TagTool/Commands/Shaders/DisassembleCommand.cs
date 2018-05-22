@@ -16,7 +16,7 @@ namespace TagTool.Commands.Shaders
         private T Definition { get; }
 
         public DisassembleCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, T definition) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "Disassemble",
                 "Disassembles a VertexShader at the specified index.",

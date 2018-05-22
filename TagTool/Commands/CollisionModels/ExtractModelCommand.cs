@@ -15,7 +15,7 @@ namespace TagTool.Commands.CollisionModels
         private CollisionModel Definition { get; }
 
         public ExtractModelCommand(CollisionModel definition) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "ExtractModel",
                 "",

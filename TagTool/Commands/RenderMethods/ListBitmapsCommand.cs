@@ -14,7 +14,7 @@ namespace TagTool.Commands.RenderMethods
         private RenderMethod Definition { get; }
 
         public ListBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                  "ListBitmaps",
                  "Lists the bitmaps used by the render_method.",

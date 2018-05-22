@@ -10,7 +10,7 @@ namespace TagTool.Commands.Files
         private HaloOnlineCacheContext CacheContext { get; }
 
         public RebuildStringIdsCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "RebuildStringIds",
                 "Rebuilds the string_id cache.",

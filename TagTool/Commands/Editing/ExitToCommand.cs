@@ -9,7 +9,7 @@ namespace TagTool.Commands.Editing
         private CommandContextStack ContextStack { get; }
 
         public ExitToCommand(CommandContextStack contextStack)
-            : base( CommandFlags.Inherit,
+            : base( true,
 
                   "ExitTo",
                   "Exits each context on the stack until the specified one is found.",

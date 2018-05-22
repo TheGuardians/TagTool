@@ -15,7 +15,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ExportTagDefinitionsCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "ExportTagDefinitions",
                 "Exports all internal tag definitions for use in ElDewrito.",

@@ -18,7 +18,7 @@ namespace TagTool.Commands.Bitmaps
         private Bitmap Bitmap { get; }
 
         public ImportBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ImportBitmap",
                   "Imports an image from a DDS file.",

@@ -13,7 +13,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public TagResourceCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "TagResource",
                 "Manage raw resource data",

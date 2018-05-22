@@ -17,7 +17,7 @@ namespace TagTool.Commands.Unicode
         private MultilingualUnicodeStringList Definition { get; }
 
         public SetStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "SetString",
                   "Set the value of a string",

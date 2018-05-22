@@ -12,7 +12,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public ListUnusedTagsCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ListUnusedTags",
                   "Lists all unreferenced tags in the current tag cache",

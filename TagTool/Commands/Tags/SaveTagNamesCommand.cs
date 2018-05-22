@@ -9,7 +9,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public SaveTagNamesCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "SaveTagNames",
                 "Saves the current tag names to the specified csv file.",

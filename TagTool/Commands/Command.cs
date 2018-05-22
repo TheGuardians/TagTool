@@ -16,13 +16,13 @@ namespace TagTool.Commands
         /// <param name="description">The command's description.</param>
         /// <param name="usage">The command's usage string.</param>
         /// <param name="helpMessage">The command's help message.</param>
-        protected Command(CommandFlags flags, string name, string description, string usage, string helpMessage)
+        protected Command(bool inherit, string name, string description, string usage, string helpMessage)
         {
             Name = name;
             Description = description;
             Usage = usage;
             HelpMessage = helpMessage;
-            Flags = flags;
+            Inherit = inherit;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace TagTool.Commands
         /// <summary>
         /// Gets the command's flags.
         /// </summary>
-        public CommandFlags Flags { get; private set; }
+        public bool Inherit { get; private set; }
 
         /// <summary>
         /// Executes the command.
@@ -56,16 +56,5 @@ namespace TagTool.Commands
         /// <param name="args">The command arguments.</param>
         /// <returns><c>true</c> if the command's arguments were valid.</returns>
         public abstract object Execute(List<string> args);
-    }
-
-    [Flags]
-    public enum CommandFlags
-    {
-        None = 0,
-
-        /// <summary>
-        /// The command can be inherited by child contexts.
-        /// </summary>
-        Inherit = 1
     }
 }

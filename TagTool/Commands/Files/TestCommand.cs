@@ -25,7 +25,7 @@ namespace TagTool.Commands.Files
         private static List<string> csvQueue2 = new List<string>();
 
         public TestCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "Test",
                 "A test command.",

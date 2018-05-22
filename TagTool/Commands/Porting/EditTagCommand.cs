@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
         private CommandContextStack ContextStack { get; }
 
         public EditTagCommand(CommandContextStack contextStack, CacheFile blamCache) : base(
-            CommandFlags.None,
+            false,
 
             "EditTag",
             "Edit tag-specific data",

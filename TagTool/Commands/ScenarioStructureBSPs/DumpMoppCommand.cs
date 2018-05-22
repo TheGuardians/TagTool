@@ -14,7 +14,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private ScenarioStructureBsp Definition { get; }
 
         public DumpMoppCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp bsp) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "DumpMopp",
                 "Dumps bsp mopp.",

@@ -10,7 +10,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public GetTagInfoCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
             "GetTagInfo",
             "Displays detailed information about a tag.",

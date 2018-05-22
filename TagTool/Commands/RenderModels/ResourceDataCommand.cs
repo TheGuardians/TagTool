@@ -15,7 +15,7 @@ namespace TagTool.Commands.RenderModels
         private RenderModel Definition { get; }
 
         public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ResourceData",
                   "Extract or import a mode tag's resource.",

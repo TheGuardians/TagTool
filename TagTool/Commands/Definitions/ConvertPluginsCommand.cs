@@ -16,7 +16,7 @@ namespace TagTool.Commands.Definitions
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ConvertPluginsCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ConvertPlugins",
                   "Convert Assembly plugins to tag layout structures",

@@ -13,7 +13,7 @@ namespace TagTool.Commands.Strings
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ListAllStringsCommand(HaloOnlineCacheContext cacheContext) : base(
-            CommandFlags.Inherit,
+            true,
 
             "ListAllStrings",
             "Scan unic tags to find a localized string",

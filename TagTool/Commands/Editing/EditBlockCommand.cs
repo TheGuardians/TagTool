@@ -18,7 +18,7 @@ namespace TagTool.Commands.Editing
         public object Owner { get; set; }
         
         public EditBlockCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "EditBlock",
                   "Edit the fields of a particular block element.",

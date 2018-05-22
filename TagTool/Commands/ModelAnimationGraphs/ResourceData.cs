@@ -16,7 +16,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         private ModelAnimationGraph Definition { get; }
 
         public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ModelAnimationGraph definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ResourceData",
                   "ResourceData Extract/Import [Cache Type] <Resource group Index (decimal)> <Filename>",

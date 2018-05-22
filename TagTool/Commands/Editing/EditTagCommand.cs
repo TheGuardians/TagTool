@@ -11,7 +11,7 @@ namespace TagTool.Commands.Editing
         private HaloOnlineCacheContext CacheContext { get; }
 
         public EditTagCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) : base(
-            CommandFlags.None,
+            false,
 
             "EditTag",
             "Edit tag-specific data",

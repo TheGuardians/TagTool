@@ -17,7 +17,7 @@ namespace TagTool.Commands.Models
         private Model Definition { get; }
 
         public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Model definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
                   
                   "ExtractBitmaps",
                   "Extracts all bitmaps used by the model's shaders to a specific directory.",

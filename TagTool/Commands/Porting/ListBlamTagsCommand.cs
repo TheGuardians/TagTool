@@ -11,7 +11,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public ListBlamTagsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ListBlamTags",
                   "Lists tag instances that are of the specified tag group.",

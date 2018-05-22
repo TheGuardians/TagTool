@@ -16,7 +16,7 @@ namespace TagTool.Commands.Definitions
         private HaloOnlineCacheContext CacheContext { get; }
 
         public GenerateTagStructuresCommand(HaloOnlineCacheContext cacheFile) : base(
-            CommandFlags.Inherit,
+            true,
 
             "GenerateTagStructures",
             "Generates tag structures in either C# or C++.",

@@ -138,11 +138,11 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in scenarioLightmap.Lightmaps)
             {
-                var wasReplacing = IsReplacing;
+                var wasReplacing = Flags.HasFlag(PortingFlags.IsReplacing);
 
-                IsReplacing = false;
+                Flags &= ~PortingFlags.IsReplacing;
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
-                IsReplacing = wasReplacing;
+                if (wasReplacing) Flags |= PortingFlags.IsReplacing;
 
                 CachedTagInstance edTag = null;
                 TagGroup edGroup = null;

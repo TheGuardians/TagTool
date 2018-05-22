@@ -13,7 +13,7 @@ namespace TagTool.Commands.RenderModels
         private RenderModel Definition { get; }
 
         public GetResourceInfoCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "GetResourceInfo",
                   "Gets information about the render_model's resource.",

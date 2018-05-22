@@ -9,7 +9,7 @@ namespace TagTool.Commands
     class GetMapInfoCommand : Command
     {
         public GetMapInfoCommand()
-            : base(CommandFlags.Inherit,
+            : base(true,
                   
                   "GetMapInfo",
                   "Get information about a map",

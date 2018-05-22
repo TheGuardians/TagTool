@@ -12,7 +12,7 @@ namespace TagTool.Commands.Files
         public HaloOnlineCacheContext CacheContext { get; }
 
         public CleanCsvFileCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "CleanCsvFile",
                 "Removes any unfound tag indices from a tag conversion .csv file.",

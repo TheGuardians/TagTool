@@ -14,7 +14,7 @@ namespace TagTool.Commands.CollisionModels
         private HaloOnlineCacheContext CacheContext { get; }
 
         public CollisionModelTestCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
                   
                   "CollisionModelTest",
                   "Collision geometry import command (Test)",

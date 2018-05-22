@@ -16,7 +16,7 @@ namespace TagTool.Commands.Editing
         private object Value { get; }
         
         public ListFieldsCommand(HaloOnlineCacheContext cacheContext, TagStructureInfo structure, object value)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ListFields",
                   $"Lists the fields in the current {structure.Types[0].Name} definition.",

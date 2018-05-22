@@ -10,7 +10,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public DuplicateTagCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
                   
                   "DuplicateTag",
                   "Creates a new copy of a tag in the tag cache.",

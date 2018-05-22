@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public DumpScriptInfoCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "DumpScriptInfo",
                 "DumpScriptInfo <scnr tag>",

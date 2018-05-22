@@ -15,7 +15,7 @@ namespace TagTool.Commands.Sounds
         private Sound Definition { get; }
 
         public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ResourceData",
                   "snd!Resource Extract/Import<Filename>",

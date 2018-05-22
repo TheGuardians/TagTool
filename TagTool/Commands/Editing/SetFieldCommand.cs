@@ -22,7 +22,7 @@ namespace TagTool.Commands.Editing
         public object Owner { get; set; }
 
         public SetFieldCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "SetField",
                   $"Sets the value of a specific field in the current {structure.Types[0].Name} definition.",

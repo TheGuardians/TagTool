@@ -16,7 +16,7 @@ namespace TagTool.Commands.Scenarios
         private Scenario Definition { get; }
 
         public ExtractScriptsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ExtractScripts",
                   "Extracts all scripts in the current scenario tag to a file.",

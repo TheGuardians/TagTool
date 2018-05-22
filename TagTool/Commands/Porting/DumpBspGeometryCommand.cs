@@ -20,7 +20,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public DumpBspGeometryCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "DumpBspGeometry",
                 "Dumps bsp geometry in ascii format.",

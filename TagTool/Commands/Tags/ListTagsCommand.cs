@@ -11,7 +11,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ListTagsCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ListTags",
                   "Lists tag instances that are of the specified tag group.",

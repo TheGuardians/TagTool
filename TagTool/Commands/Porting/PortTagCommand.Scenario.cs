@@ -222,7 +222,7 @@ namespace TagTool.Commands.Porting
             // Convert scripts
             //
 
-            if (ConvertScripts)
+            if (Flags.HasFlag(PortingFlags.ConvertScripts))
             {
                 foreach (var global in scnr.Globals)
                 {

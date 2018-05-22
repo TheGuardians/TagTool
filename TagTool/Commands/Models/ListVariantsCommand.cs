@@ -13,7 +13,7 @@ namespace TagTool.Commands.Models
         private Model Definition { get; }
 
         public ListVariantsCommand(HaloOnlineCacheContext cacheContext, Model model)
-            : base(CommandFlags.Inherit,
+            : base(true,
                   
                   "ListVariants",
                   "List available variants of the current model definition.",

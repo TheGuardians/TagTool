@@ -16,7 +16,7 @@ namespace TagTool.Commands.Editing
         private object Owner { get; set; }
 
         public RemoveBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "RemoveBlockElements",
                   $"Removes block element(s) from a specified index of a specific tag block in the current {structure.Types[0].Name} definition.",

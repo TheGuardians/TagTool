@@ -20,7 +20,7 @@ namespace TagTool.Commands.Shaders
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ListRegistersRMT2(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "ListRegistersRMT2",
                 "List Registers using RMT2 tags",

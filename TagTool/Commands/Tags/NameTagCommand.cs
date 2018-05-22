@@ -10,7 +10,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public NameTagCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
                   
                   "NameTag",
                   "Sets the name of a tag file in the current cache.",

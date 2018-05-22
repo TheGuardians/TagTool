@@ -1,17 +1,16 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Geometry;
-using TagTool.Havok;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
-using TagTool.Damage;
 using TagTool.Audio;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Damage;
+using TagTool.Geometry;
+using TagTool.Havok;
+using TagTool.Serialization;
+using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
 {
@@ -27,20 +26,27 @@ namespace TagTool.Commands.Porting
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
         private List<Tag> OtherTagGroups = new List<Tag> { /*new Tag("effe"), new Tag("foot"),*/ new Tag("shit"), new Tag("sncl") };
 
-        private bool IsReplacing = false;
-        private bool IsRecursive = true;
-        private bool IsNew = false;
-        private bool UseNull = false;
-        private bool NoAudio = false;
-        private bool NoElites = false;
-        private bool NoForgePalette = false;
-        private bool UseShaderTest = false;
-        private bool MatchShaders = true;
-        private bool ConvertScripts = true;
-        private bool NoSquads = false;
+        private PortingFlags Flags { get; set; } = PortingFlags.IsRecursive | PortingFlags.MatchShaders | PortingFlags.ConvertScripts;
+
+        [Flags]
+        public enum PortingFlags
+        {
+            None,
+            IsReplacing = 1 << 0,
+            IsRecursive = 1 << 1,
+            IsNew = 1 << 2,
+            UseNull = 1 << 3,
+            NoAudio = 1 << 4,
+            NoElites = 1 << 5,
+            NoForgePalette = 1 << 6,
+            UseShaderTest = 1 << 7,
+            MatchShaders = 1 << 8,
+            ConvertScripts = 1 << 9,
+            NoSquads = 1 << 10
+        }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "PortTag",
                 "Ports a tag from the current cache file. Options are : noaudio | noreplace | noelites | noforgepalette | replace | new | single | nonnull" + Environment.NewLine + Environment.NewLine +
@@ -64,24 +70,17 @@ namespace TagTool.Commands.Porting
             if (args.Count < 1)
                 return false;
 
+            var flagNames = Enum.GetNames(typeof(PortingFlags)).Select(name => name.ToLower());
+            var flagValues = Enum.GetValues(typeof(PortingFlags)) as PortingFlags[];
+
             while (args.Count > 1)
             {
-                switch (args[0].ToLower())
-                {
-					case "new": IsNew = true; break;
-					case "noaudio": NoAudio = true; break;
-					case "noelites": NoElites = true; break;
-					case "noforgepalette": NoForgePalette = true; break;
-					case "noreplace": IsReplacing = false; break;
-					case "noscripts": ConvertScripts = false; break;
-					case "noshaders": MatchShaders = false; break;
-					case "nosquads": NoSquads = true; break;
-					case "replace": IsReplacing = true; break;
-					case "shadertest": UseShaderTest = true; MatchShaders = false; break;
-					case "single": IsRecursive = false; IsNew = true; break;
-					case "usenull": UseNull = true; break;
-					default: throw new NotImplementedException(args[0]);
-				}
+                var arg = args[0].ToLower();
+
+                for (var i = 0; i < flagNames.Count(); i++)
+                    if (arg == flagNames.ElementAt(i))
+                        Flags |= flagValues[i];
+                
                 args.RemoveAt(0);
             }
             
@@ -175,16 +174,16 @@ namespace TagTool.Commands.Porting
 
             CachedTagInstance edTag = null;
 
-            if ((groupTag == "snd!") && NoAudio)
+            if ((groupTag == "snd!") && Flags.HasFlag(PortingFlags.NoAudio))
                 return null;
 
-            var wasReplacing = IsReplacing;
-            var wasNew = IsNew;
+            var wasReplacing = Flags.HasFlag(PortingFlags.IsReplacing);
+            var wasNew = Flags.HasFlag(PortingFlags.IsNew);
             
-            if (NoElites && groupTag == "bipd" && blamTag.Filename.Contains("elite"))
+            if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && blamTag.Filename.Contains("elite"))
                 return null;
 
-            if (!IsNew || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
+            if (!Flags.HasFlag(PortingFlags.IsNew) || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -193,7 +192,7 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
                     {
-                        if (IsReplacing)
+                        if (Flags.HasFlag(PortingFlags.IsReplacing))
                             edTag = instance;
                         else
                         {
@@ -230,7 +229,7 @@ namespace TagTool.Commands.Porting
             // If isReplacing is true, check current tags if there is an existing instance to replace
             //
 
-            if (IsReplacing)
+            if (Flags.HasFlag(PortingFlags.IsReplacing))
             {
                 var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Filename);
 
@@ -242,8 +241,8 @@ namespace TagTool.Commands.Porting
                     {
                         edTag = tagInstance;
                         //If not recursive, use existing tags
-                        if (!IsRecursive)
-                            IsReplacing = false;
+                        if (!Flags.HasFlag(PortingFlags.IsRecursive))
+                            Flags &= ~PortingFlags.IsReplacing;
                         break;
                     }
                 }
@@ -275,9 +274,9 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
 
 				// Don't port rmfd tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				case "rmdf" when UseShaderTest && CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
+				case "rmdf" when Flags.HasFlag(PortingFlags.UseShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
 					return CacheContext.GetTagInstance<RenderMethodDefinition>(blamTag.Filename);
-				case "rmdf" when UseShaderTest && !CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
+				case "rmdf" when Flags.HasFlag(PortingFlags.UseShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
 					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Filename}.rmdf`; using `shaders\\shader.rmdf` instead.");
 					return CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader");
 			}
@@ -287,7 +286,7 @@ namespace TagTool.Commands.Porting
             //
 
             if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
-                (!UseShaderTest && !MatchShaders))
+                (!Flags.HasFlag(PortingFlags.UseShaderTest | PortingFlags.MatchShaders)))
             {
                 switch (groupTag.ToString())
                 {
@@ -353,7 +352,7 @@ namespace TagTool.Commands.Porting
             // Allocate Eldorado Tag
             //
 
-            if (edTag == null && UseNull)
+            if (edTag == null && Flags.HasFlag(PortingFlags.UseNull))
             {
 				var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
 				CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
@@ -406,10 +405,10 @@ namespace TagTool.Commands.Porting
                         material.RenderMethod = null;
                     break;
 
-                case Scenario scenario when NoSquads:
+                case Scenario scenario when Flags.HasFlag(PortingFlags.NoSquads):
                     scenario.Squads = new List<Scenario.Squad>();
 					break;
-				case Scenario scenario when NoForgePalette:
+				case Scenario scenario when Flags.HasFlag(PortingFlags.NoForgePalette):
                     scenario.SandboxEquipment.Clear();
                     scenario.SandboxGoalObjects.Clear();
                     scenario.SandboxScenery.Clear();
@@ -620,7 +619,7 @@ namespace TagTool.Commands.Porting
 				// 	return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
 				case CachedTagInstance tag:
-					if (IsRecursive == false)
+					if (!Flags.HasFlag(PortingFlags.IsRecursive))
                     {
                         foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
                         {
@@ -634,7 +633,7 @@ namespace TagTool.Commands.Porting
                         return null;
                     }
 					tag = PortTagReference(tag.Index);
-					if (tag != null && !(IsNew || IsReplacing))
+					if (tag != null && !Flags.HasFlag(PortingFlags.IsNew | PortingFlags.IsReplacing))
 						return tag;
 					return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
@@ -656,7 +655,7 @@ namespace TagTool.Commands.Porting
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
-				case PixelShader pixelShader when UseShaderTest && BlamCache.Version >= CacheVersion.Halo3Retail:
+				case PixelShader pixelShader when Flags.HasFlag(PortingFlags.UseShaderTest) && BlamCache.Version >= CacheVersion.Halo3Retail:
 					foreach (var shader in pixelShader.Shaders)
 					{
 						shader.PCParameters = shader.XboxParameters;
@@ -683,7 +682,7 @@ namespace TagTool.Commands.Porting
                     property.IntValue = property.ShortValue;
                     break;
 				
-                case RenderMethod renderMethod when MatchShaders:
+                case RenderMethod renderMethod when Flags.HasFlag(PortingFlags.MatchShaders):
 					ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
 					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
 

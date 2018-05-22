@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public ListBspMoppCodesCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "ListBspMoppCodes",
                 "Lists bsp mopp codes.",

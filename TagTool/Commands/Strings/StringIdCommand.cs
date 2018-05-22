@@ -13,7 +13,7 @@ namespace TagTool.Commands.Strings
         private HaloOnlineCacheContext CacheContext { get; }
 
         public StringIdCommand(HaloOnlineCacheContext cacheContext) : base(
-            CommandFlags.Inherit,
+            true,
 
             "StringId",
             "Add, look up, or find stringID values",

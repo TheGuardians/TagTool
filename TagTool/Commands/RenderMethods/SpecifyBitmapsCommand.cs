@@ -15,7 +15,7 @@ namespace TagTool.Commands.RenderMethods
         private RenderMethod Definition { get; }
 
         public SpecifyBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                  "SpecifyBitmaps",
                  "Allows the bitmaps of the render_method to be respecified.",

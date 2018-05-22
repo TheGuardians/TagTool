@@ -16,7 +16,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private ScenarioStructureBsp BSP { get; }
 
         public CollisionTestCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp bsp)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "CollisionTest",
                   "A test resource-loading command for 'sbsp' tag collision.",

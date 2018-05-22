@@ -20,7 +20,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public PortingTestCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "PortingTest",
                 "A test command for porting-related actions.",

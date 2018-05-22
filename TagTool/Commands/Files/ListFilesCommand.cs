@@ -12,7 +12,7 @@ namespace TagTool.Commands.Files
         private readonly VFilesList Definition;
 
         public ListFilesCommand(VFilesList definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ListFiles",
                   "List files stored in the tag.",

@@ -15,7 +15,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private ScenarioStructureBsp Definition { get; }
 
         public ResourceDataCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioStructureBsp definition)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ResourceData",
                   "SbspResource Extract/Import <Resource Type> <Filename>",

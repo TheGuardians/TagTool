@@ -17,7 +17,7 @@ namespace TagTool.Commands.Shaders
         private RenderMethodDefinition Definition { get; }
 
         public ListMethodOptionParameters(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethodDefinition definition) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "ListMethodOptionParameters",
                 "ListMethodOptionParameters",

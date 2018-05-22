@@ -16,7 +16,7 @@ namespace TagTool.Commands.Bitmaps
         private Bitmap Bitmap { get; }
 
         public ExtractBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ExtractBitmap",
                   "Extracts a bitmap to a file.",

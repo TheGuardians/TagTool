@@ -18,7 +18,7 @@ namespace TagTool.Commands.Shaders
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ListRegisters(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "ListRegisters",
                 "List Registers",

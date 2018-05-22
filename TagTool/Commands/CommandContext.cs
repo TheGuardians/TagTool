@@ -89,7 +89,7 @@ namespace TagTool.Commands
             {
                 p.CommandsByName.TryGetValue(name, out result);
 
-                if (result != null && (result.Flags & CommandFlags.Inherit) != 0)
+                if (result != null && result.Inherit)
                     return result;
 
                 //
@@ -98,7 +98,7 @@ namespace TagTool.Commands
 
                 foreach (var pair in p.CommandsByName)
                     if (nameLower == pair.Key.ToLower())
-                        if ((pair.Value.Flags & CommandFlags.Inherit) != 0)
+                        if (pair.Value.Inherit)
                             return pair.Value;
 
                 //
@@ -107,7 +107,7 @@ namespace TagTool.Commands
 
                 foreach (var pair in p.CommandsByName)
                     if (nameSnake == pair.Key.ToSnakeCase())
-                        if ((pair.Value.Flags & CommandFlags.Inherit) != 0)
+                        if (pair.Value.Inherit)
                             return pair.Value;
             }
 

@@ -34,7 +34,7 @@ namespace TagTool.Commands.Tags
         private HaloOnlineCacheContext CacheContext { get; }
 
         public MatchTagsCommand(HaloOnlineCacheContext cacheContext) : base(
-            CommandFlags.Inherit,
+            true,
 
             "MatchTags",
             "Find equivalent tags in different engine versions",

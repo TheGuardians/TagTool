@@ -17,7 +17,7 @@ namespace TagTool.Commands.RenderModels
         private HaloOnlineCacheContext CacheContext { get; }
 
         public RenderModelTestCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "RenderModelTest",
                   "A test command for 'mode' tag resources.",

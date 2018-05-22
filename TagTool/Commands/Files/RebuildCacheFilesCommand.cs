@@ -22,7 +22,7 @@ namespace TagTool.Commands.Files
         private bool NoVariants { get; set; } = false;
 
         public RebuildCacheFilesCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "RebuildCacheFiles",
                   "Rebuilds the cache files into the specified output directory.",

@@ -24,7 +24,7 @@ namespace TagTool.Commands.Files
         public HaloOnlineCacheContext CacheContext { get; }
 
         public UpdateMapFilesCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "UpdateMapFiles",
                   "Updates the game's .map files to contain valid scenario indices.",

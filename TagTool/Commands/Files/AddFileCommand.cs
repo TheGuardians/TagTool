@@ -15,7 +15,7 @@ namespace TagTool.Commands.Files
         private VFilesList Definition { get; }
 
         public AddFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "AddFile",
                 "Adds a new file to the virtual files list.",

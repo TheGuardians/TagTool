@@ -18,7 +18,7 @@ namespace TagTool.Commands.Tags
 		public HaloOnlineCacheContext CacheContext { get; }
 
 		public TestSimpleShadersCommand(HaloOnlineCacheContext cacheContext)
-			: base(CommandFlags.Inherit,
+			: base(true,
 
 				  "SimplifyShaders",
 				  "Sets the name of a tag file in the current cache.",

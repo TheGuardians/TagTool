@@ -15,7 +15,7 @@ namespace TagTool.Commands.Unicode
         private MultilingualUnicodeStringList Definition { get; }
 
         public GetStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList unic)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "GetString",
                   "Gets the value of a string.",

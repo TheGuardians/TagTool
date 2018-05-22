@@ -15,7 +15,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public CreateTagCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "CreateTag",
                   "Creates a new tag of the specified tag group in the current tag cache.",

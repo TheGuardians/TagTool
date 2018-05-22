@@ -14,7 +14,7 @@ namespace TagTool.Commands.RenderModels
         private RenderModel Definition { get; }
 
         public SpecifyShadersCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "SpecifyShaders",
                   "Allows the shaders of a render_model to be respecified.",

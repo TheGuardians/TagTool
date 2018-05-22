@@ -10,7 +10,7 @@ namespace TagTool.Commands.Common
         private CommandContextStack ContextStack { get; }
  
         public HelpCommand(CommandContextStack contextStack)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "Help",
                   "Display help",
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Common
 
         private bool IsAvailable(CommandContext context, Command command)
         {
-            return ((command.Flags & CommandFlags.Inherit) != 0 || ContextStack.Context == context);
+            return (command.Inherit || ContextStack.Context == context);
         }
     }
 }

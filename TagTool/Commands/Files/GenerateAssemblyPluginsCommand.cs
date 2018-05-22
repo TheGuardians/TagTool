@@ -15,7 +15,7 @@ namespace TagTool.Commands.Files
     {
 
         public GenerateAssemblyPluginsCommand()
-            : base(CommandFlags.None,
+            : base(false,
 
                   "GenerateAssemblyPlugins",
                   "Converts BlamCore tag definitions to Assembly Plugin files..",

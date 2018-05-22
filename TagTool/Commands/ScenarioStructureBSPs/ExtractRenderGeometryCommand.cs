@@ -16,7 +16,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private ScenarioStructureBsp Definition { get; }
 
         public ExtractRenderGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ExtractRenderGeometry",
                   "Extracts render geometry from the current scenario_structure_bsp definition.",

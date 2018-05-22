@@ -11,7 +11,7 @@ namespace TagTool.Commands.Tags
     class GetTagAddressCommand : Command
     {
         public GetTagAddressCommand()
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "GetTagAddress",
                   "Get the address of a tag in memory",

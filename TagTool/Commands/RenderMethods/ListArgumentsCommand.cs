@@ -15,7 +15,7 @@ namespace TagTool.Commands.RenderMethods
         private RenderMethod Definition { get; }
 
         public ListArgumentsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                  "ListArguments",
                  "Lists the arguments of the render_method.",

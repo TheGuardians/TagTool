@@ -14,7 +14,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public TagDependencyCommand(HaloOnlineCacheContext cacheContext) : base(
-            CommandFlags.None,
+            false,
 
             "TagDependency",
             "Manage tag dependencies.",

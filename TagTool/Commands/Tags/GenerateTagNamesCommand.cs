@@ -17,7 +17,7 @@ namespace TagTool.Commands.Tags
         private Dictionary<int, object> LoadedDefinitions { get; } = new Dictionary<int, object>();
 
         public GenerateTagNamesCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.Inherit,
+            : base(true,
                   
                   "GenerateTagNames",
                   "Generates tag names into a csv file (overwriting existing entries).",

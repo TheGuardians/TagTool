@@ -19,7 +19,7 @@ namespace TagTool.Commands.Editing
         private object Value { get; }
 
         public PokeTagChangesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "PokeTagChanges",
                   $"Pokes changes made to the current {cacheContext.GetString(tag.Group.Name)} definition to a running game's memory.",

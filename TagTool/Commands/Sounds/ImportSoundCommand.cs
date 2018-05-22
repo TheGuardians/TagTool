@@ -19,7 +19,7 @@ namespace TagTool.Commands.Sounds
         private Sound Definition { get; }
 
         public ImportSoundCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "ImportSound",
                 "Import a MP3 file into the current snd! tag. See documentation for formatting and options.",

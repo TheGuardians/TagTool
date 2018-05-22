@@ -10,7 +10,7 @@ namespace TagTool.Commands.Tags
         public HaloOnlineCacheContext CacheContext { get; }
 
         public ListNullTagsCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
                   
                   "ListNullTags",
                   "Lists all null tag indices in the current tag cache",

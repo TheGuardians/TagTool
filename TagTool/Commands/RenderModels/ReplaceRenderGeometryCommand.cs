@@ -19,7 +19,7 @@ namespace TagTool.Commands.RenderModels
         private RenderModel Definition { get; }
 
         public ReplaceRenderGeometryCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
-            base(CommandFlags.None,
+            base(false,
 
                 "ReplaceRenderGeometry",
                 "Replaces the render_geometry of the current render_model tag.",

@@ -13,7 +13,7 @@ namespace TagTool.Commands.Unicode
         private MultilingualUnicodeStringList Definition { get; set; }
 
         public RemoveStringCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, MultilingualUnicodeStringList definition) :
-            base(CommandFlags.None,
+            base(false,
                 
                 "RemoveString",
                 "Removes a string entry from the multilingual_unicode_string_list definition.",

@@ -19,7 +19,7 @@ namespace TagTool.Commands.Editing
         public static List<object> Elements { get; set; } = null;
 
         public CopyBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "CopyBlockElements",
                   "Copies block elements from one tag to another.",

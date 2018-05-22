@@ -18,7 +18,7 @@ namespace TagTool.Commands.Porting
         public object Owner { get; set; }
         
         public EditBlockCommand(CommandContextStack contextStack, CacheFile blamCache, CacheFile.IndexItem tag, object value)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "EditBlock",
                   "Edit the fields of a particular block element.",

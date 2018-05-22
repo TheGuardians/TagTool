@@ -13,7 +13,7 @@ namespace TagTool.Commands.Editing
         private object Value { get; }
 
         public SaveTagChangesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "SaveTagChanges",
                   $"Saves changes made to the current {cacheContext.GetString(tag.Group.Name)} definition.",

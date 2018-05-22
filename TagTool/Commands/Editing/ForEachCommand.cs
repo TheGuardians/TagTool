@@ -18,7 +18,7 @@ namespace TagTool.Commands.Editing
         public object Owner { get; set; }
 
         public ForEachCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "ForEach",
                   "Executes a command for each element in the specified tag block.",

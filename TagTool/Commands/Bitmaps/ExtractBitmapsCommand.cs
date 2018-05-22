@@ -14,7 +14,7 @@ namespace TagTool.Commands.Bitmaps
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext) :
-            base(CommandFlags.Inherit,
+            base(true,
                 
                 "ExtractBitmaps",
                 "Extract all bitmaps to a folder",

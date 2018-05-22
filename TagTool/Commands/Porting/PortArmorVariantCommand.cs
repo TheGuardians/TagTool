@@ -21,7 +21,7 @@ namespace TagTool.Commands.Porting
         private RenderGeometryConverter GeometryConverter { get; }
 
         public PortArmorVariantCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
-            base(CommandFlags.Inherit,
+            base(true,
 
                 "PortArmorVariant",
                 "Ports an mp_masterchief armor variant.",

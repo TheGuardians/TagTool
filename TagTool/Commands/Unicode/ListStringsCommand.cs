@@ -13,7 +13,7 @@ namespace TagTool.Commands.Unicode
         private MultilingualUnicodeStringList Definition { get; }
 
         public ListStringsCommand(HaloOnlineCacheContext cacheContext, MultilingualUnicodeStringList definition)
-            : base(CommandFlags.Inherit,
+            : base(true,
                   "ListStrings",
                   "Lists the unicode strings belonging to a certain language.",
                   

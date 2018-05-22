@@ -12,7 +12,7 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache;
 
         public ListBitmapsCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ListBitmaps",
                   "",

@@ -16,7 +16,7 @@ namespace TagTool.Commands.Editing
         private object Owner { get; set; }
 
         public AddBlockElementsCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
-            : base(CommandFlags.Inherit,
+            : base(true,
 
                   "AddBlockElements",
                   $"Adds/inserts block element(s) to a specific tag block in the current {structure.Types[0].Name} definition.",

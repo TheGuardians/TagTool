@@ -16,7 +16,7 @@ namespace TagTool.Commands.Video
         private Bink Definition { get; }
 
         public ExtractBinkFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bink definition)
-            : base(CommandFlags.None,
+            : base(false,
                   
                   "ExtractBinkFile",
                   "Extracts the .bik file from the bink tag's resource.",

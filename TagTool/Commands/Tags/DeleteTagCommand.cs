@@ -24,7 +24,7 @@ namespace TagTool.Commands.Tags
         };
 
         public DeleteTagCommand(HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "DeleteTag",
                   "Nulls and removes a tag from cache.",

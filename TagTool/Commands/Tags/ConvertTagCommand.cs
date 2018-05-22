@@ -21,7 +21,7 @@ namespace TagTool.Commands.Tags
         private bool IsDecalShader { get; set; } = false;
 
         public ConvertTagCommand(HaloOnlineCacheContext info)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "ConvertTag",
                   "Convert a tag and its dependencies to another engine version",

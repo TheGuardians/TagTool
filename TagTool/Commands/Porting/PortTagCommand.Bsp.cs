@@ -87,7 +87,6 @@ namespace TagTool.Commands.Porting
                                 // Add all to list
                                 foreach (var newGrid in newGrids)
                                     newDecoratorGrids.Add(newGrid);
-
                             }
                         }
 
@@ -107,8 +106,7 @@ namespace TagTool.Commands.Porting
                 sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
                 sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
             }
-
-
+            
             sbsp.Geometry2.UnknownSections = new List<RenderGeometry.UnknownSection>();
             
             return sbsp;
@@ -183,5 +181,4 @@ namespace TagTool.Commands.Porting
             GeometryOffset = offset;
         }
     }
-    
 }

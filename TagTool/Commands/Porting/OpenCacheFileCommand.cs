@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
         private HaloOnlineCacheContext CacheContext { get; }
 
         public OpenCacheFileCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext)
-            : base(CommandFlags.None,
+            : base(false,
 
                   "OpenCacheFile",
                   "Opens a porting context on a cache file from H3B/H3/ODST.",
