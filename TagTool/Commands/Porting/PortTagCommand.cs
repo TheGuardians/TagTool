@@ -53,7 +53,7 @@ namespace TagTool.Commands.Porting
                 "Ports a tag from the current cache file. Options are:" + Environment.NewLine +
                 "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
 
-                "Replace: Use existing matching tag names if available." + Environment.NewLine +
+                "Replace: Replace tags of the same name when porting." + Environment.NewLine +
                 "Recursive: Recursively port all tag references available." + Environment.NewLine +
                 "Single: Port the specified tag instance using only existing tag references if available." + Environment.NewLine +
                 "New: Create a new tag after the last index." + Environment.NewLine +
