@@ -67,28 +67,31 @@ namespace TagTool.Commands.Sounds
 
                 Definition.Resource = new PageableResource
                 {
-                    Page = new RawPage(),
+                    Page = new RawPage
+                    {
+                        Index = -1
+                    },
                     Resource = new TagResource
                     {
                         Type = TagResourceType.Sound,
+                        DefinitionData = new byte[20],
                         DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 536870912),
-                        ResourceFixups = new List<TagResource.ResourceFixup>(),
+                        ResourceFixups = new List<TagResource.ResourceFixup>
+                        {
+                            new TagResource.ResourceFixup
+                            {
+                                BlockOffset = 12,
+                                Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
+                            }
+                        },
                         ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
                         Unknown2 = 1
                     }
                 };
-                var definitionFixup = new TagResource.ResourceFixup()
-                {
-                    BlockOffset = 12,
-                    Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
-                };
-                Definition.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
                 Definition.Resource.ChangeLocation(ResourceLocation.ResourcesB);
                 CacheContext.AddResource(Definition.Resource, dataStream);
-
-                Definition.Resource.Resource.DefinitionData = new byte[20];
-
+                
                 for (int i = 0; i < 4; i++)
                 {
                     Definition.Resource.Resource.DefinitionData[i] = (byte)(Definition.Resource.Page.UncompressedBlockSize >> (i * 8));

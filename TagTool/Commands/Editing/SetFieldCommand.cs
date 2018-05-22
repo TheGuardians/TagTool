@@ -7,6 +7,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Resources;
 using ResourceLocation = TagTool.Common.ResourceLocation;
 
 namespace TagTool.Commands.Editing
@@ -99,9 +100,9 @@ namespace TagTool.Commands.Editing
             }
 
             var fieldType = field.FieldType;
-            var fieldValue = ParseArgs(field.FieldType, args.Skip(1).ToList());
+            var newValue = ParseArgs(field.FieldType, args.Skip(1).ToList());
 
-            if (fieldValue != null && fieldValue.Equals(false))
+            if (newValue != null && newValue.Equals(false))
             {
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
@@ -111,18 +112,74 @@ namespace TagTool.Commands.Editing
 
             if (field.FieldType == typeof(PageableResource))
             {
-                var pageable = (PageableResource)field.GetValue(Owner);
+                var fieldValue = field.GetValue(Owner);
 
-                if (pageable != null)
-                    field.SetValue(Owner, fieldValue != null ?
-                        SetResourceData(pageable, (FileInfo)fieldValue) : null);
+                if (newValue == null)
+                {
+                    field.SetValue(Owner, null);
+                }
+                else if (fieldValue is PageableResource pageable)
+                {
+                    var newLocation = ResourceLocation.None;
+
+                    FileInfo resourceFile = null;
+                    
+                    switch (newValue)
+                    {
+                        case FileInfo file:
+                            if (!pageable.GetLocation(out newLocation))
+                                return false;
+                            resourceFile = file;
+                            break;
+
+                        case ValueTuple<ResourceLocation, FileInfo> tuple:
+                            newLocation = tuple.Item1;
+                            resourceFile = tuple.Item2;
+                            break;
+                            
+                        default:
+                            throw new FormatException(newValue.ToString());
+                    }
+
+                    if (pageable.GetLocation(out var oldLocation))
+                    {
+                        var oldCache = CacheContext.GetResourceCache(oldLocation);
+                        var newCache = CacheContext.GetResourceCache(newLocation);
+
+                        var data = File.ReadAllBytes(resourceFile.FullName);
+
+                        pageable.Page.UncompressedBlockSize = (uint)data.Length;
+
+                        if (oldLocation == newLocation)
+                        {
+                            using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
+                            {
+                                pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
+                            }
+                        }
+                        else
+                        {
+                            using (var srcStream = CacheContext.OpenResourceCacheRead(oldLocation))
+                            using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
+                            {
+                                pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
+                            }
+
+                            pageable.ChangeLocation(newLocation);
+                        }
+
+                        pageable.DisableChecksum();
+
+                        field.SetValue(Owner, newValue = pageable);
+                    }
+                    else throw new InvalidDataException(pageable.ToString());
+                }
             }
             else
             {
-                field.SetValue(Owner, fieldValue);
+                field.SetValue(Owner, newValue);
             }
-
-
+            
             var typeString =
                 fieldType.IsGenericType ?
                     $"{fieldType.Name}<{fieldType.GenericTypeArguments[0].Name}>" :
@@ -134,18 +191,18 @@ namespace TagTool.Commands.Editing
             try
             {
 #endif
-                if (fieldValue == null)
+                if (newValue == null)
                     valueString = "null";
                 else if (fieldType.GetInterface(typeof(IList).Name) != null)
                     valueString =
-                        ((IList)fieldValue).Count != 0 ?
-                            $"{{...}}[{((IList)fieldValue).Count}]" :
+                        ((IList)newValue).Count != 0 ?
+                            $"{{...}}[{((IList)newValue).Count}]" :
                         "null";
                 else if (fieldType == typeof(StringId))
-                    valueString = CacheContext.GetString((StringId)fieldValue);
+                    valueString = CacheContext.GetString((StringId)newValue);
                 else if (fieldType == typeof(CachedTagInstance))
                 {
-                    var instance = (CachedTagInstance)fieldValue;
+                    var instance = (CachedTagInstance)newValue;
 
                     var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
                         CacheContext.TagNames[instance.Index] :
@@ -155,19 +212,19 @@ namespace TagTool.Commands.Editing
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
-                    var function = (TagFunction)fieldValue;
+                    var function = (TagFunction)newValue;
                     valueString = "";
                     foreach (var datum in function.Data)
                         valueString += datum.ToString("X2");
                 }
                 else if (fieldType == typeof(PageableResource))
                 {
-                    var pageable = (PageableResource)fieldValue;
+                    var pageable = (PageableResource)newValue;
                     pageable.GetLocation(out var location);
                     valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
                 }
                 else
-                    valueString = fieldValue.ToString();
+                    valueString = newValue.ToString();
 #if !DEBUG
             }
             catch (Exception e)
@@ -542,23 +599,70 @@ namespace TagTool.Commands.Editing
             }
             else if (type == typeof(PageableResource))
             {
-                if (args.Count != 1)
+                if (args.Count < 1 || args.Count > 2)
                     return false;
 
-                var value = args[0].ToLower();
-
-                switch (value)
+                if (args.Count == 1)
                 {
-                    case "null":
-                        output = null;
-                        break;
+                    switch (args[0].ToLower())
+                    {
+                        case "null":
+                            output = null;
+                            break;
 
-                    default:
-                        output = new FileInfo(args[0]);
-                        if (!((FileInfo)output).Exists)
-                            throw new FileNotFoundException(args[0]);
-                        break;
+                        default:
+                            output = new FileInfo(args[0]);
+                            if (!((FileInfo)output).Exists)
+                                throw new FileNotFoundException(args[0]);
+                            break;
+                    }
                 }
+                else if (args.Count == 2)
+                {
+                    var resourceLocation = ResourceLocation.None;
+
+                    switch (args[0].ToSnakeCase())
+                    {
+                        case "resources":
+                            resourceLocation = ResourceLocation.Resources;
+                            break;
+
+                        case "textures":
+                            resourceLocation = ResourceLocation.Textures;
+                            break;
+
+                        case "textures_b":
+                            resourceLocation = ResourceLocation.TexturesB;
+                            break;
+
+                        case "audio":
+                            resourceLocation = ResourceLocation.Audio;
+                            break;
+
+                        case "resources_b":
+                            resourceLocation = ResourceLocation.ResourcesB;
+                            break;
+
+                        case "render_models" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                            resourceLocation = ResourceLocation.RenderModels;
+                            break;
+
+                        case "lightmaps" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                            resourceLocation = ResourceLocation.Lightmaps;
+                            break;
+
+                        default:
+                            throw new FormatException($"Invalid resource location: {args[0]}");
+                    }
+                    
+                    var resourceFile = new FileInfo(args[1]);
+
+                    if (!resourceFile.Exists)
+                        throw new FileNotFoundException(args[1]);
+
+                    output = (resourceLocation, resourceFile);
+                }
+                else throw new NotImplementedException();
             }
             else
             {
@@ -569,12 +673,7 @@ namespace TagTool.Commands.Editing
 
             return output;
         }
-
-        private PageableResource SetResourceData(PageableResource pageable, FileInfo file)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         private int RangeArgCount(Type type)
         {
             if (type.IsEnum ||

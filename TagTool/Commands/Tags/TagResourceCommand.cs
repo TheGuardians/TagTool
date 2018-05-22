@@ -4,26 +4,29 @@ using System.Globalization;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Commands;
+using TagTool.Common;
 
 namespace TagTool.Commands.Tags
 {
     class TagResourceCommand : Command
     {
-        public TagResourceCommand() : base(
-            CommandFlags.None,
+        public HaloOnlineCacheContext CacheContext { get; }
 
-            "TagResource",
-            "Manage raw resource data",
+        public TagResourceCommand(HaloOnlineCacheContext cacheContext) :
+            base(CommandFlags.Inherit,
 
-            "TagResource Extract <.dat file> <index> <compressed size> <output file>\n" +
-            "TagResource Import <.dat file> <index> <input file>\n" +
-            "TagResource Delete <.dat file> <index>",
+                "TagResource",
+                "Manage raw resource data",
 
-            "Extracts, imports and deletes raw resource data.\n" +
-            "When extracting, the compressed size must include chunk headers.\n\n" +
-            "Note that this is extremely low-level and does NOT edit tags\n" +
-            "which reference imported resources.")
+                "TagResource Extract <Location> <Index> <Compressed Size> <Data File>\n" +
+                "TagResource Import <Location> <Index> <Data File>",
+
+                "Extracts and imports raw resource data.\n" +
+                "When extracting, the compressed size must include chunk headers.\n\n" +
+                "Note that this is extremely low-level and does NOT edit tags\n" +
+                "which reference imported resources.")
         {
+            CacheContext = cacheContext;
         }
 
         public override object Execute(List<string> args)
@@ -32,67 +35,113 @@ namespace TagTool.Commands.Tags
                 return false;
 
             var command = args[0];
-            var cachePath = args[1];
 
-            if (!uint.TryParse(args[2], NumberStyles.HexNumber, null, out uint index))
-                return false;
+            var location = ResourceLocation.None;
+
+            switch (args[1])
+            {
+                case "resources":
+                    location = ResourceLocation.Resources;
+                    break;
+
+                case "textures":
+                    location = ResourceLocation.Textures;
+                    break;
+
+                case "textures_b":
+                    location = ResourceLocation.TexturesB;
+                    break;
+
+                case "audio":
+                    location = ResourceLocation.Audio;
+                    break;
+
+                case "resources_b":
+                    location = ResourceLocation.ResourcesB;
+                    break;
+
+                case "render_models" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                    location = ResourceLocation.RenderModels;
+                    break;
+
+                case "lightmaps" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                    location = ResourceLocation.Lightmaps;
+                    break;
+
+                default:
+                    Console.WriteLine($"Invalid resource location: {args[0]}");
+                    return false;
+            }
+
+            var index = Convert.ToUInt32(args[2], 16);
 
             switch (command.ToLower())
             {
                 case "extract":
-                    return ExtractResource(cachePath, index, args);
+                    return ExtractResource(location, index, args);
 
                 case "import":
-                    return ImportResource(cachePath, index, args);
+                    return ImportResource(location, index, args);
 
                 default:
                     return false;
             }
         }
 
-        private static bool ExtractResource(string cachePath, uint index, IReadOnlyList<string> args)
+        private bool ExtractResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
         {
             if (args.Count != 5)
                 return false;
 
-            if (!uint.TryParse(args[3], NumberStyles.HexNumber, null, out uint compressedSize))
-                return false;
-
+            var compressedSize = Convert.ToUInt32(args[3], 16);
             var outPath = args[4];
+            var outFile = new FileInfo(args[4]);
 
-            using (var stream = File.OpenRead(cachePath))
+            if (!outFile.Directory.Exists)
+            {
+                Console.Write("ERROR: Directory does not exist. Create it? [y/n]: ");
+
+                switch (Console.ReadLine().ToLower())
                 {
-                    var cache = new ResourceCache(stream);
-                    using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                    {
-                        cache.Decompress(stream, (int)index, compressedSize, outStream);
-                        Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, outPath);
-                    }
+                    case "y":
+                    case "yes":
+                        outFile.Directory.Create();
+                        break;
+
+                    default:
+                        return true;
                 }
+            }
+
+            var cache = CacheContext.GetResourceCache(location);
+
+            using (var stream = CacheContext.OpenResourceCacheRead(location))
+            {
+                using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
+                {
+                    cache.Decompress(stream, (int)index, compressedSize, outStream);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, outPath);
+                }
+            }
 
             return true;
         }
 
-        private static bool ImportResource(string cachePath, uint index, IReadOnlyList<string> args)
+        private bool ImportResource(ResourceLocation location, uint index, IReadOnlyList<string> args)
         {
             if (args.Count != 4)
                 return false;
 
             var inPath = args[3];
-            try
+
+            var cache = CacheContext.GetResourceCache(location);
+
+            using (var stream = CacheContext.OpenResourceCacheReadWrite(location))
             {
-                using (var stream = File.Open(cachePath, FileMode.Open, FileAccess.ReadWrite))
-                {
-                    var cache = new ResourceCache(stream);
-                    var data = File.ReadAllBytes(inPath);
-                    var compressedSize = cache.Compress(stream, (int)index, data);
-                    Console.WriteLine("Imported 0x{0:X} bytes.", data.Length);
-                    Console.WriteLine("Compressed size = 0x{0:X}", compressedSize);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to import resource: {0}", ex.Message);
+                var data = File.ReadAllBytes(inPath);
+                var compressedSize = cache.Compress(stream, (int)index, data);
+                Console.WriteLine("Imported 0x{0:X} bytes.", data.Length);
+                Console.WriteLine("Compressed size = 0x{0:X}", compressedSize);
             }
 
             return true;

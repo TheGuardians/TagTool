@@ -35,7 +35,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new GetMapInfoCommand());
             context.AddCommand(new DuplicateTagCommand(cacheContext));
             context.AddCommand(new GetTagAddressCommand());
-            context.AddCommand(new TagResourceCommand());
+            context.AddCommand(new TagResourceCommand(cacheContext));
             context.AddCommand(new DeleteTagCommand(cacheContext));
             context.AddCommand(new CleanCacheFilesCommand(cacheContext));
             context.AddCommand(new RebuildCacheFilesCommand(cacheContext));

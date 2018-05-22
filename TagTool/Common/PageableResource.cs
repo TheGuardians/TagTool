@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Serialization;
 using System;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Common
 {
@@ -22,6 +23,41 @@ namespace TagTool.Common
         /// The <see cref="TagResource"/> of the <see cref="PageableResource"/>.
         /// </summary>
         public TagResource Resource;
+
+        /// <summary>
+        /// Gets the definition type of the pageable_resource.
+        /// </summary>
+        /// <returns>The definition type of the pageable_resource, if it is of a valid type.</returns>
+        public Type GetDefinitionType()
+        {
+            switch (Resource.Type)
+            {
+                case TagResourceType.Animation:
+                    return typeof(ModelAnimationTagResource);
+
+                case TagResourceType.Bink:
+                    return typeof(BinkResource);
+
+                case TagResourceType.Bitmap:
+                case TagResourceType.BitmapInterleaved:
+                    return typeof(BitmapTextureInteropResource);
+
+                case TagResourceType.Collision:
+                    return typeof(StructureBspTagResources);
+
+                case TagResourceType.Pathfinding:
+                    return typeof(StructureBspCacheFileTagResources);
+
+                case TagResourceType.RenderGeometry:
+                    return typeof(RenderGeometryApiResourceDefinition);
+
+                case TagResourceType.Sound:
+                    return typeof(SoundResourceDefinition);
+
+                default:
+                    throw new TypeLoadException(Resource.Type.ToString());
+            }
+        }
 
         /// <summary>
         /// Gets the location of the resource by checking its location flags.

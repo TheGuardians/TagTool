@@ -2,6 +2,7 @@
 {
     public enum TagResourceType : sbyte
     {
+        None = -1,
         Collision,
         Bitmap,
         BitmapInterleaved,

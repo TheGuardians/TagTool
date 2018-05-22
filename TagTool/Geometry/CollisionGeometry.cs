@@ -20,6 +20,9 @@ namespace TagTool.Geometry
         public List<Edge> Edges;
         public List<Vertex> Vertices;
 
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float Unknown;
+
         public Dictionary<int, List<int>> GenerateIndices()
         {
             var result = new Dictionary<int, List<int>>();
@@ -46,9 +49,6 @@ namespace TagTool.Geometry
 
             return result;
         }
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float Unknown;
 
         [TagStructure(Size = 0x8, Align = 0x8)]
         public class Bsp3dNode
