@@ -118,10 +118,7 @@ namespace TagTool.Commands
                 return null;
 
             if (!info.TagCache.Index.Contains(tagIndex))
-            {
-                Console.WriteLine("Unable to find tag {0:X8}.", tagIndex);
                 return null;
-            }
 
             return info.TagCache.Index[tagIndex];
         }

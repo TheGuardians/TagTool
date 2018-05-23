@@ -339,6 +339,7 @@
     <Compile Include="Commands\Tags\DeleteTagCommand.cs" />
     <Compile Include="Commands\Tags\DuplicateTagCommand.cs" />
     <Compile Include="Commands\Tags\ExportTagDefinitionsCommand.cs" />
+    <Compile Include="Commands\Tags\ExportTagModCommand.cs" />
     <Compile Include="Commands\Tags\ExtractAllTagsCommand.cs" />
     <Compile Include="Commands\Tags\ExtractTagCommand.cs" />
     <Compile Include="Commands\Tags\GenerateTagNamesCommand.cs" />

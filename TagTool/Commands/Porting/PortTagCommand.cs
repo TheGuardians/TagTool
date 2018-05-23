@@ -231,7 +231,7 @@ namespace TagTool.Commands.Porting
                         else
                         {
                             edTag = instance;
-                            Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
                             return edTag;
                         }
                     }
@@ -253,7 +253,7 @@ namespace TagTool.Commands.Porting
                     if (tagInstance.Group.Tag == groupTag)
                     {
                         edTag = tagInstance;
-                        Console.WriteLine($"[Group: '{edTag.Group.Tag}', Index: 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                        Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
                         return edTag;
                     }
                 }
@@ -416,8 +416,6 @@ namespace TagTool.Commands.Porting
             //
             // Load the Blam tag definition
             //
-
-            Console.WriteLine($"Porting {blamTag.Filename}.{groupTag.ToString()}");
 
             var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
             var blamDefinition = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(groupTag));

@@ -19,6 +19,13 @@ namespace TagTool.Tags
         }
 
         /// <summary>
+        /// Finds the structure type corresponding to a group.
+        /// </summary>
+        /// <param name="group">The group to search for.</param>
+        /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
+        public static Type Find(TagGroup group) => Find(group.Tag);
+
+        /// <summary>
         /// Finds the structure type corresponding to a group tag.
         /// </summary>
         /// <param name="groupTag">The string representation of the group tag of the group to search for.</param>
