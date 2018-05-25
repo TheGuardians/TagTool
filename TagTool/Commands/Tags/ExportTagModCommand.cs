@@ -57,7 +57,7 @@ namespace TagTool.Commands.Tags
 
                         foreach (var entry in queue)
                         {
-                            if (!tagIndices.Contains(entry) && entry)
+                            if (!tagIndices.Contains(entry))
                             {
                                 var instance = CacheContext.TagCache.Index[entry];
 
