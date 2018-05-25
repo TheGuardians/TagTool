@@ -57,7 +57,7 @@ namespace TagTool.Commands.Tags
 
                         foreach (var entry in queue)
                         {
-                            if (!tagIndices.Contains(entry) && entry > 0x5ADE)
+                            if (!tagIndices.Contains(entry) && entry)
                             {
                                 var instance = CacheContext.TagCache.Index[entry];
 
@@ -71,7 +71,7 @@ namespace TagTool.Commands.Tags
                                     if (dependency == entry)
                                         continue;
 
-                                    if (!nextQueue.Contains(dependency) && dependency > 0x5ADE)
+                                    if (!nextQueue.Contains(dependency))
                                         nextQueue.Add(dependency);
                                 }
                             }
@@ -245,7 +245,7 @@ namespace TagTool.Commands.Tags
 
                                 for (var i = 0; i < jmad.ResourceGroups.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].Resource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 0 ? $"_group_{i}" : "_group");
+                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].Resource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group");
 
                                     if (resourceFile == null)
                                     {
