@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands;
+using TagTool.Common;
 
 namespace TagTool.Commands.Tags
 {
@@ -29,50 +30,50 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            var searchClasses = ArgumentParser.ParseGroupTags(CacheContext.StringIdCache, args);
-
-            if (searchClasses == null)
+            if (args.Count < 1)
                 return false;
 
             var named = false;
+            var namedWith = "";
             var unnamed = false;
 
-            if (args.Count > 0)
+            while (args.Count > 1)
             {
-
                 switch (args[0].ToLower())
                 {
                     case "named":
                         named = true;
+                        break;
+
+                    case "named:":
+                        named = true;
+                        namedWith = args[1];
                         args.RemoveAt(0);
                         break;
 
                     case "unnamed":
                         unnamed = true;
-                        args.RemoveAt(0);
 						break;
                 }
+
+                args.RemoveAt(0);
             }
 
-            CachedTagInstance[] tags;
-            if (args.Count > 0)
-                tags = CacheContext.TagCache.Index.FindAllInGroups(searchClasses).ToArray();
-            else
-                tags = CacheContext.TagCache.Index.NonNull().ToArray();
+            var groupTag = args.Count == 0 ? Tag.Null : ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
 
-            if (tags.Length == 0)
+            foreach (var tag in CacheContext.TagCache.Index)
             {
-                Console.Error.WriteLine("No tags found.");
-                return true;
-            }
+                if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
+                    continue;
 
-            foreach (var tag in tags)
-            {
+                if (named && namedWith != "" && (!CacheContext.TagNames.ContainsKey(tag.Index) || !CacheContext.TagNames[tag.Index].Contains(namedWith)))
+                    continue;
+
                 if (unnamed && !CacheContext.TagNames.ContainsKey(tag.Index))
                     Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {CacheContext.GetString(tag.Group.Name)} ({tag.Group.Tag})");
                 else if (named && CacheContext.TagNames.ContainsKey(tag.Index))
                     Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {CacheContext.TagNames[tag.Index]}.{CacheContext.GetString(tag.Group.Name)}");
-                else if (!unnamed && !named)
+                else if (!named && !unnamed)
                 {
                     var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
                         CacheContext.TagNames[tag.Index] :

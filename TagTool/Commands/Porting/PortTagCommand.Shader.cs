@@ -42,7 +42,12 @@ namespace TagTool.Commands.Porting
         private static List<string> edMaps;
         private static List<string> edArgs;
 
-        private RenderMethod ConvertRenderMethod(Stream cacheStream, RenderMethod finalRm, string blamTagName)
+        /// <summary>
+        /// A dictionary of all ElDorado RenderMethodTemplates and lists of their bitmaps and arguments names.
+        /// </summary>
+        public static Dictionary<int, List<List<string>>> Rmt2TagsInfo { get; set; } = new Dictionary<int, List<List<string>>>();
+
+        private RenderMethod ConvertRenderMethod(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, RenderMethod finalRm, string blamTagName)
         {
             // finalRm.ShaderProperties[0].ShaderMaps are all ported bitmaps
             // finalRm.BaseRenderMethod is a H3 tag
@@ -64,7 +69,7 @@ namespace TagTool.Commands.Porting
                 Arguments = new List<RenderMethod.ShaderProperty.Argument>()
             };
 
-            // Name rmt2 tags if one of them is not named
+            /* Name rmt2 tags if one of them is not named
             foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
             {
                 if (!CacheContext.TagNames.ContainsKey(tag.Index))
@@ -73,7 +78,7 @@ namespace TagTool.Commands.Porting
                     CacheContext.SaveTagNames();
                     break;
                 }
-            }
+            }*/
 
             /* Name rmdf tags if one of them is not named
             foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
@@ -108,11 +113,8 @@ namespace TagTool.Commands.Porting
             }*/
 
             // Loop only once trough all ED rmt2 tags and store them globally, string lists of their bitmaps and arguments
-            if (CacheContext.Rmt2TagsInfo.Count == 0)
-            {
-                Console.WriteLine($"Shader matching info: collecting all rmt2 tags info...");
+            if (Rmt2TagsInfo.Count == 0)
                 GetRmt2Info(cacheStream, CacheContext);
-            }
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = BlamCache.IndexItems.Find(x => x.ID == finalRm.ShaderProperties[0].Template.Index);
@@ -130,10 +132,16 @@ namespace TagTool.Commands.Porting
 
             if (edRmt2Instance == null) // should never happen
             {
-                var shaderInvalid = ArgumentParser.ParseTagName(CacheContext, $"shaders\\invalid.rmsh");
+                CachedTagInstance shaderInvalid;
 
-                if (shaderInvalid == null)
+                try
+                {
+                    shaderInvalid = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+                }
+                catch (KeyNotFoundException)
+                {
                     shaderInvalid = CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
+                }
 
                 var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
 
@@ -169,7 +177,22 @@ namespace TagTool.Commands.Porting
                 if (!CacheContext.TagCache.Index.Contains(pRmt2))
                     newBitmap = @"shaders\default_bitmaps\bitmaps\default_detail"; // would only happen for removed shaders
 
-                newShaderProperty.ShaderMaps.Add(new RenderMethod.ShaderProperty.ShaderMap { Bitmap = CacheContext.GetTagInstance<Bitmap>(newBitmap) });
+                CachedTagInstance bitmap = null;
+
+                try
+                {
+                    bitmap = CacheContext.GetTagInstance<Bitmap>(newBitmap);
+                }
+                catch (KeyNotFoundException)
+                {
+                    bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag($"{newBitmap}.bitm")[0]);
+                }
+
+                newShaderProperty.ShaderMaps.Add(
+                    new RenderMethod.ShaderProperty.ShaderMap
+                    {
+                        Bitmap = bitmap
+                    });
             }
 
             foreach (var a in edArgs)
@@ -208,24 +231,27 @@ namespace TagTool.Commands.Porting
 
         private static void GetRmt2Info(Stream cacheStream, HaloOnlineCacheContext cacheContext)
         {
-            if (cacheContext.Rmt2TagsInfo.Count != 0)
+            if (Rmt2TagsInfo.Count != 0)
                 return;
 
-            foreach (var instance in cacheContext.TagCache.Index.FindAllInGroup("rmt2"))
+            foreach (var instance in cacheContext.TagCache.Index)
             {
-                var edContext = new TagSerializationContext(cacheStream, cacheContext, instance);
-                var edRmt2 = cacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(edContext);
+                if (instance == null || !instance.IsInGroup("rmt2") || !cacheContext.TagNames.ContainsKey(instance.Index))
+                    continue;
 
-                var edBitmaps_ = new List<string>();
-                var edArgs_ = new List<string>();
+                var tagContext = new TagSerializationContext(cacheStream, cacheContext, instance);
+                var template = cacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
 
-                foreach (var ShaderMap in edRmt2.ShaderMaps)
-                    edBitmaps_.Add(cacheContext.StringIdCache.GetString(ShaderMap.Name));
+                var bitmaps = new List<string>();
+                var arguments = new List<string>();
 
-                foreach (var Argument in edRmt2.Arguments)
-                    edArgs_.Add(cacheContext.StringIdCache.GetString(Argument.Name));
+                foreach (var shaderMap in template.ShaderMaps)
+                    bitmaps.Add(cacheContext.StringIdCache.GetString(shaderMap.Name));
 
-                cacheContext.Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { edBitmaps_, edArgs_ });
+                foreach (var argument in template.Arguments)
+                    arguments.Add(cacheContext.StringIdCache.GetString(argument.Name));
+
+                Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { bitmaps, arguments });
             }
         }
 
@@ -234,7 +260,7 @@ namespace TagTool.Commands.Porting
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
             // loop trough all rmt2 and find the closest
-            foreach (var edRmt2_ in CacheContext.Rmt2TagsInfo)
+            foreach (var edRmt2_ in Rmt2TagsInfo)
             {
                 var rmt2Type = bmRmt2Instance.Filename.Split("\\".ToArray())[1];
 
@@ -302,7 +328,7 @@ namespace TagTool.Commands.Porting
             return edRmt2BestStats;
         }
 
-        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
+        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
             var edRmt2Temp = new List<ShaderTemplateItem>();
@@ -310,7 +336,7 @@ namespace TagTool.Commands.Porting
             // Make a new dictionary with rmt2 of the same shader type
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
-            edRmt2BestStats = CollectRmt2Info(bmRmt2Instance);
+            edRmt2BestStats = CollectRmt2Info(blamRmt2Tag);
 
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
@@ -320,7 +346,7 @@ namespace TagTool.Commands.Porting
                 var edRmdfValues = edSplit[2].Split("_".ToCharArray()).ToList();
                 edRmdfValues.RemoveAt(0);
 
-                var bmSplit = bmRmt2Instance.Filename.Split("\\".ToCharArray());
+                var bmSplit = blamRmt2Tag.Filename.Split("\\".ToCharArray());
                 var bmType = bmSplit[1];
                 var bmRmdfValues = bmSplit[2].Split("_".ToCharArray()).ToList();
                 bmRmdfValues.RemoveAt(0);
@@ -350,11 +376,14 @@ namespace TagTool.Commands.Porting
 
             if (edRmt2BestStats.Count == 0)
             {
-                var tempRmt2 = ArgumentParser.ParseTagSpecifier(CacheContext, @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0.rmt2");
-
-                if (tempRmt2 != null)
-                    return tempRmt2;
-                else return CacheContext.TagCache.Index.FindFirstInGroup("rmt2");
+                try
+                {
+                    return CacheContext.GetTagInstance<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                }
+                catch (KeyNotFoundException)
+                {
+                    return null;
+                }
             }
 
             return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
@@ -743,151 +772,23 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem bmRmt2Instance, RenderMethodTemplate bmRmt2)
+        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition)
         {
-			// Find existing rmt2 tags
-			// If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
-			foreach (var rmt2Tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-				if (CacheContext.TagNames.ContainsKey(rmt2Tag.Index))
-					if (CacheContext.TagNames[rmt2Tag.Index].StartsWith(bmRmt2Instance.Filename))
-						return rmt2Tag;
-
-			// if no tagname matches, find rmt2 tags based on the most common values in the name
-			return FindEquivalentRmt2(bmRmt2Instance, bmRmt2);
-		}
-
-        public bool NameRmt2()
-        {
-            var validShaders = new List<string> { "rmsh", "rmtr", "rmhg", "rmfl", "rmcs", "rmss", "rmd ", "rmw ", "rmzo", "ltvl", "prt3", "beam", "decs", "cntl", "rmzo", "rmct", "rmbk" };
-            var newlyNamedRmt2 = new List<int>();
-            var type = "invalid";
-            var rmt2Instance = -1;
-
-            // Unname rmt2 tags
-            foreach (var edInstance in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                CacheContext.TagNames[edInstance.Index] = "blank";
-
-            foreach (var edInstance in CacheContext.TagCache.Index.NonNull())
+            // Find existing rmt2 tags
+            // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
+            foreach (var instance in CacheContext.TagCache.Index)
             {
-                object rm = null;
-                RenderMethod renderMethod = null;
-
-                // ignore tag groups not in validShaders
-                if (!validShaders.Contains(edInstance.Group.Tag.ToString()))
+                if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
                     continue;
 
-                // Console.WriteLine($"Checking 0x{edInstance:x4} {edInstance.Group.Tag.ToString()}");
-
-                // Get the tagname type per tag group
-                switch (edInstance.Group.Tag.ToString())
-                {
-                    case "rmsh": type = "shader"; break;
-                    case "rmtr": type = "terrain"; break;
-                    case "rmhg": type = "halogram"; break;
-                    case "rmfl": type = "foliage"; break;
-                    case "rmss": type = "screen"; break;
-                    case "rmcs": type = "custom"; break;
-                    case "prt3": type = "particle"; break;
-                    case "beam": type = "beam"; break;
-                    case "cntl": type = "contrail"; break;
-                    case "decs": type = "decal"; break;
-                    case "ltvl": type = "light_volume"; break;
-                    case "rmct": type = "cortana"; break;
-                    case "rmbk": type = "black"; break;
-                    case "rmzo": type = "zonly"; break;
-                    case "rmd ": type = "decal"; break;
-                    case "rmw ": type = "water"; break;
-                }
-
-                switch (edInstance.Group.Tag.ToString())
-                {
-                    case "rmsh":
-                    case "rmhg":
-                    case "rmtr":
-                    case "rmcs":
-                    case "rmfl":
-                    case "rmss":
-                    case "rmct":
-                    case "rmzo":
-                    case "rmbk":
-                    case "rmd ":
-                    case "rmw ":
-                        using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                        {
-                            var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var rm2 = CacheContext.Deserializer.Deserialize<RenderMethodFast>(edContext);
-
-                            renderMethod = new RenderMethod { Unknown = rm2.Unknown };
-
-                            if (renderMethod.Unknown.Count == 0) // used to name the rmt2 tag
-                                continue;
-                        }
-
-                        foreach (var a in edInstance.Dependencies)
-                            if (CacheContext.GetTag(a).Group.ToString() == "rmt2")
-                                rmt2Instance = CacheContext.GetTag(a).Index;
-
-                        NameRmt2Part(type, renderMethod, edInstance, rmt2Instance, newlyNamedRmt2);
-
-                        continue;
-
-                    default:
-                        break;
-                }
-
-                using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                    rm = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
-                }
-
-                switch (edInstance.Group.Tag.ToString())
-                {
-                    case "prt3": var e = (Particle)rm; NameRmt2Part(type, e.RenderMethod, edInstance, e.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-                    case "beam": var a = (BeamSystem)rm; foreach (var f in a.Beam) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-                    case "cntl": var b = (ContrailSystem)rm; foreach (var f in b.Contrail) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-                    case "decs": var c = (DecalSystem)rm; foreach (var f in c.DecalSystem2) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-                    case "ltvl": var d = (LightVolumeSystem)rm; foreach (var f in d.LightVolume) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-
-                    default:
-                        break;
-                }
+                if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Filename))
+                    return instance;
             }
 
-
-            return true;
-        }
-
-        private void NameRmt2Part(string type, RenderMethod renderMethod, CachedTagInstance edInstance, int rmt2Instance, List<int> newlyNamedRmt2)
-        {
-            if (renderMethod.Unknown.Count == 0) // invalid shaders, most likely caused by ported shaders
-                return;
-
-            if (newlyNamedRmt2.Contains(rmt2Instance))
-                return;
-            else
-                newlyNamedRmt2.Add(rmt2Instance);
-
-            var newTagName = $"shaders\\{type}_templates\\";
-
-            var rmdfRefValues = "";
-
-            for (int i = 0; i < renderMethod.Unknown.Count; i++)
-            {
-                if (edInstance.Group.Tag.ToString() == "rmsh" && i > 9) // for better H3/ODST name matching
-                    break;
-
-                if (edInstance.Group.Tag.ToString() == "rmhg" && i > 6) // for better H3/ODST name matching
-                    break;
-
-                rmdfRefValues = $"{rmdfRefValues}_{renderMethod.Unknown[i].Unknown}";
-            }
-
-            newTagName = $"{newTagName}{rmdfRefValues}";
-
-            CacheContext.TagNames[rmt2Instance] = newTagName;
-        }
-
+			// if no tagname matches, find rmt2 tags based on the most common values in the name
+			return FindEquivalentRmt2(blamRmt2Tag, blamRmt2Definition);
+		}
+        
         private class Unknown3Tagblock
         {
             public int Unknown3Index;

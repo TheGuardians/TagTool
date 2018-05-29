@@ -236,9 +236,7 @@ namespace TagTool.Commands.Porting
             {
                 for (var i = 0; i < materials.Count; i++)
                 {
-                    materials[i].RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
-
-                    /*var material = materials[i];
+                    var material = materials[i];
 
                     if (material.RenderMethod.Index == -1)
                         continue;
@@ -258,28 +256,8 @@ namespace TagTool.Commands.Porting
                         }
                     }
 
-                    if (renderMethodExists)
-                        continue;
-
-                    switch (blamRenderMethodTag.Filename)
-                    {
-                        case @"levels\dlc\bunkerworld\shaders\z_invisible_quads":
-                        case @"levels\dlc\midship\shaders\z_invis_lightquad":
-                        case @"levels\multi\snowbound\shaders\z_invis_lightquad": // ToDo: see why it crashes as a shader
-                            material.RenderMethod = null;
-                            break;
-                    }
-
-                    if (material.RenderMethod != null && material.RenderMethod.Index != -1)
-                        material.RenderMethod = MatchShadersCommand.MatchShader7(stream, CacheContext, BlamCache, blamRenderMethodTag);
-
-                    if (material.RenderMethod != null)
-                    {
-                        var tagName = CacheContext.TagNames.ContainsKey(material.RenderMethod.Index) ? CacheContext.TagNames[material.RenderMethod.Index] : $"0x{material.RenderMethod.Index:X4}";
-                        Console.WriteLine($"[{i:D3}] [{material.RenderMethod.Group}] 0x{material.RenderMethod.Index:X4} {tagName}");
-                    }
-                    else
-                        Console.WriteLine($"[{i:D3}] [NULL]");*/
+                    if (!renderMethodExists)
+                        material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
                 }
             }
 

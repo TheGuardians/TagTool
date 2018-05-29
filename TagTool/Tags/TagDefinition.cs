@@ -135,6 +135,7 @@ namespace TagTool.Tags
             { new Tag("proj"), typeof(Projectile) },
             { new Tag("prt3"), typeof(Particle) },
             { new Tag("rasg"), typeof(RasterizerGlobals) },
+            { new Tag("rm  "), typeof(RenderMethod) },
             { new Tag("rmbk"), typeof(ShaderBlack) },
             { new Tag("rmcs"), typeof(ShaderCustom) },
             { new Tag("rmct"), typeof(ShaderCortana) },

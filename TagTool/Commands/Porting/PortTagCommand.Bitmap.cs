@@ -570,7 +570,6 @@ namespace TagTool.Commands.Porting
                     blamBitmap.MipMapCount = 0;
                     compress = true;
                     break;
-
             }
 
             //Remove flags for conversion
@@ -681,8 +680,7 @@ namespace TagTool.Commands.Porting
                 //Reverse each block of 2 bytes
                 for (int j = 0; j < layerRaw.Length; j += 2)
                     Array.Reverse(layerRaw, j, 2);
-
-
+                
                 byte[] tempResult = new byte[layerSize];
 
                 if (blamBitmap.Convert)

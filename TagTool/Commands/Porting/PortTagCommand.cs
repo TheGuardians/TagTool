@@ -716,7 +716,7 @@ namespace TagTool.Commands.Porting
 				
                 case RenderMethod renderMethod when Flags.HasFlag(PortingFlags.MatchShaders):
 					ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
-					return ConvertRenderMethod(cacheStream, renderMethod, blamTagName);
+					return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 
                 case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);

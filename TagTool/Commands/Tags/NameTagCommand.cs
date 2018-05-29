@@ -27,21 +27,26 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2 || args.Count > 3)
+            if (args.Count < 1 || args.Count > 3)
                 return false;
 
             var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-            var name = args[1];
 
             if (tag == null)
             {
                 Console.WriteLine($"ERROR: Invalid tag specifier: {args[0]}");
                 return false;
             }
-            
-            CacheContext.TagNames[tag.Index] = name;
-            
-            Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {name}.{CacheContext.GetString(tag.Group.Name)}");
+
+            if (args.Count < 2)
+            {
+                CacheContext.TagNames.Remove(tag.Index);
+                return true;
+            }
+
+            CacheContext.TagNames[tag.Index] = args[1];
+
+            Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {args[1]}.{CacheContext.GetString(tag.Group.Name)}");
 
             return true;
         }

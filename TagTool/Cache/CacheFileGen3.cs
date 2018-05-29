@@ -21,7 +21,6 @@ namespace TagTool.Cache
             }
             else
             {
-
                 Header.Magic = Header.StringIDsIndicesOffset - 0x3000;
 
                 Header.TagNamesBufferOffset -= Header.Magic;

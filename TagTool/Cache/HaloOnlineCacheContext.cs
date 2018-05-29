@@ -64,11 +64,6 @@ namespace TagTool.Cache
         public Dictionary<int, string> TagNames { get; set; } = new Dictionary<int, string>();
 
         /// <summary>
-        /// A dictionary of all ElDorado RenderMethodTemplates and lists of their bitmaps and arguments names.
-        /// </summary>
-        public Dictionary<int, List<List<string>>> Rmt2TagsInfo { get; set; } = new Dictionary<int, List<List<string>>>();
-
-        /// <summary>
         /// The tag cache.
         /// </summary>
         public TagCache TagCache { get; set; }
