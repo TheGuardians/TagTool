@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Commands;
 using System;
 using System.Collections.Generic;
+using TagTool.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -26,32 +27,38 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1)
+            if (args.Count < 1)
                 return false;
+            
+            var namedWith = "";
 
-            List<string> tagsList = new List<string>();
-            if (args.Count == 1)
+            while (args.Count > 1)
             {
-                foreach (var tag in BlamCache.IndexItems)
+                switch (args[0].ToLower())
                 {
-                    if (tag.GroupTag == args[0])
-                    {
-                        tagsList.Add("[" + tag.GroupTag.ToString() + "] " + tag.Filename.ToString()); // BlamCache.Header.scenarioName
-                    }
+                    case "named:":
+                        namedWith = args[1];
+                        args.RemoveAt(0);
+                        break;
+
+                    default:
+                        throw new FormatException(args[0]);
                 }
-            }
-            else
-            {
-                foreach (var tag in BlamCache.IndexItems)
-                {
-                    tagsList.Add("[" + tag.GroupTag.ToString() + "] " + tag.Filename.ToString());
-                }
+
+                args.RemoveAt(0);
             }
 
-            tagsList.Sort();
-            foreach (var tagName in tagsList)
+            var groupTag = args.Count == 0 ? Tag.Null : ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
+
+            foreach (var tag in BlamCache.IndexItems)
             {
-                Console.WriteLine(tagName);
+                if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
+                    continue;
+
+                if (namedWith != "" && !tag.Filename.Contains(namedWith))
+                    continue;
+
+                Console.WriteLine($"[Index: 0x{tag.metaIndex:X4}, Offset: 0x{tag.Offset:X8}, Size: 0x{tag.Size:X4}] {tag.Filename}.{tag.GroupName}");
             }
 
             return true;

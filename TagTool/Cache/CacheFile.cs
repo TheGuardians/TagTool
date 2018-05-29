@@ -323,6 +323,30 @@ namespace TagTool.Cache
                     Tag.Null :
                     new Tag(Cache.IndexItems.ClassList[ClassIndex].Parent2.ToCharArray());
 
+            /// <summary>
+            /// Determines whether the tag belongs to a tag group.
+            /// </summary>
+            /// <param name="groupTag">The group tag.</param>
+            /// <returns><c>true</c> if the tag belongs to the group.</returns>
+            public bool IsInGroup(Tag groupTag)
+            {
+                return GroupTag == groupTag || ParentGroupTag == groupTag || GrandparentGroupTag == groupTag;
+            }
+
+            /// <summary>
+            /// Determines whether the tag belongs to a tag group.
+            /// </summary>
+            /// <param name="groupTag">A 4-character string representing the group tag, e.g. "scnr".</param>
+            /// <returns><c>true</c> if the tag belongs to the group.</returns>
+            public bool IsInGroup(string groupTag) => IsInGroup(new Tag(groupTag));
+
+            /// <summary>
+            /// Determines whether the tag belongs to a tag group.
+            /// </summary>
+            /// <param name="group">The tag group.</param>
+            /// <returns><c>true</c> if the tag belongs to the group.</returns>
+            public bool IsInGroup(TagGroup group) => IsInGroup(group.Tag);
+
             private string GetGen2GroupName(Tag groupTag)
             {
                 if (!TagDefinition.Types.ContainsKey(groupTag))

@@ -64,6 +64,7 @@ namespace TagTool.Cache
                 case "11081.07.04.30.0934.main":
                     return CacheVersion.Halo2Vista;
                 case "11855.07.08.20.2317.halo3_ship":
+                case "12065.08.08.26.0819.halo3_ship":
                     return CacheVersion.Halo3Retail;
                 case "13895.09.04.27.2201.atlas_relea":
                     return CacheVersion.Halo3ODST;
