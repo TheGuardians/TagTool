@@ -226,7 +226,7 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
                     {
-                        if (Flags.HasFlag(PortingFlags.Replace) && !blamTag.IsInGroup("wacd"))
+                        if (Flags.HasFlag(PortingFlags.Replace))
                             edTag = instance;
                         else
                         {
