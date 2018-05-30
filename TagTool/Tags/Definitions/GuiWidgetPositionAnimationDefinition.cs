@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
     {
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
-        public byte[] Data;
+        public TagFunction Function;
 
         [TagStructure(Size = 0x1C)]
         public class AnimationDefinitionBlock

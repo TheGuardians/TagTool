@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Serialization;
 using System.Collections.Generic;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -10,7 +11,7 @@ namespace TagTool.Tags.Definitions
     {
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
-        public byte[] Data;
+        public TagFunction Function;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown;
@@ -21,8 +22,7 @@ namespace TagTool.Tags.Definitions
         public class AnimationDefinitionBlock
         {
             public uint Frame;
-            public float CoordinateX;
-            public float CoordinateY;
+            public RealPoint2d Coordinate;
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;

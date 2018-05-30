@@ -1,5 +1,6 @@
 using TagTool.Serialization;
 using System.Collections.Generic;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,16 +9,13 @@ namespace TagTool.Tags.Definitions
     {
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
-        public byte[] Data;
+        public TagFunction Function;
 
         [TagStructure(Size = 0x20)]
         public class AnimationDefinitionBlock
         {
             public uint Frame;
-            public float ColorA;
-            public float ColorR;
-            public float ColorG;
-            public float ColorB;
+            public RealArgbColor Color;
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;

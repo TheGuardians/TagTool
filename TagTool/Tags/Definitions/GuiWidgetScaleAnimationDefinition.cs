@@ -1,5 +1,6 @@
 using TagTool.Serialization;
 using System.Collections.Generic;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,7 +9,7 @@ namespace TagTool.Tags.Definitions
     {
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
-        public byte[] Data;
+        public TagFunction Function;
 
         [TagStructure(Size = 0x24)]
         public class AnimationDefinitionBlock
@@ -16,10 +17,8 @@ namespace TagTool.Tags.Definitions
             public uint Frame;
             public AnchorValue Anchor;
             public short Unknown;
-            public float CustomAnchorX;
-            public float CustomAnchorY;
-            public float XScale;
-            public float YScale;
+            public RealPoint2d CustomAnchor;
+            public RealVector2d Scale;
             public uint Unknown2;
             public uint Unknown3;
             public uint Unknown4;
@@ -35,7 +34,7 @@ namespace TagTool.Tags.Definitions
                 TopLeft,
                 TopRight,
                 BottomRight,
-                BottomLeft,
+                BottomLeft
             }
         }
     }

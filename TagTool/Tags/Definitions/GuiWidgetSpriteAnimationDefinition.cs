@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     {
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
-        public byte[] Data;
+        public TagFunction Function;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown;
