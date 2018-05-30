@@ -4,7 +4,6 @@ using TagTool.IO;
 using System;
 using TagTool.Tags;
 using System.Collections.Generic;
-using System.IO;
 
 namespace TagTool.Serialization
 {

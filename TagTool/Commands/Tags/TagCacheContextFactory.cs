@@ -6,7 +6,7 @@ using TagTool.Commands.Files;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.Porting;
 using TagTool.Commands.RenderModels;
-using TagTool.Commands.Shaders;
+using TagTool.Commands.PixelShaders;
 using TagTool.Commands.Strings;
 
 namespace TagTool.Commands.Tags
@@ -60,9 +60,6 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new RebuildStringIdsCommand(cacheContext));
             context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
-            context.AddCommand(new ListRegisters(cacheContext));
-            context.AddCommand(new ListRegistersRMT2(cacheContext));
-			context.AddCommand(new TestSimpleShadersCommand(cacheContext));
             context.AddCommand(new ExportTagModCommand(cacheContext));
 
 			return context;

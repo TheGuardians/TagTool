@@ -6,7 +6,6 @@ using TagTool.Common;
 using TagTool.Tags.Definitions;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using TagTool.Commands;
 
 namespace TagTool.Commands.Unicode
 {

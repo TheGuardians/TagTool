@@ -1,4 +1,3 @@
-using TagTool.Ai;
 using TagTool.Serialization;
 
 namespace TagTool.Ai

@@ -1,5 +1,4 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -45,17 +44,11 @@ namespace TagTool.Commands.Porting
         public static void Populate(CommandContextStack contextStack, CommandContext context, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             context.AddCommand(new EditTagCommand(contextStack, blamCache));
-            context.AddCommand(new DumpBspGeometryCommand(cacheContext, blamCache));
-            context.AddCommand(new DumpScriptInfoCommand(cacheContext, blamCache));
-            context.AddCommand(new DumpTagFunctionCommand(cacheContext, blamCache));
-            context.AddCommand(new ListBitmapsCommand(cacheContext, blamCache));
             context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
-            context.AddCommand(new ListBspMoppCodesCommand(cacheContext, blamCache));
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
             context.AddCommand(new PortTagCommand(cacheContext, blamCache));
 			context.AddCommand(new PortingTestCommand(cacheContext, blamCache));
-			context.AddCommand(new TestShaderDecompilerCommand(cacheContext, blamCache));
 		}
 	}
 }

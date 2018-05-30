@@ -1,10 +1,10 @@
-﻿using TagTool.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Linq;
 using System.Xml;
+using TagTool.Common;
 
 namespace TagTool.Layouts
 {
@@ -538,8 +538,7 @@ namespace TagTool.Layouts
 
         private static string PositionInfo(XmlReader reader)
         {
-            var info = reader as IXmlLineInfo;
-            return info != null ? string.Format(" Line {0}, position {1}.", info.LineNumber, info.LinePosition) : "";
+            return reader is IXmlLineInfo info ? string.Format(" Line {0}, position {1}.", info.LineNumber, info.LinePosition) : "";
         }
 
         private static int ParseInt(string str)

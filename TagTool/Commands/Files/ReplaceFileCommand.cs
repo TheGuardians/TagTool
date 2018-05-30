@@ -4,7 +4,6 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
-using TagTool.Commands;
 
 namespace TagTool.Commands.Files
 {

@@ -5,7 +5,6 @@ using TagTool.Cache;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Serialization;
-using TagTool.Commands;
 
 namespace TagTool.Commands.Video
 {

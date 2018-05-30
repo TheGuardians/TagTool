@@ -1,14 +1,11 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Geometry;
-using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace TagTool.Commands.RenderModels
 {

@@ -1,5 +1,0 @@
-#include "methods/albedo.hlsl"
-#include "methods/bump_mapping.hlsl"
-#include "methods/blend_mode.hlsl"
-#include "methods/tinting.hlsl"
-#include "methods/specular.hlsl"

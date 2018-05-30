@@ -5,7 +5,6 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace TagTool.Bitmaps

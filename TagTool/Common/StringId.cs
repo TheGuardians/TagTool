@@ -114,7 +114,8 @@ namespace TagTool.Common
         /// <summary>
         /// Constructs a new StringID from a 32-bit value from specified version.
         /// </summary>
-        /// <param name="value">The 32-bit value of the stringID.</param>
+        /// <param name="value">The 32-bit value of the string id.</param>
+        /// <param name="version">The cache version of the string id.</param>
         public StringId(uint value, CacheVersion version)
         {
             switch (version)

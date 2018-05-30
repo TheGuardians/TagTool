@@ -2,7 +2,6 @@
 using TagTool.Common;
 using TagTool.Serialization;
 
-
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x44)]

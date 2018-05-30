@@ -1,5 +1,4 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using System.Collections.Generic;
 
 namespace TagTool.Commands.Tags

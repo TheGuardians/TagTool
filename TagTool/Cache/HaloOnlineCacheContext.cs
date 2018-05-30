@@ -399,7 +399,6 @@ namespace TagTool.Cache
         /// Adds a new pageable_resource to the current cache.
         /// </summary>
         /// <param name="resource">The pageable_resource to add.</param>
-        /// <param name="location">The location where the resource should be stored.</param>
         /// <param name="dataStream">The stream to read the resource data from.</param>
         /// <exception cref="System.ArgumentNullException">resource</exception>
         /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
@@ -427,7 +426,6 @@ namespace TagTool.Cache
         /// Adds raw, pre-compressed resource data to a cache.
         /// </summary>
         /// <param name="resource">The resource reference to initialize.</param>
-        /// <param name="location">The location where the resource should be stored.</param>
         /// <param name="data">The pre-compressed data to store.</param>
         public void AddRawResource(PageableResource resource, byte[] data)
         {

@@ -1,6 +1,5 @@
 ﻿using Assimp;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Serialization;

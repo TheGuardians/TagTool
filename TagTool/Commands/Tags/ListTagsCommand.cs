@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 
 namespace TagTool.Commands.Tags

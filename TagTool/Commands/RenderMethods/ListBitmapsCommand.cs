@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
-using TagTool.Commands;
 
 namespace TagTool.Commands.RenderMethods
 {

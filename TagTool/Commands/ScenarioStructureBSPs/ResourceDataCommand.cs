@@ -4,7 +4,6 @@ using TagTool.Cache;
 using TagTool.Tags.Definitions;
 using System.IO;
 using TagTool.Common;
-using TagTool.Commands;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {

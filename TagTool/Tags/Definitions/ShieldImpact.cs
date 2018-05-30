@@ -158,12 +158,13 @@ namespace TagTool.Tags.Definitions
 
             //HO is missing hit blob bitmap and either it's HitIntensity or HitRadius ShieldFunction, to be determined
 
-            /// <summary>
-            /// These controls allow you to define the color variation in the area surrounding projectile impacts.
-            /// You can control the color, and the size of the colored area.
-            /// The default input is time since impact.
-            /// </summary>
+            // <summary>
+            // These controls allow you to define the color variation in the area surrounding projectile impacts.
+            // You can control the color, and the size of the colored area.
+            // The default input is time since impact.
+            // </summary>
         }
+
         [TagStructure(Size = 0x3C)]
         public class HitResponseBlock
         {

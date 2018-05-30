@@ -1,9 +1,5 @@
 using TagTool.Cache;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 
 /***************************************************************
 * The following code is derived from the HaloDeveloper project
@@ -940,87 +936,6 @@ namespace TagTool.Bitmaps
                 buffer[i] = data[index + 1];
             }
             return buffer;
-        }
-
-        public static Bitmap DecodeCubeMap(byte[] data, Tags.Definitions.Bitmap.Image image, int virtualWidth, int virtualHeight, System.Drawing.Imaging.PixelFormat PF, CacheVersion version)
-        {
-            List<Bitmap> images = new List<Bitmap>();
-            int imageSize = virtualWidth * virtualHeight * 4;
-            int tImageSize = data.Length / 6;
-
-            switch (image.Format)
-            {
-                case BitmapFormat.Dxt1:
-                    imageSize = Math.Max(imageSize / 8, 8);
-                    break;
-                case BitmapFormat.Dxt3:
-                case BitmapFormat.Dxt5:
-                    imageSize = Math.Max(imageSize / 4, 16);
-                    break;
-                case BitmapFormat.A8R8G8B8:
-                    imageSize = Math.Max(data.Length / 6, 16);
-                    break;
-            }
-
-            for (int i = 0; i < 6; i++)
-            {
-                byte[] buffer = new byte[imageSize];
-                Array.Copy(data, i * tImageSize, buffer, 0, imageSize);
-                buffer = DecodeBitmap(buffer, image, virtualWidth, virtualHeight, version);
-
-                //PixelFormat PF = (alpha) ? PixelFormat.Format32bppArgb : PixelFormat.Format32bppRgb;
-                Bitmap bitmap = new Bitmap(image.Width, image.Height, PF);
-                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
-                BitmapData bitmapdata = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PF);
-                byte[] destinationArray = new byte[image.Width * image.Height * 4];
-
-                for (int j = 0; j < image.Height; j++)
-                    Array.Copy(buffer, j * virtualWidth * 4, destinationArray, j * image.Width * 4, image.Width * 4);
-
-                Marshal.Copy(destinationArray, 0, bitmapdata.Scan0, destinationArray.Length);
-                bitmap.UnlockBits(bitmapdata);
-                images.Add(bitmap);
-            }
-
-            Bitmap finalImage = new Bitmap(4 * image.Width, 3 * image.Height);
-
-            using (Graphics g = Graphics.FromImage(finalImage))
-            {
-                // set background color
-                g.Clear(Color.Empty);
-
-                int[] crossX = new int[6] { 0, 2, 1, 3, 0, 0 }; // Front, Left, Right, Back, Top, Bottom
-                int[] crossY = new int[6] { 1, 1, 1, 1, 0, 2 }; // Front, Left, Right, Back, Top, Bottom
-
-                // go through each image and draw it on the final image
-                int xOffset = 0;
-                int yOffset = 0;
-                int tempCount = 0;
-                foreach (Bitmap Image in images)
-                {
-                    switch (tempCount)
-                    {
-                        case 0:
-                        case 4:
-                        case 5:
-                            Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                            break;
-                        case 1:
-                            Image.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                            break;
-                        case 2:
-                            Image.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                            break;
-                    }
-                    xOffset = crossX[tempCount] * Image.Width;
-                    yOffset = crossY[tempCount] * Image.Height;
-
-                    g.DrawImage(Image, new Rectangle(xOffset, yOffset, Image.Width, Image.Height));
-                    tempCount++;
-                }
-            }
-
-            return finalImage;
         }
 
         public static byte[] DecodeBitmap(byte[] bitmRaw, Tags.Definitions.Bitmap.Image image, int virtualWidth, int virtualHeight, CacheVersion Version)

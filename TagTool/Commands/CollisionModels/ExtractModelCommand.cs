@@ -1,12 +1,7 @@
-﻿using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Tags.Definitions;
+﻿using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TagTool.Commands.CollisionModels
 {

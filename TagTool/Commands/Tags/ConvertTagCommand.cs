@@ -12,6 +12,7 @@ using TagTool.Tags.Resources;
 using TagTool.Scripting;
 using TagTool.Commands.Common;
 using TagTool.Tags;
+using TagTool.Shaders;
 
 namespace TagTool.Commands.Tags
 {

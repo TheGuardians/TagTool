@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 
 namespace TagTool.Commands.Tags

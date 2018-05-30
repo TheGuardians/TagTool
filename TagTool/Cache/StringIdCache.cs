@@ -49,6 +49,7 @@ namespace TagTool.Cache
         /// Adds a string to the cache.
         /// </summary>
         /// <param name="str">The string to add.</param>
+        /// <param name="version">The cache version of the string id.</param>
         /// <returns>The stringID corresponding to the string that was added.</returns>
         public StringId AddString(string str, CacheVersion version = CacheVersion.Halo3Retail)
         {

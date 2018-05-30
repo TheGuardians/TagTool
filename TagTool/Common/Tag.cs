@@ -40,7 +40,7 @@ namespace TagTool.Common
         /// <summary>
         /// Constructs a magic number from a character array.
         /// </summary>
-        /// <param name="str">The character array.</param>
+        /// <param name="input">The character array.</param>
         public Tag(char[] input)
         {
             var chars = new char[4] { ' ', ' ', ' ', ' ' };

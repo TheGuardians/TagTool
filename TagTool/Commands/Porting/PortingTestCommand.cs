@@ -1,16 +1,16 @@
-using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Common;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Tags.Definitions;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Geometry;
+using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting
             CacheContext = cacheContext;
             BlamCache = blamCache;
         }
-
+        
         public override object Execute(List<string> args)
         {
             if (args.Count == 0)
@@ -42,384 +42,33 @@ namespace TagTool.Commands.Porting
             var name = args[0].ToLower();
             args.RemoveAt(0);
 
-            var commandsList = new Dictionary<string, string>
+            var methods = GetType().GetMethods(BindingFlags.Public).Where(method =>
             {
-                { "restoreweaponanimation"  , "Port and replace a weapon's fp animation." },
-                { "restoreweaponfiringsound", "Port and replace a weapon's firing sound." },
-                { "deserializeblam"         , "Deserialize a Blam tag and list all fields (edittag's listfields)" },
-                { "createtag"               , "Creates a new tag of the specified tag group in the current tag cache." },
-                { "updatemapfiles"          , "Updates the game's .map files to contain valid scenario tag indices." },
-                { "listtags"                , "List all tags of a specified tag group." },
-                { "listblamtags"            , "List all Blam tags of a specified tag group." },
-                { "loopallblamtags"         , "Loop trough all tags. Source code modification required." },
-                { "fixcisc"                 , "Double the framerate in cisc camera animation." },
-            };
+                var parameters = method.GetParameters();
 
-            switch (name)
+                return (method.ReturnType == typeof(bool))
+                    && (parameters.Length == 1)
+                    && (parameters[0].ParameterType != typeof(List<string>));
+            });
+
+            var foundMethods = methods.Where(i => i.Name.ToLower() == name);
+
+            if (foundMethods.Count() == 0)
             {
-                case "restoreweaponanimation": return RestoreWeaponAnimation(args);
-                case "restoreweaponfiringsound": return RestoreWeaponFiringSound(args);
-                case "deserializeblam": return DeserializeBlam(args);
-                case "createtag": return CreateTag(args);
-                case "updatemapfiles": return UpdateMapFiles(args);
-                case "listtags": return ListTags(args);
-                case "listblamtags": return ListBlamTags(args);
-                case "loopallblamtags": return LoopAllBlamTags(args);
-                case "fixcisc": return FixCisc(args);
-                default:
-                    Console.WriteLine($"Invalid command: {name}");
-                    Console.WriteLine($"Available commands: {commandsList.Count}");
-                    foreach (var a in commandsList)
-                        Console.WriteLine($"{a.Key}: {a.Value}");
-                    return false;
-            }
-        }
+                Console.WriteLine($"Invalid command: {name}");
+                Console.WriteLine($"Available commands: {methods.Count()}");
 
-        public bool ListTags(List<string> args)
-        {
-            var tags = CacheContext.TagCache.Index.NonNull().ToArray();
+                foreach (var method in methods)
+                    Console.WriteLine($"\t{method.Name}");
 
-            List<string> groupsList = new List<string>();
-            string matchName = "";
-
-            if (args.Count > 2)
-            {
-                matchName = args.Last();
-                args.RemoveAt(args.Count - 1);
-
-                foreach (var a in args)
-                    groupsList.Add(a);
-            }
-
-            foreach (var tag in tags)
-            {
-                var name = CacheContext.TagNames.ContainsKey(tag.Index) ? CacheContext.TagNames[tag.Index] : $"0x{tag.Index:X4}";
-
-                if (args.Count == 2)
-                    if (tag.Group.ToString() == args[0] && name.Contains(args[1]))
-                        Console.WriteLine($"0x{tag.Index:X4},{name}.{tag.Group}");
-
-                if (args.Count == 1)
-                {
-                    if (tag.Group.ToString() == args[0])
-                        Console.WriteLine($"0x{tag.Index:X4},{name}.{tag.Group}");
-                    if (args[0].Length > 4 && name.Contains(args[0]))
-                        Console.WriteLine($"0x{tag.Index:X4},{name}.{tag.Group}");
-                }
-
-                if (args.Count == 0)
-                    Console.WriteLine($"0x{tag.Index:X4},{name}.{tag.Group}");
-
-                if (args.Count > 2)
-                {
-                    if (groupsList.Contains(tag.Group.ToString()) && name.Contains(matchName))
-                        Console.WriteLine($"0x{tag.Index:X4},{name}.{tag.Group}");
-                }
-            }
-
-            return true;
-        }
-
-        public bool DeserializeBlam(List<string> args)
-        {
-            if (args.Count != 2)
-            {
-                Console.WriteLine($"ERROR: usage: test DeserializeBlam matg globals\\globals");
-                return false;
-            }
-
-            CacheFile.IndexItem blamInstance = null;
-            
-            foreach (var item in BlamCache.IndexItems)
-            {
-                if (item.GroupTag == args[0] && item.Filename == args[1])
-                {
-                    blamInstance = item;
-                    break;
-                }
-            }
-
-            var blamContext = new CacheSerializationContext(ref BlamCache, blamInstance);
-
-            var Value = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
-
-            var Structure = new TagStructureInfo(TagDefinition.Find(blamInstance.GroupTag));
-
-            var match = false;
-            var token = "";
-
-            var enumerator = new TagFieldEnumerator(Structure);
-
-            while (enumerator.Next())
-            {
-                if (enumerator.Attribute != null && enumerator.Attribute.Padding == true)
-                    continue;
-
-                var nameString = enumerator.Field.Name;
-
-                if (match && !nameString.ToLower().Contains(token))
-                    continue;
-
-                var fieldType = enumerator.Field.FieldType;
-                var fieldValue = enumerator.Field.GetValue(Value);
-
-                var typeString =
-                    fieldType.IsGenericType ?
-                        $"{fieldType.Name}<{fieldType.GenericTypeArguments[0].Name}>" :
-                    fieldType.Name;
-
-                string valueString = "";
-
-                try
-                {
-                    if (fieldValue == null)
-                        valueString = "null";
-                    else if (fieldType.GetInterface(typeof(IList).Name) != null)
-                        valueString =
-                            ((IList)fieldValue).Count != 0 ?
-                                $"{{...}}[{((IList)fieldValue).Count}]" :
-                            "null";
-                    else if (fieldType == typeof(StringId))
-                    {
-                        int.TryParse(fieldValue.ToString().Split("x".ToCharArray())[1], NumberStyles.HexNumber, null, out int r);
-                        valueString = BlamCache.Strings.GetItemByID(r);
-                    }
-                    else if (fieldType == typeof(CachedTagInstance))
-                    {
-                        var instance = (CachedTagInstance)fieldValue;
-
-                        if ((uint)instance.Index != 0xFFFFFFFF)
-                        {
-                            var blamInstance2 = BlamCache.IndexItems.Find(x => x.ID == instance.Index);
-
-                            valueString = $"{blamInstance2.Filename}.{blamInstance2.GroupTag}";
-                        }
-                    }
-                    else
-                        valueString = fieldValue.ToString();
-                }
-                catch (Exception e)
-                {
-                    valueString = $"<ERROR MESSAGE=\"{e.Message}\" />";
-                }
-
-                var fieldName = $"{enumerator.Field.DeclaringType.FullName}.{enumerator.Field.Name}".Replace("+", ".");
-
-                Console.WriteLine("{0}: {1} = {2}", nameString, typeString, valueString);
-            }
-            
-            return true;
-        }
-
-        public bool CreateTag(List<string> args)
-        {
-            if (args.Count < 1 || args.Count > 2)
-                return false;
-
-            begin:
-            var groupTagString = args[0];
-
-            if (groupTagString.Length > 4)
-            {
-                Console.WriteLine($"ERROR: Invalid group tag: {groupTagString}");
-                return true;
-            }
-
-            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
-
-            if (groupTag == Tag.Null)
-            {
-                var chars = new char[] { ' ', ' ', ' ', ' ' };
-
-                for (var i = 0; i < chars.Length; i++)
-                    chars[i] = groupTagString[i];
-
-                groupTag = new Tag(new string(chars));
-            }
-
-            if (!TagGroup.Instances.ContainsKey(groupTag))
-            {
-                Console.WriteLine($"ERROR: No tag group definition for group tag '{groupTag}'!");
-                Console.Write($"(BE CAREFUL WITH THIS!!!) Define '{groupTag}' tag group? [y/n]: ");
-
-                var answer = Console.ReadLine().ToLower();
-
-                if (answer != "y" && answer != "yes")
-                    return true;
-
-                Console.WriteLine("Enter the tag group specification in the following format");
-                Console.WriteLine("<group tag> [parent group tag] [grandparent group tag] <group name>:");
                 Console.WriteLine();
-                Console.Write($"{groupTag} specification> ");
-
-                answer = Console.ReadLine();
-
-                var groupArgs = ArgumentParser.ParseCommand(answer, out string redirect);
-
-                switch (groupArgs.Count)
-                {
-                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.Null, Tag.Null, CacheContext.GetStringId(groupArgs[1])); break;
-                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.Null, CacheContext.GetStringId(groupArgs[2])); break;
-                    case 4: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), new Tag(groupArgs[2]), CacheContext.GetStringId(groupArgs[3])); break;
-                    default: return false;
-                }
-
-                goto begin;
-            }
-
-            CachedTagInstance instance = null;
-
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-            {
-                if (args.Count == 2)
-                {
-                    var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
-
-                    if (tag == null)
-                        return false;
-
-                    var tagIndex = tag.Index;
-
-                    if (tagIndex > CacheContext.TagCache.Index.Count)
-                        return false;
-
-                    if (tagIndex < CacheContext.TagCache.Index.Count)
-                    {
-                        if (CacheContext.TagCache.Index[tagIndex] != null)
-                        {
-                            var oldInstance = CacheContext.TagCache.Index[tagIndex];
-                            CacheContext.TagCache.Index[tagIndex] = null;
-                            CacheContext.TagCache.SetTagDataRaw(stream, oldInstance, new byte[] { });
-                        }
-
-                        instance = new CachedTagInstance(tagIndex, TagGroup.Instances[groupTag]);
-                        CacheContext.TagCache.Index[tagIndex] = instance;
-                    }
-                }
-
-                if (instance == null)
-                    instance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
-
-                var context = new TagSerializationContext(stream, CacheContext, instance);
-
-                var data = Activator.CreateInstance(TagDefinition.Find(groupTag));
-                CacheContext.Serializer.Serialize(context, data);
-            }
-
-            var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                CacheContext.TagNames[instance.Index] :
-                $"0x{instance.Index:X4}";
-
-            Console.WriteLine($"[Index: 0x{instance.Index:X4}, Offset: 0x{instance.HeaderOffset:X8}, Size: 0x{instance.TotalSize:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}");
-
-            return true;
-        }
-
-        public bool UpdateMapFiles(List<string> args)
-        {
-            var mapIndices = new Dictionary<int, int>();
-
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
-            {
-                foreach (var scnrTag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
-                {
-                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, scnrTag);
-                    
-                    using (var tagStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(cacheStream, scnrTag)))
-                    using (var reader = new EndianReader(tagStream))
-                    {
-                        reader.BaseStream.Position = scnrTag.DefinitionOffset + 0x8;
-                        var mapId = reader.ReadInt32();
-
-                        mapIndices[mapId] = scnrTag.Index;
-                    }
-                }
-            }
-
-            foreach (var mapFile in CacheContext.Directory.GetFiles("*.map"))
-            {
-                try
-                {
-                    using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                    using (var reader = new BinaryReader(stream))
-                    using (var writer = new BinaryWriter(stream))
-                    {
-                        if (reader.ReadInt32() != new Tag("head").Value)
-                        {
-                            Console.Error.WriteLine("Invalid map file");
-                            return true;
-                        }
-
-                        reader.BaseStream.Position = 0x2DEC;
-                        var mapId = reader.ReadInt32();
-
-                        if (mapIndices.ContainsKey(mapId))
-                        {
-                            var mapIndex = mapIndices[mapId];
-
-                            writer.BaseStream.Position = 0x2DF0;
-                            writer.Write(mapIndex);
-
-                            Console.WriteLine($"Scenario tag index for {mapFile.Name}: {mapIndex:X8}");
-                        }
-                    }
-                }
-                catch (IOException)
-                {
-                    Console.Error.WriteLine("Unable to open the map file for reading.");
-                }
-            }
-
-            Console.WriteLine("Done!");
-
-            return true;
-        }
-
-        public bool ListBlamTags(List<string> args)
-        {
-            var tags = BlamCache.IndexItems.ToArray();
-
-            foreach (var tag in tags)
-            {
-                if (args.Count == 2)
-                    if (tag.GroupTag.ToString() == args[0] && tag.Filename.Contains(args[1]))
-                        Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
-
-                if (args.Count == 1)
-                    if (tag.GroupTag.ToString() == args[0])
-                        Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
-
-                if (args.Count == 0)
-                    Console.WriteLine($"[{tag.GroupTag}] {tag.Filename}");
-            }
-
-            return true;
-        }
-
-        public bool LoopAllBlamTags(List<string> args)
-        {
-            if (args.Count != 1)
+                
                 return false;
-
-            if (args[0].Length != 4)
-                return false;
-            
-            foreach (var item in BlamCache.IndexItems)
-            {
-                if (item.GroupTag == args[0])
-                {
-                    var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                    var def = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(args[0]));
-
-                    Console.WriteLine($"Deserialized [{item.GroupTag}] {item.Filename}");
-
-                    var jmad = (ModelAnimationGraph)def;
-                }
             }
 
-            return true;
+            return foundMethods.First().Invoke(this, new[] { args });
         }
-
+        
         public bool RestoreWeaponAnimation(List<string> args)
         {
             if (args.Count != 1)
@@ -705,7 +354,7 @@ namespace TagTool.Commands.Porting
             return true;
         }
         
-        public bool FixCisc(List<string> args)
+        public bool FixCinematicScene(List<string> args)
         {
             if (args.Count != 1)
                 return false;
@@ -775,6 +424,639 @@ namespace TagTool.Commands.Porting
             Console.WriteLine("Done.");
 
             return true;
+        }
+
+        public bool DumpBspGeometry(List<string> args)
+        {
+            if (args.Count != 2)
+                return false;
+
+            //
+            // Verify the Blam scenario_structure_bsp tag
+            //
+
+            var blamTagName = args[0];
+
+            CacheFile.IndexItem blamTag = null;
+
+            Console.WriteLine("Verifying Blam scenario_structure_bsp tag...");
+
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                {
+                    blamTag = tag;
+                    break;
+                }
+            }
+
+            if (blamTag == null)
+            {
+                Console.WriteLine("Blam tag does not exist: " + blamTagName);
+                return false;
+            }
+
+            //
+            // Load the Blam scenario_structure_bsp tag
+            //
+
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
+            var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
+
+            //
+            // Load blam ScenarioLightmapBspData to get geometry for geometry2
+            //
+
+            if (BlamCache.Version > CacheVersion.Halo3Retail)
+            {
+                CacheFile.IndexItem blamLbspTag = null;
+
+                foreach (var tag in BlamCache.IndexItems)
+                {
+                    if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                    {
+                        blamLbspTag = tag;
+                        break;
+                    }
+                }
+
+                var blamLbsp = BlamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(new CacheSerializationContext(ref BlamCache, blamLbspTag));
+
+                blamSbsp.Geometry2.ZoneAssetHandle = blamLbsp.Geometry.ZoneAssetHandle;
+            }
+            else
+            {
+                // H3:
+                // Deserialize scnr to get each sbsp's index
+                // Order of sbsp's in the scnr is the same as in the sLdT
+
+                CacheFile.IndexItem blamScenarioTag = null;
+
+                foreach (var tag in BlamCache.IndexItems)
+                {
+                    if (tag.GroupTag == "scnr")
+                    {
+                        blamScenarioTag = tag;
+                        break;
+                    }
+                }
+
+                var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(ref BlamCache, blamScenarioTag));
+
+                int sbspIndex = 0;
+                for (int i = 0; i < blamScenario.StructureBsps.Count; i++)
+                {
+                    if (blamScenario.StructureBsps[i].StructureBsp.Index == blamTag.ID)
+                    {
+                        sbspIndex = i;
+                        break;
+                    }
+                }
+
+                //
+                // Get sLdT
+                //
+
+                CacheFile.IndexItem blamsLdTTag = null;
+
+                foreach (var tag in BlamCache.IndexItems)
+                {
+                    if (tag.GroupTag == "sLdT")
+                    {
+                        blamsLdTTag = tag;
+                        break;
+                    }
+                }
+
+                var blamsLdT = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(new CacheSerializationContext(ref BlamCache, blamsLdTTag));
+
+                blamSbsp.Geometry2.ZoneAssetHandle = blamsLdT.Lightmaps[sbspIndex].Geometry.ZoneAssetHandle;
+            }
+
+            //
+            // Load Blam resource data
+            //
+
+            var geometry = blamSbsp.Geometry;
+            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+
+            if (resourceData == null)
+            {
+                Console.WriteLine("Blam render_geometry resource contains no data. Created empty resource.");
+                return false;
+            }
+
+            //
+            // Load Blam resource definition
+            //
+
+            Console.Write("Loading Blam render_geometry resource definition...");
+
+            var definitionEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
+
+            var resourceDefinition = new RenderGeometryApiResourceDefinition
+            {
+                VertexBuffers = new List<D3DPointer<VertexBufferDefinition>>(),
+                IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
+            };
+
+            using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
+            using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
+            {
+                var dataContext = new DataSerializationContext(definitionReader, null, CacheAddressType.Definition);
+
+                definitionReader.SeekTo(definitionEntry.FixupInformationOffset + (definitionEntry.FixupInformationLength - 24));
+
+                var vertexBufferCount = definitionReader.ReadInt32();
+                definitionReader.Skip(8);
+                var indexBufferCount = definitionReader.ReadInt32();
+
+                definitionReader.SeekTo(definitionEntry.FixupInformationOffset);
+
+                for (var i = 0; i < vertexBufferCount; i++)
+                {
+                    resourceDefinition.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                    {
+                        Definition = new VertexBufferDefinition
+                        {
+                            Count = definitionReader.ReadInt32(),
+                            Format = (VertexBufferFormat)definitionReader.ReadInt16(),
+                            VertexSize = definitionReader.ReadInt16(),
+                            Data = new TagData
+                            {
+                                Size = definitionReader.ReadInt32(),
+                                Unused4 = definitionReader.ReadInt32(),
+                                Unused8 = definitionReader.ReadInt32(),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
+                                Unused10 = definitionReader.ReadInt32()
+                            }
+                        }
+                    });
+                }
+
+                definitionReader.Skip(vertexBufferCount * 12);
+
+                for (var i = 0; i < indexBufferCount; i++)
+                {
+                    resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                    {
+                        Definition = new IndexBufferDefinition
+                        {
+                            Format = (IndexBufferFormat)definitionReader.ReadInt32(),
+                            Data = new TagData
+                            {
+                                Size = definitionReader.ReadInt32(),
+                                Unused4 = definitionReader.ReadInt32(),
+                                Unused8 = definitionReader.ReadInt32(),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
+                                Unused10 = definitionReader.ReadInt32()
+                            }
+                        }
+                    });
+                }
+            }
+
+            Console.WriteLine("done.");
+
+            //
+            // Convert Blam data to ElDorado data
+            //
+
+            using (var fileStream = File.Create(args[1]))
+            using (var fileWriter = new StreamWriter(fileStream))
+            {
+                using (var blamResourceStream = new MemoryStream(resourceData))
+                using (var blamResourceReader = new EndianReader(blamResourceStream, EndianFormat.LittleEndian))
+                {
+                    //
+                    // Convert Blam vertex buffers
+                    //
+
+                    Console.Write("Converting vertex buffers...");
+                    
+                    for (var i = 0; i < resourceDefinition.VertexBuffers.Count; i++)
+                    {
+                        blamResourceStream.Position = definitionEntry.ResourceFixups[i].Offset;
+
+                        var vertexBuffer = resourceDefinition.VertexBuffers[i].Definition;
+
+                        fileWriter.WriteLine($"Offset = {vertexBuffer.Data.Address.Offset.ToString("X8")} Count = {vertexBuffer.Count} Size = {vertexBuffer.VertexSize}, Format = {vertexBuffer.Format.ToString()}");
+
+                        switch (vertexBuffer.Format)
+                        {
+                            case VertexBufferFormat.TinyPosition:
+                                for (var j = 0; j < vertexBuffer.Count; j++)
+                                {
+                                    fileWriter.WriteLine($"(I,J,K,W) = ({blamResourceReader.ReadUInt32().ToString("X2")},{blamResourceReader.ReadUInt32().ToString("X2")},{blamResourceReader.ReadUInt32().ToString("X2")},{blamResourceReader.ReadUInt32().ToString("X2")})");
+                                }
+                                break;
+                        }
+                    }
+
+                }
+            }
+            return true;
+        }
+
+        private string ConvertTexcoord(uint input)
+        {
+            RealQuaternion vector = new RealQuaternion(BitConverter.GetBytes(input).Select(e => ConvertByte(e)).ToArray());
+
+            return vector.ToString();
+        }
+
+        private float ConvertByte(byte e)
+        {
+            var element = e;
+            float result;
+            if (element < 0)
+                result = (float)element / (float)sbyte.MinValue;
+            else if (element > 0)
+                result = (float)element / (float)sbyte.MaxValue;
+            else
+                result = 0.0f;
+
+            result = (result + 1.0f) / 2.0f;
+            return result;
+        }
+
+        public bool DumpScriptInfo(List<string> args)
+        {
+            if (args.Count != 0)
+                return false;
+
+            //
+            // Verify the Blam scenario tag
+            //
+
+            CacheFile.IndexItem blamTag = null;
+
+            Console.WriteLine("Verifying Blam scenario tag...");
+
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if (tag.GroupTag == "scnr")
+                {
+                    blamTag = tag;
+                    break;
+                }
+            }
+
+            //
+            // Load the Blam scenario tag
+            //
+
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
+            var blamScenario = BlamCache.Deserializer.Deserialize<Scenario>(blamContext);
+
+            foreach (var script in blamScenario.Scripts)
+            {
+                var index = (int)blamScenario.ScriptExpressions[(int)(script.RootExpressionHandle & ushort.MaxValue) + 1].NextExpressionHandle & ushort.MaxValue;
+                Console.WriteLine($"{script.ScriptName}: 0x{blamScenario.ScriptExpressions[index].Opcode:X3}");
+            }
+
+            return true;
+        }
+
+        public bool ListShaderBitmaps(List<string> args)
+        {
+            if (args.Count != 1)
+                return false;
+
+            CacheFile.IndexItem item = null;
+
+            Console.WriteLine("Verifying blam shader tag...");
+
+            var shaderName = args[0];
+
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if ((tag.ParentGroupTag == "rm") && tag.Filename == shaderName)
+                {
+                    item = tag;
+                    break;
+                }
+            }
+
+            if (item == null)
+            {
+                Console.WriteLine("Blam shader tag does not exist: " + shaderName);
+                return false;
+            }
+
+            var blamContext = new CacheSerializationContext(ref BlamCache, item);
+            var blamShader = BlamCache.Deserializer.Deserialize<RenderMethod>(blamContext);
+
+            var templateItem = BlamCache.IndexItems.Find(i =>
+                i.ID == blamShader.ShaderProperties[0].Template.Index);
+
+            blamContext = new CacheSerializationContext(ref BlamCache, templateItem);
+            var template = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(blamContext);
+
+            for (var i = 0; i < template.ShaderMaps.Count; i++)
+            {
+                var entry = template.ShaderMaps[i].Name;
+
+                var bitmItem = BlamCache.IndexItems.Find(j =>
+                j.ID == blamShader.ShaderProperties[0].ShaderMaps[i].Bitmap.Index);
+                Console.WriteLine(string.Format("{0:D2} {2}\t {1}", i, bitmItem, BlamCache.Strings.GetString(entry)));
+            }
+
+            return true;
+        }
+
+        public bool ListBspMoppCodes(List<string> args)
+        {
+            if (args.Count != 1)
+                return false;
+
+            CacheFile.IndexItem blamTag = null;
+
+            var blamTagName = args[0];
+
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                {
+                    blamTag = tag;
+                    break;
+                }
+            }
+
+            if (blamTag == null)
+            {
+                Console.WriteLine("Blam scenario_structure_bsp tag does not exist: " + blamTagName);
+                return false;
+            }
+
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
+            var blamSbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(blamContext);
+
+            var blamMoppCodes = new List<byte>();
+
+            foreach (var mopp in blamSbsp.CollisionMoppCodes)
+                GetMoppCodes(mopp.Data.Select(i => i.Value).ToList(), ref blamMoppCodes);
+
+            var resourceData = BlamCache.GetRawFromID(blamSbsp.ZoneAssetIndex3);
+
+            if (resourceData != null)
+            {
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[blamSbsp.ZoneAssetIndex3 & ushort.MaxValue];
+
+                var definitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress);
+                var definitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+
+                StructureBspTagResources resourceDefinition = null;
+
+                using (var definitionStream = new MemoryStream(definitionData, true))
+                using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
+                {
+                    definitionStream.Position = definitionAddress.Offset;
+                    resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspTagResources>(
+                        new DataSerializationContext(definitionReader, CacheAddressType.Definition));
+                }
+
+                using (var blamResourceStream = new MemoryStream(resourceData))
+                using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
+                {
+                    var dataContext = new DataSerializationContext(resourceReader);
+
+                    foreach (var instance in resourceDefinition.InstancedGeometry)
+                    {
+                        foreach (var moppCode in instance.CollisionMoppCodes)
+                        {
+                            blamResourceStream.Position = moppCode.Data.Address.Offset;
+                            var moppData = resourceReader.ReadBytes(moppCode.Data.Count).ToList();
+                            GetMoppCodes(moppData, ref blamMoppCodes);
+                        }
+                    }
+                }
+            }
+
+            blamMoppCodes.Sort();
+
+            foreach (var blamMoppCode in blamMoppCodes)
+                Console.WriteLine($"0x{blamMoppCode:X2}");
+
+            return true;
+        }
+
+        private void GetMoppCodes(List<byte> moppData, ref List<byte> moppCodes)
+        {
+            for (var i = 0; i < moppData.Count; i++)
+            {
+                var moppCode = moppData[i];
+
+                switch (moppCode)
+                {
+                    case 0x00: // HK_MOPP_RETURN
+                        break;
+
+                    case 0x01: // HK_MOPP_SCALE1
+                    case 0x02: // HK_MOPP_SCALE2
+                    case 0x03: // HK_MOPP_SCALE3
+                    case 0x04: // HK_MOPP_SCALE4
+                        i += 3;
+                        break;
+
+                    case 0x05: // HK_MOPP_JUMP8
+                        i += 1;
+                        break;
+
+                    case 0x06: // HK_MOPP_JUMP16
+                        i += 2;
+                        break;
+
+                    case 0x07: // HK_MOPP_JUMP24
+                        i += 3;
+                        break;
+
+                    /*case 0x08: // HK_MOPP_JUMP32 (NOT IMPLEMENTED)
+                        Array.Reverse(moppData, i + 1, 4);
+                        i += 4;
+                        break;*/
+
+                    case 0x09: // HK_MOPP_TERM_REOFFSET8
+                        i += 1;
+                        break;
+
+                    case 0x0A: // HK_MOPP_TERM_REOFFSET16
+                        i += 2;
+                        break;
+
+                    case 0x0B: // HK_MOPP_TERM_REOFFSET32
+                        i += 4;
+                        break;
+
+                    case 0x0C: // HK_MOPP_JUMP_CHUNK
+                        i += 2;
+                        break;
+
+                    case 0x0D: // HK_MOPP_DATA_OFFSET
+                        i += 5;
+                        break;
+
+                    /*case 0x0E: // UNUSED
+                    case 0x0F: // UNUSED
+                        break;*/
+
+                    case 0x10: // HK_MOPP_SPLIT_X
+                    case 0x11: // HK_MOPP_SPLIT_Y
+                    case 0x12: // HK_MOPP_SPLIT_Z
+                    case 0x13: // HK_MOPP_SPLIT_YZ
+                    case 0x14: // HK_MOPP_SPLIT_YMZ
+                    case 0x15: // HK_MOPP_SPLIT_XZ
+                    case 0x16: // HK_MOPP_SPLIT_XMZ
+                    case 0x17: // HK_MOPP_SPLIT_XY
+                    case 0x18: // HK_MOPP_SPLIT_XMY
+                    case 0x19: // HK_MOPP_SPLIT_XYZ
+                    case 0x1A: // HK_MOPP_SPLIT_XYMZ
+                    case 0x1B: // HK_MOPP_SPLIT_XMYZ
+                    case 0x1C: // HK_MOPP_SPLIT_XMYMZ
+                        i += 3;
+                        break;
+
+                    /*case 0x1D: // UNUSED
+                    case 0x1E: // UNUSED
+                    case 0x1F: // UNUSED
+                        break;*/
+
+                    case 0x20: // HK_MOPP_SINGLE_SPLIT_X
+                    case 0x21: // HK_MOPP_SINGLE_SPLIT_Y
+                    case 0x22: // HK_MOPP_SINGLE_SPLIT_Z
+                        i += 2;
+                        break;
+
+                    case 0x23: // HK_MOPP_SPLIT_JUMP_X
+                    case 0x24: // HK_MOPP_SPLIT_JUMP_Y
+                    case 0x25: // HK_MOPP_SPLIT_JUMP_Z
+                        i += 6;
+                        break;
+
+
+                    case 0x26: // HK_MOPP_DOUBLE_CUT_X
+                    case 0x27: // HK_MOPP_DOUBLE_CUT_Y
+                    case 0x28: // HK_MOPP_DOUBLE_CUT_Z
+                        i += 2;
+                        break;
+
+                    case 0x29: // HK_MOPP_DOUBLE_CUT24_X
+                    case 0x2A: // HK_MOPP_DOUBLE_CUT24_Y
+                    case 0x2B: // HK_MOPP_DOUBLE_CUT24_Z
+                        i += 6;
+                        break;
+
+                    /*case 0x2C: // UNUSED
+                    case 0x2D: // UNUSED
+                    case 0x2E: // UNUSED
+                    case 0x2F: // UNUSED
+                        break;*/
+
+                    case 0x30: // HK_MOPP_TERM4_0
+                    case 0x31: // HK_MOPP_TERM4_1
+                    case 0x32: // HK_MOPP_TERM4_2
+                    case 0x33: // HK_MOPP_TERM4_3
+                    case 0x34: // HK_MOPP_TERM4_4
+                    case 0x35: // HK_MOPP_TERM4_5
+                    case 0x36: // HK_MOPP_TERM4_6
+                    case 0x37: // HK_MOPP_TERM4_7
+                    case 0x38: // HK_MOPP_TERM4_8
+                    case 0x39: // HK_MOPP_TERM4_9
+                    case 0x3A: // HK_MOPP_TERM4_A
+                    case 0x3B: // HK_MOPP_TERM4_B
+                    case 0x3C: // HK_MOPP_TERM4_C
+                    case 0x3D: // HK_MOPP_TERM4_D
+                    case 0x3E: // HK_MOPP_TERM4_E
+                    case 0x3F: // HK_MOPP_TERM4_F
+                    case 0x40: // HK_MOPP_TERM4_10
+                    case 0x41: // HK_MOPP_TERM4_11
+                    case 0x42: // HK_MOPP_TERM4_12
+                    case 0x43: // HK_MOPP_TERM4_13
+                    case 0x44: // HK_MOPP_TERM4_14
+                    case 0x45: // HK_MOPP_TERM4_15
+                    case 0x46: // HK_MOPP_TERM4_16
+                    case 0x47: // HK_MOPP_TERM4_17
+                    case 0x48: // HK_MOPP_TERM4_18
+                    case 0x49: // HK_MOPP_TERM4_19
+                    case 0x4A: // HK_MOPP_TERM4_1A
+                    case 0x4B: // HK_MOPP_TERM4_1B
+                    case 0x4C: // HK_MOPP_TERM4_1C
+                    case 0x4D: // HK_MOPP_TERM4_1D
+                    case 0x4E: // HK_MOPP_TERM4_1E
+                    case 0x4F: // HK_MOPP_TERM4_1F
+                               // TODO: Does this function take any operands?
+                        break;
+
+                    case 0x50: // HK_MOPP_TERM8
+                        i += 1;
+                        break;
+
+                    case 0x51: // HK_MOPP_TERM16
+                        i += 2;
+                        break;
+
+                    case 0x52: // HK_MOPP_TERM24
+                        i += 3;
+                        break;
+
+                    case 0x53: // HK_MOPP_TERM32
+                        i += 4;
+                        break;
+
+                    case 0x54: // HK_MOPP_NTERM_8
+                        i += 1;
+                        break;
+
+                    case 0x55: // HK_MOPP_NTERM_16
+                        i += 2;
+                        break;
+
+                    case 0x56: // HK_MOPP_NTERM_24
+                        i += 3;
+                        break;
+
+                    case 0x57: // HK_MOPP_NTERM_32
+                        i += 4;
+                        break;
+
+                    /*case 0x58: // UNUSED
+                    case 0x59: // UNUSED
+                    case 0x5A: // UNUSED
+                    case 0x5B: // UNUSED
+                    case 0x5C: // UNUSED
+                    case 0x5D: // UNUSED
+                    case 0x5E: // UNUSED
+                    case 0x5F: // UNUSED
+                        break;*/
+
+                    case 0x60: // HK_MOPP_PROPERTY8_0
+                    case 0x61: // HK_MOPP_PROPERTY8_1
+                    case 0x62: // HK_MOPP_PROPERTY8_2
+                    case 0x63: // HK_MOPP_PROPERTY8_3
+                        i += 1;
+                        break;
+
+                    case 0x64: // HK_MOPP_PROPERTY16_0
+                    case 0x65: // HK_MOPP_PROPERTY16_1
+                    case 0x66: // HK_MOPP_PROPERTY16_2
+                    case 0x67: // HK_MOPP_PROPERTY16_3
+                        i += 2;
+                        break;
+
+                    case 0x68: // HK_MOPP_PROPERTY32_0
+                    case 0x69: // HK_MOPP_PROPERTY32_1
+                    case 0x6A: // HK_MOPP_PROPERTY32_2
+                    case 0x6B: // HK_MOPP_PROPERTY32_3
+                        i += 4;
+                        break;
+
+                    default:
+                        throw new NotSupportedException($"Opcode 0x{moppCode:X2}");
+                }
+
+                if (!moppCodes.Contains(moppCode))
+                    moppCodes.Add(moppCode);
+            }
         }
     }
 }

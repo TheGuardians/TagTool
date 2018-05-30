@@ -57,7 +57,7 @@ namespace TagTool.Cache
         /// Converts a string list index to a stringID value.
         /// </summary>
         /// <param name="index">The index.</param>
-        /// <param name="index">The version of the stringID. Halo 3 By default.</param>
+        /// <param name="version">The version of the stringID. Halo 3 By default.</param>
         /// <returns>The stringID value, or <see cref="StringId.Invalid"/> if none.</returns>
         public StringId IndexToStringID(int index, CacheVersion version = CacheVersion.Halo3Retail)
         {

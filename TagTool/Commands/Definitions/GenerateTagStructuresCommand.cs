@@ -5,8 +5,6 @@ using System.Linq;
 using TagTool.Analysis;
 using TagTool.Cache;
 using TagTool.Layouts;
-using TagTool.Commands;
-using TagTool.Common;
 using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Definitions

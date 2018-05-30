@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Commands;
 using TagTool.Common;
 
 namespace TagTool.Commands

@@ -1,21 +1,12 @@
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Geometry;
-using TagTool.Havok;
-using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
-using TagTool.Shaders;
-using System.Diagnostics;
-using System.Text;
-using TagTool.ShaderGenerator;
-using TagTool.ShaderGenerator.Types;
 
 namespace TagTool.Commands.Porting
 {
@@ -33,9 +24,7 @@ namespace TagTool.Commands.Porting
             }
             return rasg;
         }
-
-        private static bool debugUseEDFunctions;
-        private static bool dDraw = false;
+        
         private static int pRmt2 = 0;
         private static List<string> bmMaps;
         private static List<string> bmArgs;
@@ -388,15 +377,7 @@ namespace TagTool.Commands.Porting
 
             return CacheContext.GetTag(edRmt2BestStatsSorted.Last().rmt2TagIndex);
         }
-
-        private class Arguments
-        {
-            public float Arg1;
-            public float Arg2;
-            public float Arg3;
-            public float Arg4;
-        }
-
+        
         private class ShaderTemplateItem
         {
             public int rmt2TagIndex;
@@ -807,7 +788,6 @@ namespace TagTool.Commands.Porting
             public string ParameterName;
             public int ShaderIndex = -1;
             public int RegisterIndex;
-            public int FunctionIndex;
             public int EDRegisterIndex = -1;
             public int ArgumentIndex;
             public int ArgumentMappingsTagblockIndex;

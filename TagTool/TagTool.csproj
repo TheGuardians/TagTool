@@ -60,6 +60,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\x64\Debug\Documentation.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -68,6 +69,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\x64\Release\Documentation.xml</DocumentationFile>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ai\AiActorType.cs" />
@@ -163,7 +166,6 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
-    <Compile Include="Audio\FSBHeader.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\BitmapDdsExtractor.cs" />
     <Compile Include="Bitmaps\BitmapDdsFormatDetection.cs" />
@@ -266,14 +268,9 @@
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
     <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
-    <Compile Include="Commands\Porting\DumpBspGeometryCommand.cs" />
-    <Compile Include="Commands\Porting\DumpScriptInfoCommand.cs" />
-    <Compile Include="Commands\Porting\DumpTagFunctionCommand.cs" />
     <Compile Include="Commands\Porting\EditBlockCommand.cs" />
     <Compile Include="Commands\Porting\EditTagCommand.cs" />
-    <Compile Include="Commands\Porting\ListBitmapsCommand.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
-    <Compile Include="Commands\Porting\ListBspMoppCodesCommand.cs" />
     <Compile Include="Commands\Porting\ListFieldsCommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
@@ -296,7 +293,6 @@
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
-    <Compile Include="Commands\Porting\TestShaderDecompilerCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListArgumentsCommand.cs" />
     <Compile Include="Commands\RenderMethods\ListBitmapsCommand.cs" />
     <Compile Include="Commands\RenderMethods\RenderMethodContextFactory.cs" />
@@ -319,16 +315,9 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
-    <Compile Include="Commands\Shaders\GenerateRenderMethodTemplate.cs" />
-    <Compile Include="Commands\Shaders\GlobalUniformMappings.cs" />
-    <Compile Include="Commands\Shaders\ListMethodOptionParameters.cs" />
-    <Compile Include="Commands\Shaders\ListRegisters.cs" />
-    <Compile Include="Commands\Shaders\CompileCommand.cs" />
-    <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
-    <Compile Include="Commands\Shaders\ListRegistersRMT2.cs" />
-    <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
-    <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
-    <Compile Include="Commands\Shaders\DisassembleCommand.cs" />
+    <Compile Include="Commands\PixelShaders\CompileCommand.cs" />
+    <Compile Include="Commands\PixelShaders\PixelShaderContextFactory.cs" />
+    <Compile Include="Commands\PixelShaders\DisassembleCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
@@ -357,7 +346,6 @@
     <Compile Include="Commands\Tags\TagCacheContextFactory.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />
-    <Compile Include="Commands\Tags\TestSimpleShaders.cs" />
     <Compile Include="Commands\Unicode\GetStringCommand.cs" />
     <Compile Include="Commands\Unicode\ListStringsCommand.cs" />
     <Compile Include="Commands\Unicode\RemoveStringCommand.cs" />
@@ -398,63 +386,13 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
-    <Compile Include="Direct3D\Enums\CompileConstants.cs" />
-    <Compile Include="Direct3D\Enums\ReturnCode.cs" />
-    <Compile Include="Direct3D\Functions\Assemble.cs" />
-    <Compile Include="Direct3D\Functions\Compile.cs" />
-    <Compile Include="Direct3D\Functions\Disassemble.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
-    <Compile Include="Direct3D\Functions\PrintError.cs" />
-    <Compile Include="Direct3D\Interfaces\ID3DBlob.cs" />
-    <Compile Include="ShaderDecompiler\ConstantData\Enums.cs" />
-    <Compile Include="ShaderDecompiler\ShaderPdb\Definition.cs" />
-    <Compile Include="ShaderDecompiler\ShaderPdb\Generator.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\Enums.cs" />
-    <Compile Include="ShaderDecompiler\Translations\ControlFlow.cs" />
-    <Compile Include="ShaderDecompiler\Translations\ALU.cs" />
-    <Compile Include="ShaderDecompiler\Decompiler.cs" />
-    <Compile Include="ShaderDecompiler\PostFixups.cs" />
-    <Compile Include="ShaderDecompiler\PreFixups.cs" />
-    <Compile Include="ShaderDecompiler\Translations\Fetch.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\ALUInstruction.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\ControlFlowInstruction.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\Disassembler.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\FetchInstruction.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\Instruction.cs" />
-    <Compile Include="ShaderDecompiler\UcodeDisassembler\InstructionDecoding.cs" />
-    <Compile Include="ShaderGenerator\BeamTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ContrailTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\CustomTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\CortanaTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\DecalTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\FoliageTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\HalogramTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\IShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\LightVolumeTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ParticleTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ScreenTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\ShaderTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\TemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\TerrainTemplateShaderGenerator.cs" />
-    <Compile Include="ShaderGenerator\Types\IndicesManager.cs" />
-    <Compile Include="ShaderGenerator\Types\ShaderGeneratorResult.cs" />
-    <Compile Include="ShaderGenerator\Types\TemplateParameter.cs" />
-    <Compile Include="ShaderGenerator\Types\TemplateParameterManager.cs" />
-    <Compile Include="ShaderGenerator\WaterTemplateShaderGenerator.cs" />
-    <Compile Include="Shaders\Converters\PixelDecalTemplatesConverter.cs" />
-    <Compile Include="Shaders\Functions\FixBumpMapNormalExport.cs" />
-    <Compile Include="Shaders\SM3Ext\SM3ExtOperationCodes.cs" />
+    <Compile Include="Shaders\ShaderCompiler.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
-    <Compile Include="Shaders\SM3Ext\SM3ExtInstruction.cs" />
-    <Compile Include="Shaders\SM3Ext\SM3ExtShaderParser.cs" />
-    <Compile Include="Shaders\SM3\SM3Instruction.cs" />
-    <Compile Include="Shaders\SM3\SM3ShaderConverter.cs" />
-    <Compile Include="Shaders\UPDBParser.cs" />
     <Compile Include="Shaders\VertexShaderBlock.cs" />
     <Compile Include="Shaders\XboxShaderInfo.cs" />
-    <Compile Include="Shaders\XboxShaderParser.cs" />
     <Compile Include="Audio\CustomPlayback.cs" />
     <Compile Include="Audio\LanguagePermutation.cs" />
     <Compile Include="Audio\RuntimePermutation.cs" />
@@ -512,7 +450,7 @@
     <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
     <Compile Include="Geometry\RenderMaterial.cs" />
     <Compile Include="Geometry\RenderModelBuilder.cs" />
-    <Compile Include="Geometry\ShaderConverter.cs" />
+    <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Geometry\VertexBufferFormat.cs" />
     <Compile Include="Geometry\VertexCompressor.cs" />
     <Compile Include="Geometry\VertexElementStream.cs" />
@@ -566,7 +504,6 @@
     <Compile Include="Serialization\DataSerializationContext.cs" />
     <Compile Include="Serialization\IDataBlock.cs" />
     <Compile Include="Serialization\ISerializationContext.cs" />
-    <Compile Include="Serialization\MapSerializationContext.cs" />
     <Compile Include="Serialization\ResourceSerializationContext.cs" />
     <Compile Include="Serialization\TagDeserializer.cs" />
     <Compile Include="Serialization\TagFieldAttribute.cs" />
@@ -575,7 +512,6 @@
     <Compile Include="Serialization\TagSerializer.cs" />
     <Compile Include="Serialization\TagStructureAttribute.cs" />
     <Compile Include="Serialization\TagStructureInfo.cs" />
-    <Compile Include="Shaders\Decompiler.cs" />
     <Compile Include="Shaders\PixelShaderHeader.cs" />
     <Compile Include="Shaders\PixelShaderReference.cs" />
     <Compile Include="Shaders\ShaderCodeHeader.cs" />
@@ -752,271 +688,11 @@
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ShaderGenerator\shader_code\active_camo.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\albedo_pass.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\alpha_test.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\atmosphere.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\blend.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\bump_mapping.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\cook_torrance.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\debug_modes.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\decal.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\decal_registers.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\default_methods.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\deform.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\diffuse_only.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\disasm_by_hand\shader_templates\_0_0_0_0_0_0_0_0_0_0\Shaders[0].hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\entry.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\entry_points.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\environment_mapping.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\glass_material.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\halogram.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\hlsl_constant_mapping.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\hlsl_constant_oneshot.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\hlsl_constant_persist.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\hlsl_vertex_types.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\lightmap_sampling.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_models.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\material_model_none.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\beam_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\decompiled\_0_7_0_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\decompiled\_0_8_0_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\decompiled\_2_8_0_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\beam_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\contrail_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\decompiled\_0_3_0_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\decompiled\_0_3_1_0.Shaders[0].hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\contrail_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\cortana_templates\cortana_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\custom_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\alpha_test.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\bump_mapping.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\environment_mapping.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\material_model.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\misc.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\parallax.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\self_illumination.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\methods\specular_mask.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\custom_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\decal_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\methods\bump_mapping.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\methods\specular.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\methods\tinting.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\decal_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\editor_only.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\foliage_templates\foliage_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\foliage_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\foliage_templates\methods\alpha_test.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\foliage_templates\methods\material_model.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\halogram_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\edge_fade.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\misc.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\overlay.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\self_illumination.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\halogram_templates\methods\warp.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\helpers.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\light_volume_templates\light_volume_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\light_volume_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\light_volume_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\light_volume_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\parameters.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\black_point.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\depth_fade.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\fog.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\lighting.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\render_targets.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\methods\specialized_rendering.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\particle_templates\particle_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\methods\overlay_a.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\methods\overlay_b.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\methods\warp.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\methods\_base.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\screen_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\screen_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\albedo.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\alpha_test.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\blend_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\bump_mapping.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\distortion.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\environment_mapping.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\material_mode.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\misc.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\parallax.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\self_illumination.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\soft_fade.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\methods\specular_mask.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\shader_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\shader_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\methods\blending.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\methods\environment_map.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\methods\material.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\template_default_defs.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\template_includes.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\terrain_templates\terrain_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\appearance.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\bank_alpha.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\foam.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\global_shape.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\reflection.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\refraction.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\water_color.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\methods\wave_shape.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\water_templates\water_template.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\old\zanzibar_water_awesome.hlsl" />
-    <Content Include="ShaderGenerator\shader_code\overlays.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\parallax.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\particle.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\particle_render.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\particle_render_registers.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\player_emblem.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\register_group.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\render_target.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\self_illumination_halogram.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\shader.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\shadow_generate.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\simple_lights.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\single_lobe_phong.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\specular_mask.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\spherical_harmonics.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\terrain.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\texture.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\texture_xform.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\two_lobe_phong.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\utilities.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\warp.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ShaderGenerator\shader_code\water.hlsl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\Builds.xml" />
     <None Include="Resources\Classes_H1.xml" />
     <None Include="Resources\Classes_H2.xml" />
     <None Include="Resources\Versions.xml" />
     <None Include="Resources\VertexBuffer.xml" />
-    <None Include="ShaderDecompiler\UcodeDisassembler\ReadMe.txt" />
-    <Content Include="ShaderDecompiler\ReadMe_ShaderPortingPipeline.txt" />
-    <Content Include="ShaderDecompiler\TODO.txt" />
-    <Content Include="ShaderDecompiler\ShaderPdb\ReadMe.txt" />
     <Content Include="TagTool.ico" />
     <None Include="App.config" />
     <None Include="packages.config" />
@@ -1025,52 +701,21 @@
     <Reference Include="AssimpNet, Version=3.3.2.0, Culture=neutral, PublicKeyToken=3edc10cb77b1bca2, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.3.3.2\lib\net45\AssimpNet.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpImageLibrary, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpImageLibrary.4.2.0\lib\net462\CSharpImageLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="JsonMoppNet, Version=1.0.6331.34855, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\packages\JsonToMopp.1.0.1\lib\JsonToMopp\JsonMoppNet.dll</HintPath>
     </Reference>
     <Reference Include="LZ4, Version=1.0.15.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
       <HintPath>..\packages\lz4net.1.0.15.93\lib\net4-client\LZ4.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Experimental.Collections, Version=1.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity.Design" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
-    <Reference Include="UsefulThings, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UsefulCSharpThings.1.7.3\lib\net462\UsefulThings.dll</HintPath>
-    </Reference>
-    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TagToolUtilities\TagToolUtilities.vcxproj">
-      <Project>{c26e8204-0025-4484-955e-a669425fe9d7}</Project>
-      <Name>TagToolUtilities</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">
@@ -1084,23 +729,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ShaderGenerator\shader_code\old\cortana_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\cortana_templates\methods\" />
-    <Folder Include="ShaderGenerator\shader_code\old\cortana_template_methods\" />
-    <Folder Include="ShaderGenerator\shader_code\old\custom_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\decal_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\foliage_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\halogram_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\light_volume_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\particle_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\screen_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\shader_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\terrain_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\water_templates\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\water_template_methods\decompiled\" />
-    <Folder Include="ShaderGenerator\shader_code\old\water_template_methods\methods\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -1110,7 +739,6 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.3.3.2\build\AssimpNet.targets'))" />
     <Error Condition="!Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets'))" />
-    <Error Condition="!Exists('..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets'))" />
   </Target>
   <Import Project="..\packages\AssimpNet.3.3.2\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.2\build\AssimpNet.targets')" />
   <Import Project="..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets" Condition="Exists('..\packages\JsonToMopp.1.0.1\build\JsonToMopp.targets')" />
@@ -1125,7 +753,6 @@ xcopy "$(SolutionDir)Tools" "Tools" /e /i /h /Y</PostBuildEvent>
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
-  <Import Project="..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets" Condition="Exists('..\packages\DirectXTexNet.1.0.0-rc2\build\DirectXTexNet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

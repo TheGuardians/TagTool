@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
-using TagTool.Commands;
 
 namespace TagTool.Commands.Files
 {

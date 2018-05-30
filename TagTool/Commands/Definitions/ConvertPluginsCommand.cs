@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Layouts;
 

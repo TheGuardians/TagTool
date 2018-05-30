@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Models

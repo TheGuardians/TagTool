@@ -6,7 +6,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
-using TagTool.Commands;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Tags

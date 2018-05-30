@@ -1,5 +1,4 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Havok;
 using TagTool.Tags.Definitions;
 using System;

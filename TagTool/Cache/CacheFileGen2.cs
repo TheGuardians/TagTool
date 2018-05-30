@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using TagTool.IO;
 
 namespace TagTool.Cache

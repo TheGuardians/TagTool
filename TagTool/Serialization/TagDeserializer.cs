@@ -5,7 +5,6 @@ using TagTool.Shaders;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace TagTool.Serialization
 {

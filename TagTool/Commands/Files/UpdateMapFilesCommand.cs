@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 

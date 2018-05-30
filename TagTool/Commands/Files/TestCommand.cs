@@ -1,5 +1,4 @@
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
@@ -1311,16 +1310,17 @@ namespace TagTool.Commands.Files
                     case "rmd ":
                     case "rmw ":
                         using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+                        using (var cacheReader = new EndianReader(cacheStream))
                         {
-                            var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var rm2 = CacheContext.Deserializer.Deserialize<RenderMethodFast>(edContext);
-
-                            if (rm2.Unknown.Count == 0)
+                            cacheStream.Seek(edInstance.HeaderOffset + edInstance.DefinitionOffset + 0x10, SeekOrigin.Begin);
+                            var unknowns = (List<RenderMethod.UnknownBlock>)CacheContext.Deserializer.DeserializeTagBlock(cacheReader, new DataSerializationContext(cacheReader), typeof(List<RenderMethod.UnknownBlock>));
+                            
+                            if (unknowns == null || unknowns.Count == 0)
                                 continue;
 
                             renderMethod = new RenderMethod
                             {
-                                Unknown = rm2.Unknown
+                                Unknown = unknowns
                             };
                         }
 
@@ -1391,13 +1391,6 @@ namespace TagTool.Commands.Files
 
             CacheContext.TagNames[rmt2Instance] = newTagName;
             // Console.WriteLine($"0x{rmt2Instance:X4} {newTagName}");
-        }
-
-        [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x20)]
-        public class RenderMethodFast
-        {
-            public CachedTagInstance BaseRenderMethod;
-            public List<RenderMethod.UnknownBlock> Unknown;
         }
     }
 }

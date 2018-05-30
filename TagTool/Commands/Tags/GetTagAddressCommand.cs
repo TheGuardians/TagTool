@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using TagTool.Commands;
 using TagTool.IO;
 
 namespace TagTool.Commands.Tags

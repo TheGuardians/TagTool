@@ -7,7 +7,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Tags.Resources;
 using ResourceLocation = TagTool.Common.ResourceLocation;
 
 namespace TagTool.Commands.Editing

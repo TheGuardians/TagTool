@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace TagTool.Tools
 {
-	public class Tool
+    public class Tool
 	{
 		public string Output;
 		public string Error;

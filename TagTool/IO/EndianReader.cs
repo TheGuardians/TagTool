@@ -255,6 +255,7 @@ namespace TagTool.IO
         /// Reads a null-terminated UTF8 string of length up to MaxLength and advances the stream position by MaxLength bytes.
         /// </summary>
         /// <param name="MaxLength">The maximum number of characters to read.</param>
+        /// <param name="charSet"></param>
         /// <returns></returns>
         public string ReadNullTerminatedString(int MaxLength, CharSet charSet = CharSet.Ansi)
         {

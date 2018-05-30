@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderModels

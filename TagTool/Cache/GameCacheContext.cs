@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.Serialization;
 
@@ -53,7 +49,7 @@ namespace TagTool.Cache
         /// Deserializes tag data into an object.
         /// </summary>
         /// <param name="context">The serialization context to use.</param>
-        /// <param name="structureType">The type of object to deserialize the tag data as.</param>
+        /// <param name="type">The type of object to deserialize the tag data as.</param>
         /// <returns>The object that was read.</returns>
         public object Deserialize(ISerializationContext context, Type type) =>
             Deserializer.Deserialize(context, type);
@@ -88,7 +84,7 @@ namespace TagTool.Cache
         /// <summary>
         /// Adds a new pageable_resource to the current cache.
         /// </summary>
-        /// <param name="resource">The <see cref="PageableResource"/> to add.</param>
+        /// <param name="pageable">The <see cref="PageableResource"/> to add.</param>
         /// <param name="stream">The <see cref="Stream"/> to read the resource data from.</param>
         public abstract void AddResource(PageableResource pageable, Stream stream);
 

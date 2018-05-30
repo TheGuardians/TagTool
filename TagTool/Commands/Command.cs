@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace TagTool.Commands
@@ -11,7 +10,7 @@ namespace TagTool.Commands
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
-        /// <param name="flags">Command flags.</param>
+        /// <param name="inherit">Command flags.</param>
         /// <param name="name">The command's name.</param>
         /// <param name="description">The command's description.</param>
         /// <param name="usage">The command's usage string.</param>

@@ -1,7 +1,5 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Common;
-using TagTool.IO;
 using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
