@@ -24,7 +24,7 @@ namespace TagTool.Serialization
                     try
                     {
                         blamCache = CacheFileGen2.MainMenuCache;
-                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Name];
                     }
                     catch (KeyNotFoundException)
                     {
@@ -37,7 +37,7 @@ namespace TagTool.Serialization
                     try
                     {
                         blamCache = CacheFileGen2.SharedCache;
-                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Name];
                     }
                     catch (KeyNotFoundException)
                     {
@@ -50,7 +50,7 @@ namespace TagTool.Serialization
                     try
                     {
                         blamCache = CacheFileGen2.SinglePlayerSharedCache;
-                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Filename];
+                        blamTag = blamCache.IndexItems[blamTag.GroupTag, blamTag.Name];
                     }
                     catch (KeyNotFoundException)
                     {
@@ -59,7 +59,7 @@ namespace TagTool.Serialization
                     }
                 }
                 if (blamTag.External)
-                    throw new KeyNotFoundException($"[{blamTag.GroupTag}] {blamTag.Filename}");
+                    throw new KeyNotFoundException($"[{blamTag.GroupTag}] {blamTag.Name}");
             }
 
             BlamCache = blamCache;

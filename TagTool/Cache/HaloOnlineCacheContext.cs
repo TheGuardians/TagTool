@@ -39,6 +39,12 @@ namespace TagTool.Cache
                 StringIdCache = new StringIdCache(stream, stringIdResolver);
 
             LoadTagNames();
+
+            TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, GetStringId("object"));
+            TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, GetStringId("item"));
+            TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, GetStringId("device"));
+            TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, GetStringId("unit"));
+            TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, GetStringId("render_method"));
         }
 
         #region Tag Cache Functionality

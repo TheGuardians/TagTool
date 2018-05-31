@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if ((tag.GroupTag == "mode") && (tag.Filename == blamTagName))
+                if ((tag.GroupTag == "mode") && (tag.Name == blamTagName))
                 {
                     blamTag = tag;
                     break;
@@ -247,7 +247,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rm  "))
                     {
-                        if (CacheContext.TagNames.ContainsKey(instance.Index) && CacheContext.TagNames[instance.Index] == blamRenderMethodTag.Filename)
+                        if (CacheContext.TagNames.ContainsKey(instance.Index) && CacheContext.TagNames[instance.Index] == blamRenderMethodTag.Name)
                         {
                             renderMethodExists = true;
                             material.RenderMethod = instance;
@@ -460,7 +460,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if ((tag.GroupTag == "hlmt") && (tag.Filename == blamTagName))
+                    if ((tag.GroupTag == "hlmt") && (tag.Name == blamTagName))
                     {
                         blamHlmtTag = tag;
                         break;

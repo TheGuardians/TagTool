@@ -141,7 +141,7 @@ namespace TagTool.Cache
 
                 for (int i = 0; i < offsets.Length; i++)
                 {
-                    this[i].Filename = null;
+                    this[i].Name = null;
 
                     if (offsets[i] == -1)
                         continue;
@@ -152,7 +152,7 @@ namespace TagTool.Cache
                     for (char c; (c = reader.ReadChar()) != '\0'; name += c) ;
 
                     if (name.Length > 0)
-                        this[i].Filename = name;
+                        this[i].Name = name;
                 }
 
                 reader.StreamOrigin = 0;

@@ -147,7 +147,7 @@ namespace TagTool.Cache
                     item.ClassIndex = reader.ReadInt16();
                     item.ID = (reader.ReadInt16() << 16) | i;
                     item.Offset = reader.ReadInt32() - cache.Magic;
-                    item.metaIndex = i;
+                    item.Index = i;
                     this.Add(item);
                 }
                 #endregion
@@ -178,7 +178,7 @@ namespace TagTool.Cache
                 {
                     if (indices[i] == -1)
                     {
-                        this[i].Filename = "<null>";
+                        this[i].Name = "<null>";
                         continue;
                     }
 
@@ -210,7 +210,7 @@ namespace TagTool.Cache
 
                     if (length == 1)
                     {
-                        this[i].Filename = "<blank>";
+                        this[i].Name = "<blank>";
                         continue;
                     }
 
@@ -222,7 +222,7 @@ namespace TagTool.Cache
                         int i3 = indices[i + 3];
                     }
 
-                    this[i].Filename = newReader.ReadString(length);
+                    this[i].Name = newReader.ReadString(length);
                 }
 
                 newReader.Close();

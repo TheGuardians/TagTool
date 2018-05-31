@@ -642,7 +642,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in CacheContext.TagNames)
             {
-                if (entry.Value != blamTag.Filename)
+                if (entry.Value != blamTag.Name)
                     continue;
 
                 var edTag = CacheContext.GetTag(entry.Key);
@@ -657,7 +657,7 @@ namespace TagTool.Commands.Porting
 
             if (!match)
             {
-                Console.WriteLine($"ERROR: no tag matches {blamTag.Filename}. Replacing with 0x12FE (GBP)");
+                Console.WriteLine($"ERROR: no tag matches {blamTag.Name}. Replacing with 0x12FE (GBP)");
 
                 switch (blamTag.GroupTag.ToString())
                 {

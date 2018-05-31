@@ -369,7 +369,7 @@ namespace TagTool.Commands.Files
                     if (!cacheContext.TagNames.ContainsKey(tag.Index))
                         continue;
 
-                    if (instance.Filename == cacheContext.TagNames[tag.Index])
+                    if (instance.Name == cacheContext.TagNames[tag.Index])
                         return tag;
                 }
             }

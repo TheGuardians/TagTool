@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
 
             string blamWeapName = args[0];
             
-            var blamWeapTag = BlamCache.IndexItems.Find(x => x.Filename == blamWeapName);
+            var blamWeapTag = BlamCache.IndexItems.Find(x => x.Name == blamWeapName);
 
             if (blamWeapTag == null)
             {
@@ -116,7 +116,7 @@ namespace TagTool.Commands.Porting
             Weapon blamWeap = BlamCache.Deserializer.Deserialize<Weapon>(blamContext);
 
             // Get blam FP mode name
-            blamFPmodeName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.FirstPerson[0].FirstPersonAnimations.Index).Filename;
+            blamFPmodeName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.FirstPerson[0].FirstPersonAnimations.Index).Name;
 
             // ED:
             // Find weapon
@@ -188,7 +188,7 @@ namespace TagTool.Commands.Porting
             }
 
             var blamWeapName = args[1];
-            var blamWeapTag = BlamCache.IndexItems.Find(x => x.Filename == blamWeapName);
+            var blamWeapTag = BlamCache.IndexItems.Find(x => x.Name == blamWeapName);
 
             var portTagCommand = new PortTagCommand(CacheContext, BlamCache);
             
@@ -242,11 +242,11 @@ namespace TagTool.Commands.Porting
             }
 
             // Different for the smg compared to the rest of the weapons
-            if (blamWeapTag.Filename.Contains("smg"))
+            if (blamWeapTag.Name.Contains("smg"))
             {
                 for (int j = 1; j < 7; j++)
                 {
-                    blamSndName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.Attachments[j].Attachment2.Index).Filename;
+                    blamSndName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.Attachments[j].Attachment2.Index).Name;
 
                     // Rename firing sound tag
                     edSndName = CacheContext.TagNames.ContainsKey(edWeap.Attachments[j].Attachment2.Index) ? CacheContext.TagNames[edWeap.Attachments[j].Attachment2.Index] : null;
@@ -307,7 +307,7 @@ namespace TagTool.Commands.Porting
             foreach (var a in blamEffe.Events[0].Parts)
             {
                 // Get blam sound name
-                blamSndName = BlamCache.IndexItems.Find(x => x.ID == a.Type.Index).Filename;
+                blamSndName = BlamCache.IndexItems.Find(x => x.ID == a.Type.Index).Name;
 
                 portTagCommand.Execute(new List<string> { "snd!", blamSndName });
             }
@@ -315,7 +315,7 @@ namespace TagTool.Commands.Porting
             // Set new sounds
             int i = -1;
             int index = 0;
-            if (blamWeapTag.Filename.Contains("needler"))
+            if (blamWeapTag.Name.Contains("needler"))
                 index = 2;
 
             edEffe.Events[0].Parts = new List<Effect.Event.Part>();
@@ -328,7 +328,7 @@ namespace TagTool.Commands.Porting
                 i++;
 
                 // Get blam sound name
-                blamSndName = BlamCache.IndexItems.Find(x => x.ID == a.Type.Index).Filename;
+                blamSndName = BlamCache.IndexItems.Find(x => x.ID == a.Type.Index).Name;
 
                 edEffe.Events[index].Parts[i].Type = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamSndName}.snd!");
 
@@ -443,7 +443,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                if (tag.GroupTag == "sbsp" && tag.Name == blamTagName)
                 {
                     blamTag = tag;
                     break;
@@ -473,7 +473,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                    if (tag.GroupTag == "sbsp" && tag.Name == blamTagName)
                     {
                         blamLbspTag = tag;
                         break;
@@ -731,7 +731,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if ((tag.ParentGroupTag == "rm") && tag.Filename == shaderName)
+                if ((tag.ParentGroupTag == "rm") && tag.Name == shaderName)
                 {
                     item = tag;
                     break;
@@ -776,7 +776,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if (tag.GroupTag == "sbsp" && tag.Filename == blamTagName)
+                if (tag.GroupTag == "sbsp" && tag.Name == blamTagName)
                 {
                     blamTag = tag;
                     break;

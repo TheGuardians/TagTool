@@ -360,18 +360,18 @@ namespace TagTool.Cache
                 return structure.Name;
             }
 
-            public string Filename;
+            public string Name;
             public int ID;
             public int Offset;
             public int ClassIndex;
             public int Size;
-            public int metaIndex;
+            public int Index;
             public int Magic;
             public bool External = false;
 
             public override string ToString()
             {
-                return "[" + GroupTag + "] " + Filename;
+                return "[" + GroupTag + "] " + Name;
             }
         }
 
@@ -392,7 +392,7 @@ namespace TagTool.Cache
                 {
                     foreach (var blamTag in this)
                     {
-                        if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Filename == tagName))
+                        if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Name == tagName))
                         {
                             return blamTag;
                         }

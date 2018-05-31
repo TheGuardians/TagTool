@@ -46,7 +46,7 @@ namespace TagTool.Tags
         /// A dictionary of available tag groups.
         /// </summary>
         public static Dictionary<Tag, TagGroup> Instances { get; set; }
-
+        
         /// <summary>
         /// Gets the group's tag. Can be -1.
         /// </summary>

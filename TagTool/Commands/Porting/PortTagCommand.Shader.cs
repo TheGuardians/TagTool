@@ -251,7 +251,7 @@ namespace TagTool.Commands.Porting
             // loop trough all rmt2 and find the closest
             foreach (var edRmt2_ in Rmt2TagsInfo)
             {
-                var rmt2Type = bmRmt2Instance.Filename.Split("\\".ToArray())[1];
+                var rmt2Type = bmRmt2Instance.Name.Split("\\".ToArray())[1];
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
@@ -335,7 +335,7 @@ namespace TagTool.Commands.Porting
                 var edRmdfValues = edSplit[2].Split("_".ToCharArray()).ToList();
                 edRmdfValues.RemoveAt(0);
 
-                var bmSplit = blamRmt2Tag.Filename.Split("\\".ToCharArray());
+                var bmSplit = blamRmt2Tag.Name.Split("\\".ToCharArray());
                 var bmType = bmSplit[1];
                 var bmRmdfValues = bmSplit[2].Split("_".ToCharArray()).ToList();
                 bmRmdfValues.RemoveAt(0);
@@ -762,7 +762,7 @@ namespace TagTool.Commands.Porting
                 if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
                     continue;
 
-                if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Filename))
+                if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Name))
                     return instance;
             }
 
@@ -797,7 +797,7 @@ namespace TagTool.Commands.Porting
 		private void FixRmdfTagRef(RenderMethod finalRm)
 		{
 			// Set rmdf
-			var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Filename;
+			var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
 			if (CacheContext.TagNames.ContainsValue(rmdfName))
 				finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(rmdfName);
 			else

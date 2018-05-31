@@ -62,7 +62,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var blamTag in BlamCache.IndexItems)
             {
-                if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Filename == blamTagName))
+                if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Name == blamTagName))
                 {
                     tag = blamTag;
                     break;
@@ -72,7 +72,7 @@ namespace TagTool.Commands.Porting
             if (tag == null)
                 throw new Exception();
 
-            var tagName = $"(0x{tag.ID:X8}) {tag.Filename.Substring(tag.Filename.LastIndexOf('\\') + 1)}";
+            var tagName = $"(0x{tag.ID:X8}) {tag.Name.Substring(tag.Name.LastIndexOf('\\') + 1)}";
 
             var tagType = TagDefinition.Find(groupTag);
             var structure = new TagStructureInfo(tagType);

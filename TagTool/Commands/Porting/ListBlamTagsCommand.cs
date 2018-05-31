@@ -28,16 +28,50 @@ namespace TagTool.Commands.Porting
         {
             if (args.Count < 1)
                 return false;
-            
-            var namedWith = "";
+
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
+
+            if (!args[0].EndsWith(":"))
+                args.RemoveAt(0);
+
+            var startFilter = "";
+            var endFilter = "";
+            var filter = "";
 
             while (args.Count > 1)
             {
                 switch (args[0].ToLower())
                 {
+                    case "starts:":
+                    case "startswith:":
+                    case "starts_with:":
+                    case "starting:":
+                    case "startingwith:":
+                    case "starting_with:":
+                    case "start_filter:":
+                    case "starting_filter:":
+                        startFilter = args[1];
+                        args.RemoveAt(1);
+                        break;
+
+                    case "ends:":
+                    case "ending:":
+                    case "endingwith:":
+                    case "ending_with:":
+                    case "endswith:":
+                    case "ends_with:":
+                    case "end_filter:":
+                    case "ending_filter:":
+                        endFilter = args[1];
+                        args.RemoveAt(1);
+                        break;
+
                     case "named:":
-                        namedWith = args[1];
-                        args.RemoveAt(0);
+                    case "filter:":
+                    case "contains:":
+                    case "containing:":
+                        filter = args[1];
+                        args.RemoveAt(1);
                         break;
 
                     default:
@@ -47,17 +81,15 @@ namespace TagTool.Commands.Porting
                 args.RemoveAt(0);
             }
 
-            var groupTag = args.Count == 0 ? Tag.Null : ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
-
             foreach (var tag in BlamCache.IndexItems)
             {
                 if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
 
-                if (namedWith != "" && !tag.Filename.Contains(namedWith))
+                if (!tag.Name.StartsWith(startFilter) || !tag.Name.Contains(filter) || !tag.Name.EndsWith(endFilter))
                     continue;
 
-                Console.WriteLine($"[Index: 0x{tag.metaIndex:X4}, Offset: 0x{tag.Offset:X8}, Size: 0x{tag.Size:X4}] {tag.Filename}.{tag.GroupName}");
+                Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.Offset:X8}, Size: 0x{tag.Size:X4}] {tag.Name}.{tag.GroupName}");
             }
 
             return true;

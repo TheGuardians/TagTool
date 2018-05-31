@@ -187,7 +187,7 @@ namespace TagTool.Commands.Porting
 			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
 				item => item != null && groupTag == item.GroupTag);
 			else result.Add( BlamCache.IndexItems.Find(
-				item => item != null && groupTag == item.GroupTag && tagName == item.Filename));
+				item => item != null && groupTag == item.GroupTag && tagName == item.Name));
 
 			if (result.Count == 0)
                 Console.WriteLine($"Invalid tag name: {tagSpecifier}");
@@ -214,7 +214,7 @@ namespace TagTool.Commands.Porting
             var wasReplacing = Flags.HasFlag(PortingFlags.Replace);
             var wasNew = Flags.HasFlag(PortingFlags.New);
             
-            if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && blamTag.Filename.Contains("elite"))
+            if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && blamTag.Name.Contains("elite"))
                 return null;
 
             if (!Flags.HasFlag(PortingFlags.New) || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
@@ -224,7 +224,7 @@ namespace TagTool.Commands.Porting
                     if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
                         continue;
 
-                    if (CacheContext.TagNames[instance.Index] == blamTag.Filename)
+                    if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
                         if (Flags.HasFlag(PortingFlags.Replace))
                             edTag = instance;
@@ -242,9 +242,9 @@ namespace TagTool.Commands.Porting
             // Check to see if the tag was already replaced (if replacing)
             //
 
-            if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Filename))
+            if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
             {
-                var entries = CacheContext.TagNames.Where(i => i.Value == blamTag.Filename);
+                var entries = CacheContext.TagNames.Where(i => i.Value == blamTag.Name);
 
                 foreach (var entry in entries)
                 {
@@ -265,7 +265,7 @@ namespace TagTool.Commands.Porting
 
             if (Flags.HasFlag(PortingFlags.Replace))
             {
-                var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Filename);
+                var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Name);
 
                 foreach (var entry in listEntries)
                 {
@@ -286,7 +286,7 @@ namespace TagTool.Commands.Porting
                 (ReplacedTags[groupTag] ?? new List<string>()) :
                 new List<string>();
 
-            replacedTags.Add(blamTag.Filename);
+            replacedTags.Add(blamTag.Name);
             ReplacedTags[groupTag] = replacedTags;
             
             //
@@ -308,10 +308,10 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
 
 				// Don't port rmfd tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return CacheContext.GetTagInstance<RenderMethodDefinition>(blamTag.Filename);
-				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Filename) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Filename}.rmdf`; using `shaders\\shader.rmdf` instead.");
+				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					return CacheContext.GetTagInstance<RenderMethodDefinition>(blamTag.Name);
+				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
 					return CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader");
 			}
 
@@ -411,7 +411,7 @@ namespace TagTool.Commands.Porting
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
             }
 
-            CacheContext.TagNames[edTag.Index] = blamTag.Filename;
+            CacheContext.TagNames[edTag.Index] = blamTag.Name;
 
             //
             // Load the Blam tag definition
@@ -460,7 +460,7 @@ namespace TagTool.Commands.Porting
             // Perform automatic conversion on the Blam tag definition
             //
 
-            blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Filename);
+            blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Name);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -468,7 +468,7 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-				case AreaScreenEffect sefc when blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui":
+				case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
 					foreach (var screenEffect in sefc.ScreenEffects)
 						screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
 					break;
@@ -554,11 +554,11 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Scenario scnr:
-                    blamDefinition = ConvertScenario(scnr, blamTag.Filename);
+                    blamDefinition = ConvertScenario(scnr, blamTag.Name);
                     break;
 
                 case ScenarioLightmap sLdT:
-                    blamDefinition = ConvertScenarioLightmap(cacheStream, resourceStreams, blamTag.Filename, sLdT);
+                    blamDefinition = ConvertScenarioLightmap(cacheStream, resourceStreams, blamTag.Name, sLdT);
                     break;
 
                 case ScenarioLightmapBspData Lbsp:
@@ -596,10 +596,10 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // Fix shotgun reloading
-                case Weapon weapon when blamTag.Filename == "objects\\weapons\\rifle\\shotgun\\shotgun":
+                case Weapon weapon when blamTag.Name == "objects\\weapons\\rifle\\shotgun\\shotgun":
                     weapon.Unknown24 = 1 << 16;
 					break;
-				case Weapon weapon when blamTag.Filename.EndsWith("\\weapon\\warthog_horn"):
+				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
                     foreach (var attach in weapon.Attachments)
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                     break;
@@ -611,7 +611,7 @@ namespace TagTool.Commands.Porting
             
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
-                Console.WriteLine($"Something happened when converting  {blamTag.Filename.Substring(Math.Max(0, blamTag.Filename.Length - 30))}, returning null tag reference.");
+                Console.WriteLine($"Something happened when converting  {blamTag.Name.Substring(Math.Max(0, blamTag.Name.Length - 30))}, returning null tag reference.");
                 CacheContext.TagNames.Remove(edTag.Index);
                 CacheContext.TagCache.Index[edTag.Index] = null;
                 return null;
@@ -898,7 +898,7 @@ namespace TagTool.Commands.Porting
                     if (!CacheContext.TagNames.ContainsKey(tag.Index))
                         continue;
 
-                    if (instance.Filename == CacheContext.TagNames[tag.Index] && tag.Index < maxIndex)
+                    if (instance.Name == CacheContext.TagNames[tag.Index] && tag.Index < maxIndex)
                         return tag;
                 }
             }

@@ -123,6 +123,7 @@ namespace TagTool.Tags
             { new Tag("mode"), typeof(RenderModel) },
             { new Tag("mulg"), typeof(MultiplayerGlobals) },
             { new Tag("nclt"), typeof(NewCinematicLightning) },
+            { new Tag("obje"), typeof(GameObject) },
             { new Tag("pecp"), typeof(ParticleEmitterCustomPoints) },
             { new Tag("pdm!"), typeof(PodiumSettings) },
             { new Tag("perf"), typeof(PerformanceThrottles) },
