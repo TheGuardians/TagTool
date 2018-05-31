@@ -470,7 +470,7 @@ namespace TagTool.Commands.Porting
             {
 				case AreaScreenEffect sefc when blamTag.Filename == "levels\\ui\\mainmenu\\sky\\ui":
 					foreach (var screenEffect in sefc.ScreenEffects)
-						screenEffect.MaximumDistance = screenEffect.Duration = float.MaxValue;
+						screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
 					break;
 
 				case Bitmap bitm:

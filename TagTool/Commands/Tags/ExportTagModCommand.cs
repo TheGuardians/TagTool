@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
@@ -27,7 +28,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 3)
+            if (args.Count < 2)
                 return false;
 
             var name = args[0];
@@ -77,16 +78,40 @@ namespace TagTool.Commands.Tags
                     }
                 }
 
-                while (args.Count > 2)
+                string line;
+
+                while ((line = Console.ReadLine()) != "")
                 {
-                    var instance = ArgumentParser.ParseTagSpecifier(CacheContext, args[2]);
-                    args.RemoveAt(2);
+                    CachedTagInstance instance = null;
+
+                    try
+                    {
+                        instance = ArgumentParser.ParseTagSpecifier(CacheContext, line);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
 
                     if (instance == null)
                         continue;
 
                     LoadTagDependencies(instance.Index);
                 }
+
+                /*foreach (var index in tagIndices)
+                {
+                    var instance = CacheContext.GetTag(index);
+
+                    if (instance == null || !instance.IsInGroup("bitm"))
+                        continue;
+
+                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
+                        CacheContext.TagNames[instance.Index] :
+                        $"0x{instance.Index:X4}";
+
+                    Console.WriteLine($"[Index: 0x{instance.Index:X4}, Offset: 0x{instance.HeaderOffset:X8}, Size: 0x{instance.TotalSize:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}");
+                }*/
 
                 var importedTags = new HashSet<int>();
 

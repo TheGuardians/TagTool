@@ -96,11 +96,14 @@ namespace TagTool.Commands.Files
             {
                 CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+
+                /*foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);*/
             }
 
             destCacheContext.SaveTagNames();
@@ -110,7 +113,7 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg"))
+            if (srcTag == null/* || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg")*/)
                 return null;
             
             if (ConvertedTags.ContainsKey(srcTag.Index))
@@ -245,27 +248,27 @@ namespace TagTool.Commands.Files
             return data;
         }
 
-        private PageableResource CopyResource(PageableResource resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private PageableResource CopyResource(PageableResource pageable, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
-            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
+            if (pageable == null || pageable.Page.Index < 0 || !pageable.GetLocation(out var location))
                 return null;
 
-            if (resource.Page.CompressedBlockSize > 0)
+            if (pageable.Page.CompressedBlockSize > 0)
             {
-                var index = resource.Page.Index;
+                var index = pageable.Page.Index;
 
                 if (CopiedResources[location].ContainsKey(index))
                     return CopiedResources[location][index];
 
-                var data = srcCacheContext.ExtractRawResource(resource);
+                var data = srcCacheContext.ExtractRawResource(pageable);
 
-                resource.ChangeLocation(location);
-                destCacheContext.AddRawResource(resource, data);
+                pageable.ChangeLocation(location);
+                destCacheContext.AddRawResource(pageable, data);
 
-                CopiedResources[location][index] = resource;
+                CopiedResources[location][index] = pageable;
             }
 
-            return resource;
+            return pageable;
         }
 
         private bool ScriptExpressionIsValue(ScriptExpression expr)

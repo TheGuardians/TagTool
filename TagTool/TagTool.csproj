@@ -331,6 +331,7 @@
     <Compile Include="Commands\Tags\ExportTagModCommand.cs" />
     <Compile Include="Commands\Tags\ExtractAllTagsCommand.cs" />
     <Compile Include="Commands\Tags\ExtractTagCommand.cs" />
+    <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\GenerateTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\GetMapInfoCommand.cs" />
     <Compile Include="Commands\Tags\GetTagAddressCommand.cs" />

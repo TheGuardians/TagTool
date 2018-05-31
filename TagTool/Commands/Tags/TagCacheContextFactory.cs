@@ -61,6 +61,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new RebuildStringIdsCommand(cacheContext));
             context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
             context.AddCommand(new ExportTagModCommand(cacheContext));
+            context.AddCommand(new ForEachCommand(stack, cacheContext));
 
 			return context;
         }
