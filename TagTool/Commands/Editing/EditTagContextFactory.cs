@@ -18,7 +18,6 @@ using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
 using TagTool.Tags;
-using TagTool.Commands.PixelShaders;
 
 namespace TagTool.Commands.Editing
 {
@@ -115,10 +114,6 @@ namespace TagTool.Commands.Editing
 
                 case "vfsl": // vfiles_list
                     VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
-                    break;
-
-                case "pixl":
-                    PixelShaderContextFactory.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
                     break;
             }
 

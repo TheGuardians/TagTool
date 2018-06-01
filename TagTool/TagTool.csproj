@@ -315,9 +315,6 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
-    <Compile Include="Commands\PixelShaders\CompileCommand.cs" />
-    <Compile Include="Commands\PixelShaders\PixelShaderContextFactory.cs" />
-    <Compile Include="Commands\PixelShaders\DisassembleCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
@@ -331,7 +328,6 @@
     <Compile Include="Commands\Tags\ExportTagModCommand.cs" />
     <Compile Include="Commands\Tags\ExtractAllTagsCommand.cs" />
     <Compile Include="Commands\Tags\ExtractTagCommand.cs" />
-    <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\GenerateTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\GetMapInfoCommand.cs" />
     <Compile Include="Commands\Tags\GetTagAddressCommand.cs" />
@@ -388,7 +384,6 @@
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
-    <Compile Include="Shaders\ShaderCompiler.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />
@@ -451,7 +446,6 @@
     <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
     <Compile Include="Geometry\RenderMaterial.cs" />
     <Compile Include="Geometry\RenderModelBuilder.cs" />
-    <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Geometry\VertexBufferFormat.cs" />
     <Compile Include="Geometry\VertexCompressor.cs" />
     <Compile Include="Geometry\VertexElementStream.cs" />

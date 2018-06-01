@@ -591,6 +591,8 @@ namespace TagTool.Commands.Tags
 
         private void FixGlobalVertexShader(GlobalVertexShader glvs)
         {
+            throw new NotImplementedException();
+            /*TODO: Fix this
             var usedShaders = new bool[glvs.Shaders.Count];
             for (var i = 0; i < glvs.VertexTypes.Count; i++)
             {
@@ -617,11 +619,13 @@ namespace TagTool.Commands.Tags
             {
                 if (!usedShaders[i])
                     glvs.Shaders[i].PCShaderBytecode = null;
-            }
+            }*/
         }
 
         private void FixPixelShader(PixelShader ps)
         {
+            throw new NotImplementedException();
+            /*TODO: Fix this
             FixDrawModeList(ps.DrawModes);
 
             // Disable z_only
@@ -654,7 +658,7 @@ namespace TagTool.Commands.Tags
             {
                 if (!usedShaders[i])
                     ps.Shaders[i].PCShaderBytecode = null;
-            }
+            }*/
         }
 
         private void FixVertexShader(VertexShader vs)
