@@ -125,11 +125,11 @@ namespace TagTool.Commands.Porting
 
                 try
                 {
-                    shaderInvalid = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+                    shaderInvalid = CacheContext.GetTag<Shader>(@"shaders\invalid");
                 }
                 catch (KeyNotFoundException)
                 {
-                    shaderInvalid = CacheContext.GetTagInstance<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
+                    shaderInvalid = CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
                 }
 
                 var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
@@ -170,7 +170,7 @@ namespace TagTool.Commands.Porting
 
                 try
                 {
-                    bitmap = CacheContext.GetTagInstance<Bitmap>(newBitmap);
+                    bitmap = CacheContext.GetTag<Bitmap>(newBitmap);
                 }
                 catch (KeyNotFoundException)
                 {
@@ -213,7 +213,7 @@ namespace TagTool.Commands.Porting
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
                 if (a.Bitmap == null)
-                    a.Bitmap = CacheContext.GetTagInstance<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
+                    a.Bitmap = CacheContext.GetTag<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
 
             return finalRm;
         }
@@ -367,7 +367,7 @@ namespace TagTool.Commands.Porting
             {
                 try
                 {
-                    return CacheContext.GetTagInstance<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                    return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
                 }
                 catch (KeyNotFoundException)
                 {
@@ -799,11 +799,11 @@ namespace TagTool.Commands.Porting
 			// Set rmdf
 			var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
 			if (CacheContext.TagNames.ContainsValue(rmdfName))
-				finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(rmdfName);
+				finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(rmdfName);
 			else
 			{
 				// all ms23 rmdf tags need to exist, using rmsh's rmdf for all rm's is a bad idea
-				finalRm.BaseRenderMethod = CacheContext.GetTagInstance<RenderMethodDefinition>(@"shaders\shader");
+				finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
 				Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
 			}
 		}

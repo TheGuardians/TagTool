@@ -41,9 +41,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 2)
                 return false;
 
-            var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
-
-            if (tag == null)
+            if (!CacheContext.TryGetTag(args[1], out var tag))
                 return false;
 
             switch (args[0].ToLower())
@@ -69,8 +67,8 @@ namespace TagTool.Commands.Tags
             if (args.Count < 3)
                 return false;
 
-            var dependencies = args.Skip(2).Select(a => ArgumentParser.ParseTagSpecifier(CacheContext, a)).ToList();
-
+            var dependencies = args.Skip(2).Select(name => CacheContext.GetTag(name)).ToList();
+            
             if (dependencies.Count == 0 || dependencies.Any(d => d == null))
                 return false;
 

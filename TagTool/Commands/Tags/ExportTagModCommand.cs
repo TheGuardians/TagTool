@@ -82,18 +82,7 @@ namespace TagTool.Commands.Tags
 
                 while ((line = Console.ReadLine()) != "")
                 {
-                    CachedTagInstance instance = null;
-
-                    try
-                    {
-                        instance = ArgumentParser.ParseTagSpecifier(CacheContext, line);
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-
-                    if (instance == null)
+                    if (!CacheContext.TryGetTag(line, out var instance))
                         continue;
 
                     LoadTagDependencies(instance.Index);

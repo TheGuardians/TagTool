@@ -313,103 +313,103 @@ namespace TagTool.Commands.Files
                 {
                     Name = CacheContext.GetStringId("battle_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("assault_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("plasma_pistol"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\pistol\plasma_pistol\plasma_pistol")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\plasma_pistol\plasma_pistol")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("spike_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\spike_rifle\spike_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\spike_rifle\spike_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("smg"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\smg\smg")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\smg\smg")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("carbine"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("energy_sword"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("magnum"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\pistol\magnum\magnum")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\magnum\magnum")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("needler"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\pistol\needler\needler")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("plasma_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\plasma_rifle\plasma_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\plasma_rifle\plasma_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("rocket_launcher"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("shotgun"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\shotgun\shotgun")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\shotgun\shotgun")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("sniper_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("brute_shot"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_low\brute_shot\brute_shot")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_low\brute_shot\brute_shot")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("unarmed"),
                     RandomChance = 0,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade_useless")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade_useless")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("beam_rifle"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("spartan_laser"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
@@ -421,25 +421,25 @@ namespace TagTool.Commands.Files
                 {
                     Name = CacheContext.GetStringId("gravity_hammer"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\melee\gravity_hammer\gravity_hammer")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\gravity_hammer\gravity_hammer")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("excavator"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\pistol\excavator\excavator")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\excavator\excavator")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("flamethrower"),
                     RandomChance = 0,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\flamethrower\flamethrower")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\flamethrower\flamethrower")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
                 {
                     Name = CacheContext.GetStringId("missile_pod"),
                     RandomChance = 0.1f,
-                    Weapon = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\missile_pod\missile_pod")
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\missile_pod\missile_pod")
                 }
             };
 
@@ -448,7 +448,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // battle_rifle
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -457,7 +457,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // carbine
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -466,7 +466,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // sniper_rifle
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -475,7 +475,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // beam_rifle
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -484,7 +484,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // spartan_laster
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -493,7 +493,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // rocket_launcher
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -502,7 +502,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // chaingun_turret
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\vehicles\warthog\turrets\chaingun\weapon\chaingun_turret"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\chaingun\weapon\chaingun_turret"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -511,7 +511,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // machinegun_turret
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -520,7 +520,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // machinegun_turret_integrated
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret_integrated"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret_integrated"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -529,7 +529,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // plasma_cannon
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -538,7 +538,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // plasma_cannon_integrated
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon_integrated"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon_integrated"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -547,7 +547,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // needler
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\pistol\needler\needler"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -556,7 +556,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // flak_cannon
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\weapons\support_high\flak_cannon\flak_cannon"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\flak_cannon\flak_cannon"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -565,7 +565,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // gauss_turret
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\vehicles\warthog\turrets\gauss\weapon\gauss_turret"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\gauss\weapon\gauss_turret"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -574,7 +574,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // anti_infantry
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\vehicles\mauler\anti_infantry\weapon\anti_infantry"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\mauler\anti_infantry\weapon\anti_infantry"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -583,7 +583,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                 {
                     // behemoth_chaingun_turret
-                    Type = CacheContext.GetTagInstance<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
+                    Type = CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
                     Unknown1 = 5.0f,
                     Unknown2 = 15.0f,
                     Unknown3 = 5.0f,
@@ -596,37 +596,37 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("warthog"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\warthog\warthog")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\warthog\warthog")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("ghost"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\ghost\ghost")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\ghost\ghost")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("scorpion"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\scorpion\scorpion")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\scorpion\scorpion")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("wraith"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\wraith\wraith")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\wraith\wraith")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("banshee"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\banshee\banshee")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\banshee\banshee")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("mongoose"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\mongoose\mongoose")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\mongoose\mongoose")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("chopper"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\brute_chopper\brute_chopper")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\brute_chopper\brute_chopper")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
@@ -636,7 +636,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("hornet"),
-                    Vehicle = CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\hornet\hornet")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\hornet\hornet")
                 }
             };
             #endregion

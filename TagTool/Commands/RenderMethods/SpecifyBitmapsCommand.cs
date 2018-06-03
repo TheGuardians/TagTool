@@ -50,14 +50,14 @@ namespace TagTool.Commands.RenderMethods
                     var mapTemplate = template.ShaderMaps[i];
 
                     Console.Write(string.Format("Please enter the {0} index: ", CacheContext.GetString(mapTemplate.Name)));
-                    shaderMaps[mapTemplate.Name] = ArgumentParser.ParseTagSpecifier(CacheContext, Console.ReadLine());
-                    property.ShaderMaps[i].Bitmap = shaderMaps[mapTemplate.Name];
 
-                    if (property.ShaderMaps[i].Bitmap == null)
+                    if (!CacheContext.TryGetTag(Console.ReadLine(), out var shaderMap))
                     {
-                        Console.WriteLine($"Invalid bitmap, using 0x0343.");
-                        property.ShaderMaps[i].Bitmap = CacheContext.GetTag(0x0343);
+                        Console.WriteLine($"ERROR: Invalid bitmap name, setting to null.");
+                        shaderMaps[mapTemplate.Name] = null;
                     }
+
+                    property.ShaderMaps[i].Bitmap = shaderMaps[mapTemplate.Name];
                 }
             }
 

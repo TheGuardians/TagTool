@@ -26,14 +26,13 @@ namespace TagTool.Commands.Tags
         {
             if (args.Count != 2)
                 return false;
+    
+            if (!CacheContext.TryGetTag(args[0], out var instance))
+                return false;
 
-            var instance = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
             var path = args[1];
 
             if (!File.Exists(path))
-                return false;
-                
-            if (instance == null)
                 return false;
 
             byte[] data;

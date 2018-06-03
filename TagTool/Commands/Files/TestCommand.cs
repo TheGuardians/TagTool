@@ -52,8 +52,6 @@ namespace TagTool.Commands.Files
                 { "setinvalidmaterials", "Set all materials to shaders\\invalid or 0x101F to a provided mode or sbsp tag." },
                 { "namemodetags", "Name all mode tags based on" },
                 { "dumpforgepalettecommands", "Read a scnr tag's forge palettes and dump as a tagtool commands script." },
-                { "nametag", "Name all dependencies of a named tag using the same nameUsage: test nametag all shaders\\invalid." },
-                { "listtags", "Listtags with a simplified output." },
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
                 { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
@@ -68,8 +66,6 @@ namespace TagTool.Commands.Files
                 case "lensunknown": return LensUnknown(args);
                 case "setinvalidmaterials": return SetInvalidMaterials(args);
                 case "dumpforgepalettecommands": return DumpForgePaletteCommands(args);
-                case "nametag": return NameTag(args);
-                case "listtags": return ListTags(args);
                 case "dumpcommandsscript": return DumpCommandsScript(args);
                 case "temp": return Temp(args);
                 case "shadowfix": return ShadowFix(args);
@@ -386,15 +382,8 @@ namespace TagTool.Commands.Files
 
             string edTagArg = args[0];
 
-            CachedTagInstance edTag = CacheContext.GetTag(0x0);
-            try
-            {
-                edTag = ArgumentParser.ParseTagName(CacheContext, edTagArg);
-            }
-            catch
-            {
-                edTag = ArgumentParser.ParseTagSpecifier(CacheContext, edTagArg);
-            }
+            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
+                return false;
 
             if (edTag.IsInGroup("mode"))
             {
@@ -443,20 +432,8 @@ namespace TagTool.Commands.Files
         {
             Console.WriteLine("Required args: [0]ED scnr tag; ");
 
-            if (args.Count != 1)
+            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var edTag))
                 return false;
-
-            string edTagArg = args[0];
-
-            CachedTagInstance edTag = CacheContext.GetTag(0x0);
-            try
-            {
-                edTag = ArgumentParser.ParseTagName(CacheContext, edTagArg);
-            }
-            catch
-            {
-                edTag = ArgumentParser.ParseTagSpecifier(CacheContext, edTagArg);
-            }
 
             Scenario instance;
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
@@ -572,103 +549,6 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        public bool NameTag(List<string> args)
-        {
-            bool flag = args.Count != 2;
-            bool result;
-            if (flag)
-            {
-                Console.WriteLine("Description: Name all dependencies of a named tag using the same nameUsage: test nametag all shaders\\invalid");
-                result = false;
-            }
-            else
-            {
-                CachedTagInstance cachedTagInstance = ArgumentParser.ParseTagSpecifier(this.CacheContext, args[1]);
-                string text = this.CacheContext.TagNames.ContainsKey(cachedTagInstance.Index) ? this.CacheContext.TagNames[cachedTagInstance.Index] : null;
-                bool flag2 = text == null;
-                if (flag2)
-                {
-                    Console.WriteLine("ERROR: the provided tag is not named.");
-                    result = false;
-                }
-                else
-                {
-                    bool flag3 = args[0] == "all";
-                    if (flag3)
-                    {
-                        IEnumerable<CachedTagInstance> enumerable = this.CacheContext.TagCache.Index.FindDependencies(cachedTagInstance);
-                        foreach (CachedTagInstance current in enumerable)
-                        {
-                            string arg_102_0 = this.CacheContext.TagNames.ContainsKey(current.Index) ? this.CacheContext.TagNames[current.Index] : null;
-                        }
-                        foreach (CachedTagInstance current2 in enumerable)
-                        {
-                            bool flag4 = !this.CacheContext.TagNames.ContainsKey(current2.Index);
-                            if (flag4)
-                            {
-                                string arg_187_0 = this.CacheContext.TagNames.ContainsKey(current2.Index) ? this.CacheContext.TagNames[current2.Index] : null;
-                            }
-                        }
-                        foreach (CachedTagInstance current3 in enumerable)
-                        {
-                            bool flag5 = !this.CacheContext.TagNames.ContainsKey(current3.Index);
-                            if (flag5)
-                            {
-                                Console.WriteLine(string.Format("[{0}] 0x{1:X4} new tagname: {2}", current3.Group, current3.Index, text));
-                                this.CacheContext.TagNames.Add(current3.Index, text);
-                            }
-                        }
-                        result = true;
-                    }
-                    else
-                    {
-                        result = false;
-                    }
-                }
-            }
-            return result;
-        }
-
-        public bool ListTags(List<string> args)
-        {
-            if (args.Count == 0)
-            {
-                var tags = CacheContext.TagCache.Index.NonNull().ToArray();
-
-                foreach (var tag in tags)
-                {
-                    if (!CacheContext.TagNames.ContainsKey(tag.Index))
-                        Console.WriteLine($"0x{tag.Index:X4} {tag.Group.Tag} {CacheContext.GetString(tag.Group.Name)}");
-                    else
-                        Console.WriteLine($"0x{tag.Index:X4} {CacheContext.TagNames[tag.Index]}.{CacheContext.GetString(tag.Group.Name)}");
-                }
-            }
-            else
-            {
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(args[0]))
-                {
-                    if (!CacheContext.TagNames.ContainsKey(tag.Index))
-                    {
-                        if (args.Count == 1)
-                            Console.WriteLine($"0x{tag.Index:X4} {tag.Group.Tag} {CacheContext.GetString(tag.Group.Name)}");
-                    }
-
-                    else if (CacheContext.TagNames.ContainsKey(tag.Index))
-                    {
-                        if (args.Count == 2)
-                        {
-                            if (CacheContext.TagNames[tag.Index].Contains(args[1]))
-                                Console.WriteLine($"0x{tag.Index:X4} {CacheContext.TagNames[tag.Index]}.{CacheContext.GetString(tag.Group.Name)}");
-                        }
-                        else
-                            Console.WriteLine($"0x{tag.Index:X4} {CacheContext.TagNames[tag.Index]}.{CacheContext.GetString(tag.Group.Name)}");
-                    }
-                }
-            }
-
-            return true;
-        }
-        
         public bool DumpCommandsScript(List<string> args)
         {
             // Role: extract all the tags of a mode or sbsp tag.
@@ -678,156 +558,139 @@ namespace TagTool.Commands.Files
 
             // rmdf, rmt2, vtsh, pixl, mode, shader tags NEED to be named.
 
-            if (args.Count != 1)
-            {
-                Console.WriteLine("Required args: [0]tag");
+            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var instance))
                 return false;
+
+            string modName = args[0].Split("\\".ToCharArray()).Last();
+
+            if (!instance.IsInGroup("mode"))
+                throw new NotImplementedException();
+
+            IEnumerable<CachedTagInstance> dependencies = CacheContext.TagCache.Index.FindDependencies(instance);
+
+            List<string> commands = new List<string>();
+
+            // Console.WriteLine("All deps:");
+            foreach (var dep in dependencies)
+            {
+                // To avoid porting a ton of existing textures, bitmaps under 0x5726 should be ignored
+
+                // For stability and first runs, extract all. Filter out potentially existing tags later.
+                // if (dep.Group.ToString() == "bitm" && dep.Index < 0x5726)
+                // {
+                //     // Ignore default bitmaps for now
+                // }
+
+                // These are common for all the shaders, so chances are small to see they get removed.
+                if (dep.Group.Tag == "rmdf" || dep.Group.Tag == "rmop" || dep.Group.Tag == "glps" || dep.Group.Tag == "glvs")
+                    continue;
+
+                string depname = CacheContext.TagNames.ContainsKey(dep.Index) ? CacheContext.TagNames[dep.Index] : $"0x{dep.Index:X4}";
+                string exportedTagName = $"{dep.Index:X4}";
+
+                // if (!CacheContext.TagNames.ContainsKey(dep.Index))
+                //     throw new Exception($"0x{dep.Index:X4} isn't named.");
+
+                Console.WriteLine($"extracttag 0x{dep.Index:X4} {exportedTagName}.{dep.Group.Tag}");
+
+                commands.Add($"createtag cfgt");
+                commands.Add($"NameTag * {depname}");
+                commands.Add($"importtag * {exportedTagName}.{dep.Group.Tag}");
+
+                // Console.WriteLine($"createtag cfgt");
+                // Console.WriteLine($"NameTag * {depname}");
+                // Console.WriteLine($"importtag * {exportedTagName}.{dep.Group.Tag}");
+
+                // Console.WriteLine($"Echo If the program quits at this point, the tagname is invalid.");
+                // Console.WriteLine($"EditTag {depname}.{dep.Group.Tag}");
+                // Console.WriteLine($"Exit");
+                // Console.WriteLine($"Dumplog {modName}.log");
             }
 
-            string edTagArg = args[0];
-            string modName = edTagArg.Split("\\".ToCharArray()).Last();
+            Console.WriteLine("");
+            foreach (var a in commands)
+                Console.WriteLine(a);
 
-            CachedTagInstance instance = CacheContext.GetTag(0x0);
-            try
+            RenderModel modeTag;
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                instance = ArgumentParser.ParseTagName(CacheContext, edTagArg);
-            }
-            catch
-            {
-                instance = ArgumentParser.ParseTagSpecifier(CacheContext, edTagArg);
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, instance);
+                modeTag = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
             }
 
-            if (instance.IsInGroup("mode"))
+            var modename = CacheContext.TagNames[instance.Index];
+
+            List<CachedTagInstance> shadersList = new List<CachedTagInstance>();
+
+            Console.WriteLine("");
+
+            Console.WriteLine($"EditTag {modename}.{instance.Group.Tag}");
+
+            int i = -1;
+            foreach (var material in modeTag.Materials)
             {
-                IEnumerable<CachedTagInstance> dependencies = CacheContext.TagCache.Index.FindDependencies(instance);
+                i++;
+                var shadername = CacheContext.TagNames[material.RenderMethod.Index];
+                Console.WriteLine($"SetField Materials[{i}].RenderMethod {shadername}.{material.RenderMethod.Group.Tag}");
 
-                List<string> commands = new List<string>();
+                shadersList.Add(material.RenderMethod);
+            }
 
-                // Console.WriteLine("All deps:");
-                foreach (var dep in dependencies)
-                {
-                    // To avoid porting a ton of existing textures, bitmaps under 0x5726 should be ignored
+            Console.WriteLine($"SaveTagChanges");
+            Console.WriteLine($"ExitTo tags");
 
-                    // For stability and first runs, extract all. Filter out potentially existing tags later.
-                    // if (dep.Group.ToString() == "bitm" && dep.Index < 0x5726)
-                    // {
-                    //     // Ignore default bitmaps for now
-                    // }
-
-                    // These are common for all the shaders, so chances are small to see they get removed.
-                    if (dep.Group.Tag == "rmdf" || dep.Group.Tag == "rmop" || dep.Group.Tag == "glps" || dep.Group.Tag == "glvs")
-                        continue;
-
-                    string depname = CacheContext.TagNames.ContainsKey(dep.Index) ? CacheContext.TagNames[dep.Index] : $"0x{dep.Index:X4}";
-                    string exportedTagName = $"{dep.Index:X4}";
-
-                    // if (!CacheContext.TagNames.ContainsKey(dep.Index))
-                    //     throw new Exception($"0x{dep.Index:X4} isn't named.");
-
-                    Console.WriteLine($"extracttag 0x{dep.Index:X4} {exportedTagName}.{dep.Group.Tag}");
-
-                    commands.Add($"createtag cfgt");
-                    commands.Add($"NameTag * {depname}");
-                    commands.Add($"importtag * {exportedTagName}.{dep.Group.Tag}");
-
-                    // Console.WriteLine($"createtag cfgt");
-                    // Console.WriteLine($"NameTag * {depname}");
-                    // Console.WriteLine($"importtag * {exportedTagName}.{dep.Group.Tag}");
-
-                    // Console.WriteLine($"Echo If the program quits at this point, the tagname is invalid.");
-                    // Console.WriteLine($"EditTag {depname}.{dep.Group.Tag}");
-                    // Console.WriteLine($"Exit");
-                    // Console.WriteLine($"Dumplog {modName}.log");
-                }
-
-                Console.WriteLine("");
-                foreach (var a in commands)
-                    Console.WriteLine(a);
-
-                RenderModel modeTag;
+            foreach (var shaderInstance in shadersList)
+            {
+                ShaderDecal shaderTag;
                 using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
                 {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, instance);
-                    modeTag = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
+                    var edContext = new TagSerializationContext(cacheStream, CacheContext, shaderInstance);
+                    shaderTag = CacheContext.Deserializer.Deserialize<ShaderDecal>(edContext);
                 }
 
-                var modename = CacheContext.TagNames[instance.Index];
+                var shaderName = CacheContext.TagNames[shaderInstance.Index];
+                var rmdfName = CacheContext.TagNames.ContainsKey(shaderTag.BaseRenderMethod.Index) ? CacheContext.TagNames[shaderTag.BaseRenderMethod.Index] : $"0x{shaderTag.BaseRenderMethod.Index:X4}";
+                var rmt2Name = CacheContext.TagNames[shaderTag.ShaderProperties[0].Template.Index];
 
-                List<CachedTagInstance> shadersList = new List<CachedTagInstance>();
+                // Manage rmt2
+                RenderMethodTemplate rmt2Tag;
+                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+                {
+                    var edContext = new TagSerializationContext(cacheStream, CacheContext, shaderTag.ShaderProperties[0].Template);
+                    rmt2Tag = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
+                }
+
+                var vtshName = CacheContext.TagNames[rmt2Tag.VertexShader.Index];
+                var pixlName = CacheContext.TagNames[rmt2Tag.PixelShader.Index];
 
                 Console.WriteLine("");
-
-                Console.WriteLine($"EditTag {modename}.{instance.Group.Tag}");
-
-                int i = -1;
-                foreach (var material in modeTag.Materials)
-                {
-                    i++;
-                    var shadername = CacheContext.TagNames[material.RenderMethod.Index];
-                    Console.WriteLine($"SetField Materials[{i}].RenderMethod {shadername}.{material.RenderMethod.Group.Tag}");
-
-                    shadersList.Add(material.RenderMethod);
-                }
-
+                Console.WriteLine($"EditTag {rmt2Name}.rmt2");
+                Console.WriteLine($"SetField VertexShader {vtshName}.vtsh");
+                Console.WriteLine($"SetField PixelShader {pixlName}.pixl");
                 Console.WriteLine($"SaveTagChanges");
                 Console.WriteLine($"ExitTo tags");
 
-                foreach (var shaderInstance in shadersList)
-                {
-                    ShaderDecal shaderTag;
-                    using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                    {
-                        var edContext = new TagSerializationContext(cacheStream, CacheContext, shaderInstance);
-                        shaderTag = CacheContext.Deserializer.Deserialize<ShaderDecal>(edContext);
-                    }
-
-                    var shaderName = CacheContext.TagNames[shaderInstance.Index];
-                    var rmdfName = CacheContext.TagNames.ContainsKey(shaderTag.BaseRenderMethod.Index) ? CacheContext.TagNames[shaderTag.BaseRenderMethod.Index] : $"0x{shaderTag.BaseRenderMethod.Index:X4}";
-                    var rmt2Name = CacheContext.TagNames[shaderTag.ShaderProperties[0].Template.Index];
-
-                    // Manage rmt2
-                    RenderMethodTemplate rmt2Tag;
-                    using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                    {
-                        var edContext = new TagSerializationContext(cacheStream, CacheContext, shaderTag.ShaderProperties[0].Template);
-                        rmt2Tag = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
-                    }
-
-                    var vtshName = CacheContext.TagNames[rmt2Tag.VertexShader.Index];
-                    var pixlName = CacheContext.TagNames[rmt2Tag.PixelShader.Index];
-
-                    Console.WriteLine("");
-                    Console.WriteLine($"EditTag {rmt2Name}.rmt2");
-                    Console.WriteLine($"SetField VertexShader {vtshName}.vtsh");
-                    Console.WriteLine($"SetField PixelShader {pixlName}.pixl");
-                    Console.WriteLine($"SaveTagChanges");
-                    Console.WriteLine($"ExitTo tags");
-
-                    // Manage bitmaps
-                    int j = -1;
-
-                    Console.WriteLine("");
-                    Console.WriteLine($"EditTag {shaderName}.{shaderInstance.Group.Tag}");
-                    Console.WriteLine($"SetField BaseRenderMethod {rmdfName}.rmdf");
-                    Console.WriteLine($"SetField ShaderProperties[0].Template {rmt2Name}.rmt2");
-                    foreach (var a in shaderTag.ShaderProperties[0].ShaderMaps)
-                    {
-                        j++;
-                        var bitmapName = CacheContext.TagNames.ContainsKey(a.Bitmap.Index) ? CacheContext.TagNames[a.Bitmap.Index] : $"0x{a.Bitmap.Index:X4}";
-                        Console.WriteLine($"SetField ShaderProperties[0].ShaderMaps[{j}].Bitmap {bitmapName}.bitm");
-                    }
-                    Console.WriteLine($"SaveTagChanges");
-                    Console.WriteLine($"ExitTo tags");
-                }
+                // Manage bitmaps
+                int j = -1;
 
                 Console.WriteLine("");
-                Console.WriteLine($"SaveTagNames");
-                Console.WriteLine($"Dumplog {modName}.log");
-                Console.WriteLine($"Exit");
+                Console.WriteLine($"EditTag {shaderName}.{shaderInstance.Group.Tag}");
+                Console.WriteLine($"SetField BaseRenderMethod {rmdfName}.rmdf");
+                Console.WriteLine($"SetField ShaderProperties[0].Template {rmt2Name}.rmt2");
+                foreach (var a in shaderTag.ShaderProperties[0].ShaderMaps)
+                {
+                    j++;
+                    var bitmapName = CacheContext.TagNames.ContainsKey(a.Bitmap.Index) ? CacheContext.TagNames[a.Bitmap.Index] : $"0x{a.Bitmap.Index:X4}";
+                    Console.WriteLine($"SetField ShaderProperties[0].ShaderMaps[{j}].Bitmap {bitmapName}.bitm");
+                }
+                Console.WriteLine($"SaveTagChanges");
+                Console.WriteLine($"ExitTo tags");
             }
-            else
-                throw new NotImplementedException();
 
+            Console.WriteLine("");
+            Console.WriteLine($"SaveTagNames");
+            Console.WriteLine($"Dumplog {modName}.log");
+            Console.WriteLine($"Exit");
 
             return true;
         }
@@ -855,9 +718,7 @@ namespace TagTool.Commands.Files
         {
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                var hlmtInstance = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-                if (!hlmtInstance.IsInGroup("hlmt"))
+                if (!CacheContext.TryGetTag<Model>(args[0], out var hlmtInstance))
                 {
                     Console.WriteLine($"ERROR: tag group must be 'hlmt'. Supplied tag group was '{hlmtInstance.Group.Tag}'.");
                     return false;
@@ -979,7 +840,6 @@ namespace TagTool.Commands.Files
             return true;
         }
         
-        
         public bool CompareTags(List<string> args)
         {
             // When comparing between different caches, compare by name or tag index
@@ -1008,27 +868,17 @@ namespace TagTool.Commands.Files
             }
             else
                 CacheContext2 = CacheContext;
-
-            var tag1 = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-            if (tag1 == null)
+            
+            if (!CacheContext.TryGetTag(args[0], out var tag1))
             {
                 Console.WriteLine($"ERROR: tag cannot be found in this cache: {args[0]}");
                 return false;
             }
 
-            CachedTagInstance tag2 = null;
-
-            if (args.Count == 1)
-            {
-                tag2 = ArgumentParser.ParseTagSpecifier(CacheContext2, args[0]);
-            }
-            else
-            {
+            if (args.Count == 2)
                 args.RemoveAt(0);
-                tag2 = ArgumentParser.ParseTagSpecifier(CacheContext2, args[0]);
-            }
 
-            if (tag2 == null)
+            if (!CacheContext.TryGetTag(args[0], out var tag2))
             {
                 Console.WriteLine($"ERROR: tag cannot be found in the second cache: {args[0]}");
                 return false;

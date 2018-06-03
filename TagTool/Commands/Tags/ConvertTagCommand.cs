@@ -43,9 +43,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 4)
                 return false;
 
-            var srcTag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            if (srcTag == null)
+            if (!CacheContext.TryGetTag(args[0], out var srcTag))
                 return false;
 
             var csvPath = args[1];

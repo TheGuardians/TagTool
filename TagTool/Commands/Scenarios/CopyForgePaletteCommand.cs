@@ -56,9 +56,7 @@ namespace TagTool.Commands.Scenarios
                 return false;
             }
 
-            var destinationTag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            if (destinationTag == null || destinationTag.Group.Tag.ToString() != "scnr")
+            if (!CacheContext.TryGetTag(args[0], out var destinationTag))
             {
                 Console.WriteLine($"ERROR: invalid destination scenario index: {args[0]}");
                 return false;

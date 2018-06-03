@@ -36,14 +36,10 @@ namespace TagTool.Commands.RenderModels
                 else
                     Console.Write("Please enter the replace material #{0} index: ", Definition.Materials.IndexOf(material));
 
-                var newRenderMethod = Console.ReadLine();
-
-                material.RenderMethod = ArgumentParser.ParseTagSpecifier(CacheContext, newRenderMethod);
-
-                if (material.RenderMethod == null && newRenderMethod != null)
+                if (!CacheContext.TryGetTag(Console.ReadLine(), out material.RenderMethod))
                 {
-                    Console.WriteLine($"Using default shader 0x101F.");
-                    material.RenderMethod = CacheContext.GetTag(0x101F);
+                    Console.WriteLine($"ERROR: Invalid shader specified. Using default shader.");
+                    material.RenderMethod = CacheContext.GetTag<Shader>(@"shaders\default");
                 }
             }
 

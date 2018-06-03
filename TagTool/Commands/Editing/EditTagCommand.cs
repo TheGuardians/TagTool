@@ -27,20 +27,7 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
-                return false;
-
-            CachedTagInstance tag = null;
-
-            try
-            {
-                tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-            } catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            if (tag == null)
+            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var tag))
                 return false;
 
             var oldContext = ContextStack.Context;

@@ -692,7 +692,7 @@ namespace TagTool.Commands.Porting
                 builder.AddNode(node);
 
             foreach (var material in mode.Materials)
-                builder.AddMaterial(new RenderMaterial { RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid") });
+                builder.AddMaterial(new RenderMaterial { RenderMethod = CacheContext.GetTag<Shader>(@"shaders\invalid") });
 
             foreach (var region in mode.Regions)
             {

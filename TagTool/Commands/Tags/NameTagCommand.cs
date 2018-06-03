@@ -29,9 +29,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1 || args.Count > 3)
                 return false;
 
-            var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            if (tag == null)
+            if (!CacheContext.TryGetTag(args[0], out var tag))
             {
                 Console.WriteLine($"ERROR: Invalid tag specifier: {args[0]}");
                 return false;

@@ -99,7 +99,7 @@ namespace TagTool.Commands.Porting
                         break;
 
                     case "replace:":
-                        edModeTag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
+                        edModeTag = CacheContext.GetTag(args[1]);
                         args.RemoveAt(1);
                         args.RemoveAt(0);
                         break;
@@ -256,7 +256,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     if (!renderMethodExists)
-                        material.RenderMethod = CacheContext.GetTagInstance<Shader>(@"shaders\invalid");
+                        material.RenderMethod = CacheContext.GetTag<Shader>(@"shaders\invalid");
                 }
             }
 

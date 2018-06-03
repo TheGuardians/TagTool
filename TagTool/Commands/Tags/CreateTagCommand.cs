@@ -38,9 +38,13 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
-            var groupTag = ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
+            var groupTag = Tag.Null;
 
-            if (groupTag == Tag.Null)
+            try
+            {
+                groupTag = CacheContext.ParseGroupTag(groupTagString);
+            }
+            catch (KeyNotFoundException)
             {
                 var chars = new char[] { ' ', ' ', ' ', ' ' };
 
@@ -86,10 +90,9 @@ namespace TagTool.Commands.Tags
             {
                 if (args.Count == 2)
                 {
-                    var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
                     var tagIndex = -1;
 
-                    if (tag == null)
+                    if (!CacheContext.TryGetTag(args[1], out var tag))
                     {
                         if (args[1].StartsWith("0x"))
                             tagIndex = Convert.ToInt32(args[1], 16);

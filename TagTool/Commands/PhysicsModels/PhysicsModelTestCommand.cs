@@ -45,11 +45,9 @@ namespace TagTool.Commands.PhysicsModels
             }
             else
             {
-                tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[1]);
-                if (tag == null)
-                {
+                if (!CacheContext.TryGetTag(args[1], out tag))
                     return false;
-                }
+
                 b_duplicate = false;
             }
 

@@ -89,9 +89,7 @@ namespace TagTool.Commands.RenderModels
 
             if (args.Count == 2)
             {
-                destinationTag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-                if (!destinationTag.IsInGroup("mode"))
+                if (!CacheContext.TryGetTag(args[0], out destinationTag) || !destinationTag.IsInGroup("mode"))
                 {
                     Console.WriteLine("Specified tag is not a render_model: " + args[0]);
                     return false;

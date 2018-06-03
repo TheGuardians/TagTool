@@ -28,9 +28,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 1)
                 return false;
 
-            var tag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            if (tag == null)
+            if (!CacheContext.TryGetTag(args[0], out var tag))
                 return false;
 
             CachedTagInstance newTag;

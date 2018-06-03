@@ -31,7 +31,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 1)
                 return false;
 
-            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : ArgumentParser.ParseGroupTag(CacheContext.StringIdCache, args[0]);
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : CacheContext.ParseGroupTag(args[0]);
 
             if (!args[0].EndsWith(":"))
                 args.RemoveAt(0);

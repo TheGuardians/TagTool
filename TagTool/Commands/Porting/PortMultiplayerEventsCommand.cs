@@ -58,9 +58,7 @@ namespace TagTool.Commands.Porting
 
             using (var stream = CacheContext.OpenTagCacheRead())
             {
-                var edTag = ArgumentParser.ParseTagName(CacheContext, @"multiplayer\multiplayer_globals.mulg");
-
-                if (edTag == null)
+                if (!CacheContext.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {
                     Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
                     return true;
@@ -74,9 +72,7 @@ namespace TagTool.Commands.Porting
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                var edTag = ArgumentParser.ParseTagName(CacheContext, @"multiplayer\multiplayer_globals.mulg");
-
-                if (edTag == null)
+                if (!CacheContext.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
                 {
                     Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
                     return true;

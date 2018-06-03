@@ -126,5 +126,17 @@ namespace System
             }
             return result.ToString();
         }
+
+        public static bool TrySplit(this string str, char separator, out string[] result)
+        {
+            if (!str.Contains(separator.ToString()))
+            {
+                result = null;
+                return false;
+            }
+
+            result = str.Split(separator);
+            return true;
+        }
     }
 }

@@ -1,10 +1,10 @@
-using TagTool.Common;
-using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.Common;
+using TagTool.Serialization;
 using TagTool.Tags;
 
 namespace TagTool.Cache
@@ -138,39 +138,199 @@ namespace TagTool.Cache
         }
 
         /// <summary>
-        /// Gets a tag from the current cache.
+        /// Gets a tag of a specific type from the current cache.
         /// </summary>
         /// <typeparam name="T">The type of the tag definition.</typeparam>
         /// <param name="name">The name of the tag.</param>
         /// <returns>The tag of the specified type with the specified name from the current cache.</returns>
-        public override CachedTagInstance GetTagInstance<T>(string name)
+        public override CachedTagInstance GetTag<T>(string name)
         {
-            var groupTag = TagDefinition.Types.First(entry => entry.Value == typeof(T)).Key;
+            if (TryGetTag<T>(name, out var result))
+                return result;
 
-            foreach (var entry in TagNames)
-            {
-                if (entry.Value != name)
-                    continue;
+            var attributes = typeof(T).GetCustomAttributes(typeof(TagStructureAttribute), false);
+            var typeName = attributes == null ? typeof(T).Name.ToSnakeCase() : ((TagStructureAttribute)attributes[0]).Name;
 
-                var instance = TagCache.Index[entry.Key];
-
-                if (instance.IsInGroup(groupTag))
-                    return instance;
-            }
-
-            throw new KeyNotFoundException($"'{groupTag}' tag \"{name}\"");
+            throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
         }
 
         /// <summary>
-        /// Loads tag file names from the appropriate tagnames.csv file.
+        /// Attempts to get a tag of a specific type from the current cache.
         /// </summary>
-        public void LoadTagNames()
+        /// <typeparam name="T">The type of the tag definition.</typeparam>
+        /// <param name="name">The name of the tag.</param>
+        /// <param name="result">The resulting tag.</param>
+        /// <returns>True if the tag was found, false otherwise.</returns>
+        public bool TryGetTag<T>(string name, out CachedTagInstance result)
         {
-            var tagNamesPath = Path.Combine(Directory.FullName, "tag_list.csv");
-
-            if (File.Exists(tagNamesPath))
+            if (TagDefinition.Types.Values.Contains(typeof(T)))
             {
-                using (var tagNamesStream = File.Open(tagNamesPath, FileMode.Open, FileAccess.Read))
+                var groupTag = TagDefinition.Types.First(entry => entry.Value == typeof(T)).Key;
+
+                foreach (var entry in TagNames)
+                {
+                    if (entry.Value != name)
+                        continue;
+
+                    var instance = TagCache.Index[entry.Key];
+
+                    if (instance.IsInGroup(groupTag))
+                    {
+                        result = instance;
+                        return true;
+                    }
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to get a tag by parsing its group name.
+        /// </summary>
+        /// <param name="name">The full name of the tag.</param>
+        /// <param name="result">The resulting tag.</param>
+        /// <returns>True if the tag was found, false otherwise.</returns>
+        public bool TryGetTag(string name, out CachedTagInstance result)
+        {
+            if (name.Length == 0)
+            {
+                result = null;
+                return false;
+            }
+
+            if (name == "null")
+            {
+                result = null;
+                return false;
+            }
+
+            if (name == "*")
+            {
+                if (TagCache.Index.Count == 0)
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.Index.Last();
+                return true;
+            }
+
+            if (name.StartsWith("*."))
+            {
+                if (!name.TrySplit('.', out var startNamePieces) || !TryParseGroupTag(startNamePieces[1], out var starGroupTag))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.Index.Last(tag => tag.IsInGroup(starGroupTag));
+                return true;
+            }
+
+            if (name.StartsWith("0x"))
+            {
+                name = name.Substring(2);
+
+                if (name.TrySplit('.', out var hexNamePieces))
+                    name = hexNamePieces[0];
+
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !TagCache.Index.Contains(tagIndex))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.Index[tagIndex];
+                return true;
+            }
+
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[1], out var groupTag))
+                throw new Exception($"Invalid tag name: {name}");
+
+            var tagName = namePieces[0];
+
+            foreach (var nameEntry in TagNames)
+            {
+                if (nameEntry.Value != tagName)
+                    continue;
+
+                var instance = TagCache.Index[nameEntry.Key];
+
+                if (instance.Group.Tag == groupTag)
+                {
+                    result = instance;
+                    return true;
+                }
+            }
+
+            Console.WriteLine($"Tag not found: {name}");
+            result = null;
+            return true;
+        }
+
+        public CachedTagInstance GetTag(string name)
+        {
+            if (TryGetTag(name, out var result))
+                return result;
+            
+            throw new KeyNotFoundException(name);
+        }
+
+        /// <summary>
+        /// Attempts to parse a group tag or name.
+        /// </summary>
+        /// <param name="name">The tag or name of the tag group.</param>
+        /// <param name="result">The resulting group tag.</param>
+        /// <returns>True if the group tag was parsed, false otherwise.</returns>
+        public bool TryParseGroupTag(string name, out Tag result)
+        {
+            if (TagDefinition.Exists(name))
+            {
+                result = new Tag(name);
+                return true;
+            }
+
+            foreach (var pair in TagGroup.Instances)
+            {
+                if (name == GetString(pair.Value.Name))
+                {
+                    result = pair.Value.Tag;
+                    return true;
+                }
+            }
+
+            result = Tag.Null;
+            return false;
+        }
+
+        /// <summary>
+        /// Parses a group tag or name;
+        /// </summary>
+        /// <param name="name">The tag or name of the tag group.</param>
+        /// <returns>The resulting group tag.</returns>
+        public Tag ParseGroupTag(string name)
+        {
+            if (TryParseGroupTag(name, out var result))
+                return result;
+
+            throw new KeyNotFoundException(name);
+        }
+
+        /// <summary>
+        /// Loads tag file names from the appropriate tag_list.csv file.
+        /// </summary>
+        /// <param name="path">The path to the tag_list.csv file.</param>
+        public void LoadTagNames(string path = null)
+        {
+            if (path == null)
+                path = Path.Combine(Directory.FullName, "tag_list.csv");
+
+            if (File.Exists(path))
+            {
+                using (var tagNamesStream = File.Open(path, FileMode.Open, FileAccess.Read))
                 {
                     var reader = new StreamReader(tagNamesStream);
 
@@ -202,6 +362,10 @@ namespace TagTool.Cache
             }
         }
 
+        /// <summary>
+        /// Saves tag file names to the appropriate tag_list.csv file.
+        /// </summary>
+        /// <param name="path">The path to the tag_list.csv file.</param>
         public void SaveTagNames(string path = null)
         {
             var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "tag_list.csv"));
@@ -376,7 +540,7 @@ namespace TagTool.Cache
                 stream.Position = 0;
                 cache = new ResourceCache(stream);
             }
-            
+
             return cache;
         }
 
@@ -414,7 +578,7 @@ namespace TagTool.Cache
                 throw new ArgumentNullException("resource");
             if (!dataStream.CanRead)
                 throw new ArgumentException("The input stream is not open for reading", "dataStream");
-            
+
             var cache = GetResourceCache(resource);
             using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
             {

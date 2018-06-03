@@ -80,8 +80,7 @@ namespace TagTool.Commands.Porting
                 return false;
             }
 
-            string blamWeapName = args[0];
-            
+            var blamWeapName = args[0];
             var blamWeapTag = BlamCache.IndexItems.Find(x => x.Name == blamWeapName);
 
             if (blamWeapTag == null)
@@ -90,18 +89,7 @@ namespace TagTool.Commands.Porting
                 return false;
             }
 
-            // Check if ED has named tags, or has that weapon.
-            if (!CacheContext.TagNames.ContainsValue(blamWeapName))
-            {
-                Console.WriteLine($"{blamWeapName} does not exist or is named incorrectly or tags are not named.");
-                return false;
-            }
-
-            CachedTagInstance edWeapTag = null;
-
-            edWeapTag = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapTag == null)
+            if (!CacheContext.TryGetTag<Weapon>(blamWeapName, out var edWeapTag))
             {
                 Console.WriteLine($"{blamWeapName} does not exist or is named incorrectly or tags are not named.");
                 return false;
@@ -118,18 +106,11 @@ namespace TagTool.Commands.Porting
             // Get blam FP mode name
             blamFPmodeName = BlamCache.IndexItems.Find(x => x.ID == blamWeap.FirstPerson[0].FirstPersonAnimations.Index).Name;
 
-            // ED:
-            // Find weapon
-            var edWeapInstance = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapInstance == null)
-                throw new Exception($"Failed to find ED weapon {blamWeapName}");
-
             // Deserialize weap tag
             Weapon edWeap;
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeapInstance);
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeapTag);
                 edWeap = CacheContext.Deserializer.Deserialize<Weapon>(edContext);
             }
 
@@ -150,10 +131,8 @@ namespace TagTool.Commands.Porting
             var portTagCommand = new PortTagCommand(CacheContext, BlamCache);
             portTagCommand.Execute(new List<string> { "replace", "jmad", blamFPmodeName });
 
-            // Set new models
-            edWeap.FirstPerson[0].FirstPersonAnimations = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamFPmodeName}.jmad");
-
-            if (edWeap.FirstPerson[0].FirstPersonAnimations == null)
+            // Set new model animations
+            if (!CacheContext.TryGetTag<ModelAnimationGraph>(blamFPmodeName, out edWeap.FirstPerson[0].FirstPersonAnimations))
             {
                 Console.WriteLine($"Failed to find the ported jmad tag: {blamFPmodeName}");
                 return false;
@@ -162,7 +141,7 @@ namespace TagTool.Commands.Porting
             // Serialize ED weap tag
             using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
             {
-                var context = new TagSerializationContext(stream, CacheContext, edWeapInstance);
+                var context = new TagSerializationContext(stream, CacheContext, edWeapTag);
                 CacheContext.Serializer.Serialize(context, edWeap);
             }
 
@@ -205,11 +184,7 @@ namespace TagTool.Commands.Porting
                 return false;
             }
 
-            CachedTagInstance edWeapTag = null;
-
-            edWeapTag = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapTag == null)
+            if (!CacheContext.TryGetTag<Weapon>(blamWeapName, out var edWeapTag))
             {
                 Console.WriteLine($"{blamWeapName} does not exist or is named incorrectly or tags are not named.");
                 return false;
@@ -225,19 +200,12 @@ namespace TagTool.Commands.Porting
 
             var blamContext2 = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.Find(x => x.ID == blamWeap.Barrels[0].FiringEffects[0].FiringEffect2.Index));
             var blamEffe = BlamCache.Deserializer.Deserialize<Effect>(blamContext2);
-
-            // ED:
-            // Find weapon
-            var edWeapInstance = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamWeapName}.weap");
-
-            if (edWeapInstance == null)
-                throw new Exception($"Failed to find ED weapon {blamWeapName}");
-
+            
             // Deserialize weap tag
             Weapon edWeap;
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeapInstance);
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edWeapTag);
                 edWeap = CacheContext.Deserializer.Deserialize<Weapon>(edContext);
             }
 
@@ -255,7 +223,8 @@ namespace TagTool.Commands.Porting
 
                     portTagCommand.Execute(new List<string> { "lsnd", blamSndName });
 
-                    edWeap.Attachments[j].Attachment2 = ArgumentParser.ParseTagSpecifier(CacheContext, blamSndName + ".lsnd");
+                    if (!CacheContext.TryGetTag<SoundLooping>(blamSndName, out edWeap.Attachments[j].Attachment2))
+                        throw new KeyNotFoundException($"{blamSndName}.sound_looping");
                 }
 
                 // Serialize ED weap tag
@@ -330,9 +299,7 @@ namespace TagTool.Commands.Porting
                 // Get blam sound name
                 blamSndName = BlamCache.IndexItems.Find(x => x.ID == a.Type.Index).Name;
 
-                edEffe.Events[index].Parts[i].Type = ArgumentParser.ParseTagSpecifier(CacheContext, $"{blamSndName}.snd!");
-
-                if (edEffe.Events[index].Parts[i].Type == null || edEffe.Events[index].Parts[i].Type.Index > 0x7FFF)
+                if (!CacheContext.TryGetTag<Sound>(blamSndName, out edEffe.Events[index].Parts[i].Type) || edEffe.Events[index].Parts[i].Type.Index > 0x7FFF)
                     throw new Exception($"edEffe.Events[0].Parts[{i}].Type is null, sound tag has not converted.");
             }
 
@@ -356,12 +323,7 @@ namespace TagTool.Commands.Porting
         
         public bool FixCinematicScene(List<string> args)
         {
-            if (args.Count != 1)
-                return false;
-
-            var edTag = ArgumentParser.ParseTagSpecifier(CacheContext, args[0]);
-
-            if (edTag == null)
+            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var edTag))
                 return false;
 
             CinematicScene cisc;

@@ -331,9 +331,9 @@ namespace TagTool.Commands.Editing
             }
             else if (type == typeof(CachedTagInstance))
             {
-                if (args.Count != 1)
+                if (args.Count != 1 || !CacheContext.TryGetTag(input, out var tag))
                     return false;
-                output = ArgumentParser.ParseTagSpecifier(CacheContext, input);
+                output = tag;
             }
             else if (type == typeof(StringId))
             {
