@@ -47,6 +47,9 @@ namespace TagTool.Commands.Common
 
         private void ListCommands(CommandContext context, HashSet<string> ignore)
         {
+            if (context.Parent != null)
+                ListCommands(context.Parent, ignore);
+
             // Sort commands and pad them to the length of the longest command name
             // Commands which aren't inherited or which have already been displayed are ignored
             var commands = context.Commands
@@ -63,9 +66,6 @@ namespace TagTool.Commands.Common
                 ignore.Add(command.Name);
             }
             Console.WriteLine();
-
-            if (context.Parent != null)
-                ListCommands(context.Parent, ignore);
         }
 
         private void DisplayCommandHelp(string commandName)
