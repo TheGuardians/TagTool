@@ -574,17 +574,28 @@ namespace TagTool.Commands.Editing
 
                 output = bytes.ToArray();
             }
-            else if (type == typeof(RealRgbColor))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k))
-                    return false;
-                output = new RealRgbColor(i, j, k);
-            }
-            else if (type == typeof(Bounds<Angle>))
+			else if (type == typeof(RealRgbColor))
+			{
+				if (args.Count != 3)
+					return false;
+				if (!float.TryParse(args[0], out float i) ||
+					!float.TryParse(args[1], out float j) ||
+					!float.TryParse(args[2], out float k))
+					return false;
+				output = new RealRgbColor(i, j, k);
+			}
+			else if (type == typeof(ArgbColor))
+			{
+				if (args.Count != 4)
+					return false;
+				if (!byte.TryParse(args[0], out byte i) ||
+					!byte.TryParse(args[1], out byte j) ||
+					!byte.TryParse(args[2], out byte k) ||
+					!byte.TryParse(args[3], out byte w))
+					return false;
+				output = new ArgbColor(i, j, k, w);
+			}
+			else if (type == typeof(Bounds<Angle>))
             {
                 if (args.Count != 2)
                     return false;
