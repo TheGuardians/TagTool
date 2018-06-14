@@ -383,7 +383,11 @@
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
+    <Compile Include="Shaders\Compiler\D3D\D3D.cs" />
     <Compile Include="Damage\DamageReportingType.cs" />
+    <Compile Include="Shaders\Compiler\D3D\D3DCompiler.cs" />
+    <Compile Include="Shaders\Compiler\D3D\Include.cs" />
+    <Compile Include="Shaders\Compiler\ShaderGenerator.cs" />
     <Compile Include="Shaders\ShaderDrawMode.cs" />
     <Compile Include="Shaders\ShaderParameter.cs" />
     <Compile Include="Shaders\PixelShaderBlock.cs" />

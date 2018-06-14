@@ -17,6 +17,8 @@ namespace TagTool.Commands
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
+            var sh = new Shaders.Compiler.ShaderGenerator();
+
             // Get the file path from the first argument
             // If no argument is given, load tags.dat
             var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
