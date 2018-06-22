@@ -122,7 +122,7 @@ namespace TagTool.Tags
             { new Tag("mffn"), typeof(Muffin) },
             { new Tag("mode"), typeof(RenderModel) },
             { new Tag("mulg"), typeof(MultiplayerGlobals) },
-            { new Tag("nclt"), typeof(NewCinematicLightning) },
+            { new Tag("nclt"), typeof(NewCinematicLighting) },
             { new Tag("obje"), typeof(GameObject) },
             { new Tag("pecp"), typeof(ParticleEmitterCustomPoints) },
             { new Tag("pdm!"), typeof(PodiumSettings) },

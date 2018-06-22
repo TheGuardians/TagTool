@@ -18,7 +18,7 @@ namespace TagTool.Commands.Porting
 
         private CinematicScene ConvertCinematicScene(CinematicScene cisc)
         {
-            foreach (var shot in cisc.Shots)
+            /*foreach (var shot in cisc.Shots)
             {
                 var frames = new List<CinematicScene.ShotBlock.FrameBlock>();
 
@@ -70,7 +70,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var script in shot.ImportScripts)
                     script.Frame = Math.Min(script.Frame == 1 ? 1 : script.Frame * 2, shot.LoadedFrameCount - 1);
-            }
+            }*/
 
             return cisc;
         }

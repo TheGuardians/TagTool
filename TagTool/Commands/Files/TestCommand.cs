@@ -120,6 +120,14 @@ namespace TagTool.Commands.Files
 
                         foreach (var script in shot.ImportScripts)
                             script.Frame = Math.Min(script.Frame == 1 ? 1 : script.Frame * 2, shot.LoadedFrameCount - 1);
+
+                        for (var i = 0; i < shot.LoadedFrameCount; i++)
+                        {
+                            if (i + 2 >= shot.LoadedFrameCount)
+                                break;
+
+                            shot.Frames[i + 1].Flags = shot.Frames[i].Flags;
+                        }
                     }
 
                     CacheContext.Serialize(tagContext, tagDefinition);

@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "new_cinematic_lightning", Tag = "nclt", Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
-    public class NewCinematicLightning
+    [TagStructure(Name = "new_cinematic_lighting", Tag = "nclt", Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
+    public class NewCinematicLighting
     {
         public List<UnknownBlock> Unknown1;
-        public List<LightningBlock> Lightning;
+        public List<LightingBlock> Lighting;
         public float Unknown2;
 
         [TagStructure(Size = 0x20)]
@@ -25,7 +25,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class LightningBlock
+        public class LightingBlock
         {
             public float Unknown1;
             public float Unknown2;
