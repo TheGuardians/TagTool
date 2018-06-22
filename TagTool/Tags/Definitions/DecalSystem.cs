@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
         public float Unknown3;
         public float Unknown4;
         public float Unknown5;
-        public List<DecalSystemBlock> DecalSystem2;
+        public List<DecalSystemBlock> Decal;
         public float Unknown6;
 
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]

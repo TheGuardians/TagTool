@@ -350,12 +350,11 @@ namespace TagTool.Commands.Porting
                     case "rmtr":
                         return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
 
-					case "rmcs":
+                    case "rmcs":
                     case "rmrd":
                     case "rmsh":
                     case "rmss":
                         return CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-
                 }
             }
 

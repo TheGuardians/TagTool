@@ -352,29 +352,25 @@ namespace TagTool.Commands.Porting
                             (shot.Frames[i].Position.Y + shot.Frames[i + 1].Position.Y) / 2f,
                             (shot.Frames[i].Position.Z + shot.Frames[i + 1].Position.Z) / 2f
                         ),
-                        Unknown1 = (shot.Frames[i].Unknown1 + shot.Frames[i + 1].Unknown1) / 2,
-                        Unknown2 = (shot.Frames[i].Unknown2 + shot.Frames[i + 1].Unknown2) / 2,
-                        Unknown3 = (shot.Frames[i].Unknown3 + shot.Frames[i + 1].Unknown3) / 2,
-                        Unknown4 = (shot.Frames[i].Unknown4 + shot.Frames[i + 1].Unknown4) / 2,
-                        Unknown5 = (shot.Frames[i].Unknown5 + shot.Frames[i + 1].Unknown5) / 2,
-                        Unknown6 = (shot.Frames[i].Unknown6 + shot.Frames[i + 1].Unknown6) / 2,
-                        Unknown7 = (shot.Frames[i].Unknown7 + shot.Frames[i + 1].Unknown7) / 2,
-                        Unknown8 = (shot.Frames[i].Unknown8 + shot.Frames[i + 1].Unknown8) / 2,
-                        FOV = (shot.Frames[i].FOV + shot.Frames[i + 1].FOV) / 2,
-                        NearPlane = (shot.Frames[i].NearPlane + shot.Frames[i + 1].NearPlane) / 2,
-                        FarPlane = (shot.Frames[i].FarPlane + shot.Frames[i + 1].FarPlane) / 2,
-                        FocalDepth = (shot.Frames[i].FocalDepth + shot.Frames[i + 1].FocalDepth) / 2,
-                        BlurAmount = (shot.Frames[i].BlurAmount + shot.Frames[i + 1].BlurAmount) / 2,
-
+                        Unknown1 = (shot.Frames[i].Unknown1 + shot.Frames[i + 1].Unknown1) / 2f,
+                        Unknown2 = (shot.Frames[i].Unknown2 + shot.Frames[i + 1].Unknown2) / 2f,
+                        Unknown3 = (shot.Frames[i].Unknown3 + shot.Frames[i + 1].Unknown3) / 2f,
+                        Unknown4 = (shot.Frames[i].Unknown4 + shot.Frames[i + 1].Unknown4) / 2f,
+                        Unknown5 = (shot.Frames[i].Unknown5 + shot.Frames[i + 1].Unknown5) / 2f,
+                        Unknown6 = (shot.Frames[i].Unknown6 + shot.Frames[i + 1].Unknown6) / 2f,
+                        Unknown7 = (shot.Frames[i].Unknown7 + shot.Frames[i + 1].Unknown7) / 2f,
+                        Unknown8 = (shot.Frames[i].Unknown8 + shot.Frames[i + 1].Unknown8) / 2f,
+                        FOV = (shot.Frames[i].FOV + shot.Frames[i + 1].FOV) / 2f,
+                        NearPlane = (shot.Frames[i].NearPlane + shot.Frames[i + 1].NearPlane) / 2f,
+                        FarPlane = (shot.Frames[i].FarPlane + shot.Frames[i + 1].FarPlane) / 2f,
+                        FocalDepth = (shot.Frames[i].FocalDepth + shot.Frames[i + 1].FocalDepth) / 2f,
+                        BlurAmount = (shot.Frames[i].BlurAmount + shot.Frames[i + 1].BlurAmount) / 2f
                     });
                 }
 
                 shot.Frames = newFrames;
                 newFrames = new List<CinematicScene.ShotBlock.FrameBlock>();
                 shot.LoadedFrameCount *= 2;
-
-                break;
-
             }
 
             using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))

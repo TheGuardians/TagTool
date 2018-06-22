@@ -1862,16 +1862,14 @@ namespace TagTool.Tags.Definitions
                 public short CommandScriptIndex;
                 public short Unknown7;
 
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public StringId InitialState;
+
                 public short ActivityIndex;
                 public short ActivityUnknown;
 
                 public short PointSetIndex;
                 public SquadPatrolMode PatrolMode;
-
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown8;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown9;
 
                 public List<SquadPoint> Points;
             }

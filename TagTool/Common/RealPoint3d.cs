@@ -31,6 +31,42 @@ namespace TagTool.Common
         public static bool operator !=(RealPoint3d a, RealPoint3d b) =>
             !a.Equals(b);
 
+        public static RealPoint3d operator +(RealPoint3d a, RealPoint3d b) =>
+            new RealPoint3d(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+
+        public static RealPoint3d operator +(RealPoint3d a, float b) =>
+            new RealPoint3d(a.X + b, a.Y + b, a.Z + b);
+
+        public static RealPoint3d operator +(float a, RealPoint3d b) =>
+            new RealPoint3d(a + b.X, a + b.Y, a + b.Z);
+
+        public static RealPoint3d operator -(RealPoint3d a, RealPoint3d b) =>
+            new RealPoint3d(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+
+        public static RealPoint3d operator -(RealPoint3d a, float b) =>
+            new RealPoint3d(a.X - b, a.Y - b, a.Z - b);
+
+        public static RealPoint3d operator -(float a, RealPoint3d b) =>
+            new RealPoint3d(a - b.X, a - b.Y, a - b.Z);
+
+        public static RealPoint3d operator *(RealPoint3d a, RealPoint3d b) =>
+            new RealPoint3d(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+
+        public static RealPoint3d operator *(RealPoint3d a, float b) =>
+            new RealPoint3d(a.X * b, a.Y * b, a.Z * b);
+
+        public static RealPoint3d operator *(float a, RealPoint3d b) =>
+            new RealPoint3d(a * b.X, a * b.Y, a * b.Z);
+
+        public static RealPoint3d operator /(RealPoint3d a, RealPoint3d b) =>
+            new RealPoint3d(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
+
+        public static RealPoint3d operator /(RealPoint3d a, float b) =>
+            new RealPoint3d(a.X / b, a.Y / b, a.Z / b);
+
+        public static RealPoint3d operator /(float a, RealPoint3d b) =>
+            new RealPoint3d(a / b.X, a / b.Y, a / b.Z);
+
         public override int GetHashCode() =>
             13 * 17 + X.GetHashCode()
                * 17 + Y.GetHashCode()

@@ -57,7 +57,8 @@ namespace TagTool.Commands.Files
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
                 { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache." },
                 { "findconicaleffects", "" },
-                { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." }
+                { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
+                { "cisc", "" }
             };
 
             switch (name)
@@ -73,6 +74,7 @@ namespace TagTool.Commands.Files
                 case "namermt2": return NameRmt2();
                 case "findconicaleffects": return FindConicalEffects();
                 case "mergeglobaltags": return MergeGlobalTags(args);
+                case "cisc": return Cisc(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -80,6 +82,51 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool Cisc(List<string> args)
+        {
+            if (args.Count != 0)
+                return false;
+
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                foreach (var tagInstance in CacheContext.TagCache.Index)
+                {
+                    if (tagInstance == null || !tagInstance.IsInGroup("cisc"))
+                        continue;
+
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, tagInstance);
+                    var tagDefinition = CacheContext.Deserialize<CinematicScene>(tagContext);
+
+                    foreach (var shot in tagDefinition.Shots)
+                    {
+                        shot.LoadedFrameCount -= 1;
+
+                        foreach (var sound in shot.Sounds)
+                            sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
+
+                        foreach (var sound in shot.BackgroundSounds)
+                            sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
+
+                        foreach (var effect in shot.Effects)
+                            effect.Frame = Math.Min(effect.Frame == 1 ? 1 : effect.Frame * 2, shot.LoadedFrameCount - 1);
+
+                        foreach (var effect in shot.ScreenEffects)
+                        {
+                            effect.StartFrame = Math.Min(effect.StartFrame == 1 ? 1 : effect.StartFrame * 2, shot.LoadedFrameCount - 1);
+                            effect.EndFrame = Math.Min(effect.EndFrame == 1 ? 1 : effect.EndFrame * 2, shot.LoadedFrameCount - 1);
+                        }
+
+                        foreach (var script in shot.ImportScripts)
+                            script.Frame = Math.Min(script.Frame == 1 ? 1 : script.Frame * 2, shot.LoadedFrameCount - 1);
+                    }
+
+                    CacheContext.Serialize(tagContext, tagDefinition);
+                }
+            }
+
+            return true;
         }
 
         private Globals MergeGlobals(List<Globals> matgs)
@@ -1102,7 +1149,14 @@ namespace TagTool.Commands.Files
                 }
             }
         }
-        
+
+        [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x20)]
+        public class RenderMethodFast
+        {
+            public CachedTagInstance BaseRenderMethod;
+            public List<RenderMethod.UnknownBlock> Unknown;
+        }
+
         public bool NameRmt2()
         {
             var validShaders = new List<string> { "rmsh", "rmtr", "rmhg", "rmfl", "rmcs", "rmss", "rmd ", "rmw ", "rmzo", "ltvl", "prt3", "beam", "decs", "cntl", "rmzo", "rmct", "rmbk" };
@@ -1162,15 +1216,15 @@ namespace TagTool.Commands.Files
                         using (var cacheStream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
                         using (var cacheReader = new EndianReader(cacheStream))
                         {
-                            cacheStream.Seek(edInstance.HeaderOffset + edInstance.DefinitionOffset + 0x10, SeekOrigin.Begin);
-                            var unknowns = (List<RenderMethod.UnknownBlock>)CacheContext.Deserializer.DeserializeTagBlock(cacheReader, new DataSerializationContext(cacheReader), typeof(List<RenderMethod.UnknownBlock>));
-                            
-                            if (unknowns == null || unknowns.Count == 0)
+                            var edContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var edDefinition = CacheContext.Deserializer.Deserialize<RenderMethodFast>(new TagSerializationContext(cacheStream, CacheContext, edInstance));
+
+                            if (edDefinition.Unknown == null || edDefinition.Unknown.Count == 0)
                                 continue;
 
                             renderMethod = new RenderMethod
                             {
-                                Unknown = unknowns
+                                Unknown = edDefinition.Unknown
                             };
                         }
 
@@ -1199,7 +1253,7 @@ namespace TagTool.Commands.Files
                     case "prt3": var e = (Particle)rm; NameRmt2Part(type, e.RenderMethod, edInstance, e.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
                     case "beam": var a = (BeamSystem)rm; foreach (var f in a.Beam) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
                     case "cntl": var b = (ContrailSystem)rm; foreach (var f in b.Contrail) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
-                    case "decs": var c = (DecalSystem)rm; foreach (var f in c.DecalSystem2) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
+                    case "decs": var c = (DecalSystem)rm; foreach (var f in c.Decal) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
                     case "ltvl": var d = (LightVolumeSystem)rm; foreach (var f in d.LightVolume) NameRmt2Part(type, f.RenderMethod, edInstance, f.RenderMethod.ShaderProperties[0].Template.Index, newlyNamedRmt2); break;
 
                     default:

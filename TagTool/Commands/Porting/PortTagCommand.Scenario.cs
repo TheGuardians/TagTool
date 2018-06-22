@@ -18,16 +18,60 @@ namespace TagTool.Commands.Porting
 
         private CinematicScene ConvertCinematicScene(CinematicScene cisc)
         {
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            foreach (var shot in cisc.Shots)
             {
-                foreach (var shot in cisc.Shots)
+                var frames = new List<CinematicScene.ShotBlock.FrameBlock>();
+
+                for (int frameIndex = 0; frameIndex < shot.LoadedFrameCount; frameIndex++)
                 {
-                    shot.ScreenEffects = new List<CinematicScene.ShotBlock.ScreenEffectBlock>();
-                    shot.Unknown5 = 0;
-                    shot.Unknown6 = 0;
-                    shot.Unknown7 = 0;
+                    frames.Add(shot.Frames[frameIndex]);
+
+                    if (frameIndex + 1 == shot.LoadedFrameCount)
+                        break;
+
+                    frames.Add(new CinematicScene.ShotBlock.FrameBlock
+                    {
+                        Position = (shot.Frames[frameIndex].Position + shot.Frames[frameIndex + 1].Position) / 2f,
+                        Unknown1 = (shot.Frames[frameIndex].Unknown1 + shot.Frames[frameIndex + 1].Unknown1) / 2f,
+                        Unknown2 = (shot.Frames[frameIndex].Unknown2 + shot.Frames[frameIndex + 1].Unknown2) / 2f,
+                        Unknown3 = (shot.Frames[frameIndex].Unknown3 + shot.Frames[frameIndex + 1].Unknown3) / 2f,
+                        Unknown4 = (shot.Frames[frameIndex].Unknown4 + shot.Frames[frameIndex + 1].Unknown4) / 2f,
+                        Unknown5 = (shot.Frames[frameIndex].Unknown5 + shot.Frames[frameIndex + 1].Unknown5) / 2f,
+                        Unknown6 = (shot.Frames[frameIndex].Unknown6 + shot.Frames[frameIndex + 1].Unknown6) / 2f,
+                        Unknown7 = (shot.Frames[frameIndex].Unknown7 + shot.Frames[frameIndex + 1].Unknown7) / 2f,
+                        Unknown8 = (shot.Frames[frameIndex].Unknown8 + shot.Frames[frameIndex + 1].Unknown8) / 2f,
+                        FOV = (shot.Frames[frameIndex].FOV + shot.Frames[frameIndex + 1].FOV) / 2f,
+                        NearPlane = (shot.Frames[frameIndex].NearPlane + shot.Frames[frameIndex + 1].NearPlane) / 2f,
+                        FarPlane = (shot.Frames[frameIndex].FarPlane + shot.Frames[frameIndex + 1].FarPlane) / 2f,
+                        FocalDepth = (shot.Frames[frameIndex].FocalDepth + shot.Frames[frameIndex + 1].FocalDepth) / 2f,
+                        BlurAmount = (shot.Frames[frameIndex].BlurAmount + shot.Frames[frameIndex + 1].BlurAmount) / 2f
+                    });
                 }
+
+                shot.Frames = frames;
+                shot.LoadedFrameCount *= 2;
+                shot.LoadedFrameCount -= 1;
+
+                foreach (var sound in shot.Sounds)
+                    sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
+
+                foreach (var sound in shot.BackgroundSounds)
+                    sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
+
+                foreach (var effect in shot.Effects)
+                    effect.Frame = Math.Min(effect.Frame == 1 ? 1 : effect.Frame * 2, shot.LoadedFrameCount - 1);
+
+                if (shot.ScreenEffects != null)
+                    foreach (var effect in shot.ScreenEffects)
+                    {
+                        effect.StartFrame = Math.Min(effect.StartFrame == 1 ? 1 : effect.StartFrame * 2, shot.LoadedFrameCount - 1);
+                        effect.EndFrame = Math.Min(effect.EndFrame == 1 ? 1 : effect.EndFrame * 2, shot.LoadedFrameCount - 1);
+                    }
+
+                foreach (var script in shot.ImportScripts)
+                    script.Frame = Math.Min(script.Frame == 1 ? 1 : script.Frame * 2, shot.LoadedFrameCount - 1);
             }
+
             return cisc;
         }
 
@@ -92,20 +136,16 @@ namespace TagTool.Commands.Porting
                         foreach (var spawnpoint in baseSquad.StartingLocations)
                         {
                             spawnpoint.Name = ConvertStringId(spawnpoint.Name);
+                            spawnpoint.InitialEquipmentIndex = -1;
                             spawnpoint.ActorVariant = ConvertStringId(spawnpoint.ActorVariant);
                             spawnpoint.VehicleVariant = ConvertStringId(spawnpoint.VehicleVariant);
+                            spawnpoint.InitialMovementMode = spawnpoint.InitialMovementMode_H3;
 
                             foreach (var squadpoint in spawnpoint.Points)
-                            {
                                 squadpoint.ActivityName = ConvertStringId(squadpoint.ActivityName);
-                            }
-                        }
 
-
-
-                        //Append all starting locations from all baseSquads into Spawnpoints
-                        foreach (var spawnpoint in baseSquad.StartingLocations)
                             squad.SpawnPoints.Add(spawnpoint);
+                        }
 
                         Scenario.Squad.Cell designer = new Scenario.Squad.Cell
                         {

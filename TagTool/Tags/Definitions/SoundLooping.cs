@@ -171,7 +171,7 @@ namespace TagTool.Tags.Definitions
             public float FadeInDuration;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown1;
+            public float Unknown1;
 
             public float FadeOutDuration;
 
@@ -220,7 +220,6 @@ namespace TagTool.Tags.Definitions
             public Bounds<Angle> YawBounds;
             public Bounds<Angle> PitchBounds;
             public Bounds<float> DistanceBounds;
-            
         }
     }
 }

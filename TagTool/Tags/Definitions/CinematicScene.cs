@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
             public int Unknown1;
             public uint Unknown2;
             public float Unknown3;
-            public List<LightningBlock> Lightning;
+            public List<LightingBlock> Lighting;
             public List<UnknownBlock> Unknown4;
             public List<SoundBlock> Sounds;
             public List<BackgroundSoundBlock> BackgroundSounds;
@@ -98,7 +98,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
-            public class LightningBlock
+            public class LightingBlock
             {
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown;

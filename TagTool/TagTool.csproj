@@ -262,6 +262,7 @@
     <Compile Include="Commands\ModelAnimationGraphs\AnimationContextFactory.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\GetResourceInfoCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ResourceData.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\SortModesCommand.cs" />
     <Compile Include="Commands\Models\ExtractBitmapsCommand.cs" />
     <Compile Include="Commands\Models\ExtractModelCommand.cs" />
     <Compile Include="Commands\Models\ListVariantsCommand.cs" />

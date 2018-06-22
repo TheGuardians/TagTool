@@ -577,7 +577,7 @@ namespace TagTool.Commands.Tags
                 var edContext = new TagSerializationContext(stream, CacheContext, instance);
                 shader = CacheContext.Deserializer.Deserialize<DecalSystem>(edContext);
 
-                foreach (var decalSystem in shader.DecalSystem2)
+                foreach (var decalSystem in shader.Decal)
                 {
                     if (!tagNames.ContainsKey(decalSystem.RenderMethod.BaseRenderMethod.Index))
                     {

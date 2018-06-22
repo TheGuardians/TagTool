@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Common;
 
 namespace TagTool.Tags
@@ -70,31 +71,35 @@ namespace TagTool.Tags
         /// <summary>
         /// Determines whether this group is a subgroup of another group.
         /// </summary>
-        /// <param name="group">The group to check.</param>
+        /// <param name="groups">The group to check.</param>
         /// <returns><c>true</c> if this group is a subgroup of the other group.</returns>
-        public bool BelongsTo(TagGroup group)
+        public bool BelongsTo(params TagGroup[] groups)
         {
-            return BelongsTo(group.Tag);
+            return BelongsTo(groups.Select(group => group.Tag).ToArray());
         }
 
         /// <summary>
         /// Determines whether this group is a subgroup of another group.
         /// </summary>
-        /// <param name="groupTag">The group tag to check, as a 4-character string.</param>
+        /// <param name="groupTags">The group tag to check, as a 4-character string.</param>
         /// <returns><c>true</c> if this group is a subgroup of the group tag.</returns>
-        public bool BelongsTo(string groupTag)
+        public bool BelongsTo(params string[] groupTags)
         {
-            return BelongsTo(new Tag(groupTag));
+            return BelongsTo(groupTags.Select(groupTag => new Tag(groupTag)).ToArray());
         }
 
         /// <summary>
         /// Determines whether this group is a subgroup of another group.
         /// </summary>
-        /// <param name="groupTag">The group tag to check.</param>
+        /// <param name="groupTags">The group tag to check.</param>
         /// <returns><c>true</c> if this group is a subgroup of the group tag.</returns>
-        public bool BelongsTo(Tag groupTag)
+        public bool BelongsTo(params Tag[] groupTags)
         {
-            return Tag == groupTag || ParentTag == groupTag || GrandparentTag == groupTag;
+            foreach (var groupTag in groupTags)
+                if (Tag == groupTag || ParentTag == groupTag || GrandparentTag == groupTag)
+                    return true;
+
+            return false;
         }
 
         public bool Equals(TagGroup other)

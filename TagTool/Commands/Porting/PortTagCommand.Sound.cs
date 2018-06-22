@@ -727,22 +727,23 @@ namespace TagTool.Commands.Porting
 
             if (soundLooping.SoundClass == SoundLooping.SoundClassValue.FirstPersonOutside)
                 soundLooping.SoundClass = SoundLooping.SoundClassValue.OutsideSurroundTail;
-
-            // Seems to be an option to make it loop better
-
-            soundLooping.Unknown4 = 1;
-
+            
+            /* unsuccessful hacks of death and suffering
             foreach (var track in soundLooping.Tracks)
             {
-                if (BlamCache.Version == CacheVersion.Halo3Retail)
-                {
-                    track.Unknown1 = 0;
-                    track.Unknown2 = 0;
-                    track.Unknown3 = 0;
-                    track.Unknown5 = 0;
-                    track.Unknown6 = 0;
-                }
+                track.FadeInDuration *= 2f;
+                track.Unknown1 *= 2f;
+                track.FadeOutDuration *= 2f;
+                track.AlternateCrossfadeDuration *= 2f;
+                track.Unknown5 *= 2;
+                track.AlternateFadeOutDuration *= 2f;
+                track.Unknown6 *= 2f;
             }
+
+            foreach (var detailSound in soundLooping.DetailSounds)
+                detailSound.RandomPeriodBounds = new Bounds<float>(
+                    detailSound.RandomPeriodBounds.Lower * 2f,
+                    detailSound.RandomPeriodBounds.Upper * 2f);*/
 
             return soundLooping;
         }
@@ -808,4 +809,3 @@ namespace TagTool.Commands.Porting
         }
     }
 }
-

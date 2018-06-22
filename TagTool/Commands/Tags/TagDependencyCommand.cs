@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Common;
 
 namespace TagTool.Commands.Tags
 {
@@ -52,7 +53,7 @@ namespace TagTool.Commands.Tags
 
                 case "list":
                 case "listall":
-                    return ExecuteList(tag, (args[0] == "listall"));
+                    return ExecuteList(tag, (args[0] == "listall"), args.Skip(2).ToArray());
 
                 case "liston":
                     return ExecuteListDependsOn(tag);
@@ -103,7 +104,7 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private bool ExecuteList(CachedTagInstance tag, bool all)
+        private bool ExecuteList(CachedTagInstance tag, bool all, params string[] groups)
         {
             if (tag.Dependencies.Count == 0)
             {
@@ -118,8 +119,13 @@ namespace TagTool.Commands.Tags
             else
                 dependencies = tag.Dependencies.Where(i => CacheContext.TagCache.Index.Contains(i)).Select(i => CacheContext.TagCache.Index[i]);
 
+            var groupTags = groups.Select(group => CacheContext.ParseGroupTag(group)).ToArray();
+
             foreach (var dependency in dependencies)
             {
+                if (groupTags.Length != 0 && !dependency.IsInGroup(groupTags))
+                    continue;
+
                 var tagName = CacheContext.TagNames.ContainsKey(dependency.Index) ?
                     CacheContext.TagNames[dependency.Index] :
                     $"0x{dependency.Index:X4}";

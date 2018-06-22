@@ -701,8 +701,8 @@ namespace TagTool.Commands.Tags
                     TagPrinter.PrintTagShort(decalSystemTag);
                     var context = new TagSerializationContext(stream, destCacheContext, decalSystemTag);
                     var decalSystem = destCacheContext.Deserializer.Deserialize<DecalSystem>(context);
-                    foreach (var system in decalSystem.DecalSystem2)
-                        system.RenderMethod.BaseRenderMethod = firstDecalSystem.DecalSystem2[0].RenderMethod.BaseRenderMethod;
+                    foreach (var system in decalSystem.Decal)
+                        system.RenderMethod.BaseRenderMethod = firstDecalSystem.Decal[0].RenderMethod.BaseRenderMethod;
                     destCacheContext.Serializer.Serialize(context, decalSystem);
                 }
             }

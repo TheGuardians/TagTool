@@ -86,11 +86,11 @@ namespace TagTool.Cache
         /// <summary>
         /// Determines whether the tag belongs to a tag group.
         /// </summary>
-        /// <param name="groupTag">The group tag.</param>
+        /// <param name="groupTags">The group tag.</param>
         /// <returns><c>true</c> if the tag belongs to the group.</returns>
-        public bool IsInGroup(Tag groupTag)
+        public bool IsInGroup(params Tag[] groupTags)
         {
-            return Group.BelongsTo(groupTag);
+            return Group.BelongsTo(groupTags);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="groupTag">A 4-character string representing the group tag, e.g. "scnr".</param>
         /// <returns><c>true</c> if the tag belongs to the group.</returns>
-        public bool IsInGroup(string groupTag)
+        public bool IsInGroup(params string[] groupTag)
         {
             return Group.BelongsTo(groupTag);
         }
@@ -106,11 +106,11 @@ namespace TagTool.Cache
         /// <summary>
         /// Determines whether the tag belongs to a tag group.
         /// </summary>
-        /// <param name="group">The tag group.</param>
+        /// <param name="groups">The tag group.</param>
         /// <returns><c>true</c> if the tag belongs to the group.</returns>
-        public bool IsInGroup(TagGroup group)
+        public bool IsInGroup(params TagGroup[] groups)
         {
-            return Group.BelongsTo(group);
+            return Group.BelongsTo(groups);
         }
 
         /// <summary>
