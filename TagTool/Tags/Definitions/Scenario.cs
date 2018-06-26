@@ -2289,7 +2289,8 @@ namespace TagTool.Tags.Definitions
                 public float Unknown15;
                 public float Unknown16;
                 public float Unknown17;
-                public int Unknown18;
+                public short Unknown18_1;
+                public short Unknown18_2;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<UnknownBlock> Unknown19;

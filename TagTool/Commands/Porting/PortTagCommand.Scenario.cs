@@ -106,8 +106,8 @@ namespace TagTool.Commands.Porting
             }
 
             // Null cubemaps until shaders and bitmaps are fixed
-            foreach (var sbspblock in scnr.StructureBsps)
-                sbspblock.Cubemap = null;
+            // foreach (var sbspblock in scnr.StructureBsps)
+                // sbspblock.Cubemap = null;
 
             //
             // Convert Squads
@@ -636,15 +636,7 @@ namespace TagTool.Commands.Porting
                 case ScriptExpressionType.GlobalsReference:
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
-                        switch (expr.ValueType.HaloOnline)
-                        {
-                            case ScriptValueType.HaloOnlineValue.Long:
-                                dataSize = 4; // definitely not 4
-                                break;
-                            default:
-                                dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
-                                break;
-                        }
+                        dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
                     }
                     else if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
@@ -666,6 +658,19 @@ namespace TagTool.Commands.Porting
             }
 
             Array.Reverse(expr.Data, 0, dataSize);
+
+            if (expr.ExpressionType == ScriptExpressionType.GlobalsReference)
+            {
+                if (expr.Data[2] == 0xFF && expr.Data[3] == 0xFF)
+                {
+                    var opcode = BitConverter.ToUInt16(expr.Data, 0) & ~0x8000;
+                    var name = GlobalOpcodes[BlamCache.Version][opcode];
+                    opcode = GlobalOpcodes[CacheContext.Version].First(p => p.Value == name).Key | 0x8000;
+                    var bytes = BitConverter.GetBytes(opcode);
+                    expr.Data[0] = bytes[0];
+                    expr.Data[1] = bytes[1];
+                }
+            }
         }
 
         public void ConvertScriptTagReferenceExpressionData(ScriptExpression expr)
@@ -838,6 +843,126 @@ namespace TagTool.Commands.Porting
             }
         }
 
+        private static Dictionary<CacheVersion, Dictionary<int, string>> GlobalOpcodes = new Dictionary<CacheVersion, Dictionary<int, string>>
+        {
+            [CacheVersion.Halo3Retail] = new Dictionary<int, string>
+            {
+                [0x28] = "game_speed",
+                [0xA3] = "render_lightmap_shadows",
+                [0xC8] = "texture_camera_near_plane",
+                [0xC9] = "texture_camera_exposure",
+                [0xCB] = "render_near_clip_distance",
+                [0xF3] = "render_postprocess_saturation",
+                [0xF4] = "render_postprocess_red_filter",
+                [0xF5] = "render_postprocess_green_filter",
+                [0xF6] = "render_postprocess_blue_filter",
+                [0x2C3] = "ai_current_squad",
+                [0x2C4] = "ai_current_actor",
+                [0x2CD] = "ai_combat_status_alert",
+                [0x2CE] = "ai_combat_status_active",
+                [0x2D0] = "ai_combat_status_definite",
+                [0x2D2] = "ai_combat_status_visible",
+                [0x2D4] = "ai_combat_status_dangerous",
+                [0x2D8] = "ai_task_status_inactive",
+                [0x2D9] = "ai_task_status_exhausted",
+                [0x310] = "ai_action_berserk",
+                [0x315] = "ai_action_dive_forward",
+                [0x318] = "ai_action_dive_right",
+                [0x319] = "ai_action_advance",
+                [0x31A] = "ai_action_cheer",
+                [0x31B] = "ai_action_fallback",
+                [0x31D] = "ai_action_point",
+                [0x31F] = "ai_action_shakefist",
+                [0x320] = "ai_action_signal_attack",
+                [0x321] = "ai_action_signal_move",
+                [0x322] = "ai_action_taunt",
+                [0x324] = "ai_action_wave",
+                [0x352] = "ai_movement_patrol",
+                [0x354] = "ai_movement_combat",
+                [0x355] = "ai_movement_flee",
+                [0x401] = "cinematic_letterbox_style",
+                [0x413] = "global_playtest_mode"
+            },
+            [CacheVersion.Halo3ODST] = new Dictionary<int, string>
+            {
+                [0x28] = "game_speed",
+                [0xB8] = "render_lightmap_shadows",
+                [0xE3] = "texture_camera_near_plane",
+                [0xE4] = "texture_camera_exposure",
+                [0xE6] = "render_near_clip_distance",
+                [0x10E] = "render_postprocess_saturation",
+                [0x10F] = "render_postprocess_red_filter",
+                [0x110] = "render_postprocess_green_filter",
+                [0x111] = "render_postprocess_blue_filter",
+                [0x2EF] = "ai_current_squad",
+                [0x2F0] = "ai_current_actor",
+                [0x2F9] = "ai_combat_status_alert",
+                [0x2FA] = "ai_combat_status_active",
+                [0x2FC] = "ai_combat_status_definite",
+                [0x2FE] = "ai_combat_status_visible",
+                [0x300] = "ai_combat_status_dangerous",
+                [0x304] = "ai_task_status_inactive",
+                [0x305] = "ai_task_status_exhausted",
+                [0x340] = "ai_action_berserk",
+                [0x345] = "ai_action_dive_forward",
+                [0x348] = "ai_action_dive_right",
+                [0x349] = "ai_action_advance",
+                [0x34A] = "ai_action_cheer",
+                [0x34B] = "ai_action_fallback",
+                [0x34D] = "ai_action_point",
+                [0x34F] = "ai_action_shakefist",
+                [0x350] = "ai_action_signal_attack",
+                [0x351] = "ai_action_signal_move",
+                [0x352] = "ai_action_taunt",
+                [0x354] = "ai_action_wave",
+                [0x382] = "ai_movement_patrol",
+                [0x384] = "ai_movement_combat",
+                [0x385] = "ai_movement_flee",
+                [0x432] = "cinematic_letterbox_style",
+                [0x444] = "global_playtest_mode",
+                [0x522] = "survival_performance_mode"
+            },
+            [CacheVersion.HaloOnline106708] = new Dictionary<int, string>
+            {
+                [0x2A] = "game_speed",
+                [0xBE] = "render_lightmap_shadows",
+                [0xE8] = "texture_camera_near_plane",
+                [0xE9] = "texture_camera_exposure",
+                [0xEB] = "render_near_clip_distance",
+                [0x113] = "render_postprocess_saturation",
+                [0x114] = "render_postprocess_red_filter",
+                [0x115] = "render_postprocess_green_filter",
+                [0x116] = "render_postprocess_blue_filter",
+                [0x2FA] = "ai_current_squad",
+                [0x2FB] = "ai_current_actor",
+                [0x304] = "ai_combat_status_alert",
+                [0x305] = "ai_combat_status_active",
+                [0x307] = "ai_combat_status_definite",
+                [0x309] = "ai_combat_status_visible",
+                [0x30B] = "ai_combat_status_dangerous",
+                [0x30F] = "ai_task_status_inactive",
+                [0x310] = "ai_task_status_exhausted",
+                [0x34B] = "ai_action_berserk",
+                [0x350] = "ai_action_dive_forward",
+                [0x353] = "ai_action_dive_right",
+                [0x354] = "ai_action_advance",
+                [0x355] = "ai_action_cheer",
+                [0x356] = "ai_action_fallback",
+                [0x358] = "ai_action_point",
+                [0x35A] = "ai_action_shakefist",
+                [0x35B] = "ai_action_signal_attack",
+                [0x35C] = "ai_action_signal_move",
+                [0x35D] = "ai_action_taunt",
+                [0x35F] = "ai_action_wave",
+                [0x38D] = "ai_movement_patrol",
+                [0x38F] = "ai_movement_combat",
+                [0x390] = "ai_movement_flee",
+                [0x42A] = "cinematic_letterbox_style",
+                [0x43C] = "global_playtest_mode",
+                [0x51A] = "survival_performance_mode"
+            }
+        };
+
         private static Dictionary<string, List<string>> DisabledScriptsString = new Dictionary<string, List<string>>
         {
             // Format: Script expression tagblock index (dec), expression handle (salt + tagblock index), next expression handle (salt + tagblock index), opcode, data, 
@@ -918,20 +1043,6 @@ namespace TagTool.Commands.Porting
                 "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
                 "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
-                                
-                // engine globals, thanks zedd
-                // Can and should be automatized
-                "00002196,EC070894,EC080895,0005,3C84FFFF,GlobalsReference,Boolean,and,  // global_playtest_mode",
-                "00005345,F85414E1,F85514E2,0005,1A85FFFF,GlobalsReference,Boolean,and,  // survival_performance_mode",
-                "00017846,A92A45B6,FFFFFFFF,0007,9083FFFF,GlobalsReference,Short,+,      // ai_movement_flee",
-                "00019797,B0C94D55,FFFFFFFF,0013,FB82FFFF,GlobalsReference,Ai,<=,        // ai_current_actor",
-                "00022826,BC9E592A,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
-                "00022898,BCE65972,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
-                "00022973,BD3159BD,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
-                "00023042,BD765A02,FFFFFFFF,0013,FA82FFFF,GlobalsReference,Ai,<=,        // ai_current_squad",
-                // "00025500,C710639C,C711639D,FFFF,EB80FFFF,GlobalsReference,Real,,        // render_near_clip_distance", breaks
-                "00030064,D8E47570,D8E57571,FFFF,BE80FFFF,GlobalsReference,Boolean,,     // render_lightmap_shadows",
-                "00030246,D99A7626,D99B7627,FFFF,BE80FFFF,GlobalsReference,Boolean,,     // render_lightmap_shadows",
             },
 
             ["h100"] = new List<string>
