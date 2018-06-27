@@ -58,7 +58,8 @@ namespace TagTool.Commands.Files
                 { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache." },
                 { "findconicaleffects", "" },
                 { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
-                { "cisc", "" }
+                { "cisc", "" },
+                { "defaultbitmaptypes", "" }
             };
 
             switch (name)
@@ -75,6 +76,7 @@ namespace TagTool.Commands.Files
                 case "findconicaleffects": return FindConicalEffects();
                 case "mergeglobaltags": return MergeGlobalTags(args);
                 case "cisc": return Cisc(args);
+                case "defaultbitmaptypes": return DefaultBitmapTypes(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -82,6 +84,98 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool DefaultBitmapTypes(List<string> args)
+        {
+            if (args.Count != 0)
+                return false;
+
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            {
+                var defaultBitmapNames = new List<string>
+                {
+                    @"shaders\default_bitmaps\bitmaps\gray_50_percent",
+                    @"shaders\default_bitmaps\bitmaps\alpha_grey50",
+                    @"shaders\default_bitmaps\bitmaps\color_white",
+                    @"shaders\default_bitmaps\bitmaps\default_detail",
+                    @"shaders\default_bitmaps\bitmaps\reference_grids",
+                    @"shaders\default_bitmaps\bitmaps\default_vector",
+                    @"shaders\default_bitmaps\bitmaps\default_alpha_test",
+                    @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map",
+                    @"shaders\default_bitmaps\bitmaps\color_red",
+                    @"shaders\default_bitmaps\bitmaps\alpha_white",
+                    @"shaders\default_bitmaps\bitmaps\monochrome_alpha_grid",
+                    @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear",
+                    @"shaders\default_bitmaps\bitmaps\color_black_alpha_black",
+                    @"shaders\default_bitmaps\bitmaps\dither_pattern",
+                    @"shaders\default_bitmaps\bitmaps\bump_detail",
+                    @"shaders\default_bitmaps\bitmaps\color_black",
+                    @"shaders\default_bitmaps\bitmaps\auto_exposure_weight",
+                    @"shaders\default_bitmaps\bitmaps\dither_pattern2",
+                    @"shaders\default_bitmaps\bitmaps\random4_warp",
+                    @"levels\shared\bitmaps\nature\water\water_ripples",
+                    @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
+                };
+
+                var defaultBitmapTypes = new Dictionary<string, List<string>>();
+
+                foreach (var tag in CacheContext.TagCache.Index)
+                {
+                    if (tag == null || !(tag.IsInGroup("rm  ") || tag.IsInGroup("prt3")))
+                        continue;
+
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag);
+                    var tagDefinition = CacheContext.Deserialize(tagContext, TagDefinition.Find(tag.Group));
+
+                    RenderMethod renderMethod = null;
+
+                    switch (tagDefinition)
+                    {
+                        case RenderMethod rm:
+                            renderMethod = rm;
+                            break;
+
+                        case Particle prt3:
+                            renderMethod = prt3.RenderMethod;
+                            break;
+                    }
+
+                    tagContext = new TagSerializationContext(cacheStream, CacheContext, renderMethod.ShaderProperties[0].Template);
+                    var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(tagContext);
+
+                    for (var i = 0; i < template.ShaderMaps.Count; i++)
+                    {
+                        var mapTemplate = template.ShaderMaps[i];
+                        var mapName = CacheContext.GetString(mapTemplate.Name);
+
+                        var mapShader = renderMethod.ShaderProperties[0].ShaderMaps[i];
+                        var mapTagName = CacheContext.TagNames.ContainsKey(mapShader.Bitmap.Index) ?
+                            CacheContext.TagNames[mapShader.Bitmap.Index] :
+                            $"0x{mapShader.Bitmap.Index:X4}";
+
+                        if (!mapTagName.StartsWith(@"shaders\default_bitmaps\"))
+                            continue;
+
+                        if (!defaultBitmapTypes.ContainsKey(mapTagName))
+                            defaultBitmapTypes[mapTagName] = new List<string>();
+
+                        if (!defaultBitmapTypes[mapTagName].Contains(mapName))
+                            defaultBitmapTypes[mapTagName].Add(mapName);
+                    }
+                }
+
+                foreach (var entry in defaultBitmapTypes)
+                {
+                    foreach (var type in entry.Value)
+                        Console.WriteLine($"case \"{type}\":");
+                    Console.WriteLine($"return @\"{entry.Key}\";");
+                    Console.WriteLine("\tbreak;");
+                    Console.WriteLine();
+                }
+            }
+
+            return true;
         }
 
         private bool Cisc(List<string> args)

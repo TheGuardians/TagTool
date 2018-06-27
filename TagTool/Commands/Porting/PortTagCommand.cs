@@ -199,11 +199,98 @@ namespace TagTool.Commands.Porting
             if (blamTag == null)
                 return null;
 
+            var groupTag = blamTag.GroupTag;
+
+            //
+            // Handle shaders that do not exist (either in code or in tags)
+            //
+
+            switch (groupTag.ToString())
+            {
+                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
+                    return null;
+
+                case "rmcs": // there are no rmcs tags in ms23, disable completely for now
+                case "rmct": // Cortana shaders have no example in HO, they need a real port
+                case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
+                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
+
+                case "rmhg": // rmhg have register indexing issues currently
+                    return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+
+                // Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
+                case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+                    return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
+                case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+                    Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
+                    return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
+            }
+
+            //
+            // Handle shader tags when not porting or matching shaders
+            //
+
+            if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
+                (!Flags.HasFlag(PortingFlags.ShaderTest) && !Flags.HasFlag(PortingFlags.MatchShaders)))
+            {
+                switch (groupTag.ToString())
+                {
+                    case "beam":
+                        return CacheContext.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
+
+                    case "cntl":
+                        return CacheContext.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
+
+                    case "decs":
+                        return CacheContext.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
+
+                    case "ltvl":
+                        return CacheContext.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
+
+                    case "prt3":
+                        return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
+
+                    case "rmd ":
+                        return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+
+                    case "rmfl":
+                        return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+
+                    case "rmtr":
+                        return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+
+                    case "rmrd":
+                    case "rmsh":
+                    case "rmss":
+                        return CacheContext.GetTag<Shader>(@"shaders\invalid");
+                }
+            }
+
+            //
+            // Handle tags that are not ready to be ported
+            //
+
+            if (OtherTagGroups.Contains(groupTag))
+            {
+                switch (groupTag.ToString())
+                {
+                    case "effe":
+                        return CacheContext.GetTag<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
+
+                    case "foot":
+                        return CacheContext.GetTag<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
+
+                    case "shit":
+                        return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
+
+                    case "sncl":
+                        return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
+                }
+            }
+
             //
             // Check to see if the ElDorado tag exists
             //
-
-            var groupTag = blamTag.GroupTag;
 
             CachedTagInstance edTag = null;
 
@@ -213,10 +300,10 @@ namespace TagTool.Commands.Porting
             var wasReplacing = Flags.HasFlag(PortingFlags.Replace);
             var wasNew = Flags.HasFlag(PortingFlags.New);
             
-            if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && blamTag.Name.Contains("elite"))
+            if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
-            if (!Flags.HasFlag(PortingFlags.New) || groupTag == "glps" || groupTag == "glvs" || groupTag == "rmdf")
+            if (!Flags.HasFlag(PortingFlags.New))
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -288,98 +375,6 @@ namespace TagTool.Commands.Porting
             replacedTags.Add(blamTag.Name);
             ReplacedTags[groupTag] = replacedTags;
             
-            //
-            // Handle shaders that do not exist (either in code or in tags)
-            //
-            
-            if (groupTag == "rmcs")
-                return CacheContext.GetTag<Shader>(@"shaders\invalid"); // there are no rmcs tags in ms23, disable completely for now
-            
-            switch (groupTag.ToString())
-            {
-                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
-                    return null;
-
-                case "rmct": // Cortana shaders have no example in HO, they need a real port
-                    return CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-
-                case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
-                    return CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-
-				// Don't port rmfd tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
-				case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
-					return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
-			}
-
-            //
-            // Handle shader tags when not porting or matching shaders
-            //
-
-            if ((RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)) &&
-                (!Flags.HasFlag(PortingFlags.ShaderTest) && !Flags.HasFlag(PortingFlags.MatchShaders)))
-            {
-                switch (groupTag.ToString())
-                {
-                    case "beam":
-                        return CacheContext.GetTag<BeamSystem>(@"objects\weapons\support_high\spartan_laser\fx\firing_3p");
-
-                    case "cntl":
-                        return CacheContext.GetTag<ContrailSystem>(@"objects\weapons\pistol\needler\fx\projectile");
-
-                    case "decs":
-                        return CacheContext.GetTag<DecalSystem>(@"fx\decals\impact_plasma\impact_plasma_medium\hard");
-
-                    case "ltvl":
-                        return CacheContext.GetTag<LightVolumeSystem>(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile");
-
-                    case "prt3":
-                        return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
-
-                    case "rmd ":
-                        return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
-
-                    case "rmfl":
-                        return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
-
-                    case "rmhg":
-                        return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
-
-                    case "rmtr":
-                        return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
-
-                    case "rmcs":
-                    case "rmrd":
-                    case "rmsh":
-                    case "rmss":
-                        return CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-                }
-            }
-
-            //
-            // Handle tags that are not ready to be ported
-            //
-
-            if (OtherTagGroups.Contains(groupTag))
-            {
-                switch (groupTag.ToString())
-                {
-                    case "effe":
-                        return CacheContext.GetTag<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
-
-                    case "foot":
-                        return CacheContext.GetTag<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
-
-                    case "shit":
-                        return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
-
-                    case "sncl":
-                        return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
-                }    
-            }
-
             //
             // Allocate Eldorado Tag
             //

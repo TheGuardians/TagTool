@@ -58,49 +58,6 @@ namespace TagTool.Commands.Porting
                 Arguments = new List<RenderMethod.ShaderProperty.Argument>()
             };
 
-            /* Name rmt2 tags if one of them is not named
-            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-            {
-                if (!CacheContext.TagNames.ContainsKey(tag.Index))
-                {
-                    NameRmt2();
-                    CacheContext.SaveTagNames();
-                    break;
-                }
-            }*/
-
-            /* Name rmdf tags if one of them is not named
-            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
-            {
-                if (!CacheContext.TagNames.ContainsKey(tag.Index))
-                {
-                    // cheap n dirty, but there's only a few global tags that should never change their tag index
-                    CacheContext.TagNames[0x02A5] = "shaders\\particle";
-                    CacheContext.TagNames[0x033F] = "shaders\\shader";
-                    CacheContext.TagNames[0x03AA] = "shaders\\decal";
-                    CacheContext.TagNames[0x052A] = "shaders\\contrail";
-                    CacheContext.TagNames[0x0595] = "shaders\\light_volume";
-                    CacheContext.TagNames[0x0E86] = "shaders\\halogram";
-                    CacheContext.TagNames[0x18BA] = "shaders\\screen";
-                    CacheContext.TagNames[0x18CA] = "shaders\\beam";
-                    CacheContext.TagNames[0x2F49] = "shaders\\terrain";
-                    CacheContext.TagNames[0x3571] = "shaders\\foliage";
-                    CacheContext.TagNames[0x357B] = "shaders\\water";
-                    CacheContext.TagNames[0x4458] = "shaders\\shader";
-                    CacheContext.TagNames[0x44DE] = "shaders\\terrain";
-                    CacheContext.TagNames[0x457A] = "shaders\\foliage";
-                    CacheContext.TagNames[0x466B] = "shaders\\decal";
-                    CacheContext.TagNames[0x4740] = "shaders\\particle";
-                    CacheContext.TagNames[0x4753] = "shaders\\beam";
-                    CacheContext.TagNames[0x4762] = "shaders\\light_volume";
-                    CacheContext.TagNames[0x5013] = "shaders\\water";
-                    CacheContext.TagNames[0x50CC] = "shaders\\halogram";
-                    CacheContext.TagNames[0x52A9] = "shaders\\custom";
-                    CacheContext.SaveTagNames();
-                    break;
-                }
-            }*/
-
             // Loop only once trough all ED rmt2 tags and store them globally, string lists of their bitmaps and arguments
             if (Rmt2TagsInfo.Count == 0)
                 GetRmt2Info(cacheStream, CacheContext);
@@ -119,21 +76,11 @@ namespace TagTool.Commands.Porting
             // Find a HO equivalent rmt2
             var edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2);
 
-            if (edRmt2Instance == null) // should never happen
+            if (edRmt2Instance == null)
             {
-                CachedTagInstance shaderInvalid;
-
-                try
-                {
-                    shaderInvalid = CacheContext.GetTag<Shader>(@"shaders\invalid");
-                }
-                catch (KeyNotFoundException)
-                {
-                    shaderInvalid = CacheContext.GetTag<Shader>(@"objects\characters\masterchief\shaders\mp_masterchief_rubber");
-                }
+                var shaderInvalid = CacheContext.GetTag<Shader>(@"shaders\invalid");
 
                 var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
-
                 return CacheContext.Deserializer.Deserialize<Shader>(edContext2);
             }
 
@@ -686,60 +633,55 @@ namespace TagTool.Commands.Porting
             switch (type)
             {
                 case "base_map":
-                case "base_map_m_0":
-                case "base_map_m_1":
-                case "base_map_m_2":
-                case "detail_map":
-                case "detail_map2":
-                case "detail_map3":
-                case "detail_map_a":
-                case "detail_map_m_0":
-                case "detail_map_m_1":
-                case "detail_map_m_2":
-                case "detail_map_m_3":
-                case "overlay_detail_map":
-                case "detail_map_overlay":
-                case "alpha_map":
-                case "blend_map":
-                case "meter_map":
-                case "subsurface_map":
-                case "self_illum_detail_map":
-                case "warp_map":
-                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
-
-                case "change_color_map":
-                case "material_texture":
-                case "noise_map_a":
-                case "noise_map_b":
+                case "palette":
+                case "specular_mask_texture":
                 case "overlay_map":
                 case "bump_detail_mask_map":
                 case "chameleon_mask_map":
-                case "environment_map":
+                case "self_illum_map":
                 case "specular_map":
-                case "specular_mask_texture":
                 case "transparence_map":
+                case "change_color_map":
                     return @"shaders\default_bitmaps\bitmaps\color_white";
 
-                case "color_mask_map":
-                    return @"shaders\default_bitmaps\bitmaps\reference_grids";
+                case "detail_map":
+                case "detail_map2":
+                case "self_illum_detail_map":
+                case "detail_map_m_0":
+                case "detail_map_m_1":
+                case "detail_map_overlay":
+                case "detail_map_m_2":
+                case "detail_map_m_3":
+                    return @"shaders\default_bitmaps\bitmaps\default_detail";
+
+                case "material_texture":
+                case "noise_map_b":
+                case "blend_map":
+                case "base_map_m_0":
+                case "base_map_m_1":
+                case "base_map_m_2":
+                case "noise_map_a":
+                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
 
                 case "bump_map":
+                case "detail_bump_m_0":
+                case "detail_bump_m_1":
                 case "bump_map_m_0":
                 case "bump_map_m_1":
                 case "bump_map_m_2":
-                case "bump_map_m_3":
-                case "detail_bump_m_0":
-                case "detail_bump_m_1":
                 case "detail_bump_m_2":
                 case "detail_bump_m_3":
-                case "bump_detail_map":
-                case "alpha_test_map":
-                case "height_map":
-                case "overlay_multiply_map":
-                    return @"shaders\default_bitmaps\bitmaps\default_vector"; // WARNING engine's toast, anything bump map related is busted
+                case "bump_map_m_3":
+                    return @"shaders\default_bitmaps\bitmaps\default_vector";
 
-                case "self_illum_map":
-                    return @"shaders\default_bitmaps\bitmaps\default_alpha_test";
+                case "environment_map":
+                    return @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map";
+
+                case "bump_detail_map":
+                    return @"shaders\default_bitmaps\bitmaps\bump_detail";
+
+                case "color_mask_map":
+                    return @"shaders\default_bitmaps\bitmaps\reference_grids";
 
                 case "detail_mask_a":
                     return @"shaders\default_bitmaps\bitmaps\color_red";
@@ -747,9 +689,20 @@ namespace TagTool.Commands.Porting
                 case "alpha_mask_map":
                     return @"shaders\default_bitmaps\bitmaps\alpha_white";
 
+                case "overlay_detail_map":
+                    return @"shaders\default_bitmaps\bitmaps\dither_pattern";
+
+                case "alpha_test_map":
+                    return @"shaders\default_bitmaps\bitmaps\color_black_alpha_black";
+
+                case "alpha_map":
+                    return @"shaders\default_bitmaps\bitmaps\alpha_grey50";
+
+                case "height_map":
+                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear";
+
                 default:
-                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
-                    // throw new NotImplementedException($"Useless exception. Bitmaps table requires an update for {type}.");
+                    throw new NotImplementedException($"Shader map type \"{type}\"");
             }
         }
         
@@ -1019,4 +972,3 @@ namespace TagTool.Commands.Porting
         }
     }
 }
-

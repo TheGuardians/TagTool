@@ -203,7 +203,7 @@ namespace TagTool.Cache
             if (name == "null")
             {
                 result = null;
-                return false;
+                return true;
             }
 
             if (name == "*")

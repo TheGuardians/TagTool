@@ -18,6 +18,7 @@ namespace TagTool.Commands.Files
         private MultiplayerGlobals MulgDefinition { get; set; } = null;
         private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
         private bool NoVariants { get; set; } = false;
+        private bool NullReferences { get; set; } = false;
 
         public RebuildCacheFilesCommand(HaloOnlineCacheContext cacheContext)
             : base(false,
@@ -94,16 +95,38 @@ namespace TagTool.Commands.Files
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
-                CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
+                /*CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);*/
 
-                /*foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
+                    if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                        CacheContext.TagNames.Remove(tag.Index);
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("pixl"))
+                    if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                        CacheContext.TagNames.Remove(tag.Index);
+
+                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);*/
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+
+                CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
+
+                CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
+
+                destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
+                {
+                    GlobalTags = new List<TagReferenceBlock>
+                    {
+                        new TagReferenceBlock { Instance = destCacheContext.GetTag<Globals>(@"globals\globals") }
+                    }
+                });
             }
 
             destCacheContext.SaveTagNames();
@@ -113,8 +136,11 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null/* || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg")*/)
+            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
                 return null;
+
+            if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
+                return null; // kill it with fucking fire
             
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
