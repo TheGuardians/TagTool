@@ -646,21 +646,27 @@ namespace TagTool.Commands.Porting
 
                 case "detail_map":
                 case "detail_map2":
+                case "detail_map3":
                 case "self_illum_detail_map":
+                case "detail_map_a":
                 case "detail_map_m_0":
                 case "detail_map_m_1":
-                case "detail_map_overlay":
                 case "detail_map_m_2":
                 case "detail_map_m_3":
+                case "detail_map_overlay":
                     return @"shaders\default_bitmaps\bitmaps\default_detail";
 
                 case "material_texture":
+                case "meter_map":
+                case "subsurface_map":
+                case "warp_map":
+                case "overlay_multiply_map":
+                case "noise_map_a":
                 case "noise_map_b":
                 case "blend_map":
                 case "base_map_m_0":
                 case "base_map_m_1":
                 case "base_map_m_2":
-                case "noise_map_a":
                     return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
 
                 case "bump_map":
