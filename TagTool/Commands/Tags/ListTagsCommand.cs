@@ -28,12 +28,9 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1)
-                return false;
-
             var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : CacheContext.ParseGroupTag(args[0]);
 
-            if (!args[0].EndsWith(":"))
+            if (args.Count > 0 && !args[0].EndsWith(":"))
                 args.RemoveAt(0);
 
             var named = false;
