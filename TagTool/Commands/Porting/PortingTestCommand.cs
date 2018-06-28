@@ -42,14 +42,15 @@ namespace TagTool.Commands.Porting
             var name = args[0].ToLower();
             args.RemoveAt(0);
 
-            var methods = GetType().GetMethods(BindingFlags.Public).Where(method =>
+            var methods = new List<MethodInfo>();
+
+            foreach (var method in this.GetType().GetMethods())
             {
                 var parameters = method.GetParameters();
 
-                return (method.ReturnType == typeof(bool))
-                    && (parameters.Length == 1)
-                    && (parameters[0].ParameterType != typeof(List<string>));
-            });
+                if ((method.ReturnType == typeof(bool)) && (parameters.Length == 1) && (parameters[0].ParameterType == typeof(List<string>)))
+                    methods.Add(method);
+            }
 
             var foundMethods = methods.Where(i => i.Name.ToLower() == name);
 
@@ -69,6 +70,28 @@ namespace TagTool.Commands.Porting
             return foundMethods.First().Invoke(this, new[] { args });
         }
         
+        public bool ListScriptedScn3(List<string> args)
+        {
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if (!tag.IsInGroup("scn3"))
+                    continue;
+
+                var context = new CacheSerializationContext(ref BlamCache, tag);
+                var definition = BlamCache.Deserializer.Deserialize<GuiScreenWidgetDefinition>(context);
+
+                if (definition.ScriptIndex != -1)
+                {
+                    Console.WriteLine($"{tag.Name}.{tag.GroupName}");
+                    Console.WriteLine($"Script Title: {definition.ScriptTitle}");
+                    Console.WriteLine($"Script Index: {definition.ScriptIndex}");
+                    Console.WriteLine();
+                }
+            }
+
+            return true;
+        }
+
         public bool RestoreWeaponAnimation(List<string> args)
         {
             if (args.Count != 1)
