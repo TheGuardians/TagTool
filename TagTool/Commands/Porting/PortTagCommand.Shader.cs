@@ -642,6 +642,7 @@ namespace TagTool.Commands.Porting
                 case "specular_map":
                 case "transparence_map":
                 case "change_color_map":
+                case "occlusion_parameter_map":
                     return @"shaders\default_bitmaps\bitmaps\color_white";
 
                 case "detail_map":
@@ -708,7 +709,8 @@ namespace TagTool.Commands.Porting
                     return @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear";
 
                 default:
-                    throw new NotImplementedException($"Shader map type \"{type}\"");
+                    Console.WriteLine($"WARNING: Shader map type \"{type}\" default bitmap not implemented.");
+                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
             }
         }
         

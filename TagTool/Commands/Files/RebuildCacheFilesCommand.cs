@@ -110,6 +110,51 @@ namespace TagTool.Commands.Files
 
                 var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
+                var defaultBitmapNames = new[]
+                {
+                    @"shaders\default_bitmaps\bitmaps\gray_50_percent",
+                    @"shaders\default_bitmaps\bitmaps\alpha_grey50",
+                    @"shaders\default_bitmaps\bitmaps\color_white",
+                    @"shaders\default_bitmaps\bitmaps\default_detail",
+                    @"shaders\default_bitmaps\bitmaps\reference_grids",
+                    @"shaders\default_bitmaps\bitmaps\default_vector",
+                    @"shaders\default_bitmaps\bitmaps\default_alpha_test",
+                    @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map",
+                    @"shaders\default_bitmaps\bitmaps\color_red",
+                    @"shaders\default_bitmaps\bitmaps\alpha_white",
+                    @"shaders\default_bitmaps\bitmaps\monochrome_alpha_grid",
+                    @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear",
+                    @"shaders\default_bitmaps\bitmaps\color_black_alpha_black",
+                    @"shaders\default_bitmaps\bitmaps\dither_pattern",
+                    @"shaders\default_bitmaps\bitmaps\bump_detail",
+                    @"shaders\default_bitmaps\bitmaps\color_black",
+                    @"shaders\default_bitmaps\bitmaps\auto_exposure_weight",
+                    @"shaders\default_bitmaps\bitmaps\dither_pattern2",
+                    @"shaders\default_bitmaps\bitmaps\random4_warp",
+                    @"levels\shared\bitmaps\nature\water\water_ripples",
+                    @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
+                };
+
+                foreach (var tagName in defaultBitmapNames)
+                {
+                    if (!CacheContext.TagNames.ContainsValue(tagName))
+                        continue;
+
+                    foreach (var entry in CacheContext.TagNames)
+                    {
+                        var tag = CacheContext.GetTag(entry.Key);
+
+                        if (tag == null || !tag.IsInGroup("bitm"))
+                            continue;
+
+                        if (tagName == entry.Value)
+                        {
+                            CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                            break;
+                        }
+                    }
+                }
+
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
@@ -117,6 +162,7 @@ namespace TagTool.Commands.Files
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
+                CopyTag(CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo"), CacheContext, srcStream, destCacheContext, destStream);
 
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 

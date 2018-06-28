@@ -287,9 +287,9 @@ namespace TagTool.Cache
         /// <returns>True if the group tag was parsed, false otherwise.</returns>
         public bool TryParseGroupTag(string name, out Tag result)
         {
-            if (TagDefinition.Exists(name))
+            if (TagDefinition.TryFind(name, out var type))
             {
-                result = new Tag(name);
+                result = new Tag((type.GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute).Tag);
                 return true;
             }
 

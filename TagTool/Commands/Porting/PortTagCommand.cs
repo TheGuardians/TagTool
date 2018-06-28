@@ -274,12 +274,6 @@ namespace TagTool.Commands.Porting
             {
                 switch (groupTag.ToString())
                 {
-                    case "effe":
-                        return CacheContext.GetTag<Effect>(@"objects\characters\grunt\fx\grunt_birthday_party");
-
-                    case "foot":
-                        return CacheContext.GetTag<MaterialEffects>(@"fx\material_effects\objects\characters\masterchief");
-
                     case "shit":
                         return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
 
@@ -303,7 +297,7 @@ namespace TagTool.Commands.Porting
             if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
-            if (!Flags.HasFlag(PortingFlags.New))
+            if (!Flags.HasFlag(PortingFlags.New) || (groupTag == "glps" || groupTag == "glvs" || groupTag == "vtsh" || groupTag == "pixl" || groupTag == "rmdf" || groupTag == "rmt2"))
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -312,7 +306,7 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
-                        if (Flags.HasFlag(PortingFlags.Replace))
+                        if (Flags.HasFlag(PortingFlags.Replace) && !(groupTag == "glps" || groupTag == "glvs" || groupTag == "vtsh" || groupTag == "pixl" || groupTag == "rmdf" || groupTag == "rmt2"))
                             edTag = instance;
                         else
                         {
@@ -349,7 +343,7 @@ namespace TagTool.Commands.Porting
             // If isReplacing is true, check current tags if there is an existing instance to replace
             //
 
-            if (Flags.HasFlag(PortingFlags.Replace))
+            if (Flags.HasFlag(PortingFlags.Replace) && !(groupTag != "glps" && groupTag != "glvs" && groupTag != "pixl" && groupTag != "vtsh" && groupTag != "rmdf" && groupTag != "rmt2"))
             {
                 var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Name);
 
@@ -461,10 +455,10 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-				case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
+				/*case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
 					foreach (var screenEffect in sefc.ScreenEffects)
 						screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
-					break;
+					break;*/
 
 				case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);

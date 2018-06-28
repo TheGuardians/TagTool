@@ -1,7 +1,9 @@
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Tags.Definitions;
+using TagTool.Serialization;
 
 namespace TagTool.Tags
 {
@@ -18,6 +20,9 @@ namespace TagTool.Tags
             return result;
         }
 
+        public static bool TryFind(Tag groupTag, out Type result) =>
+            Types.TryGetValue(groupTag, out result);
+
         /// <summary>
         /// Finds the structure type corresponding to a group.
         /// </summary>
@@ -25,12 +30,44 @@ namespace TagTool.Tags
         /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
         public static Type Find(TagGroup group) => Find(group.Tag);
 
+        public static bool TryFind(TagGroup group, out Type result) =>
+            TryFind(group.Tag, out result);
+
         /// <summary>
         /// Finds the structure type corresponding to a group tag.
         /// </summary>
-        /// <param name="groupTag">The string representation of the group tag of the group to search for.</param>
+        /// <param name="group">The group name or group tag of the tag definition.</param>
         /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
-        public static Type Find(string groupTag) => Find(new Tag(groupTag));
+        public static Type Find(string group)
+        {
+            foreach (var entry in Types)
+            {
+                var type = entry.Value;
+                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+
+                if (attr?.Name == group)
+                    return type;
+            }
+
+            return Find(new Tag(group));
+        }
+
+        public static bool TryFind(string group, out Type result)
+        {
+            foreach (var entry in Types)
+            {
+                var type = entry.Value;
+                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+
+                if (attr?.Name == group)
+                {
+                    result = type;
+                    return true;
+                }
+            }
+
+            return TryFind(new Tag(group), out result);
+        }
 
         /// <summary>
         /// Checks to see if a tag definition exists.
@@ -42,9 +79,23 @@ namespace TagTool.Tags
         /// <summary>
         /// Checks to see if a tag definition exists.
         /// </summary>
-        /// <param name="groupTag">The group tag of the tag definition.</param>
+        /// <param name="group">The group name or group tag of the tag definition.</param>
         /// <returns>true if the tag definition exists.</returns>
-        public static bool Exists(string groupTag) => Exists(new Tag(groupTag));
+        public static bool Exists(string group)
+        {
+            foreach (var entry in Types)
+            {
+                var type = entry.Value;
+                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+
+                if (attr?.Name == group)
+                    return true;
+            }
+
+            return Exists(new Tag(group));
+        }
+
+        public static Tag GetGroupTag<T>() => new Tag((typeof(T).GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute)?.Tag ?? Tag.Null.ToString());
 
         public static readonly Dictionary<Tag, Type> Types = new Dictionary<Tag, Type>
         {

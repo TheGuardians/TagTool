@@ -108,6 +108,9 @@ namespace TagTool.Serialization
                     BlamCache.CacheContext?.GetStringId(item.GroupName) ?? StringId.Invalid) :
                 TagGroup.Null;
 
+            if (index == -1 || group.BelongsTo(Tag.Null))
+                return null;
+
             return new CachedTagInstance(index, group);
         }
     }
