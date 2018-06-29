@@ -1741,14 +1741,21 @@ namespace TagTool.Tags.Definitions
                 public short Equipment;
                 public short Vehicle;
                 public StringId VehicleVariant;
-                [TagField(Length = 32)] public string CommandScriptName;
+
+                [TagField(Length = 32)]
+                public string CommandScriptName;
+
                 public short CommandScriptIndex;
-                public short Unknown4;
+                public short CommandScriptUnknown;
+
                 public StringId InitialState;
-                public short Unknown5;
-                public short Unknown6;
-                public short Unknown7;
-                public short Unknown8;
+
+                public short ActivityIndex;
+                public short ActivityUnknown;
+
+                public short PointSetIndex;
+                public SquadPatrolMode PatrolMode;
+
                 public List<SquadPoint> MultiState;
                 public List<SpawnPoint> StartingLocations;
             }
@@ -1860,7 +1867,7 @@ namespace TagTool.Tags.Definitions
                 public string CommandScriptName;
 
                 public short CommandScriptIndex;
-                public short Unknown7;
+                public short CommandScriptUnknown;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public StringId InitialState;
@@ -1881,7 +1888,7 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
                 public SquadDifficultyFlags DifficultyFlags;
                 [TagField(Padding = true, Length = 2)]
-                public byte[] Unused;
+                public byte[] Unused1;
                 public short MinimumRound;
                 public short MaximumRound;
                 public short Unknown2;
@@ -1895,22 +1902,19 @@ namespace TagTool.Tags.Definitions
                 public SquadGrenadeType GrenadeType;
                 public short VehicleTypeIndex;
                 public StringId VehicleVariant;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
-                public uint Unknown12;
-                public uint Unknown13;
-                public short Unknown14;
-                public short Unknown15;
-                public uint Unknown16;
-                public short Unknown17;
-                public short Unknown18;
-                public uint Unknown19;
-                public uint Unknown20;
-                public uint Unknown21;
+
+                [TagField(Length = 32)]
+                public string CommandScriptName;
+
+                public short CommandScriptIndex;
+                public short CommandScriptUnknown;
+
+                public StringId InitialState;
+
+                public short PointSetIndex;
+                public SquadPatrolMode PatrolMode;
+
+                public List<SquadPoint> Points;
 
                 [TagStructure(Size = 0x10)]
                 public class CharacterTypeBlock

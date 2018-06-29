@@ -202,14 +202,15 @@ namespace TagTool.Commands.Porting
                             });
                         }
 
-                        //Add grenade type
                         designer.GrenadeType = baseSquad.GrenadeType;
-
                         designer.VehicleVariant = new StringId(baseSquad.VehicleVariant.Value);
                         designer.VehicleTypeIndex = baseSquad.Vehicle;
-
-                        designer.Unknown14 = -1;
-                        designer.Unknown17 = -1;
+                        designer.CommandScriptName = baseSquad.CommandScriptName;
+                        designer.CommandScriptIndex = baseSquad.CommandScriptIndex;
+                        designer.CommandScriptUnknown = baseSquad.CommandScriptUnknown;
+                        designer.InitialState = baseSquad.InitialState;
+                        designer.PointSetIndex = baseSquad.PointSetIndex;
+                        designer.PatrolMode = baseSquad.PatrolMode;
 
                         //Add new cell to the list
                         squad.DesignerCells.Add(designer);
