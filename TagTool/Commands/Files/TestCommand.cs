@@ -397,7 +397,7 @@ namespace TagTool.Commands.Files
 
         private ScriptValueType.Halo3ODSTValue ParseScriptValueType(string value)
         {
-            foreach (var option in Enum.GetNames(typeof(ScriptValueType)))
+            foreach (var option in Enum.GetNames(typeof(ScriptValueType.Halo3ODSTValue)))
                 if (value.ToLower().Replace("_", "").Replace(" ", "") == option.ToLower().Replace("_", "").Replace(" ", ""))
                     return (ScriptValueType.Halo3ODSTValue)Enum.Parse(typeof(ScriptValueType.Halo3ODSTValue), option);
 
@@ -415,7 +415,7 @@ namespace TagTool.Commands.Files
 
 
             Console.WriteLine();
-            Console.WriteLine("Enter the path to the lower-version scripting xml:");
+            Console.WriteLine("Enter the path to the scripting xml:");
             Console.Write("> ");
 
             var xmlPath = Console.ReadLine();

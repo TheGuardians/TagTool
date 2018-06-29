@@ -452,7 +452,7 @@ namespace TagTool.Geometry
 
                 var resourceContext = new ResourceSerializationContext(geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
-                geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                geometry.Resource.ChangeLocation(ResourceLocation.Resources);
                 var resource = geometry.Resource;
 
                 if (resource == null)
@@ -461,21 +461,21 @@ namespace TagTool.Geometry
                 if (!dataStream.CanRead)
                     throw new ArgumentException("The input stream is not open for reading", "dataStream");
 
-                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+                var cache = CacheContext.GetResourceCache(ResourceLocation.Resources);
 
-                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                if (!resourceStreams.ContainsKey(ResourceLocation.Resources))
                 {
-                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+                    resourceStreams[ResourceLocation.Resources] = new MemoryStream();
 
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Resources))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Resources]);
                 }
 
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
 
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Resources], data, out uint compressedSize);
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();

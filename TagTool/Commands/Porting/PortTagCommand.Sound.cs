@@ -673,7 +673,7 @@ namespace TagTool.Commands.Porting
                 };
                 sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
-                sound.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+                sound.Resource.ChangeLocation(ResourceLocation.Audio);
                 var resource = sound.Resource;
 
                 if (resource == null)
@@ -682,21 +682,21 @@ namespace TagTool.Commands.Porting
                 if (!dataStream.CanRead)
                     throw new ArgumentException("The input stream is not open for reading", "dataStream");
 
-                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+                var cache = CacheContext.GetResourceCache(ResourceLocation.Audio);
 
-                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                if (!resourceStreams.ContainsKey(ResourceLocation.Audio))
                 {
-                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+                    resourceStreams[ResourceLocation.Audio] = new MemoryStream();
 
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
                 }
 
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
 
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Audio], data, out uint compressedSize);
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();

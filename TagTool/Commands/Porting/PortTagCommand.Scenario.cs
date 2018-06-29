@@ -150,7 +150,7 @@ namespace TagTool.Commands.Porting
                             squad.SpawnPoints.Add(spawnpoint);
                         }
 
-                        Scenario.Squad.Cell designer = new Scenario.Squad.Cell
+                        var designer = new Scenario.Squad.Cell
                         {
                             Name = new StringId(0),
                             DifficultyFlags = baseSquad.DifficultyFlags,
@@ -761,8 +761,8 @@ namespace TagTool.Commands.Porting
                         return true;
 
                     case 0x2D2: // player_action_test_cinematic_skip
-                        expr.Opcode = 0x2FE;
-                        return true; // player_action_test_cancel
+                        expr.Opcode = 0x2F5; // player_action_test_jump
+                        return true;
 
                     case 0x34D:// cinematic_scripting_destroy_object; remove last argument
                         expr.Opcode = 0x3A0;

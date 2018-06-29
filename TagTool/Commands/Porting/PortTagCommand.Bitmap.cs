@@ -43,20 +43,26 @@ namespace TagTool.Commands.Porting
             var resourceList = new List<Bitmap.BitmapResource>();
             for (int i = 0; i < bitmap.Images.Count(); i++)
             {
+#if !DEBUG
                 try
                 {
+#endif
                     var resource = ConvertBlamBitmap(bitmap, resourceStreams, i);
+                    if (resource == null)
+                        return null;
                     Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
                     {
                         Resource = resource
                     };
                     resourceList.Add(bitmapResource);
+#if !DEBUG
                 }
                 catch
                 {
                     Console.WriteLine("Failed to port bitmap");
                     return null;
                 }
+#endif
             }
 
             bitmap.Resources = resourceList;
@@ -126,9 +132,11 @@ namespace TagTool.Commands.Porting
 
             byte[] raw = new byte[0];
             var rawSize = blamBitmap.Type == BitmapType.CubeMap ? blamBitmap.RawSize * 6 : blamBitmap.RawSize;
-            
+
+#if !DEBUG
             try
             {
+#endif
                 if (blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
                 {
                     //First or second image in an interleaved bitmap
@@ -168,15 +176,17 @@ namespace TagTool.Commands.Porting
 
                     raw = BlamCache.GetRawFromID(rawID, rawSize);
                     if (raw == null)
-                        throw new Exception("Raw not found");
+                        return null; // throw new Exception("Raw not found");
                 }
+#if !DEBUG
             }
             catch
             {
                 //2 different type of crashes, missing raw or out of bounds when trying to get the raw
                 throw new Exception("Raw not found or bad offset");
             }
-            
+#endif
+
             if (blamBitmap.Type == BitmapType.Texture2D)
             {
                 raw = ConvertBlamBitmapData(raw, blamBitmap);
@@ -253,7 +263,7 @@ namespace TagTool.Commands.Porting
                 // Serialize the new resource definition
                 //
 
-                resource.ChangeLocation(ResourceLocation.ResourcesB);
+                resource.ChangeLocation(ResourceLocation.Textures);
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");
@@ -261,21 +271,21 @@ namespace TagTool.Commands.Porting
                 if (!dataStream.CanRead)
                     throw new ArgumentException("The input stream is not open for reading", "dataStream");
 
-                var cache = CacheContext.GetResourceCache(ResourceLocation.ResourcesB);
+                var cache = CacheContext.GetResourceCache(ResourceLocation.Textures);
 
-                if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
+                if (!resourceStreams.ContainsKey(ResourceLocation.Textures))
                 {
-                    resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+                    resourceStreams[ResourceLocation.Textures] = new MemoryStream();
 
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Textures))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Textures]);
                 }
 
                 dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
 
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.ResourcesB], data, out uint compressedSize);
+                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Textures], data, out uint compressedSize);
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();

@@ -293,11 +293,8 @@ namespace TagTool.Cache
             var Loc = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
 
             if (Loc.PrimaryPageIndex == -1 || Loc.PrimarySegmentOffset == -1)
-            {
-                Console.WriteLine($"Failed to find the raw at definition entry {ID & ushort.MaxValue} : resource offset and index are -1.");
                 return null;
-            }
-                
+
             int index = (Loc.SecondaryPageIndex != -1) ? Loc.SecondaryPageIndex : Loc.PrimaryPageIndex;
             int locOffset = (Loc.SecondarySegmentOffset != -1) ? Loc.SecondarySegmentOffset : Loc.PrimarySegmentOffset;
 
@@ -345,19 +342,7 @@ namespace TagTool.Cache
             if (length > decompressed.Length)
                 length = decompressed.Length;
 
-            //Attempt to fix offset/lengths problem on some resources
-            if (length > decompressed.Length - locOffset)
-            {
-                var remainder = length - (decompressed.Length - locOffset);
-                Array.Copy(decompressed, locOffset, data, 0, length - remainder);
-            }
-            else
-            {
-                Array.Copy(decompressed, locOffset, data, 0, length);
-            }
-
-
-            Array.Copy(decompressed, locOffset, data, 0, length);
+            Array.Copy(decompressed, locOffset, data, 0, Math.Min(length, decompressed.Length - locOffset));
 
             if (er != Reader)
             {
@@ -373,24 +358,15 @@ namespace TagTool.Cache
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var Entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            if (Entry.PlaySegmentIndex == -1)
-            {
-                Console.WriteLine($"Segment index = -1 at definition entry {ID & ushort.MaxValue} ");
+            if (entry.PlaySegmentIndex == -1)
                 return null;
-            }
-                
-            
 
-            var segment = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
+            var segment = ResourceLayoutTable.Segments[entry.PlaySegmentIndex];
 
             if (segment.PrimaryPageIndex == -1 || segment.PrimarySegmentOffset == -1 ||  segment.PrimarySizeIndex == -1 || segment.SecondarySizeIndex == -1)
-            {
-                Console.WriteLine($"Failed to find the raw at definition entry {ID & ushort.MaxValue} : sound offset and index are -1.");
                 return null;
-            }
-                
 
             var sRaw = ResourceLayoutTable.Sizes[segment.SecondarySizeIndex];
             var reqPage = ResourceLayoutTable.RawPages[segment.PrimaryPageIndex];

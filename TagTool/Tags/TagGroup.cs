@@ -96,7 +96,7 @@ namespace TagTool.Tags
         public bool BelongsTo(params Tag[] groupTags)
         {
             foreach (var groupTag in groupTags)
-                if (Tag == groupTag || ParentTag == groupTag || GrandparentTag == groupTag)
+                if (Tag.Equals(groupTag) || ParentTag.Equals(groupTag) || GrandparentTag.Equals(groupTag))
                     return true;
 
             return false;

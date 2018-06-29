@@ -24,7 +24,6 @@ namespace TagTool.Commands.Porting
 
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-        private List<Tag> OtherTagGroups = new List<Tag> { /*new Tag("effe"), new Tag("foot"),*/ new Tag("shit"), new Tag("sncl") };
 
         private PortingFlags Flags { get; set; } = PortingFlags.Recursive | PortingFlags.Scripts | PortingFlags.MatchShaders;
 
@@ -172,7 +171,6 @@ namespace TagTool.Commands.Porting
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
-			Console.WriteLine(tagSpecifier);
             var tagIdentifiers = tagSpecifier.Split('.');
             
             if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
@@ -189,7 +187,7 @@ namespace TagTool.Commands.Porting
 				item => item != null && groupTag == item.GroupTag && tagName == item.Name));
 
 			if (result.Count == 0)
-                Console.WriteLine($"Invalid tag name: {tagSpecifier}");
+                throw new Exception($"Invalid tag name: {tagSpecifier}");
 
             return result;
         }
@@ -202,11 +200,17 @@ namespace TagTool.Commands.Porting
             var groupTag = blamTag.GroupTag;
 
             //
-            // Handle shaders that do not exist (either in code or in tags)
+            // Handle tags that are not ready to be ported
             //
 
             switch (groupTag.ToString())
             {
+                case "shit": // use the global shit tag until shit tags are port-able
+                    return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
+
+                case "sncl": // always use the default sncl tag
+                    return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
+
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
                     return null;
 
@@ -215,8 +219,8 @@ namespace TagTool.Commands.Porting
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
-                case "rmhg": // rmhg have register indexing issues currently
-                    return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+                //case "rmhg": // rmhg have register indexing issues currently
+                    //return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
                 // Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
                 case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
@@ -263,22 +267,6 @@ namespace TagTool.Commands.Porting
                     case "rmsh":
                     case "rmss":
                         return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                }
-            }
-
-            //
-            // Handle tags that are not ready to be ported
-            //
-
-            if (OtherTagGroups.Contains(groupTag))
-            {
-                switch (groupTag.ToString())
-                {
-                    case "shit":
-                        return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
-
-                    case "sncl":
-                        return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
                 }
             }
 
@@ -376,7 +364,9 @@ namespace TagTool.Commands.Porting
             if (edTag == null && Flags.HasFlag(PortingFlags.UseNull))
             {
 				var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
-				CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
+
+                if (i >= 0)
+				    CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
             }
 
             if (edTag == null)
@@ -598,7 +588,6 @@ namespace TagTool.Commands.Porting
             
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
-                Console.WriteLine($"Something happened when converting  {blamTag.Name.Substring(Math.Max(0, blamTag.Name.Length - 30))}, returning null tag reference.");
                 CacheContext.TagNames.Remove(edTag.Index);
                 CacheContext.TagCache.Index[edTag.Index] = null;
                 return null;

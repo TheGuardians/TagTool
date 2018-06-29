@@ -95,11 +95,6 @@ namespace TagTool.Commands.Files
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
-                /*CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
-
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);*/
-
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
                     if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
                         CacheContext.TagNames.Remove(tag.Index);
@@ -108,7 +103,8 @@ namespace TagTool.Commands.Files
                     if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
                         CacheContext.TagNames.Remove(tag.Index);
 
-                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
+                CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
+                //var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
                 var defaultBitmapNames = new[]
                 {
@@ -164,7 +160,7 @@ namespace TagTool.Commands.Files
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
                 CopyTag(CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo"), CacheContext, srcStream, destCacheContext, destStream);
 
-                CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
+                /*CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
                 destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
                 {
@@ -172,7 +168,15 @@ namespace TagTool.Commands.Files
                     {
                         new TagReferenceBlock { Instance = destCacheContext.GetTag<Globals>(@"globals\globals") }
                     }
-                });
+                });*/
+
+                foreach (var instance in CacheContext.TagCache.Index)
+                {
+                    if (instance == null || !instance.IsInGroup("scnr"))
+                        continue;
+
+                    CopyTag(instance, CacheContext, srcStream, destCacheContext, destStream);
+                }
             }
 
             destCacheContext.SaveTagNames();
@@ -182,7 +186,7 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
+            if (srcTag == null/* || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode")*/)
                 return null;
 
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
@@ -325,6 +329,31 @@ namespace TagTool.Commands.Files
             if (pageable == null || pageable.Page.Index < 0 || !pageable.GetLocation(out var location))
                 return null;
 
+            ResourceLocation newLocation;
+
+            switch (pageable.Resource.Type)
+            {
+                case TagResourceType.Bitmap:
+                    newLocation = ResourceLocation.Textures;
+                    break;
+
+                case TagResourceType.BitmapInterleaved:
+                    newLocation = ResourceLocation.TexturesB;
+                    break;
+
+                case TagResourceType.RenderGeometry:
+                    newLocation = ResourceLocation.Resources;
+                    break;
+
+                case TagResourceType.Sound:
+                    newLocation = ResourceLocation.Audio;
+                    break;
+
+                default:
+                    newLocation = ResourceLocation.ResourcesB;
+                    break;
+            }
+
             if (pageable.Page.CompressedBlockSize > 0)
             {
                 var index = pageable.Page.Index;
@@ -334,7 +363,7 @@ namespace TagTool.Commands.Files
 
                 var data = srcCacheContext.ExtractRawResource(pageable);
 
-                pageable.ChangeLocation(location);
+                pageable.ChangeLocation(newLocation);
                 destCacheContext.AddRawResource(pageable, data);
 
                 CopiedResources[location][index] = pageable;

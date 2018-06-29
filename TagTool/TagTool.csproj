@@ -71,6 +71,7 @@
     <Prefer32Bit>true</Prefer32Bit>
     <DocumentationFile>bin\x64\Release\Documentation.xml</DocumentationFile>
     <NoWarn>CS1591</NoWarn>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ai\AiActorType.cs" />
