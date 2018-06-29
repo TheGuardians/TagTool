@@ -207,7 +207,7 @@ namespace TagTool.Commands.Porting
                         designer.VehicleTypeIndex = baseSquad.Vehicle;
                         designer.CommandScriptName = baseSquad.CommandScriptName;
                         designer.CommandScriptIndex = baseSquad.CommandScriptIndex;
-                        designer.CommandScriptUnknown = baseSquad.CommandScriptUnknown;
+                        designer.CommandScriptUnknown = 0;
                         designer.InitialState = baseSquad.InitialState;
                         designer.PointSetIndex = baseSquad.PointSetIndex;
                         designer.PatrolMode = baseSquad.PatrolMode;
