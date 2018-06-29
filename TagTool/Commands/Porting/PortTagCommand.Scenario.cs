@@ -127,7 +127,7 @@ namespace TagTool.Commands.Porting
 
                     for (var i = 0; i < squad.BaseSquad.Count; i++)
                     {
-                        var baseSquad = squad.BaseSquads[i];
+                        var baseSquad = squad.BaseSquad[i];
                         
                         //
                         // Convert StringIds?
@@ -139,7 +139,7 @@ namespace TagTool.Commands.Porting
                         {
                             spawnpoint.Name = ConvertStringId(spawnpoint.Name);
                             spawnpoint.InitialEquipmentIndex = -1;
-                            spawnpoint.CellIndex = i;
+                            spawnpoint.CellIndex = (short)i;
                             spawnpoint.ActorVariant = ConvertStringId(spawnpoint.ActorVariant);
                             spawnpoint.VehicleVariant = ConvertStringId(spawnpoint.VehicleVariant);
                             spawnpoint.InitialMovementMode = spawnpoint.InitialMovementMode_H3;
