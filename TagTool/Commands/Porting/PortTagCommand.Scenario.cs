@@ -766,7 +766,7 @@ namespace TagTool.Commands.Porting
 
                     case 0x3CD: // chud_show_weapon_stats
                         expr.Opcode = 0x423; // chud_show_crosshair
-                        break;
+                        return true;
 
                     case 0x34D: // cinematic_scripting_destroy_object; remove last argument
                         expr.Opcode = 0x3A0;
