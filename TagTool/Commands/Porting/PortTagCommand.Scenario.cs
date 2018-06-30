@@ -1263,23 +1263,56 @@ namespace TagTool.Commands.Porting
                 "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, prevents cinematic looping
                 "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,", // disable g_player_training as it freezes scripts
             },
+            
+            ["010_jungle"] = new List<string>
+            {
+                // default:
+                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+            },
 
             ["020_base"] = new List<string>
             {
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,,begin",
-                "00000546,E5950222,FFFFFFFF,0376,230296E5,Group,Void,,cinematic_skip_stop_internal,E5970224",
+                 // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+             },
+
+            ["030_outskirts"] = new List<string>
+            {
+                // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
             },
 
             ["040_voi"] = new List<string>
-            {
+            {         
+                // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+
                 "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
                 "00009478,887A2506,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
                 "00012297,937D3009,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
             },
 
-            ["070_waste"] = new List<string>
+            ["050_floodvoi"] = new List<string>
             {
-                "00000546,E5950222,FFFFFFFF,0376,230296E5,Group,Void,,cinematic_skip_stop_internal,D:E5970224",
+                // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+            },
+
+            ["070_waste"] = new List<string>
+            {                // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
 
                 // Default script lines:
                 "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,",
@@ -1287,14 +1320,36 @@ namespace TagTool.Commands.Porting
                 "00012297,937D3009,937E300A,0002,00000000,Expression,FunctionName,,if",
             },
 
-            ["110_hc"] = new List<string>
+            ["100_citadel"] = new List<string>
             {
-                "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal",
+                // default:
+                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+            },
+
+            ["110_hc"] = new List<string>
+            {              
+                // default:
+                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
             },
 
             ["120_halo"] = new List<string>
             {
-                "00000308,E4A70134,FFFFFFFF,0376,3501A8E4,Group,Void,,cinematic_skip_stop_internal,D:E4A90136",
+                // default:
+                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+            },
+
+            ["130_epilogue"] = new List<string>
+            {
+                // default:
+                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
+                // modified:
+                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
             },
         };
     }
