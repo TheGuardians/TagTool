@@ -1557,5 +1557,100 @@ namespace TagTool.Commands.Files
             return true;
         }
 
+        public bool AdjustScripts(List<string> args)
+        {
+            var helpMessage =
+                @"Usage: " +
+                @"test AdjustScripts levels\multi\guardian\guardian";
+
+            if (args.Count != 1)
+            {
+                Console.WriteLine(helpMessage);
+                Console.WriteLine("args.Count != 1");
+                return false;
+            }
+
+            var edTagArg = args[0];
+
+            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!edTag.IsInGroup("scnr"))
+            {
+                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!CacheContext.TagNames.ContainsKey(edTag.Index))
+            {
+                Console.WriteLine($"CacheContext.TagNames.ContainsKey(edTag.Index) {edTag.Index:X4}");
+                return false;
+            }
+
+            var tagName = CacheContext.TagNames[edTag.Index].Split("\\".ToCharArray()).Last();
+
+            if (!DisabledScriptsString.ContainsKey(tagName))
+            {
+                Console.WriteLine("!DisabledScriptsString.ContainsKey(tagName)");
+                return false;
+            }
+
+            Scenario scnr;
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
+                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
+            }
+
+            foreach (var line in DisabledScriptsString[tagName])
+            {
+                var items = line.Split(",".ToCharArray());
+
+                var scriptIndex = Convert.ToInt32(items[0]);
+
+                uint.TryParse(items[2], NumberStyles.HexNumber, null, out uint NextExpressionHandle);
+                ushort.TryParse(items[3], NumberStyles.HexNumber, null, out ushort Opcode);
+                byte.TryParse(items[4].Substring(0, 2), NumberStyles.HexNumber, null, out byte data0);
+                byte.TryParse(items[4].Substring(2, 2), NumberStyles.HexNumber, null, out byte data1);
+                byte.TryParse(items[4].Substring(4, 2), NumberStyles.HexNumber, null, out byte data2);
+                byte.TryParse(items[4].Substring(6, 2), NumberStyles.HexNumber, null, out byte data3);
+
+                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = NextExpressionHandle;
+                scnr.ScriptExpressions[scriptIndex].Opcode = Opcode;
+                scnr.ScriptExpressions[scriptIndex].Data[0] = data0;
+                scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
+                scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
+                scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
+            }
+
+            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var context = new TagSerializationContext(stream, CacheContext, edTag);
+                CacheContext.Serializer.Serialize(context, scnr);
+            }
+
+            return true;
+
+        }
+
+        private static Dictionary<string, List<string>> DisabledScriptsString = new Dictionary<string, List<string>>
+        {
+            ["005_intro"] = new List<string>
+            {
+                // default scripts:
+                "00000308,E4A70134,E4A90136,0376,3501A8E4,Group,Void,cinematic_skip_stop_internal,",
+                
+                // modified scripts:
+                "00003019,EF3E0BCB,EF440BD1,0424,CC0B3FEF,Group,Void,chud_show_shield,",
+                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
+                "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,",
+            },
+        };
+        
     }
 }
