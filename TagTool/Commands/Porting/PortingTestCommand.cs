@@ -1039,5 +1039,224 @@ namespace TagTool.Commands.Porting
                     moppCodes.Add(moppCode);
             }
         }
+    
+        
+        private bool debugConsoleWrite = false;
+        private List<string> CsvQueue1 = new List<string>();
+
+        public void CsvDumpQueueToFile(List<string> in_, string file)
+        {
+            var fileOut = new FileInfo(file);
+            if (File.Exists(file))
+                File.Delete(file);
+
+            var i = -1;
+            using (var csvStream = fileOut.OpenWrite())
+            using (var csvWriter = new StreamWriter(csvStream))
+            {
+                foreach (var a in in_)
+                {
+                    csvStream.Position = csvStream.Length;
+                    csvWriter.WriteLine(a);
+                    i++;
+                }
+            }
+
+            Console.WriteLine($"Wrote {i} lines to {file}");
+        }
+
+        public void Csv1(string in_)
+        {
+            CsvQueue1.Add(in_);
+            if (debugConsoleWrite)
+                Console.WriteLine(in_);
+        }
+        
+        public bool DumpScripts(List<string> args)
+        {
+            if (args.Count != 1)
+            {
+                Console.WriteLine(@"This command is used to dump all script expressions for use with hardcoded script modifications.");
+                Console.WriteLine(@"Current format:");
+                Console.WriteLine(@"00016285,A3113F9D,A31D3FA9,0112,9E3F12A3,Group,Void,unit_enable_vision_mode,// A3173FA3");
+                Console.WriteLine(@"Tagblock,SaltBloc,NextExpr,Opco,Data____,Data____,Line,ExpressionType,ValueType,expressionName,valueTypeName");
+                Console.WriteLine(@"
+dec: script expression tagblock index/ID, 
+hex: short tagblock index and short ID (= next expression handle of the precedent script expression), 
+hex: int32 next expression handle (= short tagblock index and short ID), 
+hex: short opcode, 
+hex: data as 4 bytes, should definitely write as shorts, int, endian flipped, stringid value, tag index, and whatever else data is used for., 
+Type, 
+Function, 
+script name (innacurate), 
+// and after are comments");
+
+                return false;
+            }
+
+            CacheFile.IndexItem blamTag = null;
+
+            var blamTagName = args[0];
+
+            foreach (var tag in BlamCache.IndexItems)
+            {
+                if (tag.GroupTag == "scnr")
+                {
+                    blamTag = tag;
+                    break;
+                }
+            }
+
+            if (blamTag == null)
+                return false;
+
+            var blamContext = new CacheSerializationContext(ref BlamCache, blamTag);
+            var scnr = BlamCache.Deserializer.Deserialize<Scenario>(blamContext);
+
+            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
+
+            debugConsoleWrite = true;
+            var csvFileName = "scriptsDumpOutput.csv";
+
+            foreach (var a in args)
+            {
+                if (a.Contains(".") || a.Contains("."))
+                    csvFileName = a;
+
+                if (a == "console" || a == "debug")
+                    debugConsoleWrite = true;
+            }
+
+            CsvQueue1 = new List<string>();
+            var globals = new Dictionary<uint, string>();
+            var h3 = false;
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+                h3 = true;
+
+            Csv1("Globals");
+            var i = -1;
+            var line = "";
+            foreach (var a in scnr.Globals)
+            {
+                i++;
+                var salt = a.InitializationExpressionHandle >> 16;
+
+                line =
+                    $"{i:D4}," +
+                    $"{i:X4}," +
+                    $"{a.InitializationExpressionHandle:X8}," +
+                    $"{salt:X4}," +
+                    $"{a.Name,-0x20}," +
+                    $"{a.Type.Halo3ODST}," +
+                    $"";
+
+                if (h3)
+                    line =
+                        $"{i:D4}," +
+                        $"{i:X4}," +
+                        $"{a.InitializationExpressionHandle:X8}," +
+                        $"{salt:X4}," +
+                        $"{a.Name,-0x20}," +
+                        $"{a.Type.Halo3Retail}," +
+                        $"";
+
+                Csv1($"{line}");
+
+                globals.Add(a.InitializationExpressionHandle, a.Name);
+            }
+
+            Csv1("Scripts");
+            foreach (var script in scnr.Scripts)
+            {
+                line = $"{scnr.Scripts.IndexOf(script):D4}," +
+                       $"{scnr.Scripts.IndexOf(script):X4}," +
+                       $"{script.Type.ToString()}," +
+                       $"{script.ReturnType.Halo3ODST}," +
+                       $"{script.ScriptName}," +
+                       $"A:{script.RootExpressionHandle:X8}";
+
+                if (h3)
+                    line = $"{scnr.Scripts.IndexOf(script):D4}," +
+                           $"{scnr.Scripts.IndexOf(script):X4}," +
+                           $"{script.Type.ToString()}," +
+                           $"{script.ReturnType.Halo3Retail}," +
+                           $"{script.ScriptName}," +
+                           $"A:{script.RootExpressionHandle:X8}";
+            }
+
+            var failedOpcodes = new Dictionary<int, int>();
+
+            i = -1;
+            foreach (var expr in scnr.ScriptExpressions)
+            {
+                i++;
+                if (expr.Opcode == 0xBABA)
+                    continue;
+
+                var scriptGroupName = "";
+                if (expr.NextExpressionHandle == 0xFFFFFFFF &&
+                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Opcode == 0x0)
+                {
+                    var ScriptGroupName = scnr.Scripts.Find(x => (x.RootExpressionHandle >> 16) == expr.Salt);
+                    if (ScriptGroupName != null)
+                        scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
+                }
+
+                var ExpressionHandle = (uint)((expr.Salt << 16) + i);
+
+                if (globals.ContainsKey(ExpressionHandle))
+                    scriptGroupName = $"G:{globals[ExpressionHandle]}";
+
+                var opcodeName = "";
+
+                if (PortTagCommand.ScriptExpressionIsValue(expr))
+                {
+                    if (Scripting.ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
+                        opcodeName = $"{Scripting.ScriptInfo.ValueTypes[BlamCache.Version][expr.Opcode]},value";
+                }
+                else
+                {
+                    if (Scripting.ScriptInfo.Scripts[BlamCache.Version].ContainsKey(expr.Opcode))
+                        opcodeName = Scripting.ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name;
+                }
+
+                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                if (scnr.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                var ValueType = "";
+
+                ValueType = expr.ValueType.Halo3ODST.ToString();
+
+                if (h3)
+                    ValueType = expr.ValueType.Halo3Retail.ToString();
+
+                line =
+                    $"{i:D8}," +
+                    $"{expr.Salt:X4}{i:X4}," +
+                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{expr.Opcode:X4}," +
+                    $"{expr.Data[0]:X2}" +
+                    $"{expr.Data[1]:X2}" +
+                    $"{expr.Data[2]:X2}" +
+                    $"{expr.Data[3]:X2}," +
+                    $"{expr.ExpressionType}," +
+                    $"{ValueType}," +
+                    $"{opcodeName}," +
+                    $"{scriptGroupName}" +
+                    $"";
+
+                Csv1(line);
+            }
+
+            CsvDumpQueueToFile(CsvQueue1, csvFileName);
+
+            return true;
+        }
+        
     }
 }
