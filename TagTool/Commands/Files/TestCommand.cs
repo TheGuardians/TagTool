@@ -59,6 +59,7 @@ namespace TagTool.Commands.Files
                 { "findconicaleffects", "" },
                 { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
                 { "cisc", "" },
+                { "dumpscripts", "Dump scripts, usable with hardcoded scripts setup (text dump)" },
                 { "defaultbitmaptypes", "" }
             };
 
@@ -77,6 +78,7 @@ namespace TagTool.Commands.Files
                 case "mergeglobaltags": return MergeGlobalTags(args);
                 case "cisc": return Cisc(args);
                 case "defaultbitmaptypes": return DefaultBitmapTypes(args);
+                case "dumpscripts": return DumpScripts(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -1398,5 +1400,162 @@ namespace TagTool.Commands.Files
             CacheContext.TagNames[rmt2Instance] = newTagName;
             // Console.WriteLine($"0x{rmt2Instance:X4} {newTagName}");
         }
+        
+        public bool DumpScripts(List<string> args)
+        {
+            var helpMessage =
+                @"Usage: " +
+                @"test DumpScripts levels\multi\guardian\guardian guardian_HO.csv";
+
+            if (args.Count < 1)
+            {
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var edTagArg = args[0];
+
+            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!edTag.IsInGroup("scnr"))
+            {
+                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            Scenario scnr;
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
+                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
+            }
+
+            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
+
+            debugConsoleWrite = true;
+            var csvFileName = "scriptsDumpOutput.csv";
+
+            foreach (var a in args)
+            {
+                if (a.Contains(".") || a.Contains("."))
+                    csvFileName = a;
+
+                if (a == "console" || a == "debug")
+                    debugConsoleWrite = true;
+            }
+
+            csvQueue1 = new List<string>();
+            var globals = new Dictionary<uint, string>();
+
+            Csv1("Globals");
+            var i = -1;
+            var line = "";
+            foreach (var a in scnr.Globals)
+            {
+                i++;
+                var salt = a.InitializationExpressionHandle >> 16;
+
+                line =
+                    $"{i:D4}," +
+                    $"{i:X4}," +
+                    $"{a.InitializationExpressionHandle:X8}," +
+                    $"{salt:X4}," +
+                    $"{a.Name,-0x20}," +
+                    $"{a.Type.HaloOnline}," +
+                    $"";
+
+                Csv1($"{line}");
+
+                globals.Add(a.InitializationExpressionHandle, a.Name);
+            }
+
+            Csv1("Scripts");
+            foreach (var script in scnr.Scripts)
+            {
+                line = $"{scnr.Scripts.IndexOf(script):D4}," +
+                       $"{scnr.Scripts.IndexOf(script):X4}," +
+                       $"{script.Type.ToString()}," +
+                       $"{script.ReturnType.HaloOnline}," +
+                       $"{script.ScriptName}," +
+                       $"A:{script.RootExpressionHandle:X8}";
+
+            }
+
+            var failedOpcodes = new Dictionary<int, int>();
+
+            i = -1;
+            foreach (var expr in scnr.ScriptExpressions)
+            {
+                i++;
+                if (expr.Opcode == 0xBABA)
+                    continue;
+
+                var scriptGroupName = "";
+                if (expr.NextExpressionHandle == 0xFFFFFFFF &&
+                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Opcode == 0x0)
+                {
+                    var ScriptGroupName = scnr.Scripts.Find(x => (x.RootExpressionHandle >> 16) == expr.Salt);
+                    if (ScriptGroupName != null)
+                        scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
+                }
+
+                var ExpressionHandle = (uint)((expr.Salt << 16) + i);
+
+                if (globals.ContainsKey(ExpressionHandle))
+                    scriptGroupName = $"G:{globals[ExpressionHandle]}";
+
+                var opcodeName = "";
+
+                if (PortTagCommand.ScriptExpressionIsValue(expr))
+                {
+                    if (Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
+                        opcodeName = $"{Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708][expr.Opcode]},value";
+                }
+                else
+                {
+                    if (Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
+                        opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
+                }
+
+                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                if (scnr.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                var ValueType = "";
+
+                ValueType = expr.ValueType.HaloOnline.ToString();
+
+                line =
+                    $"{i:D8}," +
+                    $"{expr.Salt:X4}{i:X4}," +
+                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{expr.Opcode:X4}," +
+                    $"{expr.Data[0]:X2}" +
+                    $"{expr.Data[1]:X2}" +
+                    $"{expr.Data[2]:X2}" +
+                    $"{expr.Data[3]:X2}," +
+                    $"{expr.ExpressionType}," +
+                    $"{ValueType}," +
+                    $"{opcodeName}," +
+                    $"{scriptGroupName}" +
+                    $"";
+
+                Csv1(line);
+            }
+
+            CsvDumpQueueToFile(csvQueue1, csvFileName);
+
+            return true;
+        }
+
     }
 }
