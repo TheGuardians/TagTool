@@ -433,6 +433,29 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            definition.Modes = definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+
+            foreach (var mode in definition.Modes)
+            {
+                mode.WeaponClass = mode.WeaponClass.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+
+                foreach (var weaponClass in mode.WeaponClass)
+                {
+                    weaponClass.WeaponType = weaponClass.WeaponType.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+
+                    foreach (var weaponType in weaponClass.WeaponType)
+                    {
+                        weaponType.Actions = weaponType.Actions.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+                        weaponType.Overlays = weaponType.Overlays.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+                        weaponType.DeathAndDamage = weaponType.DeathAndDamage.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+                        weaponType.Transitions = weaponType.Transitions.OrderBy(a => a.FullName.Set).ThenBy(a => a.FullName.Index).ToList();
+
+                        foreach (var transition in weaponType.Transitions)
+                            transition.Destinations = transition.Destinations.OrderBy(a => a.FullName.Set).ThenBy(a => a.FullName.Index).ToList();
+                    }
+                }
+            }
+
             return definition;
         }
     }

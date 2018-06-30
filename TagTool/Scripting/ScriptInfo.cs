@@ -12423,8 +12423,8 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Unit),
                 },
-                [0x327] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player_action_test_unknown_float1"),
-                [0x328] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player_action_test_unknown_float2"),
+                [0x327] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player0_looking_up"),
+                [0x328] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player0_looking_down"),
                 [0x329] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "player0_set_pitch")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
@@ -12445,6 +12445,8 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
+                [0x32D] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player_action_test_lookstick_forward"),
+                [0x32E] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Boolean, "player_action_test_lookstick_backward"),
                 [0x32F] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "debug_teleport_player")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),

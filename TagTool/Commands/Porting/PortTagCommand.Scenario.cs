@@ -764,7 +764,11 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x2F5; // player_action_test_jump
                         return true;
 
-                    case 0x34D:// cinematic_scripting_destroy_object; remove last argument
+                    case 0x3CD: // chud_show_weapon_stats
+                        expr.Opcode = 0x423; // chud_show_crosshair
+                        break;
+
+                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
                         expr.Opcode = 0x3A0;
                         return true;
 
