@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
         private Scenario ConvertScenario(Scenario scnr, string tagName)
         {
             //
-            // Ai Pathfinding block conversion 
+            // Halo 3 scenario ai data
             //
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
@@ -91,6 +91,11 @@ namespace TagTool.Commands.Porting
                     foreach (var block in pathfindingdata.Unknown9)
                         block.Unknown1 = block.UnknownH3;
                 }
+
+                foreach (var aiObjective in scnr.AiObjectives)
+                    foreach (var role in aiObjective.Roles)
+                        foreach (var direction in role.Direction)
+                            direction.Points = direction.Points_H3.ToList();
             }
 
             //
