@@ -93,9 +93,13 @@ namespace TagTool.Commands.Porting
                 }
 
                 foreach (var aiObjective in scnr.AiObjectives)
+                {
+                    aiObjective.EditorFolderIndex = -1;
+
                     foreach (var role in aiObjective.Roles)
                         foreach (var direction in role.Direction)
                             direction.Points = direction.Points_H3.ToList();
+                }
             }
 
             //
