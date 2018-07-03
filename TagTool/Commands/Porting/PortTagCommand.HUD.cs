@@ -30,7 +30,6 @@ namespace TagTool.Commands.Porting
 
             stateData.MultiplayerEventsFlags = GetEquivalentFlags(stateData.MultiplayerEventsFlags, stateData.MultiplayerEventsFlags_H3);
             stateData.GeneralKudosFlags = GetEquivalentFlags(stateData.GeneralKudosFlags, stateData.GeneralKudosFlags_H3);
-            stateData.UnitGeneralFlags = GetEquivalentFlags(stateData.UnitGeneralFlags, stateData.UnitGeneralFlags_H3);
 
             return stateData;
         }
@@ -245,7 +244,7 @@ namespace TagTool.Commands.Porting
                     H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
                     H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
                     H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
-                    H3att.MotionSensorOffset.Y = (float)Math.Floor((double)(1.5f * H3att.MotionSensorOffset.Y));
+                    H3att.MotionSensorOffset.Y = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.Y));
                     H3att.MotionSensorRadius *= 1.5f;
                     H3att.MotionSensorScale *= 1.5f;
                     H3att.HorizontalScale = 1.0f;

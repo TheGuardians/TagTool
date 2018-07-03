@@ -98,8 +98,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public SurvivalDifficulty SurvivalDifficultyFlags;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short UnusedFlags;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public ushort Unused;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public GeneralKudos GeneralKudosFlags;
@@ -110,21 +110,18 @@ namespace TagTool.Tags.Definitions
                 public UnitInventory UnitInventoryFlags;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short UnusedFlags2;
+                public ushort Unused3;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public UnitGeneral UnitGeneralFlags;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public UnitGeneral_H3 UnitGeneralFlags_H3;
-
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short UnusedFlags2_1;
+                public ushort Unused4;
 
                 public WeaponKudos WeaponKudosFlags;
                 public WeaponStatus WeaponStatusFlags;
                 public WeaponTarget WeaponTargetFlags;
                 public WeaponTargetB WeaponTargetBFlags;
 
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Player_Special Player_SpecialFlags;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public Player_Special_H3 Player_SpecialFlags_H3;
@@ -275,8 +272,8 @@ namespace TagTool.Tags.Definitions
                     AttackerBombPickedUp = 1 << 12,
                     DefenderTeamIsDead = 1 << 13,
                     AttackerTeamIsDead = 1 << 14,
-                    Unknown15 = 1 << 15,
-                    SummaryEnabled = 1 << 16,
+                    SummaryEnabled = 1 << 15,
+                    Unknown16 = 1 << 16,
                     NetDebugEnabled = 1 << 17
                 }
 
@@ -520,6 +517,19 @@ namespace TagTool.Tags.Definitions
                     BinocularsEnabled = 1 << 0,
                     UnitIsZoomedLevel1 = 1 << 1,
                     UnitIsZoomedLevel2 = 1 << 2,
+                    Bit3 = 1 << 3,
+                    Bit4 = 1 << 4,
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15
                 }
 
                 [Flags]
@@ -529,10 +539,22 @@ namespace TagTool.Tags.Definitions
                     IsSingleWielding = 1 << 1,
                     IsDualWielding = 1 << 2,
                     HasSupportWeapon = 1 << 3,
+                    Bit4 = 1 << 4,
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15
                 }
 
                 [Flags]
-                public enum UnitGeneral : uint
+                public enum UnitGeneral : ushort
                 {
                     None,
                     MotionTrackerEnabled = 1 << 0,
@@ -550,31 +572,7 @@ namespace TagTool.Tags.Definitions
                     HasOvershieldLevel1 = 1 << 12,
                     HasOvershieldLevel2 = 1 << 13,
                     HasOvershieldLevel3 = 1 << 14,
-                    HasShields = 1 << 15,
-                    Unknown1 = 1 << 16,
-                    Unknown2 = 1 << 17
-                }
-
-                [Flags]
-                public enum UnitGeneral_H3 : ushort
-                {
-                    None,
-                    MotionTrackerEnabled = 1 << 0,
-                    MotionTrackerDisabled = 1 << 1,
-                    SelectedFragGrenades = 1 << 2,
-                    SelectedPlasmaGrenades = 1 << 3,
-                    SelectedSpikeGrenades = 1 << 4,
-                    SelectedFireGrenades = 1 << 5,
-                    BinocularsActive = 1 << 6,
-                    BinocularsNotActive = 1 << 7,
-                    ThirdPersonCamera = 1 << 8,
-                    FirstPersonCamera = 1 << 9,
-                    IsSpeaking = 1 << 10,
-                    IsTappingToTalk = 1 << 11,
-                    HasOvershieldLevel1 = 1 << 12,
-                    HasOvershieldLevel2 = 1 << 13,
-                    HasOvershieldLevel3 = 1 << 14,
-                    HasShields = 1 << 15,
+                    HasShields = 1 << 15
                 }
 
                 [Flags]
@@ -632,6 +630,19 @@ namespace TagTool.Tags.Definitions
                     SourceIsPrimaryWeapon = 1 << 0,
                     SourceIsDualWeapon = 1 << 1,
                     SourceIsBackpacked = 1 << 2,
+                    Bit3 = 1 << 3,
+                    Bit4 = 1 << 4,
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15
                 }
 
                 [Flags]
@@ -686,7 +697,20 @@ namespace TagTool.Tags.Definitions
 					NotZoomedIn = 1 << 0,
                     NotArmedWithSupportWeapon = 1 << 1,
 					NotFullyArmed = 1 << 2,
-				}
+                    Bit3 = 1 << 3,
+                    Bit4 = 1 << 4,
+                    Bit5 = 1 << 5,
+                    Bit6 = 1 << 6,
+                    Bit7 = 1 << 7,
+                    Bit8 = 1 << 8,
+                    Bit9 = 1 << 9,
+                    Bit10 = 1 << 10,
+                    Bit11 = 1 << 11,
+                    Bit12 = 1 << 12,
+                    Bit13 = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15
+                }
 
                 [Flags]
 				public enum Consumable : uint
