@@ -4,6 +4,7 @@ using TagTool.Scripting;
 using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
+using TagTool.Ai;
 
 namespace TagTool.Tags.Definitions
 {
@@ -2172,10 +2173,10 @@ namespace TagTool.Tags.Definitions
         {
             public List<LineSegment> LineSegments;
             public List<Parallelogram> Parallelograms;
-            public List<UnknownBlock3> Unknown3;
+            public List<JumpHint> JumpHints;
             public List<UnknownBlock4> Unknown4;
             public List<UnknownBlock5> Unknown5;
-            public List<UnknownBlock6> Unknown6;
+            public List<FlightHint> FlightHints;
             public List<UnknownBlock7> Unknown7;
             public List<UnknownBlock8> Unknown8;
             public List<UnknownBlock9> Unknown9;
@@ -2228,12 +2229,27 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class UnknownBlock3
+            public class JumpHint
             {
-                public short Unknown;
-                public short Unknown2;
-                public short Unknown3;
-                public short Unknown4;
+                public FlagsValue Flags;
+                public short GeometryIndex;
+                public CharacterJumpHeight ForceJumpHeight;
+                public ControlFlagsValue ControlFlags;
+
+                [Flags]
+                public enum FlagsValue : short
+                {
+                    None,
+                    Bidirectional = 1 << 0,
+                    Closed = 1 << 1
+                }
+
+                [Flags]
+                public enum ControlFlagsValue : ushort
+                {
+                    None,
+                    MagicLift = 1 << 0
+                }
             }
 
             [TagStructure(Size = 0x8)]
@@ -2263,16 +2279,14 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-            public class UnknownBlock6
+            public class FlightHint
             {
-                public List<UnknownBlock> Unknown;
+                public List<FlightPoint> FlightPoints;
 
                 [TagStructure(Size = 0xC)]
-                public class UnknownBlock
+                public class FlightPoint
                 {
-                    public float Unknown;
-                    public float Unknown2;
-                    public float Unknown3;
+                    public RealPoint3d Point;
                 }
             }
 
