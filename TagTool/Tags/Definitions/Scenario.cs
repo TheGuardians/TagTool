@@ -2170,8 +2170,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class AiPathfindingDatum
         {
-            public List<UnknownBlock> Unknown;
-            public List<UnknownBlock2> Unknown2;
+            public List<LineSegment> LineSegments;
+            public List<Parallelogram> Parallelograms;
             public List<UnknownBlock3> Unknown3;
             public List<UnknownBlock4> Unknown4;
             public List<UnknownBlock5> Unknown5;
@@ -2180,47 +2180,51 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock8> Unknown8;
             public List<UnknownBlock9> Unknown9;
 
-            [TagStructure(Size = 0x24)]
-            public class UnknownBlock
+            [Flags]
+            public enum UserHintFlags : int
             {
-                public uint Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public short Unknown5;
-                public short Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public short Unknown10;
-                public short Unknown11;
+                None,
+                Bidirectional = 1 << 0,
+                Closed = 1 << 1
+            }
+
+            [TagStructure(Size = 0x24)]
+            public class LineSegment
+            {
+                public UserHintFlags Flags;
+
+                public RealPoint3d Point0;
+                public short ReferenceUnknown0;
+                public short ReferenceFrame0;
+
+                public RealPoint3d Point1;
+                public short ReferenceUnknown1;
+                public short ReferenceFrame1;
             }
 
             [TagStructure(Size = 0x48)]
-            public class UnknownBlock2
+            public class Parallelogram
             {
-                public uint Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public short Unknown5;
-                public short Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public short Unknown10;
-                public short Unknown11;
-                public float Unknown12;
-                public float Unknown13;
-                public float Unknown14;
-                public short Unknown15;
-                public short Unknown16;
-                public float Unknown17;
-                public float Unknown18;
-                public float Unknown19;
-                public short Unknown20;
-                public short Unknown21;
-                public uint Unknown22;
+                public UserHintFlags Flags;
+
+                public RealPoint3d Point0;
+                public short ReferenceUnknown0;
+                public short ReferenceFrame0;
+
+                public RealPoint3d Point1;
+                public short ReferenceUnknown1;
+                public short ReferenceFrame1;
+
+                public RealPoint3d Point2;
+                public short ReferenceUnknown2;
+                public short ReferenceFrame2;
+
+                public RealPoint3d Point3;
+                public short ReferenceUnknown3;
+                public short ReferenceFrame3;
+
+                [TagField(Padding = true, Length = 4)]
+                public byte[] Unused;
             }
 
             [TagStructure(Size = 0x8)]
