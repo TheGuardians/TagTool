@@ -17,12 +17,6 @@ namespace TagTool.Commands
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
-            var sh = new Shaders.Compiler.ShaderGenerator();
-
-            // Get the file path from the first argument
-            // If no argument is given, load tags.dat
-            var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
-
             // If there are extra arguments, use them to automatically execute a command
             List<string> autoexecCommand = null;
             if (args.Length > 1)
@@ -37,11 +31,28 @@ namespace TagTool.Commands
                 Console.WriteLine();
             }
 
+            start:
+            // Get the file path from the first argument
+            // If no argument is given, load tags.dat
+            var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
+
             while (!fileInfo.Exists)
             {
                 Console.WriteLine("Enter the path to 'tags.dat':");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
+
+                switch (tagCacheFile.ToLower())
+                {
+                    case "restart":
+                        Console.WriteLine();
+                        goto start;
+
+                    case "exit":
+                    case "quit":
+                        Console.WriteLine();
+                        goto end;
+                }
 
                 //sometimes drag&drop files have quotes placed around them, remove the quotes
                 tagCacheFile = tagCacheFile.Replace("\"", "").Replace("\'", "");
@@ -98,18 +109,24 @@ namespace TagTool.Commands
                 if (commandArgs.Count == 0)
                     continue;
 
-                // If "exit" or "quit" is given, pop the current context
-                if (commandArgs[0].ToLower() == "exit" || commandArgs[0].ToLower() == "quit")
+                switch (commandArgs[0].ToLower())
                 {
-                    if (!contextStack.Pop())
-                        break; // No more contexts - quit
-                    continue;
-                }
+                    case "restart":
+                        Console.WriteLine();
+                        goto start;
 
-                if (commandArgs[0].ToLower() == "cyka")
-                {
-                    Console.WriteLine("blyat!");
-                    continue;
+                    case "quit":
+                        Console.WriteLine();
+                        goto end;
+
+                    case "exit":
+                        if (!contextStack.Pop())
+                            goto end;
+                        continue;
+
+                    case "cyka":
+                        Console.WriteLine("blyat!");
+                        continue;
                 }
 
                 // Handle redirection
@@ -136,6 +153,8 @@ namespace TagTool.Commands
                     Console.WriteLine("Wrote output to {0}.", redirectFile);
                 }
             }
+
+            end: return;
         }
 
         private static bool ExecuteCommand(CommandContext context, List<string> commandAndArgs)

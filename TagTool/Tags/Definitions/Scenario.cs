@@ -3100,8 +3100,8 @@ namespace TagTool.Tags.Definitions
                 public short Unknown5;
                 public short Unknown6;
                 public short Unknown7;
-                public short Unknown8;
-                public float Unknown9;
+                public short FollowEnum;
+                public float FollowRadius;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown10;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]

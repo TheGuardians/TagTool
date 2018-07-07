@@ -97,8 +97,13 @@ namespace TagTool.Commands.Porting
                     aiObjective.EditorFolderIndex = -1;
 
                     foreach (var role in aiObjective.Roles)
+                    {
+                        role.Unknown15 = 0;
+                        role.Unknown16 = 1;
+
                         foreach (var direction in role.Direction)
                             direction.Points = direction.Points_H3.ToList();
+                    }
                 }
             }
 
@@ -456,69 +461,10 @@ namespace TagTool.Commands.Porting
         
         public void ConvertScriptExpressionUnsupportedOpcode(ScriptExpression expr)
         {
-            if (expr.Opcode == 0xBABA)
+            if (expr.Opcode == 0xBABA || expr.Opcode == 0xCDCD)
                 return;
 
-            switch (expr.Opcode)
-            {
-                // These should have never converted due to opcode name mismatch
-
-                case 0x2CE: // camera_set_animation_relative_with_speed_loop
-                case 0x2CF: // camera_set_animation_relative_with_speed_loop_offset
-                case 0x070: // object_copy_player_appearance this one's a pos
-                case 0x676: // player_set_look_training_hack
-                case 0x1D3: // chud_show_ai_navpoint
-                case 0x2F5: // player_action_test_vision_trigger
-                case 0x302: // player_action_test_unknown1
-                case 0x303: // player_action_test_start
-                case 0x30F: // unit_action_test_grenade_trigger
-                case 0x31D: // unit_action_test_unknown1
-                case 0x31E: // unit_action_test_unknown2
-                case 0x32E: // player_action_test_1?
-                case 0x32F: // player_action_test_2?
-                case 0x640: // player_inside_active_beacon
-                case 0x668: // player_add_footprint
-                case 0x66C: // player_set_nav_enabled
-                case 0x66D: // player_set_fourth_wall_enabled
-                case 0x66E: // player_set_objectives_enabled
-
-                case 0x4D5: // net_delegate_host
-                case 0x4D6: // net_delegate_leader
-                case 0x4DA: // net_player_color
-                case 0x526: // bug_now
-                case 0x527: // bug_now_lite
-                case 0x528: // bug_now_auto
-
-                case 0x427: // chud_display_pda_minimap_message
-                case 0x428: // chud_display_pda_objectives_message
-                case 0x429: // chud_display_pda_communications_message
-                case 0x42B: // chud_show_object_navpoint
-                case 0x678: // device_arg_has_been_touched_by_unit
-                case 0x66B: // player_set_pda_enabled
-                case 0x66F: // player_force_pda
-                case 0x670: // player_close_pda
-                case 0x63B: // pda_activate_beacon
-                case 0x63D: // pda_activate_marker
-                case 0x63E: // pda_activate_marker_named
-                case 0x63F: // pda_beacon_is_selected
-                case 0x66A: // pda_is_active_deterministic
-                case 0x671: // pda_set_footprint_dead_zone
-                case 0x674: // pda_play_arg_sound
-                case 0x675: // pda_stop_arg_sound
-                case 0x677: // pda_set_active_pda_definition
-                case 0x67B: // pda_input_enable
-                case 0x67F: // pda_input_enable_a
-                case 0x680: // pda_input_enable_dismiss
-                case 0x681: // pda_input_enable_x
-                case 0x682: // pda_input_enable_y
-                case 0x683: // pda_input_enable_dpad
-                case 0x684: // pda_input_enable_analog_sticks
-                    expr.Opcode = 0xCDCD;
-                    break;
-
-                default:
-                    break;
-            }
+            expr.Opcode = 0x000; // begin
         }
 
         public void ConvertScriptExpressionOpcode(Scenario scnr, ScriptExpression expr)
@@ -584,8 +530,12 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            // If it manages to bypass the loop without returning true, then no match was found.
-            Console.WriteLine($"ERROR: no equivalent was found for 0x{expr.Opcode:X3}");
+            //
+            // If no match was found, the opcode is currently unsupported.
+            //
+
+            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3})");
+
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
 
