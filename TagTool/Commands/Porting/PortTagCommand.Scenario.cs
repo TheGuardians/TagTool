@@ -132,7 +132,7 @@ namespace TagTool.Commands.Porting
                 {
                     aiObjective.EditorFolderIndex = -1;
 
-                    foreach (var role in aiObjective.Roles)
+                    foreach (var role in aiObjective.Tasks)
                     {
                         role.Unknown15 = 0;
                         role.Unknown16 = 1;

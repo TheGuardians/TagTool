@@ -2475,6 +2475,7 @@ namespace TagTool.Tags.Definitions
         public class ScriptingDatum
         {
             public List<PointSet> PointSets;
+
             [TagField(Padding = true, Length = 120)]
             public byte[] Unused;
 
@@ -3126,7 +3127,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short EditorFolderIndex;
 
-            public List<Role> Roles;
+            public List<Task> Tasks;
 
             [TagStructure(Size = 0x4)]
             public class OpposingObjective
@@ -3139,7 +3140,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST)]
-            public class Role
+            public class Task
             {
                 public short Unknown;
                 public short Unknown2;
@@ -3152,23 +3153,28 @@ namespace TagTool.Tags.Definitions
                 public short Unknown7;
                 public short FollowEnum;
                 public float FollowRadius;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown10;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown11;
+                public uint Unknown11; // block?
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown12;
+                public uint Unknown12; // block?
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown13;
+                public uint Unknown13; // block?
+
                 [TagField(Length = 32)]
-                public string CommandScriptName1;
+                public string EntryScriptName;
                 [TagField(Length = 32)]
-                public string CommandScriptName2;
+                public string CommandScriptName;
                 [TagField(Length = 32)]
-                public string CommandScriptName3;
-                public short CommandScriptIndex1;
-                public short CommandScriptIndex2;
-                public short CommandScriptIndex3;
+                public string ExhaustionScriptName;
+
+                public short EntryScriptIndex;
+                public short CommandScriptIndex;
+                public short ExhaustionScriptIndex;
+
                 public short Unknown14;
                 public short Unknown15;
                 public short Unknown16;
@@ -3177,7 +3183,7 @@ namespace TagTool.Tags.Definitions
                 public short Unknown20;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown21;
-                public StringId Task;
+                public StringId TaskName;
                 public short HierarchyLevelFrom100;
                 public short PreviousRole;
                 public short NextRole;
@@ -3191,7 +3197,7 @@ namespace TagTool.Tags.Definitions
                 public short Bodies;
                 public short Unknown24;
                 public uint Unknown25;
-                public List<UnknownBlock> Unknown26;
+                public List<Area> Areas;
                 public List<DirectionBlock> Direction;
 
                 [TagStructure(Size = 0x8)]
@@ -3235,17 +3241,41 @@ namespace TagTool.Tags.Definitions
                     BruteChopper = 44,
                 }
 
+                public enum AreaType : short
+                {
+                    Normal,
+                    Search,
+                    Core
+                }
+
+                [Flags]
+                public enum AreaFlags : byte
+                {
+                    None,
+                    Goal = 1 << 0,
+                    DirectionValid = 1 << 1
+                }
+
                 [TagStructure(Size = 0xA, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
-                public class UnknownBlock
+                public class Area
                 {
-                    public short Unknown;
-                    public short Unknown2;
+                    public AreaType Type;
+
+                    public AreaFlags Flags;
+
+                    [TagField(Padding = true, Length = 1)]
+                    public byte[] Unused = new byte[1];
+
+                    [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                     public short Unknown3;
-                    public short Unknown4;
-                    public short Unknown5;
+
+                    public short ZoneIndex;
+                    public short AreaIndex;
+
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public short Unknown6;
+                    public Angle Yaw;
+
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public short Unknown7;
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
