@@ -2021,10 +2021,19 @@ namespace TagTool.Tags.Definitions
                 public float RuntimeStandardDeviation;
                 public short FiringPositionStartIndex;
                 public short FiringPositionCount;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public short Unknown1_Odst;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public short Unknown2_Odst;
+
                 public short Unknown3;
                 public short Unknown4;
                 public int Unknown5;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public uint Unknown6;
+
                 public uint Unknown7;
                 public uint Unknown8;
                 public uint Unknown9;
