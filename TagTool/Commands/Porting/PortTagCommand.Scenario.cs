@@ -105,6 +105,18 @@ namespace TagTool.Commands.Porting
                             direction.Points = direction.Points_H3.ToList();
                     }
                 }
+
+                foreach (var zone in scnr.Zones)
+                {
+                    if (BlamCache.Version < CacheVersion.Halo3ODST)
+                    {
+                        if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
+                            zone.FlagsNew = (Scenario.BspFlags)(1 << zone.ManualBspIndex);
+                        else
+                            for (var i = 0; i < scnr.StructureBsps.Count; i++)
+                                zone.FlagsNew = (Scenario.BspFlags)(1 << i);
+                    }
+                }
             }
 
             //

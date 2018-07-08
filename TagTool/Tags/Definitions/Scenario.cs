@@ -1950,13 +1950,26 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Label = true, Length = 32)]
             public string Name;
-            public int Unknown;
+
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public short ManualBSPIndex;
+            public ZoneFlags FlagsOld;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public BspFlags FlagsNew;
+
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public short ManualBspIndex;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short Unused;
+
             public List<FiringPosition> FiringPositions;
             public List<Area> Areas;
+
+            [Flags]
+            public enum ZoneFlags : int
+            {
+                None,
+                UsesManualBspIndex = 1 << 0
+            }
 
             [TagStructure(Size = 0x28)]
             public class FiringPosition
@@ -2003,9 +2016,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(Label = true, Length = 32)]
                 public string Name;
                 public AreaFlags Flags;
-                public RealPoint3d Position;
+                public RealPoint3d RuntimeRelativeMeanPoint;
                 public int Unknown;
-                public uint Unknown2;
+                public float RuntimeStandardDeviation;
                 public short FiringPositionStartIndex;
                 public short FiringPositionCount;
                 public short Unknown3;
@@ -2020,9 +2033,19 @@ namespace TagTool.Tags.Definitions
                 public short ManualReferenceFrame;
                 public short Unknown12;
                 public List<FlightHint> FlightHints;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public List<UnknownBlock> Unknown13;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown14;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown15;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public List<Point> Points;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public short RuntimeCarverInversion;
+
+                [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3ODST)]
+                public byte[] Unused = new byte[2];
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public AreaGenerationFlags GenerationFlags;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown16;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown17;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown18;
@@ -2043,6 +2066,19 @@ namespace TagTool.Tags.Definitions
                     ManualReferenceFrame = 1 << 2
                 }
 
+                [Flags]
+                public enum AreaGenerationFlags : int
+                {
+                    None = 0,
+                    ExcludeCover = 1 << 0,
+                    IgnoreExisting = 1 << 1,
+                    GenerateRadial = 1 << 2,
+                    DoNotStagger = 1 << 3,
+                    Airborne = 1 << 4,
+                    AirborneStagger = 1 << 5,
+                    ContinueCasting = 1 << 6
+                }
+
                 [TagStructure(Size = 0x8)]
                 public class FlightHint
                 {
@@ -2052,7 +2088,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x18)]
-                public class UnknownBlock
+                public class Point
                 {
                     public RealPoint3d Position;
                     public short Unknown;
