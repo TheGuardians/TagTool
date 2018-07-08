@@ -2023,7 +2023,7 @@ namespace TagTool.Tags.Definitions
                 public short FiringPositionCount;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown1_Odst;
+                public short Unknown1_Odst = -1; // maybe "editor folder index"?
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown2_Odst;
 
