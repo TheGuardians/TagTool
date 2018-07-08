@@ -2473,7 +2473,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x84)]
         public class ScriptingDatum
-        {
+        {            
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public int Unknown;
+            
             public List<PointSet> PointSets;
             [TagField(Padding = true, Length = 120)]
             public byte[] Unused;
