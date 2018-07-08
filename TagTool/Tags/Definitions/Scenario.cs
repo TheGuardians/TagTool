@@ -2222,7 +2222,7 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock4> Unknown4;
             public List<UnknownBlock5> Unknown5;
             public List<FlightHint> FlightHints;
-            public List<UnknownBlock7> Unknown7;
+            public List<CookieCutter> CookieCutters;
             public List<UnknownBlock8> Unknown8;
             public List<UnknownBlock9> Unknown9;
 
@@ -2337,12 +2337,15 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(MaxVersion = CacheVersion.Halo3Retail, Size = 0x44)]
             [TagStructure(MinVersion = CacheVersion.Halo3ODST, Size = 0x7C)]
-            public class UnknownBlock7
+            public class CookieCutter
             {
                 public StringId Unknown;
                 public short Unknown2;
                 public short Unknown3;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float Unknown4;
+
                 public float Unknown5;
                 public float Unknown6;
                 public float Unknown7;
@@ -2356,10 +2359,12 @@ namespace TagTool.Tags.Definitions
                 public float Unknown15;
                 public float Unknown16;
                 public float Unknown17;
-                public int Unknown18;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public List<UnknownBlock> Unknown19;
+                public float Unknown18;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public List<Point> Points;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public int Unknown20;
@@ -2379,19 +2384,19 @@ namespace TagTool.Tags.Definitions
                 public int Unknown27;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public int Unknown28;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public int Unknown29;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public int Unknown30;
+
+                public float Unknown29;
+                public short Unknown30;
+                public short Unknown31;
 
                 [TagStructure(Size = 0x14)]
-                public class UnknownBlock
+                public class Point
                 {
-                    public int Unknown1;
-                    public int Unknown2;
-                    public int Unknown3;
-                    public int Unknown4;
-                    public int Unknown5;
+                    public float Unknown1;
+                    public float Unknown2;
+                    public float Unknown3;
+                    public float Unknown4;
+                    public float Unknown5;
                 }
             }
 

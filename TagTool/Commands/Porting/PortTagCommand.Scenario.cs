@@ -85,8 +85,44 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var pathfindingdata in scnr.AiPathfindingData)
                 {
-                    foreach (var block in pathfindingdata.Unknown7)
-                        block.Unknown19 = new List<Scenario.AiPathfindingDatum.UnknownBlock7.UnknownBlock>();
+                    foreach (var cookieCutter in pathfindingdata.CookieCutters)
+                    {
+                        cookieCutter.Points = new List<Scenario.AiPathfindingDatum.CookieCutter.Point>
+                        {
+                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            {
+                                Unknown1 = cookieCutter.Unknown12 - 0.5f,
+                                Unknown2 = cookieCutter.Unknown13 - 0.5f,
+                                Unknown3 = cookieCutter.Unknown14,
+                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
+                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                            },
+                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            {
+                                Unknown1 = cookieCutter.Unknown12 + 0.5f,
+                                Unknown2 = cookieCutter.Unknown13 - 0.5f,
+                                Unknown3 = cookieCutter.Unknown14,
+                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
+                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                            },
+                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            {
+                                Unknown1 = cookieCutter.Unknown12 + 0.5f,
+                                Unknown2 = cookieCutter.Unknown13 + 0.5f,
+                                Unknown3 = cookieCutter.Unknown14,
+                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
+                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                            },
+                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            {
+                                Unknown1 = cookieCutter.Unknown12 - 0.5f,
+                                Unknown2 = cookieCutter.Unknown13 + 0.5f,
+                                Unknown3 = cookieCutter.Unknown14,
+                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
+                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                            }
+                        };
+                    }
 
                     foreach (var block in pathfindingdata.Unknown9)
                         block.Unknown1 = block.UnknownH3;
