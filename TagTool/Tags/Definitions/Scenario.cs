@@ -2053,18 +2053,18 @@ namespace TagTool.Tags.Definitions
                 public byte[] Unused = new byte[2];
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public AreaGenerationFlags GenerationFlags;
+                public AreaGenerationFlags GenerationFlags = AreaGenerationFlags.IgnoreExisting;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown16;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown17;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown18;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown19;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown20;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown21;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown22;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown23;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown24;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)] public uint Unknown25;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown16 = 0.5f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown17 = 0.5f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown18 = 0.0f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown19 = 0.0f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown20 = 1.0f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown21 = 1.0f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown22 = 0.2f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown23 = 0.7f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown24 = 0.25f;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)] public float Unknown25 = 0.5f;
 
                 [Flags]
                 public enum AreaFlags : int
@@ -2100,7 +2100,7 @@ namespace TagTool.Tags.Definitions
                 public class Point
                 {
                     public RealPoint3d Position;
-                    public short Unknown;
+                    public short Unknown1;
                     public short Unknown2;
                     public RealEulerAngles2d Facing;
                 }

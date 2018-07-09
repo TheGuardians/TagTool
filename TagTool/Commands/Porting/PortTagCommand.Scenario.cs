@@ -132,25 +132,38 @@ namespace TagTool.Commands.Porting
                 {
                     aiObjective.EditorFolderIndex = -1;
 
-                    foreach (var role in aiObjective.Tasks)
+                    foreach (var task in aiObjective.Tasks)
                     {
-                        role.Unknown15 = 0;
-                        role.Unknown16 = 1;
+                        // TODO: Find out if these are right...
+                        //task.Unknown15 = 0;
+                        task.Unknown16 = 1;
 
-                        foreach (var direction in role.Direction)
+                        foreach (var area in task.Areas)
+                            area.Flags = Scenario.AiObjective.Task.AreaFlags.DirectionValid;
+
+                        foreach (var direction in task.Direction)
                             direction.Points = direction.Points_H3.ToList();
                     }
                 }
 
                 foreach (var zone in scnr.Zones)
                 {
-                    if (BlamCache.Version < CacheVersion.Halo3ODST)
+                    if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
+                        zone.FlagsNew = (Scenario.BspFlags)(1 << zone.ManualBspIndex);
+                    else
+                        for (var i = 0; i < scnr.StructureBsps.Count; i++)
+                            zone.FlagsNew = (Scenario.BspFlags)(1 << i);
+
+                    foreach (var area in zone.Areas)
                     {
-                        if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
-                            zone.FlagsNew = (Scenario.BspFlags)(1 << zone.ManualBspIndex);
-                        else
-                            for (var i = 0; i < scnr.StructureBsps.Count; i++)
-                                zone.FlagsNew = (Scenario.BspFlags)(1 << i);
+                        // Add at least one "point" for now (there's usually a few more)
+                        area.Points = new List<Scenario.Zone.Area.Point>
+                        {
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = area.RuntimeRelativeMeanPoint
+                            }
+                        };
                     }
                 }
             }
