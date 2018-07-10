@@ -378,13 +378,13 @@ namespace TagTool.Commands.Files
                 {
                     case CacheVersion.Halo2Xbox:
                     case CacheVersion.Halo2Vista:
-                        BlamCache = new CacheFileGen2(CacheContext, blamCacheFile, version);
+                        BlamCache = new CacheFileGen2(CacheContext, blamCacheFile, version, false);
                         break;
 
                     case CacheVersion.Halo3Retail:
                     case CacheVersion.Halo3ODST:
                     case CacheVersion.HaloReach:
-                        BlamCache = new CacheFileGen3(CacheContext, blamCacheFile, version);
+                        BlamCache = new CacheFileGen3(CacheContext, blamCacheFile, version, false);
                         break;
 
                     default:

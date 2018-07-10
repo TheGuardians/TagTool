@@ -11,8 +11,8 @@ namespace TagTool.Cache
         public static CacheFileGen2 SharedCache { get; private set; } = null;
         public static CacheFileGen2 SinglePlayerSharedCache { get; private set; } = null;
 
-        public CacheFileGen2(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version = CacheVersion.Halo2Xbox) :
-            base(cacheContext, file, version)
+        public CacheFileGen2(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory) :
+            base(cacheContext, file, version, memory)
         {
             if (file.Name == "mainmenu.map" && MainMenuCache?.File.FullName != file.FullName)
                 MainMenuCache = this;

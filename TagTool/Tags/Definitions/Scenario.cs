@@ -2100,7 +2100,7 @@ namespace TagTool.Tags.Definitions
                 public class Point
                 {
                     public RealPoint3d Position;
-                    public short Unknown1;
+                    public short Unknown1 = -1;
                     public short Unknown2;
                     public RealEulerAngles2d Facing;
                 }

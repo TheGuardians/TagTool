@@ -416,10 +416,13 @@ namespace TagTool.Commands.Porting
 
                     if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
                     {
-                        resourceStreams[ResourceLocation.ResourcesB] = new MemoryStream();
+                        resourceStreams[ResourceLocation.ResourcesB] = Flags.HasFlag(PortingFlags.Memory) ?
+                            new MemoryStream() :
+                            (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.ResourcesB);
 
-                        using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
-                            resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
+                        if (Flags.HasFlag(PortingFlags.Memory))
+                            using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
+                                resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
                     }
 
                     var dataSize = (int)(dataStream.Length - dataStream.Position);

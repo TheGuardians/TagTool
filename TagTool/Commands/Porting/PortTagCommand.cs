@@ -41,7 +41,8 @@ namespace TagTool.Commands.Porting
             NoSquads = 1 << 7,
             Scripts = 1 << 8,
             ShaderTest = 1 << 9,
-            MatchShaders = 1 << 10
+            MatchShaders = 1 << 10,
+            Memory = 1 << 11
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -65,7 +66,8 @@ namespace TagTool.Commands.Porting
                 "NoScripts: Clears the scripts of any scenario tag when porting." + Environment.NewLine +
                 "ShaderTest: TBD." + Environment.NewLine +
                 "MatchShaders: Attempts to match any shader tags using existing render method tags when porting." + Environment.NewLine +
-                "NoShaders: Uses default shader tags when porting.",
+                "NoShaders: Uses default shader tags when porting." + Environment.NewLine +
+                "Memory: Keeps cache in memory until the porting process is complete.",
 
                 "PortTag [Options] <Tag>",
 
@@ -125,22 +127,24 @@ namespace TagTool.Commands.Porting
 
             var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-            using (var cacheStream = new MemoryStream())
+            using (var cacheStream = Flags.HasFlag(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenTagCacheReadWrite())
             {
-                using (var cacheFileStream = CacheContext.OpenTagCacheRead())
-                    cacheFileStream.CopyTo(cacheStream);
+                if (Flags.HasFlag(PortingFlags.Memory))
+                    using (var cacheFileStream = CacheContext.OpenTagCacheRead())
+                        cacheFileStream.CopyTo(cacheStream);
 
                 foreach (var blamTag in ParseLegacyTag(args[0]))
                     ConvertTag(cacheStream, resourceStreams, blamTag);
 
-                using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    cacheFileStream.Seek(0, SeekOrigin.Begin);
-                    cacheFileStream.SetLength(cacheFileStream.Position);
+                if (Flags.HasFlag(PortingFlags.Memory))
+                    using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
+                    {
+                        cacheFileStream.Seek(0, SeekOrigin.Begin);
+                        cacheFileStream.SetLength(cacheFileStream.Position);
 
-                    cacheStream.Seek(0, SeekOrigin.Begin);
-                    cacheStream.CopyTo(cacheFileStream);
-                }
+                        cacheStream.Seek(0, SeekOrigin.Begin);
+                        cacheStream.CopyTo(cacheFileStream);
+                    }
             }
 
             if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
@@ -151,14 +155,15 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in resourceStreams)
             {
-                using (var resourceFileStream = CacheContext.OpenResourceCacheReadWrite(entry.Key))
-                {
-                    resourceFileStream.Seek(0, SeekOrigin.Begin);
-                    resourceFileStream.SetLength(resourceFileStream.Position);
+                if (Flags.HasFlag(PortingFlags.Memory))
+                    using (var resourceFileStream = CacheContext.OpenResourceCacheReadWrite(entry.Key))
+                    {
+                        resourceFileStream.Seek(0, SeekOrigin.Begin);
+                        resourceFileStream.SetLength(resourceFileStream.Position);
 
-                    entry.Value.Seek(0, SeekOrigin.Begin);
-                    entry.Value.CopyTo(resourceFileStream);
-                }
+                        entry.Value.Seek(0, SeekOrigin.Begin);
+                        entry.Value.CopyTo(resourceFileStream);
+                    }
 
                 entry.Value.Close();
             }
@@ -673,13 +678,13 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams);
+					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
 
 				case RenderGeometry renderGeometry when definition is RenderModel mode && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams);
+					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
 
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams);
+					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))

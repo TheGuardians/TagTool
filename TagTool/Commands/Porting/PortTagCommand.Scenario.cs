@@ -161,7 +161,31 @@ namespace TagTool.Commands.Porting
                         {
                             new Scenario.Zone.Area.Point
                             {
-                                Position = area.RuntimeRelativeMeanPoint
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X - 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Y - 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Z)
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X + 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Y - 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Z)
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X + 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Y + 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Z)
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X - 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Y + 2.5f,
+                                    area.RuntimeRelativeMeanPoint.Z)
                             }
                         };
                     }
@@ -192,8 +216,6 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var squad in scnr.Squads)
                 {
-                    //First section is correct. From base squad, create spawn points and designer cell  blocks. The rest is null
-
                     squad.SpawnFormations = new List<Scenario.Squad.SpawnFormation>();
                     squad.SpawnPoints = new List<Scenario.Squad.SpawnPoint>();
                     squad.SquadTemplate = null;
@@ -204,10 +226,6 @@ namespace TagTool.Commands.Porting
                     {
                         var baseSquad = squad.BaseSquad[i];
                         
-                        //
-                        // Convert StringIds?
-                        //
-
                         baseSquad.InitialState = ConvertStringId(baseSquad.InitialState);
 
                         foreach (var spawnpoint in baseSquad.StartingLocations)
@@ -227,7 +245,7 @@ namespace TagTool.Commands.Porting
 
                         var designer = new Scenario.Squad.Cell
                         {
-                            Name = new StringId(0),
+                            Name = StringId.Invalid,
                             DifficultyFlags = baseSquad.DifficultyFlags,
                             Count = baseSquad.Count,
 

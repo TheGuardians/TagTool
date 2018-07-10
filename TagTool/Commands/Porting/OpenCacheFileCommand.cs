@@ -27,8 +27,25 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count < 1)
                 return false;
+
+            var memory = false;
+
+            while (args.Count > 1)
+            {
+                switch (args[0].ToLower())
+                {
+                    case "memory":
+                        memory = true;
+                        break;
+
+                    default:
+                        throw new FormatException(args[0]);
+                }
+
+                args.RemoveAt(0);
+            }
 
             var blamCacheFile = new FileInfo(args[0]);
 
@@ -81,18 +98,18 @@ namespace TagTool.Commands.Porting
                     case CacheVersion.Halo2Xbox:
                     case CacheVersion.Halo2Vista:
                         if (blamCacheFile.Name != "mainmenu.map")
-                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "mainmenu.map")), version);
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "mainmenu.map")), version, memory);
                         if (blamCacheFile.Name != "shared.map")
-                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "shared.map")), version);
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "shared.map")), version, memory);
                         if (blamCacheFile.Name != "single_player_shared.map")
-                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "single_player_shared.map")), version);
-                        blamCache = new CacheFileGen2(CacheContext, blamCacheFile, version);
+                            new CacheFileGen2(CacheContext, new FileInfo(Path.Combine(blamCacheFile.Directory.FullName, "single_player_shared.map")), version, memory);
+                        blamCache = new CacheFileGen2(CacheContext, blamCacheFile, version, memory);
                         break;
                         
                     case CacheVersion.Halo3Retail:
                     case CacheVersion.Halo3ODST:
                     case CacheVersion.HaloReach:
-                        blamCache = new CacheFileGen3(CacheContext, blamCacheFile, version);
+                        blamCache = new CacheFileGen3(CacheContext, blamCacheFile, version, memory);
                         break;
 
                     default: // Same question here as above.

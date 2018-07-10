@@ -45,20 +45,21 @@ namespace TagTool.Cache
         public string NetworkKey => BuildInfo.Attributes["networkKey"].Value;
         public string StringMods => BuildInfo.Attributes["stringMods"].Value;
 
-        public CacheFile(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version)
+        public CacheFile(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory)
         {
             CacheContext = cacheContext;
             File = file;
             Version = version;
             Deserializer = new TagDeserializer(Version);
 
-            Stream = new MemoryStream();
+            Stream = memory ? new MemoryStream() : (Stream)file.OpenRead();
 
-            using (var fileStream = file.OpenRead())
-            {
-                fileStream.Seek(0, SeekOrigin.Begin);
-                fileStream.CopyTo(Stream);
-            }
+            if (memory)
+                using (var fileStream = file.OpenRead())
+                {
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                    fileStream.CopyTo(Stream);
+                }
 
             Reader = new EndianReader(Stream, EndianFormat.LittleEndian);
 

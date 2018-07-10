@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
 using System.Linq;
+using TagTool.Commands.Porting;
 
 namespace TagTool.Geometry
 {
@@ -197,7 +198,7 @@ namespace TagTool.Geometry
             return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
 
-        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, Dictionary<ResourceLocation, Stream> resourceStreams)
+        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, Dictionary<ResourceLocation, Stream> resourceStreams, PortTagCommand.PortingFlags portingFlags)
         {
             //
             // Convert byte[] of UnknownBlock
@@ -465,10 +466,13 @@ namespace TagTool.Geometry
 
                 if (!resourceStreams.ContainsKey(ResourceLocation.Resources))
                 {
-                    resourceStreams[ResourceLocation.Resources] = new MemoryStream();
+                    resourceStreams[ResourceLocation.Resources] = portingFlags.HasFlag(PortTagCommand.PortingFlags.Memory) ?
+                        new MemoryStream() :
+                        (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Resources);
 
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Resources))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Resources]);
+                    if (portingFlags.HasFlag(PortTagCommand.PortingFlags.Memory))
+                        using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Resources))
+                            resourceStream.CopyTo(resourceStreams[ResourceLocation.Resources]);
                 }
 
                 var dataSize = (int)(dataStream.Length - dataStream.Position);

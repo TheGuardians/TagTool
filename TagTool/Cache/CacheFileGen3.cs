@@ -12,8 +12,8 @@ namespace TagTool.Cache
 {
     public class CacheFileGen3 : CacheFile
     {
-        public CacheFileGen3(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version)
-            : base(cacheContext, file, version)
+        public CacheFileGen3(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory)
+            : base(cacheContext, file, version, memory)
         {
             if (Header.Interop.ResourceBaseAddress == 0)
             {

@@ -686,10 +686,13 @@ namespace TagTool.Commands.Porting
 
                 if (!resourceStreams.ContainsKey(ResourceLocation.Audio))
                 {
-                    resourceStreams[ResourceLocation.Audio] = new MemoryStream();
+                    resourceStreams[ResourceLocation.Audio] = Flags.HasFlag(PortingFlags.Memory) ?
+                        new MemoryStream() :
+                        (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Audio);
 
-                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
-                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
+                    if (Flags.HasFlag(PortingFlags.Memory))
+                        using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
+                            resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
                 }
 
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
