@@ -98,7 +98,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public SurvivalDifficulty SurvivalDifficultyFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public ushort Unused;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
