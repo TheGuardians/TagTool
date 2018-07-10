@@ -135,9 +135,12 @@ namespace TagTool.Commands.Porting
 
                 foreach (var blamTag in ParseLegacyTag(args[0]))
                 {
+#if !DEBUG
                     try
                     {
+#endif
                         ConvertTag(cacheStream, resourceStreams, blamTag);
+#if !DEBUG
                     }
                     catch (Exception e)
                     {
@@ -147,6 +150,7 @@ namespace TagTool.Commands.Porting
                         Console.WriteLine();
                         break;
                     }
+#endif
                 }
 
                 if (Flags.HasFlag(PortingFlags.Memory))
