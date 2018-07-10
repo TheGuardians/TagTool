@@ -134,7 +134,20 @@ namespace TagTool.Commands.Porting
                         cacheFileStream.CopyTo(cacheStream);
 
                 foreach (var blamTag in ParseLegacyTag(args[0]))
-                    ConvertTag(cacheStream, resourceStreams, blamTag);
+                {
+                    try
+                    {
+                        ConvertTag(cacheStream, resourceStreams, blamTag);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine($"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.GroupName}':");
+                        Console.WriteLine($"\t{e.Message}");
+                        Console.WriteLine();
+                        break;
+                    }
+                }
 
                 if (Flags.HasFlag(PortingFlags.Memory))
                     using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
@@ -600,7 +613,6 @@ namespace TagTool.Commands.Porting
 
             var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
             CacheContext.Serializer.Serialize(edContext, blamDefinition);
-            CacheContext.SaveTagNames(); // Always save new tagnames in case of a crash
 
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
