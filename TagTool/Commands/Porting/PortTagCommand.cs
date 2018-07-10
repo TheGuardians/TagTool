@@ -425,12 +425,6 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-                case ChudGlobalsDefinition chgd:
-                    chgd.HudShaders.Clear();
-                    for (int hudGlobalsIndex = 0; hudGlobalsIndex < chgd.HudGlobals.Count; hudGlobalsIndex++)
-                        chgd.HudGlobals[hudGlobalsIndex].HudSounds.Clear();
-                    break;
-
                 case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
                     foreach (var material in mode.Materials)
                         material.RenderMethod = null;
@@ -485,7 +479,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case ChudGlobalsDefinition chudGlobals:
-                    blamDefinition = ConvertChudGlobalsDefinition(cacheStream, chudGlobals, blamTag, edTag);
+                    blamDefinition = ConvertChudGlobalsDefinition(chudGlobals);
                     break;
 
                 case Cinematic cine:

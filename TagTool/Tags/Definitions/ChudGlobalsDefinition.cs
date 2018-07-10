@@ -180,9 +180,9 @@ namespace TagTool.Tags.Definitions
 
         //NOT SURE WHAT THIS IS
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public CachedTagInstance Unknown58;
+		public TagFunction Unknown70;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public float Unknown59;
+		public float Unknown71;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown72;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -555,7 +555,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline498295)]
             public class HudSound
             {
-                [TagField(Label = true, MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public CachedTagInstance SpartanSound;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -578,19 +578,19 @@ namespace TagTool.Tags.Definitions
                 {
                     None,
                     HealthRecharging = 1 << 0,
-                    HealthMinor = 1 << 1,
-                    HealthMajor = 1 << 2,
-                    HealthCritical = 1 << 3,
-                    HealthLowMinor = 1 << 4,
-                    HealthLowMajor = 1 << 5,
-                    HealthLowCritical = 1 << 6,
+                    HealthMinorDamage = 1 << 1,
+                    HealthMajorDamage = 1 << 2,
+                    HealthCriticalDamage = 1 << 3,
+                    HealthMinorState = 1 << 4,
+                    HealthLow = 1 << 5,
+                    HealthEmpty = 1 << 6,
                     ShieldRecharging = 1 << 7,
-                    ShieldMinor = 1 << 8,
-                    ShieldMajor = 1 << 9,
-                    ShieldCritical = 1 << 10,
+                    ShieldMinorDamage = 1 << 8,
+                    ShieldMajorDamage = 1 << 9,
+                    ShieldCriticalDamage = 1 << 10,
                     ShieldMinorState = 1 << 11,
-                    ShieldMajorState = 1 << 12,
-                    ShieldCriticalState = 1 << 13,
+                    ShieldLow = 1 << 12,
+                    ShieldEmpty = 1 << 13,
                     RocketLocking = 1 << 14,
                     RocketLocked = 1 << 15,
                     MissileLocking = 1 << 16,
@@ -616,7 +616,7 @@ namespace TagTool.Tags.Definitions
                 {
                     None,
                     ShieldRecharging = 1 << 0,
-                    ShieldDamaged = 1 << 1,
+                    ShieldMinorDamage = 1 << 1,
                     ShieldLow = 1 << 2,
                     ShieldEmpty = 1 << 3,
                     HealthLow = 1 << 4,
@@ -652,14 +652,14 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x14)]
                 public class BipedData
                 {
-                    [TagField(Label = true, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public BipedTypeValue_ODST BipedType_ODST;
 
-                    [TagField(Label = true, MinVersion = CacheVersion.HaloOnline106708)]
+                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 					public BipedTypeValue_HO BipedType_HO;
 
-                    [TagField(MaxVersion = CacheVersion.Halo3ODST, Padding = true, Length = 3)]
-                    public TagFunction Unused;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Padding = true, Length = 3)]
+                    public byte[] unused;
 
 					public CachedTagInstance Sound;
 

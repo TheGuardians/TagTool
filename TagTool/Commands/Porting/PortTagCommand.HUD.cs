@@ -170,23 +170,12 @@ namespace TagTool.Commands.Porting
             return chudDefinition;
         }
 
-		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, ChudGlobalsDefinition H3Definition, CacheFile.IndexItem blamTag, Cache.CachedTagInstance edTag)
+		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition H3Definition)
 		{
-            //get HO tag
-            var srcTag = CacheContext.GetTag<ChudGlobalsDefinition>(@"ui\chud\globals");
-            var srcContext = new TagSerializationContext(cacheStream, CacheContext, srcTag);
-            ChudGlobalsDefinition HODefinition = CacheContext.Deserializer.Deserialize<ChudGlobalsDefinition>(srcContext);
-
-            //Use HO Shaders
-            H3Definition.HudShaders = HODefinition.HudShaders;
 
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
-                var HOglobs = HODefinition.HudGlobals[hudGlobalsIndex];
-
-                //Use HO Sounds
-                H3globs.HudSounds = HOglobs.HudSounds;
                 
                 //Color Conversion
                 H3globs.HUDDisabled = ConvertColor(H3globs.HUDDisabled);
@@ -215,24 +204,9 @@ namespace TagTool.Commands.Porting
                 //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
-                //loop through unset fields and set them to HO values
-                foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal).GetFields())
-                {
-                    object H3FieldValue = H3FieldInfo.GetValue(H3Definition.HudGlobals[hudGlobalsIndex]);
-                    object HOFieldValue = H3FieldInfo.GetValue(HODefinition.HudGlobals[hudGlobalsIndex]);
-                    object zeroint = (int)0;
-                    object zerofloat = 0.0f;
-                    object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
-                    object zerotag = new CachedTagInstance(-1);
-
-                    if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
-                        H3FieldInfo.SetValue(H3Definition.HudGlobals[hudGlobalsIndex], HOFieldValue);
-                }
-
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
                 {
                     var H3att = H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
-                    var HOatt = HODefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex];
 
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
@@ -254,96 +228,68 @@ namespace TagTool.Commands.Porting
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
 
-                    //loop through unset fields and set them to HO values
-                    foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition.HudGlobal.HudAttribute).GetFields())
-                    {
-                        object H3FieldValue = H3FieldInfo.GetValue(H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex]);
-                        object HOFieldValue = H3FieldInfo.GetValue(HODefinition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex]);
-                        object zeroint = (int)0;
-                        object zerofloat = 0.0f;
-                        object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
-                        object zerotag = new CachedTagInstance(-1);
-
-                        if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
-                            H3FieldInfo.SetValue(H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes[hudAttributesIndex], HOFieldValue);
-                    }
                 }
 
-                /*
+                
                 for (int hudSoundsIndex = 0; hudSoundsIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudSounds.Count; hudSoundsIndex++)
                 {
                     var H3snd = H3Definition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex];
-                    var HOsnd = HODefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex];
 
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo 
-                            = GetEquivalentFlags(chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo, chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].LatchedTo_H3);
+                        H3snd.LatchedTo = GetEquivalentFlags(H3snd.LatchedTo, H3snd.LatchedTo_H3);
 
-                        chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds = new List<ChudGlobalsDefinition.HudGlobal.HudSound.BipedData>();
-                        if (chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].SpartanSound != null)
+                        H3snd.Bipeds = new List<ChudGlobalsDefinition.HudGlobal.HudSound.BipedData>();
+
+                        if (H3snd.SpartanSound != null)
                         {
-                            var spartanBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData()
-                            {
-                                BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan,
-                                Sound = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].SpartanSound
-                            };
-                            chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.Add(spartanBiped);
+                            var spartanBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
+                            spartanBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
+                            spartanBiped.Sound = PortTagReference(H3snd.SpartanSound.Index);
+                            H3snd.Bipeds.Add(spartanBiped);
                         }
-                        if (chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].EliteSound != null)
+                        if (H3snd.EliteSound != null)
                         {
-                            var eliteBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData()
-                            {
-                                BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Elite,
-                                Sound = chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].EliteSound
-                            };
-                            chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.Add(eliteBiped);
+                            var eliteBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
+                            eliteBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Elite;
+                            eliteBiped.Sound = PortTagReference(H3snd.SpartanSound.Index);
+                            H3snd.Bipeds.Add(eliteBiped);
                         }
                     }
-                    */
-                    /*
+                    
+                    
 					else if(BlamCache.Version == CacheVersion.Halo3ODST)
 					{
-						for (int bipedIndex = 0; bipedIndex < chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.Count; bipedIndex++)
+						for (int bipedIndex = 0; bipedIndex < H3snd.Bipeds.Count; bipedIndex++)
 						{
-                            if (chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Any
-                                || chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie)
+                            if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Any
+                                || H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie)
                             {
-                                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds[bipedIndex].BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
+                                H3snd.Bipeds[bipedIndex].BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
                             }
                             else
                             {
-                                chudGlobalsDefinition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex].Bipeds.RemoveAt(bipedIndex);
+                                H3snd.Bipeds.RemoveAt(bipedIndex);
                             }
 						}
                     }
                     
                 }
-            */
+            
             }
 
-            //keep elite and monitor entries for HUDGlobals
-            if (BlamCache.Version == CacheVersion.Halo3ODST)
-            {
-                var HOcopy = new ChudGlobalsDefinition();
-                HOcopy.HudGlobals = HODefinition.HudGlobals;
-                HOcopy.HudGlobals[0] = H3Definition.HudGlobals[0];
-                H3Definition.HudGlobals = HOcopy.HudGlobals;
-            }
+            //additional values
+            H3Definition.Unknown5 = 1.8f;
+            H3Definition.ShieldMinorThreshold = 1.0f;
+            H3Definition.ShieldMajorThreshold = 0.25f;
+            H3Definition.ShieldCriticalThreshold = 0.0f;
+            H3Definition.HealthMinorThreshold = 0.9f;
+            H3Definition.HealthMajorThreshold = 0.75f;
+            H3Definition.HealthCriticalThreshold = 0.5f;
 
-            //loop through all fields and set unfilled fields to HO values
-            foreach (FieldInfo H3FieldInfo in typeof(ChudGlobalsDefinition).GetFields())
-            {
-                object H3FieldValue = H3FieldInfo.GetValue(H3Definition);
-                object HOFieldValue = H3FieldInfo.GetValue(HODefinition);
-                object zeroint = (int)0;
-                object zerofloat = 0.0f;
-                object zerocolor = new ArgbColor(0x00, 0x00, 0x00, 0x00);
-                object zerotag = new CachedTagInstance(-1);
+            //prevent crash?
+            H3Definition.Unknown71 = 3.0f;
 
-                if (H3FieldValue == null || H3FieldValue.Equals(zeroint) || H3FieldValue.Equals(zerofloat) || H3FieldValue.Equals(zerocolor) || H3FieldValue.Equals(zerotag))
-                    H3FieldInfo.SetValue(H3Definition, HOFieldValue);
-            }
             return H3Definition;
         }
 
