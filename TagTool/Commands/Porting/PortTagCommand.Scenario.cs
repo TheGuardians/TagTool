@@ -659,10 +659,13 @@ namespace TagTool.Commands.Porting
                 case ScriptExpressionType.Expression:
                     switch (expr.ValueType.HaloOnline)
                     {
-                        case ScriptValueType.HaloOnlineValue.Scenery:
                         case ScriptValueType.HaloOnlineValue.Object:
+                        case ScriptValueType.HaloOnlineValue.Unit:
                         case ScriptValueType.HaloOnlineValue.Vehicle:
+                        case ScriptValueType.HaloOnlineValue.Weapon:
                         case ScriptValueType.HaloOnlineValue.Device:
+                        case ScriptValueType.HaloOnlineValue.Scenery:
+                        case ScriptValueType.HaloOnlineValue.EffectScenery:
                             dataSize = 2; // definitely not 4
                             break;
 
@@ -698,6 +701,26 @@ namespace TagTool.Commands.Porting
                     dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
                     break;
             }
+
+#if DEBUG
+            if (expr.ExpressionType == ScriptExpressionType.Expression && BitConverter.ToInt32(expr.Data, 0) != -1)
+            {
+                //
+                // Breakpoint any case statement below to examine different types of "object" expression data
+                //
+
+                switch (expr.ValueType.HaloOnline)
+                {
+                    case ScriptValueType.HaloOnlineValue.Object: break;
+                    case ScriptValueType.HaloOnlineValue.Unit: break;
+                    case ScriptValueType.HaloOnlineValue.Vehicle: break;
+                    case ScriptValueType.HaloOnlineValue.Weapon: break;
+                    case ScriptValueType.HaloOnlineValue.Device: break;
+                    case ScriptValueType.HaloOnlineValue.Scenery: break;
+                    case ScriptValueType.HaloOnlineValue.EffectScenery: break;
+                }
+            }
+#endif
 
             Array.Reverse(expr.Data, 0, dataSize);
 

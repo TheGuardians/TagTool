@@ -27,6 +27,16 @@ namespace TagTool.Commands.Porting
 
         private PortingFlags Flags { get; set; } = PortingFlags.Recursive | PortingFlags.Scripts | PortingFlags.MatchShaders;
 
+        private static readonly string[] DoNotReplaceGroups = new[]
+        {
+            "glps",
+            "glvs",
+            "vtsh",
+            "pixl",
+            "rmdf",
+            "rmt2"
+        };
+
         [Flags]
         public enum PortingFlags
         {
@@ -298,6 +308,20 @@ namespace TagTool.Commands.Porting
 
             CachedTagInstance edTag = null;
 
+            TagGroup edGroup = null;
+
+            if (TagGroup.Instances.ContainsKey(groupTag))
+            {
+                edGroup = TagGroup.Instances[groupTag];
+            }
+            else
+            {
+                edGroup = new TagGroup(
+                    blamTag.GroupTag,
+                    blamTag.ParentGroupTag,
+                    blamTag.GrandparentGroupTag, CacheContext.GetStringId(blamTag.GroupName));
+            }
+
             if ((groupTag == "snd!") && Flags.HasFlag(PortingFlags.NoAudio))
                 return null;
 
@@ -307,7 +331,21 @@ namespace TagTool.Commands.Porting
             if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
-            if (!Flags.HasFlag(PortingFlags.New) || (groupTag == "glps" || groupTag == "glvs" || groupTag == "vtsh" || groupTag == "pixl" || groupTag == "rmdf" || groupTag == "rmt2"))
+            if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
+            {
+                foreach (var entry in CacheContext.TagNames.Where(i => i.Value == blamTag.Name))
+                {
+                    var tagInstance = CacheContext.GetTag(entry.Key);
+
+                    if (tagInstance.Group.Tag == groupTag)
+                    {
+                        edTag = tagInstance;
+                        Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+                        return edTag;
+                    }
+                }
+            }
+            else if (!Flags.HasFlag(PortingFlags.New))
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
@@ -316,12 +354,13 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
-                        if (Flags.HasFlag(PortingFlags.Replace) && !(groupTag == "glps" || groupTag == "glvs" || groupTag == "vtsh" || groupTag == "pixl" || groupTag == "rmdf" || groupTag == "rmt2"))
+                        if (Flags.HasFlag(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                         {
-                            Flags &= ~PortingFlags.Replace;
-
                             if (!Flags.HasFlag(PortingFlags.Recursive))
+                            {
+                                Flags &= ~PortingFlags.Replace;
                                 Flags |= PortingFlags.Recursive;
+                            }
 
                             edTag = instance;
                             break;
@@ -336,50 +375,16 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            //
-            // Check to see if the tag was already replaced (if replacing)
-            //
-
-            if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
+            if (Flags.HasFlag(PortingFlags.New) && !Flags.HasFlag(PortingFlags.Recursive))
             {
-                var entries = CacheContext.TagNames.Where(i => i.Value == blamTag.Name);
-
-                foreach (var entry in entries)
-                {
-                    var tagInstance = CacheContext.GetTag(entry.Key);
-
-                    if (tagInstance.Group.Tag == groupTag)
-                    {
-                        edTag = tagInstance;
-                        Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                        return edTag;
-                    }
-                }
+                Flags &= ~PortingFlags.New;
+                Flags |= PortingFlags.Recursive;
             }
 
             //
             // If isReplacing is true, check current tags if there is an existing instance to replace
             //
 
-            if (Flags.HasFlag(PortingFlags.Replace) && !(groupTag != "glps" && groupTag != "glvs" && groupTag != "pixl" && groupTag != "vtsh" && groupTag != "rmdf" && groupTag != "rmt2"))
-            {
-                var listEntries = CacheContext.TagNames.Where(i => i.Value == blamTag.Name);
-
-                foreach (var entry in listEntries)
-                {
-                    var tagInstance = CacheContext.GetTag(entry.Key);
-
-                    if (tagInstance.Group.Tag == groupTag)
-                    {
-                        edTag = tagInstance;
-                        //If not recursive, use existing tags
-                        if (!Flags.HasFlag(PortingFlags.Recursive))
-                            Flags &= ~PortingFlags.Replace;
-                        break;
-                    }
-                }
-            }
-            
             var replacedTags = ReplacedTags.ContainsKey(groupTag) ?
                 (ReplacedTags[groupTag] ?? new List<string>()) :
                 new List<string>();
@@ -391,31 +396,19 @@ namespace TagTool.Commands.Porting
             // Allocate Eldorado Tag
             //
 
-            if (edTag == null && Flags.HasFlag(PortingFlags.UseNull))
-            {
-				var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
-
-                if (i >= 0)
-				    CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, TagGroup.Instances[groupTag]);
-            }
-
             if (edTag == null)
             {
-                TagGroup edGroup = null;
-
-                if (TagGroup.Instances.ContainsKey(groupTag))
+                if (Flags.HasFlag(PortingFlags.UseNull))
                 {
-                    edGroup = TagGroup.Instances[groupTag];
+                    var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
+
+                    if (i >= 0)
+                        CacheContext.TagCache.Index[i] = edTag = new CachedTagInstance(i, edGroup);
                 }
                 else
                 {
-                    edGroup = new TagGroup(
-                        blamTag.GroupTag,
-                        blamTag.ParentGroupTag,
-                        blamTag.GrandparentGroupTag, CacheContext.GetStringId(blamTag.GroupName));
+                    edTag = CacheContext.TagCache.AllocateTag(edGroup);
                 }
-
-                edTag = CacheContext.TagCache.AllocateTag(edGroup);
             }
 
             CacheContext.TagNames[edTag.Index] = blamTag.Name;
@@ -451,10 +444,10 @@ namespace TagTool.Commands.Porting
                     scenario.SandboxWeapons.Clear();
                     break;
 
-                case ScenarioStructureBsp bsp:
+                /*case ScenarioStructureBsp bsp:
                     foreach (var instance in bsp.InstancedGeometryInstances)
                         instance.Name = StringId.Invalid;
-                    break;
+                    break;*/
             }
             
             //
@@ -469,10 +462,10 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-				/*case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
+				case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
 					foreach (var screenEffect in sefc.ScreenEffects)
 						screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
-					break;*/
+					break;
 
 				case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);
