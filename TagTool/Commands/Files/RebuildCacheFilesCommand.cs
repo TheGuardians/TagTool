@@ -103,8 +103,8 @@ namespace TagTool.Commands.Files
                     if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
                         CacheContext.TagNames.Remove(tag.Index);
 
-                CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
-                //var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
+                //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
+                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
                 var defaultBitmapNames = new[]
                 {
@@ -157,10 +157,13 @@ namespace TagTool.Commands.Files
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("prt3"))
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
                 CopyTag(CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo"), CacheContext, srcStream, destCacheContext, destStream);
 
-                /*CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
+                CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
                 destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
                 {
@@ -168,15 +171,15 @@ namespace TagTool.Commands.Files
                     {
                         new TagReferenceBlock { Instance = destCacheContext.GetTag<Globals>(@"globals\globals") }
                     }
-                });*/
+                });
 
-                foreach (var instance in CacheContext.TagCache.Index)
+                /*foreach (var instance in CacheContext.TagCache.Index)
                 {
                     if (instance == null || !instance.IsInGroup("scnr"))
                         continue;
 
                     CopyTag(instance, CacheContext, srcStream, destCacheContext, destStream);
-                }
+                }*/
             }
 
             destCacheContext.SaveTagNames();
@@ -186,7 +189,7 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null/* || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode")*/)
+            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
                 return null;
 
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))

@@ -317,7 +317,15 @@ namespace TagTool.Commands.Porting
                     if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
                         if (Flags.HasFlag(PortingFlags.Replace) && !(groupTag == "glps" || groupTag == "glvs" || groupTag == "vtsh" || groupTag == "pixl" || groupTag == "rmdf" || groupTag == "rmt2"))
+                        {
+                            Flags &= ~PortingFlags.Replace;
+
+                            if (!Flags.HasFlag(PortingFlags.Recursive))
+                                Flags |= PortingFlags.Recursive;
+
                             edTag = instance;
+                            break;
+                        }
                         else
                         {
                             edTag = instance;

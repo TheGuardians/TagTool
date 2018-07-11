@@ -60,7 +60,8 @@ namespace TagTool.Commands.Files
                 { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
                 { "cisc", "" },
                 { "dumpscripts", "Dump scripts, usable with hardcoded scripts setup (text dump)" },
-                { "defaultbitmaptypes", "" }
+                { "defaultbitmaptypes", "" },
+                { "mergetagnames", "" }
             };
 
             switch (name)
@@ -79,6 +80,7 @@ namespace TagTool.Commands.Files
                 case "cisc": return Cisc(args);
                 case "defaultbitmaptypes": return DefaultBitmapTypes(args);
                 case "dumpscripts": return DumpScripts(args);
+                case "mergetagnames": return MergeTagNames(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -86,6 +88,31 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool MergeTagNames(List<string> args)
+        {
+            if (args.Count != 1)
+                return false;
+
+            var context = new HaloOnlineCacheContext(new DirectoryInfo(args[0]));
+            context.LoadTagNames();
+
+            foreach (var entry in context.TagNames)
+            {
+                if (entry.Key >= CacheContext.TagCache.Index.Count || CacheContext.TagCache.Index[entry.Key] == null)
+                    continue;
+
+                var srcTag = CacheContext.GetTag(entry.Key);
+                var dstTag = context.GetTag(entry.Key);
+
+                if (!srcTag.IsInGroup(dstTag.Group) || CacheContext.TagNames.ContainsKey(srcTag.Index))
+                    continue;
+
+                CacheContext.TagNames[srcTag.Index] = context.TagNames[dstTag.Index];
+            }
+
+            return true;
         }
 
         private bool DefaultBitmapTypes(List<string> args)
