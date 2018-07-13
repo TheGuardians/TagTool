@@ -3138,31 +3138,68 @@ namespace TagTool.Tags.Definitions
                 public byte[] Unused;
             }
 
+            [Flags]
+            public enum TaskFlags : ushort
+            {
+                None = 0,
+                LatchOn = 1 << 0,
+                LatchOff = 1 << 1,
+                Gate = 1 << 2,
+                SingleUse = 1 << 3,
+                SuppressCombat = 1 << 4,
+                SuppressActiveCamo = 1 << 5,
+                Blind = 1 << 6,
+                Deaf = 1 << 7,
+                Braindead = 1 << 8,
+                MagicPlayerSight = 1 << 9,
+                Disable = 1 << 10,
+                IgnoreFronts = 1 << 11,
+                DonTGenerateFront = 1 << 12,
+                ReverseDirection = 1 << 13,
+                InvertFilterLogic = 1 << 14
+            }
+
+            [Flags]
+            public enum TaskInhibitGroups : ushort
+            {
+                None = 0,
+                Cover = 1 << 0,
+                Retreat = 1 << 1,
+                VehiclesAll = 1 << 2,
+                Grenades = 1 << 3,
+                Berserk = 1 << 4,
+                Equipment = 1 << 5,
+                ObjectInteraction = 1 << 6,
+                Turrets = 1 << 7,
+                VehiclesNonTurrets = 1 << 8
+            }
+
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST)]
             public class Task
             {
-                public short Unknown;
-                public short Unknown2;
+                public TaskFlags Flags;
+                public TaskInhibitGroups InhibitGroups;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown3;
+                public uint Unknown1;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown4;
-                public short Unknown5;
-                public short Unknown6;
-                public short Unknown7;
-                public short FollowEnum;
+                public uint Unknown2;
+
+                public SquadDifficultyFlags InhibitOnDifficulty;
+                public MovementValue Movement;
+                public FollowValue Follow;
+                public short FollowSquadIndex;
                 public float FollowRadius;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown10;
+                public FollowPlayerFlags FollowPlayers;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Padding = true, Length = 2)]
+                public byte[] Unused = new byte[2];
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown11; // block?
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown12; // block?
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown13; // block?
+                public List<FollowFiringPointQueryBlock> FollowFiringPointQuery;
 
                 [TagField(Length = 32)]
                 public string EntryScriptName;
@@ -3175,30 +3212,145 @@ namespace TagTool.Tags.Definitions
                 public short CommandScriptIndex;
                 public short ExhaustionScriptIndex;
 
-                public short Unknown14;
-                public short Unknown15;
-                public short Unknown16;
+                public short SquadGroupFilter;
+
+                /// <summary>
+                /// When someone enters this task for the first time, they play this type of dialogue.
+                /// </summary>
+                public DialogueTypeValue DialogueType;
+
+                public RuntimeFlagBits RuntimeFlags;
+
                 public List<Unknown84Block> Unknown84;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown20;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown21;
-                public StringId TaskName;
+
+                public StringId Name;
+
                 public short HierarchyLevelFrom100;
                 public short PreviousRole;
                 public short NextRole;
                 public short ParentRole;
-                public List<Condition> Conditions;
+                public List<ActivationScriptBlock> ActivationScript;
                 public short ScriptIndex;
-                public short Unknown22;
-                public short Unknown23;
+
+                /// <summary>
+                /// Task will never want to suck in more then N guys over lifetime (soft ceiling only applied when limit exceeded.
+                /// </summary>
+                public short LifetimeCount;
+
+                public FilterFlagsValue FilterFlags;
                 public FilterValue Filter;
-                public Bounds<short> Bounds;
-                public short Bodies;
-                public short Unknown24;
-                public uint Unknown25;
+
+                public Bounds<short> Capacity;
+                
+                /// <summary>
+                /// Task becomes inactive after the given number of casualties.
+                /// </summary>
+                public short MaxBodyCount;
+
+                public AttitudeValue Attitude;
+                
+                /// <summary>
+                /// Task becomes inactive after the strength of the participants falls below the given level.
+                /// </summary>
+                [TagField(Format = "[0,1]")]
+                public float MinStrength;
+
                 public List<Area> Areas;
                 public List<DirectionBlock> Direction;
+
+                public enum MovementValue : short
+                {
+                    Run,
+                    Walk,
+                    Crouch
+                }
+
+                public enum FollowValue : short
+                {
+                    None,
+                    Player,
+                    Squad
+                }
+
+                [Flags]
+                public enum FollowPlayerFlags : ushort
+                {
+                    None,
+                    Player0 = 1 << 0,
+                    Player1 = 1 << 1,
+                    Player2 = 1 << 2,
+                    Player3 = 1 << 3
+                }
+
+                [TagStructure(Size = 0x1C)]
+                public class FollowFiringPointQueryBlock
+                {
+                    public ShapeTypeValue ShapeType;
+                    public AnchorRelationshipValue AnchorRelationship;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused = new byte[2];
+
+                    public float RelationshipOffset;
+                    public float Scale;
+
+                    /// <summary>
+                    /// Don't include firing points outside of this vertical margin.
+                    /// </summary>
+                    [TagField(Format = "World Units")]  
+                    public float ZThreshold;
+
+                    public RealEulerAngles3d Angles;
+
+                    public enum ShapeTypeValue : sbyte
+                    {
+                        Circle,
+                        Triangle,
+                        Square,
+                        Bar
+                    }
+
+                    public enum AnchorRelationshipValue : sbyte
+                    {
+                        Center,
+                        Front,
+                        Back,
+                        Left,
+                        Right
+                    }
+                }
+
+                public enum DialogueTypeValue : short
+                {
+                    None,
+                    EnemyIsAdvancing,
+                    EnemyIsCharging,
+                    EnemyIsFallingBack,
+                    Advance,
+                    Charge,
+                    FallBack,
+                    MoveOnMoveone,
+                    FollowPlayer,
+                    ArrivingIntoCombat,
+                    EndCombat,
+                    Investigate,
+                    SpreadOut,
+                    HoldPositionHold,
+                    FindCover,
+                    CoveringFire
+                }
+
+                [Flags]
+                public enum RuntimeFlagBits : ushort
+                {
+                    None,
+                    AreaConnectivityValid = 1 << 0
+                }
 
                 [TagStructure(Size = 0x8)]
                 public class Unknown84Block
@@ -3208,14 +3360,32 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x124)]
-                public class Condition
+                public class ActivationScriptBlock
                 {
                     [TagField(Label = true, Length = 32)]
-                    public string Name;
+                    public string ScriptName;
+
                     [TagField(Length = 256)]
-                    public string Condition2;
-                    public short Unknown;
-                    public short Unknown2;
+                    public string ScriptSource;
+
+                    public CompileStateValue CompileState;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused = new byte[2];
+
+                    public enum CompileStateValue : short
+                    {
+                        Edited,
+                        Success,
+                        Error
+                    }
+                }
+
+                [Flags]
+                public enum FilterFlagsValue : ushort
+                {
+                    None,
+                    Exclusive = 1 << 0
                 }
 
                 public enum FilterValue : short
@@ -3241,6 +3411,17 @@ namespace TagTool.Tags.Definitions
                     BruteChopper = 44,
                 }
 
+                public enum AttitudeValue : short
+                {
+                    Normal,
+                    Defensive,
+                    Aggressive,
+                    Playfighting,
+                    Patrol,
+                    ChcknShitRecon,
+                    SpreadOut
+                }
+
                 public enum AreaType : short
                 {
                     Normal,
@@ -3264,8 +3445,7 @@ namespace TagTool.Tags.Definitions
 
                     public AreaFlags Flags;
 
-                    [TagField(Padding = true, Length = 1)]
-                    public byte[] Unused = new byte[1];
+                    public byte CharacterFlags;
 
                     [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                     public short Unknown3;
@@ -3277,9 +3457,9 @@ namespace TagTool.Tags.Definitions
                     public Angle Yaw;
 
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public short Unknown7;
+                    public short Unknown7; // connectivity?
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public short Unknown8;
+                    public short Unknown8; // connectivity?
                 }
 
                 [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3Retail)]

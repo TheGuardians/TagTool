@@ -13,6 +13,8 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using TagTool.Tags;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace TagTool.Commands.Files
 {
@@ -25,18 +27,18 @@ namespace TagTool.Commands.Files
 
         public TestCommand(HaloOnlineCacheContext cacheContext) :
             base(true,
-                
+
                 "Test",
                 "A test command.",
-                
+
                 "Test",
-                
+
                 "A test command. Used for various testing and temporary functionality.\n" +
                 "Example setinvalidmaterials: 'Test setinvalidmaterials <ED mode or sbsp tag>'. Set all materials to 0x101F shaders\\invalid. \n\n")
         {
             CacheContext = cacheContext;
         }
-        
+
         public override object Execute(List<string> args)
         {
             if (args.Count == 0)
@@ -73,14 +75,24 @@ namespace TagTool.Commands.Files
                 case "dumpcommandsscript": return DumpCommandsScript(args);
                 case "temp": return Temp(args);
                 case "shadowfix": return ShadowFix(args);
-                case "comparetags": return CompareTags(args);
                 case "namermt2": return NameRmt2();
                 case "findconicaleffects": return FindConicalEffects();
                 case "mergeglobaltags": return MergeGlobalTags(args);
                 case "cisc": return Cisc(args);
                 case "defaultbitmaptypes": return DefaultBitmapTypes(args);
-                case "dumpscripts": return DumpScripts(args);
                 case "mergetagnames": return MergeTagNames(args);
+                case "adjustscriptsfromfile": return AdjustScriptsFromFile(args);
+                case "batchtagdepadd": return BatchTagDepAdd(args);
+                case "namemodetags": return NameModeTags();
+                case "nameblocsubtags": return NameBlocSubtags();
+                case "nameeffesubtags": return NameEffeSubtags();
+                case "namegameobjectssubtags": return NameGameObjectsSubtags();
+                case "namemodelsubtags": return NameModelSubtags();
+                case "namemodeshaders": return NameModeShaders();
+                case "namefootsnd": return NameFootSnd();
+                case "nameglobalmaterials": return NameGlobalMaterials();
+                case "namelsndsubtags": return NameLsndSubtags();
+                case "setupmulg": return SetupMulg();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -88,6 +100,662 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool SetupMulg()
+        {
+            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var mulgContext = new TagSerializationContext(stream, CacheContext, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
+                var mulgDefinition = CacheContext.Deserialize<MultiplayerGlobals>(mulgContext);
+
+                mulgDefinition.Universal[0].GameVariantWeapons = new List<MultiplayerGlobals.UniversalBlock.GameVariantWeapon>
+            {
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("battle_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("assault_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("plasma_pistol"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\plasma_pistol\plasma_pistol")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("spike_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\spike_rifle\spike_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("smg"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\smg\smg")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("carbine"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("energy_sword"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("magnum"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\magnum\magnum")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("needler"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("plasma_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\plasma_rifle\plasma_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("rocket_launcher"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("shotgun"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\shotgun\shotgun")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("sniper_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("brute_shot"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_low\brute_shot\brute_shot")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("unarmed"),
+                    RandomChance = 0,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\energy_blade\energy_blade_useless")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("beam_rifle"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("spartan_laser"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("none"),
+                    RandomChance = 0,
+                    Weapon = null
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("gravity_hammer"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\melee\gravity_hammer\gravity_hammer")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("excavator"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\excavator\excavator")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("flamethrower"),
+                    RandomChance = 0,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\flamethrower\flamethrower")
+                },
+                new MultiplayerGlobals.UniversalBlock.GameVariantWeapon
+                {
+                    Name = CacheContext.GetStringId("missile_pod"),
+                    RandomChance = 0.1f,
+                    Weapon = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\missile_pod\missile_pod")
+                }
+            };
+
+                mulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons = new List<MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon>
+                {
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // battle_rifle
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // carbine
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // sniper_rifle
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // beam_rifle
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // spartan_laster
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // rocket_launcher
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // chaingun_turret
+                        Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\chaingun\weapon\chaingun_turret"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // machinegun_turret
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // machinegun_turret_integrated
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret_integrated"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // plasma_cannon
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // plasma_cannon_integrated
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon_integrated"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // needler
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // flak_cannon
+                        Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\flak_cannon\flak_cannon"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // gauss_turret
+                        Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\gauss\weapon\gauss_turret"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // anti_infantry
+                        Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\mauler\anti_infantry\weapon\anti_infantry"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    },
+                    new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                    {
+                        // behemoth_chaingun_turret
+                        Type = CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
+                        Unknown1 = 5.0f,
+                        Unknown2 = 15.0f,
+                        Unknown3 = 5.0f,
+                        Unknown4 = -10.0f
+                    }
+                };
+                
+                #region Universal GameVariantVehicles
+                mulgDefinition.Universal[0].GameVariantVehicles = new List<MultiplayerGlobals.UniversalBlock.GameVariantVehicle>
+                {
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("warthog"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\warthog\warthog")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("ghost"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\ghost\ghost")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("scorpion"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\scorpion\scorpion")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("wraith"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\wraith\wraith")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("banshee"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\banshee\banshee")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("mongoose"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\mongoose\mongoose")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("chopper"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\brute_chopper\brute_chopper")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("mauler"),
+                        Vehicle = null, //CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\mauler\mauler")
+                    },
+                    new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
+                    {
+                        Name = CacheContext.GetStringId("hornet"),
+                        Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\hornet\hornet")
+                    }
+                };
+                #endregion
+
+                #region Universal VehicleSets
+                mulgDefinition.Universal[0].VehicleSets = new List<MultiplayerGlobals.UniversalBlock.VehicleSet>
+                {
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("default"),
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>()
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("no_vehicles"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("warthog"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("ghost"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("scorpion"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("wraith"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mongoose"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("banshee"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("chopper"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mauler"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("hornet"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("mongooses_only"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("warthog"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("ghost"),
+                                SubstitutedVehicle = CacheContext.GetStringId("mongoose")
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("scorpion"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("wraith"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("banshee"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("chopper"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mauler"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("hornet"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("light_ground_only"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("scorpion"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("wraith"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("banshee"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("hornet"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("tanks_only"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("warthog"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("ghost"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mongoose"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("banshee"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("chopper"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mauler"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("hornet"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("aircraft_only"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("warthog"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("ghost"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("scorpion"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("wraith"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mongoose"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("chopper"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mauler"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("no_light_ground"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("warthog"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("ghost"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mongoose"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("chopper"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("mauler"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("no_tanks"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("scorpion"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("wraith"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("no_aircraft"),
+                        #region Substitutions
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>
+                        {
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("banshee"),
+                                SubstitutedVehicle = StringId.Invalid
+                            },
+                            new MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution
+                            {
+                                OriginalVehicle = CacheContext.GetStringId("hornet"),
+                                SubstitutedVehicle = StringId.Invalid
+                            }
+                        }
+                        #endregion
+                    },
+                    new MultiplayerGlobals.UniversalBlock.VehicleSet
+                    {
+                        Name = CacheContext.GetStringId("all_vehicles"),
+                        Substitutions = new List<MultiplayerGlobals.UniversalBlock.VehicleSet.Substitution>()
+                    }
+                };
+                #endregion
+
+                CacheContext.Serialize(mulgContext, mulgDefinition);
+            }
+
+            return true;
         }
 
         private bool MergeTagNames(List<string> args)
@@ -362,20 +1030,6 @@ namespace TagTool.Commands.Files
             }
         }
 
-        public static void Csv1(string in_)
-        {
-            csvQueue1.Add(in_);
-            if (debugConsoleWrite)
-                Console.WriteLine($"{in_}");
-        }
-
-        public static void Csv2(string in_)
-        {
-            csvQueue2.Add(in_);
-            if (debugConsoleWrite)
-                Console.WriteLine($"{in_}");
-        }
-
         private CacheFile OpenCacheFile(string cacheArg)
         {
             FileInfo blamCacheFile = new FileInfo(cacheArg);
@@ -419,7 +1073,7 @@ namespace TagTool.Commands.Files
                 }
             }
 
-            BlamCache.LoadResourceTags();
+            // BlamCache.LoadResourceTags();
 
             return BlamCache;
         }
@@ -476,7 +1130,7 @@ namespace TagTool.Commands.Files
                         script.Arguments.Add(new ScriptInfo.ArgumentInfo(ParseScriptValueType(argumentNode.Attributes["type"].InnerText)));
                     }
                 }
-                
+
                 scripts[int.Parse(node.Attributes["opcode"].InnerText.Replace("0x", ""), NumberStyles.HexNumber)] = script;
             }
 
@@ -486,7 +1140,7 @@ namespace TagTool.Commands.Files
             {
                 if (!scripts.ContainsKey(opcode))
                     continue;
-                
+
                 var script = scripts[opcode];
 
                 if (script.Arguments.Count == 0)
@@ -605,7 +1259,7 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-        
+
         public bool DumpForgePaletteCommands(List<string> args) // Dump all the forge lists of a scnr to use as tagtool commands. Mainly to reorder the items easily
         {
             Console.WriteLine("Required args: [0]ED scnr tag; ");
@@ -872,7 +1526,7 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-        
+
         public bool Temp(List<string> args)
         {
             var tags = CacheContext.TagCache.Index.FindAllInGroup("rmt2");
@@ -916,7 +1570,7 @@ namespace TagTool.Commands.Files
 
                 edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtInstance);
                 CacheContext.Serializer.Serialize(edContext, hlmtDefinition);
-                
+
                 edContext = new TagSerializationContext(cacheStream, CacheContext, hlmtDefinition.RenderModel);
                 var modeDefinition = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
 
@@ -1016,269 +1670,6 @@ namespace TagTool.Commands.Files
             }
 
             return true;
-        }
-        
-        public bool CompareTags(List<string> args)
-        {
-            // When comparing between different caches, compare by name or tag index
-            // test compare "D:\Halo\Halo3\maps\tags.dat" levels\solo\005_intro\005_intro.scenario levels\solo\005_intro\005_intro.scenario
-
-            // Get the tag with the same name from both caches
-            // test compare "D:\Halo\Halo3\maps\tags.dat" levels\solo\005_intro\005_intro.scenario
-
-            // Compare in the same cache between 2 named tags, or tag indexes
-            // test compare levels\solo\005_intro\005_intro.scenario levels\solo\005_intro\005_intro_scripts.scenario
-
-            debugConsoleWrite = false;
-            var dumpMatch = false;
-
-            if (args.Count < 2)
-                return false;
-
-            csvQueue1 = new List<string>();
-
-            HaloOnlineCacheContext CacheContext2 = null;
-
-            if (args[0].Contains(".dat"))
-            {
-                CacheContext2 = new HaloOnlineCacheContext(new FileInfo(args[0]).Directory);
-                args.RemoveAt(0);
-            }
-            else
-                CacheContext2 = CacheContext;
-            
-            if (!CacheContext.TryGetTag(args[0], out var tag1))
-            {
-                Console.WriteLine($"ERROR: tag cannot be found in this cache: {args[0]}");
-                return false;
-            }
-
-            if (args.Count == 2)
-                args.RemoveAt(0);
-
-            if (!CacheContext.TryGetTag(args[0], out var tag2))
-            {
-                Console.WriteLine($"ERROR: tag cannot be found in the second cache: {args[0]}");
-                return false;
-            }
-
-            object def1 = null;
-
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                def1 = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, tag1), TagDefinition.Find(tag1.Group.Tag));
-
-            object def2 = null;
-
-            using (var cacheStream = CacheContext2.OpenTagCacheReadWrite())
-                def2 = CacheContext2.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext2, tag2), TagDefinition.Find(tag2.Group.Tag));
-
-            CompareBlocks(def1, def2, CacheContext, CacheContext2, "");
-
-            if (csvQueue1.Count == 0)
-            {
-                Console.WriteLine($"No changes found.");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine($"Found differences.");
-            }
-
-            var tagname1 = CacheContext.TagNames.ContainsKey(tag1.Index) ? CacheContext.TagNames[tag1.Index] : $"0x{tag1.Index:X4}";
-            var tagname2 = CacheContext2.TagNames.ContainsKey(tag2.Index) ? CacheContext2.TagNames[tag2.Index] : $"0x{tag2.Index:X4}";
-            var filename1 = tagname1.Split("\\".ToCharArray()).Last();
-            var filename2 = tagname2.Split("\\".ToCharArray()).Last();
-
-            CsvDumpQueueToFile(csvQueue1, $"{tag1.Group}_{filename1}_diff.csv");
-            if (dumpMatch)
-                CsvDumpQueueToFile(csvQueue2, $"{tag1.Group}_{filename1}_match.csv");
-
-            return true;
-        }
-
-        public static void CompareBlocks(object leftData, object rightData, HaloOnlineCacheContext CacheContext, HaloOnlineCacheContext CacheContext2, String name)
-        {
-            var dumpMatch = false;
-
-            if (leftData == null || rightData == null)
-                return;
-
-            if (name.Contains("ResourcePageIndex"))
-                return;
-
-            var type = leftData.GetType();
-
-            if (type == typeof(CachedTagInstance))
-            {
-                // If the objects are tags, then we've found a match
-                var leftTag = (CachedTagInstance)leftData;
-                var rightTag = (CachedTagInstance)rightData;
-
-                var leftName = CacheContext.TagNames.ContainsKey(leftTag.Index) ? CacheContext.TagNames[leftTag.Index] : "";
-                var rightName = CacheContext2.TagNames.ContainsKey(rightTag.Index) ? CacheContext2.TagNames[rightTag.Index] : "";
-
-                if (leftName != rightName)
-                {
-                    Csv1($"{name,-120},{leftName},{rightName}");
-                    return;
-                }
-                else
-                    Csv2($"{name,-120},{leftName,-60},{rightName}");
-
-                if (leftTag.Group.Tag != rightTag.Group.Tag)
-                    Csv1($"{name,-120},{leftName}.{leftTag.Group.Tag,-20},{rightName}.{rightTag.Group.Tag}");
-                else
-                    Csv2($"{name,-120},{leftName}.{leftTag.Group.Tag,-60},{rightName}.{rightTag.Group.Tag}");
-            }
-            else if (type.IsArray)
-            {
-                if (type.GetElementType().IsPrimitive)
-                {
-                    switch (Type.GetTypeCode(type))
-                    {
-                        case TypeCode.Int32:
-                        case TypeCode.UInt32:
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    return;
-                }
-
-                // If the objects are arrays, then loop through each element
-                var leftArray = (Array)leftData;
-                var rightArray = (Array)rightData;
-
-                if (leftArray.Length != rightArray.Length)
-                {
-                    Csv1($"{name,-120},{leftArray.Length,-20},{rightArray.Length}");
-                    return;
-                }
-                else
-                    Csv2($"{name,-120},{leftArray.Length,-60},{rightArray.Length}");
-
-                for (var i = 0; i < leftArray.Length; i++)
-                    CompareBlocks(leftArray.GetValue(i), rightArray.GetValue(i), CacheContext, CacheContext2, name);
-            }
-            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-            {
-                if (type.GenericTypeArguments[0].IsPrimitive)
-                {
-                    Csv1($"{name,-120} : type.GenericTypeArguments().IsPrimitive");
-                    return;
-                }
-
-                // If the objects are lists, then loop through each element
-                var countProperty = type.GetProperty("Count");
-                var leftCount = (int)countProperty.GetValue(leftData);
-                var rightCount = (int)countProperty.GetValue(rightData);
-                if (leftCount != rightCount) // If the sizes are different, we probably can't compare them
-                {
-                    Csv1($"{name,-120},{leftCount,-20},{rightCount}");
-                    return;
-                }
-                else if (dumpMatch)
-                    Csv2($"{name,-120},{leftCount,-60},{rightCount}");
-
-                var getItem = type.GetMethod("get_Item");
-                for (var i = 0; i < leftCount; i++)
-                {
-                    var leftItem = getItem.Invoke(leftData, new object[] { i });
-                    var rightItem = getItem.Invoke(rightData, new object[] { i });
-                    CompareBlocks(leftItem, rightItem, CacheContext, CacheContext2, $"{name}[{i}].");
-                }
-            }
-            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-            {
-                // The objects are structures
-                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
-                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
-                while (left.Next() && right.Next())
-                {
-                    // Keep going on the left until the field is on the right
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
-                    {
-                        if (!left.Next())
-                            return; // probably unused
-                    }
-
-                    // Keep going on the right until the field is on the left
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
-                    {
-                        if (!right.Next())
-                            return;
-                    }
-                    if (left.Field.MetadataToken != right.Field.MetadataToken)
-                        throw new InvalidOperationException("WTF, left and right fields don't match!");
-
-                    // Process the fields
-                    var leftFieldData = left.Field.GetValue(leftData);
-                    var rightFieldData = right.Field.GetValue(rightData);
-                    CompareBlocks(leftFieldData, rightFieldData, CacheContext, CacheContext2, $"{name}{left.Field.Name}");
-                }
-            }
-            else if (type.IsEnum)
-            {
-                var a = leftData.ToString();
-                var b = rightData.ToString();
-                if (a != b)
-                    Csv1($"{name,-120},{leftData,-20},{rightData}");
-                else if (dumpMatch)
-                    Csv2($"{name,-120},{leftData,-60},{rightData}");
-            }
-            else if (type.IsPrimitive)
-            {
-                switch (Type.GetTypeCode(type))
-                {
-                    case TypeCode.SByte:
-                        if ((sbyte)leftData != (sbyte)rightData)
-                            Csv1($"{name,-120},{(sbyte)leftData,-20},{(sbyte)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(sbyte)leftData,-60},{(sbyte)rightData}");
-                        break;
-                    case TypeCode.Byte:
-                        if ((byte)leftData != (byte)rightData)
-                            Csv1($"{name,-120},{(byte)leftData,-20},{(byte)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(byte)leftData,-60},{(byte)rightData}");
-                        break;
-                    case TypeCode.Int16:
-                        if ((short)leftData != (short)rightData)
-                            Csv1($"{name,-120},{(short)leftData,-20},{(short)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(short)leftData,-60},{(short)rightData}");
-                        break;
-                    case TypeCode.UInt16:
-                        if ((ushort)leftData != (ushort)rightData)
-                            Csv1($"{name,-120},{(ushort)leftData,-20},{(ushort)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(ushort)leftData,-60},{(ushort)rightData}");
-                        break;
-                    case TypeCode.Int32:
-                        if ((int)leftData != (int)rightData)
-                            Csv1($"{name,-120},{(int)leftData,-20},{(int)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(int)leftData,-60},{(int)rightData}");
-                        break;
-                    case TypeCode.UInt32:
-                        if ((uint)leftData != (uint)rightData)
-                            Csv1($"{name,-120},{(uint)leftData,-20},{(uint)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(uint)leftData,-60},{(uint)rightData}");
-                        break;
-                    case TypeCode.Single:
-                        if ((float)leftData != (float)rightData)
-                            Csv1($"{name,-120},{(float)leftData,-20},{(float)rightData}");
-                        else if (dumpMatch)
-                            Csv2($"{name,-120},{(float)leftData,-60},{(float)rightData}");
-                        break;
-
-                    default:
-                        break;
-                }
-            }
         }
 
         [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x20)]
@@ -1396,7 +1787,6 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-
         private void NameRmt2Part(string type, RenderMethod renderMethod, CachedTagInstance edInstance, int rmt2Instance, List<int> newlyNamedRmt2)
         {
             if (renderMethod.Unknown.Count == 0) // invalid shaders, most likely caused by ported shaders
@@ -1426,162 +1816,6 @@ namespace TagTool.Commands.Files
 
             CacheContext.TagNames[rmt2Instance] = newTagName;
             // Console.WriteLine($"0x{rmt2Instance:X4} {newTagName}");
-        }
-        
-        public bool DumpScripts(List<string> args)
-        {
-            var helpMessage =
-                @"Usage: " +
-                @"test DumpScripts levels\multi\guardian\guardian guardian_HO.csv";
-
-            if (args.Count < 1)
-            {
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            var edTagArg = args[0];
-
-            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
-            {
-                Console.WriteLine($"ERROR: cannot find tag {edTag}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            if (!edTag.IsInGroup("scnr"))
-            {
-                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            Scenario scnr;
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
-            }
-
-            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
-
-            debugConsoleWrite = true;
-            var csvFileName = "scriptsDumpOutput.csv";
-
-            foreach (var a in args)
-            {
-                if (a.Contains(".") || a.Contains("."))
-                    csvFileName = a;
-
-                if (a == "console" || a == "debug")
-                    debugConsoleWrite = true;
-            }
-
-            csvQueue1 = new List<string>();
-            var globals = new Dictionary<uint, string>();
-
-            Csv1("Globals");
-            var i = -1;
-            var line = "";
-            foreach (var a in scnr.Globals)
-            {
-                i++;
-                var salt = a.InitializationExpressionHandle >> 16;
-
-                line =
-                    $"{i:D4}," +
-                    $"{i:X4}," +
-                    $"{a.InitializationExpressionHandle:X8}," +
-                    $"{salt:X4}," +
-                    $"{a.Name,-0x20}," +
-                    $"{a.Type.HaloOnline}," +
-                    $"";
-
-                Csv1($"{line}");
-
-                globals.Add(a.InitializationExpressionHandle, a.Name);
-            }
-
-            Csv1("Scripts");
-            foreach (var script in scnr.Scripts)
-            {
-                line = $"{scnr.Scripts.IndexOf(script):D4}," +
-                       $"{scnr.Scripts.IndexOf(script):X4}," +
-                       $"{script.Type.ToString()}," +
-                       $"{script.ReturnType.HaloOnline}," +
-                       $"{script.ScriptName}," +
-                       $"A:{script.RootExpressionHandle:X8}";
-
-            }
-
-            var failedOpcodes = new Dictionary<int, int>();
-
-            i = -1;
-            foreach (var expr in scnr.ScriptExpressions)
-            {
-                i++;
-                if (expr.Opcode == 0xBABA)
-                    continue;
-
-                var scriptGroupName = "";
-                if (expr.NextExpressionHandle == 0xFFFFFFFF &&
-                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
-                    expr.Opcode == 0x0)
-                {
-                    var ScriptGroupName = scnr.Scripts.Find(x => (x.RootExpressionHandle >> 16) == expr.Salt);
-                    if (ScriptGroupName != null)
-                        scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
-                }
-
-                var ExpressionHandle = (uint)((expr.Salt << 16) + i);
-
-                if (globals.ContainsKey(ExpressionHandle))
-                    scriptGroupName = $"G:{globals[ExpressionHandle]}";
-
-                var opcodeName = "";
-
-                if (PortTagCommand.ScriptExpressionIsValue(expr))
-                {
-                    if (Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
-                        opcodeName = $"{Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708][expr.Opcode]},value";
-                }
-                else
-                {
-                    if (Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
-                        opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
-                }
-
-                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
-                    opcodeName = "";
-
-                if (scnr.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
-                    opcodeName = "";
-
-                var ValueType = "";
-
-                ValueType = expr.ValueType.HaloOnline.ToString();
-
-                line =
-                    $"{i:D8}," +
-                    $"{expr.Salt:X4}{i:X4}," +
-                    $"{expr.NextExpressionHandle:X8}," +
-                    $"{expr.Opcode:X4}," +
-                    $"{expr.Data[0]:X2}" +
-                    $"{expr.Data[1]:X2}" +
-                    $"{expr.Data[2]:X2}" +
-                    $"{expr.Data[3]:X2}," +
-                    $"{expr.ExpressionType}," +
-                    $"{ValueType}," +
-                    $"{opcodeName}," +
-                    $"{scriptGroupName}" +
-                    $"";
-
-                Csv1(line);
-            }
-
-            CsvDumpQueueToFile(csvQueue1, csvFileName);
-
-            return true;
         }
 
         public bool AdjustScripts(List<string> args)
@@ -1665,6 +1899,182 @@ namespace TagTool.Commands.Files
 
         }
 
+        public bool AdjustScriptsFromFile(List<string> args)
+        {
+            var helpMessage =
+                @"Usage: " +
+                @"test AdjustScripts levels\multi\guardian\guardian guardian.csv";
+
+            if (args.Count != 2)
+            {
+                Console.WriteLine("ERROR: args.Count != 2");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var edTagArg = args[0];
+            var file = args[1];
+
+            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!edTag.IsInGroup("scnr"))
+            {
+                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var file_ = new FileInfo(file);
+
+            if (!File.Exists(file))
+            {
+                Console.WriteLine($"ERROR: file does not exist: {file}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            Scenario scnr;
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
+                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
+            }
+
+            var lines = new List<string>();
+
+            using (var csvStream = file_.OpenRead())
+            using (var csvReader = new StreamReader(csvStream))
+            {
+                var line = "";
+                while (line != null)
+                {
+                    line = csvReader.ReadLine();
+
+                    if (line == null)
+                        break;
+
+                    if (line == "// STOP")
+                        break;
+
+                    if (line.StartsWith("//"))
+                        continue;
+
+                    if (line == "")
+                        continue;
+
+                    lines.Add(line);
+                }
+            }
+
+            foreach (var line in lines)
+            {
+                var items = line.Split(",".ToCharArray());
+
+                var scriptIndex = Convert.ToInt32(items[0]);
+
+                uint.TryParse(items[2], NumberStyles.HexNumber, null, out uint NextExpressionHandle);
+                ushort.TryParse(items[3], NumberStyles.HexNumber, null, out ushort Opcode);
+                byte.TryParse(items[4].Substring(0, 2), NumberStyles.HexNumber, null, out byte data0);
+                byte.TryParse(items[4].Substring(2, 2), NumberStyles.HexNumber, null, out byte data1);
+                byte.TryParse(items[4].Substring(4, 2), NumberStyles.HexNumber, null, out byte data2);
+                byte.TryParse(items[4].Substring(6, 2), NumberStyles.HexNumber, null, out byte data3);
+
+                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = NextExpressionHandle;
+                scnr.ScriptExpressions[scriptIndex].Opcode = Opcode;
+                scnr.ScriptExpressions[scriptIndex].Data[0] = data0;
+                scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
+                scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
+                scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
+            }
+
+            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var context = new TagSerializationContext(stream, CacheContext, edTag);
+                CacheContext.Serializer.Serialize(context, scnr);
+            }
+
+            return true;
+        }
+
+        public bool BatchTagDepAdd(List<string> args)
+        {
+            var helpMessage =
+                "Usage: " +
+                "test BatchTagDepAdd 0x0 0x1234 0x4567 rmsh" +
+                "test BatchTagDepAdd <main tag> <first tag dep> <last tag dep> <tag class>" +
+                "Add new tag dependencies to the first specified tag. Add all the tags between the second and the last specified tags.";
+
+            if (args.Count != 4)
+            {
+                Console.WriteLine(helpMessage);
+                Console.WriteLine("args.Count != 4");
+                return false;
+            }
+
+            var tag1arg = args[0];
+            var tag2arg = args[1];
+            var tag3arg = args[2];
+            var tagClas = args[3];
+
+            if (!CacheContext.TryGetTag(tag1arg, out var tag1))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {tag1}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!CacheContext.TryGetTag(tag2arg, out var tag2))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {tag2}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!CacheContext.TryGetTag(tag3arg, out var tag3))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {tag3}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var dependencies = new List<int>();
+
+            // foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(args[4]))
+            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(tagClas))
+            {
+                if (tag.Index < tag2.Index)
+                    continue;
+
+                if (tag.Index > tag3.Index)
+                    break;
+
+                dependencies.Add(tag.Index);
+            }
+
+            // Based on TagDependencyCommand
+            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var data = CacheContext.TagCache.ExtractTag(stream, tag1);
+
+                foreach (var dependency in dependencies)
+                {
+                    if (data.Dependencies.Add(dependency))
+                        Console.WriteLine("Added dependency on tag {0:X8}.", dependency);
+                    else
+                        Console.Error.WriteLine("Tag {0:X8} already depends on tag {1:X8}.", tag1.Index, dependency);
+                }
+
+                CacheContext.TagCache.SetTagData(stream, tag1, data);
+            }
+
+            return true;
+        }
+
         private static Dictionary<string, List<string>> DisabledScriptsString = new Dictionary<string, List<string>>
         {
             ["005_intro"] = new List<string>
@@ -1678,6 +2088,962 @@ namespace TagTool.Commands.Files
                 "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,",
             },
         };
-        
+
+        public static List<string> Halo3MPCommonCacheFiles = new List<string> {
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\guardian.map"   ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\riverworld.map" ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\bunkerworld.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\chill.map"      ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\cyberdyne.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\deadlock.map"   ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\shrine.map"     ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\zanzibar.map"   ,
+        };
+
+        public static List<string> Halo3MPUncommonCacheFiles = new List<string> {
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\armory.map"     ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\chillout.map"   ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\construct.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\descent.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\docks.map"      ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\fortress.map"   ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\ghosttown.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\isolation.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\lockout.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\midship.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\salvation.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\sandbox.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\sidewinder.map" ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\snowbound.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\spacecamp.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\warehouse.map"  ,
+        };
+
+        public static List<string> Halo3CampaignCacheFiles = new List<string> {
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\005_intro.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\010_jungle.map"   ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\020_base.map"     ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\030_outskirts.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\040_voi.map"      ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\050_floodvoi.map" ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\070_waste.map"    ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\100_citadel.map"  ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\110_hc.map"       ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\120_halo.map"     ,
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\130_epilogue.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\mainmenu.map"   ,
+        };
+
+        public static List<string> Halo3ODSTCacheFiles = new List<string> {
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\mainmenu.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\c100.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\c200.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\h100.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\l200.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\l300.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc100.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc110.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc120.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc130.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc140.map",
+            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc150.map",
+        };
+
+        private bool IsDiffOrNull(CachedTagInstance a, CachedTagInstance b, CacheFile BlamCache)
+        {
+            // a is ed tag, b is blam tag
+            if ((a != null && b == null) ||
+                (a == null && b != null))
+                return false;
+
+            if (a == null && b == null)
+                return true;
+
+            CacheContext.TagNames[a.Index] = BlamCache.IndexItems.GetItemByID(b.Index).Name;
+
+            return true;
+        }
+
+        private class Item
+        {
+            public int TagIndex;
+            public string Tagname;
+            public string ModeName;
+            public uint Checksum;
+        }
+
+        [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1D0, MinVersion = CacheVersion.HaloOnline106708)]
+        public class RenderModel_materials
+        {
+            public StringId Name;
+            public int Padding0;
+            public int Padding1;
+            public int Padding2;
+            public int Padding3;
+            public int Padding4;
+            public int Padding5;
+            public int Padding6;
+            public int Padding7;
+            public int Padding8;
+            public int Padding9;
+            public int PaddingA;
+            public int PaddingB;
+            public int PaddingC;
+            public int PaddingD;
+            public int PaddingE;
+            public int PaddingF;
+            public int Padding10;
+            public List<RenderMaterial> Materials;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public string GetCurrentMethod()
+        {
+            StackTrace st = new StackTrace();
+            StackFrame sf = st.GetFrame(1);
+
+            return sf.GetMethod().Name;
+        }
+
+        public bool NameGlobalMaterials()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            var edAlreadyNamedTag = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.Name != "globals\\globals")
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmGlobals = blamDeserializer.Deserialize<Globals>(blamContext);
+
+                        if (!CacheContext.TryGetTag($"globals\\globals.matg", out var edInstance))
+                            throw new Exception();
+
+                        if (edInstance == null)
+                            throw new Exception();
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var edGlobals = CacheContext.Deserialize<Globals>(tagContext);
+
+                            for (int i = 0; i < bmGlobals.Materials.Count; i++)
+                            {
+                                if (i >= edGlobals.Materials.Count)
+                                    continue;
+
+                                IsDiffOrNull(edGlobals.Materials[i].BreakableSurface, bmGlobals.Materials[i].BreakableSurface, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerGrinding, bmGlobals.Materials[i].EffectSweetenerGrinding, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerLarge, bmGlobals.Materials[i].EffectSweetenerLarge, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMedium, bmGlobals.Materials[i].EffectSweetenerMedium, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMelee, bmGlobals.Materials[i].EffectSweetenerMelee, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerRolling, bmGlobals.Materials[i].EffectSweetenerRolling, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerSmall, bmGlobals.Materials[i].EffectSweetenerSmall, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].MaterialEffects, bmGlobals.Materials[i].MaterialEffects, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerGrinding, bmGlobals.Materials[i].SoundSweetenerGrinding, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerLarge, bmGlobals.Materials[i].SoundSweetenerLarge, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMedium, bmGlobals.Materials[i].SoundSweetenerMedium, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeLarge, bmGlobals.Materials[i].SoundSweetenerMeleeLarge, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeMedium, bmGlobals.Materials[i].SoundSweetenerMeleeMedium, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeSmall, bmGlobals.Materials[i].SoundSweetenerMeleeSmall, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerRolling, bmGlobals.Materials[i].SoundSweetenerRolling, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerSmall, bmGlobals.Materials[i].SoundSweetenerSmall, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleLarge, bmGlobals.Materials[i].WaterRippleLarge, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleMedium, bmGlobals.Materials[i].WaterRippleMedium, BlamCache);
+                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleSmall, bmGlobals.Materials[i].WaterRippleSmall, BlamCache);
+                            }
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameBlocSubtags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "bloc")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+    item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (!CacheContext.TryGetTag(tagname, out var tag1))
+                            continue;
+
+                        if (tag1 == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var crateBm = blamDeserializer.Deserialize<Crate>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
+                            var crateED = CacheContext.Deserialize<Crate>(tagContext);
+
+                            if (crateED.Attachments.Count != crateBm.Attachments.Count)
+                                continue;
+
+                            IsDiffOrNull(crateED.MaterialEffects, crateBm.MaterialEffects, BlamCache);
+
+                            for (int i = 0; i < crateED.Attachments.Count; i++)
+                                IsDiffOrNull(crateED.Attachments[i].Attachment2, crateBm.Attachments[i].Attachment2, BlamCache);
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameEffe()
+        {
+            return false;
+
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "effe")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+    item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (item.GroupName == "hlsl_include")
+                            continue;
+
+                        if (item.GroupName == "user_interface_fourth_wall_timing_definition")
+                            continue;
+
+                        if (item.GroupName == "scenario_pda")
+                            continue;
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (item.Name.Contains("."))
+                            continue;
+
+                        if (!CacheContext.TryGetTag(tagname, out var tag1))
+                            continue;
+
+                        if (tag1 == null)
+                            continue;
+
+                        //Csv1($"{item.GroupName},{cacheFile},{tagname}");
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var crateBm = blamDeserializer.Deserialize<Effect>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
+                            var crateED = CacheContext.Deserialize<Effect>(tagContext);
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameEffeSubtags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "effe")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+    item.GroupName == "scenario_pda")
+
+                            continue;
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (!CacheContext.TryGetTag(tagname, out var tag1))
+                            continue;
+
+                        if (tag1 == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmTag = blamDeserializer.Deserialize<Effect>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
+                            var edTag = CacheContext.Deserialize<Effect>(tagContext);
+
+                            for (int i = 0; i < edTag.Events.Count; i++)
+                            {
+                                if (edTag.Events.Count != bmTag.Events.Count)
+                                    continue;
+
+                                for (int j = 0; j < edTag.Events[i].Parts.Count; j++)
+                                {
+                                    if (edTag.Events[i].Parts.Count != bmTag.Events[i].Parts.Count)
+                                        continue;
+
+                                    if (!IsDiffOrNull(edTag.Events[i].Parts[j].Type, bmTag.Events[i].Parts[j].Type, BlamCache))
+                                        continue;
+                                }
+
+                                for (int j = 0; j < edTag.Events[i].ParticleSystems.Count; j++)
+                                {
+                                    if (edTag.Events[i].ParticleSystems.Count != bmTag.Events[i].ParticleSystems.Count)
+                                        continue;
+
+                                    if (!IsDiffOrNull(edTag.Events[i].ParticleSystems[j].Particle, bmTag.Events[i].ParticleSystems[j].Particle, BlamCache))
+                                        continue;
+
+                                    for (int k = 0; k < edTag.Events[i].ParticleSystems[j].Emitters.Count; k++)
+                                        if (!IsDiffOrNull(edTag.Events[i].ParticleSystems[j].Emitters[k].ParticleMovement.Template, bmTag.Events[i].ParticleSystems[j].Emitters[k].ParticleMovement.Template, BlamCache))
+                                            continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameModeTags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var blamTags = new List<Item>();
+            var edTags = new List<Item>();
+            var list = new List<string>();
+            debugConsoleWrite = false;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "mode")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+    item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var tag = blamDeserializer.Deserialize<RasterizerCacheFileGlobals>(blamContext);
+
+                        var modeName = BlamCache.Strings.GetItemByID(new StringId(tag.Unknown).Index);
+
+                        switch (modeName)
+                        {
+                            case "sky":
+                            case "fp":
+                            case "fp_body":
+                                continue;
+                            default:
+                                break;
+                        }
+
+                        blamTags.Add(new Item
+                        {
+                            Tagname = item.Name,
+                            ModeName = modeName,
+                            Checksum = tag.Unknown3
+                        });
+                    }
+                }
+            }
+
+            foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("mode"))
+            {
+                RasterizerCacheFileGlobals tag;
+                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+                {
+                    var edContext = new TagSerializationContext(cacheStream, CacheContext, instance);
+                    tag = CacheContext.Deserializer.Deserialize<RasterizerCacheFileGlobals>(edContext);
+                }
+
+                var modeName = CacheContext.StringIdCache.GetString(new StringId(tag.Unknown));
+
+                switch (modeName)
+                {
+                    case "sky":
+                    case "fp":
+                    case "fp_body":
+                        continue;
+                    default:
+                        break;
+                }
+
+                edTags.Add(new Item
+                {
+                    TagIndex = instance.Index,
+                    ModeName = modeName,
+                    Checksum = tag.Unknown3
+                });
+            }
+
+            var edNamedTags = new List<Item>();
+
+            foreach (var blamTag in blamTags)
+            {
+                foreach (var edTag in edTags)
+                {
+                    if (edTag.ModeName != blamTag.ModeName)
+                        continue;
+
+                    if (edNamedTags.Contains(edTag))
+                        continue;
+
+                    edNamedTags.Add(edTag);
+
+                    CacheContext.TagNames[edTag.TagIndex] = blamTag.Tagname;
+
+                    // if (!CacheContext.TagNames.ContainsKey(edTag.TagIndex))
+                    // {
+                    //     if (edTag.Checksum != blamTag.Checksum)
+                    //         Csv1($"NameTag 0x{edTag.TagIndex:X4} {blamTag.Tagname},{edTag.Checksum:X8},{blamTag.Checksum:X8},diff check");
+                    //     else
+                    //         Csv1($"NameTag 0x{edTag.TagIndex:X4} {blamTag.Tagname},{edTag.Checksum:X8},{blamTag.Checksum:X8},same check");
+                    //     goto FoundED;
+                    // }
+                }
+
+                FoundED:
+                ;
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameModeShaders()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            var edAlreadyNamedTag = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "mode")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+                            item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (item.Name.Contains("."))
+                            continue;
+
+                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
+                            continue;
+
+                        if (edInstance == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmMode = blamDeserializer.Deserialize<RenderModel_materials>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var edMode = CacheContext.Deserialize<RenderModel_materials>(tagContext);
+
+                            if (bmMode.Materials.Count != edMode.Materials.Count)
+                            {
+                                //Csv2($"{item.Name},bmMode.Materials.Count != edMode.Materials.Count");
+                                continue;
+                            }
+
+                            for (int i = 0; i < bmMode.Materials.Count; i++)
+                                IsDiffOrNull(edMode.Materials[i].RenderMethod, bmMode.Materials[i].RenderMethod, BlamCache);
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameGameObjectsSubtags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        switch (item.GroupTag.ToString())
+                        {
+                            case "bloc":
+                            case "efsc":
+                            case "snce":
+                            case "armr":
+                            case "proj":
+                            case "crea":
+                            case "devi":
+                            case "bipd":
+                            case "vehi":
+                            case "gint":
+                            case "ssce":
+                            case "scen":
+                            case "item":
+                            case "weap":
+                            case "eqip":
+                            case "term":
+                            case "ctrl":
+                            case "mach":
+                                break;
+                            default:
+                                continue;
+                        }
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (!CacheContext.TryGetTag(tagname, out var tag1))
+                            continue;
+
+                        if (tag1 == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmTag = blamDeserializer.Deserialize<EffectScenery>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
+                            var edTag = CacheContext.Deserialize<EffectScenery>(tagContext);
+
+                            IsDiffOrNull(edTag.Model, bmTag.Model, BlamCache);
+                            IsDiffOrNull(edTag.CrateObject, bmTag.CrateObject, BlamCache);
+                            IsDiffOrNull(edTag.CollisionDamage, bmTag.CollisionDamage, BlamCache);
+                            IsDiffOrNull(edTag.CreationEffect, bmTag.CreationEffect, BlamCache);
+                            IsDiffOrNull(edTag.MaterialEffects, bmTag.MaterialEffects, BlamCache);
+                            IsDiffOrNull(edTag.MeleeImpact, bmTag.MeleeImpact, BlamCache);
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameModelSubtags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        switch (item.GroupTag.ToString())
+                        {
+                            case "hlmt":
+                                break;
+                            default:
+                                continue;
+                        }
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (!CacheContext.TryGetTag(tagname, out var tag1))
+                            continue;
+
+                        if (tag1 == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmTag = blamDeserializer.Deserialize<Model>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
+                            var edTag = CacheContext.Deserialize<Model>(tagContext);
+
+                            IsDiffOrNull(edTag.RenderModel, bmTag.RenderModel, BlamCache);
+                            IsDiffOrNull(edTag.CollisionModel, bmTag.CollisionModel, BlamCache);
+                            IsDiffOrNull(edTag.Animation, bmTag.Animation, BlamCache);
+                            IsDiffOrNull(edTag.PhysicsModel, bmTag.PhysicsModel, BlamCache);
+                            IsDiffOrNull(edTag.LodModel, bmTag.LodModel, BlamCache);
+                            IsDiffOrNull(edTag.PrimaryDialogue, bmTag.PrimaryDialogue, BlamCache);
+                            IsDiffOrNull(edTag.SecondaryDialogue, bmTag.SecondaryDialogue, BlamCache);
+                            IsDiffOrNull(edTag.ShieldImpactFirstPerson, bmTag.ShieldImpactFirstPerson, BlamCache);
+                            IsDiffOrNull(edTag.ShieldImpactThirdPerson, bmTag.ShieldImpactThirdPerson, BlamCache);
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameFootSnd()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            var edAlreadyNamedTag = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "foot")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+                            item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (item.Name.Contains("."))
+                            continue;
+
+                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
+                            continue;
+
+                        if (edInstance == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmMode = blamDeserializer.Deserialize<MaterialEffects>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var edMode = CacheContext.Deserialize<MaterialEffects>(tagContext);
+
+                            if (bmMode.Effects.Count != edMode.Effects.Count)
+                            {
+                                //Csv2($"{item.Name},bmMode.Materials.Count != edMode.Materials.Count");
+                                continue;
+                            }
+
+                            for (int i = 0; i < bmMode.Effects.Count; i++)
+                            {
+                                if (bmMode.Effects[i].OldMaterials.Count != edMode.Effects[i].OldMaterials.Count)
+                                {
+                                    //Csv2($"{item.Name},bmMode.OldMaterials.Count != edMode.OldMaterials.Count");
+                                    goto TagMismatch;
+                                }
+
+                                if (bmMode.Effects[i].Sounds.Count != edMode.Effects[i].Sounds.Count)
+                                {
+                                    //Csv2($"{item.Name},bmMode.Sounds.Count != edMode.Sounds.Count");
+                                    goto TagMismatch;
+                                }
+
+                                if (bmMode.Effects[i].Effects.Count != edMode.Effects[i].Effects.Count)
+                                {
+                                    //Csv2($"{item.Name},bmMode.Effects.Count != edMode.Effects.Count");
+                                    goto TagMismatch;
+                                }
+                            }
+
+                            for (int i = 0; i < bmMode.Effects.Count; i++)
+                            {
+                                for (int j = 0; j < bmMode.Effects[i].Sounds.Count; j++)
+                                    IsDiffOrNull(edMode.Effects[i].Sounds[j].Effect, bmMode.Effects[i].Sounds[j].Effect, BlamCache);
+                                for (int j = 0; j < bmMode.Effects[i].Effects.Count; j++)
+                                    IsDiffOrNull(edMode.Effects[i].Effects[j].Effect, bmMode.Effects[i].Effects[j].Effect, BlamCache);
+                            }
+
+                            TagMismatch:
+                            ;
+                        }
+                    }
+
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
+        public bool NameLsndSubtags()
+        {
+            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
+            var list = new List<string>();
+            var edAlreadyNamedTag = new List<string>();
+            debugConsoleWrite = true;
+
+            foreach (var cacheGroup in haloMapsList)
+            {
+                foreach (var cacheFile in cacheGroup)
+                {
+                    var BlamCache = OpenCacheFile(cacheFile);
+
+                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+                    foreach (var item in BlamCache.IndexItems)
+                    {
+                        if (item.ClassIndex == -1)
+                            continue;
+
+                        if (item.GroupTag != "lsnd")
+                            continue;
+
+                        if (item.GroupName == "hlsl_include" ||
+                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
+                            item.GroupName == "scenario_pda")
+                            continue;
+
+                        var tagname = $"{item.Name}.{item.GroupName}";
+
+                        if (list.Contains(tagname))
+                            continue;
+
+                        list.Add(tagname);
+
+                        if (item.Name.Contains("."))
+                            continue;
+
+                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
+                            continue;
+
+                        if (edInstance == null)
+                            continue;
+
+                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                        var bmTag = blamDeserializer.Deserialize<SoundLooping>(blamContext);
+
+                        using (var cacheStream = CacheContext.OpenTagCacheRead())
+                        {
+                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                            var edTag = CacheContext.Deserialize<SoundLooping>(tagContext);
+
+                            if (edTag.Flags != bmTag.Flags) goto Continue;
+                            if (edTag.MartySMusicTime != bmTag.MartySMusicTime) goto Continue;
+                            if (edTag.Unknown1 != bmTag.Unknown1) goto Continue;
+                            if (edTag.Unknown2 != bmTag.Unknown2) goto Continue;
+                            if (edTag.Unknown3 != bmTag.Unknown3) goto Continue;
+                            if (edTag.Unused != bmTag.Unused) goto Continue;
+                            // if (edTag.SoundClass != bmTag.SoundClass) goto Continue;
+                            if (edTag.Unknown4 != bmTag.Unknown4) goto Continue;
+                            if (edTag.Tracks.Count != bmTag.Tracks.Count) goto Continue;
+                            if (edTag.DetailSounds.Count != bmTag.DetailSounds.Count) goto Continue;
+
+                            for (int i = 0; i < edTag.Tracks.Count; i++)
+                            {
+                                var edTrack = edTag.Tracks[i];
+                                var bmTrack = bmTag.Tracks[i];
+
+                                if (CacheContext.StringIdCache.GetString(edTrack.Name) != BlamCache.Strings.GetItemByID(bmTrack.Name.Index))
+                                    goto Continue;
+
+                                IsDiffOrNull(edTrack.In, bmTrack.In, BlamCache);
+                                IsDiffOrNull(edTrack.Loop, bmTrack.Loop, BlamCache);
+                                IsDiffOrNull(edTrack.Out, bmTrack.Out, BlamCache);
+                                IsDiffOrNull(edTrack.AlternateLoop, bmTrack.AlternateLoop, BlamCache);
+                                IsDiffOrNull(edTrack.AlternateOut, bmTrack.AlternateOut, BlamCache);
+                                IsDiffOrNull(edTrack.AlternateTransitionIn, bmTrack.AlternateTransitionIn, BlamCache);
+                                IsDiffOrNull(edTrack.AlternateTransitionOut, bmTrack.AlternateTransitionOut, BlamCache);
+                            }
+
+                            Continue:
+                            continue;
+
+                        }
+                    }
+                }
+            }
+
+            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
+            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+
+            return true;
+        }
+
     }
 }

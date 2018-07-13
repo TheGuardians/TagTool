@@ -134,12 +134,13 @@ namespace TagTool.Commands.Porting
 
                     foreach (var task in aiObjective.Tasks)
                     {
-                        // TODO: Find out if these are right...
-                        //task.Unknown15 = 0;
-                        task.Unknown16 = 1;
+                        task.RuntimeFlags = Scenario.AiObjective.Task.RuntimeFlagBits.AreaConnectivityValid;
 
                         foreach (var area in task.Areas)
+                        {
                             area.Flags = Scenario.AiObjective.Task.AreaFlags.DirectionValid;
+                            // TODO: set up task area connectivity flags
+                        }
 
                         foreach (var direction in task.Direction)
                             direction.Points = direction.Points_H3.ToList();
@@ -152,7 +153,7 @@ namespace TagTool.Commands.Porting
                         zone.FlagsNew = (Scenario.BspFlags)(1 << zone.ManualBspIndex);
                     else
                         for (var i = 0; i < scnr.StructureBsps.Count; i++)
-                            zone.FlagsNew = (Scenario.BspFlags)(1 << i);
+                            zone.FlagsNew |= (Scenario.BspFlags)(1 << i);
 
                     foreach (var area in zone.Areas)
                     {
