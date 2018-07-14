@@ -72,7 +72,7 @@ namespace TagTool.Tags.Definitions
             //
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown5;
+            public float Delay;
 
             /// <summary>
             /// The effect is destroyed after this many seconds. (0 = never dies)
@@ -95,65 +95,60 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public TagFunction AngleFalloffFunction = new TagFunction { Data = new byte[0] };
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public StringId Trigger1;
 
+            ///OBJECT FALLOFF 
+            ///applies a falloff based on an object function - ignored if the effect is not attached to an object
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public StringId Trigger2;
-
+            public StringId InputVariable;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public TagFunction UnknownFunction = new TagFunction { Data = new byte[0] };
+            public StringId RangeVariable;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public TagFunction ObjectFalloff = new TagFunction { Data = new byte[0] };
             
             public float LightIntensity;
-            public float PrimaryHue;
-            public float SecondaryHue;
-            public float Saturation;
-            public float Desaturation;
-            public float GammaIncrease;
-            public float GammaDecrease;
+            public float PrimaryHue; ///degrees [0-360] shifts hue R>G>B
+            public float SecondaryHue; ///degrees [0-360] shifts hue R>G>B
+            public float Saturation; ///[0-1]#increases saturation
+            public float Desaturation; ///[0-1]#decreases saturation
+            public float GammaIncrease; ///[0-10]#gamma increase
+            public float GammaDecrease; ///[0-10]#gamma decrease
             public float ShadowBrightness;
-            public RealRgbColor ColorFilter;
-            public RealRgbColor ColorFloor;
+            public RealRgbColor ColorFilter; ///#this color is multiplied on top
+            public RealRgbColor ColorFloor; ///#this color is subtracted
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Holograph;
+            public float Tron; ///tron:[0-1]#adds a full-screen tron effect
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Drunk;
+            public float RadialBlur; ///{motion suck}:[-2, 2]#adds motion-blur towards or away from this screen effect
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public RealVector3d RadialBlurDirection; ///{motion suck direction}!:[do not edit]#do not edit" />
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown1;
+            public float HorizontalBlur; ///[0-10] expensive#blurs the entire screen
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown2;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown3;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float HorizontalBlur;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float VerticalBlur;
+            public float VerticalBlur; ///[0-10] expensive#blurs the entire screen
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Tracing;
+            public float Vision; ///[0-1]#turns on the global vision mode
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown4;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float HudTransparency;
+            public float HudTransparency; ///[0-1]#fades the chud
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float ZoomIn;
+            public float FovIn;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float ZoomOut;
+            public float FovOut;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Turbulence;
+            public float ScreenShake;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance ScreenShader;
+            public CachedTagInstance ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]
             public enum FlagBits : ushort
