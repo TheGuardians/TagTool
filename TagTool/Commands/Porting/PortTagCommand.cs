@@ -471,6 +471,10 @@ namespace TagTool.Commands.Porting
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);
                     break;
 
+                case CameraFxSettings cfxs:
+                    blamDefinition = ConvertCameraFxSettings(cfxs);
+                    break;
+
                 case Character character:
                     blamDefinition = ConvertCharacter(character);
                     break;
