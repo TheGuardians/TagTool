@@ -180,7 +180,7 @@ namespace TagTool.Tags.Definitions
 
         //NOT SURE WHAT THIS IS
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public TagFunction Unknown70;
+		public CachedTagInstance Unknown70;
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
 		public float Unknown71;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]

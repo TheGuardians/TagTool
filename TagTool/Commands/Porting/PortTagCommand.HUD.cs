@@ -227,7 +227,6 @@ namespace TagTool.Commands.Porting
                     H3att.PickupDialogScale = 1.2f;
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
-
                 }
 
                 
@@ -262,8 +261,7 @@ namespace TagTool.Commands.Porting
 					{
 						for (int bipedIndex = 0; bipedIndex < H3snd.Bipeds.Count; bipedIndex++)
 						{
-                            if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Any
-                                || H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie)
+                            if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie)
                             {
                                 H3snd.Bipeds[bipedIndex].BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
                             }
@@ -280,12 +278,17 @@ namespace TagTool.Commands.Porting
 
             //additional values
             H3Definition.Unknown5 = 1.8f;
-            H3Definition.ShieldMinorThreshold = 1.0f;
-            H3Definition.ShieldMajorThreshold = 0.25f;
-            H3Definition.ShieldCriticalThreshold = 0.0f;
+            H3Definition.ShieldMinorThreshold = 0.75f;
+            H3Definition.ShieldMajorThreshold = 0.74f;
+            H3Definition.ShieldCriticalThreshold = 0.1f;
             H3Definition.HealthMinorThreshold = 0.9f;
             H3Definition.HealthMajorThreshold = 0.75f;
             H3Definition.HealthCriticalThreshold = 0.5f;
+
+            //upscale blip bitmap sizes
+            H3Definition.LargeSensorBlipScale = H3Definition.LargeSensorBlipScale * 1.5f;
+            H3Definition.MediumSensorBlipScale = H3Definition.MediumSensorBlipScale * 1.5f;
+            H3Definition.SmallSensorBlipScale = H3Definition.SmallSensorBlipScale * 1.5f;
 
             //prevent crash?
             H3Definition.Unknown71 = 3.0f;
