@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Serialization;
-using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,7 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
     public class CameraFxSettings
     {
-        public ushort Flags;
+        public FlagsValue Flags;
         public short Unknown;
         public float OverexposureAmount;
         public float OverexposureUnknown;
@@ -17,70 +18,75 @@ namespace TagTool.Tags.Definitions
         public float BrightnessUnknown;
         public float BrightnessUnknown2;
         public float BrightnessUnknown3;
-        public ushort Flags2;
+        public FlagsValue Flags2;
         public short Unknown2;
         public float Unknown3;
-        public ushort Flags3;
+        public FlagsValue Flags3;
         public short Unknown4;
         public float Unknown5;
-        public ushort Flags4;
+        public FlagsValue Flags4;
         public short Unknown6;
         public float Base;
         public float Min;
         public float Max;
-        public ushort Flags5;
+        public FlagsValue Flags5;
         public short Unknown7;
         public float Base2;
         public float Min2;
         public float Max2;
-        public ushort Flags6;
+        public FlagsValue Flags6;
         public short Unknown8;
         public float Base3;
         public float Min3;
         public float Max3;
-        public ushort Flags7;
+        public FlagsValue Flags7;
         public short Unknown9;
         public float Red;
         public float Green;
         public float Blue;
-        public ushort Flags8;
+        public FlagsValue Flags8;
         public short Unknown10;
         public float Red2;
         public float Green2;
         public float Blue2;
-        public ushort Flags9;
+        public FlagsValue Flags9;
         public short Unknown11;
         public float Red3;
         public float Green3;
         public float Blue3;
-        public ushort Flags10;
+        public FlagsValue Flags10;
         public short Unknown12;
         public float Unknown13;
         public float Unknown14;
         public float Unknown15;
-        public ushort Flags11;
+        public FlagsValue Flags11;
         public short Unknown16;
         public float Unknown17;
         public float Unknown18;
         public float Unknown19;
-        public ushort Flags12;
+        public FlagsValue Flags12;
         public short Unknown20;
         public float Unknown21;
         public float Unknown22;
         public float Unknown23;
         public int Unknown24;
-        public ushort Flags13;
+        public FlagsValue Flags13;
         public short Unknown25;
         public float Base4;
         public float Min4;
         public float Max4;
-        public ushort Flags14;
+        public FlagsValue Flags14;
         public short Unknown26;
         public float Base5;
         public float Min5;
         public float Max5;
+
+        //
+        // SSAO
+        //
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public ushort Flags15;
+        public FlagsValue Flags15;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown27;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -89,12 +95,14 @@ namespace TagTool.Tags.Definitions
         public float Unknown29;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown30;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public ushort Flags16;
+        public FlagsValue Flags16;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown31;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown32;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<UnknownBlock> Unknown33;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -107,8 +115,13 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock5> Unknown37;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<UnknownBlock6> Unknown38;
+
+        //
+        // Godrays
+        //
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public ushort Flags17;
+        public FlagsValue Flags17;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown39;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -131,6 +144,13 @@ namespace TagTool.Tags.Definitions
         public float Unknown45;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown46;
+
+        [Flags]
+        public enum FlagsValue : ushort
+        {
+            None = 0,
+            Disable = 1 << 0
+        }
 
         [TagStructure(Size = 0x58)]
         public class UnknownBlock

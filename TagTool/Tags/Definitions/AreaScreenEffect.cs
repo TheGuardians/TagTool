@@ -19,8 +19,6 @@ namespace TagTool.Tags.Definitions
 
         public List<ScreenEffectBlock> ScreenEffects;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [Flags]
         public enum GlobalFlagBits : ushort
@@ -73,6 +71,9 @@ namespace TagTool.Tags.Definitions
             //      NOTE: Not used for scenario global effects
             //
 
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public float Unknown5;
+
             /// <summary>
             /// The effect is destroyed after this many seconds. (0 = never dies)
             /// </summary>
@@ -94,6 +95,15 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public TagFunction AngleFalloffFunction = new TagFunction { Data = new byte[0] };
 
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public StringId Trigger1;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public StringId Trigger2;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public TagFunction UnknownFunction = new TagFunction { Data = new byte[0] };
+            
             public float LightIntensity;
             public float PrimaryHue;
             public float SecondaryHue;

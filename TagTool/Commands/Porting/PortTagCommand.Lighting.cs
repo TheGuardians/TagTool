@@ -203,6 +203,29 @@ namespace TagTool.Commands.Porting
 
             return crte;
         }
+
+        private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs)
+        {
+            cfxs.Flags15 = CameraFxSettings.FlagsValue.Disable;
+            cfxs.Flags16 = CameraFxSettings.FlagsValue.Disable;
+            cfxs.Flags17 = CameraFxSettings.FlagsValue.Disable;
+
+            //
+            // Not sure if Flags17 at disable will ignore those values. Using default HO settings
+            //
+
+            cfxs.ColorR = 1.0f;
+            cfxs.ColorG = 1.0f;
+            cfxs.ColorB = 1.0f;
+
+            cfxs.Unknown42 = 5000.0f;
+            cfxs.Unknown43 = 0.0f;
+            cfxs.Unknown44 = 0.5f;
+            cfxs.Unknown45 = 2.0f;
+            cfxs.Unknown46 = 1.0f;
+
+            return cfxs;
+        }
     }
 }
 
