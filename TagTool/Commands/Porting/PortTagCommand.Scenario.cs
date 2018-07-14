@@ -134,7 +134,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var task in aiObjective.Tasks)
                     {
-                        task.RuntimeFlags = Scenario.AiObjective.Task.RuntimeFlagBits.AreaConnectivityValid;
+                        //task.RuntimeFlags = Scenario.AiObjective.Task.RuntimeFlagBits.AreaConnectivityValid;
 
                         foreach (var area in task.Areas)
                         {
@@ -157,7 +157,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var area in zone.Areas)
                     {
-                        // Add at least one "point" for now (there's usually a few more)
+                        /* Add at least one "point" for now (there's usually a few more)
                         area.Points = new List<Scenario.Zone.Area.Point>
                         {
                             new Scenario.Zone.Area.Point
@@ -188,7 +188,7 @@ namespace TagTool.Commands.Porting
                                     area.RuntimeRelativeMeanPoint.Y + 2.5f,
                                     area.RuntimeRelativeMeanPoint.Z)
                             }
-                        };
+                        };*/
                     }
                 }
             }

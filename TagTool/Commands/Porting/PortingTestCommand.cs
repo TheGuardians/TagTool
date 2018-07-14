@@ -1258,5 +1258,32 @@ script name (innacurate),
             return true;
         }
         
+        public bool NameChgdShaders(List<string> args)
+        {
+            using (var stream = CacheContext.OpenTagCacheRead())
+            {
+                var h3Instance = BlamCache.IndexItems.Find(tag => tag.IsInGroup("chgd"));
+                var h3Context = new CacheSerializationContext(ref BlamCache, h3Instance);
+                var h3Definition = BlamCache.Deserializer.Deserialize<ChudGlobalsDefinition>(h3Context);
+
+                var edInstance = CacheContext.TagCache.Index.FindFirstInGroup("chgd");
+                var edContext = new TagSerializationContext(stream, CacheContext, edInstance);
+                var edDefinition = CacheContext.Deserialize<ChudGlobalsDefinition>(edContext);
+
+                for (var i = 0; i < h3Definition.HudShaders.Count; i++)
+                {
+                    var h3Shader = h3Definition.HudShaders[i];
+                    var edShader = edDefinition.HudShaders[i];
+
+                    if (h3Shader.VertexShader != null && edShader.VertexShader != null)
+                        CacheContext.TagNames[edShader.VertexShader.Index] = BlamCache.IndexItems.GetItemByID(h3Shader.VertexShader.Index).Name;
+
+                    if (h3Shader.PixelShader != null && edShader.PixelShader != null)
+                        CacheContext.TagNames[edShader.PixelShader.Index] = BlamCache.IndexItems.GetItemByID(h3Shader.PixelShader.Index).Name;
+                }
+            }
+
+            return true;
+        }
     }
 }

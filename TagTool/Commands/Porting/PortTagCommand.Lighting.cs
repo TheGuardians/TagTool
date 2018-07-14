@@ -144,6 +144,9 @@ namespace TagTool.Commands.Porting
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
                 if (wasReplacing) Flags |= PortingFlags.Replace;
 
+                Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
+                Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
+
                 CachedTagInstance edTag = null;
                 TagGroup edGroup = null;
 
@@ -169,6 +172,8 @@ namespace TagTool.Commands.Porting
                     LightmapData = edTag
                 });
             }
+
+            scenarioLightmap.Airprobes.Clear();
 
             return scenarioLightmap;
         }

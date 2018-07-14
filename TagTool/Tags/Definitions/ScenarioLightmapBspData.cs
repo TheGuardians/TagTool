@@ -77,7 +77,7 @@ namespace TagTool.Tags.Definitions
         public RenderGeometry Geometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<ScenarioLightmap.Airprobe> Unknown69;
+        public List<ScenarioLightmap.Airprobe> Airprobes;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ScenarioLightmap.UnknownBlock2> Unknown64;
