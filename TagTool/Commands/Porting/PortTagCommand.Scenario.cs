@@ -18,6 +18,17 @@ namespace TagTool.Commands.Porting
 
         private CinematicScene ConvertCinematicScene(CinematicScene cisc)
         {
+            foreach (var shot in cisc.Shots)
+            {
+                foreach (var frame in shot.Frames)
+                {
+                    if (frame.Flags.HasFlag(CinematicScene.ShotBlock.FrameBlock.FlagBits.EnableDepthOfField))
+                    {
+                        frame.NearPlane /= 100.0f;
+                        frame.FarPlane /= 100.0f;
+                    }
+                }
+            }
             /*foreach (var shot in cisc.Shots)
             {
                 var frames = new List<CinematicScene.ShotBlock.FrameBlock>();

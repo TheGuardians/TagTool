@@ -385,7 +385,7 @@ namespace TagTool.Commands.Files
                     new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
                     {
                         // behemoth_chaingun_turret
-                        Type = CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
+                        Type = null,// CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
                         Unknown1 = 5.0f,
                         Unknown2 = 15.0f,
                         Unknown3 = 5.0f,

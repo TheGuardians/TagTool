@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -220,11 +221,18 @@ namespace TagTool.Tags.Definitions
 
                 //Depth of field options
 
-                public int Flags;
+                public FlagBits Flags;
                 public float NearPlane;
                 public float FarPlane;
                 public float FocalDepth;
                 public float BlurAmount;
+
+                [Flags]
+                public enum FlagBits : int
+                {
+                    None,
+                    EnableDepthOfField = 1 << 0
+                }
             }
         }
 

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using System.Linq;
 
 namespace TagTool.Commands.Files
 {
@@ -157,7 +158,10 @@ namespace TagTool.Commands.Files
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("prt3"))
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmhg").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("prt3").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);

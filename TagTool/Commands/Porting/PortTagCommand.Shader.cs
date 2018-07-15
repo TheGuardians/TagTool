@@ -673,19 +673,19 @@ namespace TagTool.Commands.Porting
                 case "bump_map":
                 case "detail_bump_m_0":
                 case "detail_bump_m_1":
+                case "detail_bump_m_2":
+                case "detail_bump_m_3":
                 case "bump_map_m_0":
                 case "bump_map_m_1":
                 case "bump_map_m_2":
-                case "detail_bump_m_2":
-                case "detail_bump_m_3":
                 case "bump_map_m_3":
                     return @"shaders\default_bitmaps\bitmaps\default_vector";
 
-                case "environment_map":
-                    return @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map";
-
                 case "bump_detail_map":
                     return @"shaders\default_bitmaps\bitmaps\bump_detail";
+
+                case "environment_map":
+                    return @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map";
 
                 case "color_mask_map":
                     return @"shaders\default_bitmaps\bitmaps\reference_grids";

@@ -52,7 +52,8 @@ namespace TagTool.Commands.Porting
             Scripts = 1 << 8,
             ShaderTest = 1 << 9,
             MatchShaders = 1 << 10,
-            Memory = 1 << 11
+            Memory = 1 << 11,
+            NoRmhg = 1 << 12
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -251,8 +252,8 @@ namespace TagTool.Commands.Porting
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
-                //case "rmhg": // rmhg have register indexing issues currently
-                    //return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
+                case "rmhg" when Flags.HasFlag(PortingFlags.NoRmhg): // rmhg have register indexing issues currently
+                    return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
                 // Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
                 case "rmdf" when Flags.HasFlag(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
