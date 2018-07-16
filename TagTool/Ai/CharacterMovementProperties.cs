@@ -16,6 +16,8 @@ namespace TagTool.Ai
         public AiSize ObstaceSmashableSize;
         public CharacterJumpHeight JumpHeight;
         public CharacterMovementHintFlags HintFlags;
-        public List<CharacterChangeDirectionPause> ChangeDirectionPause;
+        public float Unknown1;
+        public float Unknown2;
+        public float Unknown3;
     }
 }

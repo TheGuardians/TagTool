@@ -13,7 +13,7 @@ namespace TagTool.Ai
         public CachedTagInstance Weapon;
         public float MaximumFiringRange;
         public float MinimumFiringRange;
-        public float NormalCombatRange;
+        public Bounds<float> NormalCombatRange;
         public float BombardmentRange;
         public float MaxSpecialTargetDistance;
         public Bounds<float> TimidCombatRange;

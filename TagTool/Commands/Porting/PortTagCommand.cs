@@ -553,7 +553,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Scenario scnr:
-                    blamDefinition = ConvertScenario(scnr, blamTag.Name);
+                    blamDefinition = ConvertScenario(cacheStream, scnr, blamTag.Name);
                     break;
 
                 case ScenarioLightmap sLdT:

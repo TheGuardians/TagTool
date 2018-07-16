@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -18,17 +20,6 @@ namespace TagTool.Commands.Porting
 
         private CinematicScene ConvertCinematicScene(CinematicScene cisc)
         {
-            foreach (var shot in cisc.Shots)
-            {
-                foreach (var frame in shot.Frames)
-                {
-                    if (frame.Flags.HasFlag(CinematicScene.ShotBlock.FrameBlock.FlagBits.EnableDepthOfField))
-                    {
-                        frame.NearPlane /= 100.0f;
-                        frame.FarPlane /= 100.0f;
-                    }
-                }
-            }
             /*foreach (var shot in cisc.Shots)
             {
                 var frames = new List<CinematicScene.ShotBlock.FrameBlock>();
@@ -86,7 +77,7 @@ namespace TagTool.Commands.Porting
             return cisc;
         }
 
-        private Scenario ConvertScenario(Scenario scnr, string tagName)
+        private Scenario ConvertScenario(Stream cacheStream, Scenario scnr, string tagName)
         {
             //
             // Halo 3 scenario ai data
@@ -327,45 +318,91 @@ namespace TagTool.Commands.Porting
             // Add prematch camera position
             //
 
-            bool createPrematchCamera = false;
+            var createPrematchCamera = false;
 
-            RealPoint3d position = new RealPoint3d();
-            float yaw = 0.0f;
-            float pitch = 0.0f;
+            var position = new RealPoint3d();
+            var orientation = new RealEulerAngles3d();
 
             switch (tagName)
             {
-                case "levels\\dlc\\chillout\\chillout":
+                case @"levels\multi\guardian\guardian":
                     createPrematchCamera = true;
-                    position = new RealPoint3d(-6.559f, 4.763f, 0.699f);
-                    yaw = 239.89f;
-                    pitch = -1.36f;
+                    position = new RealPoint3d(-3.856011f, -1.605904f, 22.34261f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-58.089f), Angle.FromDegrees(-6.839594f), Angle.FromDegrees(10.82678f));
                     break;
 
-                case "levels\\dlc\\descent\\descent":
+                case @"levels\multi\riverworld\riverworld":
                     createPrematchCamera = true;
-                    position = new RealPoint3d(9.259f, 3.942f, -17.249f);
-                    yaw = 188.57f;
-                    pitch = -12.60f;
+                    position = new RealPoint3d(80f, -115f, 8f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-72f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
                     break;
 
-                case "levels\\multi\\salvation\\salvation":
+                case @"levels\multi\s3d_avalanche\s3d_avalanche":
                     createPrematchCamera = true;
-                    position = new RealPoint3d(1.522f, 16.490f, 4.648f);
-                    yaw = 252.14f;
-                    pitch = -13.68f;
+                    position = new RealPoint3d(39.68156f, 52.96737f, 13.24531f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-101.3976f), Angle.FromDegrees(1.840378f), Angle.FromDegrees(9.051623f));
                     break;
 
-                case "levels\\dlc\\armory\\armory":
+                case @"levels\multi\s3d_turf\s3d_turf":
                     createPrematchCamera = true;
-                    position = new RealPoint3d(-33.057f, -17.607f, -7.658f);
-                    yaw = 48.44f;
-                    pitch = -2.48f;
+                    position = new RealPoint3d(-11.1375f, 10.65022f, 3.68083f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-1.106702f), Angle.FromDegrees(-6.048638f), Angle.FromDegrees(0.1166338f));
+                    break;
+
+                case @"levels\multi\cyberdyne\cyberdyne":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(16.48399f, -0.2954462f, 5.926272f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(148.4995f), Angle.FromDegrees(10.94987f), Angle.FromDegrees(-6.639596f));
+                    break;
+
+                case @"levels\multi\chill\chill":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(0.1023328f, 13.20142f, 67.24016f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-91.86741f), Angle.FromDegrees(0.5627626f), Angle.FromDegrees(16.76527f));
+                    break;
+
+                case @"levels\dlc\bunkerworld\bunkerworld":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(1.919771f, 39.41721f, 14.75777f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-74.90959f), Angle.FromDegrees(-0.6069012f), Angle.FromDegrees(2.249499f));
+                    break;
+
+                case @"levels\multi\zanzibar\zanzibar":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(-0.5595548f, 8.776897f, 12.80816f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-70.32931f), Angle.FromDegrees(-4.318761f), Angle.FromDegrees(11.89593f));
+                    break;
+
+                case @"levels\multi\deadlock\deadlock":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(-7.903993f, -4.081663f, 17.2834f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(74.76313f), Angle.FromDegrees(-4.653013f), Angle.FromDegrees(-16.58442f));
+                    break;
+
+                case @"levels\multi\shrine\shrine":
+                    createPrematchCamera = true;
+                    position = new RealPoint3d(31.19498f, 20.94002f, -6.859918f);
+                    orientation = new RealEulerAngles3d(Angle.FromDegrees(-137.8311f), Angle.FromDegrees(16.69542f), Angle.FromDegrees(15.16735f));
+                    break;
+
+                default:
+                    if (scnr.MapType == ScenarioMapType.Multiplayer)
+                    {
+                        var sbspContext = new TagSerializationContext(cacheStream, CacheContext, scnr.StructureBsps[0].StructureBsp);
+                        var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(sbspContext);
+
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(
+                            (sbsp.WorldBoundsX.Lower + sbsp.WorldBoundsX.Upper) / 2.0f,
+                            (sbsp.WorldBoundsY.Lower + sbsp.WorldBoundsY.Upper) / 2.0f,
+                            (sbsp.WorldBoundsZ.Lower + sbsp.WorldBoundsZ.Upper) / 2.0f);
+                        orientation = new RealEulerAngles3d(scnr.LocalNorth, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f));
+                    }
                     break;
             }
 
-            if(createPrematchCamera)
-                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, yaw, pitch) };
+            if (createPrematchCamera)
+                scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
             
             //
             // Convert scripts
@@ -406,10 +443,8 @@ namespace TagTool.Commands.Porting
         /// <summary>
         /// Given the position and the yaw/pitch given by the camera coordinates, create a CutsceneCameraPoint block. Note that roll is always 0 in the coordinates.
         /// </summary>
-        public Scenario.CutsceneCameraPoint MultiplayerPrematchCamera(RealPoint3d position, float yaw, float pitch)
+        public Scenario.CutsceneCameraPoint MultiplayerPrematchCamera(RealPoint3d position, RealEulerAngles3d orientation)
         {
-            var orientation = ConvertXYZtoZYX(new RealEulerAngles3d(Angle.FromDegrees(yaw), Angle.FromDegrees(pitch), Angle.FromDegrees(0)));
-
             var camera = new Scenario.CutsceneCameraPoint()
             {
                 Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,

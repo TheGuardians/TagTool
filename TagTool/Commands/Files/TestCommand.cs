@@ -93,6 +93,7 @@ namespace TagTool.Commands.Files
                 case "nameglobalmaterials": return NameGlobalMaterials();
                 case "namelsndsubtags": return NameLsndSubtags();
                 case "setupmulg": return SetupMulg();
+                case "listprematchcameras": return ListPrematchCameras();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -100,6 +101,36 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool ListPrematchCameras()
+        {
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            {
+                foreach (var scnrTag in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
+                {
+                    if (scnrTag == null)
+                        continue;
+
+                    var scnrContext = new TagSerializationContext(cacheStream, CacheContext, scnrTag);
+                    var scnrDefinition = CacheContext.Deserialize<Scenario>(scnrContext);
+
+                    foreach (var cameraPoint in scnrDefinition.CutsceneCameraPoints)
+                    {
+                        if (cameraPoint.Name == "prematch_camera")
+                        {
+                            Console.WriteLine($"case @\"{CacheContext.TagNames[scnrTag.Index]}\":");
+                            Console.WriteLine($"    createPrematchCamera = true;");
+                            Console.WriteLine($"    position = new RealPoint3d({cameraPoint.Position.X}f, {cameraPoint.Position.Y}f, {cameraPoint.Position.Z}f);");
+                            Console.WriteLine($"    orientation = new RealEulerAngles3d(Angle.FromDegrees({cameraPoint.Orientation.Yaw.Degrees}f), Angle.FromDegrees({cameraPoint.Orientation.Pitch.Degrees}f), Angle.FromDegrees({cameraPoint.Orientation.Roll.Degrees}f));");
+                            Console.WriteLine($"    break;");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return true;
         }
 
         private bool SetupMulg()
