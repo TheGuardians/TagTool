@@ -17,12 +17,7 @@ namespace TagTool.Tags.Definitions
         public TagMapping.OutputModifierValue OutputModifier;
         public TagMapping.VariableTypeValue OutputModifierInput;
         public float RuntimeMConstantValue;
-        public ushort RuntimeMFlags;
-
-        public TagMapping.ForceFlagsValue ForceFlags;
-
-        [TagField(Padding = true, Length = 1)]
-        public byte[] Unused;
+        public int Unknown2; // usually -1
 
         [TagStructure(Size = 0x2)]
         public class UnknownBlock

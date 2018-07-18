@@ -14,13 +14,10 @@ namespace TagTool.Tags
         public TagFunction Function = new TagFunction { Data = new byte[0] };
 
         public float RuntimeMConstantValue;
-        public byte RuntimeMFlags1;
-        public byte RuntimeMFlags2;
+        public byte RuntimeMFlags;
 
-        public ForceFlagsValue ForceFlags;
-
-        [TagField(Padding = true, Length = 1)]
-        public byte[] Unused;
+        [TagField(Padding = true, Length = 3)]
+        public byte[] Unused = new byte[3];
 
         public enum VariableTypeValue : sbyte
         {
