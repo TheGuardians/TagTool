@@ -266,9 +266,8 @@ namespace TagTool.Cache
                 }
             }
 
-            Console.WriteLine($"Tag not found: {name}");
             result = null;
-            return true;
+            return false;
         }
 
         public CachedTagInstance GetTag(string name)
