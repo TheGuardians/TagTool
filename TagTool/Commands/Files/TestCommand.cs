@@ -108,50 +108,27 @@ namespace TagTool.Commands.Files
         {
             using (var cacheStream = CacheContext.OpenTagCacheRead())
             {
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups("beam", "cntl", "decs", "ltvl", "prt3", "rm  "))
+                var templateTagIndices = new HashSet<int>();
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups("rm  "))
                 {
                     if (tag == null)
                         continue;
 
                     var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag);
-                    var tagDefinition = CacheContext.Deserialize(tagContext, TagDefinition.Find(tag.Group));
+                    var rmDefinition = (RenderMethod)CacheContext.Deserialize(tagContext, TagDefinition.Find(tag.Group));
 
-                    RenderMethod rmDefinition = null;
-
-                    switch (tagDefinition)
+                    if (rmDefinition.ShaderProperties[0].Unknown.Count != 0)
                     {
-                        case BeamSystem beam:
-                            rmDefinition = beam.Beam[0].RenderMethod;
-                            break;
+                        var rmt2Instance = CacheContext.GetTag(rmDefinition.ShaderProperties[0].Template.Index);
 
-                        case ContrailSystem cntl:
-                            rmDefinition = cntl.Contrail[0].RenderMethod;
-                            break;
+                        var tagName = CacheContext.TagNames.ContainsKey(rmt2Instance.Index) ?
+                            CacheContext.TagNames[rmt2Instance.Index] :
+                            $"0x{rmt2Instance.Index:X4}";
 
-                        case DecalSystem decs:
-                            rmDefinition = decs.Decal[0].RenderMethod;
-                            break;
-
-                        case LightVolumeSystem ltvl:
-                            rmDefinition = ltvl.LightVolume[0].RenderMethod;
-                            break;
-
-                        case Particle prt3:
-                            rmDefinition = prt3.RenderMethod;
-                            break;
-
-                        case RenderMethod rm:
-                            rmDefinition = rm;
-                            break;
-                    }
-
-                    if (rmDefinition.ShaderProperties[0].Template.Index == -1)
-                    {
-                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
-                            CacheContext.TagNames[tag.Index] :
-                            $"0x{tag.Index:X4}";
-
-                        Console.WriteLine($"[{tag.Group.Tag}, 0x{tag.Index:X4}] {tagName}.{CacheContext.GetString(tag.Group.Name)}");
+                        Console.WriteLine($"[{rmt2Instance.Group.Tag}, 0x{rmt2Instance.Index:X4}] {tagName}.{CacheContext.GetString(rmt2Instance.Group.Name)}");
+                        Console.WriteLine($"{rmDefinition.ShaderProperties[0].Unknown[0].Unknown}");
+                        Console.WriteLine();
                     }
                 }
             }

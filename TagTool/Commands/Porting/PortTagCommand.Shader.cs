@@ -24,12 +24,20 @@ namespace TagTool.Commands.Porting
             }
             return rasg;
         }
-        
-        private static int pRmt2 = 0;
-        private static List<string> bmMaps;
-        private static List<string> bmArgs;
-        private static List<string> edMaps;
-        private static List<string> edArgs;
+
+        private static List<string> RmhgUnknownTemplates { get; } = new List<string>
+        {
+            @"shaders\halogram_templates\_0_10_1_1_0_0_0",
+            @"shaders\halogram_templates\_0_9_1_1_0_0_0",
+            @"shaders\halogram_templates\_0_9_0_1_0_2_0",
+            @"shaders\halogram_templates\_0_8_1_0_0_0_0",
+            @"shaders\halogram_templates\_0_8_1_0_0_4_1",
+            @"shaders\halogram_templates\_0_8_1_0_1_0_0",
+            @"shaders\halogram_templates\_2_9_1_1_0_2_0",
+            @"shaders\halogram_templates\_0_8_1_0_0_1_0",
+            @"shaders\halogram_templates\_0_8_1_0_0_1_1",
+            @"shaders\halogram_templates\_0_8_1_0_0_3_1"
+        };
 
         /// <summary>
         /// A dictionary of all ElDorado RenderMethodTemplates and lists of their bitmaps and arguments names.
@@ -43,13 +51,13 @@ namespace TagTool.Commands.Porting
             // finalRm.ShaderProperties[0].Template is a H3 tag
 
             // TODO hardcode shader values such as argument changes for specific shaders
-            bmMaps = new List<string>();
-            bmArgs = new List<string>();
-            edMaps = new List<string>();
-            edArgs = new List<string>();
+            var bmMaps = new List<string>();
+            var bmArgs = new List<string>();
+            var edMaps = new List<string>();
+            var edArgs = new List<string>();
 
             // Reset rmt2 preset
-            pRmt2 = 0;
+            var pRmt2 = 0;
 
             // Make a template of ShaderProperty, with the correct bitmaps and arguments counts. 
             var newShaderProperty = new RenderMethod.ShaderProperty
@@ -74,7 +82,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2);
+            var edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
             {
@@ -162,6 +170,15 @@ namespace TagTool.Commands.Porting
                 if (a.Bitmap == null)
                     a.Bitmap = CacheContext.GetTag<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
 
+            if (CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) && RmhgUnknownTemplates.Contains(CacheContext.TagNames[edRmt2Instance.Index]))
+                finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>
+                {
+                    new RenderMethod.ShaderProperty.UnknownBlock1
+                    {
+                        Unknown = 1
+                    }
+                };
+
             return finalRm;
         }
 
@@ -191,7 +208,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private List<ShaderTemplateItem> CollectRmt2Info(CacheFile.IndexItem bmRmt2Instance)
+        private List<ShaderTemplateItem> CollectRmt2Info(CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
         {
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
@@ -264,7 +281,7 @@ namespace TagTool.Commands.Porting
             return edRmt2BestStats;
         }
 
-        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition)
+        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
             var edRmt2Temp = new List<ShaderTemplateItem>();
@@ -272,7 +289,7 @@ namespace TagTool.Commands.Porting
             // Make a new dictionary with rmt2 of the same shader type
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
-            edRmt2BestStats = CollectRmt2Info(blamRmt2Tag);
+            edRmt2BestStats = CollectRmt2Info(blamRmt2Tag, bmMaps, bmArgs);
 
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
@@ -714,7 +731,7 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition)
+        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
@@ -728,7 +745,7 @@ namespace TagTool.Commands.Porting
             }
 
 			// if no tagname matches, find rmt2 tags based on the most common values in the name
-			return FindEquivalentRmt2(blamRmt2Tag, blamRmt2Definition);
+			return FindEquivalentRmt2(blamRmt2Tag, blamRmt2Definition, bmMaps, bmArgs);
 		}
         
         private class Unknown3Tagblock
