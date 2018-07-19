@@ -131,6 +131,38 @@ namespace TagTool.Cache
         /// <summary>
         /// Finds all tags belonging to at least one group in a collection of groups.
         /// </summary>
+        /// <param name="groupStrings">The group tags.</param>
+        /// <returns>All tags which belong to at least one of the groups.</returns>
+        public IEnumerable<CachedTagInstance> FindAllInGroups(params string[] groupStrings)
+        {
+            var groupTags = groupStrings.Select(groupTag => new Tag(groupTag));
+
+            foreach (var tag in this)
+            {
+                if (tag == null)
+                    continue;
+
+                var inGroup = false;
+
+                foreach (var groupTag in groupTags)
+                {
+                    if (tag.IsInGroup(groupTag))
+                    {
+                        inGroup = true;
+                        break;
+                    }
+                }
+
+                if (!inGroup)
+                    continue;
+
+                yield return tag;
+            }
+        }
+
+        /// <summary>
+        /// Finds all tags belonging to at least one group in a collection of groups.
+        /// </summary>
         /// <param name="groupTags">The group tags.</param>
         /// <returns>All tags which belong to at least one of the groups.</returns>
         public IEnumerable<CachedTagInstance> FindAllInGroups(ICollection<Tag> groupTags) =>

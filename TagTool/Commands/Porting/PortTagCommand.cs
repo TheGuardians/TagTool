@@ -253,6 +253,8 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
                 case "rmhg" when Flags.HasFlag(PortingFlags.NoRmhg): // rmhg have register indexing issues currently
+                    if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
+                        return rmhgInstance;
                     return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
                 // Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).

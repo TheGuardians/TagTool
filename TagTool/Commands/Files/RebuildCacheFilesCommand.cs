@@ -161,12 +161,8 @@ namespace TagTool.Commands.Files
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmhg").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("prt3").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
-
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
-                CopyTag(CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo"), CacheContext, srcStream, destCacheContext, destStream);
-
+                
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
                 destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags

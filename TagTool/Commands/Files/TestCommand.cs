@@ -94,6 +94,7 @@ namespace TagTool.Commands.Files
                 case "namelsndsubtags": return NameLsndSubtags();
                 case "setupmulg": return SetupMulg();
                 case "listprematchcameras": return ListPrematchCameras();
+                case "findnullshaders": return FindNullShaders();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -101,6 +102,61 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool FindNullShaders()
+        {
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            {
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups("beam", "cntl", "decs", "ltvl", "prt3", "rm  "))
+                {
+                    if (tag == null)
+                        continue;
+
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag);
+                    var tagDefinition = CacheContext.Deserialize(tagContext, TagDefinition.Find(tag.Group));
+
+                    RenderMethod rmDefinition = null;
+
+                    switch (tagDefinition)
+                    {
+                        case BeamSystem beam:
+                            rmDefinition = beam.Beam[0].RenderMethod;
+                            break;
+
+                        case ContrailSystem cntl:
+                            rmDefinition = cntl.Contrail[0].RenderMethod;
+                            break;
+
+                        case DecalSystem decs:
+                            rmDefinition = decs.Decal[0].RenderMethod;
+                            break;
+
+                        case LightVolumeSystem ltvl:
+                            rmDefinition = ltvl.LightVolume[0].RenderMethod;
+                            break;
+
+                        case Particle prt3:
+                            rmDefinition = prt3.RenderMethod;
+                            break;
+
+                        case RenderMethod rm:
+                            rmDefinition = rm;
+                            break;
+                    }
+
+                    if (rmDefinition.ShaderProperties[0].Template.Index == -1)
+                    {
+                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
+                            CacheContext.TagNames[tag.Index] :
+                            $"0x{tag.Index:X4}";
+
+                        Console.WriteLine($"[{tag.Group.Tag}, 0x{tag.Index:X4}] {tagName}.{CacheContext.GetString(tag.Group.Name)}");
+                    }
+                }
+            }
+
+            return true;
         }
 
         private bool ListPrematchCameras()
