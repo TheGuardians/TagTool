@@ -171,13 +171,14 @@ namespace TagTool.Commands.Porting
                     a.Bitmap = CacheContext.GetTag<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
 
             if (CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) && RmhgUnknownTemplates.Contains(CacheContext.TagNames[edRmt2Instance.Index]))
-                finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>
-                {
-                    new RenderMethod.ShaderProperty.UnknownBlock1
+                if (finalRm.ShaderProperties[0].Unknown.Count == 0)
+                    finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>
                     {
-                        Unknown = 1
-                    }
-                };
+                        new RenderMethod.ShaderProperty.UnknownBlock1
+                        {
+                            Unknown = 1
+                        }
+                    };
 
             return finalRm;
         }
@@ -651,51 +652,54 @@ namespace TagTool.Commands.Porting
             {
                 case "base_map":
                 case "palette":
-                case "specular_mask_texture":
+                case "self_illum_map":
+                case "occlusion_parameter_map":
+                case "change_color_map":
+                case "noise_map_a":
+                case "noise_map_b":
                 case "overlay_map":
                 case "bump_detail_mask_map":
                 case "chameleon_mask_map":
-                case "self_illum_map":
                 case "specular_map":
+                case "specular_mask_texture":
                 case "transparence_map":
-                case "change_color_map":
-                case "occlusion_parameter_map":
                     return @"shaders\default_bitmaps\bitmaps\color_white";
 
                 case "detail_map":
                 case "detail_map2":
                 case "detail_map3":
-                case "self_illum_detail_map":
                 case "detail_map_a":
                 case "detail_map_m_0":
                 case "detail_map_m_1":
                 case "detail_map_m_2":
                 case "detail_map_m_3":
                 case "detail_map_overlay":
+                case "self_illum_detail_map":
                     return @"shaders\default_bitmaps\bitmaps\default_detail";
 
-                case "material_texture":
-                case "meter_map":
-                case "subsurface_map":
-                case "warp_map":
-                case "overlay_multiply_map":
-                case "noise_map_a":
-                case "noise_map_b":
-                case "blend_map":
                 case "base_map_m_0":
                 case "base_map_m_1":
                 case "base_map_m_2":
+                case "base_map_m_3":
+                case "blend_map":
+                case "material_texture":
+                case "meter_map":
+                case "overlay_multiply_map":
+                case "subsurface_map":
+                case "warp_map":
                     return @"shaders\default_bitmaps\bitmaps\gray_50_percent";
 
                 case "bump_map":
-                case "detail_bump_m_0":
-                case "detail_bump_m_1":
-                case "detail_bump_m_2":
-                case "detail_bump_m_3":
                 case "bump_map_m_0":
                 case "bump_map_m_1":
                 case "bump_map_m_2":
                 case "bump_map_m_3":
+                case "detail_bump_m_0":
+                case "detail_bump_m_1":
+                case "detail_bump_m_2":
+                case "detail_bump_m_3":
+                case "height_map":
+                case "vector_map":
                     return @"shaders\default_bitmaps\bitmaps\default_vector";
 
                 case "bump_detail_map":
@@ -721,9 +725,6 @@ namespace TagTool.Commands.Porting
 
                 case "alpha_map":
                     return @"shaders\default_bitmaps\bitmaps\alpha_grey50";
-
-                case "height_map":
-                    return @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear";
 
                 default:
                     Console.WriteLine($"WARNING: Shader map type \"{type}\" default bitmap not implemented.");

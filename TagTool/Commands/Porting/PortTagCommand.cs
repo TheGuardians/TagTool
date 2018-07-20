@@ -150,7 +150,9 @@ namespace TagTool.Commands.Porting
                     try
                     {
 #endif
+                        var oldFlags = Flags;
                         ConvertTag(cacheStream, resourceStreams, blamTag);
+                        Flags = oldFlags;
 #if !DEBUG
                     }
                     catch (Exception e)
@@ -473,10 +475,10 @@ namespace TagTool.Commands.Porting
                         foreach (var screenEffect in sefc.ScreenEffects)
                             screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui")
+                    if (blamTag.Name == @"levels\ui\mainmenu\sky\ui")
                     {
-                        foreach (var screenEffect in sefc.ScreenEffects)
-                            screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
+                        sefc.ScreenEffects[0].Unknown4 = 1E-19f;
+                        sefc.ScreenEffects[0].Duration = 1E-19f;
                     }
                     break;
 
