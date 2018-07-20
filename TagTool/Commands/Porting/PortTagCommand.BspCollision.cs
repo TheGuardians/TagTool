@@ -253,7 +253,7 @@ namespace TagTool.Commands.Porting
             {
                 Page = new RawPage
                 {
-                    Index = 1
+                    Index = -1
                 },
                 Resource = new TagResource
                 {
@@ -265,15 +265,6 @@ namespace TagTool.Commands.Porting
                     Unknown2 = 1
                 }
             };
-
-            //
-            // Load Blam resource data
-            //
-
-            var resourceData = BlamCache.GetRawFromID(bsp.ZoneAssetIndex3);
-
-            if (resourceData == null)
-                return bsp.CollisionBspResource;
 
             //
             // Port Blam resource definition
@@ -328,10 +319,22 @@ namespace TagTool.Commands.Porting
             }
 
             //
+            // Load Blam resource data
+            //
+
+            var resourceData = BlamCache.GetRawFromID(bsp.ZoneAssetIndex3);
+
+            if (resourceData == null)
+            {
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
+                return bsp.CollisionBspResource;
+            }
+
+            //
             // Port Blam resource to ElDorado resource cache
             //
-            
-            using (var blamResourceStream = new MemoryStream(resourceData))
+
+            using (var blamResourceStream = resourceData != null ? new MemoryStream(resourceData) : new MemoryStream())
             using (var resourceReader = new EndianReader(blamResourceStream, EndianFormat.BigEndian))
             using (var dataStream = new MemoryStream())
             using (var resourceWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))

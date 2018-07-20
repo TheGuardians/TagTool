@@ -12,7 +12,6 @@ namespace TagTool.Tags.Definitions
         public List<Size> Sizes;
         public List<Segment> Segments;
 
-        
         [TagStructure(Size = 0x10)]
         public class CompressionCodec
         {
