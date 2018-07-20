@@ -19,7 +19,6 @@ namespace TagTool.Tags.Definitions
 
         public List<ScreenEffectBlock> ScreenEffects;
 
-
         [Flags]
         public enum GlobalFlagBits : ushort
         {
@@ -46,7 +45,13 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Label = true)]
             public StringId Name;
+
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public ushort Unknown;
+
             public FlagBits Flags;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public HiddenFlagBits HiddenFlags;
 
             //

@@ -465,10 +465,20 @@ namespace TagTool.Commands.Porting
 
             switch (blamDefinition)
             {
-				case AreaScreenEffect sefc when blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui":
-					foreach (var screenEffect in sefc.ScreenEffects)
-						screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
-					break;
+                case AreaScreenEffect sefc:
+                    if (BlamCache.Version < CacheVersion.Halo3ODST)
+                    {
+                        sefc.GlobalHiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
+                        
+                        foreach (var screenEffect in sefc.ScreenEffects)
+                            screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
+                    }
+                    if (blamTag.Name == "levels\\ui\\mainmenu\\sky\\ui")
+                    {
+                        foreach (var screenEffect in sefc.ScreenEffects)
+                            screenEffect.MaximumDistance = screenEffect.Duration = 1E-19f;
+                    }
+                    break;
 
 				case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);
