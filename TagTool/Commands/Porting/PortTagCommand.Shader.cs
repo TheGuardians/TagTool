@@ -163,7 +163,7 @@ namespace TagTool.Commands.Porting
 
             FixRmdfTagRef(finalRm);
 
-            FixFunctions(BlamCache, CacheContext, cacheStream, finalRm, edRmt2, bmRmt2);
+            FixFunctions(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2);
 
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
@@ -787,7 +787,7 @@ namespace TagTool.Commands.Porting
 			}
 		}
 
-		private RenderMethod FixFunctions(CacheFile blamCache, HaloOnlineCacheContext CacheContext, Stream cacheStream, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
+		private RenderMethod FixFunctions(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
@@ -795,7 +795,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var a in finalRm.ShaderProperties[0].Functions)
             {
-                a.Name = ConvertStringId(a.Name);
+                a.Name = (StringId)ConvertData(cacheStream, resourceStreams, a.Name, null, null);
                 ConvertTagFunction(a.Function);
             }    
 

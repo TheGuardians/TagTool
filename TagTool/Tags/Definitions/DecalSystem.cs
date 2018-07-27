@@ -6,8 +6,7 @@ using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x24)]
     public class DecalSystem
     {
         public FlagsValue Flags;
@@ -37,9 +36,6 @@ namespace TagTool.Tags.Definitions
         public List<DecalDefinitionBlock> Decal;
 
         public float RuntimeMaxRadius;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public long DecalDefinitionConstants;
 
         [Flags]
         public enum FlagsValue : int

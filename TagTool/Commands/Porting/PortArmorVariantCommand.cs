@@ -483,7 +483,7 @@ namespace TagTool.Commands.Porting
                 edHlmtDefinition.ReduceToL2Low = 27.28503f;
                 edHlmtDefinition.Variants = new List<Model.Variant>();
                 edHlmtDefinition.Materials = new List<Model.Material>();
-                edHlmtDefinition.NewDamageInfo = new List<Model.NewDamageInfoBlock>();
+                edHlmtDefinition.NewDamageInfo = new List<Model.GlobalDamageInfoBlock>();
                 edHlmtDefinition.Targets = new List<Model.Target>();
 
                 var collisionRegions = new List<Model.CollisionRegion>();

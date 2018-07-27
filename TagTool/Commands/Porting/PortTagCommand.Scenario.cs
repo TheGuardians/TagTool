@@ -77,7 +77,7 @@ namespace TagTool.Commands.Porting
             return cisc;
         }
 
-        private Scenario ConvertScenario(Stream cacheStream, Scenario scnr, string tagName)
+        private Scenario ConvertScenario(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             //
             // Halo 3 scenario ai data
@@ -229,19 +229,11 @@ namespace TagTool.Commands.Porting
                     {
                         var baseSquad = squad.BaseSquad[i];
                         
-                        baseSquad.InitialState = ConvertStringId(baseSquad.InitialState);
-
                         foreach (var spawnpoint in baseSquad.StartingLocations)
                         {
-                            spawnpoint.Name = ConvertStringId(spawnpoint.Name);
                             spawnpoint.InitialEquipmentIndex = -1;
                             spawnpoint.CellIndex = (short)i;
-                            spawnpoint.ActorVariant = ConvertStringId(spawnpoint.ActorVariant);
-                            spawnpoint.VehicleVariant = ConvertStringId(spawnpoint.VehicleVariant);
                             spawnpoint.InitialMovementMode = spawnpoint.InitialMovementMode_H3;
-
-                            foreach (var squadpoint in spawnpoint.Points)
-                                squadpoint.ActivityName = ConvertStringId(squadpoint.ActivityName);
 
                             squad.SpawnPoints.Add(spawnpoint);
                         }
@@ -425,7 +417,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var expr in scnr.ScriptExpressions)
                 {
-                    ConvertScriptExpression(scnr, expr);
+                    ConvertScriptExpression(cacheStream, resourceStreams, scnr, expr);
                 }
 
                 AdjustScripts(scnr, tagName);
@@ -472,7 +464,7 @@ namespace TagTool.Commands.Porting
             return new RealEulerAngles3d(Angle.FromRadians(x2), Angle.FromRadians(y2), Angle.FromRadians(z2));
         }
 
-        public void ConvertScriptExpression(Scenario scnr, ScriptExpression expr)
+        public void ConvertScriptExpression(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, ScriptExpression expr)
         {
             if (expr.Opcode == 0xBABA)
                 return;
@@ -501,7 +493,7 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
-            ConvertScriptExpressionData(expr);
+            ConvertScriptExpressionData(cacheStream, resourceStreams, expr);
         }
 
         public bool ScriptExpressionIsValue(ScriptExpression expr)
@@ -665,7 +657,7 @@ namespace TagTool.Commands.Porting
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
 
-        public void ConvertScriptExpressionData(ScriptExpression expr)
+        public void ConvertScriptExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
             if (expr.ExpressionType == ScriptExpressionType.Expression)
                 switch (expr.ValueType.HaloOnline)
@@ -687,12 +679,12 @@ namespace TagTool.Commands.Porting
                     case ScriptValueType.HaloOnlineValue.BinkDefinition:
                     case ScriptValueType.HaloOnlineValue.AnyTag:
                     case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
-                        ConvertScriptTagReferenceExpressionData(expr);
+                        ConvertScriptTagReferenceExpressionData(cacheStream, resourceStreams, expr);
                         return;
 
                     case ScriptValueType.HaloOnlineValue.AiLine:
                     case ScriptValueType.HaloOnlineValue.StringId:
-                        ConvertScriptStringIdExpressionData(expr);
+                        ConvertScriptStringIdExpressionData(cacheStream, resourceStreams, expr);
                         return;
 
                     default:
@@ -785,51 +777,17 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public void ConvertScriptTagReferenceExpressionData(ScriptExpression expr)
+        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
-            var blamTag = BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0));
+            var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
 
-            if (blamTag == null)
-            {
-                Console.WriteLine($"ERROR: Blam tag referenced by the script was not found. 0x{BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)}");
+            if (tag == null)
                 return;
-            }
-                
-            var match = false;
 
-            foreach (var entry in CacheContext.TagNames)
-            {
-                if (entry.Value != blamTag.Name)
-                    continue;
-
-                var edTag = CacheContext.GetTag(entry.Key);
-
-                if (edTag.Group.Tag == blamTag.GroupTag)
-                {
-                    expr.Data = BitConverter.GetBytes(entry.Key).ToArray();
-                    match = true;
-                    break;
-                }
-            }
-
-            if (!match)
-            {
-                Console.WriteLine($"ERROR: no tag matches {blamTag.Name}. Replacing with 0x12FE (GBP)");
-
-                switch (blamTag.GroupTag.ToString())
-                {
-                    case "effe":
-                        expr.Data = new byte[] { 0xFE, 0x12, 0x00, 0x00 };
-                        break;
-
-                    default: // should definitely add a tag for each class
-                        expr.Data = new byte[4];
-                        break;
-                }
-            }
+            expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();
         }
 
-        public void ConvertScriptStringIdExpressionData(ScriptExpression expr)
+        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
             int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
             var value = BlamCache.Strings.GetItemByID(blamStringId);
@@ -838,14 +796,7 @@ namespace TagTool.Commands.Porting
                 return;
 
             if (!CacheContext.StringIdCache.Contains(value))
-            {
-                ConvertStringId(new StringId((uint)blamStringId, BlamCache.Version));
-                /*
-                Console.WriteLine($"ERROR: stringid does not exist in ED: {value}");
-                expr.Data = new byte[4]; // set to blank
-                return;
-                */
-            }
+                ConvertData(cacheStream, resourceStreams, new StringId((uint)blamStringId, BlamCache.Version), null, null);
 
             var edStringId = CacheContext.StringIdCache.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();

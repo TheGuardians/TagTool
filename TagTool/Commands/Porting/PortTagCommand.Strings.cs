@@ -3,12 +3,13 @@ using TagTool.Tags.Definitions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private MultilingualUnicodeStringList ConvertMultilingualUnicodeStringList(MultilingualUnicodeStringList unic)
+        private MultilingualUnicodeStringList ConvertMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultilingualUnicodeStringList unic)
         {
             ushort[] stringIndex = new ushort[12];
             ushort[] stringCount = new ushort[12];
@@ -78,7 +79,7 @@ namespace TagTool.Commands.Porting
             {
                 var pair = table[i];
                 var stringBlock = new LocalizedString {
-                    StringID = ConvertStringId(new StringId((uint)pair.Key, BlamCache.Version)),
+                    StringID = (StringId)ConvertData(cacheStream, resourceStreams, new StringId((uint)pair.Key, BlamCache.Version), null, null),
                     StringIDStr = null,
                 };
 

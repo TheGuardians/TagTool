@@ -294,10 +294,10 @@ namespace TagTool.Commands.Porting
             return 10.0f * (float)Math.Log10(ratio);
         }
 
-        private Sound ConvertSound(Sound sound, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
+                BlamSoundGestalt = (SoundCacheFileGestalt)ConvertData(cacheStream, resourceStreams, PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache), null, null);
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
@@ -400,7 +400,6 @@ namespace TagTool.Commands.Porting
                 //
 
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
-                pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name);
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
                 pitchRange.Unknown1 = 0;
                 pitchRange.Unknown2 = 0;
@@ -458,7 +457,6 @@ namespace TagTool.Commands.Porting
                     // For the permutation conversion to work properly, we must go through the permutation in chunk order.
                     var permutation = BlamSoundGestalt.Permutations[pitchRange.FirstPermutationIndex + i];
 
-                    permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationList[i];

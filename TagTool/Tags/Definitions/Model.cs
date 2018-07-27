@@ -62,7 +62,7 @@ namespace TagTool.Tags.Definitions
 
         public List<Material> Materials;
 
-        public List<NewDamageInfoBlock> NewDamageInfo;
+        public List<GlobalDamageInfoBlock> NewDamageInfo;
 
         public List<Target> Targets;
 
@@ -106,7 +106,10 @@ namespace TagTool.Tags.Definitions
         public StringId HologramControlFunction;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public short Unknown4;
+        public sbyte UnknownIndex1;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        public sbyte UnknownIndex2;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown5;
@@ -318,15 +321,21 @@ namespace TagTool.Tags.Definitions
         public class InstanceGroup
         {
             public StringId Name;
-            public int Unknown;
+            public ChoiceValue Choice;
             public List<InstanceMember> InstanceMembers;
             public float Probability;
+
+            public enum ChoiceValue : int
+            {
+                ChooseOneMember,
+                ChooseAllMembers
+            }
 
             [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
             public class InstanceMember
             {
-                public int Unknown;
+                public int SubgroupIndex;
                 public StringId InstanceName;
                 public float Probability;
 
@@ -347,11 +356,13 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public MaterialTypeValue MaterialType;
             public short DamageSectionIndex;
-            public short Unknown2;
-            public short Unknown3;
+            public short RuntimeCollisionMaterialIndex;
+            public short RuntimeDamagerMaterialIndex;
             public StringId MaterialName;
             public short GlobalMaterialIndex;
-            public short Unknown4;
+
+            [TagField(Padding = true, Length = 2)]
+            public byte[] Unused = new byte[2];
 
             public enum MaterialTypeValue : short
             {
@@ -393,21 +404,42 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x140, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x100, MinVersion = CacheVersion.Halo3Retail)]
-        public class NewDamageInfoBlock
+        public class GlobalDamageInfoBlock
         {
             public FlagsValue Flags;
+
+            /// <summary>
+            /// Absorbes AOE or child damage
+            /// </summary>
             public StringId GlobalIndirectMaterialName;
+
+            /// <summary>
+            /// Absorbes AOE or child damage
+            /// </summary>
             public short IndirectDamageSection;
-            public short Unknown;
-            public uint Unknown2;
-            public DamageReportingType CollisionDamageReportingType;
-            public DamageReportingType ResponseDamageReportingType;
-            public short Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
+
+            [TagField(Padding = true, Length = 2)]
+            public byte[] Unused1 = new byte[2];
+
+            [TagField(Padding = true, Length = 4)]
+            public byte[] Unused2 = new byte[4];
+
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public DamageReportingType CollisionDamageReportingTypeOld;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public DamageReportingTypeNew CollisionDamageReportingTypeNew;
+
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public DamageReportingType ResponseDamageReportingTypeOld;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public DamageReportingTypeNew ResponseDamageReportingTypeNew;
+
+            [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo3ODST)]
+            public byte[] Unused3 = new byte[2];
+
+            [TagField(Padding = true, Length = 20)]
+            public byte[] Unused4 = new byte[20];
+
             public float MaxVitality;
             public float MinStunDamage;
             public float StunTime;
@@ -481,6 +513,74 @@ namespace TagTool.Tags.Definitions
                 IgnoreForceMinimumTransfer = 1 << 14,
                 OrphanFromPostprocessAutogen = 1 << 15,
                 OnlyDamagedByBoardingDamage = 1 << 16
+            }
+
+            public enum DamageReportingTypeNew : short
+            {
+                GuardiansUnknown,
+                Guardians,
+                FallingDamage,
+                GenericCollision,
+                ArmorLockCrush,
+                GenericMelee,
+                GenericExplosion,
+                Magnum,
+                PlasmaPistol,
+                Needler,
+                Mauler,
+                SMG,
+                PlasmaRifle,
+                BattleRifle,
+                Carbine,
+                Shotgun,
+                SniperRifle,
+                BeamRifle,
+                AssaultRifle,
+                Spiker,
+                FuelRodCannon,
+                MissilePod,
+                RocketLauncher,
+                SpartanLaser,
+                BruteShot,
+                Flamethrower,
+                SentinelGun,
+                EnergySword,
+                GravityHammer,
+                FragGrenade,
+                PlasmaGrenade,
+                SpikeGrenade,
+                FirebombGrenade,
+                Flag,
+                Bomb,
+                BombExplosion,
+                Ball,
+                MachinegunTurret,
+                PlasmaCannon,
+                PlasmaMortar,
+                PlasmaTurret,
+                ShadeTurret,
+                Banshee,
+                Ghost,
+                Mongoose,
+                Scorpion,
+                ScorpionGunner,
+                Spectre,
+                SpectreGunner,
+                Warthog,
+                WarthogGunner,
+                WarthogGaussTurret,
+                Wraith,
+                WraithGunner,
+                Tank,
+                Chopper,
+                Hornet,
+                Mantis,
+                Prowler,
+                SentinelBeam,
+                SentinelRPG,
+                Teleporter,
+                Tripmine,
+                DMR
             }
 
             [TagStructure(Size = 0x44)]

@@ -537,7 +537,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case MultilingualUnicodeStringList unic:
-                    blamDefinition = ConvertMultilingualUnicodeStringList(unic);
+                    blamDefinition = ConvertMultilingualUnicodeStringList(cacheStream, resourceStreams, unic);
                     break;
 
                 case Particle particle when BlamCache.Version == CacheVersion.Halo3Retail:
@@ -567,7 +567,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Scenario scnr:
-                    blamDefinition = ConvertScenario(cacheStream, scnr, blamTag.Name);
+                    blamDefinition = ConvertScenario(cacheStream, resourceStreams, scnr, blamTag.Name);
                     break;
 
                 case ScenarioLightmap sLdT:
@@ -589,7 +589,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Sound sound:
-                    blamDefinition = ConvertSound(sound, resourceStreams);
+                    blamDefinition = ConvertSound(cacheStream, resourceStreams, sound);
                     break;
 
                 case SoundLooping lsnd:
@@ -649,36 +649,54 @@ namespace TagTool.Commands.Porting
 
             switch (data)
             {
-				case BipedPhysicsFlags bipedPhysicsFlags:
-					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
+                case TagFunction tagFunction:
+                    return ConvertTagFunction(tagFunction);
 
-				// case CachedTagInstance tag when !IsRecursive:
-				// 	return null;
-				// case CachedTagInstance tag when tag != null && !IsNew || !IsReplacing:
-				// 	tag = PortTagReference(tag.Index);
-				// 	return tag;
-				// case CachedTagInstance tag:
-				// 	tag = PortTagReference(tag.Index);
-				// 	return ConvertTag(cacheStream, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
-
-				case CachedTagInstance tag:
-					if (!Flags.HasFlag(PortingFlags.Recursive))
+                case StringId stringId:
                     {
-                        foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
-                        {
-                            if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
-                                continue;
+                        if (stringId == StringId.Invalid)
+                            return stringId;
 
-                            if (CacheContext.TagNames[instance.Index] == blamTagName)
-                                return instance;
+                        var value = BlamCache.Version < CacheVersion.Halo3Retail ?
+                            BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
+                            BlamCache.Strings.GetString(stringId);
+
+                        var edStringId = BlamCache.Version < CacheVersion.Halo3Retail ?
+                            CacheContext.GetStringId(value) :
+                            CacheContext.StringIdCache.GetStringId(stringId.Set, value);
+
+                        if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
+                            return edStringId;
+
+                        if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
+                            return CacheContext.StringIdCache.AddString(value);
+
+                        return StringId.Invalid;
+                    }
+
+                case CachedTagInstance tag:
+                    {
+                        if (!Flags.HasFlag(PortingFlags.Recursive))
+                        {
+                            foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
+                            {
+                                if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
+                                    continue;
+
+                                if (CacheContext.TagNames[instance.Index] == blamTagName)
+                                    return instance;
+                            }
+
+                            return null;
                         }
 
-                        return null;
+                        tag = PortTagReference(tag.Index);
+
+                        if (tag != null && !(Flags.HasFlag(PortingFlags.New) || Flags.HasFlag(PortingFlags.Replace)))
+                            return tag;
+
+                        return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
                     }
-					tag = PortTagReference(tag.Index);
-					if (tag != null && !(Flags.HasFlag(PortingFlags.New) || Flags.HasFlag(PortingFlags.Replace)))
-						return tag;
-					return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
 
 				case CollisionMoppCode collisionMopp:
 					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
@@ -690,56 +708,26 @@ namespace TagTool.Commands.Porting
 				case GameObjectType gameObjectType:
 					return ConvertGameObjectType(gameObjectType);
 
-                case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
-                    if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
-                        throw new NotSupportedException(part.TypeOld.ToString());
-                    break;
-
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
-				case PixelShader pixelShader when Flags.HasFlag(PortingFlags.ShaderTest) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					foreach (var shader in pixelShader.Shaders)
-					{
-						shader.PCParameters = shader.XboxParameters;
-						shader.XboxShaderReference = null;
-						shader.XboxParameters = null;
-					}
-					break;
-
-				case RenderGeometry renderGeometry when definition is ScenarioStructureBsp sbsp && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
-
-				case RenderGeometry renderGeometry when definition is RenderModel mode && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
-
-				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
-					return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+                case BipedPhysicsFlags bipedPhysicsFlags:
+                    return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
                         throw new NotSupportedException(propertyType.Halo2.ToString());
                     break;
 
-                case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
-                    property.IntValue = property.ShortValue;
-                    break;
-				
                 case RenderMethod renderMethod when Flags.HasFlag(PortingFlags.MatchShaders):
-					ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
-					return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
+                    ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
+                    return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 
                 case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
 
 				case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
-
-				case StringId stringId:
-					return ConvertStringId(stringId);
-
-				case TagFunction tagFunction:
-					return ConvertTagFunction(tagFunction);
 			}
 
             if (type.IsArray)
@@ -749,9 +737,40 @@ namespace TagTool.Commands.Porting
                 return ConvertList(cacheStream, resourceStreams, data, type, definition, blamTagName);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(cacheStream, resourceStreams, data, type, definition, blamTagName);
+            {
+                data = ConvertStructure(cacheStream, resourceStreams, data, type, definition, blamTagName);
+
+                switch (data)
+                {
+                    case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
+                        return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+
+                    case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
+                        if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
+                            throw new NotSupportedException(part.TypeOld.ToString());
+                        break;
+
+                    case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
+                        property.IntValue = property.ShortValue;
+                        break;
+
+                    case Model.GlobalDamageInfoBlock newDamageInfo:
+                        return ConvertNewDamageInfo(newDamageInfo);
+                }
+            }
 
             return data;
+        }
+
+        private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)
+        {
+            if (!Enum.TryParse(newDamageInfo.CollisionDamageReportingTypeOld.HaloOnline.ToString(), out newDamageInfo.CollisionDamageReportingTypeNew))
+                newDamageInfo.CollisionDamageReportingTypeNew = Model.GlobalDamageInfoBlock.DamageReportingTypeNew.Guardians;
+
+            if (!Enum.TryParse(newDamageInfo.ResponseDamageReportingTypeOld.HaloOnline.ToString(), out newDamageInfo.ResponseDamageReportingTypeNew))
+                newDamageInfo.ResponseDamageReportingTypeNew = Model.GlobalDamageInfoBlock.DamageReportingTypeNew.Guardians;
+
+            return newDamageInfo;
         }
 
         private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags objectTypeFlags)
@@ -797,28 +816,6 @@ namespace TagTool.Commands.Porting
                 throw new NotSupportedException(value ?? CacheContext.Version.ToString());
             
             return damageReportingType;
-        }
-
-        private StringId ConvertStringId(StringId stringId)
-        {
-            if (stringId == StringId.Invalid)
-                return stringId;
-
-            var value = BlamCache.Version < CacheVersion.Halo3Retail ?
-                BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
-                BlamCache.Strings.GetString(stringId);
-
-            var edStringId = BlamCache.Version < CacheVersion.Halo3Retail ?
-                CacheContext.GetStringId(value) :
-                CacheContext.StringIdCache.GetStringId(stringId.Set, value);
-
-            if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
-                return edStringId;
-
-            if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
-                return CacheContext.StringIdCache.AddString(value);
-
-            return StringId.Invalid;
         }
 
         private Array ConvertArray(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Array array, object definition, string blamTagName)
