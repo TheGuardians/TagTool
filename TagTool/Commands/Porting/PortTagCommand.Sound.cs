@@ -111,34 +111,34 @@ namespace TagTool.Commands.Porting
             string loopMP3 = @"Temp\permutationTruncated.mp3";
             string tempMP3 = @"Temp\permutation.mp3";
 
-			//If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
+            //If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
 
-			CLEAN_FILES:
-			try
-			{
-				if (File.Exists(tempXMA))
-					File.Delete(tempXMA);
-				if (File.Exists(tempWAV))
-					File.Delete(tempWAV);
-				if (File.Exists(fixedWAV))
-					File.Delete(fixedWAV);
-				if (File.Exists(loopMP3))
-					File.Delete(loopMP3);
-				if (File.Exists(tempMP3))
-					File.Delete(tempMP3);
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e.Message);
-				Thread.Sleep(100);
-				goto CLEAN_FILES;
-			}
+            CLEAN_FILES:
+            try
+            {
+                if (File.Exists(tempXMA))
+                    File.Delete(tempXMA);
+                if (File.Exists(tempWAV))
+                    File.Delete(tempWAV);
+                if (File.Exists(fixedWAV))
+                    File.Delete(fixedWAV);
+                if (File.Exists(loopMP3))
+                    File.Delete(loopMP3);
+                if (File.Exists(tempMP3))
+                    File.Delete(tempMP3);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Thread.Sleep(100);
+                goto CLEAN_FILES;
+            }
 
-			try
+            try
             {
                 using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
                 {
-                    output.Write(CreateXMAHeader(fileSize,channelCount, sampleRate.GetSampleRateHz()));
+                    output.Write(CreateXMAHeader(fileSize, channelCount, sampleRate.GetSampleRateHz()));
                     output.Format = EndianFormat.LittleEndian;
                     output.Write(buffer, index, count);
                 }
@@ -290,14 +290,14 @@ namespace TagTool.Commands.Porting
         private static float ModifyGain(float gain, float modifier)
         {
             // gain (dB) = 10*log(P_out / P_in) * (dB)
-            double ratio = Math.Pow(10, gain / 10.0f) * (1.0+modifier);
+            double ratio = Math.Pow(10, gain / 10.0f) * (1.0 + modifier);
             return 10.0f * (float)Math.Log10(ratio);
         }
 
         private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = (SoundCacheFileGestalt)ConvertData(cacheStream, resourceStreams, PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache), null, null);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
@@ -400,6 +400,7 @@ namespace TagTool.Commands.Porting
                 //
 
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
+                pitchRange.ImportName = (StringId)ConvertData(cacheStream, resourceStreams, BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name, null, null);
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
                 pitchRange.Unknown1 = 0;
                 pitchRange.Unknown2 = 0;
@@ -457,6 +458,7 @@ namespace TagTool.Commands.Porting
                     // For the permutation conversion to work properly, we must go through the permutation in chunk order.
                     var permutation = BlamSoundGestalt.Permutations[pitchRange.FirstPermutationIndex + i];
 
+                    permutation.ImportName = (StringId)ConvertData(cacheStream, resourceStreams, BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name, null, null);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationList[i];
@@ -707,10 +709,10 @@ namespace TagTool.Commands.Porting
                     sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
                 }
             }
-            
+
             if (File.Exists(soundMP3))
                 File.Delete(soundMP3);
-            
+
             return sound;
         }
 
@@ -728,7 +730,7 @@ namespace TagTool.Commands.Porting
 
             if (soundLooping.SoundClass == SoundLooping.SoundClassValue.FirstPersonOutside)
                 soundLooping.SoundClass = SoundLooping.SoundClassValue.OutsideSurroundTail;
-            
+
             /* unsuccessful hacks of death and suffering
             foreach (var track in soundLooping.Tracks)
             {
