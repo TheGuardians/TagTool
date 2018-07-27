@@ -33,10 +33,9 @@ namespace TagTool.Tags.Definitions
         public List<InvisibilityBlock> Invisibility;
         public List<InvincibilityBlock> Invincibility;
         public List<RegeneratorBlock> Regenerator;
-        //Here too
-        public uint Unknown15;
-        public uint Unknown16;
-        public uint Unknown17;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<NewHealthPackBlock> NewHealthPack;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<ForcedReloadBlock> ForcedReload;
@@ -69,7 +68,10 @@ namespace TagTool.Tags.Definitions
 
         public CachedTagInstance HudInterface;
         public CachedTagInstance PickupSound;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance EmptySound;
+
         public CachedTagInstance ActivationEffect;
         public CachedTagInstance ActiveEffect;
         public CachedTagInstance DeactivationEffect;
@@ -209,6 +211,13 @@ namespace TagTool.Tags.Definitions
         public class RegeneratorBlock
         {
             public CachedTagInstance RegeneratingEffect;
+        }
+
+        [TagStructure(Size = 0x8)]
+        public class NewHealthPackBlock
+        {
+            public float Unknown1;
+            public float Unknown2;
         }
 
         [TagStructure(Size = 0x14)]
