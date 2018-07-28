@@ -510,10 +510,6 @@ namespace TagTool.Commands.Porting
                     blamDefinition = ConvertCinematicScene(cisc);
                     break;
 
-                case CortanaEffectDefinition crte:
-                    blamDefinition = ConvertCortanaEffect(crte);
-                    break;
-
                 case Dialogue udlg:
                     blamDefinition = ConvertDialogue(cacheStream, udlg);
                     break;

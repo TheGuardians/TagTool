@@ -184,26 +184,6 @@ namespace TagTool.Commands.Porting
             return Lbsp;
         }
 
-        private CortanaEffectDefinition ConvertCortanaEffect(CortanaEffectDefinition crte)
-        {
-            foreach(var block in crte.Unknown2)
-            {
-                block.Unknown3 = new CortanaEffectDefinition.UnknownBlock1.UnknownObject();
-
-                if (block.Unknown1.Count > 0)
-                    block.Unknown3.Unknown1 = block.Unknown1[0];
-                else
-                    block.Unknown3.Unknown1 = null;
-
-                if (block.Unknown2.Count > 0)
-                    block.Unknown3.Unknown2 = block.Unknown2[0];
-                else
-                    block.Unknown3.Unknown2 = null;
-            }
-
-            return crte;
-        }
-
         private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs)
         {
             cfxs.Flags15 = CameraFxSettings.FlagsValue.Disable;
