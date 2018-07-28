@@ -118,6 +118,7 @@ namespace TagTool.Commands.Porting
             foreach (var a in edMaps)
             {
                 var newBitmap = GetDefaultBitmapTag(a);
+
                 if (!CacheContext.TagCache.Index.Contains(pRmt2))
                     newBitmap = @"shaders\default_bitmaps\bitmaps\default_detail"; // would only happen for removed shaders
 
@@ -650,19 +651,19 @@ namespace TagTool.Commands.Porting
         {
             switch (type)
             {
-                case "base_map":
-                case "palette":
-                case "self_illum_map":
-                case "occlusion_parameter_map":
                 case "change_color_map":
-                case "noise_map_a":
-                case "noise_map_b":
+                case "material_texture":
                 case "overlay_map":
                 case "bump_detail_mask_map":
                 case "chameleon_mask_map":
                 case "specular_map":
                 case "specular_mask_texture":
-                case "transparence_map":
+                case "blend_map":
+                    return @"shaders\default_bitmaps\bitmaps\color_white";
+
+                case "base_map":
+                case "palette":
+                case "occlusion_parameter_map":
                     return @"shaders\default_bitmaps\bitmaps\color_white";
 
                 case "detail_map":
@@ -674,15 +675,12 @@ namespace TagTool.Commands.Porting
                 case "detail_map_m_2":
                 case "detail_map_m_3":
                 case "detail_map_overlay":
-                case "self_illum_detail_map":
                     return @"shaders\default_bitmaps\bitmaps\default_detail";
 
                 case "base_map_m_0":
                 case "base_map_m_1":
                 case "base_map_m_2":
                 case "base_map_m_3":
-                case "blend_map":
-                case "material_texture":
                 case "meter_map":
                 case "overlay_multiply_map":
                 case "subsurface_map":
@@ -720,11 +718,20 @@ namespace TagTool.Commands.Porting
                 case "overlay_detail_map":
                     return @"shaders\default_bitmaps\bitmaps\dither_pattern";
 
+                case "self_illum_map":
+                case "self_illum_detail_map":
+                case "transparence_map":
                 case "alpha_test_map":
                     return @"shaders\default_bitmaps\bitmaps\color_black_alpha_black";
 
                 case "alpha_map":
                     return @"shaders\default_bitmaps\bitmaps\alpha_grey50";
+
+                case "noise_map_a":
+                    return @"shaders\default_bitmaps\bitmaps\clouds_a";
+
+                case "noise_map_b":
+                    return @"shaders\default_bitmaps\bitmaps\clouds_b";
 
                 default:
                     Console.WriteLine($"WARNING: Shader map type \"{type}\" default bitmap not implemented.");

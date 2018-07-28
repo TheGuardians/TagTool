@@ -20,11 +20,8 @@ namespace TagTool.Tags.Definitions
 
         public List<UnknownBlock1> Unknown2;
         public List<PassBlock> Pass;
-        public List<UnknownBlock2> Unknown3;
+        public List<UnknownBlock3> Unknown3;
         public List<UnknownBlock3> Unknown4;
-
-
-
 
         [TagStructure(Size = 0x14)]
         public class SoundBlock
@@ -32,7 +29,6 @@ namespace TagTool.Tags.Definitions
             public uint Unknown;
             public CachedTagInstance Sound;
         }
-
 
         [TagStructure(MaxVersion = CacheVersion.Halo3Retail, Size = 0x18)]
         [TagStructure(MinVersion = CacheVersion.HaloOnline106708, Size = 0x48)]
@@ -88,7 +84,6 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock6> Unknown3;
             public List<UnknownBlock4> Unknown4;
 
-
             [TagStructure(Size = 0x34, Align = 0x08)]
             public class UnknownBlock5
             {
@@ -123,12 +118,6 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x0)]
-        public class UnknownBlock2
-        {
-            
-        }
-
         [TagStructure(Size = 0x24)]
         public class UnknownBlock3
         {
@@ -152,8 +141,6 @@ namespace TagTool.Tags.Definitions
                 public float Unknown11;
                 public float Unknown12;
             }
-
-            
 
             [TagStructure(Size = 0xC)]
             public class UnknownBlock6
