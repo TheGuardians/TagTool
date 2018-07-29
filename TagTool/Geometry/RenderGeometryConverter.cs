@@ -17,11 +17,13 @@ namespace TagTool.Geometry
     {
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
+        private List<long> OriginalBufferOffsets;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
+            OriginalBufferOffsets = new List<long>();
         }
 
         private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
@@ -33,7 +35,6 @@ namespace TagTool.Geometry
         public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount)
         {
             var vertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
-
             var count = vertexBuffer.Count;
 
             var startPos = (int)outputStream.Position;
@@ -41,6 +42,8 @@ namespace TagTool.Geometry
 
             var inVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
             var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, outputStream);
+
+            OriginalBufferOffsets.Add(inputStream.Position);
 
             switch (vertexBuffer.Format)
             {
@@ -123,16 +126,14 @@ namespace TagTool.Geometry
                         // Store current stream position
                         var tempStreamPosition = inputStream.Position;
 
-                        // Open previous world buffer (H3) INCORRECT : Data.Address.Offset refers to the newly created HO world buffer. 
-                        var worldBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex-2].Definition;
-                        var worldVertexBufferBasePosition = worldBuffer.Data.Address.Offset;
+                        // Open previous world buffer (H3)
+                        var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
                         inputStream.Position = worldVertexBufferBasePosition;
-                        var worldVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
 
                         for (int j = 0; i < 3; i++)
                         {
                             inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
-                            WorldVertex w = worldVertexStream.ReadWorldVertex();
+                            WorldVertex w = inVertexStream.ReadWorldVertex();
                             //TODO Insert code to keep track of v.Indices[j] to create the new index buffer for these world vertices
 
                             //TODO Insert conversion code here for world (0x38) -> world water (0x34)
