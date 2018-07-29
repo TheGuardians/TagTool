@@ -57,11 +57,9 @@ namespace TagTool.Commands.Files
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
                 { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
-                { "comparetags", "Compare and dump differences between two tags. Works between this and a different ms23 cache." },
                 { "findconicaleffects", "" },
                 { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
                 { "cisc", "" },
-                { "dumpscripts", "Dump scripts, usable with hardcoded scripts setup (text dump)" },
                 { "defaultbitmaptypes", "" },
                 { "mergetagnames", "" }
             };
@@ -83,18 +81,11 @@ namespace TagTool.Commands.Files
                 case "mergetagnames": return MergeTagNames(args);
                 case "adjustscriptsfromfile": return AdjustScriptsFromFile(args);
                 case "batchtagdepadd": return BatchTagDepAdd(args);
-                case "namemodetags": return NameModeTags();
-                case "nameblocsubtags": return NameBlocSubtags();
-                case "nameeffesubtags": return NameEffeSubtags();
-                case "namegameobjectssubtags": return NameGameObjectsSubtags();
-                case "namemodelsubtags": return NameModelSubtags();
-                case "namemodeshaders": return NameModeShaders();
-                case "namefootsnd": return NameFootSnd();
-                case "nameglobalmaterials": return NameGlobalMaterials();
-                case "namelsndsubtags": return NameLsndSubtags();
                 case "setupmulg": return SetupMulg();
                 case "listprematchcameras": return ListPrematchCameras();
                 case "findnullshaders": return FindNullShaders();
+                case "nameglobalmaterials": return NameGlobalMaterials(args);
+                case "nameanytagsubtags": return NameAnyTagSubtags(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -2223,6 +2214,10 @@ namespace TagTool.Commands.Files
             if (a == null && b == null)
                 return true;
 
+            if (!CacheContext.TagNames.ContainsKey(a.Index))
+                if (debugConsoleWrite)
+                    Console.WriteLine($"0x{a.Index:X4},{CacheContext.TagNames[a.Index]}");
+
             CacheContext.TagNames[a.Index] = BlamCache.IndexItems.GetItemByID(b.Index).Name;
 
             return true;
@@ -2270,843 +2265,274 @@ namespace TagTool.Commands.Files
             return sf.GetMethod().Name;
         }
 
-        public bool NameGlobalMaterials()
+        public bool NameGlobalMaterials(List<string> args)
         {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            var edAlreadyNamedTag = new List<string>();
             debugConsoleWrite = true;
 
-            foreach (var cacheGroup in haloMapsList)
+            var helpMessage = "Required arguments: 1." +
+                    "Usage: use H3 matg tag to name all HO matg subtags (effects tagblock only)" +
+                    "Usage:" +
+                    "test NameGlobalMaterials \"D:\\FOLDERS\\Xenia\\ISO\\Halo3Campaign\\maps\"";
+
+            if (args.Count < 1)
             {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.Name != "globals\\globals")
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmGlobals = blamDeserializer.Deserialize<Globals>(blamContext);
-
-                        if (!CacheContext.TryGetTag($"globals\\globals.matg", out var edInstance))
-                            throw new Exception();
-
-                        if (edInstance == null)
-                            throw new Exception();
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var edGlobals = CacheContext.Deserialize<Globals>(tagContext);
-
-                            for (int i = 0; i < bmGlobals.Materials.Count; i++)
-                            {
-                                if (i >= edGlobals.Materials.Count)
-                                    continue;
-
-                                IsDiffOrNull(edGlobals.Materials[i].BreakableSurface, bmGlobals.Materials[i].BreakableSurface, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerGrinding, bmGlobals.Materials[i].EffectSweetenerGrinding, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerLarge, bmGlobals.Materials[i].EffectSweetenerLarge, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMedium, bmGlobals.Materials[i].EffectSweetenerMedium, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMelee, bmGlobals.Materials[i].EffectSweetenerMelee, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerRolling, bmGlobals.Materials[i].EffectSweetenerRolling, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerSmall, bmGlobals.Materials[i].EffectSweetenerSmall, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].MaterialEffects, bmGlobals.Materials[i].MaterialEffects, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerGrinding, bmGlobals.Materials[i].SoundSweetenerGrinding, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerLarge, bmGlobals.Materials[i].SoundSweetenerLarge, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMedium, bmGlobals.Materials[i].SoundSweetenerMedium, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeLarge, bmGlobals.Materials[i].SoundSweetenerMeleeLarge, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeMedium, bmGlobals.Materials[i].SoundSweetenerMeleeMedium, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeSmall, bmGlobals.Materials[i].SoundSweetenerMeleeSmall, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerRolling, bmGlobals.Materials[i].SoundSweetenerRolling, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerSmall, bmGlobals.Materials[i].SoundSweetenerSmall, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleLarge, bmGlobals.Materials[i].WaterRippleLarge, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleMedium, bmGlobals.Materials[i].WaterRippleMedium, BlamCache);
-                                IsDiffOrNull(edGlobals.Materials[i].WaterRippleSmall, bmGlobals.Materials[i].WaterRippleSmall, BlamCache);
-                            }
-                        }
-
-                        break;
-                    }
-                }
+                Console.WriteLine(helpMessage);
+                return false;
             }
 
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+            var mainPath = args[0];
+
+            if (!Directory.Exists(mainPath))
+            {
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var cacheFiles = Directory.EnumerateFiles(mainPath).ToList();
+            if (cacheFiles.Count == 0)
+            {
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var BlamCache = OpenCacheFile(cacheFiles.Find(x => x.Contains("guardian"))); // don't pick [0], as it might pick mainmenu
+            if (BlamCache == null)
+                BlamCache = OpenCacheFile(cacheFiles.Find(x => x.Contains("010_jungle")));
+            if (BlamCache == null)
+                BlamCache = OpenCacheFile(cacheFiles.Find(x => x.Contains("h100")));
+            if (BlamCache == null)
+                BlamCache = OpenCacheFile(cacheFiles[0]);
+
+            var blamDeserializer = new TagDeserializer(BlamCache.Version);
+
+            foreach (var item in BlamCache.IndexItems)
+            {
+                if (item.Name != "globals\\globals")
+                    continue;
+
+                var blamContext = new CacheSerializationContext(ref BlamCache, item);
+                var bmGlobals = blamDeserializer.Deserialize<Globals>(blamContext);
+
+                if (!CacheContext.TryGetTag($"globals\\globals.matg", out var edInstance))
+                    throw new Exception();
+
+                if (edInstance == null)
+                    throw new Exception();
+
+                using (var cacheStream = CacheContext.OpenTagCacheRead())
+                {
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
+                    var edGlobals = CacheContext.Deserialize<Globals>(tagContext);
+
+                    for (int i = 0; i < bmGlobals.Materials.Count; i++)
+                    {
+                        if (i >= edGlobals.Materials.Count)
+                            continue;
+
+                        IsDiffOrNull(edGlobals.Materials[i].BreakableSurface, bmGlobals.Materials[i].BreakableSurface, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerGrinding, bmGlobals.Materials[i].EffectSweetenerGrinding, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerLarge, bmGlobals.Materials[i].EffectSweetenerLarge, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMedium, bmGlobals.Materials[i].EffectSweetenerMedium, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerMelee, bmGlobals.Materials[i].EffectSweetenerMelee, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerRolling, bmGlobals.Materials[i].EffectSweetenerRolling, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].EffectSweetenerSmall, bmGlobals.Materials[i].EffectSweetenerSmall, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].MaterialEffects, bmGlobals.Materials[i].MaterialEffects, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerGrinding, bmGlobals.Materials[i].SoundSweetenerGrinding, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerLarge, bmGlobals.Materials[i].SoundSweetenerLarge, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMedium, bmGlobals.Materials[i].SoundSweetenerMedium, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeLarge, bmGlobals.Materials[i].SoundSweetenerMeleeLarge, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeMedium, bmGlobals.Materials[i].SoundSweetenerMeleeMedium, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerMeleeSmall, bmGlobals.Materials[i].SoundSweetenerMeleeSmall, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerRolling, bmGlobals.Materials[i].SoundSweetenerRolling, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].SoundSweetenerSmall, bmGlobals.Materials[i].SoundSweetenerSmall, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].WaterRippleLarge, bmGlobals.Materials[i].WaterRippleLarge, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].WaterRippleMedium, bmGlobals.Materials[i].WaterRippleMedium, BlamCache);
+                        IsDiffOrNull(edGlobals.Materials[i].WaterRippleSmall, bmGlobals.Materials[i].WaterRippleSmall, BlamCache);
+                    }
+                }
+
+                return true;
+            }
 
             return true;
         }
 
-        public bool NameBlocSubtags()
+        public bool NameAnyTagSubtags(List<string> args)
         {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
             debugConsoleWrite = true;
 
-            foreach (var cacheGroup in haloMapsList)
+            var helpMessage = "Required arguments: 2." +
+                    "\nUsage: use H3/ODST cache files to name subtags of ED commonly named tags." +
+                    "\nUsage:" +
+                    "\ntest NameAnyTagSubtags <tag class> <H3/ODST maps path>" +
+                    "\nExample: test NameAnyTagSubtags effe \"D:\\FOLDERS\\Xenia\\ISO\\Halo3Campaign\\maps\"";
+
+            if (args.Count < 2)
             {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "bloc")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-    item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (!CacheContext.TryGetTag(tagname, out var tag1))
-                            continue;
-
-                        if (tag1 == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var crateBm = blamDeserializer.Deserialize<Crate>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
-                            var crateED = CacheContext.Deserialize<Crate>(tagContext);
-
-                            if (crateED.Attachments.Count != crateBm.Attachments.Count)
-                                continue;
-
-                            IsDiffOrNull(crateED.MaterialEffects, crateBm.MaterialEffects, BlamCache);
-
-                            for (int i = 0; i < crateED.Attachments.Count; i++)
-                                IsDiffOrNull(crateED.Attachments[i].Attachment2, crateBm.Attachments[i].Attachment2, BlamCache);
-                        }
-                    }
-                }
+                Console.WriteLine("ERROR: args.Count < 2");
+                Console.WriteLine(helpMessage);
+                return false;
             }
 
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+            var tagClass = args[0];
+            var mainPath = args[1];
 
-            return true;
-        }
-
-        public bool NameEffe()
-        {
-            return false;
-
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
+            if (!Directory.Exists(mainPath))
             {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "effe")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-    item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (item.GroupName == "hlsl_include")
-                            continue;
-
-                        if (item.GroupName == "user_interface_fourth_wall_timing_definition")
-                            continue;
-
-                        if (item.GroupName == "scenario_pda")
-                            continue;
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (item.Name.Contains("."))
-                            continue;
-
-                        if (!CacheContext.TryGetTag(tagname, out var tag1))
-                            continue;
-
-                        if (tag1 == null)
-                            continue;
-
-                        //Csv1($"{item.GroupName},{cacheFile},{tagname}");
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var crateBm = blamDeserializer.Deserialize<Effect>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
-                            var crateED = CacheContext.Deserialize<Effect>(tagContext);
-                        }
-                    }
-                }
+                Console.WriteLine($"ERROR: !Directory.Exists({mainPath})");
+                Console.WriteLine(helpMessage);
+                return false;
             }
 
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
-        }
-
-        public bool NameEffeSubtags()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
+            var cacheFiles = Directory.EnumerateFiles(mainPath).ToList();
+            if (cacheFiles.Count == 0)
             {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "effe")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-    item.GroupName == "scenario_pda")
-
-                            continue;
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (!CacheContext.TryGetTag(tagname, out var tag1))
-                            continue;
-
-                        if (tag1 == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmTag = blamDeserializer.Deserialize<Effect>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
-                            var edTag = CacheContext.Deserialize<Effect>(tagContext);
-
-                            for (int i = 0; i < edTag.Events.Count; i++)
-                            {
-                                if (edTag.Events.Count != bmTag.Events.Count)
-                                    continue;
-
-                                for (int j = 0; j < edTag.Events[i].Parts.Count; j++)
-                                {
-                                    if (edTag.Events[i].Parts.Count != bmTag.Events[i].Parts.Count)
-                                        continue;
-
-                                    if (!IsDiffOrNull(edTag.Events[i].Parts[j].Type, bmTag.Events[i].Parts[j].Type, BlamCache))
-                                        continue;
-                                }
-
-                                for (int j = 0; j < edTag.Events[i].ParticleSystems.Count; j++)
-                                {
-                                    if (edTag.Events[i].ParticleSystems.Count != bmTag.Events[i].ParticleSystems.Count)
-                                        continue;
-
-                                    if (!IsDiffOrNull(edTag.Events[i].ParticleSystems[j].Particle, bmTag.Events[i].ParticleSystems[j].Particle, BlamCache))
-                                        continue;
-
-                                    for (int k = 0; k < edTag.Events[i].ParticleSystems[j].Emitters.Count; k++)
-                                        if (!IsDiffOrNull(edTag.Events[i].ParticleSystems[j].Emitters[k].ParticleMovement.Template, bmTag.Events[i].ParticleSystems[j].Emitters[k].ParticleMovement.Template, BlamCache))
-                                            continue;
-                                }
-                            }
-                        }
-                    }
-                }
+                Console.WriteLine("ERROR: cacheFiles.Count == 0");
+                Console.WriteLine(helpMessage);
+                return false;
             }
 
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
+            var verifiedBlamTags = new List<string>();
 
-            return true;
-        }
+            CacheContext.TryParseGroupTag(tagClass, out var groupTag);
 
-        public bool NameModeTags()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var blamTags = new List<Item>();
-            var edTags = new List<Item>();
-            var list = new List<string>();
-            debugConsoleWrite = false;
-
-            foreach (var cacheGroup in haloMapsList)
+            foreach (var cacheFile in cacheFiles)
             {
-                foreach (var cacheFile in cacheGroup)
+                if (!cacheFile.Contains(".map"))
+                    continue;
+
+                if (cacheFile.Contains("campaign") || cacheFile.Contains("shared"))
+                    continue;
+
+                var BlamCache = OpenCacheFile(cacheFile);
+                if (BlamCache == null)
+                    continue;
+
+                foreach (var bmInstance in BlamCache.IndexItems)
                 {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "mode")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-    item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-    item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var tag = blamDeserializer.Deserialize<RasterizerCacheFileGlobals>(blamContext);
-
-                        var modeName = BlamCache.Strings.GetItemByID(new StringId(tag.Unknown).Index);
-
-                        switch (modeName)
-                        {
-                            case "sky":
-                            case "fp":
-                            case "fp_body":
-                                continue;
-                            default:
-                                break;
-                        }
-
-                        blamTags.Add(new Item
-                        {
-                            Tagname = item.Name,
-                            ModeName = modeName,
-                            Checksum = tag.Unknown3
-                        });
-                    }
-                }
-            }
-
-            foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("mode"))
-            {
-                RasterizerCacheFileGlobals tag;
-                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, instance);
-                    tag = CacheContext.Deserializer.Deserialize<RasterizerCacheFileGlobals>(edContext);
-                }
-
-                var modeName = CacheContext.StringIdCache.GetString(new StringId(tag.Unknown));
-
-                switch (modeName)
-                {
-                    case "sky":
-                    case "fp":
-                    case "fp_body":
-                        continue;
-                    default:
-                        break;
-                }
-
-                edTags.Add(new Item
-                {
-                    TagIndex = instance.Index,
-                    ModeName = modeName,
-                    Checksum = tag.Unknown3
-                });
-            }
-
-            var edNamedTags = new List<Item>();
-
-            foreach (var blamTag in blamTags)
-            {
-                foreach (var edTag in edTags)
-                {
-                    if (edTag.ModeName != blamTag.ModeName)
+                    if (bmInstance.ClassIndex == -1)
                         continue;
 
-                    if (edNamedTags.Contains(edTag))
+                    if (bmInstance.GroupTag.ToString() != groupTag.ToString())
                         continue;
 
-                    edNamedTags.Add(edTag);
+                    if (verifiedBlamTags.Contains(bmInstance.Name))
+                        continue;
 
-                    CacheContext.TagNames[edTag.TagIndex] = blamTag.Tagname;
+                    verifiedBlamTags.Add(bmInstance.Name);
 
-                    // if (!CacheContext.TagNames.ContainsKey(edTag.TagIndex))
-                    // {
-                    //     if (edTag.Checksum != blamTag.Checksum)
-                    //         Csv1($"NameTag 0x{edTag.TagIndex:X4} {blamTag.Tagname},{edTag.Checksum:X8},{blamTag.Checksum:X8},diff check");
-                    //     else
-                    //         Csv1($"NameTag 0x{edTag.TagIndex:X4} {blamTag.Tagname},{edTag.Checksum:X8},{blamTag.Checksum:X8},same check");
-                    //     goto FoundED;
-                    // }
+                    var tagname = $"{bmInstance.Name}.{bmInstance.GroupName}";
+
+                    if (!CacheContext.TryGetTag(tagname, out var edInstance)) // a bit risky because some equivalent HO tags have different subtags
+                        continue;
+
+                    if (edInstance == null)
+                        continue;
+
+                    object edDef = null;
+                    using (var stream = CacheContext.OpenTagCacheRead())
+                        edDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
+
+                    var blamContext = new CacheSerializationContext(ref BlamCache, bmInstance);
+                    var bmDef = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(bmInstance.GroupTag));
+
+                    CompareBlocksToNameTags(edDef, bmDef, CacheContext, BlamCache, "");
+
                 }
-
-                FoundED:
-                ;
             }
 
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
+            Console.WriteLine($"Saved new tagnames.");
+            CacheContext.SaveTagNames();
             return true;
         }
 
-        public bool NameModeShaders()
+        public static void CompareBlocksToNameTags(object leftData, object rightData, HaloOnlineCacheContext edContext, CacheFile bmContext, String name)
         {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            var edAlreadyNamedTag = new List<string>();
-            debugConsoleWrite = true;
+            if (leftData == null || rightData == null)
+                return;
 
-            foreach (var cacheGroup in haloMapsList)
+            if (name.Contains("ResourcePageIndex"))
+                return;
+
+            if (name == "Geometry")
+                return;
+
+            var type = leftData.GetType();
+
+            if (type == typeof(CachedTagInstance))
             {
-                foreach (var cacheFile in cacheGroup)
+                var leftTag = (CachedTagInstance)leftData;
+                var rightTag = (CachedTagInstance)rightData;
+
+                var leftName = edContext.TagNames.ContainsKey(leftTag.Index) ? edContext.TagNames[leftTag.Index] : "";
+                var rightName = bmContext.IndexItems.GetItemByID(rightTag.Index).Name;
+
+                if (!edContext.TagNames.ContainsKey(leftTag.Index))
                 {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "mode")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-                            item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (item.Name.Contains("."))
-                            continue;
-
-                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
-                            continue;
-
-                        if (edInstance == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmMode = blamDeserializer.Deserialize<RenderModel_materials>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var edMode = CacheContext.Deserialize<RenderModel_materials>(tagContext);
-
-                            if (bmMode.Materials.Count != edMode.Materials.Count)
-                            {
-                                //Csv2($"{item.Name},bmMode.Materials.Count != edMode.Materials.Count");
-                                continue;
-                            }
-
-                            for (int i = 0; i < bmMode.Materials.Count; i++)
-                                IsDiffOrNull(edMode.Materials[i].RenderMethod, bmMode.Materials[i].RenderMethod, BlamCache);
-                        }
-                    }
+                    if (debugConsoleWrite)
+                        Console.WriteLine($"0x{leftTag.Index:X4},{rightName}");
+                    edContext.TagNames[leftTag.Index] = rightName;
                 }
             }
-
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
-        }
-
-        public bool NameGameObjectsSubtags()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
+            else if (type.IsArray)
             {
-                foreach (var cacheFile in cacheGroup)
+                if (type.GetElementType().IsPrimitive)
+                    return;
+
+                var leftArray = (Array)leftData;
+                var rightArray = (Array)rightData;
+
+                if (leftArray.Length != rightArray.Length)
+                    return;
+
+                for (var i = 0; i < leftArray.Length; i++)
+                    CompareBlocksToNameTags(leftArray.GetValue(i), rightArray.GetValue(i), edContext, bmContext, name);
+            }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var countProperty = type.GetProperty("Count");
+                var leftCount = (int)countProperty.GetValue(leftData);
+                var rightCount = (int)countProperty.GetValue(rightData);
+                if (leftCount != rightCount) 
+                    return;
+
+                var getItem = type.GetMethod("get_Item");
+                for (var i = 0; i < leftCount; i++)
                 {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        switch (item.GroupTag.ToString())
-                        {
-                            case "bloc":
-                            case "efsc":
-                            case "snce":
-                            case "armr":
-                            case "proj":
-                            case "crea":
-                            case "devi":
-                            case "bipd":
-                            case "vehi":
-                            case "gint":
-                            case "ssce":
-                            case "scen":
-                            case "item":
-                            case "weap":
-                            case "eqip":
-                            case "term":
-                            case "ctrl":
-                            case "mach":
-                                break;
-                            default:
-                                continue;
-                        }
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (!CacheContext.TryGetTag(tagname, out var tag1))
-                            continue;
-
-                        if (tag1 == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmTag = blamDeserializer.Deserialize<EffectScenery>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
-                            var edTag = CacheContext.Deserialize<EffectScenery>(tagContext);
-
-                            IsDiffOrNull(edTag.Model, bmTag.Model, BlamCache);
-                            IsDiffOrNull(edTag.CrateObject, bmTag.CrateObject, BlamCache);
-                            IsDiffOrNull(edTag.CollisionDamage, bmTag.CollisionDamage, BlamCache);
-                            IsDiffOrNull(edTag.CreationEffect, bmTag.CreationEffect, BlamCache);
-                            IsDiffOrNull(edTag.MaterialEffects, bmTag.MaterialEffects, BlamCache);
-                            IsDiffOrNull(edTag.MeleeImpact, bmTag.MeleeImpact, BlamCache);
-                        }
-                    }
+                    var leftItem = getItem.Invoke(leftData, new object[] { i });
+                    var rightItem = getItem.Invoke(rightData, new object[] { i });
+                    CompareBlocksToNameTags(leftItem, rightItem, edContext, bmContext, $"{name}[{i}].");
                 }
             }
-
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
-        }
-
-        public bool NameModelSubtags()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
+            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
-                foreach (var cacheFile in cacheGroup)
+                // The objects are structures
+                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                while (left.Next() && right.Next())
                 {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
+                    // Keep going on the left until the field is on the right
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
                     {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        switch (item.GroupTag.ToString())
-                        {
-                            case "hlmt":
-                                break;
-                            default:
-                                continue;
-                        }
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (!CacheContext.TryGetTag(tagname, out var tag1))
-                            continue;
-
-                        if (tag1 == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmTag = blamDeserializer.Deserialize<Model>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag1);
-                            var edTag = CacheContext.Deserialize<Model>(tagContext);
-
-                            IsDiffOrNull(edTag.RenderModel, bmTag.RenderModel, BlamCache);
-                            IsDiffOrNull(edTag.CollisionModel, bmTag.CollisionModel, BlamCache);
-                            IsDiffOrNull(edTag.Animation, bmTag.Animation, BlamCache);
-                            IsDiffOrNull(edTag.PhysicsModel, bmTag.PhysicsModel, BlamCache);
-                            IsDiffOrNull(edTag.LodModel, bmTag.LodModel, BlamCache);
-                            IsDiffOrNull(edTag.PrimaryDialogue, bmTag.PrimaryDialogue, BlamCache);
-                            IsDiffOrNull(edTag.SecondaryDialogue, bmTag.SecondaryDialogue, BlamCache);
-                            IsDiffOrNull(edTag.ShieldImpactFirstPerson, bmTag.ShieldImpactFirstPerson, BlamCache);
-                            IsDiffOrNull(edTag.ShieldImpactThirdPerson, bmTag.ShieldImpactThirdPerson, BlamCache);
-                        }
-                    }
-                }
-            }
-
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
-        }
-
-        public bool NameFootSnd()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            var edAlreadyNamedTag = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
-            {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
-                    {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "foot")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-                            item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (item.Name.Contains("."))
-                            continue;
-
-                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
-                            continue;
-
-                        if (edInstance == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmMode = blamDeserializer.Deserialize<MaterialEffects>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var edMode = CacheContext.Deserialize<MaterialEffects>(tagContext);
-
-                            if (bmMode.Effects.Count != edMode.Effects.Count)
-                            {
-                                //Csv2($"{item.Name},bmMode.Materials.Count != edMode.Materials.Count");
-                                continue;
-                            }
-
-                            for (int i = 0; i < bmMode.Effects.Count; i++)
-                            {
-                                if (bmMode.Effects[i].OldMaterials.Count != edMode.Effects[i].OldMaterials.Count)
-                                {
-                                    //Csv2($"{item.Name},bmMode.OldMaterials.Count != edMode.OldMaterials.Count");
-                                    goto TagMismatch;
-                                }
-
-                                if (bmMode.Effects[i].Sounds.Count != edMode.Effects[i].Sounds.Count)
-                                {
-                                    //Csv2($"{item.Name},bmMode.Sounds.Count != edMode.Sounds.Count");
-                                    goto TagMismatch;
-                                }
-
-                                if (bmMode.Effects[i].Effects.Count != edMode.Effects[i].Effects.Count)
-                                {
-                                    //Csv2($"{item.Name},bmMode.Effects.Count != edMode.Effects.Count");
-                                    goto TagMismatch;
-                                }
-                            }
-
-                            for (int i = 0; i < bmMode.Effects.Count; i++)
-                            {
-                                for (int j = 0; j < bmMode.Effects[i].Sounds.Count; j++)
-                                    IsDiffOrNull(edMode.Effects[i].Sounds[j].Effect, bmMode.Effects[i].Sounds[j].Effect, BlamCache);
-                                for (int j = 0; j < bmMode.Effects[i].Effects.Count; j++)
-                                    IsDiffOrNull(edMode.Effects[i].Effects[j].Effect, bmMode.Effects[i].Effects[j].Effect, BlamCache);
-                            }
-
-                            TagMismatch:
-                            ;
-                        }
+                        if (!left.Next())
+                            return; // probably unused
                     }
 
-                }
-            }
-
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
-        }
-
-        public bool NameLsndSubtags()
-        {
-            var haloMapsList = new List<List<string>> { Halo3MPCommonCacheFiles, Halo3MPUncommonCacheFiles, Halo3ODSTCacheFiles, Halo3CampaignCacheFiles };
-            var list = new List<string>();
-            var edAlreadyNamedTag = new List<string>();
-            debugConsoleWrite = true;
-
-            foreach (var cacheGroup in haloMapsList)
-            {
-                foreach (var cacheFile in cacheGroup)
-                {
-                    var BlamCache = OpenCacheFile(cacheFile);
-
-                    var blamDeserializer = new TagDeserializer(BlamCache.Version);
-
-                    foreach (var item in BlamCache.IndexItems)
+                    // Keep going on the right until the field is on the left
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
                     {
-                        if (item.ClassIndex == -1)
-                            continue;
-
-                        if (item.GroupTag != "lsnd")
-                            continue;
-
-                        if (item.GroupName == "hlsl_include" ||
-                            item.GroupName == "user_interface_fourth_wall_timing_definition" ||
-                            item.GroupName == "scenario_pda")
-                            continue;
-
-                        var tagname = $"{item.Name}.{item.GroupName}";
-
-                        if (list.Contains(tagname))
-                            continue;
-
-                        list.Add(tagname);
-
-                        if (item.Name.Contains("."))
-                            continue;
-
-                        if (!CacheContext.TryGetTag(tagname, out var edInstance))
-                            continue;
-
-                        if (edInstance == null)
-                            continue;
-
-                        var blamContext = new CacheSerializationContext(ref BlamCache, item);
-                        var bmTag = blamDeserializer.Deserialize<SoundLooping>(blamContext);
-
-                        using (var cacheStream = CacheContext.OpenTagCacheRead())
-                        {
-                            var tagContext = new TagSerializationContext(cacheStream, CacheContext, edInstance);
-                            var edTag = CacheContext.Deserialize<SoundLooping>(tagContext);
-
-                            if (edTag.Flags != bmTag.Flags) goto Continue;
-                            if (edTag.MartySMusicTime != bmTag.MartySMusicTime) goto Continue;
-                            if (edTag.Unknown1 != bmTag.Unknown1) goto Continue;
-                            if (edTag.Unknown2 != bmTag.Unknown2) goto Continue;
-                            if (edTag.Unknown3 != bmTag.Unknown3) goto Continue;
-                            if (edTag.Unused != bmTag.Unused) goto Continue;
-                            // if (edTag.SoundClass != bmTag.SoundClass) goto Continue;
-                            if (edTag.Unknown4 != bmTag.Unknown4) goto Continue;
-                            if (edTag.Tracks.Count != bmTag.Tracks.Count) goto Continue;
-                            if (edTag.DetailSounds.Count != bmTag.DetailSounds.Count) goto Continue;
-
-                            for (int i = 0; i < edTag.Tracks.Count; i++)
-                            {
-                                var edTrack = edTag.Tracks[i];
-                                var bmTrack = bmTag.Tracks[i];
-
-                                if (CacheContext.StringIdCache.GetString(edTrack.Name) != BlamCache.Strings.GetItemByID(bmTrack.Name.Index))
-                                    goto Continue;
-
-                                IsDiffOrNull(edTrack.In, bmTrack.In, BlamCache);
-                                IsDiffOrNull(edTrack.Loop, bmTrack.Loop, BlamCache);
-                                IsDiffOrNull(edTrack.Out, bmTrack.Out, BlamCache);
-                                IsDiffOrNull(edTrack.AlternateLoop, bmTrack.AlternateLoop, BlamCache);
-                                IsDiffOrNull(edTrack.AlternateOut, bmTrack.AlternateOut, BlamCache);
-                                IsDiffOrNull(edTrack.AlternateTransitionIn, bmTrack.AlternateTransitionIn, BlamCache);
-                                IsDiffOrNull(edTrack.AlternateTransitionOut, bmTrack.AlternateTransitionOut, BlamCache);
-                            }
-
-                            Continue:
-                            continue;
-
-                        }
+                        if (!right.Next())
+                            return;
                     }
+                    if (left.Field.MetadataToken != right.Field.MetadataToken)
+                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+
+                    // Process the fields
+                    var leftFieldData = left.Field.GetValue(leftData);
+                    var rightFieldData = right.Field.GetValue(rightData);
+                    CompareBlocksToNameTags(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}");
                 }
             }
-
-            CsvDumpQueueToFile(csvQueue1, $"{GetCurrentMethod()}.csv");
-            CsvDumpQueueToFile(csvQueue2, $"{GetCurrentMethod()}_2.csv");
-
-            return true;
         }
 
     }
