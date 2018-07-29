@@ -241,9 +241,8 @@ namespace TagTool.Geometry
 
     public class Unknown1A
     {
-        public uint Unknown { get; set; }
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
+        public ushort[] Vertices{ get; set; }
+        public ushort[] Indices { get; set; }
     }
 
     public class Unknown1B

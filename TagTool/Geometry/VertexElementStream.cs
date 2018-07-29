@@ -82,6 +82,11 @@ namespace TagTool.Geometry
             return Read(2, () => Reader.ReadInt16());
         }
 
+        public ushort[] ReadUShort6()
+        {
+            return Read(6, () => Reader.ReadUInt16());
+        }
+
         public void WriteShort2(short[] v)
         {
             Write(v, 2, e => Writer.Write(e));

@@ -113,7 +113,35 @@ namespace TagTool.Geometry
                     goto case VertexBufferFormat.World;
 
                 case VertexBufferFormat.Unknown1A:
-                    ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) => outVertexStream.WriteUnknown1A(v));
+                    ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) =>
+                    {
+                        // Reformat Vertex Buffer
+                        vertexBuffer.Format = VertexBufferFormat.World;
+                        vertexBuffer.VertexSize = 0x34;
+                        vertexBuffer.Count *= 3;
+
+                        // Store current stream position
+                        var tempStreamPosition = inputStream.Position;
+
+                        // Open previous world buffer (H3) INCORRECT : Data.Address.Offset refers to the newly created HO world buffer. 
+                        var worldBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex-2].Definition;
+                        var worldVertexBufferBasePosition = worldBuffer.Data.Address.Offset;
+                        inputStream.Position = worldVertexBufferBasePosition;
+                        var worldVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
+
+                        for (int j = 0; i < 3; i++)
+                        {
+                            inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
+                            WorldVertex w = worldVertexStream.ReadWorldVertex();
+                            //TODO Insert code to keep track of v.Indices[j] to create the new index buffer for these world vertices
+
+                            //TODO Insert conversion code here for world (0x38) -> world water (0x34)
+                            outVertexStream.WriteWorldWaterVertex(w);
+                        }
+
+                        // Restore position for reading the next vertex correctly
+                        inputStream.Position = tempStreamPosition;
+                    });
                     break;
 
                 case VertexBufferFormat.Unknown1B:

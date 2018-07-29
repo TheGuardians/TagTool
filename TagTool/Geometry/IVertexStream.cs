@@ -64,5 +64,7 @@ namespace TagTool.Geometry
         void WriteUnknown1A(Unknown1A v);
         Unknown1B ReadUnknown1B();
         void WriteUnknown1B(Unknown1B v);
+        WorldVertex ReadWorldWaterVertex();
+        void WriteWorldWaterVertex(WorldVertex v);
     }
 }

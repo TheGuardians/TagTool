@@ -583,20 +583,30 @@ namespace TagTool.Geometry
 
         public Unknown1A ReadUnknown1A()
         {
+            var buffer = _stream.ReadUShort6();
+            ushort[] vertices = new ushort[3];
+            ushort[] indices = new ushort[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                vertices[i] = buffer[2 * i];
+                indices[i] = buffer[2 * i + 1];
+            }
             return new Unknown1A
             {
-                Unknown = _stream.ReadColor(),
-                Unknown1 = _stream.ReadColor(),
-                Unknown2 = _stream.ReadColor(),
+                Vertices = vertices,
+                Indices = indices
 
             };
         }
 
         public void WriteUnknown1A(Unknown1A v)
         {
-            _stream.WriteColor(v.Unknown);
-            _stream.WriteColor(v.Unknown1);
-            _stream.WriteColor(v.Unknown2);
+            for(int i = 0; i < 3; i+=2)
+            {
+                _stream.WriteUShort(v.Vertices[i]);
+                _stream.WriteUShort(v.Indices[i]);
+            }
         }
 
         public Unknown1B ReadUnknown1B()
@@ -627,5 +637,29 @@ namespace TagTool.Geometry
             _stream.WriteFloat1(v.Unknown7);
             _stream.WriteFloat1(v.Unknown8);
         }
+
+        //TODO Implement proper reading/writing of World Water Vertices
+
+        public WorldVertex ReadWorldWaterVertex()
+        {
+            return new WorldVertex
+            {
+                Position = new RealQuaternion(_stream.ReadFloat3(), 0),
+                Texcoord = _stream.ReadFloat2(),
+                Normal = _stream.ReadFloat3(),
+                Tangent = new RealQuaternion(_stream.ReadFloat3(), 0),
+                Binormal = _stream.ReadFloat3(),
+            };
+        }
+
+        public void WriteWorldWaterVertex(WorldVertex v)
+        {
+            _stream.WriteFloat3(v.Position.IJK);
+            _stream.WriteFloat2(v.Texcoord);
+            _stream.WriteFloat3(v.Normal);
+            _stream.WriteFloat3(v.Tangent.IJK);
+            _stream.WriteFloat3(v.Binormal);
+        }
+
     }
 }

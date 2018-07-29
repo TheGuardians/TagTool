@@ -585,20 +585,30 @@ namespace TagTool.Geometry
 
         public Unknown1A ReadUnknown1A()
         {
+            var buffer = _stream.ReadUShort6();
+            ushort[] vertices = new ushort[3];
+            ushort[] indices = new ushort[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                vertices[i] = buffer[2 * i];
+                indices[i] = buffer[2 * i + 1];
+            }
             return new Unknown1A
             {
-                Unknown = _stream.ReadColor(),
-                Unknown1 = _stream.ReadColor(),
-                Unknown2 = _stream.ReadColor(),
+                Vertices = vertices,
+                Indices = indices
 
             };
         }
 
         public void WriteUnknown1A(Unknown1A v)
         {
-            _stream.WriteColor(v.Unknown);
-            _stream.WriteColor(v.Unknown1);
-            _stream.WriteColor(v.Unknown2);
+            for (int i = 0; i < 3; i += 2)
+            {
+                _stream.WriteUShort(v.Vertices[i]);
+                _stream.WriteUShort(v.Indices[i]);
+            }
         }
 
         public Unknown1B ReadUnknown1B()
@@ -628,6 +638,23 @@ namespace TagTool.Geometry
             _stream.WriteFloat1(v.Unknown6);
             _stream.WriteFloat1(v.Unknown7);
             _stream.WriteFloat1(v.Unknown8);
+        }
+
+        public WorldVertex ReadWorldWaterVertex()
+        {
+            return new WorldVertex
+            {
+                Position = _stream.ReadFloat4(),
+                Texcoord = _stream.ReadFloat2(),
+                Tangent = TransformTangent(_stream.ReadUByte4N()),
+            };
+        }
+
+        public void WriteWorldWaterVertex(WorldVertex v)
+        {
+            _stream.WriteFloat4(v.Position);
+            _stream.WriteFloat2(v.Texcoord);
+            _stream.WriteUByte4N(v.Tangent);
         }
     }
 }

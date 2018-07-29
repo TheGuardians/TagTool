@@ -435,11 +435,20 @@ namespace TagTool.Geometry
 
         public Unknown1A ReadUnknown1A()
         {
+            var buffer = Stream.ReadUShort6();
+            ushort[] vertices = new ushort[3];
+            ushort[] indices = new ushort[3];
+
+            for(int i = 0; i<3; i++)
+            {
+                vertices[i] = buffer[2 * i];
+                indices[i] = buffer[2 * i + 1];
+            }
             return new Unknown1A
             {
-                Unknown = Stream.ReadColor(),
-                Unknown1 = Stream.ReadColor(),
-                Unknown2 = Stream.ReadColor(),
+                Vertices = vertices,
+                Indices = indices
+                
             };
         }
 
@@ -468,5 +477,16 @@ namespace TagTool.Geometry
         {
             throw new NotImplementedException();
         }
+
+        public void WriteWorldWaterVertex(WorldVertex v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public WorldVertex ReadWorldWaterVertex()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
