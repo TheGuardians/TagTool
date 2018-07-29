@@ -461,7 +461,6 @@ namespace TagTool.Geometry
         {
             return new Unknown1B
             {
-                Unknown = Stream.ReadFloat1(),
                 Unknown1 = Stream.ReadFloat1(),
                 Unknown2 = Stream.ReadFloat1(),
                 Unknown3 = Stream.ReadFloat1(),
@@ -470,6 +469,7 @@ namespace TagTool.Geometry
                 Unknown6 = Stream.ReadFloat1(),
                 Unknown7 = Stream.ReadFloat1(),
                 Unknown8 = Stream.ReadFloat1(),
+                Unknown9 = Stream.ReadFloat1(),
             };
         }
 

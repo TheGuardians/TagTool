@@ -116,13 +116,14 @@ namespace TagTool.Geometry
                     goto case VertexBufferFormat.World;
 
                 case VertexBufferFormat.Unknown1A:
+
+                    // Reformat Vertex Buffer
+                    vertexBuffer.Format = VertexBufferFormat.World;
+                    vertexBuffer.VertexSize = 0x34;
+                    vertexBuffer.Count *= 3;
+
                     ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) =>
                     {
-                        // Reformat Vertex Buffer
-                        vertexBuffer.Format = VertexBufferFormat.World;
-                        vertexBuffer.VertexSize = 0x34;
-                        vertexBuffer.Count *= 3;
-
                         // Store current stream position
                         var tempStreamPosition = inputStream.Position;
 
@@ -134,9 +135,10 @@ namespace TagTool.Geometry
                         {
                             inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
                             WorldVertex w = inVertexStream.ReadWorldVertex();
-                            //TODO Insert code to keep track of v.Indices[j] to create the new index buffer for these world vertices
 
-                            //TODO Insert conversion code here for world (0x38) -> world water (0x34)
+                            //TODO Insert code to keep track of v.Indices[j] to create the new index buffer for these world vertices
+                            // The last 2 floats in WorldWater are unknown.
+                            
                             outVertexStream.WriteWorldWaterVertex(w);
                         }
 
@@ -146,7 +148,15 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.Unknown1B:
-                    ConvertVertices(count, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
+
+                    // Adjust vertex size to match HO
+                    vertexBuffer.VertexSize = 0x18;
+
+                    ConvertVertices(count, inVertexStream.ReadUnknown1B, (v, i) => 
+                    {
+                        outVertexStream.WriteUnknown1B(v);
+                    });
+
                     break;
 
                 case VertexBufferFormat.ParticleModel:

@@ -615,7 +615,6 @@ namespace TagTool.Geometry
         {
             return new Unknown1B
             {
-                Unknown = _stream.ReadFloat1(),
                 Unknown1 = _stream.ReadFloat1(),
                 Unknown2 = _stream.ReadFloat1(),
                 Unknown3 = _stream.ReadFloat1(),
@@ -624,12 +623,12 @@ namespace TagTool.Geometry
                 Unknown6 = _stream.ReadFloat1(),
                 Unknown7 = _stream.ReadFloat1(),
                 Unknown8 = _stream.ReadFloat1(),
+                Unknown9 = _stream.ReadFloat1(),
             };
         }
 
         public void WriteUnknown1B(Unknown1B v)
         {
-            _stream.WriteFloat1(v.Unknown);
             _stream.WriteFloat1(v.Unknown1);
             _stream.WriteFloat1(v.Unknown2);
             _stream.WriteFloat1(v.Unknown3);
@@ -638,6 +637,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat1(v.Unknown6);
             _stream.WriteFloat1(v.Unknown7);
             _stream.WriteFloat1(v.Unknown8);
+            _stream.WriteFloat1(v.Unknown9);
         }
 
         public WorldVertex ReadWorldWaterVertex()

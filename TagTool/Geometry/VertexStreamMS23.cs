@@ -613,32 +613,29 @@ namespace TagTool.Geometry
         {
             return new Unknown1B
             {
-                Unknown = _stream.ReadFloat1(),
                 Unknown1 = _stream.ReadFloat1(),
                 Unknown2 = _stream.ReadFloat1(),
                 Unknown3 = _stream.ReadFloat1(),
-                Unknown4 = _stream.ReadFloat1(),
-                Unknown5 = _stream.ReadFloat1(),
-                Unknown6 = _stream.ReadFloat1(),
+                Unknown4 = 0,
+                Unknown5 = 0,
+                Unknown6 = 0,
                 Unknown7 = _stream.ReadFloat1(),
                 Unknown8 = _stream.ReadFloat1(),
+                Unknown9 = _stream.ReadFloat1(),
             };
         }
 
         public void WriteUnknown1B(Unknown1B v)
         {
-            _stream.WriteFloat1(v.Unknown);
             _stream.WriteFloat1(v.Unknown1);
             _stream.WriteFloat1(v.Unknown2);
             _stream.WriteFloat1(v.Unknown3);
-            _stream.WriteFloat1(v.Unknown4);
-            _stream.WriteFloat1(v.Unknown5);
-            _stream.WriteFloat1(v.Unknown6);
             _stream.WriteFloat1(v.Unknown7);
             _stream.WriteFloat1(v.Unknown8);
+            _stream.WriteFloat1(v.Unknown9);
         }
 
-        //TODO Implement proper reading/writing of World Water Vertices
+        //TODO The last 2 float in WorldWaterVertex are unknown
 
         public WorldVertex ReadWorldWaterVertex()
         {
@@ -646,9 +643,9 @@ namespace TagTool.Geometry
             {
                 Position = new RealQuaternion(_stream.ReadFloat3(), 0),
                 Texcoord = _stream.ReadFloat2(),
-                Normal = _stream.ReadFloat3(),
                 Tangent = new RealQuaternion(_stream.ReadFloat3(), 0),
                 Binormal = _stream.ReadFloat3(),
+                Normal = new RealVector3d(0, 0, 1)
             };
         }
 
@@ -656,9 +653,10 @@ namespace TagTool.Geometry
         {
             _stream.WriteFloat3(v.Position.IJK);
             _stream.WriteFloat2(v.Texcoord);
-            _stream.WriteFloat3(v.Normal);
             _stream.WriteFloat3(v.Tangent.IJK);
             _stream.WriteFloat3(v.Binormal);
+            //Temporary hack to have the right size
+            _stream.WriteFloat2(new RealVector2d(0, 0));
         }
 
     }
