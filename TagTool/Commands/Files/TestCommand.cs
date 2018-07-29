@@ -86,6 +86,7 @@ namespace TagTool.Commands.Files
                 case "findnullshaders": return FindNullShaders();
                 case "nameglobalmaterials": return NameGlobalMaterials(args);
                 case "nameanytagsubtags": return NameAnyTagSubtags(args);
+                case "compareedtoblam": return CompareEDtoBlam(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -2535,5 +2536,580 @@ namespace TagTool.Commands.Files
             }
         }
 
+        public bool CompareEDtoBlam(List<string> args)
+        {
+            debugConsoleWrite = true;
+
+            var helpMessage = "Required arguments: 3." +
+                    "\nUsage: use H3/ODST cache files to name subtags of common named tags." +
+                    "\nUsage: test NameAnyTagSubtags <tag class> <tags to compare count> <H3/ODST maps path>" +
+                    "\nExample: test NameAnyTagSubtags effe 5 \"D:\\FOLDERS\\Xenia\\ISO\\Halo3Campaign\\maps\"";
+
+            if (args.Count < 3)
+            {
+                Console.WriteLine("ERROR: args.Count < 3");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var tagClass = args[0];
+            var comparedTagCount = args[1];
+            var mainPath = args[2];
+
+            uint.TryParse(comparedTagCount, NumberStyles.HexNumber, null, out uint comparedTagsCount);
+
+            if (!Directory.Exists(mainPath))
+            {
+                Console.WriteLine($"ERROR: !Directory.Exists({mainPath})");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var cacheFiles = Directory.EnumerateFiles(mainPath).ToList();
+            if (cacheFiles.Count == 0)
+            {
+                Console.WriteLine("ERROR: cacheFiles.Count == 0");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            CacheContext.TryParseGroupTag(tagClass, out var groupTag);
+
+            var verifiedBlamTags = new List<string>();
+            var verifiedFields = new List<string>();
+
+            var i = 0;
+            foreach (var cacheFile in cacheFiles)
+            {
+                if (!cacheFile.Contains(".map"))
+                    continue;
+
+                if (cacheFile.Contains("campaign") || cacheFile.Contains("shared"))
+                    continue;
+
+                var BlamCache = OpenCacheFile(cacheFile);
+                if (BlamCache == null)
+                    continue;
+
+                foreach (var bmInstance in BlamCache.IndexItems)
+                {
+                    if (bmInstance.ClassIndex == -1)
+                        continue;
+
+                    if (bmInstance.GroupTag.ToString() != tagClass)
+                        continue;
+
+                    var tagname = $"{bmInstance.Name}.{bmInstance.GroupName}";
+
+                    if (verifiedBlamTags.Contains(tagname))
+                        continue;
+
+                    verifiedBlamTags.Add(tagname);
+
+                    if (!CacheContext.TryGetTag(tagname, out var edInstance))
+                        continue;
+
+                    if (edInstance == null)
+                        continue;
+
+                    var blamContext = new CacheSerializationContext(ref BlamCache, bmInstance);
+                    var bmDef = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(bmInstance.GroupTag));
+
+                    object edDef = null;
+                    using (var stream = CacheContext.OpenTagCacheRead())
+                        edDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
+
+                    CompareBlocksBlam(edDef, bmDef, CacheContext, BlamCache, "", verifiedFields);
+
+                    if (verifiedFields.Count != 0)
+                    {
+                        Console.WriteLine($"");
+                        Console.WriteLine($"List of missmatching fields for {tagname} in {cacheFile}");
+                        foreach (var a in verifiedFields)
+                            Console.WriteLine($"{a}");
+                    }
+
+                    i++;
+                    if (i > comparedTagsCount)
+                        continue;
+
+                    verifiedFields = new List<string>();
+                }
+            }
+
+            return true;
+        }
+
+
+        public static void CompareBlocksBlam(object leftData, object rightData, HaloOnlineCacheContext edContext, CacheFile bmContext, String name, List<string> verifiedFields)
+        {
+            // base on MatchTagsCommand
+
+            if (leftData == null || rightData == null)
+                return;
+
+            var type = leftData.GetType();
+
+            if (type.Name.Contains("ResourcePageIndex"))
+                return;
+
+            if (type.Name.Contains("ResourceGroups"))
+                return;
+
+            if (type.Name.Contains("LightmapAirprobe")) // there's an issue with it currently, and the tagblocks were very different anyway
+                return;
+
+            if (type.Name.Contains("Geometry")) // just ignore
+                return;
+
+            if (name.Contains("ResourcePageIndex"))
+                return;
+
+            if (name.Contains("ResourceGroups"))
+                return;
+
+            if (name.Contains("LightmapAirprobe")) // there's an issue with it currently, and the tagblocks were very different anyway
+                return;
+
+            if (name.Contains("Geometry")) // just ignore
+                return;
+
+            if (name.Contains("FunctionData") || name.Contains("Function2Data")) // endian flipped
+                return;
+
+            if (type == typeof(CachedTagInstance))
+            {
+                // If the objects are tags, then we've found a match
+                var leftTag = (CachedTagInstance)leftData;
+                var rightTag = (CachedTagInstance)rightData;
+
+                var leftName = edContext.TagNames.ContainsKey(leftTag.Index) ? edContext.TagNames[leftTag.Index] : "";
+                var rightName = bmContext.IndexItems.GetItemByID(rightTag.Index).Name;
+
+                if (leftName != rightName)
+                {
+                    Console.WriteLine($"{name},{leftName},{rightName}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+
+                if (leftTag.Group.Tag != rightTag.Group.Tag)
+                {
+                    Console.WriteLine($"{name},{leftName}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.IsArray)
+            {
+                // ?? 
+                // if (type.GetElementType().IsPrimitive)
+                // {
+                //     switch (Type.GetTypeCode(type))
+                //     {
+                //         case TypeCode.Int32:
+                //         case TypeCode.UInt32:
+                //             break;
+                // 
+                //         default:
+                //             break;
+                //     }
+                // 
+                //     return false;
+                // }
+
+                // If the objects are arrays, then loop through each element
+                var leftArray = (Array)leftData;
+                var rightArray = (Array)rightData;
+
+                if (leftArray.Length != rightArray.Length)
+                {
+                    Console.WriteLine($"{name},{name}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+
+                for (var i = 0; i < leftArray.Length; i++)
+                    if (i < rightArray.Length)
+                        CompareBlocksBlam(leftArray.GetValue(i), rightArray.GetValue(i), edContext, bmContext, name, verifiedFields);
+            }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                // ??
+                if (type.GenericTypeArguments[0].IsPrimitive)
+                {
+                }
+
+                // If the objects are lists, then loop through each element
+                var countProperty = type.GetProperty("Count");
+                var leftCount = (int)countProperty.GetValue(leftData);
+                var rightCount = (int)countProperty.GetValue(rightData);
+                if (leftCount != rightCount) // If the sizes are different, we probably can't compare them
+                {
+                    Console.WriteLine($"{name},{leftCount} != {rightCount}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+
+                    return;
+                }
+
+                var getItem = type.GetMethod("get_Item");
+                for (var i = 0; i < leftCount; i++)
+                {
+                    var leftItem = getItem.Invoke(leftData, new object[] { i });
+                    var rightItem = getItem.Invoke(rightData, new object[] { i });
+                    CompareBlocksBlam(leftItem, rightItem, edContext, bmContext, $"{name}[{i}].", verifiedFields);
+                }
+            }
+            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+            {
+                // The objects are structures
+                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                while (left.Next() && right.Next())
+                {
+                    // Keep going on the left until the field is on the right
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+                    {
+                        if (!left.Next())
+                            return; // probably unused
+                    }
+
+                    // Keep going on the right until the field is on the left
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+                    {
+                        if (!right.Next())
+                            return;
+                    }
+                    if (left.Field.MetadataToken != right.Field.MetadataToken)
+                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+
+                    // Process the fields
+                    var leftFieldData = left.Field.GetValue(leftData);
+                    var rightFieldData = right.Field.GetValue(rightData);
+                    CompareBlocksBlam(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}", verifiedFields);
+                }
+            }
+            else if (type.IsEnum)
+            {
+                var a = leftData.ToString();
+                var b = rightData.ToString();
+                if (a != b)
+                {
+                    Console.WriteLine($"{name},{a},{b}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.IsPrimitive)
+            {
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.SByte:
+                        if ((sbyte)leftData != (sbyte)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.Byte:
+                        if ((byte)leftData != (byte)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.Int16:
+                        if ((short)leftData != (short)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.UInt16:
+                        if ((ushort)leftData != (ushort)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.Int32:
+                        if ((int)leftData != (int)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.UInt32:
+                        if ((uint)leftData != (uint)rightData)
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+                    case TypeCode.Single: // WARNING passes as error in any case
+                        if ($"{(float)leftData}" != $"{(float)rightData}")
+                        {
+                            Console.WriteLine($"{name},{leftData},{rightData}");
+
+                            if (!verifiedFields.Contains(name))
+                                verifiedFields.Add(name);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else if (type.Name == "StringId")
+            {
+                var edString = edContext.StringIdCache.GetString((StringId)leftData);
+                var bmString = bmContext.Strings.GetString((StringId)rightData);
+
+                if (edString != bmString)
+                {
+                    Console.WriteLine($"{name},{edString},{bmString}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "Angle")
+            {
+                if ((Angle)leftData != (Angle)rightData)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.FullName.StartsWith("TagTool.Common.Bounds"))
+            {
+                ; // unsupported, needs a fix asap
+            }
+            else if (type.Name == "RealPoint2d")
+            {
+                var a = (RealPoint2d)leftData;
+                var b = (RealPoint2d)rightData;
+                if (a.X != b.X || a.Y != b.Y)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealPoint3d")
+            {
+                var a = (RealPoint3d)leftData;
+                var b = (RealPoint3d)rightData;
+                if (a.X != b.X || a.Y != b.Y || a.Z != b.Z)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealArgbColor")
+            {
+                var a = (RealArgbColor)leftData;
+                var b = (RealArgbColor)rightData;
+                if (a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealRgbColor")
+            {
+                var a = (RealRgbColor)leftData;
+                var b = (RealRgbColor)rightData;
+                if (a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealEulerAngles3d")
+            {
+                var a = (RealEulerAngles3d)leftData;
+                var b = (RealEulerAngles3d)rightData;
+                if (a.Pitch != b.Pitch || a.Roll != b.Roll || a.Yaw != b.Yaw)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealPlane2d")
+            {
+                var a = (RealPlane2d)leftData;
+                var b = (RealPlane2d)rightData;
+                if (a.I != b.I || a.J != b.J)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealPlane3d")
+            {
+                var a = (RealPlane3d)leftData;
+                var b = (RealPlane3d)rightData;
+                if (a.I != b.I || a.J != b.J || a.K != b.K)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealQuaternion")
+            {
+                var a = (RealQuaternion)leftData;
+                var b = (RealQuaternion)rightData;
+                if (a.I != b.I || a.J != b.J || a.K != b.K || a.W != b.W)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealVector2d")
+            {
+                var a = (RealVector2d)leftData;
+                var b = (RealVector2d)rightData;
+                if (a.I != b.I || a.J != b.J)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealVector3d")
+            {
+                var a = (RealVector3d)leftData;
+                var b = (RealVector3d)rightData;
+                if (a.I != b.I || a.J != b.J || a.K != b.K)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "Point2d")
+            {
+                var a = (Point2d)leftData;
+                var b = (Point2d)rightData;
+                if (a.X != b.X || a.Y != b.Y)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "Tag")
+            {
+                var a = (Tag)leftData;
+                var b = (Tag)rightData;
+                if (a.Value != b.Value)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "ArgbColor")
+            {
+                var a = (ArgbColor)leftData;
+                var b = (ArgbColor)rightData;
+                if (a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealMatrix4x3")
+            {
+                var a = (RealMatrix4x3)leftData;
+                var b = (RealMatrix4x3)rightData;
+                if (a.m11 != b.m11 ||
+                    a.m12 != b.m12 ||
+                    a.m13 != b.m13 ||
+                    a.m21 != b.m21 ||
+                    a.m22 != b.m22 ||
+                    a.m23 != b.m23 ||
+                    a.m31 != b.m31 ||
+                    a.m32 != b.m32 ||
+                    a.m33 != b.m33 ||
+                    a.m41 != b.m41 ||
+                    a.m42 != b.m42 ||
+                    a.m43 != b.m43)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "RealEulerAngles2d")
+            {
+                var a = (RealEulerAngles2d)leftData;
+                var b = (RealEulerAngles2d)rightData;
+                if (a.Pitch != b.Pitch || a.Yaw != b.Yaw)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else if (type.Name == "String")
+            {
+                if ((string)leftData != (string)rightData)
+                {
+                    Console.WriteLine($"{name},{leftData},{rightData}");
+
+                    if (!verifiedFields.Contains(name))
+                        verifiedFields.Add(name);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"ERROR: {type.Name},{type.FullName}");
+            }
+        }
     }
 }
