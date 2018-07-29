@@ -85,6 +85,7 @@ namespace TagTool.Commands.Files
                 case "listprematchcameras": return ListPrematchCameras();
                 case "findnullshaders": return FindNullShaders();
                 case "nameglobalmaterials": return NameGlobalMaterials(args);
+                case "nameanytagsubtags": return NameAnyTagSubtags(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -2355,6 +2356,184 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-        
+
+        public bool NameAnyTagSubtags(List<string> args)
+        {
+            debugConsoleWrite = true;
+
+            var helpMessage = "Required arguments: 2." +
+                    "\nUsage: use H3/ODST cache files to name subtags of ED commonly named tags." +
+                    "\nUsage:" +
+                    "\ntest NameAnyTagSubtags <tag class> <H3/ODST maps path>" +
+                    "\nExample: test NameAnyTagSubtags effe \"D:\\FOLDERS\\Xenia\\ISO\\Halo3Campaign\\maps\"";
+
+            if (args.Count < 2)
+            {
+                Console.WriteLine("ERROR: args.Count < 2");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var tagClass = args[0];
+            var mainPath = args[1];
+
+            if (!Directory.Exists(mainPath))
+            {
+                Console.WriteLine($"ERROR: !Directory.Exists({mainPath})");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var cacheFiles = Directory.EnumerateFiles(mainPath).ToList();
+            if (cacheFiles.Count == 0)
+            {
+                Console.WriteLine("ERROR: cacheFiles.Count == 0");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var verifiedBlamTags = new List<string>();
+
+            CacheContext.TryParseGroupTag(tagClass, out var groupTag);
+
+            foreach (var cacheFile in cacheFiles)
+            {
+                if (!cacheFile.Contains(".map"))
+                    continue;
+
+                if (cacheFile.Contains("campaign") || cacheFile.Contains("shared"))
+                    continue;
+
+                var BlamCache = OpenCacheFile(cacheFile);
+                if (BlamCache == null)
+                    continue;
+
+                foreach (var bmInstance in BlamCache.IndexItems)
+                {
+                    if (bmInstance.ClassIndex == -1)
+                        continue;
+
+                    if (bmInstance.GroupTag.ToString() != groupTag.ToString())
+                        continue;
+
+                    if (verifiedBlamTags.Contains(bmInstance.Name))
+                        continue;
+
+                    verifiedBlamTags.Add(bmInstance.Name);
+
+                    var tagname = $"{bmInstance.Name}.{bmInstance.GroupName}";
+
+                    if (!CacheContext.TryGetTag(tagname, out var edInstance)) // a bit risky because some equivalent HO tags have different subtags
+                        continue;
+
+                    if (edInstance == null)
+                        continue;
+
+                    object edDef = null;
+                    using (var stream = CacheContext.OpenTagCacheRead())
+                        edDef = CacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, CacheContext, edInstance), TagDefinition.Find(edInstance.Group.Tag));
+
+                    var blamContext = new CacheSerializationContext(ref BlamCache, bmInstance);
+                    var bmDef = BlamCache.Deserializer.Deserialize(blamContext, TagDefinition.Find(bmInstance.GroupTag));
+
+                    CompareBlocksToNameTags(edDef, bmDef, CacheContext, BlamCache, "");
+
+                }
+            }
+
+            Console.WriteLine($"Saved new tagnames.");
+            CacheContext.SaveTagNames();
+            return true;
+        }
+
+        public static void CompareBlocksToNameTags(object leftData, object rightData, HaloOnlineCacheContext edContext, CacheFile bmContext, String name)
+        {
+            if (leftData == null || rightData == null)
+                return;
+
+            if (name.Contains("ResourcePageIndex"))
+                return;
+
+            if (name == "Geometry")
+                return;
+
+            var type = leftData.GetType();
+
+            if (type == typeof(CachedTagInstance))
+            {
+                var leftTag = (CachedTagInstance)leftData;
+                var rightTag = (CachedTagInstance)rightData;
+
+                var leftName = edContext.TagNames.ContainsKey(leftTag.Index) ? edContext.TagNames[leftTag.Index] : "";
+                var rightName = bmContext.IndexItems.GetItemByID(rightTag.Index).Name;
+
+                if (!edContext.TagNames.ContainsKey(leftTag.Index))
+                {
+                    if (debugConsoleWrite)
+                        Console.WriteLine($"0x{leftTag.Index:X4},{rightName}");
+                    edContext.TagNames[leftTag.Index] = rightName;
+                }
+            }
+            else if (type.IsArray)
+            {
+                if (type.GetElementType().IsPrimitive)
+                    return;
+
+                var leftArray = (Array)leftData;
+                var rightArray = (Array)rightData;
+
+                if (leftArray.Length != rightArray.Length)
+                    return;
+
+                for (var i = 0; i < leftArray.Length; i++)
+                    CompareBlocksToNameTags(leftArray.GetValue(i), rightArray.GetValue(i), edContext, bmContext, name);
+            }
+            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var countProperty = type.GetProperty("Count");
+                var leftCount = (int)countProperty.GetValue(leftData);
+                var rightCount = (int)countProperty.GetValue(rightData);
+                if (leftCount != rightCount) 
+                    return;
+
+                var getItem = type.GetMethod("get_Item");
+                for (var i = 0; i < leftCount; i++)
+                {
+                    var leftItem = getItem.Invoke(leftData, new object[] { i });
+                    var rightItem = getItem.Invoke(rightData, new object[] { i });
+                    CompareBlocksToNameTags(leftItem, rightItem, edContext, bmContext, $"{name}[{i}].");
+                }
+            }
+            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+            {
+                // The objects are structures
+                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                while (left.Next() && right.Next())
+                {
+                    // Keep going on the left until the field is on the right
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+                    {
+                        if (!left.Next())
+                            return; // probably unused
+                    }
+
+                    // Keep going on the right until the field is on the left
+                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+                    {
+                        if (!right.Next())
+                            return;
+                    }
+                    if (left.Field.MetadataToken != right.Field.MetadataToken)
+                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+
+                    // Process the fields
+                    var leftFieldData = left.Field.GetValue(leftData);
+                    var rightFieldData = right.Field.GetValue(rightData);
+                    CompareBlocksToNameTags(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}");
+                }
+            }
+        }
+
     }
 }
