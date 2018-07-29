@@ -21,8 +21,7 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock1> Unknown2;
         public List<PassBlock> Pass;
 
-        [TagField(Padding = true, Size = 0xC)]
-        public byte[] Unknown3;
+        public List<UnknownBlock2> Unknown3;
 
         public List<UnknownBlock2> Unknown4;
 
