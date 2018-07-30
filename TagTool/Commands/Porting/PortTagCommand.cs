@@ -758,6 +758,55 @@ namespace TagTool.Commands.Porting
             return data;
         }
 
+        private Array ConvertArray(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Array array, object definition, string blamTagName)
+        {
+            if (array.GetType().GetElementType().IsPrimitive)
+                return array;
+
+            for (var i = 0; i < array.Length; i++)
+            {
+                var oldValue = array.GetValue(i);
+                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                array.SetValue(newValue, i);
+            }
+
+            return array;
+        }
+
+        private object ConvertList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object list, Type type, object definition, string blamTagName)
+        {
+            if (type.GenericTypeArguments[0].IsPrimitive)
+                return list;
+
+            var count = (int)type.GetProperty("Count").GetValue(list);
+
+            var getItem = type.GetMethod("get_Item");
+            var setItem = type.GetMethod("set_Item");
+
+            for (var i = 0; i < count; i++)
+            {
+                var oldValue = getItem.Invoke(list, new object[] { i });
+                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                setItem.Invoke(list, new object[] { i, newValue });
+            }
+
+            return list;
+        }
+
+        private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
+        {
+            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
+
+            while (enumerator.Next())
+            {
+                var oldValue = enumerator.Field.GetValue(data);
+                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                enumerator.Field.SetValue(data, newValue);
+            }
+
+            return data;
+        }
+
         private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)
         {
             if (!Enum.TryParse(newDamageInfo.CollisionDamageReportingTypeOld.HaloOnline.ToString(), out newDamageInfo.CollisionDamageReportingTypeNew))
@@ -812,55 +861,6 @@ namespace TagTool.Commands.Porting
                 throw new NotSupportedException(value ?? CacheContext.Version.ToString());
             
             return damageReportingType;
-        }
-
-        private Array ConvertArray(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Array array, object definition, string blamTagName)
-        {
-            if (array.GetType().GetElementType().IsPrimitive)
-                return array;
-
-            for (var i = 0; i < array.Length; i++)
-            {
-                var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                array.SetValue(newValue, i);
-            }
-
-            return array;
-        }
-
-        private object ConvertList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object list, Type type, object definition, string blamTagName)
-        {
-            if (type.GenericTypeArguments[0].IsPrimitive)
-                return list;
-
-            var count = (int)type.GetProperty("Count").GetValue(list);
-
-            var getItem = type.GetMethod("get_Item");
-            var setItem = type.GetMethod("set_Item");
-
-            for (var i = 0; i < count; i++)
-            {
-                var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                setItem.Invoke(list, new object[] { i, newValue });
-            }
-
-            return list;
-        }
-
-        private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
-        {
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
-
-            while (enumerator.Next())
-            {
-                var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                enumerator.Field.SetValue(data, newValue);
-            }
-
-            return data;
         }
 
         private TagFunction ConvertTagFunction(TagFunction function)

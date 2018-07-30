@@ -1,5 +1,4 @@
 using TagTool.Bitmaps;
-using TagTool.Common;
 using TagTool.Serialization;
 
 namespace TagTool.Tags.Resources
@@ -13,7 +12,7 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// The texture object.
         /// </summary>
-        public D3DPointer<BitmapDefinition> Texture;
+        public TagStructureReference<BitmapDefinition> Texture;
 
         /// <summary>
         /// Describes a bitmap.

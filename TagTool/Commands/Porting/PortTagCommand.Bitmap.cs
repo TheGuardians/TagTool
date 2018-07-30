@@ -232,7 +232,7 @@ namespace TagTool.Commands.Porting
                 // Create new definition
                 var resourceDefinition = new BitmapTextureInteropResource
                 {
-                    Texture = new D3DPointer<BitmapTextureInteropResource.BitmapDefinition>
+                    Texture = new TagStructureReference<BitmapTextureInteropResource.BitmapDefinition>
                     {
                         Definition = new BitmapTextureInteropResource.BitmapDefinition
                         {

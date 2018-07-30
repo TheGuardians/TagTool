@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Serialization;
-using System.Collections.Generic;
 
 namespace TagTool.Tags.Resources
 {

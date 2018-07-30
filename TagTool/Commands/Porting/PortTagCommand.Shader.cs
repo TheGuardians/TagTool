@@ -659,8 +659,6 @@ namespace TagTool.Commands.Porting
                 case "specular_map":
                 case "specular_mask_texture":
                 case "blend_map":
-                    return @"shaders\default_bitmaps\bitmaps\color_white";
-
                 case "base_map":
                 case "palette":
                 case "occlusion_parameter_map":

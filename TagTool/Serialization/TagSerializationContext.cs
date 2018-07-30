@@ -127,7 +127,7 @@ namespace TagTool.Serialization
                 // Get the object type and make sure it's supported
                 var type = obj.GetType();
                 if (type == typeof(TagData) ||
-                    (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(D3DPointer<>)))
+                    (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagStructureReference<>)))
                     throw new InvalidOperationException(type + " cannot be serialized as tag data");
 
                 // HACK: If the object is a ResourceReference, fix the Owner property

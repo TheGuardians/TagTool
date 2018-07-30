@@ -357,7 +357,8 @@
     <Compile Include="Common\ArrayUtil.cs" />
     <Compile Include="Common\Bitmask.cs" />
     <Compile Include="Common\Bounds.cs" />
-    <Compile Include="Common\D3DPointer.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Tags\TagStructureReference.cs" />
     <Compile Include="Common\FunctionType.cs" />
     <Compile Include="Common\GameLanguage.cs" />
     <Compile Include="Common\Half.cs" />

@@ -204,7 +204,7 @@ namespace TagTool.Geometry
 
         public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, int count)
         {
-            resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
             {
                 Definition = new IndexBufferDefinition
                 {
@@ -375,8 +375,8 @@ namespace TagTool.Geometry
 
             var rsrcDef = new RenderGeometryApiResourceDefinition
             {
-                VertexBuffers = new List<D3DPointer<VertexBufferDefinition>>(),
-                IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
+                VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
+                IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
             };
 
             using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
@@ -392,7 +392,7 @@ namespace TagTool.Geometry
 
                 for (var i = 0; i < vertexBufferCount; i++)
                 {
-                    rsrcDef.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                    rsrcDef.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                     {
                         Definition = new VertexBufferDefinition
                         {
@@ -415,7 +415,7 @@ namespace TagTool.Geometry
 
                 for (var i = 0; i < indexBufferCount; i++)
                 {
-                    rsrcDef.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                    rsrcDef.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
                     {
                         Definition = new IndexBufferDefinition
                         {

@@ -1633,10 +1633,10 @@ namespace TagTool.Commands.Files
                 var resourceContext = new ResourceSerializationContext(modeDefinition.Geometry.Resource);
                 var geometryResource = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
-                geometryResource.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                geometryResource.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
                 {
-                    Address = 0,
-                    UnusedC = 0,
+                    RuntimeAddress = 0,
+                    DefinitionAddress = 0,
                     Definition = new IndexBufferDefinition
                     {
                         Format = IndexBufferFormat.TriangleStrip,
@@ -1648,7 +1648,7 @@ namespace TagTool.Commands.Files
                     }
                 });
 
-                geometryResource.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                geometryResource.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
                     {
@@ -1662,7 +1662,7 @@ namespace TagTool.Commands.Files
                     }
                 });
 
-                geometryResource.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                geometryResource.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
                     {

@@ -1,5 +1,4 @@
 using TagTool.Cache;
-using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Serialization;
 using System.Collections.Generic;
@@ -21,12 +20,12 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// The vertex buffer definitions for the model data.
         /// </summary>
-        public List<D3DPointer<VertexBufferDefinition>> VertexBuffers;
+        public List<TagStructureReference<VertexBufferDefinition>> VertexBuffers;
 
         /// <summary>
         /// The index buffer definitions for the model data.
         /// </summary>
-        public List<D3DPointer<IndexBufferDefinition>> IndexBuffers;
+        public List<TagStructureReference<IndexBufferDefinition>> IndexBuffers;
     }
 
     /// <summary>

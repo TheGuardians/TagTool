@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
@@ -94,7 +95,7 @@ namespace TagTool.Serialization
         {
             private readonly ResourceSerializationContext _context;
             private readonly List<TagResource.ResourceFixup> _fixups = new List<TagResource.ResourceFixup>();
-            private readonly List<TagResource.ResourceDefinitionFixup> _d3dFixups = new List<TagResource.ResourceDefinitionFixup>();
+            private readonly List<TagResource.ResourceDefinitionFixup> _tagStructureFixups = new List<TagResource.ResourceDefinitionFixup>();
             private uint _align = DefaultBlockAlign;
 
             public ResourceDataBlock(ResourceSerializationContext context)
@@ -130,16 +131,16 @@ namespace TagTool.Serialization
                 }
 
                 var type = obj.GetType();
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(D3DPointer<>))
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagStructureReference<>))
                 {
                     // Add a D3D fixup for D3DPointers based on the type of object being pointed to
-                    var d3dType = GetD3DObjectType(type.GenericTypeArguments[0]);
-                    _d3dFixups.Add(MakeD3DFixup((uint)Stream.Position, d3dType));
+                    var definitionType = GetTagStructureDefinitionType(type.GenericTypeArguments[0]);
+                    _tagStructureFixups.Add(MakeTagStructureFixup((uint)Stream.Position, definitionType));
                 }
                 return obj;
             }
 
-            private static int GetD3DObjectType(Type type)
+            private static int GetTagStructureDefinitionType(Type type)
             {
                 if (type == typeof(VertexBufferDefinition))
                     return 0;
@@ -148,7 +149,7 @@ namespace TagTool.Serialization
                 if (type == typeof(BitmapTextureInteropResource.BitmapDefinition))
                     return 2;
                 // TODO: interleaved textures
-                throw new InvalidOperationException("Invalid D3D object type: " + type);
+                throw new InvalidOperationException("Invalid tag structure type: " + type);
             }
 
             public void SuggestAlignment(uint align)
@@ -166,7 +167,7 @@ namespace TagTool.Serialization
 
                 // Adjust fixups and add them to the resource
                 _context.ResourceFixups.AddRange(_fixups.Select(f => FinalizeDefinitionFixup(f, dataOffset)));
-                _context.ResourceDefinitionFixups.AddRange(_d3dFixups.Select(f => FinalizeD3DFixup(f, dataOffset)));
+                _context.ResourceDefinitionFixups.AddRange(_tagStructureFixups.Select(f => FinalizeD3DFixup(f, dataOffset)));
 
                 // Free the block data
                 Writer.Close();
@@ -184,7 +185,7 @@ namespace TagTool.Serialization
                 };
             }
 
-            private TagResource.ResourceDefinitionFixup MakeD3DFixup(uint offset, int typeIndex)
+            private TagResource.ResourceDefinitionFixup MakeTagStructureFixup(uint offset, int typeIndex)
             {
                 return new TagResource.ResourceDefinitionFixup
                 {

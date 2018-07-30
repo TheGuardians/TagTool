@@ -537,8 +537,8 @@ namespace TagTool.Commands.Porting
 
             var resourceDefinition = new RenderGeometryApiResourceDefinition
             {
-                VertexBuffers = new List<D3DPointer<VertexBufferDefinition>>(),
-                IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
+                VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
+                IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
             };
 
             using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
@@ -556,7 +556,7 @@ namespace TagTool.Commands.Porting
 
                 for (var i = 0; i < vertexBufferCount; i++)
                 {
-                    resourceDefinition.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                    resourceDefinition.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                     {
                         Definition = new VertexBufferDefinition
                         {
@@ -579,7 +579,7 @@ namespace TagTool.Commands.Porting
 
                 for (var i = 0; i < indexBufferCount; i++)
                 {
-                    resourceDefinition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                    resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
                     {
                         Definition = new IndexBufferDefinition
                         {

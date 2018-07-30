@@ -44,7 +44,7 @@ namespace TagTool.Bitmaps
                 resourceContext = new ResourceSerializationContext(resource);
                 definition = new BitmapTextureInteropResource
                 {
-                    Texture = new D3DPointer<BitmapTextureInteropResource.BitmapDefinition>
+                    Texture = new TagStructureReference<BitmapTextureInteropResource.BitmapDefinition>
                     {
                         Definition = new BitmapTextureInteropResource.BitmapDefinition
                         {

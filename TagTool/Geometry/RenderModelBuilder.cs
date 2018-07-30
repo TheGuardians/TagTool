@@ -434,8 +434,8 @@ namespace TagTool.Geometry
         {
             var definition = new RenderGeometryApiResourceDefinition
             {
-                VertexBuffers = new List<D3DPointer<VertexBufferDefinition>>(),
-                IndexBuffers = new List<D3DPointer<IndexBufferDefinition>>()
+                VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
+                IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
             };
 
             foreach (var mesh in Meshes)
@@ -447,7 +447,7 @@ namespace TagTool.Geometry
 
                 // Add a definition for it
                 mesh.Mesh.VertexBufferIndices[0] = (ushort)definition.VertexBuffers.Count;
-                definition.VertexBuffers.Add(new D3DPointer<VertexBufferDefinition>
+                definition.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
                     {
@@ -465,7 +465,7 @@ namespace TagTool.Geometry
 
                 // Add a definition for it
                 mesh.Mesh.IndexBufferIndices[0] = (ushort)definition.IndexBuffers.Count;
-                definition.IndexBuffers.Add(new D3DPointer<IndexBufferDefinition>
+                definition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
                 {
                     Definition = new IndexBufferDefinition
                     {
