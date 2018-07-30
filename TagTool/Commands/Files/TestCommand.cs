@@ -2216,10 +2216,12 @@ namespace TagTool.Commands.Files
                 return true;
 
             if (!CacheContext.TagNames.ContainsKey(a.Index))
+            {
+                CacheContext.TagNames[a.Index] = BlamCache.IndexItems.GetItemByID(b.Index).Name;
+
                 if (debugConsoleWrite)
                     Console.WriteLine($"0x{a.Index:X4},{CacheContext.TagNames[a.Index]}");
-
-            CacheContext.TagNames[a.Index] = BlamCache.IndexItems.GetItemByID(b.Index).Name;
+            }
 
             return true;
         }
