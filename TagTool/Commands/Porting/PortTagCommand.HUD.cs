@@ -95,12 +95,6 @@ namespace TagTool.Commands.Porting
                 for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].RenderData.Count; renderDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex]);
 
-                //fixup for binoculars
-                if (widgetname == "binoculars_wide_fullscreen" && BlamCache.Version == CacheVersion.Halo3Retail)
-                {
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 0.0f;
-                }
-
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDatumIndex++)
