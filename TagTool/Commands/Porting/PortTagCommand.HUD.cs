@@ -95,12 +95,6 @@ namespace TagTool.Commands.Porting
                 for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].RenderData.Count; renderDatumIndex++)
                     chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex] = ConvertRenderData(chudDefinition.HudWidgets[hudWidgetIndex].RenderData[renderDatumIndex]);
 
-                //fixup for binoculars
-                if (widgetname == "binoculars_wide_fullscreen" && BlamCache.Version == CacheVersion.Halo3Retail)
-                {
-                    chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[0].Offset.Y = 0.0f;
-                }
-
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDatumIndex++)
@@ -278,9 +272,9 @@ namespace TagTool.Commands.Porting
 
             //additional values
             H3Definition.Unknown5 = 1.8f;
-            H3Definition.ShieldMinorThreshold = 0.75f;
-            H3Definition.ShieldMajorThreshold = 0.74f;
-            H3Definition.ShieldCriticalThreshold = 0.1f;
+            H3Definition.ShieldMinorThreshold = 1.0f;
+            H3Definition.ShieldMajorThreshold = 0.5f;
+            H3Definition.ShieldCriticalThreshold = 0.25f;
             H3Definition.HealthMinorThreshold = 0.9f;
             H3Definition.HealthMajorThreshold = 0.75f;
             H3Definition.HealthCriticalThreshold = 0.5f;
