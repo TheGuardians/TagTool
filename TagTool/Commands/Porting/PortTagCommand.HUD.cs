@@ -278,9 +278,9 @@ namespace TagTool.Commands.Porting
 
             //additional values
             H3Definition.Unknown5 = 1.8f;
-            H3Definition.ShieldMinorThreshold = 0.75f;
-            H3Definition.ShieldMajorThreshold = 0.74f;
-            H3Definition.ShieldCriticalThreshold = 0.1f;
+            H3Definition.ShieldMinorThreshold = 1.0f;
+            H3Definition.ShieldMajorThreshold = 0.5f;
+            H3Definition.ShieldCriticalThreshold = 0.25f;
             H3Definition.HealthMinorThreshold = 0.9f;
             H3Definition.HealthMajorThreshold = 0.75f;
             H3Definition.HealthCriticalThreshold = 0.5f;
