@@ -127,7 +127,6 @@ namespace TagTool.Commands.Porting
 
         private PageableResource ConvertBlamBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex)
         {
-
             BlamBitmap blamBitmap = new BlamBitmap(bitmap.Images[imageIndex], 0, 0);
 
             byte[] raw = new byte[0];
@@ -826,6 +825,7 @@ namespace TagTool.Commands.Porting
             image.MipmapCount = (sbyte)blamBitmap.MipMapCount;
             image.DataSize = blamBitmap.RawSize;
             image.XboxFlags = BitmapFlagsXbox.None;
+            image.Flags = blamBitmap.Image.Flags;
 
             switch (blamBitmap.Format)
             {
@@ -833,10 +833,10 @@ namespace TagTool.Commands.Porting
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
-                    image.Flags = BitmapFlags.Compressed;
+                    image.Flags |= BitmapFlags.Compressed;
                     break;
                 default:
-                    image.Flags = BitmapFlags.None;
+                    image.Flags &= ~BitmapFlags.Compressed;
                     break;
             }
 
