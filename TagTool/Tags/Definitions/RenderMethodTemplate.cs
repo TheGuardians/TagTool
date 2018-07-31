@@ -5,8 +5,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84)]
     public class RenderMethodTemplate
     {
         public enum ShaderMode : sbyte
@@ -67,11 +66,8 @@ namespace TagTool.Tags.Definitions
         public List<ShaderArgument> Unknown5;
         public List<ShaderArgument> GlobalArguments;
         public List<ShaderArgument> ShaderMaps;
-        public uint Unknown7;
-        public uint Unknown8;
-        public uint Unknown9;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Padding = true, Length = 12)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x2)]
