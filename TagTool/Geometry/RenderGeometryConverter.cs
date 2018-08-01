@@ -18,7 +18,9 @@ namespace TagTool.Geometry
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
         private List<long> OriginalBufferOffsets;
+        // May remove in the future
         private List<List<ushort>> WaterIndexBuffers;
+        private List<ushort> Unknown1BIndices;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
@@ -125,7 +127,7 @@ namespace TagTool.Geometry
                     vertexBuffer.Count *= 3;
 
                     // Create list of indices for later use.
-                    List<ushort> indexBuffer = new List<ushort>();
+                    Unknown1BIndices = new List<ushort>();
 
                     ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) =>
                     {
@@ -142,7 +144,7 @@ namespace TagTool.Geometry
 
                             WorldVertex w = inVertexStream.ReadWorldVertex();
 
-                            indexBuffer.Add(v.Indices[j]);
+                            Unknown1BIndices.Add(v.Indices[j]);
 
                             // The last 2 floats in WorldWater are unknown.
                             
@@ -152,21 +154,27 @@ namespace TagTool.Geometry
                         // Restore position for reading the next vertex correctly
                         inputStream.Position = tempStreamPosition;
                     });
-
-                    WaterIndexBuffers.Add(indexBuffer);
-
                     break;
 
                 case VertexBufferFormat.Unknown1B:
 
-                    // Adjust vertex size to match HO
+                    // Adjust vertex size to match HO. Set count of vertices
+
                     vertexBuffer.VertexSize = 0x18;
 
-                    ConvertVertices(count, inVertexStream.ReadUnknown1B, (v, i) => 
-                    {
-                        outVertexStream.WriteUnknown1B(v);
-                    });
+                    var originalCount = vertexBuffer.Count;       
+                    vertexBuffer.Count = Unknown1BIndices.Count();
 
+                    var basePosition = inputStream.Position;
+
+                    for(int j = 0; j < Unknown1BIndices.Count(); j++)
+                    {
+                        inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
+                        ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
+                    }
+
+                    // Get to the end of Unknown1B in H3 data
+                    inputStream.Position = basePosition + originalCount * 0x24;
                     break;
 
                 case VertexBufferFormat.ParticleModel:
@@ -515,7 +523,7 @@ namespace TagTool.Geometry
                 }
 
                 // Create water index buffers
-
+                /*
                 var curWaterBuffer = 0;
 
                 if(WaterIndexBuffers.Count() > 0)
@@ -531,7 +539,7 @@ namespace TagTool.Geometry
                         }
                     }
                 }
-                    
+                */ 
                 
                 //
                 // Finalize the new ElDorado geometry resource
