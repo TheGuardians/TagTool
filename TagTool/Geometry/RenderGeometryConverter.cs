@@ -18,12 +18,14 @@ namespace TagTool.Geometry
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
         private List<long> OriginalBufferOffsets;
+        private List<List<ushort>> WaterIndexBuffers;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
             OriginalBufferOffsets = new List<long>();
+            WaterIndexBuffers = new List<List<ushort>>();
         }
 
         private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
@@ -122,6 +124,9 @@ namespace TagTool.Geometry
                     vertexBuffer.VertexSize = 0x34;
                     vertexBuffer.Count *= 3;
 
+                    // Create list of indices for later use.
+                    List<ushort> indexBuffer = new List<ushort>();
+
                     ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) =>
                     {
                         // Store current stream position
@@ -131,12 +136,14 @@ namespace TagTool.Geometry
                         var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
                         inputStream.Position = worldVertexBufferBasePosition;
 
-                        for (int j = 0; i < 3; i++)
+                        for (int j = 0; j < 3; j++)
                         {
                             inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
+
                             WorldVertex w = inVertexStream.ReadWorldVertex();
 
-                            //TODO Insert code to keep track of v.Indices[j] to create the new index buffer for these world vertices
+                            indexBuffer.Add(v.Indices[j]);
+
                             // The last 2 floats in WorldWater are unknown.
                             
                             outVertexStream.WriteWorldWaterVertex(w);
@@ -145,6 +152,9 @@ namespace TagTool.Geometry
                         // Restore position for reading the next vertex correctly
                         inputStream.Position = tempStreamPosition;
                     });
+
+                    WaterIndexBuffers.Add(indexBuffer);
+
                     break;
 
                 case VertexBufferFormat.Unknown1B:
@@ -233,6 +243,41 @@ namespace TagTool.Geometry
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)j);
+
+            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
+        }
+
+        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, List<ushort> buffer)
+        {
+            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
+            {
+                Definition = new IndexBufferDefinition
+                {
+                    Format = IndexBufferFormat.TriangleStrip,
+                    Data = new TagData
+                    {
+                        Size = buffer.Count() * 2,
+                        Unused4 = 0,
+                        Unused8 = 0,
+                        Address = new CacheAddress(),
+                        Unused10 = 0
+                    }
+                }
+            });
+
+            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
+
+            var indexCount = indexBuffer.Data.Size / 2;
+
+            var outIndexStream = new EndianWriter(
+                outputStream,
+                EndianFormat.LittleEndian);
+
+            StreamUtil.Align(outputStream, 4);
+            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+
+            for (var j = 0; j < indexCount; j++)
+                outIndexStream.Write((short)buffer[j]);
 
             return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
@@ -468,6 +513,25 @@ namespace TagTool.Geometry
 
                     mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, dataStream, indexCount);
                 }
+
+                // Create water index buffers
+
+                var curWaterBuffer = 0;
+
+                if(WaterIndexBuffers.Count() > 0)
+                {
+                    for (int i = 0; i < geometry.Meshes.Count(); i++)
+                    {
+                        var mesh = geometry.Meshes[i];
+
+                        if (mesh.VertexBufferIndices[6] != 0xFFFF && mesh.VertexBufferIndices[7] != 0xFFFF)
+                        {
+                            mesh.IndexBufferIndices[1] = CreateIndexBuffer(rsrcDef, dataStream, WaterIndexBuffers[curWaterBuffer]);
+                            curWaterBuffer++;
+                        }
+                    }
+                }
+                    
                 
                 //
                 // Finalize the new ElDorado geometry resource

@@ -656,7 +656,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat3(v.Tangent.IJK);
             _stream.WriteFloat3(v.Binormal);
             //Temporary hack to have the right size
-            _stream.WriteFloat2(new RealVector2d(0, 0));
+            _stream.WriteFloat2(new RealVector2d(1, 1));
         }
 
     }
