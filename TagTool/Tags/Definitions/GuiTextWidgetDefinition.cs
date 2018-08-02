@@ -4,8 +4,8 @@ using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x40)]
-    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x3c, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x40, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x3C, MaxVersion = CacheVersion.Halo3ODST)]
     public class GuiTextWidgetDefinition
     {
         public uint Flags;
