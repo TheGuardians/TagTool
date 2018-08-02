@@ -522,6 +522,34 @@ namespace TagTool.Geometry
                     mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, dataStream, indexCount);
                 }
 
+                //
+                // Swap order of buffers
+                //
+
+                for (int i = 0; i < geometry.Meshes.Count(); i++)
+                {
+                    var mesh = geometry.Meshes[i];
+
+                    if (mesh.VertexBufferIndices[6] != 0xFFFF && mesh.VertexBufferIndices[7] != 0xFFFF)
+                    {
+                        ushort temp = mesh.VertexBufferIndices[6];
+                        mesh.VertexBufferIndices[6] = mesh.VertexBufferIndices[7];
+                        mesh.VertexBufferIndices[7] = temp;
+                    }
+                }
+
+                for (var i = 0; i < rsrcDef.VertexBuffers.Count; i++)
+                {               
+                    var vertexBuffer = rsrcDef.VertexBuffers[i];
+
+                    if (vertexBuffer.Definition.Format == VertexBufferFormat.Unknown1B)
+                    {
+                        TagStructureReference<VertexBufferDefinition> temp = vertexBuffer;
+                        rsrcDef.VertexBuffers[i] = rsrcDef.VertexBuffers[i - 1];
+                        rsrcDef.VertexBuffers[i - 1] = temp;
+                    }                  
+                }
+
                 // Create water index buffers
                 /*
                 var curWaterBuffer = 0;
@@ -539,8 +567,8 @@ namespace TagTool.Geometry
                         }
                     }
                 }
-                */ 
-                
+                */
+
                 //
                 // Finalize the new ElDorado geometry resource
                 //
