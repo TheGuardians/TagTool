@@ -18,16 +18,16 @@ namespace TagTool.Geometry
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
         private List<long> OriginalBufferOffsets;
-        // May remove in the future
-        private List<List<ushort>> WaterIndexBuffers;
         private List<ushort> Unknown1BIndices;
+        private List<WaterConversionData> WaterData;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
             OriginalBufferOffsets = new List<long>();
-            WaterIndexBuffers = new List<List<ushort>>();
+            Unknown1BIndices = new List<ushort>();
+            WaterData = new List<WaterConversionData>();
         }
 
         private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
@@ -497,6 +497,44 @@ namespace TagTool.Geometry
                 // Convert Blam render_geometry_api_resource_definition
                 //
 
+                for (int i = 0; i < geometry.Meshes.Count(); i++)
+                {
+                    var mesh = geometry.Meshes[i];
+
+                    if (mesh.VertexBufferIndices[6] != 0xFFFF && mesh.VertexBufferIndices[7] != 0xFFFF)
+                    {
+                        ushort temp = mesh.VertexBufferIndices[6];
+                        mesh.VertexBufferIndices[6] = mesh.VertexBufferIndices[7];
+                        mesh.VertexBufferIndices[7] = temp;
+
+
+                        // Get total amount of indices
+
+                        int indexCount = 0;
+
+                        foreach(var subpart in mesh.SubParts)
+                            indexCount += subpart.IndexCount;
+
+                        WaterConversionData waterData = new WaterConversionData()
+                        {
+                            IndexBufferLength = indexCount,
+                        };
+
+                        for (int j = 0; i < mesh.Parts.Count(); j++)
+                        {
+                            var part = mesh.Parts[j];
+
+                            // Should be water flag
+                            if (part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles))
+                            {
+                                waterData.Counts.Add(part.IndexCount);
+                                waterData.Offsets.Add(part.FirstIndex);
+                            }
+                        }
+                        WaterData.Add(waterData);
+                    }
+                }
+
                 for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
                 {
                     blamResourceStream.Position = rsrcDefEntry.ResourceFixups[i].Offset;
@@ -523,20 +561,10 @@ namespace TagTool.Geometry
                 }
 
                 //
-                // Swap order of buffers
+                // Swap order of water vertex buffers
                 //
 
-                for (int i = 0; i < geometry.Meshes.Count(); i++)
-                {
-                    var mesh = geometry.Meshes[i];
-
-                    if (mesh.VertexBufferIndices[6] != 0xFFFF && mesh.VertexBufferIndices[7] != 0xFFFF)
-                    {
-                        ushort temp = mesh.VertexBufferIndices[6];
-                        mesh.VertexBufferIndices[6] = mesh.VertexBufferIndices[7];
-                        mesh.VertexBufferIndices[7] = temp;
-                    }
-                }
+                
 
                 for (var i = 0; i < rsrcDef.VertexBuffers.Count; i++)
                 {               
@@ -549,25 +577,6 @@ namespace TagTool.Geometry
                         rsrcDef.VertexBuffers[i - 1] = temp;
                     }                  
                 }
-
-                // Create water index buffers
-                /*
-                var curWaterBuffer = 0;
-
-                if(WaterIndexBuffers.Count() > 0)
-                {
-                    for (int i = 0; i < geometry.Meshes.Count(); i++)
-                    {
-                        var mesh = geometry.Meshes[i];
-
-                        if (mesh.VertexBufferIndices[6] != 0xFFFF && mesh.VertexBufferIndices[7] != 0xFFFF)
-                        {
-                            mesh.IndexBufferIndices[1] = CreateIndexBuffer(rsrcDef, dataStream, WaterIndexBuffers[curWaterBuffer]);
-                            curWaterBuffer++;
-                        }
-                    }
-                }
-                */
 
                 //
                 // Finalize the new ElDorado geometry resource
@@ -674,5 +683,22 @@ namespace TagTool.Geometry
         {
             return new RealVector3d(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))).ToArray());
         }
+
+        private class WaterConversionData
+        {
+            // Number of vertices that are supposed to be in the buffer
+            public int IndexBufferLength;
+            // Lists of pairs of offsets and counts of valid World/Unknown1B data. Usually only one per buffer.
+            public List<int> Offsets;
+            public List<int> Counts;
+
+            public WaterConversionData()
+            {
+                Offsets = new List<int>();
+                Counts = new List<int>();
+            }
+        }
     }
+
+    
 }
