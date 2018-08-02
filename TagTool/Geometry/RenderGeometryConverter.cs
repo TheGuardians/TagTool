@@ -20,6 +20,7 @@ namespace TagTool.Geometry
         private List<long> OriginalBufferOffsets;
         private List<ushort> Unknown1BIndices;
         private List<WaterConversionData> WaterData;
+        private int CurrentWaterBuffer;
 
         public RenderGeometryConverter(HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
@@ -28,6 +29,7 @@ namespace TagTool.Geometry
             OriginalBufferOffsets = new List<long>();
             Unknown1BIndices = new List<ushort>();
             WaterData = new List<WaterConversionData>();
+            CurrentWaterBuffer = 0;
         }
 
         private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
@@ -121,60 +123,100 @@ namespace TagTool.Geometry
 
                 case VertexBufferFormat.Unknown1A:
 
+                    var waterData = WaterData[CurrentWaterBuffer];
+
                     // Reformat Vertex Buffer
                     vertexBuffer.Format = VertexBufferFormat.World;
                     vertexBuffer.VertexSize = 0x34;
-                    vertexBuffer.Count *= 3;
+                    vertexBuffer.Count = waterData.IndexBufferLength;
 
                     // Create list of indices for later use.
                     Unknown1BIndices = new List<ushort>();
 
-                    ConvertVertices(count, inVertexStream.ReadUnknown1A, (v, i) =>
+                    for(int k = 0; k < waterData.PartData.Count(); k++)
                     {
-                        // Store current stream position
-                        var tempStreamPosition = inputStream.Position;
+                        Tuple<int, int, bool> currentPartData = waterData.PartData[k];
 
-                        // Open previous world buffer (H3)
-                        var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
-                        inputStream.Position = worldVertexBufferBasePosition;
-
-                        for (int j = 0; j < 3; j++)
+                        // Not water, add garbage data
+                        if(currentPartData.Item3 == false)
                         {
-                            inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
-
-                            WorldVertex w = inVertexStream.ReadWorldVertex();
-
-                            Unknown1BIndices.Add(v.Indices[j]);
-
-                            // The last 2 floats in WorldWater are unknown.
-                            
-                            outVertexStream.WriteWorldWaterVertex(w);
+                            for (int j = 0; j < currentPartData.Item2; j++)
+                                WriteUnusedWorldWaterData(outputStream);
                         }
+                        else
+                        {
+                            ConvertVertices(currentPartData.Item2, inVertexStream.ReadUnknown1A, (v, i) =>
+                            {
+                                // Store current stream position
+                                var tempStreamPosition = inputStream.Position;
 
-                        // Restore position for reading the next vertex correctly
-                        inputStream.Position = tempStreamPosition;
-                    });
+                                // Open previous world buffer (H3)
+                                var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
+                                inputStream.Position = worldVertexBufferBasePosition;
+
+                                for (int j = 0; j < 3; j++)
+                                {
+                                    inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
+
+                                    WorldVertex w = inVertexStream.ReadWorldVertex();
+
+                                    Unknown1BIndices.Add(v.Indices[j]);
+
+                                    // The last 2 floats in WorldWater are unknown.
+
+                                    outVertexStream.WriteWorldWaterVertex(w);
+                                }
+
+                                // Restore position for reading the next vertex correctly
+                                inputStream.Position = tempStreamPosition;
+                            });
+                        }
+                    }
+
+
+                    
                     break;
 
                 case VertexBufferFormat.Unknown1B:
+
+                    var waterDataB = WaterData[CurrentWaterBuffer];
 
                     // Adjust vertex size to match HO. Set count of vertices
 
                     vertexBuffer.VertexSize = 0x18;
 
                     var originalCount = vertexBuffer.Count;       
-                    vertexBuffer.Count = Unknown1BIndices.Count();
+                    vertexBuffer.Count = waterDataB.IndexBufferLength;
 
                     var basePosition = inputStream.Position;
+                    var unknown1BPosition = 0;
 
-                    for(int j = 0; j < Unknown1BIndices.Count(); j++)
+                    for (int k = 0; k < waterDataB.PartData.Count(); k++)
                     {
-                        inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
-                        ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
+                        Tuple<int, int, bool> currentPartData = waterDataB.PartData[k];
+
+                        // Not water, add garbage data
+                        if (currentPartData.Item3 == false)
+                        {
+                            for(int j =0; j<currentPartData.Item2; j++)
+                                WriteUnusedUnknown1BData(outputStream);
+                        }
+                        else
+                        {
+                            for (int j = unknown1BPosition; j < Unknown1BIndices.Count() && j- unknown1BPosition < currentPartData.Item2; j++)
+                            {
+                                inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
+                                ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
+                                unknown1BPosition++;
+                            }
+                        }
                     }
 
                     // Get to the end of Unknown1B in H3 data
                     inputStream.Position = basePosition + originalCount * 0x24;
+
+                    CurrentWaterBuffer++;
+
                     break;
 
                 case VertexBufferFormat.ParticleModel:
@@ -197,6 +239,24 @@ namespace TagTool.Geometry
 
             vertexBuffer.Data.Size = (int)outputStream.Position - startPos;
             vertexBuffer.VertexSize = (short)(vertexBuffer.Data.Size / vertexBuffer.Count);
+        }
+
+        public void WriteUnusedWorldWaterData(Stream outputStream)
+        {
+            byte[] data = new byte[4] { 0xCD, 0xCD, 0xCD, 0xCD };
+            for(int i = 0; i < 13; i++)
+            {
+                outputStream.Write(data, 0, 4);
+            }
+        }
+
+        public void WriteUnusedUnknown1BData(Stream outputStream)
+        {
+            byte[] data = new byte[4] { 0x00, 0x00, 0x00, 0x00 };
+            for (int i = 0; i < 6; i++)
+            {
+                outputStream.Write(data, 0, 4);
+            }
         }
 
         public void ConvertIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int indexBufferIndex)
@@ -520,17 +580,12 @@ namespace TagTool.Geometry
                             IndexBufferLength = indexCount,
                         };
 
-                        for (int j = 0; i < mesh.Parts.Count(); j++)
+                        for (int j = 0; j < mesh.Parts.Count(); j++)
                         {
                             var part = mesh.Parts[j];
-
-                            // Should be water flag
-                            if (part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles))
-                            {
-                                waterData.Counts.Add(part.IndexCount);
-                                waterData.Offsets.Add(part.FirstIndex);
-                            }
+                            waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndex, part.IndexCount, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles)));
                         }
+                        waterData.Sort();
                         WaterData.Add(waterData);
                     }
                 }
@@ -686,16 +741,18 @@ namespace TagTool.Geometry
 
         private class WaterConversionData
         {
-            // Number of vertices that are supposed to be in the buffer
+            // offset, count, isWater
+            public List<Tuple<int,int, bool>> PartData;
             public int IndexBufferLength;
-            // Lists of pairs of offsets and counts of valid World/Unknown1B data. Usually only one per buffer.
-            public List<int> Offsets;
-            public List<int> Counts;
 
             public WaterConversionData()
             {
-                Offsets = new List<int>();
-                Counts = new List<int>();
+                PartData = new List<Tuple<int, int, bool>>();
+            }
+
+            public void Sort()
+            {
+                PartData.Sort((x, y) => x.Item1.CompareTo(y.Item1));
             }
         }
     }
