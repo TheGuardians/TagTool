@@ -162,7 +162,9 @@ namespace TagTool.Commands.Files
                     //CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
-                
+
+                CopyTag(CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough"), CacheContext, srcStream, destCacheContext, destStream);
+
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
                 destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
