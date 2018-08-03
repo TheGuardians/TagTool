@@ -5,7 +5,9 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x90)]
+    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x84, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
     public class GuiModelWidgetDefinition
     {
         public uint Flags;
@@ -21,28 +23,61 @@ namespace TagTool.Tags.Definitions
         public short StandardYBoundsMax;
         public short StandardXBoundsMax;
         public CachedTagInstance Animation;
-        public List<Biped> Bipeds;
-        public uint Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
-        public uint Unknown5;
-        public uint Unknown6;
-        public uint Unknown7;
-        public uint Unknown8;
-        public List<UnknownBlock> Unknown9;
-        public uint Unknown10;
-        public uint Unknown11;
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
-        public uint Unknown15;
-        public List<UnknownBlock2> Unknown16;
-        public uint Unknown17;
-        public uint Unknown18;
-        public uint Unknown19;
+        public List<CameraRefinement> Bipeds;
 
-        [TagStructure(Size = 0xA0)]
-        public class Biped
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown2;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown3;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown4;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown5;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown6;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown7;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public uint Unknown8;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<UnknownBlock> Unknown9;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown10;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown11;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown12;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown13;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown14;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown15;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown16;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown17;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown18;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown19;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown20;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public ushort Unknown21;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<UnknownBlock2> Unknown22;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public uint Unknown23;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public uint Unknown24;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public uint Unknown25;
+
+        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
+        public class CameraRefinement
         {
             public StringId Biped2;
             public uint Unknown;
@@ -53,44 +88,74 @@ namespace TagTool.Tags.Definitions
             public uint Unknown6;
             public uint Unknown7;
             public uint Unknown8;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown9;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown10;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown11;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown12;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown13;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown14;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown15;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown16;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown17;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown18;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown19;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown20;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown21;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown22;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown23;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown24;
-            public List<UnknownBlock> Unknown25;
+
+            public List<ZoomData> ZoomData1;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public List<ZoomData> ZoomData2;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown26;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown27;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public Angle Unknown28;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown29;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public Angle Unknown30;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown31;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown32;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CachedTagInstance Unknown33;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown34;
 
             [TagStructure(Size = 0x14)]
-            public class UnknownBlock
+            public class ZoomData
             {
-                public byte[] Unknown;
+                public TagFunction Unknown;
             }
         }
 
         [TagStructure(Size = 0x14)]
         public class UnknownBlock
         {
-            public byte[] Unknown;
+            public TagFunction Unknown;
         }
 
         [TagStructure(Size = 0x14)]
