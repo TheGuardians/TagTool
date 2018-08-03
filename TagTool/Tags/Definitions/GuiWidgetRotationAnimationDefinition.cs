@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_widget_rotation_animation_definition", Tag = "wrot", Size = 0x2C)]
+    [TagStructure(Name = "gui_widget_rotation_animation_definition", Tag = "wrot", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "gui_widget_rotation_animation_definition", Tag = "wrot", Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
     public class GuiWidgetRotationAnimationDefinition
     {

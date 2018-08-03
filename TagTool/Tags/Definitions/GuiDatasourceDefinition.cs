@@ -1,10 +1,13 @@
 using TagTool.Common;
+using TagTool.Cache;
 using TagTool.Serialization;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x20)]
+    [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
+
     public class GuiDatasourceDefinition
     {
         public StringId Name;
@@ -12,6 +15,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown2;
         public uint Unknown3;
         public List<Datum> Data;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown4;
 
         [TagStructure(Size = 0x28)]
