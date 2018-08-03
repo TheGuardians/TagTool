@@ -145,7 +145,7 @@ namespace TagTool.Geometry
                         }
                         else
                         {
-                            ConvertVertices(currentPartData.Item2, inVertexStream.ReadUnknown1A, (v, i) =>
+                            ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
                             {
                                 // Store current stream position
                                 var tempStreamPosition = inputStream.Position;
