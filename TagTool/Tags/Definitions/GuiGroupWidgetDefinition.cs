@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_group_widget_definition", Tag = "grup", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "gui_group_widget_definition", Tag = "grup", Size = 0x5C, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "gui_group_widget_definition", Tag = "grup", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
     public class GuiGroupWidgetDefinition
     {
         public uint Flags;

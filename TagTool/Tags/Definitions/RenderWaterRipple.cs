@@ -1,3 +1,4 @@
+using System;
 using TagTool.Cache;
 using TagTool.Serialization;
 
@@ -7,36 +8,88 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_water_ripple", Tag = "rwrd", Size = 0x50, MinVersion = CacheVersion.Halo3ODST)]
     public class RenderWaterRipple
     {
-        public int UnknownFlags;
-        public float Unknown1;
-        public float Unknown2;
-        public float Unknown3;
-        public float Unknown4;
-        public float Unknown5;
+        public TypeFlagsValue TypeFlags;
+
+        //
+        // INITIAL SETTINGS
+        //
+
+        public float Radius;
+        public float Amplitude;
+        public float SpreadSpeed;
+        public float SpreadBias;
+        public float PositionRandomRange;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown6;
+        public float MaxVisibilityDistance;
 
-        public float Unknown7;
-        public float Unknown8;
-        public float Unknown9;
+        //
+        // LIFE SETTINGS
+        //    What happens during the ripple life. Damping should be always larger than 0.
+        //
 
-        public short UnknownFlags2;
-        public short Unknown10;
+        public float DurationMax;
+        public float DurationMin;
+        public float RisePeriodRatio;
 
-        public float Unknown11;
-        public float Unknown12;
-        public float Unknown13;
-        public float Unknown14;
+        public FunctionValue RiseFunction;
+        public FunctionValue DescendFunction;
 
-        public short Unknown15;
-        public short Unknown16;
+        //
+        // PENDULUM SETTINGS
+        //    Only valid in case of the predulum flag has been checked.
+        //
 
-        public float Unknown17;
-        public float Unknown18;
-        public float Unknown19;
+        public float PhaseRevolutionSpeed;
+        public float PhaseRepeatAlongRadius;
 
-        public short Unknown20;
-        public short Unknown21;
+        //
+        // SHAPE TRANSITION
+        //    Interpolate between shapes in ripple pattern array.
+        //
+
+        public float PatternStartIndex;
+        public float PatternEndIndex;
+
+        public FunctionValue PatternTransition;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused1 = new byte[2];
+
+        //
+        // FOAM
+        //    Quick-flashed foam.
+        //
+
+        public float FoamOutRadius;
+        public float FoamFadeRadius;
+        public float FoamDuration;
+
+        public FunctionValue FoamFadeFunction;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused2 = new byte[2];
+
+        [Flags]
+        public enum TypeFlagsValue : int
+        {
+            None = 0,
+            RippleDriftedByFlow = 1 << 0,
+            AmplitudeChangedByPendulumFunction = 1 << 1,
+            DisplayFlashFoam = 1 << 2,
+            FoamSizeDefinedInGameUnit = 1 << 3
+        }
+
+        public enum FunctionValue : short
+        {
+            Linear,
+            Early,
+            VeryEarly,
+            Late,
+            VeryLate,
+            Cosine,
+            One,
+            Zero
+        }
     }
 }

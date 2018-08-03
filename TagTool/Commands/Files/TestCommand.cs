@@ -87,6 +87,7 @@ namespace TagTool.Commands.Files
                 case "nameglobalmaterials": return NameGlobalMaterials(args);
                 case "nameanytagsubtags": return NameAnyTagSubtags(args);
                 case "compareedtoblam": return CompareEDtoBlam(args);
+                case "dsrc": return Dsrc();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -94,6 +95,36 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool Dsrc()
+        {
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            {
+                var templateTagIndices = new HashSet<int>();
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups("dsrc"))
+                {
+                    if (tag == null)
+                        continue;
+
+                    var dsrcContext = new TagSerializationContext(cacheStream, CacheContext, tag);
+                    var dsrcDefinition = CacheContext.Deserialize<GuiDatasourceDefinition>(dsrcContext);
+
+                    if (dsrcDefinition.Unknown4 != 0)
+                    {
+                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
+                            CacheContext.TagNames[tag.Index] :
+                            $"0x{tag.Index:X4}";
+
+                        Console.WriteLine($"[{tag.Group.Tag}, 0x{tag.Index:X4}] {tagName}.{CacheContext.GetString(tag.Group.Name)}");
+                        Console.WriteLine($"{dsrcDefinition.Unknown4}");
+                        Console.WriteLine();
+                    }
+                }
+            }
+
+            return true;
         }
 
         private bool FindNullShaders()

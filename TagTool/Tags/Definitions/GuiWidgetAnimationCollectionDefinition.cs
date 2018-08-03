@@ -3,8 +3,8 @@ using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x240, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST)]
     public class GuiWidgetAnimationCollectionDefinition
     {
         public CachedTagInstance Unknown;

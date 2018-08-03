@@ -5,9 +5,8 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
-
+    [TagStructure(Name = "gui_datasource_definition", Tag = "dsrc", Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
     public class GuiDatasourceDefinition
     {
         public StringId Name;

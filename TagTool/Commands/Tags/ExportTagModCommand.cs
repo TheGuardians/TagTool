@@ -15,12 +15,12 @@ namespace TagTool.Commands.Tags
 
         public ExportTagModCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
-                
+
                 "ExportTagMod",
                 "",
-                
+
                 "ExportTagMod <Name> <Directory> {Tag1, ..., TagN}",
-                
+
                 "")
         {
             CacheContext = cacheContext;
@@ -129,15 +129,34 @@ namespace TagTool.Commands.Tags
                     using (var outStream = file.Create())
                         outStream.Write(data, 0, data.Length);
 
-                    scriptWriter.WriteLine($"CreateTag \"{instance.Group.Tag}\"");
+                    scriptWriter.WriteLine($"CreateTag \"{instance.Group.Tag}\" 0x{instance.Index:X4}");
 
                     if (!tagName.StartsWith("0x"))
-                        scriptWriter.WriteLine($"NameTag * {tagName}");
+                        scriptWriter.WriteLine($"NameTag 0x{instance.Index:X4} {tagName}");
 
-                    scriptWriter.WriteLine($"ImportTag * \"tags\\{tagName}.{groupName}\"");
+                    scriptWriter.WriteLine($"ImportTag 0x{instance.Index:X4} \"tags\\{tagName}.{groupName}\"");
                     scriptWriter.WriteLine();
 
                     importedTags.Add(index);
+                }
+
+                var completedTags = new HashSet<int>();
+
+                foreach (var index in tagIndices)
+                {
+                    if (completedTags.Contains(index))
+                        continue;
+
+                    var instance = CacheContext.GetTag(index);
+
+                    if (instance == null)
+                        continue;
+
+                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
+                        CacheContext.TagNames[instance.Index] :
+                        $"0x{instance.Index:X4}";
+
+                    var groupName = CacheContext.GetString(instance.Group.Name);
 
                     var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
                     var tagDefinition = CacheContext.Deserialize(tagContext, TagDefinition.Find(instance.Group));
@@ -159,12 +178,12 @@ namespace TagTool.Commands.Tags
 
                         return outFile;
                     }
-                    
+
                     switch (tagDefinition)
                     {
                         case Bink bink:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(bink.Resource, "bink_resource");
 
@@ -186,7 +205,7 @@ namespace TagTool.Commands.Tags
 
                         case Bitmap bitm:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 for (var i = 0; i < bitm.Resources.Count; i++)
                                 {
@@ -210,7 +229,7 @@ namespace TagTool.Commands.Tags
 
                         case RenderModel mode:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(mode.Geometry.Resource, "render_geometry_api_resource_definition", "_geometry");
 
@@ -232,7 +251,7 @@ namespace TagTool.Commands.Tags
 
                         case ModelAnimationGraph jmad:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 for (var i = 0; i < jmad.ResourceGroups.Count; i++)
                                 {
@@ -256,7 +275,7 @@ namespace TagTool.Commands.Tags
 
                         case ScenarioStructureBsp sbsp:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(sbsp.Geometry.Resource, "render_geometry_api_resource_definition", "_decorator_geometry");
 
@@ -314,7 +333,7 @@ namespace TagTool.Commands.Tags
 
                         case ScenarioLightmapBspData sLdT:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(sLdT.Geometry.Resource, "render_geometry_api_resource_definition", "_lightmap_geometry");
 
@@ -336,7 +355,7 @@ namespace TagTool.Commands.Tags
 
                         case ParticleModel pmdf:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(pmdf.Geometry.Resource, "render_geometry_api_resource_definition", "_particle_geometry");
 
@@ -358,7 +377,7 @@ namespace TagTool.Commands.Tags
 
                         case Sound snd_:
                             {
-                                scriptWriter.WriteLine($"EditTag {tagName}.{groupName}");
+                                scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
                                 var resourceFile = ExportResource(snd_.Resource, "sound_resource");
 
@@ -378,6 +397,8 @@ namespace TagTool.Commands.Tags
                             }
                             break;
                     }
+
+                    completedTags.Add(instance.Index);
                 }
 
                 scriptWriter.WriteLine();
