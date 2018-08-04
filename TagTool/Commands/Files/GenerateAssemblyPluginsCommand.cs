@@ -41,6 +41,9 @@ namespace TagTool.Commands.Files
             {
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
+                    if (tagType.Key == "coll")
+                        continue;
+
                     if (path != null)
                     {
                         try
