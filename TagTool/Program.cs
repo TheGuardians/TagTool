@@ -14,6 +14,29 @@ namespace TagTool.Commands
     {
         static void Main(string[] args)
         {
+            if(HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Albedo))
+            {
+                var bytecode = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
+                    HaloShaderGenerator.Enums.ShaderStage.Albedo,
+                    HaloShaderGenerator.Enums.Albedo.Two_Change_Color,
+                    HaloShaderGenerator.Enums.Bump_Mapping.Off,
+                    HaloShaderGenerator.Enums.Alpha_Test.None,
+                    HaloShaderGenerator.Enums.Specular_Mask.No_Specular_Mask,
+                    HaloShaderGenerator.Enums.Material_Model.None,
+                    HaloShaderGenerator.Enums.Environment_Mapping.None,
+                    HaloShaderGenerator.Enums.Self_Illumination.Off,
+                    HaloShaderGenerator.Enums.Blend_Mode.Opaque,
+                    HaloShaderGenerator.Enums.Parallax.Off,
+                    HaloShaderGenerator.Enums.Misc.First_Person_Always,
+                    HaloShaderGenerator.Enums.Distortion.Off,
+                    HaloShaderGenerator.Enums.Soft_fade.Off
+                );
+
+                Console.WriteLine(bytecode?.Length ?? -1);
+            }
+
+
+
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 

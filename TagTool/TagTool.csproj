@@ -703,6 +703,9 @@
     <Reference Include="AssimpNet, Version=3.3.2.0, Culture=neutral, PublicKeyToken=3edc10cb77b1bca2, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.3.3.2\lib\net45\AssimpNet.dll</HintPath>
     </Reference>
+    <Reference Include="HaloShaderGeneratorLib">
+      <HintPath>..\Tools\HaloShaderGeneratorLib.dll</HintPath>
+    </Reference>
     <Reference Include="JsonMoppNet, Version=1.0.6331.34855, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\packages\JsonToMopp.1.0.1\lib\JsonToMopp\JsonMoppNet.dll</HintPath>
     </Reference>
@@ -747,7 +750,13 @@
   <PropertyGroup>
     <PostBuildEvent>cd $(ProjectDir)
 xcopy "$(SolutionDir)Physics" "$(ProjectDir)$(OutDir)Physics" /e /i /h /Y
-xcopy "$(SolutionDir)Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y</PostBuildEvent>
+xcopy "$(SolutionDir)Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y
+
+if ERRORLEVEL == 0 (
+    xcopy "$(SolutionDir)Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
+    SET ERRORLEVEL=0
+)
+EXIT %25ERRORLEVEL%25</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
