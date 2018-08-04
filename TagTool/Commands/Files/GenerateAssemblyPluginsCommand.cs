@@ -895,6 +895,10 @@ namespace TagTool.Commands.Files
                     if (tagFieldAttribute.Gen3Only && !CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo3Retail, CacheVersion.Halo3ODST))
                         continue;
 
+                    if (tagFieldAttribute.Version != CacheVersion.Unknown)
+                        if (tagFieldAttribute.Version != cacheVersion)
+                            continue;
+
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
                 }
 
