@@ -872,6 +872,12 @@ namespace TagTool.Commands.Files
                     if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
                         continue;
 
+                    if (tagFieldAttribute.HaloOnlineOnly && cacheVersion != CacheVersion.HaloOnline106708)
+                        continue;
+
+                    if (tagFieldAttribute.Gen3Only && !CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo3Retail, CacheVersion.Halo3ODST))
+                        continue;
+
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
                 }
 
@@ -880,6 +886,12 @@ namespace TagTool.Commands.Files
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
                     if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
+                        continue;
+
+                    if (tagFieldAttribute.HaloOnlineOnly && cacheVersion != CacheVersion.HaloOnline106708)
+                        continue;
+
+                    if (tagFieldAttribute.Gen3Only && !CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo3Retail, CacheVersion.Halo3ODST))
                         continue;
 
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
@@ -896,6 +908,8 @@ namespace TagTool.Commands.Files
         static Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
         {
             {CacheVersion.HaloOnline106708, "HaloOnline" },
+            {CacheVersion.Halo3Retail, "Halo3" },
+            {CacheVersion.Halo3ODST, "ODST" },
         };
 
         /// <summary>
@@ -911,10 +925,6 @@ namespace TagTool.Commands.Files
         {
             if (!Directory.Exists("Plugins"))
                 Directory.CreateDirectory("Plugins");
-
-            // these groups give a stackoverflow error if not skipped
-            if (tagGroup == "forg" || tagGroup == "cntl" || tagGroup == "coll")
-                return;
 
             ConvertTagDefinition(tagGroup, tagType, cacheVersion, "Plugins");
         }
