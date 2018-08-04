@@ -181,6 +181,7 @@ namespace TagTool.Commands.Files
                 {typeof(TagFunction), AssemblyPluginFieldTypes.dataRef },
                 {typeof(VertexShaderReference), AssemblyPluginFieldTypes.shader},
                 {typeof(PixelShaderReference), AssemblyPluginFieldTypes.shader },
+                {typeof(Boolean), AssemblyPluginFieldTypes.int8 },
             };
 
             /// <summary>
