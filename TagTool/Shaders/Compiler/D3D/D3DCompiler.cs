@@ -10,7 +10,7 @@ namespace TagTool
 {
     static class D3DCompiler
     {
-        public static byte[] Compile(string Source, string Entrypoint, string Target, D3D.SHADER_MACRO[] Defines = null, int Flags1 = 0, int Flags2 = 0, string SourceName = null, Include include = null)
+        public static byte[] Compile(string Source, string Entrypoint, string Target, D3D.SHADER_MACRO[] Defines = null, uint Flags1 = 0, uint Flags2 = 0, string SourceName = null, Include include = null)
         {
             byte[] data = null;
             D3D.ID3DBlob ppCode = null;
@@ -56,7 +56,7 @@ namespace TagTool
             return data;
         }
 
-        public static byte[] CompileFromFile(string Filename, string Entrypoint, string Target, D3D.SHADER_MACRO[] Defines = null, int Flags1 = 0, int Flags2 = 0, Include include = null)
+        public static byte[] CompileFromFile(string Filename, string Entrypoint, string Target, D3D.SHADER_MACRO[] Defines = null, uint Flags1 = 0, uint Flags2 = 0, Include include = null)
         {
             byte[] data = null;
             D3D.ID3DBlob ppCode = null;
@@ -100,7 +100,7 @@ namespace TagTool
             return data;
         }
 
-        public static byte[] Assemble(string Assembly, string filename = null, D3D.SHADER_MACRO[] Defines = null, int Flags = 0, Include include = null)
+        public static byte[] Assemble(string Assembly, string filename = null, D3D.SHADER_MACRO[] Defines = null, uint Flags = 0, Include include = null)
         {
             byte[] data = null;
             D3D.ID3DBlob ppCode = null;
@@ -144,5 +144,36 @@ namespace TagTool
 
             return data;
         }
+
+        public static string Disassemble(byte[] bytecode)
+        {
+            D3D.ID3DBlob ppDisassembly = null;
+
+            var result = D3D.D3DDisassemble(bytecode, new UIntPtr((uint)bytecode.Length), 0, null, ref ppDisassembly);
+
+            if(result != 0)
+            {
+                throw new Exception("Failed to disassembly shader");
+            }
+
+            string result_str = null;
+
+            if (ppDisassembly != null)
+            {
+                IntPtr pData = ppDisassembly.GetBufferPointer();
+                int iSize = ppDisassembly.GetBufferSize();
+
+                var data = new byte[iSize];
+                Marshal.Copy(pData, data, 0, data.Length);
+
+                Marshal.ReleaseComObject(ppDisassembly);
+
+                result_str = System.Text.Encoding.ASCII.GetString(data);
+            }
+
+            return result_str;
+        }
+
+
     }
 }

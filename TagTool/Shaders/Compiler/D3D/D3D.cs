@@ -45,8 +45,8 @@ namespace TagTool
             IntPtr pInclude,
             [MarshalAs(UnmanagedType.LPStr)] string pEntrypoint,
             [MarshalAs(UnmanagedType.LPStr)] string pTarget,
-            int flags1,
-            int flags2,
+            uint flags1,
+            uint flags2,
             ref ID3DBlob ppCode,
             ref ID3DBlob ppErrorMsgs);
 
@@ -59,7 +59,7 @@ namespace TagTool
             [MarshalAs(UnmanagedType.LPStr)] string pSourceName,
             [In, Out] SHADER_MACRO[] pDefines,
             IntPtr pInclude,
-            int Flags,
+            uint Flags,
             ref ID3DBlob ppCode,
             ref ID3DBlob ppErrorMsgs);
 
@@ -73,9 +73,18 @@ namespace TagTool
             IntPtr pInclude,
             [MarshalAs(UnmanagedType.LPStr)] string pEntrypoint,
             [MarshalAs(UnmanagedType.LPStr)] string pTarget,
-            int flags1,
-            int flags2,
+            uint flags1,
+            uint flags2,
             ref ID3DBlob ppCode,
             ref ID3DBlob ppErrorMsgs);
+
+        [PreserveSig]
+        [DllImport("D3DCompiler_47.dll")]
+        public extern static int D3DDisassemble(
+            [In] byte[] pSrcData,
+            [In] UIntPtr SrcDataSize,
+            uint flags,
+            [MarshalAs(UnmanagedType.LPStr)] string szComments,
+            ref ID3DBlob ppDisassembly);
     }
 }
