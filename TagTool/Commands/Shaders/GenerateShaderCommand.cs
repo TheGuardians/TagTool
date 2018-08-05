@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Common;
 using System.Linq;
+using HaloShaderGenerator.Enums;
+using System.Reflection;
 
 namespace TagTool.Commands.Shaders
 {
@@ -31,6 +33,34 @@ namespace TagTool.Commands.Shaders
             CacheContext = cacheContext;
             Tag = tag;
             Definition = definition;
+        }
+
+        public object[] CreateArguments(MethodInfo method, ShaderStage stage, Int32[] template)
+        {
+            var _params = method.GetParameters();
+            object[] input_params = new object[_params.Length];
+
+            for(int i=0;i<_params.Length;i++)
+            {
+                if (i == 0) input_params[0] = stage;
+                else
+                {
+                    var template_index = i - 1;
+                    if(template_index < template.Length)
+                    {
+                        var _enum = Enum.ToObject(_params[i].ParameterType, template[template_index]);
+                        input_params[i] = _enum;
+                    }
+                    else
+                    {
+                        var _enum = Enum.ToObject(_params[i].ParameterType, 0);
+                        input_params[i] = _enum;
+                    }
+                    
+                }
+            }
+
+            return input_params;
         }
 
         public override object Execute(List<string> args)
@@ -58,40 +88,19 @@ namespace TagTool.Commands.Shaders
                 return false;
             }
 
-   //         var drawmode = TemplateShaderGenerator.Drawmode.Default;
-   //         {
-   //             bool found_drawmode = false;
-   //             var drawmode_enums = Enum.GetValues(typeof(TemplateShaderGenerator.Drawmode)).Cast<TemplateShaderGenerator.Drawmode>();
-   //             foreach (var drawmode_enum in drawmode_enums)
-   //             {
-   //                 var enum_name = Enum.GetName(typeof(TemplateShaderGenerator.Drawmode), drawmode_enum).ToLower();
-   //                 if (drawmode_str == enum_name)
-   //                 {
-   //                     drawmode = drawmode_enum;
-   //                     found_drawmode = true;
-   //                     break;
-   //                 }
-   //             }
+            var shader_stage = ShaderStage.Default;
+            foreach(var _shader_stage in Enum.GetValues(typeof(ShaderStage)).Cast<ShaderStage>())
+            {
+                if(drawmode_str == _shader_stage.ToString().ToLower())
+                {
+                    shader_stage = _shader_stage;
+                }
+            }
 
-   //             if (!found_drawmode)
-   //             {
-   //                 //try
-   //                 //{
-   //                 //    drawmode = (TemplateShaderGenerator.Drawmode)Int32.Parse(drawmode_str);
-   //                 //}
-   //                 //catch
-   //                 {
-   //                     Console.WriteLine("Invalid shader arguments! (could not parse to drawmode)");
-   //                     return false;
-   //                 }
-   //             }
-   //         }
-
-   //         Int32[] shader_args;
-			//try { shader_args = Array.ConvertAll(args.Skip(3).ToArray(), Int32.Parse); }
-			//catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
-
-            var func_params = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader").GetParameters();
+            Int32[] shader_args;
+            try { shader_args = Array.ConvertAll(args.Skip(3).ToArray(), Int32.Parse); }
+            catch { Console.WriteLine("Invalid shader arguments! (could not parse to Int32[].)"); return false; }
+            
 
             // runs the appropriate shader-generator for the template type.
             byte[] bytecode = null;
@@ -103,21 +112,10 @@ namespace TagTool.Commands.Shaders
 
                     if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Albedo))
                     {
-                        bytecode = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
-                            HaloShaderGenerator.Enums.ShaderStage.Albedo,
-                            HaloShaderGenerator.Enums.Albedo.Two_Change_Color,
-                            HaloShaderGenerator.Enums.Bump_Mapping.Off,
-                            HaloShaderGenerator.Enums.Alpha_Test.None,
-                            HaloShaderGenerator.Enums.Specular_Mask.No_Specular_Mask,
-                            HaloShaderGenerator.Enums.Material_Model.None,
-                            HaloShaderGenerator.Enums.Environment_Mapping.None,
-                            HaloShaderGenerator.Enums.Self_Illumination.Off,
-                            HaloShaderGenerator.Enums.Blend_Mode.Opaque,
-                            HaloShaderGenerator.Enums.Parallax.Off,
-                            HaloShaderGenerator.Enums.Misc.First_Person_Always,
-                            HaloShaderGenerator.Enums.Distortion.Off,
-                            HaloShaderGenerator.Enums.Soft_fade.Off
-                        );
+                        var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
+                        var GenerateShaderArgs = CreateArguments(GenerateShader, shader_stage, shader_args);
+                        bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
+
                         Console.WriteLine(bytecode?.Length ?? -1);
                     }
 
