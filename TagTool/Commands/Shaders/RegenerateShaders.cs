@@ -47,14 +47,13 @@ namespace TagTool.Commands.Shaders
         {
             if (args.Count <= 0) return false;
 
-            ListType(args[0]);
+            Regenerate(args[0]);
 
             return true;
         }
 
-        public void ListType(string _template_type)
+        public void Regenerate(string _template_type)
         {
-
             foreach (var instance in CacheContext.TagCache.Index)
             {
                 if (instance == null)
