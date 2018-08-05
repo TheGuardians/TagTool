@@ -128,7 +128,7 @@ namespace TagTool.Commands.Porting
                 {
                     bitmap = CacheContext.GetTag<Bitmap>(newBitmap);
                 }
-                catch (KeyNotFoundException)
+                catch
                 {
                     bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag($"{newBitmap}.bitm")[0]);
                 }
@@ -168,8 +168,21 @@ namespace TagTool.Commands.Porting
 
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
-                if (a.Bitmap == null)
-                    a.Bitmap = CacheContext.GetTag<Bitmap>(GetDefaultBitmapTag(edMaps[(int)finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]));
+            {
+                if (a.Bitmap != null)
+                    continue;
+
+                var defaultBitmap = GetDefaultBitmapTag(edMaps[finalRm.ShaderProperties[0].ShaderMaps.IndexOf(a)]);
+
+                try
+                {
+                    a.Bitmap = CacheContext.GetTag<Bitmap>(defaultBitmap);
+                }
+                catch
+                {
+                    a.Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag($"{defaultBitmap}.bitm")[0]);
+                }
+            }
 
             if (CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) && RmhgUnknownTemplates.Contains(CacheContext.TagNames[edRmt2Instance.Index]))
                 if (finalRm.ShaderProperties[0].Unknown.Count == 0)
