@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = FixRmt2Reference(CacheContext, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = FixRmt2Reference(cacheStream, CacheContext, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
             {
@@ -223,9 +223,14 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private List<ShaderTemplateItem> CollectRmt2Info(CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
+        private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
         {
             var edRmt2BestStats = new List<ShaderTemplateItem>();
+
+            var bmRmt2Context = new CacheSerializationContext(ref BlamCache, bmRmt2Instance);
+            var bmRmt2 = BlamCache.Deserializer.Deserialize<RenderMethodTemplate>(bmRmt2Context);
+            var bmPixlContext = new CacheSerializationContext(ref BlamCache, BlamCache.IndexItems.GetItemByID(bmRmt2.PixelShader.Index));
+            var bmPixl = BlamCache.Deserializer.Deserialize<PixelShader>(bmPixlContext);
 
             // loop trough all rmt2 and find the closest
             foreach (var edRmt2_ in Rmt2TagsInfo)
@@ -234,6 +239,14 @@ namespace TagTool.Commands.Porting
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
+                    continue;
+
+                var edRmt2Context = new TagSerializationContext(cacheStream, CacheContext, CacheContext.GetTag(edRmt2_.Key));
+                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(edRmt2Context);
+                var edPixlContext = new TagSerializationContext(cacheStream, CacheContext, edRmt2.PixelShader);
+                var edPixl = CacheContext.Deserialize<PixelShader>(edPixlContext);
+
+                if (bmPixl.DrawModes.Count > edPixl.DrawModes.Count || bmPixl.Shaders.Count > edPixl.Shaders.Count)
                     continue;
 
                 int mapsCommon = 0;
@@ -296,7 +309,7 @@ namespace TagTool.Commands.Porting
             return edRmt2BestStats;
         }
 
-        private CachedTagInstance FindEquivalentRmt2(CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private CachedTagInstance FindEquivalentRmt2(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
             var edRmt2Temp = new List<ShaderTemplateItem>();
@@ -304,7 +317,7 @@ namespace TagTool.Commands.Porting
             // Make a new dictionary with rmt2 of the same shader type
             var edRmt2BestStats = new List<ShaderTemplateItem>();
 
-            edRmt2BestStats = CollectRmt2Info(blamRmt2Tag, bmMaps, bmArgs);
+            edRmt2BestStats = CollectRmt2Info(cacheStream, blamRmt2Tag, bmMaps, bmArgs);
 
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
@@ -750,7 +763,7 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private CachedTagInstance FixRmt2Reference(Stream cacheStream, HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
@@ -764,7 +777,7 @@ namespace TagTool.Commands.Porting
             }
 
 			// if no tagname matches, find rmt2 tags based on the most common values in the name
-			return FindEquivalentRmt2(blamRmt2Tag, blamRmt2Definition, bmMaps, bmArgs);
+			return FindEquivalentRmt2(cacheStream, blamRmt2Tag, blamRmt2Definition, bmMaps, bmArgs);
 		}
         
         private class Unknown3Tagblock
@@ -948,11 +961,9 @@ namespace TagTool.Commands.Porting
                         if (b.RegisterIndex == c.RegisterIndex && b.RegisterType == c.RegisterType)
                         {
                             b.ParameterName = c.ParameterName;
-                            goto opp;
+                            break;
                         }
                     }
-                    opp:
-                    ;
                 }
             }
 
