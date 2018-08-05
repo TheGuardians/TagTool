@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using HaloShaderGenerator.Enums;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace TagTool.Commands.Shaders
 {
@@ -52,54 +53,73 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
+        class TagSerializationPair
+        {
+            public CachedTagInstance tag;
+            public object definition;
+        }
+
         public void Regenerate(string _template_type)
         {
-            foreach (var instance in CacheContext.TagCache.Index)
+            var then = DateTime.Now;
+
+            var base_stream = CacheContext.OpenTagCacheReadWrite();
+            var memory_stream = new MemoryStream();
             {
-                if (instance == null)
-                    continue;
+                base_stream.Position = 0;
+                base_stream.CopyTo(memory_stream);
+                base_stream.Position = 0;
+            }
 
-                var type = TagDefinition.Find(instance.Group.Tag);
-                if (type != typeof(Shader)) continue;
+            List<TagSerializationPair> serializationPairs = new List<TagSerializationPair>();
+            HashSet<int> serilaizedRmt2 = new HashSet<int>();
 
-                TagSerializationContext rmsh_context = null;
-                Shader rmsh_definition = null;
-                TagSerializationContext rmdf_context = null;
-                RenderMethodDefinition render_definition = null;
-                TagSerializationContext rmt2_context = null;
-                RenderMethodTemplate rmt2_definition = null;
-                TagSerializationContext pixl_context = null;
-                PixelShader pixel_shader = null;
+            var shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == typeof(Shader));
+            var shader_rmdf = CacheContext.GetTag<RenderMethodDefinition>("shaders\\shader");
 
+            foreach (var instance in shader_instances)
+            {
                 // get shader
-                var rmsh_stream = CacheContext.OpenTagCacheRead();
-                rmsh_context = new TagSerializationContext(rmsh_stream, CacheContext, instance);
-                rmsh_definition = CacheContext.Deserializer.Deserialize(rmsh_context, type) as Shader;
-
-
-                // get render method definitions
-                var rmdf_stream = CacheContext.OpenTagCacheRead();
-                rmdf_context = new TagSerializationContext(rmdf_stream, CacheContext, rmsh_definition.BaseRenderMethod);
-                render_definition = CacheContext.Deserializer.Deserialize(rmdf_context, type) as RenderMethodDefinition;
-                rmdf_stream.Close();
-
-                // make sure this is the correct render method definition
+                Shader rmsh_definition = null;
                 {
-                    var tag_index = CacheContext.TagCache.Index.ToList().IndexOf(rmsh_definition.BaseRenderMethod);
-                    var name = CacheContext.TagNames.ContainsKey(tag_index) ? CacheContext.TagNames[tag_index] : null;
-                    if (name != "shaders\\shader") continue;
+                    memory_stream.Position = 0;
+                    var rmsh_context = new TagSerializationContext(memory_stream, CacheContext, instance);
+
+                    // if there is no dependency on the rmsh, early exit
+                    if (!rmsh_context.Tag.Dependencies.Contains(shader_rmdf.Index))
+                    {
+                        continue;
+                    }
+                    rmsh_definition = CacheContext.Deserializer.Deserialize<Shader>(rmsh_context);
+                    // double check to make sure this is the correct render method definition
+                    if (rmsh_definition.BaseRenderMethod.Index != shader_rmdf.Index)
+                    {
+                        continue;
+                    }
+
                 }
 
-                // get the render method template
-                var rmt2_stream = CacheContext.OpenTagCacheRead();
-                rmt2_context = new TagSerializationContext(rmt2_stream, CacheContext, rmsh_definition.ShaderProperties[0].Template);
-                rmt2_definition = CacheContext.Deserializer.Deserialize(rmt2_context, type) as RenderMethodTemplate;
-                rmt2_stream.Close();
+                // get render method template
+                RenderMethodTemplate rmt2_definition = null;
+                string rmt2_name = null;
+                {
+                    memory_stream.Position = 0;
+                    var rmt2_context = new TagSerializationContext(memory_stream, CacheContext, rmsh_definition.ShaderProperties[0].Template);
 
-                // get the pixl shader that will be rebuilt
-                var pixl_stream = CacheContext.OpenTagCacheReadWrite();
-                pixl_context = new TagSerializationContext(pixl_stream, CacheContext, rmt2_definition.PixelShader);
-                pixel_shader = CacheContext.Deserializer.Deserialize(pixl_context, type) as PixelShader;
+                    // Skip previously finished RMT2 tags
+                    if (serilaizedRmt2.Contains(rmt2_context.Tag.Index))
+                    {
+                        continue;
+                    }
+
+                    serilaizedRmt2.Add(rmt2_context.Tag.Index);
+
+                    rmt2_definition = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(rmt2_context);
+
+                    // console output
+                    rmt2_name = CacheContext.TagNames.ContainsKey(rmt2_context.Tag.Index) ? CacheContext.TagNames[rmt2_context.Tag.Index] : rmt2_context.Tag.Index.ToString("X");
+                    Console.WriteLine($"Regenerating {rmt2_name}");
+                }
 
                 // extract the render method definition arguments to rebuild the shader again
                 List<int> shader_template_args = new List<int>();
@@ -108,14 +128,43 @@ namespace TagTool.Commands.Shaders
                     shader_template_args.Add((int)template_arg.Unknown);
                 }
 
-                // regenerate the shader
+                // get the pixl shader that will be rebuilt
+                memory_stream.Position = 0;
+                var pixl_context = new TagSerializationContext(memory_stream, CacheContext, rmt2_definition.PixelShader);
+                var pixel_shader = CacheContext.Deserializer.Deserialize<PixelShader>(pixl_context);
+
+                //TODO: Regenerate all shaders based on RMT2 and set invalid shaders back to null
+                // regenerate the pixel shader
                 RegenerateShader(pixel_shader, shader_template_args.ToArray(), _template_type);
 
-                // save contents
-                CacheContext.Serialize(pixl_context, pixel_shader);
-                pixl_stream.Close();
+                serializationPairs.Add(new TagSerializationPair { tag = pixl_context.Tag, definition = pixel_shader });
+            }
+            int before = serializationPairs.Count;
+            serializationPairs = serializationPairs.Where(sp => sp != null).GroupBy(sp => sp.tag.Index).Select(g => g.First()).ToList();
+
+            Console.WriteLine($"Generation completed in {(DateTime.Now - then).TotalSeconds} seconds {Math.Round(100.0f * (float)serializationPairs.Count / (float)before, 2)}% efficiency");
+            Debug.WriteLine($"Generation completed in {(DateTime.Now - then).TotalSeconds} seconds {Math.Round(100.0f * (float)serializationPairs.Count / (float)before, 2)}% efficiency");
+
+            // serialize modified tags
+            foreach (var sp in serializationPairs)
+            {
+                memory_stream.Position = 0;
+                var tag = CacheContext.GetTag(sp.tag.Index);
+                var new_context = new TagSerializationContext(memory_stream, CacheContext, tag);
+                CacheContext.Serialize(new_context, sp.definition);
             }
 
+            base_stream.Position = 0;
+            memory_stream.Position = 0;
+
+            base_stream.SetLength(0);
+            memory_stream.CopyTo(base_stream);
+
+            base_stream.Close();
+            memory_stream.Close();
+
+            Console.WriteLine($"Finished in {(DateTime.Now - then).TotalSeconds} seconds");
+            Debug.WriteLine($"Finished in {(DateTime.Now - then).TotalSeconds} seconds");
         }
 
         void RegenerateShader(PixelShader shader, Int32[] shader_args, string shader_type)
@@ -141,7 +190,7 @@ namespace TagTool.Commands.Shaders
                         var GenerateShaderArgs = CreateArguments(GenerateShader, shader_stage, shader_args);
                         bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
 
-                        Console.WriteLine(bytecode?.Length ?? -1);
+                        //Console.WriteLine(bytecode?.Length ?? -1);
                     }
                     break;
 
