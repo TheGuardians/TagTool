@@ -110,9 +110,9 @@ namespace TagTool.Tags.Definitions
         public int ScrollSpeedTransitionWaitTime;
         public int HeldScrollSpeed;
         public int AttractVideoIdleWait;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction Unknown = new TagFunction { Data = new byte[0] };
 
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public TagFunction Unknown;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown2;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -124,31 +124,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown7;
+        public CachedTagInstance Unknown7;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown8;
+        public RealArgbColor Unknown17;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown9;
+        public RealArgbColor Unknown18;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown10;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown11;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown12;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown13;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown14;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown15;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown16;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown17;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown18;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown19;
+        public StringId Unknown19;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown20;
