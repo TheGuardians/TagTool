@@ -145,26 +145,7 @@ namespace TagTool.Commands.Porting
                         cacheFileStream.CopyTo(cacheStream);
 
                 foreach (var blamTag in ParseLegacyTag(args[0]))
-                {
-#if !DEBUG
-                    try
-                    {
-#endif
-                        var oldFlags = Flags;
-                        ConvertTag(cacheStream, resourceStreams, blamTag);
-                        Flags = oldFlags;
-#if !DEBUG
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine($"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.GroupName}':");
-                        Console.WriteLine($"\t{e.Message}");
-                        Console.WriteLine();
-                        break;
-                    }
-#endif
-                }
+                    ConvertTag(cacheStream, resourceStreams, blamTag);
 
                 if (Flags.HasFlag(PortingFlags.Memory))
                     using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
@@ -228,6 +209,30 @@ namespace TagTool.Commands.Porting
         }
 
         public CachedTagInstance ConvertTag(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
+        {
+            CachedTagInstance result = null;
+#if !DEBUG
+            try
+            {
+#endif
+                var oldFlags = Flags;
+                result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
+                Flags = oldFlags;
+#if !DEBUG
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.GroupName}':");
+                Console.WriteLine($"\t{e.Message}");
+                Console.WriteLine();
+                throw e;
+            }
+#endif
+            return result;
+        }
+
+        public CachedTagInstance ConvertTagInternal(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
         {
             if (blamTag == null)
                 return null;
