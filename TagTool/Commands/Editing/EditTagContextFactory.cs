@@ -115,6 +115,30 @@ namespace TagTool.Commands.Editing
                 case "vfsl": // vfiles_list
                     VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
                     break;
+
+                case "pixl":
+                    Shaders.ShaderContextFactory<PixelShader>.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
+                    break;
+
+                case "vtsh":
+                    Shaders.ShaderContextFactory<VertexShader>.Populate(commandContext, cacheContext, tag, (VertexShader)definition);
+                    break;
+
+                case "glps":
+                    Shaders.ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cacheContext, tag, (GlobalPixelShader)definition);
+                    break;
+
+                case "glvs":
+                    Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cacheContext, tag, (GlobalVertexShader)definition);
+                    break;
+
+                case "rmdf":
+                    commandContext.AddCommand(new Shaders.ListMethodOptionParameters(cacheContext, tag, (RenderMethodDefinition)definition));
+                    break;
+
+                case "rmt2":
+                    Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
+                    break;
             }
 
             var structure = new TagStructureInfo(TagDefinition.Find(tag.Group.Tag));

@@ -317,6 +317,16 @@
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
+    <Compile Include="Commands\Shaders\CompileCommand.cs" />
+    <Compile Include="Commands\Shaders\DisassembleCommand.cs" />
+    <Compile Include="Commands\Shaders\GenerateRenderMethodTemplate.cs" />
+    <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
+    <Compile Include="Commands\Shaders\GlobalUniformMappings.cs" />
+    <Compile Include="Commands\Shaders\ListMethodOptionParameters.cs" />
+    <Compile Include="Commands\Shaders\ListRegisters.cs" />
+    <Compile Include="Commands\Shaders\ListRegistersRMT2.cs" />
+    <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
+    <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
