@@ -182,7 +182,7 @@ namespace TagTool.Commands.Shaders
             typeof(Shader)
         };
 
-        public void Regenerate(string _template_type)
+        public void Regenerate(string template_name)
         {
             var then = DateTime.Now;
 
@@ -197,14 +197,14 @@ namespace TagTool.Commands.Shaders
             ConcurrentBag<TagSerializationPair> serialization_pairs_bag = new ConcurrentBag<TagSerializationPair>();
             ConcurrentBag<int> serilaizedRmt2 = new ConcurrentBag<int>();
 
-            var shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && SupportedShaderTypes.Contains(TagDefinition.Find(instance.Group.Tag)));
 
+            Type template_type = null;
             CachedTagInstance shader_rmdf = null;
-            switch (_template_type)
+            switch (template_name)
             {
                 case "shader_templates":
                 case "shader_template":
-
+                    template_type = typeof(Shader);
                     shader_rmdf = CacheContext.GetTag<RenderMethodDefinition>("shaders\\shader");
                     break;
 
@@ -216,8 +216,15 @@ namespace TagTool.Commands.Shaders
                     break;
             }
 
-
-            
+            IEnumerable<CachedTagInstance> shader_instances = null;
+            if (template_type != null)
+            {
+                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == template_type);
+            }
+            else
+            {
+                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && SupportedShaderTypes.Contains(TagDefinition.Find(instance.Group.Tag)));
+            }
 
             var num_shader_instances = shader_instances.Count();
             Task[] tasks = new Task[num_shader_instances];
