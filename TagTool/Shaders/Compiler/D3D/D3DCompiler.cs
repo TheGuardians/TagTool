@@ -153,7 +153,8 @@ namespace TagTool
 
             if(result != 0)
             {
-                throw new Exception("Failed to disassembly shader");
+                //throw new Exception("Failed to disassembly shader");
+                return null;
             }
 
             string result_str = null;

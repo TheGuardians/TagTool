@@ -50,8 +50,9 @@ namespace TagTool.Commands.Shaders
                 }
 
                 var pc_shader = shader_block.PCShaderBytecode;
-				//new Disassemble(pc_shader, out string disassembly);
-				//if (pc_shader != null) Console.WriteLine(disassembly);
+                var disassembly = D3DCompiler.Disassemble(pc_shader);
+				if (pc_shader != null) Console.WriteLine(disassembly);
+                else Console.WriteLine("Failed to disassemble shader");
             }
 
             if (typeof(T) == typeof(VertexShader) || typeof(T) == typeof(GlobalVertexShader))
@@ -70,8 +71,9 @@ namespace TagTool.Commands.Shaders
                 }
 
                 var pc_shader = shader_block.PCShaderBytecode;
-				//new Disassemble(pc_shader, out string disassembly);
-				//if (pc_shader != null) Console.WriteLine(disassembly);
+                var disassembly = D3DCompiler.Disassemble(pc_shader);
+                if (pc_shader != null) Console.WriteLine(disassembly);
+                else Console.WriteLine("Failed to disassemble shader");
             }
 
 
