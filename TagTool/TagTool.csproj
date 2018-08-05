@@ -325,6 +325,7 @@
     <Compile Include="Commands\Shaders\ListMethodOptionParameters.cs" />
     <Compile Include="Commands\Shaders\ListRegisters.cs" />
     <Compile Include="Commands\Shaders\ListRegistersRMT2.cs" />
+    <Compile Include="Commands\Shaders\RegenerateShaders.cs" />
     <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
