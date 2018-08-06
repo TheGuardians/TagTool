@@ -3144,5 +3144,159 @@ namespace TagTool.Commands.Files
                 Console.WriteLine($"ERROR: {type.Name},{type.FullName}");
             }
         }
+
+        public static void CsvAdd(string in_)
+        {
+            csvQueue1.Add(in_);
+            if (debugConsoleWrite)
+                Console.WriteLine($"{in_}");
+        }
+
+        public bool DumpScripts(List<string> args)
+        {
+            var helpMessage =
+                @"Extract a scenario's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile." +
+                @"Example: " +
+                @"test DumpScripts levels\multi\guardian\guardian guardian_HO.csv";
+
+            if (args.Count < 1)
+            {
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            var edTagArg = args[0]; // needs to be changed
+            args.RemoveAt(0);
+
+            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
+            {
+                Console.WriteLine($"ERROR: cannot find tag {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            if (!edTag.IsInGroup("scnr"))
+            {
+                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
+                Console.WriteLine(helpMessage);
+                return false;
+            }
+
+            Scenario scnr;
+            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            {
+                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
+                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
+            }
+
+            var PortTagCommand = new Porting.PortTagCommand(CacheContext, null);
+
+            debugConsoleWrite = true;
+            var csvFileName = "scriptsDumpOutput.csv";
+
+            foreach (var a in args)
+                if (a.Contains(".") || a.Contains("."))
+                    csvFileName = a;
+
+            csvQueue1 = new List<string>();
+            var globals = new Dictionary<uint, string>();
+
+            var i = -1;
+            CsvAdd("Globals");
+            foreach (var a in scnr.Globals)
+            {
+                i++;
+                var salt = a.InitializationExpressionHandle >> 16;
+
+                CsvAdd(
+                    $"{i:D4}," +
+                    $"{i:X4}," +
+                    $"{a.InitializationExpressionHandle:X8}," +
+                    $"{salt:X4}," +
+                    $"{a.Name,-0x20}," +
+                    $"{a.Type.HaloOnline}," +
+                    $"");
+
+                globals.Add(a.InitializationExpressionHandle, a.Name);
+            }
+
+            CsvAdd("Scripts");
+            foreach (var script in scnr.Scripts)
+            {
+                CsvAdd($"{scnr.Scripts.IndexOf(script):D4}," +
+                       $"{scnr.Scripts.IndexOf(script):X4}," +
+                       $"{script.Type.ToString()}," +
+                       $"{script.ReturnType.HaloOnline}," +
+                       $"{script.ScriptName}," +
+                       $"A:{script.RootExpressionHandle:X8}");
+            }
+
+            var failedOpcodes = new Dictionary<int, int>();
+
+            i = -1;
+            foreach (var expr in scnr.ScriptExpressions)
+            {
+                i++;
+                if (expr.Opcode == 0xBABA)
+                    continue;
+
+                var scriptGroupName = "";
+                if (expr.NextExpressionHandle == 0xFFFFFFFF &&
+                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Opcode == 0x0)
+                {
+                    var ScriptGroupName = scnr.Scripts.Find(x => (x.RootExpressionHandle >> 16) == expr.Salt);
+                    if (ScriptGroupName != null)
+                        scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
+                }
+
+                var ExpressionHandle = (uint)((expr.Salt << 16) + i);
+
+                if (globals.ContainsKey(ExpressionHandle))
+                    scriptGroupName = $"G:{globals[ExpressionHandle]}";
+
+                var opcodeName = "";
+
+                if (PortTagCommand.ScriptExpressionIsValue(expr))
+                {
+                    if (Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
+                        opcodeName = $"{Scripting.ScriptInfo.ValueTypes[CacheVersion.HaloOnline106708][expr.Opcode]},value";
+                }
+                else
+                {
+                    if (Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708].ContainsKey(expr.Opcode))
+                        opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
+                }
+
+                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                if (scnr.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                    opcodeName = "";
+
+                var ValueType = "";
+
+                ValueType = expr.ValueType.HaloOnline.ToString();
+
+                CsvAdd(
+                    $"{i:D8}," +
+                    $"{expr.Salt:X4}{i:X4}," +
+                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{expr.Opcode:X4}," +
+                    $"{expr.Data[0]:X2}" +
+                    $"{expr.Data[1]:X2}" +
+                    $"{expr.Data[2]:X2}" +
+                    $"{expr.Data[3]:X2}," +
+                    $"{expr.ExpressionType}," +
+                    $"{ValueType}," +
+                    $"{opcodeName}," +
+                    $"{scriptGroupName}" +
+                    $"");
+            }
+
+            CsvDumpQueueToFile(csvQueue1, csvFileName);
+
+            return true;
+        }
     }
 }
