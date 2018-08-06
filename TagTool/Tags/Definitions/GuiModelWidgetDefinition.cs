@@ -84,9 +84,9 @@ namespace TagTool.Tags.Definitions
             public uint Unknown2;
             public uint Unknown3;
             public uint Unknown4;
-            public uint Unknown5;
+            public uint BipedAngle; //[0 to 1]
             public uint Unknown6;
-            public uint Unknown7;
+            public uint DistancefromCamera;  //[0 to -1]
             public uint Unknown8;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
