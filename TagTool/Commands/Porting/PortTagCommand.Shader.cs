@@ -862,13 +862,13 @@ namespace TagTool.Commands.Porting
                 if (a.Count == 0)
                     continue;
 
-                foreach (var b in bmPixl.Shaders[a.Index].XboxParameters)
+                foreach (var b in bmPixl.Shaders[a.Offset].XboxParameters)
                 {
                     var ParameterName = BlamCache.Strings.GetItemByID(b.ParameterName.Index);
 
                     bmPixlParameters[DrawModeIndex].Add(new ArgumentMapping
                     {
-                        ShaderIndex = a.Index,
+                        ShaderIndex = a.Offset,
                         ParameterName = ParameterName,
                         RegisterIndex = b.RegisterIndex,
                         RegisterType = b.RegisterType
@@ -976,7 +976,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var b in a.Value.ArgumentMappings)
                 {
-                    foreach (var c in edPixl.Shaders[edPixl.DrawModes[a.Key].Index].PCParameters)
+                    foreach (var c in edPixl.Shaders[edPixl.DrawModes[a.Key].Offset].PCParameters)
                     {
                         var ParameterName = CacheContext.StringIdCache.GetString(c.ParameterName);
 

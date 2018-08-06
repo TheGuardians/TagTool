@@ -107,10 +107,11 @@ namespace TagTool.Commands.Shaders
 
             // get render method template
             RenderMethodTemplate rmt2_definition = null;
+            TagSerializationContext rmt2_context = null;
             string rmt2_name = null;
             {
                 memory_stream.Position = 0;
-                var rmt2_context = new TagSerializationContext(memory_stream, CacheContext, rm_shader_definition.ShaderProperties[0].Template);
+                rmt2_context = new TagSerializationContext(memory_stream, CacheContext, rm_shader_definition.ShaderProperties[0].Template);
 
                 // Skip previously finished RMT2 tags
                 if (serilaizedRmt2.Contains(rmt2_context.Tag.Index))
@@ -151,6 +152,10 @@ namespace TagTool.Commands.Shaders
             {
                 case "shaders\\shader":
                     template_type = "shader_template";
+
+                    //TODO: Regenerate all shaders based on RMT2 and set invalid shaders back to null
+                    RegenerateShader(rmt2_definition, pixel_shader, shader_template_args.ToArray(), template_type);
+
                     break;
                 default:
                     Console.WriteLine($"Error: Unknown rmdf {rmdf_name}");
@@ -159,11 +164,8 @@ namespace TagTool.Commands.Shaders
                     return;
             }
 
-            //TODO: Regenerate all shaders based on RMT2 and set invalid shaders back to null
-            // regenerate the pixel shader
-            RegenerateShader(pixel_shader, shader_template_args.ToArray(), template_type);
-
             serializationPairs.Add(new TagSerializationPair { tag = pixl_context.Tag, definition = pixel_shader });
+            serializationPairs.Add(new TagSerializationPair { tag = rmt2_context.Tag, definition = rmt2_definition });
 
             mutex.ReleaseMutex();
         }
@@ -299,51 +301,66 @@ namespace TagTool.Commands.Shaders
 #endif
         }
 
-        void RegenerateShader(PixelShader shader, Int32[] shader_args, string shader_type)
+        void RegenerateShader(RenderMethodTemplate rmt2, PixelShader pixl, Int32[] shader_args, string shader_type)
         {
-            //TODO: Lets just replace albedo for now, we need more advanced RMSH > RMT2 > PIXL code for this
-            // but albedo is always index 0 in an RMSH generated template
-            var shader_stage = ShaderStage.Albedo;
-            foreach (var _shader_stage in Enum.GetValues(typeof(ShaderStage)).Cast<ShaderStage>())
-            {
-
-            }
-
-            byte[] bytecode = null;
-
             switch (shader_type)
             {
                 case "shader_templates":
                 case "shader_template":
 
-                    if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Albedo))
-                    {
-                        var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
-                        var GenerateShaderArgs = CreateArguments(GenerateShader, shader_stage, shader_args);
-                        bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
+                    var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
 
-                        //Console.WriteLine(bytecode?.Length ?? -1);
+                    //TODO: Lets just replace albedo for now, we need more advanced RMSH > RMT2 > PIXL code for this
+                    // but albedo is always index 0 in an RMSH generated template
+                    var drawmodebitmasl = rmt2.DrawModeBitmask;
+                    RenderMethodTemplate.ShaderModeBitmask newbitmask = 0;
+                    if ((drawmodebitmasl | RenderMethodTemplate.ShaderModeBitmask.Albedo) != 0)
+                    {
+                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Albedo))
+                        {
+                            var GenerateShaderArgs = CreateArguments(GenerateShader, ShaderStage.Albedo, shader_args);
+
+                            byte[] bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
+
+                            if (bytecode == null) return;
+
+                            var offset = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Albedo].Offset;
+                            var count = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Albedo].Count;
+
+                            pixl.Shaders[offset].PCShaderBytecode = bytecode;
+
+                            newbitmask |= RenderMethodTemplate.ShaderModeBitmask.Albedo;
+                        }
+                        // todo, disable it. but for now, we'll just keep the other shaders here
                     }
+
+                    if ((drawmodebitmasl | RenderMethodTemplate.ShaderModeBitmask.Active_Camo) != 0)
+                    {
+                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Active_Camo))
+                        {
+                            var GenerateShaderArgs = CreateArguments(GenerateShader, ShaderStage.Active_Camo, shader_args);
+
+                            byte[] bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
+
+                            if (bytecode == null) return;
+
+                            var offset = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Active_Camo].Offset;
+                            var count = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Active_Camo].Count;
+
+                            pixl.Shaders[offset].PCShaderBytecode = bytecode;
+
+                            newbitmask |= RenderMethodTemplate.ShaderModeBitmask.Active_Camo;
+                        }
+                        // todo, disable it. but for now, we'll just keep the other shaders here
+                    }
+
+                    //rmt2.DrawModeBitmask = newbitmask;
+
                     break;
 
                 default:
                     break;
             }
-
-            if (bytecode == null) return;
-
-            var shader_data_block = new PixelShaderBlock
-            {
-                PCShaderBytecode = bytecode
-            };
-
-            var _definition = shader;
-            var existing_block = _definition.Shaders[0];
-            //shader_data_block.PCParameters = existing_block.PCParameters;
-            //TODO: Set parameters
-            //shader_data_block.PCParameters = shader_gen_result.Parameters;
-
-            _definition.Shaders[0] = shader_data_block;
         }
 
         public object[] CreateArguments(MethodInfo method, ShaderStage stage, Int32[] template)

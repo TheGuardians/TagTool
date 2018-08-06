@@ -5,7 +5,7 @@ namespace TagTool.Shaders
     [TagStructure(Size = 0x2)]
     public class ShaderDrawMode
     {
-        public byte Index;
+        public byte Offset;
         public byte Count;
     }
 }
