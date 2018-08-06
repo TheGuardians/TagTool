@@ -51,36 +51,38 @@ namespace TagTool.Commands.Files
             {
                 { "scriptingxml", "scriptingxml" },
                 { "lensunknown", "lensunknown" },
-                { "setinvalidmaterials", "Set all materials to shaders\\invalid or 0x101F to a provided mode or sbsp tag." },
-                { "namemodetags", "Name all mode tags based on" },
-                { "dumpforgepalettecommands", "Read a scnr tag's forge palettes and dump as a tagtool commands script." },
                 { "dumpcommandsscript", "Extract all the tags of a mode or sbsp tag (rmt2, rm--) and generate a commands script. WIP" },
                 { "shadowfix", "Hack/fix a weapon or forge object's shadow mesh." },
                 { "namermt2", "Name all rmt2 tags based on their parent render method." },
                 { "findconicaleffects", "" },
                 { "mergeglobaltags", "Merges matg/mulg tags ported from legacy cache files into single Halo Online format matg/mulg tags." },
-                { "cisc", "" },
+                { "doublecinematicscenefps", "Double the camera framerate in cinematic tag. (cisc)" },
                 { "defaultbitmaptypes", "" },
-                { "mergetagnames", "" }
+                { "mergetagnames", "" },
+                { "adjustscriptsfromfile", "Modify a scenario's scripts with a provided scripts dump using ." },
+                { "setupmulg", "" },
+                { "listprematchcameras", "" },
+                { "findnullshaders", "" },
+                { "nameglobalmaterials", "Name all tags under globals based on their Halo 3 or ODST equivalent." },
+                { "nameanytagsubtags", "Name all dependencies of a tag based on its Halo 3 or ODST equivalent." },
+                { "compareedtoblam", "Compare an ED tag to Blam, and attempt to find fields with different values." },
+                { "dsrc", "" },
+                { "dumpscripts", "Dump a scenario's scripts to be used with AdjustScriptsFromFile or PortTagCommand.Scenario's hardcoded presets." },
             };
 
             switch (name)
             {
                 case "scriptingxml": return ScriptingXml(args);
                 case "lensunknown": return LensUnknown(args);
-                case "setinvalidmaterials": return SetInvalidMaterials(args);
-                case "dumpforgepalettecommands": return DumpForgePaletteCommands(args);
                 case "dumpcommandsscript": return DumpCommandsScript(args);
-                case "temp": return Temp(args);
                 case "shadowfix": return ShadowFix(args);
                 case "namermt2": return NameRmt2();
                 case "findconicaleffects": return FindConicalEffects();
                 case "mergeglobaltags": return MergeGlobalTags(args);
-                case "cisc": return Cisc(args);
+                case "doublecinematicscenefps": return DoubleCinematicSceneFPS(args);
                 case "defaultbitmaptypes": return DefaultBitmapTypes(args);
                 case "mergetagnames": return MergeTagNames(args);
                 case "adjustscriptsfromfile": return AdjustScriptsFromFile(args);
-                case "batchtagdepadd": return BatchTagDepAdd(args);
                 case "setupmulg": return SetupMulg();
                 case "listprematchcameras": return ListPrematchCameras();
                 case "findnullshaders": return FindNullShaders();
@@ -88,6 +90,7 @@ namespace TagTool.Commands.Files
                 case "nameanytagsubtags": return NameAnyTagSubtags(args);
                 case "compareedtoblam": return CompareEDtoBlam(args);
                 case "dsrc": return Dsrc();
+                case "dumpscripts": return DumpScripts(args);
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -962,7 +965,7 @@ namespace TagTool.Commands.Files
             return true;
         }
 
-        private bool Cisc(List<string> args)
+        private bool DoubleCinematicSceneFPS(List<string> args)
         {
             if (args.Count != 0)
                 return false;
@@ -1292,182 +1295,6 @@ namespace TagTool.Commands.Files
             return null;
         }
 
-        public bool SetInvalidMaterials(List<string> args) // Set all mode or sbsp shaders to shaders\invalid 0x101F
-        {
-            Console.WriteLine("Required args: [0]ED tag; ");
-
-            if (args.Count != 1)
-                return false;
-
-            string edTagArg = args[0];
-
-            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
-                return false;
-
-            if (edTag.IsInGroup("mode"))
-            {
-                RenderModel edMode;
-                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                    edMode = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
-                }
-
-                foreach (var a in edMode.Materials)
-                    a.RenderMethod = CacheContext.GetTag(0x101F);
-
-                using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                {
-                    var context = new TagSerializationContext(stream, CacheContext, edTag);
-                    CacheContext.Serializer.Serialize(context, edMode);
-                }
-            }
-
-            else if (edTag.IsInGroup("sbsp"))
-            {
-                ScenarioStructureBsp instance;
-                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                    instance = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp>(edContext);
-                }
-
-                foreach (var a in instance.Materials)
-                    a.RenderMethod = CacheContext.GetTag(0x101F);
-
-                Console.WriteLine("Nuked shaders.");
-
-                using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-                {
-                    var context = new TagSerializationContext(stream, CacheContext, edTag);
-                    CacheContext.Serializer.Serialize(context, instance);
-                }
-            }
-
-            return true;
-        }
-
-        public bool DumpForgePaletteCommands(List<string> args) // Dump all the forge lists of a scnr to use as tagtool commands. Mainly to reorder the items easily
-        {
-            Console.WriteLine("Required args: [0]ED scnr tag; ");
-
-            if (args.Count != 1 || !CacheContext.TryGetTag(args[0], out var edTag))
-                return false;
-
-            Scenario instance;
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                instance = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
-            }
-
-            Console.WriteLine($"RemoveBlockElements SandboxEquipment 0 *");
-            foreach (var a in instance.SandboxEquipment)
-            {
-                Console.WriteLine($"AddBlockElements SandboxEquipment 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField SandboxEquipment[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField SandboxEquipment[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField SandboxEquipment[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            string type = "SandboxWeapons";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxWeapons)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            type = "SandboxVehicles";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxVehicles)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            type = "SandboxScenery";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxScenery)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            type = "SandboxSpawning";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxSpawning)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            type = "SandboxTeleporters";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxTeleporters)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            type = "SandboxGoalObjects";
-            Console.WriteLine($"RemoveBlockElements {type} 0 *");
-            foreach (var a in instance.SandboxGoalObjects)
-            {
-                Console.WriteLine($"AddBlockElements {type} 1");
-                if (CacheContext.TagNames.ContainsKey(a.Object.Index))
-                    Console.WriteLine($"SetField {type}[*].Object {CacheContext.TagNames[a.Object.Index]}.{a.Object.Group}");
-                else
-                    Console.WriteLine($"SetField {type}[*].Object 0x{a.Object.Index:X4}");
-
-                Console.WriteLine($"SetField {type}[*].Name {CacheContext.StringIdCache.GetString(a.Name)}");
-
-                Console.WriteLine("");
-            }
-
-            return true;
-        }
-
         public bool DumpCommandsScript(List<string> args)
         {
             // Role: extract all the tags of a mode or sbsp tag.
@@ -1613,26 +1440,7 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-
-        public bool Temp(List<string> args)
-        {
-            var tags = CacheContext.TagCache.Index.FindAllInGroup("rmt2");
-
-            foreach (var tag in tags)
-            {
-                RenderMethodTemplate edRmt2;
-                using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    var edContext = new TagSerializationContext(cacheStream, CacheContext, tag);
-                    edRmt2 = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
-                }
-
-                Console.WriteLine($"A:{edRmt2.Arguments.Count:D2} S:{edRmt2.ShaderMaps.Count:D2} 0x{tag.Index:X4} ");
-            }
-
-            return true;
-        }
-
+        
         public bool ShadowFix(List<string> args)
         {
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
@@ -1904,88 +1712,7 @@ namespace TagTool.Commands.Files
             CacheContext.TagNames[rmt2Instance] = newTagName;
             // Console.WriteLine($"0x{rmt2Instance:X4} {newTagName}");
         }
-
-        public bool AdjustScripts(List<string> args)
-        {
-            var helpMessage =
-                @"Usage: " +
-                @"test AdjustScripts levels\multi\guardian\guardian";
-
-            if (args.Count != 1)
-            {
-                Console.WriteLine(helpMessage);
-                Console.WriteLine("args.Count != 1");
-                return false;
-            }
-
-            var edTagArg = args[0];
-
-            if (!CacheContext.TryGetTag(edTagArg, out var edTag))
-            {
-                Console.WriteLine($"ERROR: cannot find tag {edTag}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            if (!edTag.IsInGroup("scnr"))
-            {
-                Console.WriteLine($"ERROR: tag is not a scenario {edTag}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            if (!CacheContext.TagNames.ContainsKey(edTag.Index))
-            {
-                Console.WriteLine($"CacheContext.TagNames.ContainsKey(edTag.Index) {edTag.Index:X4}");
-                return false;
-            }
-
-            var tagName = CacheContext.TagNames[edTag.Index].Split("\\".ToCharArray()).Last();
-
-            if (!DisabledScriptsString.ContainsKey(tagName))
-            {
-                Console.WriteLine("!DisabledScriptsString.ContainsKey(tagName)");
-                return false;
-            }
-
-            Scenario scnr;
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                scnr = CacheContext.Deserializer.Deserialize<Scenario>(edContext);
-            }
-
-            foreach (var line in DisabledScriptsString[tagName])
-            {
-                var items = line.Split(",".ToCharArray());
-
-                var scriptIndex = Convert.ToInt32(items[0]);
-
-                uint.TryParse(items[2], NumberStyles.HexNumber, null, out uint NextExpressionHandle);
-                ushort.TryParse(items[3], NumberStyles.HexNumber, null, out ushort Opcode);
-                byte.TryParse(items[4].Substring(0, 2), NumberStyles.HexNumber, null, out byte data0);
-                byte.TryParse(items[4].Substring(2, 2), NumberStyles.HexNumber, null, out byte data1);
-                byte.TryParse(items[4].Substring(4, 2), NumberStyles.HexNumber, null, out byte data2);
-                byte.TryParse(items[4].Substring(6, 2), NumberStyles.HexNumber, null, out byte data3);
-
-                scnr.ScriptExpressions[scriptIndex].NextExpressionHandle = NextExpressionHandle;
-                scnr.ScriptExpressions[scriptIndex].Opcode = Opcode;
-                scnr.ScriptExpressions[scriptIndex].Data[0] = data0;
-                scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
-                scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
-                scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
-            }
-
-            using (var stream = CacheContext.TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var context = new TagSerializationContext(stream, CacheContext, edTag);
-                CacheContext.Serializer.Serialize(context, scnr);
-            }
-
-            return true;
-
-        }
-
+        
         public bool AdjustScriptsFromFile(List<string> args)
         {
             var helpMessage =
@@ -2087,155 +1814,7 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-
-        public bool BatchTagDepAdd(List<string> args)
-        {
-            var helpMessage =
-                "Usage: " +
-                "test BatchTagDepAdd 0x0 0x1234 0x4567 rmsh" +
-                "test BatchTagDepAdd <main tag> <first tag dep> <last tag dep> <tag class>" +
-                "Add new tag dependencies to the first specified tag. Add all the tags between the second and the last specified tags.";
-
-            if (args.Count != 4)
-            {
-                Console.WriteLine(helpMessage);
-                Console.WriteLine("args.Count != 4");
-                return false;
-            }
-
-            var tag1arg = args[0];
-            var tag2arg = args[1];
-            var tag3arg = args[2];
-            var tagClas = args[3];
-
-            if (!CacheContext.TryGetTag(tag1arg, out var tag1))
-            {
-                Console.WriteLine($"ERROR: cannot find tag {tag1}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            if (!CacheContext.TryGetTag(tag2arg, out var tag2))
-            {
-                Console.WriteLine($"ERROR: cannot find tag {tag2}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            if (!CacheContext.TryGetTag(tag3arg, out var tag3))
-            {
-                Console.WriteLine($"ERROR: cannot find tag {tag3}");
-                Console.WriteLine(helpMessage);
-                return false;
-            }
-
-            var dependencies = new List<int>();
-
-            // foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(args[4]))
-            foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(tagClas))
-            {
-                if (tag.Index < tag2.Index)
-                    continue;
-
-                if (tag.Index > tag3.Index)
-                    break;
-
-                dependencies.Add(tag.Index);
-            }
-
-            // Based on TagDependencyCommand
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var data = CacheContext.TagCache.ExtractTag(stream, tag1);
-
-                foreach (var dependency in dependencies)
-                {
-                    if (data.Dependencies.Add(dependency))
-                        Console.WriteLine("Added dependency on tag {0:X8}.", dependency);
-                    else
-                        Console.Error.WriteLine("Tag {0:X8} already depends on tag {1:X8}.", tag1.Index, dependency);
-                }
-
-                CacheContext.TagCache.SetTagData(stream, tag1, data);
-            }
-
-            return true;
-        }
-
-        private static Dictionary<string, List<string>> DisabledScriptsString = new Dictionary<string, List<string>>
-        {
-            ["005_intro"] = new List<string>
-            {
-                // default scripts:
-                "00000308,E4A70134,E4A90136,0376,3501A8E4,Group,Void,cinematic_skip_stop_internal,",
-                
-                // modified scripts:
-                "00003019,EF3E0BCB,EF440BD1,0424,CC0B3FEF,Group,Void,chud_show_shield,",
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-                "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,",
-            },
-        };
-
-        public static List<string> Halo3MPCommonCacheFiles = new List<string> {
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\guardian.map"   ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\riverworld.map" ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\bunkerworld.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\chill.map"      ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\cyberdyne.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\deadlock.map"   ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\shrine.map"     ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\zanzibar.map"   ,
-        };
-
-        public static List<string> Halo3MPUncommonCacheFiles = new List<string> {
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\armory.map"     ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\chillout.map"   ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\construct.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\descent.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\docks.map"      ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\fortress.map"   ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\ghosttown.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\isolation.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\lockout.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\midship.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\salvation.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\sandbox.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\sidewinder.map" ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\snowbound.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\spacecamp.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Mythic\maps\warehouse.map"  ,
-        };
-
-        public static List<string> Halo3CampaignCacheFiles = new List<string> {
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\005_intro.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\010_jungle.map"   ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\020_base.map"     ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\030_outskirts.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\040_voi.map"      ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\050_floodvoi.map" ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\070_waste.map"    ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\100_citadel.map"  ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\110_hc.map"       ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\120_halo.map"     ,
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\130_epilogue.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3Campaign\maps\mainmenu.map"   ,
-        };
-
-        public static List<string> Halo3ODSTCacheFiles = new List<string> {
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\mainmenu.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\c100.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\c200.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\h100.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\l200.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\l300.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc100.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc110.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc120.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc130.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc140.map",
-            @"D:\FOLDERS\Xenia\ISO\Halo3ODST\maps\sc150.map",
-        };
-
+        
         private bool IsDiffOrNull(CachedTagInstance a, CachedTagInstance b, CacheFile BlamCache)
         {
             // a is ed tag, b is blam tag
@@ -2256,40 +1835,7 @@ namespace TagTool.Commands.Files
 
             return true;
         }
-
-        private class Item
-        {
-            public int TagIndex;
-            public string Tagname;
-            public string ModeName;
-            public uint Checksum;
-        }
-
-        [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1D0, MinVersion = CacheVersion.HaloOnline106708)]
-        public class RenderModel_materials
-        {
-            public StringId Name;
-            public int Padding0;
-            public int Padding1;
-            public int Padding2;
-            public int Padding3;
-            public int Padding4;
-            public int Padding5;
-            public int Padding6;
-            public int Padding7;
-            public int Padding8;
-            public int Padding9;
-            public int PaddingA;
-            public int PaddingB;
-            public int PaddingC;
-            public int PaddingD;
-            public int PaddingE;
-            public int PaddingF;
-            public int Padding10;
-            public List<RenderMaterial> Materials;
-        }
-
+        
         [MethodImpl(MethodImplOptions.NoInlining)]
         public string GetCurrentMethod()
         {
