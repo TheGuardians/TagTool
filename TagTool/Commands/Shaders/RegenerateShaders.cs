@@ -154,7 +154,7 @@ namespace TagTool.Commands.Shaders
                     template_type = "shader_template";
 
                     //TODO: Regenerate all shaders based on RMT2 and set invalid shaders back to null
-                    RegenerateShader(rmt2_definition, pixel_shader, shader_template_args.ToArray(), template_type);
+                    _RegenerateShaders(rmt2_definition, pixel_shader, shader_template_args.ToArray(), template_type);
 
                     break;
                 default:
@@ -301,7 +301,43 @@ namespace TagTool.Commands.Shaders
 #endif
         }
 
-        void RegenerateShader(RenderMethodTemplate rmt2, PixelShader pixl, Int32[] shader_args, string shader_type)
+        bool RegenerateShader(
+            RenderMethodTemplate rmt2,
+            PixelShader pixl,
+            MethodInfo method,
+            Int32[] shader_args,
+            ShaderType type,
+            ShaderStage shaderstage,
+            RenderMethodTemplate.ShaderModeBitmask bit,
+            RenderMethodTemplate.ShaderMode mode
+            )
+        {
+            //TODO: Rewrite this crazyness
+            if ((rmt2.DrawModeBitmask | bit) != 0)
+            {
+                if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(type, shaderstage))
+                {
+                    var GenerateShaderArgs = CreateArguments(method, shaderstage, shader_args);
+
+                    byte[] bytecode = method.Invoke(null, GenerateShaderArgs) as byte[];
+
+                    if (bytecode == null) return false;
+
+                    var offset = pixl.DrawModes[(int)mode].Offset;
+                    var count = pixl.DrawModes[(int)mode].Count;
+
+                    pixl.Shaders[offset].PCShaderBytecode = bytecode;
+
+                    rmt2.DrawModeBitmask |= bit;
+
+                    return true;
+                }
+                // todo, disable it. but for now, we'll just keep the other shaders here
+            }
+            return false;
+        }
+
+        void _RegenerateShaders(RenderMethodTemplate rmt2, PixelShader pixl, Int32[] shader_args, string shader_type)
         {
             switch (shader_type)
             {
@@ -310,51 +346,60 @@ namespace TagTool.Commands.Shaders
 
                     var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
 
-                    //TODO: Lets just replace albedo for now, we need more advanced RMSH > RMT2 > PIXL code for this
-                    // but albedo is always index 0 in an RMSH generated template
-                    var drawmodebitmasl = rmt2.DrawModeBitmask;
-                    RenderMethodTemplate.ShaderModeBitmask newbitmask = 0;
-                    if ((drawmodebitmasl | RenderMethodTemplate.ShaderModeBitmask.Albedo) != 0)
-                    {
-                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Albedo))
-                        {
-                            var GenerateShaderArgs = CreateArguments(GenerateShader, ShaderStage.Albedo, shader_args);
 
-                            byte[] bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
+                    RegenerateShader(
+                        rmt2,
+                        pixl,
+                        GenerateShader,
+                        shader_args,
+                        ShaderType.Shader,
+                        ShaderStage.Albedo,
+                        RenderMethodTemplate.ShaderModeBitmask.Albedo,
+                        RenderMethodTemplate.ShaderMode.Albedo
+                    );
 
-                            if (bytecode == null) return;
+                    RegenerateShader(
+                        rmt2,
+                        pixl,
+                        GenerateShader,
+                        shader_args,
+                        ShaderType.Shader,
+                        ShaderStage.Active_Camo,
+                        RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
+                        RenderMethodTemplate.ShaderMode.Active_Camo
+                    );
 
-                            var offset = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Albedo].Offset;
-                            var count = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Albedo].Count;
+                    RegenerateShader(
+                        rmt2,
+                        pixl,
+                        GenerateShader,
+                        shader_args,
+                        ShaderType.Shader,
+                        ShaderStage.Static_Prt_Ambient,
+                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Ambient,
+                        RenderMethodTemplate.ShaderMode.Static_Prt_Ambient
+                    );
 
-                            pixl.Shaders[offset].PCShaderBytecode = bytecode;
-
-                            newbitmask |= RenderMethodTemplate.ShaderModeBitmask.Albedo;
-                        }
-                        // todo, disable it. but for now, we'll just keep the other shaders here
-                    }
-
-                    if ((drawmodebitmasl | RenderMethodTemplate.ShaderModeBitmask.Active_Camo) != 0)
-                    {
-                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Active_Camo))
-                        {
-                            var GenerateShaderArgs = CreateArguments(GenerateShader, ShaderStage.Active_Camo, shader_args);
-
-                            byte[] bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
-
-                            if (bytecode == null) return;
-
-                            var offset = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Active_Camo].Offset;
-                            var count = pixl.DrawModes[(int)RenderMethodTemplate.ShaderMode.Active_Camo].Count;
-
-                            pixl.Shaders[offset].PCShaderBytecode = bytecode;
-
-                            newbitmask |= RenderMethodTemplate.ShaderModeBitmask.Active_Camo;
-                        }
-                        // todo, disable it. but for now, we'll just keep the other shaders here
-                    }
-
-                    //rmt2.DrawModeBitmask = newbitmask;
+                    RegenerateShader(
+                        rmt2,
+                        pixl,
+                        GenerateShader,
+                        shader_args,
+                        ShaderType.Shader,
+                        ShaderStage.Static_Prt_Linear,
+                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Linear,
+                        RenderMethodTemplate.ShaderMode.Static_Prt_Linear
+                    );
+                    RegenerateShader(
+                        rmt2,
+                        pixl,
+                        GenerateShader,
+                        shader_args,
+                        ShaderType.Shader,
+                        ShaderStage.Static_Prt_Quadratic,
+                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Quadratic,
+                        RenderMethodTemplate.ShaderMode.Static_Prt_Quadratic
+                    );
 
                     break;
 
