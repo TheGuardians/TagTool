@@ -64,7 +64,7 @@ namespace TagTool.Commands.Shaders
 
         private void ProcessInstance(
             int index,
-            IEnumerable<CachedTagInstance> shader_instances,
+            CachedTagInstance[] shader_instances,
             IEnumerable<int> shader_rmdfs_ids,
             ConcurrentBag<int> serilaizedRmt2,
             ConcurrentBag<TagSerializationPair> serializationPairs,
@@ -225,16 +225,17 @@ namespace TagTool.Commands.Shaders
             {
                 shader_rmdfs = shader_rmdfs.Where(rmdf => TagDefinition.Find(rmdf.Group.Tag) == typeof(RenderMethodDefinition));
                 shader_rmdfs_ids = shader_rmdfs.Select(rmdf => rmdf.Index);
+                shader_rmdfs_ids = new int[] { shader_rmdfs_ids.FirstOrDefault() };
             }
 
-            IEnumerable<CachedTagInstance> shader_instances = null;
+            CachedTagInstance[] shader_instances = null;
             if (template_type != null)
             {
-                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == template_type);
+                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && TagDefinition.Find(instance.Group.Tag) == template_type).ToArray();
             }
             else
             {
-                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && SupportedShaderTypes.Contains(TagDefinition.Find(instance.Group.Tag)));
+                shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && SupportedShaderTypes.Contains(TagDefinition.Find(instance.Group.Tag))).ToArray();
             }
 
             var num_shader_instances = shader_instances.Count();
@@ -366,27 +367,27 @@ namespace TagTool.Commands.Shaders
 
                     var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
 
-                    RegenerateShader(
-                        rmt2,
-                        pixl,
-                        GenerateShader,
-                        shader_args,
-                        ShaderType.Shader,
-                        ShaderStage.Albedo,
-                        RenderMethodTemplate.ShaderModeBitmask.Albedo,
-                        RenderMethodTemplate.ShaderMode.Albedo
-                    );
+                    //RegenerateShader(
+                    //    rmt2,
+                    //    pixl,
+                    //    GenerateShader,
+                    //    shader_args,
+                    //    ShaderType.Shader,
+                    //    ShaderStage.Albedo,
+                    //    RenderMethodTemplate.ShaderModeBitmask.Albedo,
+                    //    RenderMethodTemplate.ShaderMode.Albedo
+                    //);
 
-                    RegenerateShader(
-                        rmt2,
-                        pixl,
-                        GenerateShader,
-                        shader_args,
-                        ShaderType.Shader,
-                        ShaderStage.Active_Camo,
-                        RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
-                        RenderMethodTemplate.ShaderMode.Active_Camo
-                    );
+                    //RegenerateShader(
+                    //    rmt2,
+                    //    pixl,
+                    //    GenerateShader,
+                    //    shader_args,
+                    //    ShaderType.Shader,
+                    //    ShaderStage.Active_Camo,
+                    //    RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
+                    //    RenderMethodTemplate.ShaderMode.Active_Camo
+                    //);
 
                     RegenerateShader(
                         rmt2,
@@ -399,26 +400,26 @@ namespace TagTool.Commands.Shaders
                         RenderMethodTemplate.ShaderMode.Static_Prt_Ambient
                     );
 
-                    RegenerateShader(
-                        rmt2,
-                        pixl,
-                        GenerateShader,
-                        shader_args,
-                        ShaderType.Shader,
-                        ShaderStage.Static_Prt_Linear,
-                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Linear,
-                        RenderMethodTemplate.ShaderMode.Static_Prt_Linear
-                    );
-                    RegenerateShader(
-                        rmt2,
-                        pixl,
-                        GenerateShader,
-                        shader_args,
-                        ShaderType.Shader,
-                        ShaderStage.Static_Prt_Quadratic,
-                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Quadratic,
-                        RenderMethodTemplate.ShaderMode.Static_Prt_Quadratic
-                    );
+                    //RegenerateShader(
+                    //    rmt2,
+                    //    pixl,
+                    //    GenerateShader,
+                    //    shader_args,
+                    //    ShaderType.Shader,
+                    //    ShaderStage.Static_Prt_Linear,
+                    //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Linear,
+                    //    RenderMethodTemplate.ShaderMode.Static_Prt_Linear
+                    //);
+                    //RegenerateShader(
+                    //    rmt2,
+                    //    pixl,
+                    //    GenerateShader,
+                    //    shader_args,
+                    //    ShaderType.Shader,
+                    //    ShaderStage.Static_Prt_Quadratic,
+                    //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Quadratic,
+                    //    RenderMethodTemplate.ShaderMode.Static_Prt_Quadratic
+                    //);
 
                     break;
 
