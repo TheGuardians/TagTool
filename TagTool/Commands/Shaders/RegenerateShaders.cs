@@ -65,7 +65,7 @@ namespace TagTool.Commands.Shaders
         private void ProcessInstance(
             int index,
             IEnumerable<CachedTagInstance> shader_instances,
-            CachedTagInstance shader_rmdf,
+            IEnumerable<int> shader_rmdfs_ids,
             ConcurrentBag<int> serilaizedRmt2,
             ConcurrentBag<TagSerializationPair> serializationPairs,
             MemoryStream[] read_memory_streams,
@@ -81,21 +81,23 @@ namespace TagTool.Commands.Shaders
             // get shader
             RenderMethod rm_shader_definition = null;
             Type rm_shader_type = null;
+            TagSerializationContext rm_shader_context = null;
             string rmdf_name = null;
             {
                 memory_stream.Position = 0;
-                var rmsh_context = new TagSerializationContext(memory_stream, CacheContext, instance);
+                rm_shader_context = new TagSerializationContext(memory_stream, CacheContext, instance);
 
                 // if there is no dependency on the rmsh, early exit
-                if (shader_rmdf != null && !rmsh_context.Tag.Dependencies.Contains(shader_rmdf.Index))
+
+                if (shader_rmdfs_ids != null && !rm_shader_context.Tag.Dependencies.Intersect(shader_rmdfs_ids).Any())
                 {
                     mutex.ReleaseMutex();
                     return;
                 }
-                rm_shader_type = TagDefinition.Find(rmsh_context.Tag.Group.Tag);
-                rm_shader_definition = CacheContext.Deserializer.Deserialize(rmsh_context, rm_shader_type) as RenderMethod;
+                rm_shader_type = TagDefinition.Find(rm_shader_context.Tag.Group.Tag);
+                rm_shader_definition = CacheContext.Deserializer.Deserialize(rm_shader_context, rm_shader_type) as RenderMethod;
                 // double check to make sure this is the correct render method definition
-                if (shader_rmdf != null && rm_shader_definition.BaseRenderMethod.Index != shader_rmdf.Index)
+                if (shader_rmdfs_ids != null && !shader_rmdfs_ids.Contains(rm_shader_definition.BaseRenderMethod.Index))
                 {
                     mutex.ReleaseMutex();
                     return;
@@ -201,13 +203,15 @@ namespace TagTool.Commands.Shaders
 
 
             Type template_type = null;
-            CachedTagInstance shader_rmdf = null;
+            IEnumerable<CachedTagInstance> shader_rmdfs = null;
+            IEnumerable<int> shader_rmdfs_ids = null;
             switch (template_name)
             {
                 case "shader_templates":
                 case "shader_template":
                     template_type = typeof(Shader);
-                    shader_rmdf = CacheContext.GetTag<RenderMethodDefinition>("shaders\\shader");
+                    //shader_rmdf = CacheContext.GetTag<RenderMethodDefinition>("shaders\\shader");
+                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == "shaders\\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
                     break;
 
                 case "*":
@@ -216,6 +220,11 @@ namespace TagTool.Commands.Shaders
                 default:
                     Console.WriteLine("Invalid template_type");
                     break;
+            }
+            if(shader_rmdfs != null)
+            {
+                shader_rmdfs = shader_rmdfs.Where(rmdf => TagDefinition.Find(rmdf.Group.Tag) == typeof(RenderMethodDefinition));
+                shader_rmdfs_ids = shader_rmdfs.Select(rmdf => rmdf.Index);
             }
 
             IEnumerable<CachedTagInstance> shader_instances = null;
@@ -256,7 +265,7 @@ namespace TagTool.Commands.Shaders
                     ProcessInstance(
                         (int)index,
                         shader_instances,
-                        shader_rmdf,
+                        shader_rmdfs_ids,
                         serilaizedRmt2,
                         serialization_pairs_bag,
                         read_memory_streams,
@@ -319,6 +328,17 @@ namespace TagTool.Commands.Shaders
                 {
                     var GenerateShaderArgs = CreateArguments(method, shaderstage, shader_args);
 
+                    //TODO: Remove this
+                    switch(shaderstage)
+                    {
+                        case ShaderStage.Albedo:
+                            Albedo albedo = GenerateShaderArgs.Where(x => x.GetType() == typeof(Albedo)).Cast<Albedo>().FirstOrDefault();
+                            if (albedo > Albedo.Two_Detail_Black_Point) return false; // saber territory
+                            Bump_Mapping bumpmapping = GenerateShaderArgs.Where(x => x.GetType() == typeof(Bump_Mapping)).Cast<Bump_Mapping>().FirstOrDefault();
+                            if (bumpmapping > Bump_Mapping.Detail) return false; // saber territory
+                            break;
+                    }
+
                     byte[] bytecode = method.Invoke(null, GenerateShaderArgs) as byte[];
 
                     if (bytecode == null) return false;
@@ -345,7 +365,6 @@ namespace TagTool.Commands.Shaders
                 case "shader_template":
 
                     var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
-
 
                     RegenerateShader(
                         rmt2,
