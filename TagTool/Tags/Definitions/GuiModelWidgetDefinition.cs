@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown7;
+        public float Zoom;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown8;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
