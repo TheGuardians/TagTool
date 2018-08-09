@@ -86,41 +86,20 @@ namespace TagTool.Tags.Definitions
             public float Unknown4;
             public float BipedAngle; //[0 to 1]
             public uint Unknown6;
-            public float BaseOffsetX;  //[0 to -1]
-            public float BaseOffsetY;
-
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public RealPoint2d BaseOffsetOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float BaseOffsetZ;
+            public RealPoint3d BaseOffsetNew;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown10;
+            public RealVector3d Unknown10;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown11;
+            public RealVector3d Unknown13;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown12;
+            public RealVector3d Unknown16;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown13;
+            public RealVector3d Unknown19;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown14;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown15;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown16;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown17;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown18;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown19;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown20;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown21;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown22;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown23;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown24;
+            public RealVector3d Unknown22;
 
             public List<ZoomData> ZoomData1;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -162,10 +141,8 @@ namespace TagTool.Tags.Definitions
         public class TexCam
         {
             public StringId Name;
-            public uint xBoundsmin;
-            public uint xBoundsmax;
-            public uint yBoundsmin;
-            public uint yBoundsmax;
+            public Bounds<float> XBounds;   
+            public Bounds<float> YBounds;
         }
     }
 }

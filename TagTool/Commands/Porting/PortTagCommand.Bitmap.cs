@@ -132,6 +132,10 @@ namespace TagTool.Commands.Porting
             byte[] raw = new byte[0];
             var rawSize = blamBitmap.Type == BitmapType.CubeMap ? blamBitmap.RawSize * 6 : blamBitmap.RawSize;
 
+            //very hacky fix for a very rare format in which a black and white image is stored in a colored format, needs proper fix
+            if (blamBitmap.Format == BitmapFormat.A4R4G4B4)
+                blamBitmap.Format = BitmapFormat.A8Y8;
+
 #if !DEBUG
             try
             {
