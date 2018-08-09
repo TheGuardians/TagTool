@@ -23,7 +23,7 @@ namespace TagTool.Tags.Definitions
         public short StandardYBoundsMax;
         public short StandardXBoundsMax;
         public CachedTagInstance Animation;
-        public List<CameraRefinement> Bipeds;
+        public List<CameraRefinement> CameraControl;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown2;
@@ -40,33 +40,33 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown8;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> Unknown9;
+        public List<UnknownBlock> ZoomFunction;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown10;
+        public ushort MovementLeft;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown11;
+        public ushort MovementRight;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown12;
+        public ushort MovementUp;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown13;
+        public ushort MovementDown;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort Unknown14;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort Unknown15;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown16;
+        public ushort ZoomIn;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown17;
+        public ushort ZoomOut;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown18;
+        public ushort RotateLeft;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown19;
+        public ushort RotateRight;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort Unknown20;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort Unknown21;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock2> Unknown22;
+        public List<TexCam> TextureCameraSections;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown23;
@@ -83,14 +83,14 @@ namespace TagTool.Tags.Definitions
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
-            public uint Unknown4;
-            public uint BipedAngle; //[0 to 1]
+            public float Unknown4;
+            public float BipedAngle; //[0 to 1]
             public uint Unknown6;
-            public uint DistancefromCamera;  //[0 to -1]
-            public uint Unknown8;
+            public float BaseOffsetX;  //[0 to -1]
+            public float BaseOffsetY;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown9;
+            public float BaseOffsetZ;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Unknown10;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -159,13 +159,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock2
+        public class TexCam
         {
-            public StringId Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
+            public StringId Name;
+            public uint xBoundsmin;
+            public uint xBoundsmax;
+            public uint yBoundsmin;
+            public uint yBoundsmax;
         }
     }
 }
