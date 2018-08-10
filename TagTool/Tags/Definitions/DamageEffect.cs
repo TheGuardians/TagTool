@@ -42,7 +42,7 @@ namespace TagTool.Tags.Definitions
         public float Unknown2;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown3;
+        public float Unknown3 = 1.0f;
 
         public List<PlayerResponseBlock> PlayerResponses;
         public CachedTagInstance DamageResponse;
@@ -70,15 +70,12 @@ namespace TagTool.Tags.Definitions
         public float OutwardRadius;
         public float OutwardExponent;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
-        
         public enum SideEffectValue : short
         {
             None,
             Harmless,
             LethalToTheUnsuspecting,
-            Emp,
+            Emp
         }
 
         public enum CategoryValue : short
@@ -95,7 +92,7 @@ namespace TagTool.Tags.Definitions
             Vehicle,
             Plasma,
             Needle,
-            Shotgun,
+            Shotgun
         }
 
         [TagStructure(Size = 0x70)]
@@ -109,10 +106,7 @@ namespace TagTool.Tags.Definitions
             public FunctionType FadeFunction;
             public short Unknown2;
             public float MaximumIntensity;
-            public float ColorAlpha;
-            public float ColorRed;
-            public float ColorGreen;
-            public float ColorBlue;
+            public RealArgbColor Color;
             public float LowFrequencyVibrationDuration;
             public TagFunction LowFrequencyVibrationFunction = new TagFunction { Data = new byte[0] };
             public float HighFrequencyVibrationDuration;
@@ -125,7 +119,7 @@ namespace TagTool.Tags.Definitions
             {
                 Shielded,
                 Unshielded,
-                All,
+                All
             }
 
             public enum TypeValue : short
@@ -136,14 +130,14 @@ namespace TagTool.Tags.Definitions
                 Max,
                 Min,
                 Invert,
-                Tint,
+                Tint
             }
 
             public enum PriorityValue : short
             {
                 Low,
                 Medium,
-                High,
+                High
             }
         }
 
@@ -160,7 +154,7 @@ namespace TagTool.Tags.Definitions
             Noise,
             Jitter,
             Wander,
-            Spark,
+            Spark
         }
     }
 }

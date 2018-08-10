@@ -32,334 +32,19 @@ namespace TagTool.Geometry
             CurrentWaterBuffer = 0;
         }
 
-        private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
-        {
-            for (var i = 0; i < count; i++)
-                writeVertex(readVertex(), i);
-        }
-
-        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount)
-        {
-            var vertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
-            var count = vertexBuffer.Count;
-
-            var startPos = (int)outputStream.Position;
-            vertexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, startPos);
-
-            var inVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
-            var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, outputStream);
-
-            OriginalBufferOffsets.Add(inputStream.Position);
-
-            switch (vertexBuffer.Format)
-            {
-                case VertexBufferFormat.World:
-                    ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
-                    {
-                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        outVertexStream.WriteWorldVertex(v);
-                    });
-                    break;
-
-                case VertexBufferFormat.Rigid:
-                    ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
-                    {
-                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        outVertexStream.WriteRigidVertex(v);
-                    });
-                    break;
-
-                case VertexBufferFormat.Skinned:
-                    ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
-                    {
-                        v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
-                        outVertexStream.WriteSkinnedVertex(v);
-                    });
-                    break;
-
-                case VertexBufferFormat.StaticPerPixel:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerPixelData, (v, i) => outVertexStream.WriteStaticPerPixelData(v));
-                    break;
-
-                case VertexBufferFormat.StaticPerVertex:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
-                    {
-                        v.Texcoord1 = ConvertNormal(v.Texcoord1);
-                        v.Texcoord2 = ConvertNormal(v.Texcoord2);
-                        v.Texcoord3 = ConvertNormal(v.Texcoord3);
-                        v.Texcoord4 = ConvertNormal(v.Texcoord4);
-                        v.Texcoord5 = ConvertNormal(v.Texcoord5);
-                        outVertexStream.WriteStaticPerVertexData(v);
-                    });
-                    break;
-
-                case VertexBufferFormat.AmbientPrt:
-                    ConvertVertices(vertexBuffer.Count = previousVertexBufferCount, inVertexStream.ReadAmbientPrtData, (v, i) => outVertexStream.WriteAmbientPrtData(v));
-                    break;
-
-                case VertexBufferFormat.LinearPrt:
-                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) =>
-                    {
-                        v.BlendWeight = ConvertNormal(v.BlendWeight);
-                        outVertexStream.WriteLinearPrtData(v);
-                    });
-                    break;
-
-                case VertexBufferFormat.QuadraticPrt:
-                    ConvertVertices(count, inVertexStream.ReadQuadraticPrtData, (v, i) => outVertexStream.WriteQuadraticPrtData(v));
-                    break;
-
-                case VertexBufferFormat.StaticPerVertexColor:
-                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexColorData, (v, i) => outVertexStream.WriteStaticPerVertexColorData(v));
-                    break;
-
-                case VertexBufferFormat.Decorator:
-                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) => outVertexStream.WriteDecoratorVertex(v));
-                    break;
-
-                case VertexBufferFormat.World2:
-                    vertexBuffer.Format = VertexBufferFormat.World;
-                    goto case VertexBufferFormat.World;
-
-                case VertexBufferFormat.Unknown1A:
-
-                    var waterData = WaterData[CurrentWaterBuffer];
-
-                    // Reformat Vertex Buffer
-                    vertexBuffer.Format = VertexBufferFormat.World;
-                    vertexBuffer.VertexSize = 0x34;
-                    vertexBuffer.Count = waterData.IndexBufferLength;
-
-                    // Create list of indices for later use.
-                    Unknown1BIndices = new List<ushort>();
-
-                    for(int k = 0; k < waterData.PartData.Count(); k++)
-                    {
-                        Tuple<int, int, bool> currentPartData = waterData.PartData[k];
-
-                        // Not water, add garbage data
-                        if(currentPartData.Item3 == false)
-                        {
-                            for (int j = 0; j < currentPartData.Item2; j++)
-                                WriteUnusedWorldWaterData(outputStream);
-                        }
-                        else
-                        {
-                            ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
-                            {
-                                // Store current stream position
-                                var tempStreamPosition = inputStream.Position;
-
-                                // Open previous world buffer (H3)
-                                var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
-                                inputStream.Position = worldVertexBufferBasePosition;
-
-                                for (int j = 0; j < 3; j++)
-                                {
-                                    inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
-
-                                    WorldVertex w = inVertexStream.ReadWorldVertex();
-
-                                    Unknown1BIndices.Add(v.Indices[j]);
-
-                                    // The last 2 floats in WorldWater are unknown.
-
-                                    outVertexStream.WriteWorldWaterVertex(w);
-                                }
-
-                                // Restore position for reading the next vertex correctly
-                                inputStream.Position = tempStreamPosition;
-                            });
-                        }
-                    }
-
-
-                    
-                    break;
-
-                case VertexBufferFormat.Unknown1B:
-
-                    var waterDataB = WaterData[CurrentWaterBuffer];
-
-                    // Adjust vertex size to match HO. Set count of vertices
-
-                    vertexBuffer.VertexSize = 0x18;
-
-                    var originalCount = vertexBuffer.Count;       
-                    vertexBuffer.Count = waterDataB.IndexBufferLength;
-
-                    var basePosition = inputStream.Position;
-                    var unknown1BPosition = 0;
-
-                    for (int k = 0; k < waterDataB.PartData.Count(); k++)
-                    {
-                        Tuple<int, int, bool> currentPartData = waterDataB.PartData[k];
-
-                        // Not water, add garbage data
-                        if (currentPartData.Item3 == false)
-                        {
-                            for(int j =0; j<currentPartData.Item2; j++)
-                                WriteUnusedUnknown1BData(outputStream);
-                        }
-                        else
-                        {
-                            for (int j = unknown1BPosition; j < Unknown1BIndices.Count() && j- unknown1BPosition < currentPartData.Item2; j++)
-                            {
-                                inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
-                                ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
-                                unknown1BPosition++;
-                            }
-                        }
-                    }
-
-                    // Get to the end of Unknown1B in H3 data
-                    inputStream.Position = basePosition + originalCount * 0x24;
-
-                    CurrentWaterBuffer++;
-
-                    break;
-
-                case VertexBufferFormat.ParticleModel:
-                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) => outVertexStream.WriteParticleModelVertex(v));
-                    break;
-
-                case VertexBufferFormat.TinyPosition:
-                    ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) => 
-                    {
-                        v.Position = ConvertPositionShort(v.Position);
-                        v.Variant = (ushort) ((v.Variant >> 8) & 0xFF);
-                        v.Normal = ConvertNormal(v.Normal);
-                        outVertexStream.WriteTinyPositionVertex(v);
-                    });
-                    break;
-
-                default:
-                    throw new NotSupportedException(vertexBuffer.Format.ToString());
-            }
-
-            vertexBuffer.Data.Size = (int)outputStream.Position - startPos;
-            vertexBuffer.VertexSize = (short)(vertexBuffer.Data.Size / vertexBuffer.Count);
-        }
-
-        public void WriteUnusedWorldWaterData(Stream outputStream)
-        {
-            byte[] data = new byte[4] { 0xCD, 0xCD, 0xCD, 0xCD };
-            for(int i = 0; i < 13; i++)
-            {
-                outputStream.Write(data, 0, 4);
-            }
-        }
-
-        public void WriteUnusedUnknown1BData(Stream outputStream)
-        {
-            byte[] data = new byte[4] { 0x00, 0x00, 0x00, 0x00 };
-            for (int i = 0; i < 6; i++)
-            {
-                outputStream.Write(data, 0, 4);
-            }
-        }
-
-        public void ConvertIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int indexBufferIndex)
-        {
-            var indexBuffer = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
-
-            var indexCount = indexBuffer.Data.Size / 2;
-
-            var inIndexStream = new IndexBufferStream(
-                inputStream, 
-                EndianFormat.BigEndian);
-
-            var outIndexStream = new IndexBufferStream(
-                outputStream,
-                EndianFormat.LittleEndian);
-
-            StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
-
-            for (var j = 0; j < indexCount; j++)
-                outIndexStream.WriteIndex(inIndexStream.ReadIndex());
-        }
-
-        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, int count)
-        {
-            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
-            {
-                Definition = new IndexBufferDefinition
-                {
-                    Format = IndexBufferFormat.TriangleStrip,
-                    Data = new TagData
-                    {
-                        Size = count * 2,
-                        Unused4 = 0,
-                        Unused8 = 0,
-                        Address = new CacheAddress(),
-                        Unused10 = 0
-                    }
-                }
-            });
-
-            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
-
-            var indexCount = indexBuffer.Data.Size / 2;
-            
-            var outIndexStream = new EndianWriter(
-                outputStream,
-                EndianFormat.LittleEndian);
-
-            StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
-
-            for (var j = 0; j < indexCount; j++)
-                outIndexStream.Write((short)j);
-
-            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
-        }
-
-        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, List<ushort> buffer)
-        {
-            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
-            {
-                Definition = new IndexBufferDefinition
-                {
-                    Format = IndexBufferFormat.TriangleStrip,
-                    Data = new TagData
-                    {
-                        Size = buffer.Count() * 2,
-                        Unused4 = 0,
-                        Unused8 = 0,
-                        Address = new CacheAddress(),
-                        Unused10 = 0
-                    }
-                }
-            });
-
-            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
-
-            var indexCount = indexBuffer.Data.Size / 2;
-
-            var outIndexStream = new EndianWriter(
-                outputStream,
-                EndianFormat.LittleEndian);
-
-            StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
-
-            for (var j = 0; j < indexCount; j++)
-                outIndexStream.Write((short)buffer[j]);
-
-            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
-        }
-
         public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, Dictionary<ResourceLocation, Stream> resourceStreams, PortTagCommand.PortingFlags portingFlags)
         {
+            if (BlamCache.ResourceGestalt == null || BlamCache.ResourceLayoutTable == null)
+                BlamCache.LoadResourceTags();
+
             //
             // Convert byte[] of UnknownBlock
             //
 
-            foreach(var block in geometry.Unknown2)
+            foreach (var block in geometry.Unknown2)
             {
                 var data = block.Unknown3;
-                if(data != null || data.Length != 0)
+                if (data != null || data.Length != 0)
                 {
                     var result = new byte[data.Length];
 
@@ -459,7 +144,7 @@ namespace TagTool.Geometry
             {
                 Page = new RawPage
                 {
-                    Index = -1,
+                    Index = -1
                 },
                 Resource = new TagResource
                 {
@@ -468,82 +153,77 @@ namespace TagTool.Geometry
                     DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
                     ResourceFixups = new List<TagResource.ResourceFixup>(),
                     ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                    Unknown2 = 1
                 }
             };
+
+            //
+            // Port Blam resource definition
+            //
+
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
+
+            geometry.Resource.Resource.DefinitionAddress = new CacheAddress((uint)resourceEntry.DefinitionAddress);
+            geometry.Resource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+
+            RenderGeometryApiResourceDefinition resourceDefinition = null;
+
+            if (geometry.Resource.Resource.DefinitionData.Length < 0x30)
+            {
+                resourceDefinition = new RenderGeometryApiResourceDefinition
+                {
+                    VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
+                    IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
+                };
+            }
+            else
+            {
+                using (var definitionStream = new MemoryStream(geometry.Resource.Resource.DefinitionData, true))
+                using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
+                using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
+                {
+                    foreach (var fixup in resourceEntry.ResourceFixups)
+                    {
+                        var newFixup = new TagResource.ResourceFixup
+                        {
+                            BlockOffset = (uint)fixup.BlockOffset,
+                            Address = new CacheAddress((uint)fixup.Address)
+                        };
+
+                        definitionStream.Position = newFixup.BlockOffset;
+                        definitionWriter.Write(newFixup.Address.Value);
+
+                        geometry.Resource.Resource.ResourceFixups.Add(newFixup);
+                    }
+
+                    foreach (var definitionFixup in resourceEntry.ResourceDefinitionFixups)
+                    {
+                        var newDefinitionFixup = new TagResource.ResourceDefinitionFixup
+                        {
+                            Address = new CacheAddress((uint)definitionFixup.Address),
+                            ResourceStructureTypeIndex = definitionFixup.ResourceStructureTypeIndex
+                        };
+
+                        geometry.Resource.Resource.ResourceDefinitionFixups.Add(newDefinitionFixup);
+                    }
+
+                    var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+
+                    definitionStream.Position = geometry.Resource.Resource.DefinitionAddress.Offset;
+                    resourceDefinition = BlamCache.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(dataContext);
+                }
+            }
 
             //
             // Load Blam resource data
             //
 
-            var rsrcData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
 
-            if (rsrcData == null)
+            if (resourceData == null)
+            {
+                geometry.Resource.Resource.Type = TagResourceType.None;
                 return geometry;
-
-            //
-            // Load Blam resource definition
-            //
-
-            var rsrcDefEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
-
-            var rsrcDef = new RenderGeometryApiResourceDefinition
-            {
-                VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
-                IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
-            };
-
-            using (var rsrcDefStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
-            using (var rsrcDefReader = new EndianReader(rsrcDefStream, EndianFormat.BigEndian))
-            {
-                rsrcDefReader.SeekTo(rsrcDefEntry.FixupInformationOffset + (rsrcDefEntry.FixupInformationLength - 24));
-
-                var vertexBufferCount = rsrcDefReader.ReadInt32();
-                rsrcDefReader.Skip(8);
-                var indexBufferCount = rsrcDefReader.ReadInt32();
-
-                rsrcDefReader.SeekTo(rsrcDefEntry.FixupInformationOffset);
-
-                for (var i = 0; i < vertexBufferCount; i++)
-                {
-                    rsrcDef.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
-                    {
-                        Definition = new VertexBufferDefinition
-                        {
-                            Count = rsrcDefReader.ReadInt32(),
-                            Format = (VertexBufferFormat)rsrcDefReader.ReadInt16(),
-                            VertexSize = rsrcDefReader.ReadInt16(),
-                            Data = new TagData
-                            {
-                                Size = rsrcDefReader.ReadInt32(),
-                                Unused4 = rsrcDefReader.ReadInt32(),
-                                Unused8 = rsrcDefReader.ReadInt32(),
-                                Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
-                                Unused10 = rsrcDefReader.ReadInt32()
-                            }
-                        }
-                    });
-                }
-
-                rsrcDefReader.Skip(vertexBufferCount * 12);
-
-                for (var i = 0; i < indexBufferCount; i++)
-                {
-                    rsrcDef.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
-                    {
-                        Definition = new IndexBufferDefinition
-                        {
-                            Format = (IndexBufferFormat)rsrcDefReader.ReadInt32(),
-                            Data = new TagData
-                            {
-                                Size = rsrcDefReader.ReadInt32(),
-                                Unused4 = rsrcDefReader.ReadInt32(),
-                                Unused8 = rsrcDefReader.ReadInt32(),
-                                Address = new CacheAddress(CacheAddressType.Memory, rsrcDefReader.ReadInt32()),
-                                Unused10 = rsrcDefReader.ReadInt32()
-                            }
-                        }
-                    });
-                }
             }
 
             //
@@ -551,12 +231,8 @@ namespace TagTool.Geometry
             //
 
             using (var dataStream = new MemoryStream())
-            using (var blamResourceStream = new MemoryStream(rsrcData))
+            using (var blamResourceStream = new MemoryStream(resourceData))
             {
-                //
-                // Convert Blam render_geometry_api_resource_definition
-                //
-
                 for (int i = 0; i < geometry.Meshes.Count(); i++)
                 {
                     var mesh = geometry.Meshes[i];
@@ -567,12 +243,11 @@ namespace TagTool.Geometry
                         mesh.VertexBufferIndices[6] = mesh.VertexBufferIndices[7];
                         mesh.VertexBufferIndices[7] = temp;
 
-
                         // Get total amount of indices
 
                         int indexCount = 0;
 
-                        foreach(var subpart in mesh.SubParts)
+                        foreach (var subpart in mesh.SubParts)
                             indexCount += subpart.IndexCount;
 
                         WaterConversionData waterData = new WaterConversionData()
@@ -590,16 +265,16 @@ namespace TagTool.Geometry
                     }
                 }
 
-                for (int i = 0, prevVertCount = -1; i < rsrcDef.VertexBuffers.Count; i++, prevVertCount = rsrcDef.VertexBuffers[i - 1].Definition.Count)
+                for (int i = 0, prevVertCount = -1; i < resourceDefinition.VertexBuffers.Count; i++, prevVertCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[i].Offset;
-                    ConvertVertexBuffer(rsrcDef, blamResourceStream, dataStream, i, prevVertCount);
+                    blamResourceStream.Position = resourceDefinition.VertexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[i].Offset;
+                    ConvertVertexBuffer(resourceDefinition, blamResourceStream, dataStream, i, prevVertCount);
                 }
 
-                for (var i = 0; i < rsrcDef.IndexBuffers.Count; i++)
+                for (var i = 0; i < resourceDefinition.IndexBuffers.Count; i++)
                 {
-                    blamResourceStream.Position = rsrcDefEntry.ResourceFixups[rsrcDef.VertexBuffers.Count * 2 + i].Offset;
-                    ConvertIndexBuffer(rsrcDef, blamResourceStream, dataStream, i);
+                    blamResourceStream.Position = resourceDefinition.IndexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[resourceDefinition.VertexBuffers.Count * 2 + i].Offset;
+                    ConvertIndexBuffer(resourceDefinition, blamResourceStream, dataStream, i);
                 }
 
                 foreach (var mesh in geometry.Meshes)
@@ -612,58 +287,28 @@ namespace TagTool.Geometry
                     foreach (var part in mesh.Parts)
                         indexCount += part.IndexCount;
 
-                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(rsrcDef, dataStream, indexCount);
+                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(resourceDefinition, dataStream, indexCount);
                 }
 
                 //
                 // Swap order of water vertex buffers
                 //
 
-                
-
-                for (var i = 0; i < rsrcDef.VertexBuffers.Count; i++)
-                {               
-                    var vertexBuffer = rsrcDef.VertexBuffers[i];
+                for (var i = 0; i < resourceDefinition.VertexBuffers.Count; i++)
+                {
+                    var vertexBuffer = resourceDefinition.VertexBuffers[i];
 
                     if (vertexBuffer.Definition.Format == VertexBufferFormat.Unknown1B)
                     {
                         TagStructureReference<VertexBufferDefinition> temp = vertexBuffer;
-                        rsrcDef.VertexBuffers[i] = rsrcDef.VertexBuffers[i - 1];
-                        rsrcDef.VertexBuffers[i - 1] = temp;
-                    }                  
+                        resourceDefinition.VertexBuffers[i] = resourceDefinition.VertexBuffers[i - 1];
+                        resourceDefinition.VertexBuffers[i - 1] = temp;
+                    }
                 }
 
                 //
                 // Finalize the new ElDorado geometry resource
                 //
-
-                geometry.Resource = new PageableResource
-                {
-                    Page = new RawPage
-                    {
-                        Index = -1
-                    },
-                    Resource = new TagResource
-                    {
-                        Type = TagResourceType.RenderGeometry,
-                        ResourceFixups = new List<TagResource.ResourceFixup>(),
-                        ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
-                        Unknown2 = 1
-                    }
-                };
-
-                dataStream.Position = 0;
-
-                var resourceContext = new ResourceSerializationContext(geometry.Resource);
-                CacheContext.Serializer.Serialize(resourceContext, rsrcDef);
-                geometry.Resource.ChangeLocation(ResourceLocation.Resources);
-                var resource = geometry.Resource;
-
-                if (resource == null)
-                    throw new ArgumentNullException("resource");
-
-                if (!dataStream.CanRead)
-                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
 
                 var cache = CacheContext.GetResourceCache(ResourceLocation.Resources);
 
@@ -678,17 +323,342 @@ namespace TagTool.Geometry
                             resourceStream.CopyTo(resourceStreams[ResourceLocation.Resources]);
                 }
 
-                var dataSize = (int)(dataStream.Length - dataStream.Position);
-                var data = new byte[dataSize];
-                dataStream.Read(data, 0, dataSize);
+                geometry.Resource.ChangeLocation(ResourceLocation.Resources);
 
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Resources], data, out uint compressedSize);
-                resource.Page.CompressedBlockSize = compressedSize;
-                resource.Page.UncompressedBlockSize = (uint)dataSize;
-                resource.DisableChecksum();
+                geometry.Resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Resources], dataStream.ToArray(), out uint compressedSize);
+                geometry.Resource.Page.CompressedBlockSize = compressedSize;
+                geometry.Resource.Page.UncompressedBlockSize = (uint)dataStream.Length;
+                geometry.Resource.DisableChecksum();
+
+                var resourceContext = new ResourceSerializationContext(geometry.Resource);
+                CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             }
 
             return geometry;
+        }
+
+        private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
+        {
+            for (var i = 0; i < count; i++)
+                writeVertex(readVertex(), i);
+        }
+
+        public void ConvertVertexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int vertexBufferIndex, int previousVertexBufferCount)
+        {
+            var vertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+            var count = vertexBuffer.Count;
+
+            var startPos = (int)outputStream.Position;
+            vertexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, startPos);
+
+            var inVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
+            var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, outputStream);
+
+            OriginalBufferOffsets.Add(inputStream.Position);
+
+            switch (vertexBuffer.Format)
+            {
+                case VertexBufferFormat.World:
+                    ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
+                    {
+                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        outVertexStream.WriteWorldVertex(v);
+                    });
+                    break;
+
+                case VertexBufferFormat.Rigid:
+                    ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
+                    {
+                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        outVertexStream.WriteRigidVertex(v);
+                    });
+                    break;
+
+                case VertexBufferFormat.Skinned:
+                    ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
+                    {
+                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        outVertexStream.WriteSkinnedVertex(v);
+                    });
+                    break;
+
+                case VertexBufferFormat.StaticPerPixel:
+                    ConvertVertices(count, inVertexStream.ReadStaticPerPixelData, (v, i) => outVertexStream.WriteStaticPerPixelData(v));
+                    break;
+
+                case VertexBufferFormat.StaticPerVertex:
+                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
+                    {
+                        v.Texcoord1 = ConvertNormal(v.Texcoord1);
+                        v.Texcoord2 = ConvertNormal(v.Texcoord2);
+                        v.Texcoord3 = ConvertNormal(v.Texcoord3);
+                        v.Texcoord4 = ConvertNormal(v.Texcoord4);
+                        v.Texcoord5 = ConvertNormal(v.Texcoord5);
+                        outVertexStream.WriteStaticPerVertexData(v);
+                    });
+                    break;
+
+                case VertexBufferFormat.AmbientPrt:
+                    ConvertVertices(vertexBuffer.Count = previousVertexBufferCount, inVertexStream.ReadAmbientPrtData, (v, i) => outVertexStream.WriteAmbientPrtData(v));
+                    break;
+
+                case VertexBufferFormat.LinearPrt:
+                    ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) =>
+                    {
+                        v.BlendWeight = ConvertNormal(v.BlendWeight);
+                        outVertexStream.WriteLinearPrtData(v);
+                    });
+                    break;
+
+                case VertexBufferFormat.QuadraticPrt:
+                    ConvertVertices(count, inVertexStream.ReadQuadraticPrtData, (v, i) => outVertexStream.WriteQuadraticPrtData(v));
+                    break;
+
+                case VertexBufferFormat.StaticPerVertexColor:
+                    ConvertVertices(count, inVertexStream.ReadStaticPerVertexColorData, (v, i) => outVertexStream.WriteStaticPerVertexColorData(v));
+                    break;
+
+                case VertexBufferFormat.Decorator:
+                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) => outVertexStream.WriteDecoratorVertex(v));
+                    break;
+
+                case VertexBufferFormat.World2:
+                    vertexBuffer.Format = VertexBufferFormat.World;
+                    goto case VertexBufferFormat.World;
+
+                case VertexBufferFormat.Unknown1A:
+
+                    var waterData = WaterData[CurrentWaterBuffer];
+
+                    // Reformat Vertex Buffer
+                    vertexBuffer.Format = VertexBufferFormat.World;
+                    vertexBuffer.VertexSize = 0x34;
+                    vertexBuffer.Count = waterData.IndexBufferLength;
+
+                    // Create list of indices for later use.
+                    Unknown1BIndices = new List<ushort>();
+
+                    for (int k = 0; k < waterData.PartData.Count(); k++)
+                    {
+                        Tuple<int, int, bool> currentPartData = waterData.PartData[k];
+
+                        // Not water, add garbage data
+                        if (currentPartData.Item3 == false)
+                        {
+                            for (int j = 0; j < currentPartData.Item2; j++)
+                                WriteUnusedWorldWaterData(outputStream);
+                        }
+                        else
+                        {
+                            ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
+                            {
+                                // Store current stream position
+                                var tempStreamPosition = inputStream.Position;
+
+                                // Open previous world buffer (H3)
+                                var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
+                                inputStream.Position = worldVertexBufferBasePosition;
+
+                                for (int j = 0; j < 3; j++)
+                                {
+                                    inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
+
+                                    WorldVertex w = inVertexStream.ReadWorldVertex();
+
+                                    Unknown1BIndices.Add(v.Indices[j]);
+
+                                    // The last 2 floats in WorldWater are unknown.
+
+                                    outVertexStream.WriteWorldWaterVertex(w);
+                                }
+
+                                // Restore position for reading the next vertex correctly
+                                inputStream.Position = tempStreamPosition;
+                            });
+                        }
+                    }
+
+
+
+                    break;
+
+                case VertexBufferFormat.Unknown1B:
+
+                    var waterDataB = WaterData[CurrentWaterBuffer];
+
+                    // Adjust vertex size to match HO. Set count of vertices
+
+                    vertexBuffer.VertexSize = 0x18;
+
+                    var originalCount = vertexBuffer.Count;
+                    vertexBuffer.Count = waterDataB.IndexBufferLength;
+
+                    var basePosition = inputStream.Position;
+                    var unknown1BPosition = 0;
+
+                    for (int k = 0; k < waterDataB.PartData.Count(); k++)
+                    {
+                        Tuple<int, int, bool> currentPartData = waterDataB.PartData[k];
+
+                        // Not water, add garbage data
+                        if (currentPartData.Item3 == false)
+                        {
+                            for (int j = 0; j < currentPartData.Item2; j++)
+                                WriteUnusedUnknown1BData(outputStream);
+                        }
+                        else
+                        {
+                            for (int j = unknown1BPosition; j < Unknown1BIndices.Count() && j - unknown1BPosition < currentPartData.Item2; j++)
+                            {
+                                inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
+                                ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
+                                unknown1BPosition++;
+                            }
+                        }
+                    }
+
+                    // Get to the end of Unknown1B in H3 data
+                    inputStream.Position = basePosition + originalCount * 0x24;
+
+                    CurrentWaterBuffer++;
+
+                    break;
+
+                case VertexBufferFormat.ParticleModel:
+                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) => outVertexStream.WriteParticleModelVertex(v));
+                    break;
+
+                case VertexBufferFormat.TinyPosition:
+                    ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) =>
+                    {
+                        v.Position = ConvertPositionShort(v.Position);
+                        v.Variant = (ushort)((v.Variant >> 8) & 0xFF);
+                        v.Normal = ConvertNormal(v.Normal);
+                        outVertexStream.WriteTinyPositionVertex(v);
+                    });
+                    break;
+
+                default:
+                    throw new NotSupportedException(vertexBuffer.Format.ToString());
+            }
+
+            vertexBuffer.Data.Size = (int)outputStream.Position - startPos;
+            vertexBuffer.VertexSize = (short)(vertexBuffer.Data.Size / vertexBuffer.Count);
+
+            resourceDefinition.VertexBuffers[vertexBufferIndex].DefinitionAddress = 0;
+            resourceDefinition.VertexBuffers[vertexBufferIndex].RuntimeAddress = 0;
+        }
+
+        public void WriteUnusedWorldWaterData(Stream outputStream)
+        {
+            byte[] data = new byte[4] { 0xCD, 0xCD, 0xCD, 0xCD };
+            for (int i = 0; i < 13; i++)
+            {
+                outputStream.Write(data, 0, 4);
+            }
+        }
+
+        public void WriteUnusedUnknown1BData(Stream outputStream)
+        {
+            byte[] data = new byte[4] { 0x00, 0x00, 0x00, 0x00 };
+            for (int i = 0; i < 6; i++)
+            {
+                outputStream.Write(data, 0, 4);
+            }
+        }
+
+        public void ConvertIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream inputStream, Stream outputStream, int indexBufferIndex)
+        {
+            var indexBuffer = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+
+            var indexCount = indexBuffer.Data.Size / 2;
+
+            var inIndexStream = new IndexBufferStream(
+                inputStream,
+                EndianFormat.BigEndian);
+
+            var outIndexStream = new IndexBufferStream(
+                outputStream,
+                EndianFormat.LittleEndian);
+
+            StreamUtil.Align(outputStream, 4);
+            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+
+            for (var j = 0; j < indexCount; j++)
+                outIndexStream.WriteIndex(inIndexStream.ReadIndex());
+
+            resourceDefinition.IndexBuffers[indexBufferIndex].DefinitionAddress = 0;
+            resourceDefinition.IndexBuffers[indexBufferIndex].RuntimeAddress = 0;
+        }
+
+        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, int count)
+        {
+            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
+            {
+                Definition = new IndexBufferDefinition
+                {
+                    Format = IndexBufferFormat.TriangleStrip,
+                    Data = new TagData
+                    {
+                        Size = count * 2,
+                        Unused4 = 0,
+                        Unused8 = 0,
+                        Address = new CacheAddress(),
+                        Unused10 = 0
+                    }
+                }
+            });
+
+            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
+
+            var indexCount = indexBuffer.Data.Size / 2;
+
+            var outIndexStream = new EndianWriter(
+                outputStream,
+                EndianFormat.LittleEndian);
+
+            StreamUtil.Align(outputStream, 4);
+            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+
+            for (var j = 0; j < indexCount; j++)
+                outIndexStream.Write((short)j);
+
+            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
+        }
+
+        public ushort CreateIndexBuffer(RenderGeometryApiResourceDefinition resourceDefinition, Stream outputStream, List<ushort> buffer)
+        {
+            resourceDefinition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
+            {
+                Definition = new IndexBufferDefinition
+                {
+                    Format = IndexBufferFormat.TriangleStrip,
+                    Data = new TagData
+                    {
+                        Size = buffer.Count() * 2,
+                        Unused4 = 0,
+                        Unused8 = 0,
+                        Address = new CacheAddress(),
+                        Unused10 = 0
+                    }
+                }
+            });
+
+            var indexBuffer = resourceDefinition.IndexBuffers.Last().Definition;
+
+            var indexCount = indexBuffer.Data.Size / 2;
+
+            var outIndexStream = new EndianWriter(
+                outputStream,
+                EndianFormat.LittleEndian);
+
+            StreamUtil.Align(outputStream, 4);
+            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+
+            for (var j = 0; j < indexCount; j++)
+                outIndexStream.Write((short)buffer[j]);
+
+            return (ushort)resourceDefinition.IndexBuffers.IndexOf(resourceDefinition.IndexBuffers.Last());
         }
 
         /// <summary> 
@@ -742,7 +712,7 @@ namespace TagTool.Geometry
         private class WaterConversionData
         {
             // offset, count, isWater
-            public List<Tuple<int,int, bool>> PartData;
+            public List<Tuple<int, int, bool>> PartData;
             public int IndexBufferLength;
 
             public WaterConversionData()
@@ -756,6 +726,4 @@ namespace TagTool.Geometry
             }
         }
     }
-
-    
 }

@@ -69,7 +69,7 @@ namespace TagTool.Tags.Definitions
             {
                 Shielded,
                 Unshielded,
-                All,
+                All
             }
 
             public enum FadeFunctionValue : short
@@ -81,7 +81,7 @@ namespace TagTool.Tags.Definitions
                 VeryEarly,
                 Cosine,
                 Zero,
-                One,
+                One
             }
 
             public enum FalloffFunctionValue : short
@@ -93,7 +93,7 @@ namespace TagTool.Tags.Definitions
                 VeryEarly,
                 Cosine,
                 Zero,
-                One,
+                One
             }
 
             public enum WobbleFunctionValue : short
@@ -109,7 +109,7 @@ namespace TagTool.Tags.Definitions
                 Noise,
                 Jitter,
                 Wander,
-                Spark,
+                Spark
             }
         }
     }
