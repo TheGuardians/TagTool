@@ -583,6 +583,8 @@ namespace TagTool.Commands.Porting
                     for (var i = 0; (i + 1) < info.LipsyncDataLength; i += 2)
                         Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
                 }
+
+                extraInfo.EncodedPermutationSections.Add(newSection);
             }
 
             //Data ref needs endian swapping
