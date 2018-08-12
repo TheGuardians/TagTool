@@ -22,7 +22,7 @@ namespace System
                 var arrayType = array.GetType();
                 var elementType = arrayType.GetElementType();
 
-                result = (Array)Activator.CreateInstance(arrayType, new object[] { });
+                result = (Array)Activator.CreateInstance(arrayType, new object[] {array.Length});
 
                 for (var i = 0; i < array.Length; i++)
                     ((Array)result).SetValue(array.GetValue(i).DeepClone(), i);
@@ -32,7 +32,7 @@ namespace System
 
             result = Activator.CreateInstance(type, new object[] { });
 
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic))
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 field.SetValue(result, field.GetValue(data).DeepClone());
 
             return (T)result;

@@ -95,37 +95,29 @@ namespace TagTool.Audio
             [TagStructure(Size = 0xC)]
             public class UnknownBlock
             {
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public uint Unknown1;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public uint Unknown2;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public uint Unknown3;
-
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public List<UnknownBlock2> Unknown;
 
                 [TagStructure(Size = 0x28)]
                 public class UnknownBlock2
                 {
-                    public uint Unknown;
-                    public uint Unknown2;
-                    public uint Unknown3;
-                    public uint Unknown4;
-                    public List<UnknownBlock> Unknown5;
+                    public float Unknown1;
+                    public float Unknown2;
+                    public float Unknown3;
+                    public float Unknown4;
+                    public List<UnknownBlock2_1> Unknown5;
                     public List<UnknownBlock2_2> Unknown6;
 
                     [TagStructure(Size = 0x8)]
-                    public class UnknownBlock
+                    public class UnknownBlock2_1
                     {
-                        public uint Unknown;
+                        public uint Unknown1;
                         public uint Unknown2;
                     }
 
                     [TagStructure(Size = 0x8)]
                     public class UnknownBlock2_2
                     {
-                        public short Unknown;
+                        public short Unknown1;
                         public short Unknown2;
                         public short Unknown3;
                         public short Unknown4;
