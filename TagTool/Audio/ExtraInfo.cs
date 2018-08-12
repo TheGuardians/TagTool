@@ -118,9 +118,12 @@ namespace TagTool.Audio
                     public class UnknownBlock2_2
                     {
                         public short Unknown1;
-                        public short Unknown2;
-                        public short Unknown3;
-                        public short Unknown4;
+                        public sbyte Unknown2;
+                        public sbyte Unknown3;
+                        public sbyte Unknown4;
+                        public sbyte Unknown5;
+                        public sbyte Unknown6;
+                        public sbyte Unknown7;
                     }
                 }
             }
