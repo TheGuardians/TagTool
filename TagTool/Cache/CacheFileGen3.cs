@@ -284,73 +284,85 @@ namespace TagTool.Cache
                 LoadResourceTags();
 
             EndianReader er;
-            string fName = "";
 
             var Entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
             if (Entry.PlaySegmentIndex == -1) return null;
 
-            var Loc = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
+            var segment = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
 
-            if (Loc.PrimaryPageIndex == -1 || Loc.PrimarySegmentOffset == -1)
-                return null;
-
-            int index = (Loc.SecondaryPageIndex != -1) ? Loc.SecondaryPageIndex : Loc.PrimaryPageIndex;
-            int locOffset = (Loc.SecondarySegmentOffset != -1) ? Loc.SecondarySegmentOffset : Loc.PrimarySegmentOffset;
-
-            if (index == -1 || locOffset == -1) return null;
-
-            if (ResourceLayoutTable.RawPages[index].BlockOffset == -1)
+            using (var dataStream = new MemoryStream())
             {
-                index = Loc.PrimaryPageIndex;
-                locOffset = Loc.PrimarySegmentOffset;
-            }
-
-            var Pool = ResourceLayoutTable.RawPages[index];
-
-            if (Pool.SharedCacheIndex != -1)
-            {
-                fName = ResourceLayoutTable.ExternalCacheReferences[Pool.SharedCacheIndex].MapPath;
-                fName = fName.Substring(fName.LastIndexOf('\\'));
-                fName = File.DirectoryName + fName;
-
-                if (fName == File.FullName)
-                    er = Reader;
-                else
+                if (segment.PrimaryPageIndex != -1 && segment.PrimarySegmentOffset != -1)
                 {
-                    var fs = new FileStream(fName, FileMode.Open, FileAccess.Read);
-                    er = new EndianReader(fs, EndianFormat.BigEndian);
+                    var page = ResourceLayoutTable.RawPages[segment.PrimaryPageIndex];
+
+                    if (page.SharedCacheIndex != -1)
+                    {
+                        var fName = ResourceLayoutTable.ExternalCacheReferences[page.SharedCacheIndex].MapPath;
+                        fName = fName.Substring(fName.LastIndexOf('\\'));
+                        fName = File.DirectoryName + fName;
+
+                        er = (fName != File.FullName) ?
+                            new EndianReader(new FileStream(fName, FileMode.Open, FileAccess.Read), EndianFormat.BigEndian) :
+                            Reader;
+                    }
+                    else
+                        er = Reader;
+
+                    er.SeekTo(int.Parse(VersionInfo.ChildNodes[0].Attributes["rawTableOffset"].Value));
+                    er.SeekTo(page.BlockOffset + er.ReadInt32());
+
+                    var data = er.ReadBytes(page.CompressionCodecIndex == byte.MaxValue ? page.UncompressedBlockSize : page.CompressedBlockSize);
+
+                    using (var reqReader = new BinaryReader(
+                        page.CompressionCodecIndex == byte.MaxValue ?
+                            (Stream)new MemoryStream(data) :
+                            (Stream)new DeflateStream(new MemoryStream(data), CompressionMode.Decompress)))
+                    {
+                        if (segment.PrimarySegmentOffset != -1)
+                            reqReader.BaseStream.Seek(segment.PrimarySegmentOffset, SeekOrigin.Current);
+
+                        dataStream.Write(reqReader.ReadBytes(page.UncompressedBlockSize), 0, page.UncompressedBlockSize);
+                    }
                 }
+
+                if (segment.SecondaryPageIndex != -1 && segment.SecondarySegmentOffset != -1)
+                {
+                    var page = ResourceLayoutTable.RawPages[segment.SecondaryPageIndex];
+
+                    if (page.SharedCacheIndex != -1)
+                    {
+                        var fName = ResourceLayoutTable.ExternalCacheReferences[page.SharedCacheIndex].MapPath;
+                        fName = fName.Substring(fName.LastIndexOf('\\'));
+                        fName = File.DirectoryName + fName;
+
+                        er = (fName != File.FullName) ?
+                            new EndianReader(new FileStream(fName, FileMode.Open, FileAccess.Read), EndianFormat.BigEndian) :
+                            Reader;
+                    }
+                    else
+                        er = Reader;
+
+                    er.SeekTo(int.Parse(VersionInfo.ChildNodes[0].Attributes["rawTableOffset"].Value));
+                    er.SeekTo(page.BlockOffset + er.ReadInt32());
+
+                    var data = er.ReadBytes(page.CompressionCodecIndex == byte.MaxValue ? page.UncompressedBlockSize : page.CompressedBlockSize);
+
+                    using (var reqReader = new BinaryReader(
+                        page.CompressionCodecIndex == byte.MaxValue ?
+                            (Stream)new MemoryStream(data) :
+                            (Stream)new DeflateStream(new MemoryStream(data), CompressionMode.Decompress)))
+                    {
+                        if (segment.SecondarySegmentOffset != -1)
+                            reqReader.BaseStream.Seek(segment.SecondarySegmentOffset, SeekOrigin.Current);
+
+                        dataStream.Write(reqReader.ReadBytes(page.UncompressedBlockSize), 0, page.UncompressedBlockSize);
+                    }
+                }
+
+                return dataStream.ToArray();
             }
-            else
-                er = Reader;
-
-            er.SeekTo(int.Parse(VersionInfo.ChildNodes[0].Attributes["rawTableOffset"].Value));
-            int offset = Pool.BlockOffset + er.ReadInt32();
-            er.SeekTo(offset);
-            byte[] compressed = er.ReadBytes(Pool.CompressedBlockSize);
-            byte[] decompressed = new byte[Pool.UncompressedBlockSize];
-
-            BinaryReader BR = new BinaryReader(new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress));
-            decompressed = BR.ReadBytes(Pool.UncompressedBlockSize);
-            BR.Close();
-            BR.Dispose();
-
-            byte[] data = new byte[(DataLength != -1) ? DataLength : (Pool.UncompressedBlockSize - locOffset)];
-            int length = data.Length;
-   
-            if (length > decompressed.Length)
-                length = decompressed.Length;
-
-            Array.Copy(decompressed, locOffset, data, 0, Math.Min(length, decompressed.Length - locOffset));
-
-            if (er != Reader)
-            {
-                er.Close();
-                er.Dispose();
-            }
-
-            return data;
         }
 
         public override byte[] GetSoundRaw(int ID, int size)

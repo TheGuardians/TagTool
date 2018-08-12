@@ -89,7 +89,7 @@ namespace TagTool.Audio
                 public uint MouthDataOffset;
                 public uint MouthDataLength;
                 public uint LipsyncDataOffset;
-                public uint LipsynceDataLength;
+                public uint LipsyncDataLength;
             }
 
             [TagStructure(Size = 0xC)]

@@ -520,9 +520,9 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
-					foreach (var even in effect.Events)
-						foreach (var particleSystem in even.ParticleSystems)
-							particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+					//foreach (var even in effect.Events)
+						//foreach (var particleSystem in even.ParticleSystems)
+							//particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
 					break;
 
                 case Globals matg:
