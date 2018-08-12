@@ -575,23 +575,18 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var section in BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections)
                 {
-                    if (BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections.Count != 0)
+                    var newSection = section.DeepClone();
+
+                    foreach (var info in newSection.SoundDialogueInfo)
                     {
-                        var newSection = section.DeepClone();
+                        for (var i = 0; (i + 1) < info.MouthDataLength; i += 2)
+                            Array.Reverse(newSection.EncodedData, (int)(info.MouthDataOffset + i), 2);
 
-                        if(newSection.SoundDialogueInfo.Count() > 0)
-                        {
-                            foreach (var info in newSection.SoundDialogueInfo)
-                            {
-                                for (var i = 0; (i + 1) < info.MouthDataLength; i += 2)
-                                    Array.Reverse(newSection.EncodedData, (int)(info.MouthDataOffset + i), 2);
-
-                                for (var i = 0; (i + 1) < info.LipsyncDataLength; i += 2)
-                                    Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
-                            }
-                            extraInfo.EncodedPermutationSections.Add(newSection);
-                        }
+                        for (var i = 0; (i + 1) < info.LipsyncDataLength; i += 2)
+                            Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
                     }
+
+                    extraInfo.EncodedPermutationSections.Add(newSection);
                 }
             }
 
