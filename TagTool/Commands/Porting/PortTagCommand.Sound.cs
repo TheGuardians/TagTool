@@ -579,10 +579,10 @@ namespace TagTool.Commands.Porting
 
                     foreach (var info in newSection.SoundDialogueInfo)
                     {
-                        for (var i = 0; (i + 1) < info.MouthDataLength; i += 2)
+                        for (var i = ((info.MouthDataLength % 2) == 0 ? 0 : 1); (i + 1) < info.MouthDataLength; i += 2)
                             Array.Reverse(newSection.EncodedData, (int)(info.MouthDataOffset + i), 2);
 
-                        for (var i = 0; (i + 1) < info.LipsyncDataLength; i += 2)
+                        for (var i = ((info.LipsyncDataLength % 2) == 0 ? 0 : 1); (i + 1) < info.LipsyncDataLength; i += 2)
                             Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
                     }
 

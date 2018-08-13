@@ -115,7 +115,7 @@ namespace TagTool.Commands.Files
                     var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag);
                     var tagDefinition = CacheContext.Deserialize<Sound>(tagContext);
 
-                    if (tagDefinition.ExtraInfo.Count > 0)
+                    if (tagDefinition.ExtraInfo.Count > 0 && tagDefinition.ExtraInfo[0].EncodedPermutationSections.Count > 0)
                     {
                         var section = tagDefinition.ExtraInfo[0].EncodedPermutationSections[0];
                     }
