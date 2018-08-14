@@ -85,6 +85,10 @@ namespace TagTool.Tags.Definitions
                 public UnitBase_H3 UnitBaseFlags_H3;
 
                 public Editor EditorFlags;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public EngineGeneralH3 EngineGeneralFlags_H3;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public EngineGeneral EngineGeneralFlags;               
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -359,6 +363,28 @@ namespace TagTool.Tags.Definitions
                     EditorHolding = 1 << 2,
                     EditorNotAllowed = 1 << 3,
                     IsEditorBiped = 1 << 4,
+                }
+
+                [Flags]
+                public enum EngineGeneralH3 : ushort
+                {
+                    None,
+                    MotionTracker10M = 1 << 0,
+                    MotionTracker25M = 1 << 1,
+                    MotionTracker75M = 1 << 2,
+                    MotionTracker150M = 1 << 3,
+                    MetagameDebugEnabled = 1 << 4,
+                    Bit5 = 1 << 5,
+                    MetagamePlayer2Exists = 1 << 6,
+                    Bit7 = 1 << 7,
+                    MetagamePlayer3Exists = 1 << 8,
+                    Bit9 = 1 << 9,
+                    MetagamePlayer4Exists = 1 << 10,
+                    Bit11 = 1 << 11,
+                    MetagameScoreAdded = 1 << 12,
+                    MetagameMultikill = 1 << 13,
+                    MetagameScoreRemoved = 1 << 14,
+                    Bit14 = 1 << 15,
                 }
 
                 [Flags]
