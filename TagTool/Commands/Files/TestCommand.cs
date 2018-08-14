@@ -118,6 +118,20 @@ namespace TagTool.Commands.Files
                     if (tagDefinition.ExtraInfo.Count > 0 && tagDefinition.ExtraInfo[0].EncodedPermutationSections.Count > 0)
                     {
                         var section = tagDefinition.ExtraInfo[0].EncodedPermutationSections[0];
+
+                        if (section.Unknown.Count != 0)
+                        {
+                            foreach (var unknown in section.Unknown)
+                            {
+                                if (unknown.Unknown.Count != 0)
+                                {
+                                    foreach (var unknown2 in unknown.Unknown)
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

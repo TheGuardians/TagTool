@@ -437,7 +437,7 @@ namespace TagTool.Serialization
             {
                 case CharSet.Ansi:
                 case CharSet.Unicode:
-                    return reader.ReadNullTerminatedString(valueInfo.Length,valueInfo.CharSet);
+                    return reader.ReadNullTerminatedString(valueInfo.Length, valueInfo.CharSet);
                 default:
                     throw new NotSupportedException($"{valueInfo.CharSet}");
             }

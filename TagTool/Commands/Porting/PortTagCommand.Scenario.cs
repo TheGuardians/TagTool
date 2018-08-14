@@ -228,14 +228,35 @@ namespace TagTool.Commands.Porting
                     for (var i = 0; i < squad.BaseSquad.Count; i++)
                     {
                         var baseSquad = squad.BaseSquad[i];
-                        
-                        foreach (var spawnpoint in baseSquad.StartingLocations)
-                        {
-                            spawnpoint.InitialEquipmentIndex = -1;
-                            spawnpoint.CellIndex = (short)i;
-                            spawnpoint.InitialMovementMode = spawnpoint.InitialMovementMode_H3;
 
-                            squad.SpawnPoints.Add(spawnpoint);
+                        baseSquad.VehicleVariant = (StringId)ConvertData(cacheStream, resourceStreams, baseSquad.VehicleVariant, scnr, tagName);
+                        baseSquad.InitialState = (StringId)ConvertData(cacheStream, resourceStreams, baseSquad.InitialState, scnr, tagName);
+
+                        foreach (var multiState in baseSquad.MultiState)
+                        {
+                            multiState.ActivityName = (StringId)ConvertData(cacheStream, resourceStreams, multiState.ActivityName, scnr, tagName);
+                        }
+
+                        foreach (var spawnPoint in baseSquad.StartingLocations)
+                        {
+                            spawnPoint.Name = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.Name, scnr, tagName);
+
+                            spawnPoint.InitialEquipmentIndex = -1;
+                            spawnPoint.CellIndex = (short)i;
+
+                            spawnPoint.ActorVariant = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.ActorVariant, scnr, tagName);
+                            spawnPoint.VehicleVariant = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.VehicleVariant, scnr, tagName);
+
+                            spawnPoint.InitialMovementMode = spawnPoint.InitialMovementMode_H3;
+
+                            spawnPoint.InitialState = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.InitialState, scnr, tagName);
+
+                            foreach (var point in spawnPoint.Points)
+                            {
+                                point.ActivityName = (StringId)ConvertData(cacheStream, resourceStreams, point.ActivityName, scnr, tagName);
+                            }
+
+                            squad.SpawnPoints.Add(spawnPoint);
                         }
 
                         var designer = new Scenario.Squad.Cell
@@ -291,14 +312,16 @@ namespace TagTool.Commands.Porting
                         }
 
                         designer.GrenadeType = baseSquad.GrenadeType;
-                        designer.VehicleVariant = new StringId(baseSquad.VehicleVariant.Value);
                         designer.VehicleTypeIndex = baseSquad.Vehicle;
+                        designer.VehicleVariant = baseSquad.VehicleVariant;
                         designer.CommandScriptName = baseSquad.CommandScriptName;
                         designer.CommandScriptIndex = baseSquad.CommandScriptIndex;
                         designer.CommandScriptUnknown = 0;
                         designer.InitialState = baseSquad.InitialState;
                         designer.PointSetIndex = baseSquad.PointSetIndex;
                         designer.PatrolMode = baseSquad.PatrolMode;
+
+                        designer.Points = baseSquad.MultiState;
 
                         //Add new cell to the list
                         squad.DesignerCells.Add(designer);
