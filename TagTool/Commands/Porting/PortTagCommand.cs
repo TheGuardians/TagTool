@@ -715,6 +715,9 @@ namespace TagTool.Commands.Porting
                 case BipedPhysicsFlags bipedPhysicsFlags:
                     return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
+                case WeaponFlags weaponFlags:
+                    return ConvertWeaponFlags(weaponFlags);
+
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
                         throw new NotSupportedException(propertyType.Halo2.ToString());
@@ -840,6 +843,14 @@ namespace TagTool.Commands.Porting
                 throw new FormatException(BlamCache.Version.ToString());
 
             return bipedPhysicsFlags;
+        }
+
+        private object ConvertWeaponFlags(WeaponFlags weaponFlags)
+        {
+            if (!Enum.TryParse(weaponFlags.OldFlags.ToString(), out weaponFlags.NewFlags))
+                throw new FormatException(BlamCache.Version.ToString());
+
+            return weaponFlags;
         }
 
         private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
