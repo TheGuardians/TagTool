@@ -345,14 +345,10 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var entry in CacheContext.TagNames.Where(i => i.Value == blamTag.Name))
                 {
-                    var tagInstance = CacheContext.GetTag(entry.Key);
+                    var instance = CacheContext.GetTag(entry.Key);
 
-                    if (tagInstance.Group.Tag == groupTag)
-                    {
-                        edTag = tagInstance;
-                        Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                        return edTag;
-                    }
+                    if (instance.Group.Tag == groupTag)
+                        return edTag = instance;
                 }
             }
             else if (!Flags.HasFlag(PortingFlags.New))
@@ -375,12 +371,7 @@ namespace TagTool.Commands.Porting
                             edTag = instance;
                             break;
                         }
-                        else
-                        {
-                            edTag = instance;
-                            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                            return edTag;
-                        }
+                        else return edTag = instance;
                     }
                 }
             }
