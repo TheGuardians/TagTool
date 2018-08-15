@@ -166,7 +166,6 @@ namespace TagTool.Commands.Porting
 
 		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition H3Definition)
 		{
-
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
