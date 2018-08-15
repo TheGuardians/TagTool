@@ -838,6 +838,9 @@ namespace TagTool.Commands.Porting
 
         private object ConvertWeaponFlags(WeaponFlags weaponFlags)
         {
+            if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
+                weaponFlags.OldFlags &= ~WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode;
+
             if (!Enum.TryParse(weaponFlags.OldFlags.ToString(), out weaponFlags.NewFlags))
                 throw new FormatException(BlamCache.Version.ToString());
 
