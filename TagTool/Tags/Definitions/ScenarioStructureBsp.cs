@@ -610,15 +610,20 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x18)]
                 public class UnknownBlock
                 {
-                    public int Unknown1;
-                    public int Unknown2;
-                    public List<UnknownBlock2> Unknown3;
-                    public int Unknown4;
+                    public sbyte Unknown1;
+                    public sbyte Unknown2;
+                    public sbyte Unknown3;
+                    public sbyte Unknown4;
+                    public short Unknown5;
+                    public short Unknown6;
+                    public List<UnknownBlock2> Unknown7;
+                    public int Unknown8;
 
                     [TagStructure(Size = 0x4)]
                     public class UnknownBlock2
                     {
-                        public int Unknown;
+                        public short Unknown1;
+                        public short Unknown2;
                     }
                 }
             }
