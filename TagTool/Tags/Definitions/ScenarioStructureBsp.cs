@@ -63,7 +63,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown43;
         public List<Marker> Markers;
         public List<TagReferenceBlock> Lights;
-        public List<UnknownBlock3> Unknown44;
+        public List<RuntimeLight> RuntimeLights;
         public List<RuntimeDecal> RuntimeDecals;
         public List<EnvironmentObjectPaletteBlock> EnvironmentObjectPalette;
         public List<EnvironmentObject> EnvironmentObjects;
@@ -259,12 +259,16 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x78)]
         public class UnknownBlock2
         {
-            [TagField(Length = 32)] public string Name;
+            [TagField(Length = 32)]
+            public string Name;
+
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
             public uint Unknown4;
+
             public uint Unknown5;
+
             public uint Unknown6;
             public uint Unknown7;
             public uint Unknown8;
@@ -273,14 +277,18 @@ namespace TagTool.Tags.Definitions
             public uint Unknown11;
             public uint Unknown12;
             public uint Unknown13;
+
             public uint Unknown14;
             public uint Unknown15;
             public uint Unknown16;
             public uint Unknown17;
+
             public uint Unknown18;
             public uint Unknown19;
             public uint Unknown20;
+
             public uint Unknown21;
+
             public uint Unknown22;
         }
 
@@ -581,7 +589,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class Reference
             {
-                public int NodeOrSectorIndex;
+                public short Plane;
+                public short Bsp2dNode;
             }
 
             [TagStructure(Size = 0x14)]
@@ -793,9 +802,9 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-        public class UnknownBlock3
+        public class RuntimeLight
         {
-            public short Unknown;
+            public short LightIndex;
         }
 
         [TagStructure(Size = 0x24)]
@@ -847,11 +856,20 @@ namespace TagTool.Tags.Definitions
             public RealPoint3d Position;
             public float Scale;
             public short PaletteIndex;
-            public short Unknown;
+            public FlagsValue Flags;
+            [TagField(Padding = true, Length = 1)]
+            public byte[] Unused = new byte[1];
             public int UniqueId;
             [TagField(Length = 32)]
             public string ScenarioObjectName;
-            public uint Unknown2;
+            public StringId VariantName;
+
+            [Flags]
+            public enum FlagsValue : byte
+            {
+                None,
+                ScriptsAlwaysRun = 1 << 0
+            }
         }
 
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
@@ -860,17 +878,17 @@ namespace TagTool.Tags.Definitions
         {
             public float Scale;
             public RealMatrix4x3 Matrix;
+            public short InstanceDefinition;
+            public FlagsValue Flags;
             public short MeshIndex;
-            public ushort Flags;
-            public short UnknownYoIndex;
-            public short Unknown;
-            public uint Unknown2;
-            public RealPoint3d BoundingSphereOffset;
+            public short CompressionIndex;
+            public uint SeamBitVector;
+            public RealPoint3d WorldBoundingSphereCenter;
             public Bounds<float> BoundingSphereRadiusBounds;
             public StringId Name;
-            public short PathfindingPolicy;
-            public short LightmappingPolicy;
-            public uint Unknown3;
+            public Scenery.PathfindingPolicyValue PathfindingPolicy;
+            public Scenery.LightmappingPolicyValue LightmappingPolicy;
+            public float LightmapResolutionScale;
             public List<CollisionDefinition> CollisionDefinitions;
             public short Unknown4;
             public short Unknown5;
@@ -878,6 +896,28 @@ namespace TagTool.Tags.Definitions
             public short Unknown7;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public uint Unknown8;
+
+            [Flags]
+            public enum FlagsValue : ushort
+            {
+                None,
+                ContainsSplitLightingParts = 1 << 0,
+                RenderOnly = 1 << 1,
+                DoesNotBlockAoeDamage = 1 << 2,
+                Collidable = 1 << 3,
+                ContainsDecalParts = 1 << 4,
+                ContainsWaterParts = 1 << 5,
+                NegativeScale = 1 << 6,
+                OutsideMap = 1 << 7,
+                SeamColliding = 1 << 8,
+                ContainsDeferredReflections = 1 << 9,
+                RemoveFromShadowGeometry = 1 << 10,
+                CinemaOnly = 1 << 11,
+                ExcludeFromCinema = 1 << 12,
+                DisableFX = 1 << 13,
+                DisablePlayCollision = 1 << 14,
+                DisableBulletCollision = 1 << 15
+            }
 
             [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail, Align = 0x10)]
             [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST, Align = 0x10)]

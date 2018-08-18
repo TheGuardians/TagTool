@@ -158,10 +158,13 @@ namespace TagTool.Commands.Porting
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
                 for (var i = 0; i < resourceDefinition.UnknownRaw1sts.Count; i++)
-                    CacheContext.Serializer.Serialize(dataContext,
-                        BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.UnknownRaw1sts[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext));
+                {
+                    var element = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.UnknownRaw1sts[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext);
+
+                    CacheContext.Serializer.Serialize(dataContext, element);
+                }
 
                 //
                 // UnknownRaw7ths
@@ -177,10 +180,13 @@ namespace TagTool.Commands.Porting
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
                 for (var i = 0; i < resourceDefinition.UnknownRaw7ths.Count; i++)
-                    CacheContext.Serializer.Serialize(dataContext,
-                        BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.UnknownRaw7ths[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext));
+                {
+                    var element = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.UnknownRaw7ths[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext);
+
+                    CacheContext.Serializer.Serialize(dataContext, element);
+                }
 
                 if (BlamCache.Version < CacheVersion.Halo3ODST && bsp.PathfindingData.Count != 0)
                 {
