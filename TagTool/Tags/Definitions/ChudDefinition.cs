@@ -77,10 +77,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public MultiplayerEvents MultiplayerEventsFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public UnitBase UnitBaseFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public UnitBase_ODST UnitBaseFlags_ODST;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public UnitBase_H3 UnitBaseFlags_H3;
 
@@ -313,7 +311,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum UnitBase_ODST : uint
+                public enum UnitBase : uint
                 {
                     None,
                     TextureCamEnabled = 1 << 0,
@@ -332,26 +330,6 @@ namespace TagTool.Tags.Definitions
 					Achievement4 = 1 << 13,
 					Achievement5 = 1 << 14,
                     ARGEnabled = 1 << 15,
-                }
-
-                [Flags]
-                public enum UnitBase : uint
-                {
-                    None,
-                    TextureCamEnabled = 1 << 0,
-                    BinocularsTargeted = 1 << 1,
-                    Bit2 = 1 << 2, //unused?
-                    Bit3 = 1 << 3, //unused?
-                    TrainingPrompt = 1 << 4,
-                    ObjectivePrompt = 1 << 5,
-                    SurvivalState = 1 << 6,
-                    Unknown1 = 1 << 7,
-                    Unknown2 = 1 << 8,
-                    Unknown3 = 1 << 9,
-                    Unknown4 = 1 << 10,
-                    Unknown5 = 1 << 11,
-                    Unknown6 = 1 << 12,
-                    Unknown7 = 1 << 13, //time?
                 }
 
                 [Flags]
