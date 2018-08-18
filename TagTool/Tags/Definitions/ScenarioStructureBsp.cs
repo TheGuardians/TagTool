@@ -589,8 +589,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class Reference
             {
-                public short Plane;
-                public short Bsp2dNode;
+                public int NodeOrSectorIndex;
             }
 
             [TagStructure(Size = 0x14)]
@@ -631,8 +630,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x4)]
                     public class UnknownBlock2
                     {
-                        public short Unknown1;
-                        public short Unknown2;
+                        public int Unknown;
                     }
                 }
             }

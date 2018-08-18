@@ -47,15 +47,8 @@ namespace TagTool.Tags.Resources
                     public sbyte Unknown4;
                     public short Unknown5;
                     public short Unknown6;
-                    public TagBlock<Unknown7Block> Unknown7;
+                    public TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2> Unknown7;
                     public int Unknown8;
-
-                    [TagStructure(Size = 0x4)]
-                    public class Unknown7Block
-                    {
-                        public short Unknown1;
-                        public short Unknown2;
-                    }
                 }
             }
 

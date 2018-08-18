@@ -219,7 +219,7 @@ namespace TagTool.Commands.Porting
                                 Unknown4 = oldUnknown.Unknown4,
                                 Unknown5 = oldUnknown.Unknown5,
                                 Unknown6 = oldUnknown.Unknown6,
-                                Unknown7 = new TagBlock<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.Unknown1Block.Unknown7Block>(oldUnknown.Unknown7.Count, new CacheAddress()),
+                                Unknown7 = new TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(oldUnknown.Unknown7.Count, new CacheAddress()),
                                 Unknown8 = oldUnknown.Unknown8
                             });
                         }
