@@ -459,13 +459,9 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown;
                 }
 
-                [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-                [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
+                [TagStructure(Size = 0xC)]
                 public class Cluster2
                 {
-                    [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                    public uint Unknown;
-                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public List<UnknownBlock> Unknowns;
 
                     [TagStructure(Size = 0x1)]
