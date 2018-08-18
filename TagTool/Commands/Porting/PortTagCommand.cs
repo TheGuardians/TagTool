@@ -537,6 +537,11 @@ namespace TagTool.Commands.Porting
                     particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
                     break;
 
+                // If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
+                case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
+                    blamDefinition = null;
+                    break;
+
                 case PhysicsModel phmo:
                     blamDefinition = ConvertPhysicsModel(phmo);
                     break;
