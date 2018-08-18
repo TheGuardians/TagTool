@@ -27,24 +27,12 @@ namespace TagTool.Commands.Shaders
             base(true,
 
                 "RegenerateShaders",
-                "Regenerates all of the shaders of a template type",
+                "",
 
-                "RegenerateShaders <template_type>",
-                "Regenerates all of the shaders of a template type")
+                "RegenerateShaders",
+                "")
         {
             CacheContext = cacheContext as HaloOnlineCacheContext;
-        }
-
-        struct ParameterGroup
-        {
-            string Name;
-            ShaderParameter Parameter;
-
-            public ParameterGroup(string name)
-            {
-                Name = name;
-                Parameter = new ShaderParameter();
-            }
         }
 
         public override object Execute(List<string> args)
@@ -56,43 +44,38 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        class TagSerializationPair
+        class ProcessInstanceResult
         {
             public CachedTagInstance tag;
             public object definition;
         }
 
-        private void ProcessInstance(
-            int index,
-            CachedTagInstance[] shader_instances,
+        private bool GetShader(
+            Mutex mutex,
+            Stream stream,
+            CachedTagInstance instance,
             IEnumerable<int> shader_rmdfs_ids,
-            ConcurrentBag<int> serilaizedRmt2,
-            ConcurrentBag<TagSerializationPair> serializationPairs,
-            MemoryStream[] read_memory_streams,
-            Mutex[] mutices
+            out RenderMethod rm_shader_definition,
+            out Type rm_shader_type,
+            out TagSerializationContext rm_shader_context,
+            out string rmdf_name
             )
         {
-            var stream_index = Mutex.WaitAny(mutices);
-            var mutex = mutices[stream_index];
-            var memory_stream = read_memory_streams[stream_index];
-
-            var instance = shader_instances.ElementAt(index);
-
             // get shader
-            RenderMethod rm_shader_definition = null;
-            Type rm_shader_type = null;
-            TagSerializationContext rm_shader_context = null;
-            string rmdf_name = null;
+            rm_shader_definition = null;
+            rm_shader_type = null;
+            rm_shader_context = null;
+            rmdf_name = null;
             {
-                memory_stream.Position = 0;
-                rm_shader_context = new TagSerializationContext(memory_stream, CacheContext, instance);
+                stream.Position = 0;
+                rm_shader_context = new TagSerializationContext(stream, CacheContext, instance);
 
                 // if there is no dependency on the rmsh, early exit
 
                 if (shader_rmdfs_ids != null && !rm_shader_context.Tag.Dependencies.Intersect(shader_rmdfs_ids).Any())
                 {
                     mutex.ReleaseMutex();
-                    return;
+                    return true;
                 }
                 rm_shader_type = TagDefinition.Find(rm_shader_context.Tag.Group.Tag);
                 rm_shader_definition = CacheContext.Deserializer.Deserialize(rm_shader_context, rm_shader_type) as RenderMethod;
@@ -100,26 +83,40 @@ namespace TagTool.Commands.Shaders
                 if (shader_rmdfs_ids != null && !shader_rmdfs_ids.Contains(rm_shader_definition.BaseRenderMethod.Index))
                 {
                     mutex.ReleaseMutex();
-                    return;
+                    return true;
                 }
 
                 var rmdf_index = rm_shader_definition.BaseRenderMethod.Index;
                 rmdf_name = CacheContext.TagNames.ContainsKey(rmdf_index) ? CacheContext.TagNames[rmdf_index] : rmdf_index.ToString("X");
             }
 
+            return false;
+        }
+
+        private bool GetRenderMethodTemplate(
+            Mutex mutex,
+            Stream stream,
+            CachedTagInstance instance,
+            ConcurrentBag<int> serilaizedRmt2,
+            RenderMethod rm_shader_definition,
+            out RenderMethodTemplate rmt2_definition,
+            out TagSerializationContext rmt2_context,
+            out string rmt2_name
+            )
+        {
             // get render method template
-            RenderMethodTemplate rmt2_definition = null;
-            TagSerializationContext rmt2_context = null;
-            string rmt2_name = null;
+            rmt2_definition = null;
+            rmt2_context = null;
+            rmt2_name = null;
             {
-                memory_stream.Position = 0;
-                rmt2_context = new TagSerializationContext(memory_stream, CacheContext, rm_shader_definition.ShaderProperties[0].Template);
+                stream.Position = 0;
+                rmt2_context = new TagSerializationContext(stream, CacheContext, rm_shader_definition.ShaderProperties[0].Template);
 
                 // Skip previously finished RMT2 tags
                 if (serilaizedRmt2.Contains(rmt2_context.Tag.Index))
                 {
                     mutex.ReleaseMutex();
-                    return;
+                    return true;
                 }
 
                 serilaizedRmt2.Add(rmt2_context.Tag.Index);
@@ -130,6 +127,48 @@ namespace TagTool.Commands.Shaders
                 rmt2_name = CacheContext.TagNames.ContainsKey(rmt2_context.Tag.Index) ? CacheContext.TagNames[rmt2_context.Tag.Index] : rmt2_context.Tag.Index.ToString("X");
                 Console.WriteLine($"Regenerating {rmt2_name}");
             }
+
+            return false;
+        }
+
+        private void ProcessInstance(
+            int index,
+            CachedTagInstance[] shader_instances,
+            IEnumerable<int> shader_rmdfs_ids,
+            ConcurrentBag<int> serilaizedRmt2,
+            ConcurrentBag<ProcessInstanceResult> serializationPairs,
+            MemoryStream[] read_memory_streams,
+            Mutex[] mutices
+            )
+        {
+            var stream_index = Mutex.WaitAny(mutices);
+            var mutex = mutices[stream_index];
+            var memory_stream = read_memory_streams[stream_index];
+            var instance = shader_instances.ElementAt(index);
+
+            bool get_shader_error = GetShader(
+                mutex,
+                memory_stream,
+                instance,
+                shader_rmdfs_ids,
+                out RenderMethod rm_shader_definition,
+                out Type rm_shader_type,
+                out TagSerializationContext rm_shader_context,
+                out string rmdf_name
+                );
+            if (get_shader_error) return;
+
+            bool get_render_method_template_error = GetRenderMethodTemplate(
+                mutex,
+                memory_stream,
+                instance,
+                serilaizedRmt2,
+                rm_shader_definition,
+                out RenderMethodTemplate rmt2_definition,
+                out TagSerializationContext rmt2_context,
+                out string rmt2_name
+                );
+            if (get_render_method_template_error) return;
 
             // extract the render method definition arguments to rebuild the shader again
             List<int> shader_template_args = new List<int>();
@@ -143,6 +182,7 @@ namespace TagTool.Commands.Shaders
             var pixl_context = new TagSerializationContext(memory_stream, CacheContext, rmt2_definition.PixelShader);
             var pixel_shader = CacheContext.Deserializer.Deserialize<PixelShader>(pixl_context);
 
+
             //TODO: This is slow, there should be a faster way to do this, maybe a Dictionary with tag index???
             //NOTE: This might seem redundant, and it kind of is. But this ensures that we can just pass any
             // shader in here, but also support a custom RMDF in the future, ie. Halo 3 + Halo 3 ODST + Halo Reach
@@ -150,7 +190,7 @@ namespace TagTool.Commands.Shaders
             // Also "Shaders" includes shader, beam, contrail etc. this is important too
 
             string template_type = null;
-            switch(rmdf_name)
+            switch (rmdf_name)
             {
                 case "shaders\\shader":
                     template_type = "shader_template";
@@ -166,8 +206,8 @@ namespace TagTool.Commands.Shaders
                     return;
             }
 
-            serializationPairs.Add(new TagSerializationPair { tag = pixl_context.Tag, definition = pixel_shader });
-            serializationPairs.Add(new TagSerializationPair { tag = rmt2_context.Tag, definition = rmt2_definition });
+            serializationPairs.Add(new ProcessInstanceResult { tag = pixl_context.Tag, definition = pixel_shader });
+            serializationPairs.Add(new ProcessInstanceResult { tag = rmt2_context.Tag, definition = rmt2_definition });
 
             mutex.ReleaseMutex();
         }
@@ -186,25 +226,12 @@ namespace TagTool.Commands.Shaders
             typeof(Shader)
         };
 
-        public void Regenerate(string template_name)
+        public void GetRMDF_IDs(string template_name, out IEnumerable<int> shader_rmdfs_ids, out Type template_type)
         {
-            var then = DateTime.Now;
+            template_type = null;
+            shader_rmdfs_ids = null;
 
-            var base_stream = CacheContext.OpenTagCacheReadWrite();
-            var memory_stream = new MemoryStream();
-            {
-                base_stream.Position = 0;
-                base_stream.CopyTo(memory_stream);
-                base_stream.Position = 0;
-            }
-
-            ConcurrentBag<TagSerializationPair> serialization_pairs_bag = new ConcurrentBag<TagSerializationPair>();
-            ConcurrentBag<int> serilaizedRmt2 = new ConcurrentBag<int>();
-
-
-            Type template_type = null;
             IEnumerable<CachedTagInstance> shader_rmdfs = null;
-            IEnumerable<int> shader_rmdfs_ids = null;
             switch (template_name)
             {
                 case "shader_templates":
@@ -214,20 +241,23 @@ namespace TagTool.Commands.Shaders
                     shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == "shaders\\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
                     break;
 
+                case null:
                 case "*":
                     break;
-                case null:
                 default:
                     Console.WriteLine("Invalid template_type");
                     break;
             }
-            if(shader_rmdfs != null)
+            if (shader_rmdfs != null)
             {
                 shader_rmdfs = shader_rmdfs.Where(rmdf => TagDefinition.Find(rmdf.Group.Tag) == typeof(RenderMethodDefinition));
                 shader_rmdfs_ids = shader_rmdfs.Select(rmdf => rmdf.Index);
                 shader_rmdfs_ids = new int[] { shader_rmdfs_ids.FirstOrDefault() };
             }
+        }
 
+        public CachedTagInstance[] GetShaderInstances(Type template_type)
+        {
             CachedTagInstance[] shader_instances = null;
             if (template_type != null)
             {
@@ -237,9 +267,22 @@ namespace TagTool.Commands.Shaders
             {
                 shader_instances = CacheContext.TagCache.Index.Where(instance => instance != null && SupportedShaderTypes.Contains(TagDefinition.Find(instance.Group.Tag))).ToArray();
             }
+            return shader_instances;
+        }
 
-            var num_shader_instances = shader_instances.Count();
-            Task[] tasks = new Task[num_shader_instances];
+        public void Regenerate(string template_name)
+        {
+            var then = DateTime.Now;
+            GetRMDF_IDs(template_name, out IEnumerable<int> shader_rmdfs_ids, out Type template_type);
+            var shader_instances = GetShaderInstances(template_type);
+
+            var base_stream = CacheContext.OpenTagCacheReadWrite();
+            var memory_stream = new MemoryStream();
+            {
+                base_stream.Position = 0;
+                base_stream.CopyTo(memory_stream);
+                base_stream.Position = 0;
+            }
 
             // create a memory stream with the given number of threads
             var threads_count = Environment.ProcessorCount;
@@ -257,8 +300,10 @@ namespace TagTool.Commands.Shaders
                 read_memory_mutex[i] = new Mutex();
             }
 
-
-
+            ConcurrentBag<ProcessInstanceResult> serialization_pairs_bag = new ConcurrentBag<ProcessInstanceResult>();
+            ConcurrentBag<int> serilaizedRmt2 = new ConcurrentBag<int>();
+            var num_shader_instances = shader_instances.Count();
+            Task[] tasks = new Task[num_shader_instances];
             for (var i = 0; i < num_shader_instances; i++)
             {
                 var task = new TaskFactory().StartNew(delegate (object index) {
@@ -330,7 +375,7 @@ namespace TagTool.Commands.Shaders
                     var GenerateShaderArgs = CreateArguments(method, shaderstage, shader_args);
 
                     //TODO: Remove this
-                    switch(shaderstage)
+                    switch (shaderstage)
                     {
                         case ShaderStage.Albedo:
                             Albedo albedo = GenerateShaderArgs.Where(x => x.GetType() == typeof(Albedo)).Cast<Albedo>().FirstOrDefault();
