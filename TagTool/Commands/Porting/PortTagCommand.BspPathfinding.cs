@@ -158,10 +158,13 @@ namespace TagTool.Commands.Porting
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
                 for (var i = 0; i < resourceDefinition.UnknownRaw1sts.Count; i++)
-                    CacheContext.Serializer.Serialize(dataContext,
-                        BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.UnknownRaw1sts[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext));
+                {
+                    var element = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.UnknownRaw1sts[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw1st>(dataContext);
+
+                    CacheContext.Serializer.Serialize(dataContext, element);
+                }
 
                 //
                 // UnknownRaw7ths
@@ -177,10 +180,13 @@ namespace TagTool.Commands.Porting
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
                 for (var i = 0; i < resourceDefinition.UnknownRaw7ths.Count; i++)
-                    CacheContext.Serializer.Serialize(dataContext,
-                        BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.UnknownRaw7ths[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext));
+                {
+                    var element = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.UnknownRaw7ths[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext);
+
+                    CacheContext.Serializer.Serialize(dataContext, element);
+                }
 
                 if (BlamCache.Version < CacheVersion.Halo3ODST && bsp.PathfindingData.Count != 0)
                 {
@@ -209,8 +215,12 @@ namespace TagTool.Commands.Porting
                             {
                                 Unknown1 = oldUnknown.Unknown1,
                                 Unknown2 = oldUnknown.Unknown2,
-                                Unknown3 = new TagBlock<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.Unknown1Block.Unknown3Block>(oldUnknown.Unknown3.Count, new CacheAddress()),
-                                Unknown4 = oldUnknown.Unknown4
+                                Unknown3 = oldUnknown.Unknown3,
+                                Unknown4 = oldUnknown.Unknown4,
+                                Unknown5 = oldUnknown.Unknown5,
+                                Unknown6 = oldUnknown.Unknown6,
+                                Unknown7 = new TagBlock<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.Unknown1Block.Unknown7Block>(oldUnknown.Unknown7.Count, new CacheAddress()),
+                                Unknown8 = oldUnknown.Unknown8
                             });
                         }
 
@@ -311,13 +321,13 @@ namespace TagTool.Commands.Porting
 
                             StreamUtil.Align(dataStream, 0x4);
                             if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                                blamResourceStream.Position = unknown2.Unknown3.Address.Offset;
-                            unknown2.Unknown3.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
+                                blamResourceStream.Position = unknown2.Unknown7.Address.Offset;
+                            unknown2.Unknown7.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
 
-                            for (var unk3Idx = 0; unk3Idx < unknown2.Unknown3.Count; unk3Idx++)
+                            for (var unk3Idx = 0; unk3Idx < unknown2.Unknown7.Count; unk3Idx++)
                                 CacheContext.Serializer.Serialize(dataContext,
                                     BlamCache.Version < CacheVersion.Halo3ODST ?
-                                    bsp.PathfindingData[0].ObjectReferences[objRefIdx].Unknown2[unk2Idx].Unknown3[unk3Idx] :
+                                    bsp.PathfindingData[0].ObjectReferences[objRefIdx].Unknown2[unk2Idx].Unknown7[unk3Idx] :
                                     BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(dataContext));
                         }
                     }

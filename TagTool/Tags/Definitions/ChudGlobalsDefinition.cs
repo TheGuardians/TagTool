@@ -154,7 +154,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float SprintFOXTransitionOutTime;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ParallaxData;
+        public CachedTagInstance ParallaxData = null;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown49;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -179,10 +179,12 @@ namespace TagTool.Tags.Definitions
 		public TagFunction Unknown69;
 
         //NOT SURE WHAT THIS IS
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public CachedTagInstance Unknown70 = null;
+
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public CachedTagInstance Unknown70;
-		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public float Unknown71;
+		public float Unknown71 = 3.0f;
+
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown72;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -290,9 +292,9 @@ namespace TagTool.Tags.Definitions
 			public CachedTagInstance DamageNoise;
 			public CachedTagInstance DirectionalArrow;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance GrenadeWaypoint;
+            public CachedTagInstance GrenadeWaypoint = null;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance PinkGradient;
+            public CachedTagInstance PinkGradient = null;
 
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
 			public float Unknown7;
@@ -309,20 +311,20 @@ namespace TagTool.Tags.Definitions
 
 			public CachedTagInstance ObjectiveWaypoints;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance PlayerWaypoints;
+			public CachedTagInstance PlayerWaypoints = null;
 			public CachedTagInstance ScoreboardHud;
 			public CachedTagInstance MetagameScoreboardHud;
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
-			public CachedTagInstance SurvivalHud;
+			public CachedTagInstance SurvivalHud = null;
 			[TagField(MinVersion = CacheVersion.Halo3ODST)]
-			public CachedTagInstance MetagameScoreboardHud2;
+			public CachedTagInstance MetagameScoreboardHud2 = null;
 			public CachedTagInstance TheaterHud;
 			public CachedTagInstance ForgeHud;
 			public CachedTagInstance HudStrings;
 			public CachedTagInstance Medals;
 			public List<MultiplayerMedal> MultiplayerMedals;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public CachedTagInstance MedalHudAnimation2;
+			public CachedTagInstance MedalHudAnimation2 = null;
 			public CachedTagInstance MedalHudAnimation;
 			public CachedTagInstance CortanaChannel;
 			public CachedTagInstance Unknown20;
@@ -438,13 +440,13 @@ namespace TagTool.Tags.Definitions
 				public float HorizontalStretch;
 				public float VerticalStretch;
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
-				public CachedTagInstance Unknown;
+				public CachedTagInstance Unknown = null;
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
-				public CachedTagInstance Unknown19;
+				public CachedTagInstance Unknown19 = null;
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
-				public CachedTagInstance FirstPersonDamageBorder;
+				public CachedTagInstance FirstPersonDamageBorder = null;
 				[TagField(MinVersion = CacheVersion.Halo3ODST)]
-				public CachedTagInstance ThirdPersonDamageBorder;
+				public CachedTagInstance ThirdPersonDamageBorder = null;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float PickupDialogScale;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]

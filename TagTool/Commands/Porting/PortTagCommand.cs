@@ -345,14 +345,10 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var entry in CacheContext.TagNames.Where(i => i.Value == blamTag.Name))
                 {
-                    var tagInstance = CacheContext.GetTag(entry.Key);
+                    var instance = CacheContext.GetTag(entry.Key);
 
-                    if (tagInstance.Group.Tag == groupTag)
-                    {
-                        edTag = tagInstance;
-                        Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                        return edTag;
-                    }
+                    if (instance.Group.Tag == groupTag)
+                        return edTag = instance;
                 }
             }
             else if (!Flags.HasFlag(PortingFlags.New))
@@ -375,12 +371,7 @@ namespace TagTool.Commands.Porting
                             edTag = instance;
                             break;
                         }
-                        else
-                        {
-                            edTag = instance;
-                            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
-                            return edTag;
-                        }
+                        else return edTag = instance;
                     }
                 }
             }
@@ -520,9 +511,9 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
-					foreach (var even in effect.Events)
-						foreach (var particleSystem in even.ParticleSystems)
-							particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+					//foreach (var even in effect.Events)
+						//foreach (var particleSystem in even.ParticleSystems)
+							//particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
 					break;
 
                 case Globals matg:
@@ -544,6 +535,11 @@ namespace TagTool.Commands.Porting
                 case Particle particle when BlamCache.Version == CacheVersion.Halo3Retail:
                     // Shift all flags above 2 by 1.
                     particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
+                    break;
+
+                // If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
+                case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
+                    blamDefinition = null;
                     break;
 
                 case PhysicsModel phmo:
@@ -715,6 +711,9 @@ namespace TagTool.Commands.Porting
                 case BipedPhysicsFlags bipedPhysicsFlags:
                     return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
+                case WeaponFlags weaponFlags:
+                    return ConvertWeaponFlags(weaponFlags);
+
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
                         throw new NotSupportedException(propertyType.Halo2.ToString());
@@ -840,6 +839,17 @@ namespace TagTool.Commands.Porting
                 throw new FormatException(BlamCache.Version.ToString());
 
             return bipedPhysicsFlags;
+        }
+
+        private object ConvertWeaponFlags(WeaponFlags weaponFlags)
+        {
+            if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
+                weaponFlags.OldFlags &= ~WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode;
+
+            if (!Enum.TryParse(weaponFlags.OldFlags.ToString(), out weaponFlags.NewFlags))
+                throw new FormatException(BlamCache.Version.ToString());
+
+            return weaponFlags;
         }
 
         private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)

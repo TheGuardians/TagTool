@@ -67,6 +67,8 @@ namespace TagTool.Commands.Porting
                 return false;
             }
 
+            return NameChgdShaders(args);
+
             return foundMethods.First().Invoke(this, new[] { args });
         }
         

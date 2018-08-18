@@ -32,7 +32,7 @@ namespace TagTool.Cache
                 var resourceSection = Header.Interop.Sections[(int)CacheFileSectionType.Resource];
                 Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (Header.Interop.DebugSectionSize + resourceSection.Size);
             }
-            
+
             Header.TagIndexAddress = BitConverter.ToUInt32(BitConverter.GetBytes(Header.TagIndexAddress - Magic), 0);
 
             IndexHeader = new CacheIndexHeader(this);
@@ -338,7 +338,7 @@ namespace TagTool.Cache
 
             byte[] data = new byte[(DataLength != -1) ? DataLength : (Pool.UncompressedBlockSize - locOffset)];
             int length = data.Length;
-   
+
             if (length > decompressed.Length)
                 length = decompressed.Length;
 
@@ -365,7 +365,7 @@ namespace TagTool.Cache
 
             var segment = ResourceLayoutTable.Segments[entry.PlaySegmentIndex];
 
-            if (segment.PrimaryPageIndex == -1 || segment.PrimarySegmentOffset == -1 ||  segment.PrimarySizeIndex == -1 || segment.SecondarySizeIndex == -1)
+            if (segment.PrimaryPageIndex == -1 || segment.PrimarySegmentOffset == -1 || segment.PrimarySizeIndex == -1 || segment.SecondarySizeIndex == -1)
                 return null;
 
             var sRaw = ResourceLayoutTable.Sizes[segment.SecondarySizeIndex];

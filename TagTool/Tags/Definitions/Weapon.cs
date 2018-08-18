@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
 using TagTool.Damage;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,7 +13,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295)]
     public class Weapon : Item
     {
-        public uint Flags3;
+        public WeaponFlags WeaponFlags;
         public uint MoreFlags;
         public StringId Unknown8;
         public SecondaryTriggerModeValue SecondaryTriggerMode;
@@ -582,6 +583,87 @@ namespace TagTool.Tags.Definitions
         public class FirstPersonOffsetBlock
         {
             public RealVector3d Offset;
+        }
+    }
+
+    [TagStructure(Size = 0x4)]
+    public struct WeaponFlags
+    {
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public OldWeaponFlags OldFlags;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public NewWeaponFlags NewFlags;
+
+        [Flags]
+        public enum OldWeaponFlags : int
+        {
+            None = 0,
+            VerticalHeatDisplay = 1 << 0,
+            MutuallyExclusiveTriggers = 1 << 1,
+            AttacksAutomaticallyOnBump = 1 << 2,
+            MustBeReadied = 1 << 3,
+            DoesNotCountTowardsMaximum = 1 << 4,
+            AimAssistsOnlyWhenZoomed = 1 << 5,
+            PreventsGrenadeThrowing = 1 << 6,
+            MustBePickedUp = 1 << 7,
+            HoldsTriggersWhenDropped = 1 << 8,
+            PreventsMeleeAttack = 1 << 9,
+            DetonatesWhenDropped = 1 << 10,
+            CannotFireAtMaximumAge = 1 << 11,
+            SecondaryTriggerOverridesGrenades = 1 << 12,
+            DoesNotDepowerActiveCamoInMultiplayer = 1 << 13,
+            EnablesIntegratedNightVision = 1 << 14,
+            AIsUseWeaponMeleeDamage = 1 << 15,
+            ForcesNoBinoculars = 1 << 16,
+            LoopFPFiringAnimation = 1 << 17,
+            PreventsSprinting = 1 << 18,
+            CannotFireWhileBoosting = 1 << 19,
+            PreventsDriving = 1 << 20,
+            ThirdPersonCamera = 1 << 21,
+            CanBeDualWielded = 1 << 22,
+            CanOnlyBeDualWielded = 1 << 23,
+            MeleeOnly = 1 << 24,
+            CannotFireIfParentDead = 1 << 25,
+            WeaponAgesWithEachKill = 1 << 26,
+            WeaponUsesOldDualFireErrorCode = 1 << 27, // removed in later games
+            PrimaryTriggerMeleeAttacks = 1 << 28,
+            CannotBeUsedByPlayer = 1 << 29,
+        }
+
+        [Flags]
+        public enum NewWeaponFlags : int
+        {
+            None = 0,
+            VerticalHeatDisplay = 1 << 0,
+            MutuallyExclusiveTriggers = 1 << 1,
+            AttacksAutomaticallyOnBump = 1 << 2,
+            MustBeReadied = 1 << 3,
+            DoesNotCountTowardsMaximum = 1 << 4,
+            AimAssistsOnlyWhenZoomed = 1 << 5,
+            PreventsGrenadeThrowing = 1 << 6,
+            MustBePickedUp = 1 << 7,
+            HoldsTriggersWhenDropped = 1 << 8,
+            PreventsMeleeAttack = 1 << 9,
+            DetonatesWhenDropped = 1 << 10,
+            CannotFireAtMaximumAge = 1 << 11,
+            SecondaryTriggerOverridesGrenades = 1 << 12,
+            DoesNotDepowerActiveCamoInMultiplayer = 1 << 13,
+            EnablesIntegratedNightVision = 1 << 14,
+            AIsUseWeaponMeleeDamage = 1 << 15,
+            ForcesNoBinoculars = 1 << 16,
+            LoopFPFiringAnimation = 1 << 17,
+            PreventsSprinting = 1 << 18,
+            CannotFireWhileBoosting = 1 << 19,
+            PreventsDriving = 1 << 20,
+            ThirdPersonCamera = 1 << 21,
+            CanBeDualWielded = 1 << 22,
+            CanOnlyBeDualWielded = 1 << 23,
+            MeleeOnly = 1 << 24,
+            CannotFireIfParentDead = 1 << 25,
+            WeaponAgesWithEachKill = 1 << 26,
+            PrimaryTriggerMeleeAttacks = 1 << 27,
+            CannotBeUsedByPlayer = 1 << 28,
         }
     }
 }

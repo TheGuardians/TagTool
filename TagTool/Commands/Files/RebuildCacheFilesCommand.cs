@@ -96,13 +96,13 @@ namespace TagTool.Commands.Files
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
-                    if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                        CacheContext.TagNames.Remove(tag.Index);
+                //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
+                    //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                        //CacheContext.TagNames.Remove(tag.Index);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("pixl"))
-                    if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                        CacheContext.TagNames.Remove(tag.Index);
+                //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("pixl"))
+                    //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                        //CacheContext.TagNames.Remove(tag.Index);
 
                 //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
                 var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);

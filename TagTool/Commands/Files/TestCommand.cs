@@ -91,6 +91,7 @@ namespace TagTool.Commands.Files
                 case "compareedtoblam": return CompareEDtoBlam(args);
                 case "dsrc": return Dsrc();
                 case "dumpscripts": return DumpScripts(args);
+                case "findlipsync": return FindLipsync();
                 default:
                     Console.WriteLine($"Invalid command: {name}");
                     Console.WriteLine($"Available commands: {commandsList.Count}");
@@ -98,6 +99,44 @@ namespace TagTool.Commands.Files
                         Console.WriteLine($"{a.Key}: {a.Value}");
                     return false;
             }
+        }
+
+        private bool FindLipsync()
+        {
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            {
+                var templateTagIndices = new HashSet<int>();
+
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroups("snd!"))
+                {
+                    if (tag == null)
+                        continue;
+
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, tag);
+                    var tagDefinition = CacheContext.Deserialize<Sound>(tagContext);
+
+                    if (tagDefinition.ExtraInfo.Count > 0 && tagDefinition.ExtraInfo[0].EncodedPermutationSections.Count > 0)
+                    {
+                        var section = tagDefinition.ExtraInfo[0].EncodedPermutationSections[0];
+
+                        if (section.Unknown.Count != 0)
+                        {
+                            foreach (var unknown in section.Unknown)
+                            {
+                                if (unknown.Unknown.Count != 0)
+                                {
+                                    foreach (var unknown2 in unknown.Unknown)
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
         }
 
         private bool Dsrc()

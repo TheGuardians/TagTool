@@ -539,22 +539,22 @@ namespace TagTool.Commands.Porting
 
             var extraInfo = new ExtraInfo()
             {
-                LanguagePermutations = new List<ExtraInfo.LanguagePermutation>()
+                LanguagePermutations = new List<ExtraInfo.LanguagePermutation>(),
+                EncodedPermutationSections = new List<ExtraInfo.EncodedPermutationSection>()
             };
 
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
 
-                var extraInfoBlock = new ExtraInfo.LanguagePermutation
+                var languagePermutation = new ExtraInfo.LanguagePermutation
                 {
                     RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>()
                 };
 
-
                 for (int i = 0; i < sound.PitchRanges[u].PermutationCount; i++)
                 {
-                    var rawInfoBlock = new ExtraInfo.LanguagePermutation.RawInfoBlock
+                    var rawInfo = new ExtraInfo.LanguagePermutation.RawInfoBlock
                     {
                         SkipFractionName = StringId.Invalid,
                         Unknown24 = 480,
@@ -564,23 +564,29 @@ namespace TagTool.Commands.Porting
                         ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
                         ResourceSampleOffset = pitchRange.Permutations[i].PermutationChunks[0].Offset
                     };
-                    extraInfoBlock.RawInfo.Add(rawInfoBlock);
+
+                    languagePermutation.RawInfo.Add(rawInfo);
                 }
-                extraInfo.LanguagePermutations.Add(extraInfoBlock);
+
+                extraInfo.LanguagePermutations.Add(languagePermutation);
             }
-
-            extraInfo.Unknown1 = 0;
-            extraInfo.Unknown2 = 0;
-            extraInfo.Unknown3 = 0;
-            extraInfo.Unknown4 = 0;
-
-            //Data ref needs endian swapping
 
             if (sound.SoundReference.ExtraInfoIndex != -1)
             {
-                if (BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections.Count != 0)
+                foreach (var section in BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections)
                 {
-                    extraInfo.EncodedPermutationSections = BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections;
+                    var newSection = section.DeepClone();
+
+                    foreach (var info in newSection.SoundDialogueInfo)
+                    {
+                        for (var i = ((info.MouthDataLength % 2) == 0 ? 0 : 1); (i + 1) < info.MouthDataLength; i += 2)
+                            Array.Reverse(newSection.EncodedData, (int)(info.MouthDataOffset + i), 2);
+
+                        for (var i = ((info.LipsyncDataLength % 2) == 0 ? 0 : 1); (i + 1) < info.LipsyncDataLength; i += 2)
+                            Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
+                    }
+
+                    extraInfo.EncodedPermutationSections.Add(newSection);
                 }
             }
 
