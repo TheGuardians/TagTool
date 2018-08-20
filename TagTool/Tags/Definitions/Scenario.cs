@@ -1510,12 +1510,20 @@ namespace TagTool.Tags.Definitions
         public class SquadGroup
         {
             [TagField(Label = true, Length = 32)]
-            public string Name;
-            public short ParentIndex;
-            public short InitialObjective;
+            public string Name = "";
+
+            public short ParentIndex = -1;
+
+            [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo3Retail)]
+            public byte[] Unused1 = new byte[2];
+
+            public short InitialObjective = -1;
+
             [TagField(Padding = true, Length = 2)]
-            public byte[] Unused;
-            public short EditorFolderIndex;
+            public byte[] Unused2 = new byte[2];
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public short EditorFolderIndex = -1;
         }
 
         [Flags]
