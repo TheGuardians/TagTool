@@ -166,29 +166,31 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public TagFunction Unknown63;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown64;
+        public TagFunction Unknown64;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown65;
+        public float Unknown65;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public TagFunction Unknown66;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown66;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown67;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown68;
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public TagFunction Unknown69;
+		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+		public TagFunction Unknown70;
 
         //NOT SURE WHAT THIS IS
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown70 = null;
+        public CachedTagInstance Unknown71 = null;  //chdt tagreference which activates in firefight
 
 		[TagField(MinVersion = CacheVersion.Halo3ODST)]
-		public float Unknown71 = 3.0f;
+		public float Unknown72 = 3.0f;
 
 		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-		public float Unknown72;
-		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 		public float Unknown73;
+		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
+		public float Unknown74;
 
 		[TagStructure(Size = 0x208, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x23C, MaxVersion = CacheVersion.Halo3ODST)]

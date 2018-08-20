@@ -106,9 +106,9 @@ namespace TagTool.Commands.Porting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
 
                     //fixup for waypoint light
-                    if (widgetname.Contains("waypoint_light") && BlamCache.Version == CacheVersion.Halo3ODST)
+                    if (bitmapwidgetname.Contains("waypoint_light") && BlamCache.Version == CacheVersion.Halo3ODST)
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].Input_HO = ChudDefinition.HudWidget.RenderDatum.InputValue_HO.UnitHealth;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC_HO = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
                     }
 
                     //fixup for widgets without global placement data
@@ -204,7 +204,8 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version == CacheVersion.Halo3ODST)
                     {
                         H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
-                        H3att.WarpAngle = Angle.FromDegrees(1.0f);
+                        H3att.WarpAngle = Angle.FromDegrees(4.5f);
+                        H3att.WarpAmount = 0.1f;
                     }
                     
                     //more fixups
@@ -248,19 +249,21 @@ namespace TagTool.Commands.Porting
                             H3snd.Bipeds.Add(eliteBiped);
                         }
                     }
-                    
-                    
+
 					else if(BlamCache.Version == CacheVersion.Halo3ODST)
 					{
 						for (int bipedIndex = 0; bipedIndex < H3snd.Bipeds.Count; bipedIndex++)
 						{
-                            if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie)
+                            if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie
+                                || H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Any)
                             {
                                 H3snd.Bipeds[bipedIndex].BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
                             }
                             else
                             {
                                 H3snd.Bipeds.RemoveAt(bipedIndex);
+                                //indexes are shifted left by one because of this removal
+                                bipedIndex -= 1;
                             }
 						}
                     }
@@ -284,7 +287,7 @@ namespace TagTool.Commands.Porting
             H3Definition.SmallSensorBlipScale = H3Definition.SmallSensorBlipScale * 2.0f;
 
             //prevent crash?
-            H3Definition.Unknown71 = 3.0f;
+            H3Definition.Unknown72 = 3.0f;
 
             return H3Definition;
         }
@@ -309,7 +312,7 @@ namespace TagTool.Commands.Porting
             //Check params are enums.
             if(!(flags2 is Enum) || !(flags1 is Enum))
             {
-                Console.WriteLine("GetEquevelantFlags called with a non enum parameter.");
+                Console.WriteLine("GetEquivalentFlags called with a non enum parameter.");
                 return flags1;
             }
 
@@ -319,7 +322,7 @@ namespace TagTool.Commands.Porting
 
             if (hoFlagsAttributes.Count() < 1 || h3FlagsAttributes.Count() < 1)
             {
-                Console.WriteLine("GetEquevelantFlags called with a non flags enum parameter.");
+                Console.WriteLine("GetEquivalentFlags called with a non flags enum parameter.");
                 return flags1;
             }
 
@@ -369,7 +372,7 @@ namespace TagTool.Commands.Porting
             //Check params are enums.
             if (!(enum1 is Enum) || !(enum2 is Enum))
             {
-                Console.WriteLine("Get Equivalent Flags called with a non-enum parameter.");
+                Console.WriteLine("GetEquivalentFlags called with a non-enum parameter.");
                 return enum1;
             }
 
