@@ -10,15 +10,19 @@ namespace System
                 return data;
 
             var type = data.GetType();
+            var isString = type == typeof(string);
 
             if (type.IsPrimitive)
                 return data;
+
+            if (isString)
+                type = typeof(char[]);
 
             object result = null;
 
             if (type.IsArray)
             {
-                var array = data as Array;
+                var array = isString ? (data as string).ToCharArray() : data as Array;
                 var arrayType = array.GetType();
                 var elementType = arrayType.GetElementType();
 
@@ -27,7 +31,7 @@ namespace System
                 for (var i = 0; i < array.Length; i++)
                     ((Array)result).SetValue(array.GetValue(i).DeepClone(), i);
 
-                return (T)result;
+                return isString ? (T)(object)new string((char[])result) : (T)result;
             }
 
             result = Activator.CreateInstance(type, new object[] { });

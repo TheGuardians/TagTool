@@ -239,24 +239,29 @@ namespace TagTool.Commands.Porting
 
                         foreach (var spawnPoint in baseSquad.StartingLocations)
                         {
-                            spawnPoint.Name = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.Name, scnr, tagName);
+                            var newSpawnPoint = spawnPoint.DeepClone();
 
-                            spawnPoint.InitialEquipmentIndex = -1;
-                            spawnPoint.CellIndex = (short)i;
+                            newSpawnPoint.Unknown2New = (uint)newSpawnPoint.Unknown2Old;
+                            newSpawnPoint.Unknown3New = (uint)newSpawnPoint.Unknown3Old;
 
-                            spawnPoint.ActorVariant = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.ActorVariant, scnr, tagName);
-                            spawnPoint.VehicleVariant = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.VehicleVariant, scnr, tagName);
+                            newSpawnPoint.Name = (StringId)ConvertData(cacheStream, resourceStreams, newSpawnPoint.Name, scnr, tagName);
 
-                            spawnPoint.InitialMovementMode = spawnPoint.InitialMovementMode_H3;
+                            newSpawnPoint.InitialEquipmentIndex = -1;
+                            newSpawnPoint.CellIndex = (short)i;
 
-                            spawnPoint.InitialState = (StringId)ConvertData(cacheStream, resourceStreams, spawnPoint.InitialState, scnr, tagName);
+                            newSpawnPoint.ActorVariant = (StringId)ConvertData(cacheStream, resourceStreams, newSpawnPoint.ActorVariant, scnr, tagName);
+                            newSpawnPoint.VehicleVariant = (StringId)ConvertData(cacheStream, resourceStreams, newSpawnPoint.VehicleVariant, scnr, tagName);
 
-                            foreach (var point in spawnPoint.Points)
+                            newSpawnPoint.InitialMovementMode = newSpawnPoint.InitialMovementMode_H3;
+
+                            newSpawnPoint.InitialState = (StringId)ConvertData(cacheStream, resourceStreams, newSpawnPoint.InitialState, scnr, tagName);
+
+                            foreach (var point in newSpawnPoint.Points)
                             {
                                 point.ActivityName = (StringId)ConvertData(cacheStream, resourceStreams, point.ActivityName, scnr, tagName);
                             }
 
-                            squad.SpawnPoints.Add(spawnPoint);
+                            squad.SpawnPoints.Add(newSpawnPoint);
                         }
 
                         var designer = new Scenario.Squad.Cell
@@ -805,6 +810,9 @@ namespace TagTool.Commands.Porting
 
         public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
+            if (!Flags.HasFlag(PortingFlags.Recursive))
+                return;
+
             var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
 
             if (tag == null)
