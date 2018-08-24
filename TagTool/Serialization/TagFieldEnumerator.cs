@@ -13,17 +13,17 @@ namespace TagTool.Serialization
     {
         private static readonly TagFieldAttribute DefaultFieldAttribute = new TagFieldAttribute();
 
-        private readonly List<FieldInfo> _fields = new List<FieldInfo>();
+        private readonly List<TagFieldInfo> _tagFieldInfos = new List<TagFieldInfo>();
         private int _nextIndex;
-
+		
         /// <summary>
         /// Constructs an enumerator over a tag structure.
         /// </summary>
         /// <param name="info">The info for the structure. Only fields which match the version used to create the info will be enumerated over.</param>
         public TagFieldEnumerator(TagStructureInfo info)
         {
-            Info = info;
-            Begin();
+            this.Info = info;
+            this.Build();
         }
 
         /// <summary>
@@ -48,18 +48,31 @@ namespace TagTool.Serialization
         /// <returns><c>true</c> if the enumerator moved to a new element, or <c>false</c> if the end of the structure has been reached.</returns>
         public bool Next()
         {
-            if (_fields == null || _nextIndex >= _fields.Count)
+            if (this._tagFieldInfos == null || this._nextIndex >= this._tagFieldInfos.Count)
                 return false;
 
-            Field = _fields[_nextIndex];
-            Attribute = Field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
+            this.Field = this._tagFieldInfos[this._nextIndex].FieldInfo;
+			this.Attribute = this._tagFieldInfos[this._nextIndex].TagFieldAttribute;
 
-            _nextIndex++;
+			this._nextIndex++;
 
             return true;
         }
 
-        private void Begin()
+		/// <summary>
+		/// Resets the <see cref="TagFieldEnumerator"/> position, <see cref="Field"/>, and <see cref="Attribute"/>.
+		/// </summary>
+		public void Reset()
+		{
+			this._nextIndex = 0;
+			this.Field = null;
+			this.Attribute = null;
+		}
+
+		/// <summary>
+		/// Builds the <see cref="TagFieldInfo"/> <see cref="List{T}"/> to be enumerated.
+		/// </summary>
+		private void Build()
         {
             // Build the field list. Scan through the type's inheritance
             // hierarchy and add any fields belonging to tag structures.
@@ -69,35 +82,41 @@ namespace TagTool.Serialization
                 foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
                 {
                     var attribute = field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
+					var tagFieldInfo = new TagFieldInfo(field, attribute);
 
                     if (attribute.Gen3Only)
                     {
                         if (Info.Version == CacheVersion.Halo3Retail || Info.Version == CacheVersion.Halo3ODST || Info.Version == CacheVersion.HaloReach)
-                            _fields.Add(field);
+                            _tagFieldInfos.Add(tagFieldInfo);
                         continue;
                     }
 
                     if (attribute.HaloOnlineOnly)
                     {
                         if (CacheVersionDetection.IsBetween(Info.Version, CacheVersion.HaloOnline106708, CacheVersion.HaloOnline700123))
-                            _fields.Add(field);
+                            _tagFieldInfos.Add(tagFieldInfo);
                         continue;
                     }
 
                     if (attribute.Version != CacheVersion.Unknown)
                     {
                         if (Info.Version == attribute.Version)
-                            _fields.Add(field);
+                            _tagFieldInfos.Add(tagFieldInfo);
                         continue;
                     }
 
                     if (CacheVersionDetection.IsBetween(Info.Version, attribute.MinVersion, attribute.MaxVersion))
-                        _fields.Add(field);
+                        _tagFieldInfos.Add(tagFieldInfo);
                 }
             }
         }
 
-        public FieldInfo Find(Predicate<FieldInfo> match) =>
-            _fields.Find(match);
-    }
+		/// <summary>
+		/// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
+		/// </summary>
+		/// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
+		/// <returns></returns>
+		public FieldInfo Find(Predicate<FieldInfo> match) =>
+			this._tagFieldInfos.Find(f => match.Invoke(f.FieldInfo)).FieldInfo;
+	}
 }

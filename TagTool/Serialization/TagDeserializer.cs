@@ -5,458 +5,460 @@ using TagTool.Shaders;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace TagTool.Serialization
 {
-    /// <summary>
-    /// Deserializes tag data into objects by     /// </summary>
-    public class TagDeserializer
-    {
-        public CacheVersion Version { get; }
+	/// <summary>
+	/// Deserializes tag data into objects by 
+	/// </summary>
+	public class TagDeserializer
+	{
+		public CacheVersion Version { get; }
 
-        /// <summary>
-        /// Constructs a tag deserializer for a specific engine version.
-        /// </summary>
-        /// <param name="version">The engine version to target.</param>
-        public TagDeserializer(CacheVersion version)
-        {
-            Version = version;
-        }
+		/// <summary>
+		/// Constructs a tag deserializer for a specific engine version.
+		/// </summary>
+		/// <param name="version">The engine version to target.</param>
+		public TagDeserializer(CacheVersion version)
+		{
+			Version = version;
+		}
 
-        /// <summary>
-        /// Deserializes tag data into an object.
-        /// </summary>
-        /// <typeparam name="T">The type of object to deserialize the tag data as.</typeparam>
-        /// <param name="context">The serialization context to use.</param>
-        /// <returns>The object that was read.</returns>
-        public T Deserialize<T>(ISerializationContext context)
-        {
-            var result = Deserialize(context, typeof(T));
-            return (T)Convert.ChangeType(result, typeof(T));
-        }
+		/// <summary>
+		/// Deserializes tag data into an object.
+		/// </summary>
+		/// <typeparam name="T">The type of object to deserialize the tag data as.</typeparam>
+		/// <param name="context">The serialization context to use.</param>
+		/// <returns>The object that was read.</returns>
+		public T Deserialize<T>(ISerializationContext context)
+		{
+			var result = Deserialize(context, typeof(T));
+			return (T)Convert.ChangeType(result, typeof(T));
+		}
 
-        /// <summary>
-        /// Deserializes tag data into an object.
-        /// </summary>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="structureType">The type of object to deserialize the tag data as.</param>
-        /// <returns>The object that was read.</returns>
-        public object Deserialize(ISerializationContext context, Type structureType)
-        {
-            var info = new TagStructureInfo(structureType, Version);
-            var reader = context.BeginDeserialize(info);
-            var result = DeserializeStruct(reader, context, info);
-            context.EndDeserialize(info, result);
-            return result;
-        }
+		/// <summary>
+		/// Deserializes tag data into an object.
+		/// </summary>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="structureType">The type of object to deserialize the tag data as.</param>
+		/// <returns>The object that was read.</returns>
+		public object Deserialize(ISerializationContext context, Type structureType)
+		{
+			var info = new TagStructureInfo(structureType, Version);
+			var reader = context.BeginDeserialize(info);
+			var result = DeserializeStruct(reader, context, info);
+			context.EndDeserialize(info, result);
+			return result;
+		}
 
-        /// <summary>
-        /// Deserializes a structure.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="info">Information about the structure to deserialize.</param>
-        /// <returns>The deserialized structure.</returns>
-        /// <exception cref="System.InvalidOperationException">Target type must have TagStructureAttribute</exception>
-        public object DeserializeStruct(EndianReader reader, ISerializationContext context, TagStructureInfo info)
-        {
-            var baseOffset = reader.BaseStream.Position;
-            var instance = Activator.CreateInstance(info.Types[0]);
-            var enumerator = new TagFieldEnumerator(info);
+		/// <summary>
+		/// Deserializes a structure.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="info">Information about the structure to deserialize.</param>
+		/// <returns>The deserialized structure.</returns>
+		/// <exception cref="System.InvalidOperationException">Target type must have TagStructureAttribute</exception>
+		public object DeserializeStruct(EndianReader reader, ISerializationContext context, TagStructureInfo info)
+		{
+			var baseOffset = reader.BaseStream.Position;
+			var instance = Activator.CreateInstance(info.Types[0]);
+			var enumerator = new TagFieldEnumerator(info);
 
-            while (enumerator.Next())
-                DeserializeProperty(reader, context, instance, enumerator, baseOffset);
-            if (enumerator.Info.TotalSize > 0)
-                reader.BaseStream.Position = baseOffset + enumerator.Info.TotalSize;
-            return instance;
-        }
+			while (enumerator.Next())
+				DeserializeProperty(reader, context, instance, enumerator, baseOffset);
+			if (enumerator.Info.TotalSize > 0)
+				reader.BaseStream.Position = baseOffset + enumerator.Info.TotalSize;
+			return instance;
+		}
 
-        /// <summary>
-        /// Deserializes a property of a structure.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="instance">The instance to store the property to.</param>
-        /// <param name="enumerator">The active element enumerator.</param>
-        /// <param name="baseOffset">The offset of the start of the structure.</param>
-        /// <exception cref="System.InvalidOperationException">Offset for property is outside of its structure</exception>
-        public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldEnumerator enumerator, long baseOffset)
-        {
-            if (enumerator.Attribute.Local == true)
-                return;
+		/// <summary>
+		/// Deserializes a property of a structure.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="instance">The instance to store the property to.</param>
+		/// <param name="enumerator">The active element enumerator.</param>
+		/// <param name="baseOffset">The offset of the start of the structure.</param>
+		/// <exception cref="System.InvalidOperationException">Offset for property is outside of its structure</exception>
+		public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldEnumerator enumerator, long baseOffset)
+		{
+			if (enumerator.Attribute.Local == true)
+				return;
 
-            if (enumerator.Attribute.Padding == true)
-            {
-                reader.BaseStream.Position += enumerator.Attribute.Length;
-            }
-            else
-            {
-                if (enumerator.Attribute.Offset >= 0)
-                    reader.BaseStream.Position = baseOffset + enumerator.Attribute.Offset;
-                var startOffset = reader.BaseStream.Position;
-                enumerator.Field.SetValue(instance, DeserializeValue(reader, context, enumerator.Attribute, enumerator.Field.FieldType));
-                if (enumerator.Attribute.Size > 0)
-                    reader.BaseStream.Position = startOffset + enumerator.Attribute.Size; // Honor the value's size if it has one set
-            }
-        }
+			if (enumerator.Attribute.Padding == true)
+			{
+				reader.BaseStream.Position += enumerator.Attribute.Length;
+			}
+			else
+			{
+				if (enumerator.Attribute.Offset >= 0)
+					reader.BaseStream.Position = baseOffset + enumerator.Attribute.Offset;
+				var startOffset = reader.BaseStream.Position;
+				enumerator.Field.SetValue(instance, DeserializeValue(reader, context, enumerator.Attribute, enumerator.Field.FieldType));
+				if (enumerator.Attribute.Size > 0)
+					reader.BaseStream.Position = startOffset + enumerator.Attribute.Size; // Honor the value's size if it has one set
+			}
+		}
 
-        /// <summary>
-        /// Deserializes a value.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized value.</returns>
-        public object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
-        {
-            if (valueType.IsPrimitive)
-                return DeserializePrimitiveValue(reader, valueType);
-            return DeserializeComplexValue(reader, context, valueInfo, valueType);
-        }
+		/// <summary>
+		/// Deserializes a value.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized value.</returns>
+		public object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
+		{
+			if (valueType.IsPrimitive)
+				return DeserializePrimitiveValue(reader, valueType);
+			return DeserializeComplexValue(reader, context, valueInfo, valueType);
+		}
 
-        /// <summary>
-        /// Deserializes a primitive value.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized value.</returns>
-        /// <exception cref="System.ArgumentException">Unsupported type</exception>
-        public object DeserializePrimitiveValue(EndianReader reader, Type valueType)
-        {
-            switch (Type.GetTypeCode(valueType))
-            {
-                case TypeCode.Boolean:
-                    return reader.ReadBoolean();
-                case TypeCode.Byte:
-                    return reader.ReadByte();
-                case TypeCode.Double:
-                    return reader.ReadDouble();
-                case TypeCode.Int16:
-                    return reader.ReadInt16();
-                case TypeCode.Int32:
-                    return reader.ReadInt32();
-                case TypeCode.Int64:
-                    return reader.ReadInt64();
-                case TypeCode.SByte:
-                    return reader.ReadSByte();
-                case TypeCode.Single:
-                    return reader.ReadSingle();
-                case TypeCode.UInt16:
-                    return reader.ReadUInt16();
-                case TypeCode.UInt32:
-                    return reader.ReadUInt32();
-                case TypeCode.UInt64:
-                    return reader.ReadUInt64();
-                default:
-                    throw new ArgumentException("Unsupported type " + valueType.Name);
-            }
-        }
+		/// <summary>
+		/// Deserializes a primitive value.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized value.</returns>
+		/// <exception cref="System.ArgumentException">Unsupported type</exception>
+		public object DeserializePrimitiveValue(EndianReader reader, Type valueType)
+		{
+			switch (Type.GetTypeCode(valueType))
+			{
+				case TypeCode.Boolean:
+					return reader.ReadBoolean();
+				case TypeCode.Byte:
+					return reader.ReadByte();
+				case TypeCode.Double:
+					return reader.ReadDouble();
+				case TypeCode.Int16:
+					return reader.ReadInt16();
+				case TypeCode.Int32:
+					return reader.ReadInt32();
+				case TypeCode.Int64:
+					return reader.ReadInt64();
+				case TypeCode.SByte:
+					return reader.ReadSByte();
+				case TypeCode.Single:
+					return reader.ReadSingle();
+				case TypeCode.UInt16:
+					return reader.ReadUInt16();
+				case TypeCode.UInt32:
+					return reader.ReadUInt32();
+				case TypeCode.UInt64:
+					return reader.ReadUInt64();
+				default:
+					throw new ArgumentException("Unsupported type " + valueType.Name);
+			}
+		}
 
-        /// <summary>
-        /// Deserializes a complex value.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized value.</returns>
-        public object DeserializeComplexValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
-        {
-            // Indirect objects
-            // TODO: Remove ResourceReference hax, the Indirect flag wasn't available when I generated the tag structures
-            if (valueInfo != null && valueInfo.Pointer)
-                return DeserializeIndirectValue(reader, context, valueType);
+		/// <summary>
+		/// Deserializes a complex value.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized value.</returns>
+		public object DeserializeComplexValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
+		{
+			// Indirect objects
+			// TODO: Remove ResourceReference hax, the Indirect flag wasn't available when I generated the tag structures
+			if (valueInfo != null && valueInfo.Pointer)
+				return DeserializeIndirectValue(reader, context, valueType);
 
-            // enum = Enum type
-            if (valueType.IsEnum)
-                return DeserializePrimitiveValue(reader, valueType.GetEnumUnderlyingType());
+			// enum = Enum type
+			if (valueType.IsEnum)
+				return DeserializePrimitiveValue(reader, valueType.GetEnumUnderlyingType());
 
-            // string = ASCII string
-            if (valueType == typeof(string))
-                return DeserializeString(reader, valueInfo);
+			// string = ASCII string
+			if (valueType == typeof(string))
+				return DeserializeString(reader, valueInfo);
 
-            if (valueType == typeof(Tag))
-                return new Tag(reader.ReadInt32());
+			if (valueType == typeof(Tag))
+				return new Tag(reader.ReadInt32());
 
-            // TagInstance = Tag reference
-            if (valueType == typeof(CachedTagInstance))
-                return DeserializeTagReference(reader, context, valueInfo);
+			// TagInstance = Tag reference
+			if (valueType == typeof(CachedTagInstance))
+				return DeserializeTagReference(reader, context, valueInfo);
 
-            // ResourceAddress = Resource address
-            if (valueType == typeof(CacheAddress))
-                return new CacheAddress(reader.ReadUInt32());
+			// ResourceAddress = Resource address
+			if (valueType == typeof(CacheAddress))
+				return new CacheAddress(reader.ReadUInt32());
 
-            // Byte array = Data reference
-            // TODO: Allow other types to be in data references, since sometimes they can point to a structure
-            if (valueType == typeof(byte[]) && valueInfo.Length == 0)
-                return DeserializeDataReference(reader, context);
+			// Byte array = Data reference
+			// TODO: Allow other types to be in data references, since sometimes they can point to a structure
+			if (valueType == typeof(byte[]) && valueInfo.Length == 0)
+				return DeserializeDataReference(reader, context);
 
-            // Color types
-            if (valueType == typeof(RealRgbColor))
-                return new RealRgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            else if (valueType == typeof(RealArgbColor))
-                return new RealArgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            else if (valueType == typeof(ArgbColor))
-                return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-            else if (valueType == typeof(ArgbColor))
-                return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+			// Color types
+			if (valueType == typeof(RealRgbColor))
+				return new RealRgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			else if (valueType == typeof(RealArgbColor))
+				return new RealArgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			else if (valueType == typeof(ArgbColor))
+				return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+			else if (valueType == typeof(ArgbColor))
+				return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 
-            if (valueType == typeof(Point2d))
-                return new Point2d(reader.ReadInt16(), reader.ReadInt16());
-            if (valueType == typeof(Rectangle2d))
-                return new Rectangle2d(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16());
+			if (valueType == typeof(Point2d))
+				return new Point2d(reader.ReadInt16(), reader.ReadInt16());
+			if (valueType == typeof(Rectangle2d))
+				return new Rectangle2d(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16());
 
-            if (valueType == typeof(RealEulerAngles2d))
-            {
-                var i = Angle.FromRadians(reader.ReadSingle());
-                var j = Angle.FromRadians(reader.ReadSingle());
-                return new RealEulerAngles2d(i, j);
-            }
-            else if (valueType == typeof(RealEulerAngles3d))
-            {
-                var i = Angle.FromRadians(reader.ReadSingle());
-                var j = Angle.FromRadians(reader.ReadSingle());
-                var k = Angle.FromRadians(reader.ReadSingle());
-                return new RealEulerAngles3d(i, j, k);
-            }
+			if (valueType == typeof(RealEulerAngles2d))
+			{
+				var i = Angle.FromRadians(reader.ReadSingle());
+				var j = Angle.FromRadians(reader.ReadSingle());
+				return new RealEulerAngles2d(i, j);
+			}
+			else if (valueType == typeof(RealEulerAngles3d))
+			{
+				var i = Angle.FromRadians(reader.ReadSingle());
+				var j = Angle.FromRadians(reader.ReadSingle());
+				var k = Angle.FromRadians(reader.ReadSingle());
+				return new RealEulerAngles3d(i, j, k);
+			}
 
-            if (valueType == typeof(RealPoint2d))
-                return new RealPoint2d(reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealPoint3d))
-                return new RealPoint3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealVector2d))
-                return new RealVector2d(reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealVector3d))
-                return new RealVector3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealQuaternion))
-                return new RealQuaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealPlane2d))
-                return new RealPlane2d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealPlane3d))
-                return new RealPlane3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            if (valueType == typeof(RealMatrix4x3))
-                return new RealMatrix4x3(
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealPoint2d))
+				return new RealPoint2d(reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealPoint3d))
+				return new RealPoint3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealVector2d))
+				return new RealVector2d(reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealVector3d))
+				return new RealVector3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealQuaternion))
+				return new RealQuaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealPlane2d))
+				return new RealPlane2d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealPlane3d))
+				return new RealPlane3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+			if (valueType == typeof(RealMatrix4x3))
+				return new RealMatrix4x3(
+					reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+					reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+					reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+					reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 
-            // StringID
-            if (valueType == typeof(StringId))
-                return new StringId(reader.ReadUInt32(),Version);
+			// StringID
+			if (valueType == typeof(StringId))
+				return new StringId(reader.ReadUInt32(), Version);
 
-            // Angle (radians)
-            if (valueType == typeof(Angle))
-                return Angle.FromRadians(reader.ReadSingle());
+			// Angle (radians)
+			if (valueType == typeof(Angle))
+				return Angle.FromRadians(reader.ReadSingle());
 
-            // Non-byte array = Inline array
-            // TODO: Define more clearly in general what constitutes a data reference and what doesn't
-            if (valueType.IsArray)
-                return DeserializeInlineArray(reader, context, valueInfo, valueType);
+			// Non-byte array = Inline array
+			// TODO: Define more clearly in general what constitutes a data reference and what doesn't
+			if (valueType.IsArray)
+				return DeserializeInlineArray(reader, context, valueInfo, valueType);
 
-            // List = Tag block
-            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
-                return DeserializeTagBlock(reader, context, valueType);
+			// List = Tag block
+			if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
+				return DeserializeTagBlock(reader, context, valueType);
 
-            // Ranges
-            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
-                return DeserializeRange(reader, context, valueType);
+			// Ranges
+			if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
+				return DeserializeRange(reader, context, valueType);
 
 			if (valueType == typeof(VertexShaderReference))
 				return DeserializeVertexShaderReference(reader, context);
 
 			if (valueType == typeof(PixelShaderReference))
-                return DeserializePixelShaderReference(reader, context);
+				return DeserializePixelShaderReference(reader, context);
 
-            // Assume the value is a structure
-            return DeserializeStruct(reader, context, new TagStructureInfo(valueType, Version));
-        }
+			// Assume the value is a structure
+			return DeserializeStruct(reader, context, new TagStructureInfo(valueType, Version));
+		}
 
-        /// <summary>
-        /// Deserializes a tag block (list of values).
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized tag block.</returns>
-        public object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
-        {
-            var result = Activator.CreateInstance(valueType);
-            var elementType = valueType.GenericTypeArguments[0];
+		/// <summary>
+		/// Deserializes a tag block (list of values).
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized tag block.</returns>
+		public object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+		{
+			var result = Activator.CreateInstance(valueType);
+			var elementType = valueType.GenericTypeArguments[0];
 
-            TagStructureAttribute structure;
+			TagStructureAttribute structure;
 
-            try
-            {
-                structure = new TagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
+			try
+			{
+				structure = new TagStructureInfo(elementType, Version).Structure;
+			}
+			catch
+			{
+				structure = null;
+			}
 
-            // Read count and offset
-            var startOffset = reader.BaseStream.Position;
-            var count = reader.ReadInt32();
-            
-            var pointer = reader.ReadUInt32();
-            if (count == 0 || pointer == 0)
-            {
-                // Null tag block
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
-                return result;
-            }
+			// Read count and offset
+			var startOffset = reader.BaseStream.Position;
+			var count = reader.ReadInt32();
 
-            //
-            // Read each value
-            //
+			var pointer = reader.ReadUInt32();
+			if (count == 0 || pointer == 0)
+			{
+				// Null tag block
+				reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+				return result;
+			}
 
-            var addMethod = valueType.GetMethod("Add");
+			//
+			// Read each value
+			//
 
-            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer);
+			var addMethod = valueType.GetMethod("Add");
 
-            for (var i = 0; i < count; i++)
-            {
-                var element = DeserializeValue(reader, context, null, elementType);
-                addMethod.Invoke(result, new[] { element });
-            }
+			reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer);
 
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+			for (var i = 0; i < count; i++)
+			{
+				var element = DeserializeValue(reader, context, null, elementType);
+				addMethod.Invoke(result, new[] { element });
+			}
 
-            return result;
-        }
+			reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
 
-        /// <summary>
-        /// Deserializes a value which is pointed to by an address.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized value.</returns>
-        public object DeserializeIndirectValue(EndianReader reader, ISerializationContext context, Type valueType)
-        {
-            // Read the pointer
-            var pointer = reader.ReadUInt32();
-            if (pointer == 0)
-                return null; // Null object
+			return result;
+		}
 
-            // Seek to it and read the object
-            var nextOffset = reader.BaseStream.Position;
-            reader.BaseStream.Position = context.AddressToOffset((uint)nextOffset - 4, pointer);
-            var result = DeserializeValue(reader, context, null, valueType);
-            reader.BaseStream.Position = nextOffset;
-            return result;
-        }
+		/// <summary>
+		/// Deserializes a value which is pointed to by an address.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized value.</returns>
+		public object DeserializeIndirectValue(EndianReader reader, ISerializationContext context, Type valueType)
+		{
+			// Read the pointer
+			var pointer = reader.ReadUInt32();
+			if (pointer == 0)
+				return null; // Null object
 
-        /// <summary>
-        /// Deserializes a tag reference.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
-        /// <returns>The deserialized tag reference.</returns>
-        public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
-        {
-            if (valueInfo == null || !valueInfo.Short)
-                reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
-            
-            var result = context.GetTagByIndex(reader.ReadInt32());
+			// Seek to it and read the object
+			var nextOffset = reader.BaseStream.Position;
+			reader.BaseStream.Position = context.AddressToOffset((uint)nextOffset - 4, pointer);
+			var result = DeserializeValue(reader, context, null, valueType);
+			reader.BaseStream.Position = nextOffset;
+			return result;
+		}
 
-            if (result != null && valueInfo != null && valueInfo.ValidTags != null)
-                foreach (string tag in valueInfo.ValidTags)
-                    if (!result.IsInGroup(tag))
-                        throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
+		/// <summary>
+		/// Deserializes a tag reference.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
+		/// <returns>The deserialized tag reference.</returns>
+		public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
+		{
+			if (valueInfo == null || !valueInfo.Short)
+				reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
 
-            return result;
-        }
+			var result = context.GetTagByIndex(reader.ReadInt32());
 
-        /// <summary>
-        /// Deserializes a data reference.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <returns>The deserialized data reference.</returns>
-        public byte[] DeserializeDataReference(EndianReader reader, ISerializationContext context)
-        {
-            // Read size and pointer
-            var startOffset = reader.BaseStream.Position;
-            var size = reader.ReadInt32();
-            if (Version > CacheVersion.Halo2Vista)
-                reader.BaseStream.Position = startOffset + 0xC;
-            var pointer = reader.ReadUInt32();
-            if (pointer == 0)
-            {
-                // Null data reference
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
-                return new byte[0];
-            }
+			if (result != null && valueInfo != null && valueInfo.ValidTags != null)
+				foreach (string tag in valueInfo.ValidTags)
+					if (!result.IsInGroup(tag))
+						throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
 
-            // Read the data
-            var result = new byte[size];
-            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
-            reader.Read(result, 0, size);
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
-            return result;
-        }
+			return result;
+		}
 
-        /// <summary>
-        /// Deserializes an inline array.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
-        /// <param name="valueType">The type of the value to deserialize.</param>
-        /// <returns>The deserialized array.</returns>
-        public Array DeserializeInlineArray(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
-        {
-            if (valueInfo == null || valueInfo.Length == 0)
-                throw new ArgumentException("Cannot deserialize an inline array with no count set");
+		/// <summary>
+		/// Deserializes a data reference.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <returns>The deserialized data reference.</returns>
+		public byte[] DeserializeDataReference(EndianReader reader, ISerializationContext context)
+		{
+			// Read size and pointer
+			var startOffset = reader.BaseStream.Position;
+			var size = reader.ReadInt32();
+			if (Version > CacheVersion.Halo2Vista)
+				reader.BaseStream.Position = startOffset + 0xC;
+			var pointer = reader.ReadUInt32();
+			if (pointer == 0)
+			{
+				// Null data reference
+				reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+				return new byte[0];
+			}
 
-            // Create the array and read the elements in order
-            var elementCount = valueInfo.Length;
-            var elementType = valueType.GetElementType();
-            var result = Array.CreateInstance(elementType, elementCount);
-            for (var i = 0; i < elementCount; i++)
-                result.SetValue(DeserializeValue(reader, context, null, elementType), i);
-            return result;
-        }
+			// Read the data
+			var result = new byte[size];
+			reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+			reader.Read(result, 0, size);
+			reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+			return result;
+		}
 
-        /// <summary>
-        /// Deserializes a null-terminated ASCII string.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="valueInfo">The value information.</param>
-        /// <returns>The deserialized string.</returns>
-        public string DeserializeString(EndianReader reader, TagFieldAttribute valueInfo)
-        {
-            if (valueInfo == null || valueInfo.Length == 0)
-                throw new ArgumentException("Cannot deserialize a string with no length set");
+		/// <summary>
+		/// Deserializes an inline array.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
+		/// <param name="valueType">The type of the value to deserialize.</param>
+		/// <returns>The deserialized array.</returns>
+		public Array DeserializeInlineArray(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
+		{
+			if (valueInfo == null || valueInfo.Length == 0)
+				throw new ArgumentException("Cannot deserialize an inline array with no count set");
 
-            switch (valueInfo.CharSet)
-            {
-                case CharSet.Ansi:
-                case CharSet.Unicode:
-                    return reader.ReadNullTerminatedString(valueInfo.Length, valueInfo.CharSet);
-                default:
-                    throw new NotSupportedException($"{valueInfo.CharSet}");
-            }
-        }
+			// Create the array and read the elements in order
+			var elementCount = valueInfo.Length;
+			var elementType = valueType.GetElementType();
+			var result = Array.CreateInstance(elementType, elementCount);
+			for (var i = 0; i < elementCount; i++)
+				result.SetValue(DeserializeValue(reader, context, null, elementType), i);
+			return result;
+		}
 
-        /// <summary>
-        /// Deserializes a <see cref="Bounds{T}"/> value.
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="context">The serialization context to use.</param>
-        /// <param name="rangeType">The range's type.</param>
-        /// <returns>The deserialized range.</returns>
-        public object DeserializeRange(EndianReader reader, ISerializationContext context, Type rangeType)
-        {
-            var boundsType = rangeType.GenericTypeArguments[0];
-            var min = DeserializeValue(reader, context, null, boundsType);
-            var max = DeserializeValue(reader, context, null, boundsType);
-            return Activator.CreateInstance(rangeType, min, max);
-        }
+		/// <summary>
+		/// Deserializes a null-terminated ASCII string.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="valueInfo">The value information.</param>
+		/// <returns>The deserialized string.</returns>
+		public string DeserializeString(EndianReader reader, TagFieldAttribute valueInfo)
+		{
+			if (valueInfo == null || valueInfo.Length == 0)
+				throw new ArgumentException("Cannot deserialize a string with no length set");
+
+			switch (valueInfo.CharSet)
+			{
+				case CharSet.Ansi:
+				case CharSet.Unicode:
+					return reader.ReadNullTerminatedString(valueInfo.Length, valueInfo.CharSet);
+				default:
+					throw new NotSupportedException($"{valueInfo.CharSet}");
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="Bounds{T}"/> value.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">The serialization context to use.</param>
+		/// <param name="rangeType">The range's type.</param>
+		/// <returns>The deserialized range.</returns>
+		public object DeserializeRange(EndianReader reader, ISerializationContext context, Type rangeType)
+		{
+			var boundsType = rangeType.GenericTypeArguments[0];
+			var min = DeserializeValue(reader, context, null, boundsType);
+			var max = DeserializeValue(reader, context, null, boundsType);
+			return Activator.CreateInstance(rangeType, min, max);
+		}
 
 		public PixelShaderReference DeserializePixelShaderReference(EndianReader reader, ISerializationContext context)
 		{
@@ -510,40 +512,40 @@ namespace TagTool.Serialization
 				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
 				constantSize = reader.ReadUInt32();
 				codeSize = reader.ReadUInt32();
-            }
+			}
 
-            var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
-            reader.SeekTo(constant_block_offset);
-            var constantData = reader.ReadBytes((int)constantSize);
+			var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+			reader.SeekTo(constant_block_offset);
+			var constantData = reader.ReadBytes((int)constantSize);
 
-            var shader_data_block_offset = constant_block_offset + constantSize;
-            reader.SeekTo(shader_data_block_offset);
-            var shaderData = reader.ReadBytes((int)codeSize);
+			var shader_data_block_offset = constant_block_offset + constantSize;
+			reader.SeekTo(shader_data_block_offset);
+			var shaderData = reader.ReadBytes((int)codeSize);
 
-            reader.SeekTo(endPosition);
+			reader.SeekTo(endPosition);
 
-            var info = new XboxShaderInfo
-            {
-                DataAddress = shader_data_block_offset,
-                DebugInfoOffset = (uint)debugHeaderOffset,
-                DebugInfoSize = debugHeader.StructureSize,
-                DatabasePath = updbName,
-                DataSize = totalSize,
-                ConstantDataSize = constantSize,
-                CodeDataSize = codeSize
-            };
+			var info = new XboxShaderInfo
+			{
+				DataAddress = shader_data_block_offset,
+				DebugInfoOffset = (uint)debugHeaderOffset,
+				DebugInfoSize = debugHeader.StructureSize,
+				DatabasePath = updbName,
+				DataSize = totalSize,
+				ConstantDataSize = constantSize,
+				CodeDataSize = codeSize
+			};
 
-            return new PixelShaderReference
-            {
-                Info = info,
-                UpdbName = updbName,
-                Header = header,
-                DebugHeader = debugHeader,
-                DebugData = debugData,
-                ShaderData = shaderData,
-                ConstantData = constantData
-            };
-        }
+			return new PixelShaderReference
+			{
+				Info = info,
+				UpdbName = updbName,
+				Header = header,
+				DebugHeader = debugHeader,
+				DebugData = debugData,
+				ShaderData = shaderData,
+				ConstantData = constantData
+			};
+		}
 
 		public VertexShaderReference DeserializeVertexShaderReference(EndianReader reader, ISerializationContext context)
 		{
@@ -597,39 +599,39 @@ namespace TagTool.Serialization
 				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
 				constantSize = reader.ReadUInt32();
 				codeSize = reader.ReadUInt32();
-            }
+			}
 
-            var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
-            reader.SeekTo(constant_block_offset);
-            var constantData = reader.ReadBytes((int)constantSize);
+			var constant_block_offset = context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+			reader.SeekTo(constant_block_offset);
+			var constantData = reader.ReadBytes((int)constantSize);
 
-            var shader_data_block_offset = constant_block_offset + constantSize;
-            reader.SeekTo(shader_data_block_offset);
-            var shaderData = reader.ReadBytes((int)codeSize);
+			var shader_data_block_offset = constant_block_offset + constantSize;
+			reader.SeekTo(shader_data_block_offset);
+			var shaderData = reader.ReadBytes((int)codeSize);
 
-            reader.SeekTo(endPosition);
+			reader.SeekTo(endPosition);
 
-            var info = new XboxShaderInfo
-            {
-                DataAddress = shader_data_block_offset,
-                DebugInfoOffset = (uint)debugHeaderOffset,
-                DebugInfoSize = debugHeader.StructureSize,
-                DatabasePath = updbName,
-                DataSize = totalSize,
-                ConstantDataSize = constantSize,
-                CodeDataSize = codeSize
-            };
+			var info = new XboxShaderInfo
+			{
+				DataAddress = shader_data_block_offset,
+				DebugInfoOffset = (uint)debugHeaderOffset,
+				DebugInfoSize = debugHeader.StructureSize,
+				DatabasePath = updbName,
+				DataSize = totalSize,
+				ConstantDataSize = constantSize,
+				CodeDataSize = codeSize
+			};
 
-            return new VertexShaderReference
-            {
-                Info = info,
-                UpdbName = updbName,
-                Header = header,
-                DebugHeader = debugHeader,
-                DebugData = debugData,
-                ShaderData = shaderData,
-                ConstantData = constantData
-            };
-        }
+			return new VertexShaderReference
+			{
+				Info = info,
+				UpdbName = updbName,
+				Header = header,
+				DebugHeader = debugHeader,
+				DebugData = debugData,
+				ShaderData = shaderData,
+				ConstantData = constantData
+			};
+		}
 	}
 }
