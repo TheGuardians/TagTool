@@ -21,6 +21,7 @@ namespace TagTool.Serialization
 			this.Type = this.Field.FieldType;
 			this.Attribute = attribute;
 			this.Offset = offset;
+			this.Size = size;
 		}
 
 		/// <summary>
