@@ -92,7 +92,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var enumerator = new TagFieldEnumerator(Structure);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
             var field = enumerator.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
             var fieldType = field.FieldType;
 
@@ -165,8 +165,8 @@ namespace TagTool.Commands.Editing
 
             if (isTagStructure)
             {
-                var enumerator = new TagFieldEnumerator(
-                    new TagStructureInfo(elementType));
+                var enumerator = ReflectionCache.GetTagFieldEnumerator(
+                    ReflectionCache.GetTagStructureInfo(elementType));
 
                 while (enumerator.Next())
                 {

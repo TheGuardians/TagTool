@@ -37,7 +37,7 @@ namespace TagTool.Commands.Editing
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";
             
-            var enumerator = new TagFieldEnumerator(Structure);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
 
             while (enumerator.Next())
             {

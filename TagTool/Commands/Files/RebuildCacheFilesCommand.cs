@@ -317,7 +317,7 @@ namespace TagTool.Commands.Files
 
         private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, destCacheContext.Version));
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, destCacheContext.Version));
 
             while (enumerator.Next())
             {

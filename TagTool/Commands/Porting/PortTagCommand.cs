@@ -799,7 +799,7 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {

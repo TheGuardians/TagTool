@@ -29,8 +29,8 @@ namespace TagTool.Commands.Porting
             BlamCache = blamCache;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = new TagStructureInfo(value.GetType(), BlamCache.Version);
-            Owner = value;
+			Structure = ReflectionCache.GetTagStructureInfo(value.GetType(), BlamCache.Version);
+			Owner = value;
         }
 
         public override object Execute(List<string> args)
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Porting
             var blockName = args[0];
             var ownerType = Owner.GetType();
 
-            var enumerator = new TagFieldEnumerator(Structure);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
 
             var deferredNames = new List<string>();
             var deferredArgs = new List<string>();
@@ -126,7 +126,7 @@ namespace TagTool.Commands.Porting
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = new TagStructureInfo(blockValue.GetType());
+            var blockStructure = ReflectionCache.GetTagStructureInfo(blockValue.GetType());
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(BlamCache, blockStructure, blockValue));

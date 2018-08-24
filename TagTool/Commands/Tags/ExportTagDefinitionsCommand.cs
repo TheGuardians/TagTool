@@ -37,8 +37,8 @@ namespace TagTool.Commands.Tags
             {
                 var tagGroup = TagGroup.Instances[entry.Key];
                 var tagGroupName = CacheContext.GetString(tagGroup.Name);
-                var tagStructureInfo = new TagStructureInfo(entry.Value, CacheContext.Version);
-                var enumerator = new TagFieldEnumerator(tagStructureInfo);
+                var tagStructureInfo = ReflectionCache.GetTagStructureInfo(entry.Value, CacheContext.Version);
+                var enumerator = ReflectionCache.GetTagFieldEnumerator(tagStructureInfo);
 
                 using (var stream = File.Create(Path.Combine(destDir.FullName, $"{tagGroupName}.hpp")))
                 using (var writer = new StreamWriter(stream))

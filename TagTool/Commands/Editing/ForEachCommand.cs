@@ -80,7 +80,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var enumerator = new TagFieldEnumerator(Structure);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
 
             var field = enumerator.Find(f =>
                 f.Name == fieldName ||

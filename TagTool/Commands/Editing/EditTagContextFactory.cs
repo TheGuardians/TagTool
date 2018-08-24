@@ -141,7 +141,7 @@ namespace TagTool.Commands.Editing
                     break;
             }
 
-            var structure = new TagStructureInfo(TagDefinition.Find(tag.Group.Tag));
+            var structure = ReflectionCache.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag));
 
             commandContext.AddCommand(new ListFieldsCommand(cacheContext, structure, definition));
             commandContext.AddCommand(new SetFieldCommand(contextStack, cacheContext, tag, structure, definition));

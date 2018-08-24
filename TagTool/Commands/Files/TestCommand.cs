@@ -2126,8 +2126,8 @@ namespace TagTool.Commands.Files
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
                 // The objects are structures
-                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
-                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
                 while (left.Next() && right.Next())
                 {
                     // Keep going on the left until the field is on the right
@@ -2386,8 +2386,8 @@ namespace TagTool.Commands.Files
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
                 // The objects are structures
-                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
-                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
+                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
+                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
                 while (left.Next() && right.Next())
                 {
                     // Keep going on the left until the field is on the right

@@ -168,7 +168,7 @@ namespace TagTool.Commands.Files
 
         private object ConvertStructure(Stream tagsStream, Stream sourceStream, Stream destStream, object data, Type type)
         {
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {

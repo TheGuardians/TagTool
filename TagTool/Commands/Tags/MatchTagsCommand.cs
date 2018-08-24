@@ -193,8 +193,8 @@ namespace TagTool.Commands.Tags
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
                 // The objects are structures
-                var left = new TagFieldEnumerator(new TagStructureInfo(leftData.GetType(), leftVersion));
-                var right = new TagFieldEnumerator(new TagStructureInfo(rightData.GetType(), rightVersion));
+                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), leftVersion));
+                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), rightVersion));
                 while (left.Next() && right.Next())
                 {
                     // Keep going on the left until the field is on the right

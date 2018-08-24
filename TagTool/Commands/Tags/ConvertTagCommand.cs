@@ -255,7 +255,7 @@ namespace TagTool.Commands.Tags
         private object ConvertStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
             // Convert each field
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, destCacheContext.Version));
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, destCacheContext.Version));
             while (enumerator.Next())
             {
                 var oldValue = enumerator.Field.GetValue(data);

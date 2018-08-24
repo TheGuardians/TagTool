@@ -44,8 +44,8 @@ namespace TagTool.Serialization
         /// <returns>The object that was read.</returns>
         public object Deserialize(ISerializationContext context, Type structureType)
         {
-            var info = new TagStructureInfo(structureType, Version);
-            var reader = context.BeginDeserialize(info);
+			var info = ReflectionCache.GetTagStructureInfo(structureType, Version);
+			var reader = context.BeginDeserialize(info);
             var result = DeserializeStruct(reader, context, info);
             context.EndDeserialize(info, result);
             return result;
@@ -63,7 +63,7 @@ namespace TagTool.Serialization
         {
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
-            var enumerator = new TagFieldEnumerator(info);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(info);
 
             while (enumerator.Next())
                 DeserializeProperty(reader, context, instance, enumerator, baseOffset);
@@ -269,7 +269,7 @@ namespace TagTool.Serialization
                 return DeserializePixelShaderReference(reader, context);
 
             // Assume the value is a structure
-            return DeserializeStruct(reader, context, new TagStructureInfo(valueType, Version));
+            return DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(valueType, Version));
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace TagTool.Serialization
 
             try
             {
-                structure = new TagStructureInfo(elementType, Version).Structure;
+                structure = ReflectionCache.GetTagStructureInfo(elementType, Version).Structure;
             }
             catch
             {
@@ -472,13 +472,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (PixelShaderHeader)DeserializeStruct(reader, context, new TagStructureInfo(typeof(PixelShaderHeader)));
+			var header = (PixelShaderHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(PixelShaderHeader)));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, new TagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(ShaderDebugHeader)));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;
@@ -559,13 +559,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (VertexShaderHeader)DeserializeStruct(reader, context, new TagStructureInfo(typeof(VertexShaderHeader)));
+			var header = (VertexShaderHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(VertexShaderHeader)));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, new TagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(ShaderDebugHeader)));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;

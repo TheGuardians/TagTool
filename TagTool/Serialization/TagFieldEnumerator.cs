@@ -202,7 +202,7 @@ namespace TagTool.Serialization
 
 				// Assume the field is a structure
 				default:
-					return new TagStructureInfo(type, attr.Version).TotalSize;
+					return ReflectionCache.GetTagStructureInfo(type, attr.Version).TotalSize;
 			}
 		}
 

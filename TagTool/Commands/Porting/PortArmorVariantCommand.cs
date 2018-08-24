@@ -713,7 +713,7 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, object data, Type type, bool replace)
         {
-            var enumerator = new TagFieldEnumerator(new TagStructureInfo(type, CacheContext.Version));
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, CacheContext.Version));
 
             while (enumerator.Next())
             {

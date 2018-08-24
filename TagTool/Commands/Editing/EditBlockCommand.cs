@@ -29,7 +29,7 @@ namespace TagTool.Commands.Editing
             CacheContext = cacheContext;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = new TagStructureInfo(value.GetType(), CacheContext.Version);
+            Structure = ReflectionCache.GetTagStructureInfo(value.GetType(), CacheContext.Version);
             Owner = value;
         }
 
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Editing
             var blockName = args[0];
             var ownerType = Owner.GetType();
 
-            var enumerator = new TagFieldEnumerator(Structure);
+            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
 
             var deferredNames = new List<string>();
             var deferredArgs = new List<string>();
@@ -126,7 +126,7 @@ namespace TagTool.Commands.Editing
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = new TagStructureInfo(blockValue.GetType());
+            var blockStructure = ReflectionCache.GetTagStructureInfo(blockValue.GetType());
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(CacheContext, blockStructure, blockValue));
