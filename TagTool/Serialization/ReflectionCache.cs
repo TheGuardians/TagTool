@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Shaders;
 
 namespace TagTool.Serialization
 {
 	/// <summary>
-	/// TODO: Document this. Currently only used by <see cref="TagFieldEnumerator(TagStructureInfo)"/> and
-	/// <see cref="TagStructureInfo.GetStructureAttribute(Type, CacheVersion)"/>
+	/// Utility class for caching/accessing a <see cref="TagStructureInfo"/> or <see cref="TagFieldEnumerator"/>.
 	/// </summary>
 	public static class ReflectionCache
 	{
@@ -28,6 +23,11 @@ namespace TagTool.Serialization
 		private static readonly Dictionary<MemberInfoVersionKey, TagFieldEnumerator> _tagFieldEnumerators =
 			new Dictionary<MemberInfoVersionKey, TagFieldEnumerator> { };
 
+		/// <summary>
+		/// Finds a cached <see cref="TagStructureInfo"/> or creates a new one (and caches it for later use).
+		/// </summary>
+		/// <param name="type">The <see cref="Type"/> used in lookup/creation.</param>
+		/// <param name="version">The <see cref="CacheVersion"/> used in lookup/creation. Defaults to <see cref="CacheVersion.Unknown"/></param>
 		public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown)
 		{
 			var key = new MemberInfoVersionKey(type, version);
@@ -36,6 +36,10 @@ namespace TagTool.Serialization
 			return info;
 		}
 
+		/// <summary>
+		/// Finds a cached <see cref="TagFieldEnumerator"/> or creates a new one (and caches it for later use).
+		/// </summary>
+		/// <param name="info">The <see cref="TagStructureInfo"/> used in lookup/creation.</param>
 		public static TagFieldEnumerator GetTagFieldEnumerator(TagStructureInfo info)
 		{
 			var key = new MemberInfoVersionKey(info.Types[0], info.Version);
@@ -45,6 +49,11 @@ namespace TagTool.Serialization
 			return enumerator;
 		}
 
+		/// <summary>
+		/// Finds a cached <see cref="TagFieldEnumerator"/> or creates a new one (and caches it for later use).
+		/// </summary>
+		/// <param name="type">The <see cref="Type"/> used in lookup/creation.</param>
+		/// <param name="version">The <see cref="CacheVersion"/> used in lookup/creation. Defaults to <see cref="CacheVersion.Unknown"/></param>
 		public static TagFieldEnumerator GetTagFieldEnumerator(Type type, CacheVersion version = CacheVersion.Unknown) =>
 			ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, version));
 	}

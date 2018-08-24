@@ -77,8 +77,13 @@ namespace TagTool.Serialization
             if (Structure == null)
                 throw new InvalidOperationException("No TagStructure attribute which matches the target version was found on " + mainType.Name);
 
-            // Scan through the type's inheritance hierarchy and analyze each TagStructure attribute
-            var currentType = mainType;
+			// ATTENTION: If the exception above is thrown, it is likely a mishandled type in TagFieldInfo.GetFieldSize(), 
+			// which causes the type to be treated as a structure. The below line will print the mishandled type which will 
+			// need a case added/fixed in TagFieldInfo.GetFieldSize(). Refer to TagSerializer/TagDeserializer to find sizes.
+			// Console.WriteLine(mainType.Name);
+
+			// Scan through the type's inheritance hierarchy and analyze each TagStructure attribute
+			var currentType = mainType;
             Types = new List<Type>();
             while (currentType != null)
             {
