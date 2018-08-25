@@ -128,12 +128,10 @@ namespace TagTool.Serialization
         {
             switch (Type.GetTypeCode(valueType))
             {
-                case TypeCode.Boolean:
-                    return reader.ReadBoolean();
+                case TypeCode.Single:
+                    return reader.ReadSingle();
                 case TypeCode.Byte:
                     return reader.ReadByte();
-                case TypeCode.Double:
-                    return reader.ReadDouble();
                 case TypeCode.Int16:
                     return reader.ReadInt16();
                 case TypeCode.Int32:
@@ -142,14 +140,16 @@ namespace TagTool.Serialization
                     return reader.ReadInt64();
                 case TypeCode.SByte:
                     return reader.ReadSByte();
-                case TypeCode.Single:
-                    return reader.ReadSingle();
                 case TypeCode.UInt16:
                     return reader.ReadUInt16();
                 case TypeCode.UInt32:
                     return reader.ReadUInt32();
                 case TypeCode.UInt64:
                     return reader.ReadUInt64();
+                case TypeCode.Boolean:
+                    return reader.ReadBoolean();
+                case TypeCode.Double:
+                    return reader.ReadDouble();
                 default:
                     throw new ArgumentException("Unsupported type " + valueType.Name);
             }

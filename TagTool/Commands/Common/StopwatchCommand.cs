@@ -33,7 +33,15 @@ namespace TagTool.Commands.Common
 				switch (arg)
 				{
 					case "print":
-						Console.WriteLine(_stopWatch.ElapsedMilliseconds);
+                        var miliseconds = _stopWatch.ElapsedMilliseconds;
+                        if (miliseconds <= 1000)
+                        {
+                            Console.WriteLine($"{miliseconds}ms");
+                        }
+                        else
+                        {
+                            Console.WriteLine("{0:0.000}s", (double)_stopWatch.ElapsedMilliseconds / 1000.0f);
+                        }
 						break;
 					case "reset":
 						_stopWatch.Reset();
