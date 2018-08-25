@@ -1,3 +1,5 @@
+#define TEST_REFLECTION_CACHE
+
 using TagTool.Cache;
 using System;
 using System.Collections.Generic;
@@ -11,12 +13,12 @@ namespace TagTool.Serialization
     /// <summary>
     /// Allows easy enumeration over a tag structure's elements and filtering by version.
     /// </summary>
-    public class TagFieldEnumerator
+    public class TagFieldEnumerator : IDisposable
     {
         private static readonly TagFieldAttribute DefaultFieldAttribute = new TagFieldAttribute();
 
-        private readonly List<TagFieldInfo> _tagFieldInfos = new List<TagFieldInfo>();
-        private int _nextIndex;
+        private readonly List<TagFieldInfo> _tagFieldInfos = new List<TagFieldInfo> { };
+		private int _nextIndex;
 		
         /// <summary>
         /// Constructs an enumerator over a tag structure.
@@ -25,8 +27,17 @@ namespace TagTool.Serialization
         public TagFieldEnumerator(TagStructureInfo info)
         {
             this.Info = info;
-            this.Build();
+			this.Build();
         }
+
+		public TagFieldEnumerator(TagFieldEnumerator enumerator)
+		{
+			this.Info = enumerator.Info;
+			this._tagFieldInfos = enumerator._tagFieldInfos;
+		}
+
+		public bool IsFree => 
+			this._nextIndex == 0 && this.Field is null && this.Attribute is null;
 
         /// <summary>
         /// Gets the info that was used to construct the enumerator.
@@ -135,16 +146,19 @@ namespace TagTool.Serialization
 		/// <returns></returns>
 		private static uint GetFieldSize(Type type, TagFieldAttribute attr)
 		{
+#if TEST_REFLECTION_CACHE
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
 				case TypeCode.SByte:
 				case TypeCode.Byte:
 					return 1;
+
 				case TypeCode.Char:
 				case TypeCode.Int16:
 				case TypeCode.UInt16:
 					return 2;
+
 				case TypeCode.Single:
 				case TypeCode.Int32:
 				case TypeCode.UInt32:
@@ -159,6 +173,7 @@ namespace TagTool.Serialization
 				case TypeCode.Object when type == typeof(VertexShaderReference):
 				case TypeCode.Object when type == typeof(PixelShaderReference):
 					return 4;
+
 				case TypeCode.Double:
 				case TypeCode.Int64:
 				case TypeCode.UInt64:
@@ -170,6 +185,7 @@ namespace TagTool.Serialization
 				case TypeCode.Object when type == typeof(RealVector2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && attr.Version <= CacheVersion.Halo2Vista:
 					return 8;
+
 				case TypeCode.Object when type == typeof(RealRgbColor):
 				case TypeCode.Object when type == typeof(RealEulerAngles3d):
 				case TypeCode.Object when type == typeof(RealPoint3d):
@@ -177,6 +193,7 @@ namespace TagTool.Serialization
 				case TypeCode.Object when type == typeof(RealPlane2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && attr.Version > CacheVersion.Halo2Vista:
 					return 12;
+
 				case TypeCode.Decimal:
 				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Version > CacheVersion.Halo2Vista:
 				case TypeCode.Object when type == typeof(RealArgbColor):
@@ -204,6 +221,9 @@ namespace TagTool.Serialization
 				default:
 					return ReflectionCache.GetTagStructureInfo(type, attr.Version).TotalSize;
 			}
+#else
+			return 0;
+#endif
 		}
 
 		/// <summary>
@@ -213,5 +233,12 @@ namespace TagTool.Serialization
 		/// <returns></returns>
 		public FieldInfo Find(Predicate<FieldInfo> match) =>
 			this._tagFieldInfos.Find(f => match.Invoke(f.Field)).Field;
+
+		public void Dispose()
+		{
+			this._nextIndex = 0;
+			this.Field = null;
+			this.Attribute = null;
+		}
 	}
 }

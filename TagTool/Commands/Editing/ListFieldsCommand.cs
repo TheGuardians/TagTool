@@ -36,83 +36,82 @@ namespace TagTool.Commands.Editing
 
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";
-            
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
 
-            while (enumerator.Next())
-            {
-                if (enumerator.Attribute != null && enumerator.Attribute.Padding == true)
-                    continue;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
+				while (enumerator.Next())
+				{
+					if (enumerator.Attribute != null && enumerator.Attribute.Padding == true)
+						continue;
 
-                var nameString = enumerator.Field.Name;
+					var nameString = enumerator.Field.Name;
 
-                if (match && !nameString.ToLower().Contains(token))
-                    continue;
+					if (match && !nameString.ToLower().Contains(token))
+						continue;
 
-                var fieldType = enumerator.Field.FieldType;
-                var fieldValue = enumerator.Field.GetValue(Value);
+					var fieldType = enumerator.Field.FieldType;
+					var fieldValue = enumerator.Field.GetValue(Value);
 
-                var typeString =
-                    fieldType.IsGenericType ?
-                        $"{fieldType.Name}<{fieldType.GenericTypeArguments[0].Name}>" :
-                    fieldType.Name;
+					var typeString =
+						fieldType.IsGenericType ?
+							$"{fieldType.Name}<{fieldType.GenericTypeArguments[0].Name}>" :
+						fieldType.Name;
 
-                string valueString;
+					string valueString;
 
-            #if !DEBUG
+#if !DEBUG
                 try
                 {
-            #endif
-                    if (fieldValue == null)
-                        valueString = "null";
-                    else if (fieldType.GetInterface(typeof(IList).Name) != null)
-                        valueString =
-                            ((IList)fieldValue).Count != 0 ?
-                                $"{{...}}[{((IList)fieldValue).Count}]" :
-                            "null";
-                    else if (fieldType == typeof(StringId))
-                        valueString = CacheContext.GetString((StringId)fieldValue);
-                    else if (fieldType == typeof(CachedTagInstance))
-                    {
-                        var instance = (CachedTagInstance)fieldValue;
+#endif
+					if (fieldValue == null)
+						valueString = "null";
+					else if (fieldType.GetInterface(typeof(IList).Name) != null)
+						valueString =
+							((IList)fieldValue).Count != 0 ?
+								$"{{...}}[{((IList)fieldValue).Count}]" :
+							"null";
+					else if (fieldType == typeof(StringId))
+						valueString = CacheContext.GetString((StringId)fieldValue);
+					else if (fieldType == typeof(CachedTagInstance))
+					{
+						var instance = (CachedTagInstance)fieldValue;
 
-                        var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                            CacheContext.TagNames[instance.Index] :
-                            $"0x{instance.Index:X4}";
+						var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
+							CacheContext.TagNames[instance.Index] :
+							$"0x{instance.Index:X4}";
 
-                        valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
-                    }
-                    else if (fieldType == typeof(TagFunction))
-                    {
-                        var function = (TagFunction)fieldValue;
-                        valueString = "";
-                        foreach (var datum in function.Data)
-                            valueString += datum.ToString("X2");
-                    }
-                    else if (fieldType == typeof(PageableResource))
-                    {
-                        var pageable = (PageableResource)fieldValue;
-                        pageable.GetLocation(out var location);
-                        valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
-                    }
-                    else
-                        valueString = fieldValue.ToString();
-            #if !DEBUG
+						valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
+					}
+					else if (fieldType == typeof(TagFunction))
+					{
+						var function = (TagFunction)fieldValue;
+						valueString = "";
+						foreach (var datum in function.Data)
+							valueString += datum.ToString("X2");
+					}
+					else if (fieldType == typeof(PageableResource))
+					{
+						var pageable = (PageableResource)fieldValue;
+						pageable.GetLocation(out var location);
+						valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
+					}
+					else
+						valueString = fieldValue.ToString();
+#if !DEBUG
                 }
                 catch (Exception e)
                 {
                     valueString = $"<ERROR MESSAGE=\"{e.Message}\" />";
                 }
-            #endif
+#endif
 
-                var fieldName = $"{enumerator.Field.DeclaringType.FullName}.{enumerator.Field.Name}".Replace("+", ".");
-                var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldName}')]");
-                
-                Console.WriteLine("{0}: {1} = {2} {3}", nameString, typeString, valueString,
-                    documentationNode != null ?
-                        $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
-                        "");
-            }
+					var fieldName = $"{enumerator.Field.DeclaringType.FullName}.{enumerator.Field.Name}".Replace("+", ".");
+					var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldName}')]");
+
+					Console.WriteLine("{0}: {1} = {2} {3}", nameString, typeString, valueString,
+						documentationNode != null ?
+							$":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
+							"");
+				}
 
             return true;
         }

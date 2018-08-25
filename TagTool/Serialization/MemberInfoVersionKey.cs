@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using TagTool.Cache;
+using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
@@ -11,24 +12,19 @@ namespace TagTool.Serialization
 	/// </summary>
 	public struct MemberInfoVersionKey : IEquatable<MemberInfoVersionKey>
 	{
-		/// <summary>
-		/// Contains the MetaDataToken of the <see cref="MemberInfo"/> that was used in construction.
-		/// </summary>
-		private readonly int _memberInfo;
+		private readonly MemberInfo _memberInfo;
+
+		private readonly int _metadataToken;
 
 		/// <summary>
 		/// Contains the <see cref="CacheVersion"/> that was used in construction, cast to an <see cref="int"/>.
 		/// </summary>
 		private readonly int _version;
 
-		/// <summary>
-		/// Constructs a new <see cref="MemberInfoVersionKey"/> from a <see cref="MemberInfo"/> and <see cref="CacheVersion"/>.
-		/// </summary>
-		/// <param name="memberInfo"> The <see cref="MemberInfo"/> used as the first half of the key. </param>
-		/// <param name="version"> The <see cref="CacheVersion"/> used as the second half of the key. </param>
 		public MemberInfoVersionKey(MemberInfo memberInfo, CacheVersion version)
 		{
-			this._memberInfo = memberInfo.MetadataToken;
+			this._memberInfo = memberInfo;
+			this._metadataToken = memberInfo.MetadataToken;
 			this._version = (int)version;
 		}
 
@@ -37,7 +33,7 @@ namespace TagTool.Serialization
 		/// and <see cref="CacheVersion"/> used in construction.
 		/// </summary>
 		public override int GetHashCode() =>
-			(17 * 31 + this._memberInfo) * 31 + this._version;
+			(17 * 31 + this._metadataToken) * 31 + this._version;
 
 		/// <summary>
 		/// <c>true</c> if the <see cref="MemberInfo"/> and <see cref="CacheVersion"/> values of 

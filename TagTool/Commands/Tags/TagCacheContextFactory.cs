@@ -21,6 +21,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DumpLogCommand());
             context.AddCommand(new EchoCommand());
             context.AddCommand(new SetLocaleCommand());
+			context.AddCommand(new StopwatchCommand());
             context.AddCommand(new CleanCsvFileCommand(cacheContext));
             context.AddCommand(new TagDependencyCommand(cacheContext));
             context.AddCommand(new ExtractTagCommand(cacheContext));

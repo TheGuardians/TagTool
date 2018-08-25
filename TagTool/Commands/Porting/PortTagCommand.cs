@@ -115,6 +115,10 @@ namespace TagTool.Commands.Porting
                         Flags &= ~PortingFlags.MatchShaders;
                         break;
 
+					case "replace":
+						Flags |= PortingFlags.Replace;
+						break;
+
                     default:
                         {
                             if (!flagNames.Contains(arg))
@@ -799,15 +803,15 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, CacheContext.Version));
-
-            while (enumerator.Next())
-            {
-                var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                enumerator.Field.SetValue(data, newValue);
-            }
-
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
+			{
+				while (enumerator.Next())
+				{
+					var oldValue = enumerator.Field.GetValue(data);
+					var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+					enumerator.Field.SetValue(data, newValue);
+				}
+			}
             return data;
         }
 

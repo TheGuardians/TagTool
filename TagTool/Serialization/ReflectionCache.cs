@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define TEST_REFLECTION_CACHE
+
+using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 
@@ -30,10 +32,15 @@ namespace TagTool.Serialization
 		/// <param name="version">The <see cref="CacheVersion"/> used in lookup/creation. Defaults to <see cref="CacheVersion.Unknown"/></param>
 		public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown)
 		{
+
+#if TEST_REFLECTION_CACHE
 			var key = new MemberInfoVersionKey(type, version);
 			if (!ReflectionCache._tagStructureInfos.TryGetValue(key, out TagStructureInfo info))
 				ReflectionCache._tagStructureInfos[key] = info = new TagStructureInfo(type, version);
 			return info;
+#else
+			return new TagStructureInfo(type, version);
+#endif
 		}
 
 		/// <summary>
@@ -42,11 +49,18 @@ namespace TagTool.Serialization
 		/// <param name="info">The <see cref="TagStructureInfo"/> used in lookup/creation.</param>
 		public static TagFieldEnumerator GetTagFieldEnumerator(TagStructureInfo info)
 		{
+#if TEST_REFLECTION_CACHE
 			var key = new MemberInfoVersionKey(info.Types[0], info.Version);
 			if (!ReflectionCache._tagFieldEnumerators.TryGetValue(key, out TagFieldEnumerator enumerator))
 				ReflectionCache._tagFieldEnumerators[key] = enumerator = new TagFieldEnumerator(info);
-			enumerator.Reset();
-			return enumerator;
+
+			if (enumerator.IsFree)
+				return enumerator;
+			else
+				return new TagFieldEnumerator(info);
+#else
+			return new TagFieldEnumerator(info);
+#endif
 		}
 
 		/// <summary>

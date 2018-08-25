@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TagTool.Cache;
 using TagTool.Serialization;
 
@@ -41,8 +42,6 @@ namespace TagTool.Commands.Editing
             var blockName = args[0];
             var ownerType = Owner.GetType();
 
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
-
             var deferredNames = new List<string>();
             var deferredArgs = new List<string>();
 
@@ -69,12 +68,14 @@ namespace TagTool.Commands.Editing
             var blockNameLow = blockName.ToLower();
             var blockNameSnake = blockName.ToSnakeCase();
 
-            var field = enumerator.Find(f =>
-                f.Name == blockName ||
-                f.Name.ToLower() == blockNameLow ||
-                f.Name.ToSnakeCase() == blockNameSnake);
+			FieldInfo field;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
+				field = enumerator.Find(f =>
+					f.Name == blockName ||
+					f.Name.ToLower() == blockNameLow ||
+					f.Name.ToSnakeCase() == blockNameSnake);
 
-            if (field == null)
+			if (field == null)
             {
                 Console.WriteLine("{0} does not contain a block named \"{1}\"", ownerType.Name, blockName);
                 return false;

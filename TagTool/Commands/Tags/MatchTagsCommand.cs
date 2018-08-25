@@ -192,33 +192,33 @@ namespace TagTool.Commands.Tags
             }
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
-                // The objects are structures
-                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), leftVersion));
-                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), rightVersion));
-                while (left.Next() && right.Next())
-                {
-                    // Keep going on the left until the field is on the right
-                    while (!CacheVersionDetection.IsBetween(rightVersion, left.Attribute.MinVersion, left.Attribute.MaxVersion))
-                    {
-                        if (!left.Next())
-                            return;
-                    }
+				// The objects are structures
+				using (var left = ReflectionCache.GetTagFieldEnumerator(leftData.GetType(), leftVersion))
+				using (var right = ReflectionCache.GetTagFieldEnumerator(rightData.GetType(), rightVersion))
+					while (left.Next() && right.Next())
+					{
+						// Keep going on the left until the field is on the right
+						while (!CacheVersionDetection.IsBetween(rightVersion, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+						{
+							if (!left.Next())
+								return;
+						}
 
-                    // Keep going on the right until the field is on the left
-                    while (!CacheVersionDetection.IsBetween(leftVersion, right.Attribute.MinVersion, right.Attribute.MaxVersion))
-                    {
-                        if (!right.Next())
-                            return;
-                    }
-                    if (left.Field.MetadataToken != right.Field.MetadataToken)
-                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+						// Keep going on the right until the field is on the left
+						while (!CacheVersionDetection.IsBetween(leftVersion, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+						{
+							if (!right.Next())
+								return;
+						}
+						if (left.Field.MetadataToken != right.Field.MetadataToken)
+							throw new InvalidOperationException("WTF, left and right fields don't match!");
 
-                    // Process the fields
-                    var leftFieldData = left.Field.GetValue(leftData);
-                    var rightFieldData = right.Field.GetValue(rightData);
-                    CompareBlocks(leftFieldData, leftVersion, rightFieldData, rightVersion, result, tagQueue);
-                }
-            }
+						// Process the fields
+						var leftFieldData = left.Field.GetValue(leftData);
+						var rightFieldData = right.Field.GetValue(rightData);
+						CompareBlocks(leftFieldData, leftVersion, rightFieldData, rightVersion, result, tagQueue);
+					}
+			}
         }
 
         private static List<QueuedTag> FindScenarios(HaloOnlineCacheContext info, Stream stream)

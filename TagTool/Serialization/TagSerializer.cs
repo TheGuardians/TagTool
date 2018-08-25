@@ -59,9 +59,10 @@ namespace TagTool.Serialization
         private void SerializeStruct(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagStructureInfo info, object structure)
         {
             var baseOffset = block.Stream.Position;
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(info);
-            while (enumerator.Next())
-                SerializeProperty(info.Version, context, tagStream, block, structure, enumerator, baseOffset);
+
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(info))
+				while (enumerator.Next())
+					SerializeProperty(info.Version, context, tagStream, block, structure, enumerator, baseOffset);
 
             // Honor the struct size if it's defined
             if (info.TotalSize > 0)

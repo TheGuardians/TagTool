@@ -38,23 +38,23 @@ namespace TagTool.Commands.Tags
                 var tagGroup = TagGroup.Instances[entry.Key];
                 var tagGroupName = CacheContext.GetString(tagGroup.Name);
                 var tagStructureInfo = ReflectionCache.GetTagStructureInfo(entry.Value, CacheContext.Version);
-                var enumerator = ReflectionCache.GetTagFieldEnumerator(tagStructureInfo);
 
-                using (var stream = File.Create(Path.Combine(destDir.FullName, $"{tagGroupName}.hpp")))
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.WriteLine(@"#pragma once");
-                    writer.WriteLine(@"#include <cstdint>");
-                    writer.WriteLine(@"#include ..\\Tags.hpp");
-                    writer.WriteLine();
-                    writer.WriteLine(@"namespace Blam");
-                    writer.WriteLine(@"{");
-                    writer.WriteLine(@"    namespace Tags");
-                    writer.WriteLine(@"    {");
-                    
-                    while (enumerator.Next())
-                        PrintField(writer, enumerator);
-                }
+				using (var enumerator = ReflectionCache.GetTagFieldEnumerator(tagStructureInfo))
+				using (var stream = File.Create(Path.Combine(destDir.FullName, $"{tagGroupName}.hpp")))
+				using (var writer = new StreamWriter(stream))
+				{
+					writer.WriteLine(@"#pragma once");
+					writer.WriteLine(@"#include <cstdint>");
+					writer.WriteLine(@"#include ..\\Tags.hpp");
+					writer.WriteLine();
+					writer.WriteLine(@"namespace Blam");
+					writer.WriteLine(@"{");
+					writer.WriteLine(@"    namespace Tags");
+					writer.WriteLine(@"    {");
+
+					while (enumerator.Next())
+						PrintField(writer, enumerator);
+				}
             }
 
             return true;

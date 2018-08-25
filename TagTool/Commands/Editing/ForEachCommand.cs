@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace TagTool.Commands.Editing
 {
@@ -80,12 +81,12 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
-
-            var field = enumerator.Find(f =>
-                f.Name == fieldName ||
-                f.Name.ToLower() == fieldNameLow ||
-                f.Name.ToSnakeCase() == fieldNameSnake);
+			FieldInfo field;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
+				field = enumerator.Find(f =>
+					f.Name == fieldName ||
+					f.Name.ToLower() == fieldNameLow ||
+					f.Name.ToSnakeCase() == fieldNameSnake);
 
             var ownerType = Owner.GetType();
 

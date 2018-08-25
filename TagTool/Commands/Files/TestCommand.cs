@@ -2125,33 +2125,33 @@ namespace TagTool.Commands.Files
             }
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
-                // The objects are structures
-                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
-                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
-                while (left.Next() && right.Next())
-                {
-                    // Keep going on the left until the field is on the right
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
-                    {
-                        if (!left.Next())
-                            return; // probably unused
-                    }
+				// The objects are structures
+				using (var left = ReflectionCache.GetTagFieldEnumerator(leftData.GetType(), CacheVersion.HaloOnline106708))
+				using (var right = ReflectionCache.GetTagFieldEnumerator(rightData.GetType(), CacheVersion.HaloOnline106708))
+					while (left.Next() && right.Next())
+					{
+						// Keep going on the left until the field is on the right
+						while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+						{
+							if (!left.Next())
+								return; // probably unused
+						}
 
-                    // Keep going on the right until the field is on the left
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
-                    {
-                        if (!right.Next())
-                            return;
-                    }
-                    if (left.Field.MetadataToken != right.Field.MetadataToken)
-                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+						// Keep going on the right until the field is on the left
+						while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+						{
+							if (!right.Next())
+								return;
+						}
+						if (left.Field.MetadataToken != right.Field.MetadataToken)
+							throw new InvalidOperationException("WTF, left and right fields don't match!");
 
-                    // Process the fields
-                    var leftFieldData = left.Field.GetValue(leftData);
-                    var rightFieldData = right.Field.GetValue(rightData);
-                    CompareBlocksToNameTags(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}");
-                }
-            }
+						// Process the fields
+						var leftFieldData = left.Field.GetValue(leftData);
+						var rightFieldData = right.Field.GetValue(rightData);
+						CompareBlocksToNameTags(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}");
+					}
+			}
         }
 
         public bool CompareEDtoBlam(List<string> args)
@@ -2385,33 +2385,33 @@ namespace TagTool.Commands.Files
             }
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
-                // The objects are structures
-                var left = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(leftData.GetType(), CacheVersion.HaloOnline106708));
-                var right = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(rightData.GetType(), CacheVersion.HaloOnline106708));
-                while (left.Next() && right.Next())
-                {
-                    // Keep going on the left until the field is on the right
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
-                    {
-                        if (!left.Next())
-                            return; // probably unused
-                    }
+				// The objects are structures
+				using (var left = ReflectionCache.GetTagFieldEnumerator(leftData.GetType(), CacheVersion.HaloOnline106708))
+				using (var right = ReflectionCache.GetTagFieldEnumerator(rightData.GetType(), CacheVersion.HaloOnline106708))
+					while (left.Next() && right.Next())
+					{
+						// Keep going on the left until the field is on the right
+						while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, left.Attribute.MinVersion, left.Attribute.MaxVersion))
+						{
+							if (!left.Next())
+								return; // probably unused
+						}
 
-                    // Keep going on the right until the field is on the left
-                    while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
-                    {
-                        if (!right.Next())
-                            return;
-                    }
-                    if (left.Field.MetadataToken != right.Field.MetadataToken)
-                        throw new InvalidOperationException("WTF, left and right fields don't match!");
+						// Keep going on the right until the field is on the left
+						while (!CacheVersionDetection.IsBetween(CacheVersion.HaloOnline106708, right.Attribute.MinVersion, right.Attribute.MaxVersion))
+						{
+							if (!right.Next())
+								return;
+						}
+						if (left.Field.MetadataToken != right.Field.MetadataToken)
+							throw new InvalidOperationException("WTF, left and right fields don't match!");
 
-                    // Process the fields
-                    var leftFieldData = left.Field.GetValue(leftData);
-                    var rightFieldData = right.Field.GetValue(rightData);
-                    CompareBlocksBlam(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}", verifiedFields);
-                }
-            }
+						// Process the fields
+						var leftFieldData = left.Field.GetValue(leftData);
+						var rightFieldData = right.Field.GetValue(rightData);
+						CompareBlocksBlam(leftFieldData, rightFieldData, edContext, bmContext, $"{name}{left.Field.Name}", verifiedFields);
+					}
+			}
             else if (type.IsEnum)
             {
                 var a = leftData.ToString();

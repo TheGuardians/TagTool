@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
@@ -82,12 +83,12 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
-
-            var field = enumerator.Find(f =>
-                f.Name == fieldName ||
-                f.Name.ToLower() == fieldNameLow ||
-                f.Name.ToSnakeCase() == fieldNameSnake);
+			FieldInfo field;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
+				field = enumerator.Find(f =>
+					f.Name == fieldName ||
+					f.Name.ToLower() == fieldNameLow ||
+					f.Name.ToSnakeCase() == fieldNameSnake);
 
             if (field == null)
             {

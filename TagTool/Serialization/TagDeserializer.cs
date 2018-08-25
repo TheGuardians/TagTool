@@ -63,12 +63,13 @@ namespace TagTool.Serialization
         {
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(info);
-
-            while (enumerator.Next())
-                DeserializeProperty(reader, context, instance, enumerator, baseOffset);
-            if (enumerator.Info.TotalSize > 0)
-                reader.BaseStream.Position = baseOffset + enumerator.Info.TotalSize;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(info))
+			{
+				while (enumerator.Next())
+					DeserializeProperty(reader, context, instance, enumerator, baseOffset);
+				if (enumerator.Info.TotalSize > 0)
+					reader.BaseStream.Position = baseOffset + enumerator.Info.TotalSize;
+			}
             return instance;
         }
 

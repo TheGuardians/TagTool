@@ -228,6 +228,7 @@
     <Compile Include="Commands\Common\HelpCommand.cs" />
     <Compile Include="Commands\Common\LocalizedStringPrinter.cs" />
     <Compile Include="Commands\Common\SetLocaleCommand.cs" />
+    <Compile Include="Commands\Common\StopwatchCommand.cs" />
     <Compile Include="Commands\Common\TagPrinter.cs" />
     <Compile Include="Commands\Definitions\ConvertPluginsCommand.cs" />
     <Compile Include="Commands\Definitions\GenerateTagStructuresCommand.cs" />

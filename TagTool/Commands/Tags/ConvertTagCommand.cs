@@ -254,14 +254,14 @@ namespace TagTool.Commands.Tags
 
         private object ConvertStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
-            // Convert each field
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, destCacheContext.Version));
-            while (enumerator.Next())
-            {
-                var oldValue = enumerator.Field.GetValue(data);
-                var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
-                enumerator.Field.SetValue(data, newValue);
-            }
+			// Convert each field
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, destCacheContext.Version))
+				while (enumerator.Next())
+				{
+					var oldValue = enumerator.Field.GetValue(data);
+					var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+					enumerator.Field.SetValue(data, newValue);
+				}
 
             // Perform fixups
             FixShaders(data);

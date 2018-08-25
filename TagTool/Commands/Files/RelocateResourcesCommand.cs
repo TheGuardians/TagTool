@@ -168,14 +168,13 @@ namespace TagTool.Commands.Files
 
         private object ConvertStructure(Stream tagsStream, Stream sourceStream, Stream destStream, object data, Type type)
         {
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, CacheContext.Version));
-
-            while (enumerator.Next())
-            {
-                var oldValue = enumerator.Field.GetValue(data);
-                var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
-                enumerator.Field.SetValue(data, newValue);
-            }
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
+				while (enumerator.Next())
+				{
+					var oldValue = enumerator.Field.GetValue(data);
+					var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
+					enumerator.Field.SetValue(data, newValue);
+				}
 
             return data;
         }

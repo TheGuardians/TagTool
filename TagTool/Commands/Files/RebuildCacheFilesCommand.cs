@@ -317,16 +317,15 @@ namespace TagTool.Commands.Files
 
         private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, destCacheContext.Version));
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, destCacheContext.Version))
+				while (enumerator.Next())
+				{
+					var oldValue = enumerator.Field.GetValue(data);
+					var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+					enumerator.Field.SetValue(data, newValue);
+				}
 
-            while (enumerator.Next())
-            {
-                var oldValue = enumerator.Field.GetValue(data);
-                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-                enumerator.Field.SetValue(data, newValue);
-            }
-            
-            return data;
+			return data;
         }
 
         private PageableResource CopyResource(PageableResource pageable, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)

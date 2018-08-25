@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TagTool.Cache;
 using TagTool.Serialization;
 
@@ -92,8 +93,10 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure);
-            var field = enumerator.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
+			FieldInfo field;
+			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
+				field = enumerator.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
+
             var fieldType = field.FieldType;
 
             if ((field == null) ||
@@ -165,34 +168,32 @@ namespace TagTool.Commands.Editing
 
             if (isTagStructure)
             {
-                var enumerator = ReflectionCache.GetTagFieldEnumerator(
-                    ReflectionCache.GetTagStructureInfo(elementType));
+				using (var enumerator = ReflectionCache.GetTagFieldEnumerator(elementType))
+					while (enumerator.Next())
+					{
+						var fieldType = enumerator.Field.FieldType;
 
-                while (enumerator.Next())
-                {
-                    var fieldType = enumerator.Field.FieldType;
+						if (fieldType.IsArray && enumerator.Attribute.Length > 0)
+						{
+							var array = (IList)Activator.CreateInstance(enumerator.Field.FieldType,
+								new object[] { enumerator.Attribute.Length });
 
-                    if (fieldType.IsArray && enumerator.Attribute.Length > 0)
-                    {
-                        var array = (IList)Activator.CreateInstance(enumerator.Field.FieldType,
-                            new object[] { enumerator.Attribute.Length });
-
-                        for (var i = 0; i < enumerator.Attribute.Length; i++)
-                            array[i] = CreateElement(fieldType.GetElementType());
-                    }
-                    else
-                    {
-                        try
-                        {
-                            enumerator.Field.SetValue(element, CreateElement(enumerator.Field.FieldType));
-                        }
-                        catch
-                        {
-                            enumerator.Field.SetValue(element, null);
-                        }
-                    }
-                }
-            }
+							for (var i = 0; i < enumerator.Attribute.Length; i++)
+								array[i] = CreateElement(fieldType.GetElementType());
+						}
+						else
+						{
+							try
+							{
+								enumerator.Field.SetValue(element, CreateElement(enumerator.Field.FieldType));
+							}
+							catch
+							{
+								enumerator.Field.SetValue(element, null);
+							}
+						}
+					}
+			}
 
             return element;
         }
