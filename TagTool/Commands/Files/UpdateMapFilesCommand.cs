@@ -77,7 +77,16 @@ namespace TagTool.Commands.Files
                 DirectoryInfo mapInfoDir = null;
 
                 if (args.Count == 1)
+                {
                     mapInfoDir = new DirectoryInfo(args[0]);
+                }
+                else
+                {
+                    if(Directory.Exists("info"))
+                    {
+                        mapInfoDir = new DirectoryInfo("info");
+                    }
+                }
 
                 using (var stream = mapFile.Open(FileMode.Open, FileAccess.ReadWrite))
                 using (var reader = new BinaryReader(stream))
@@ -100,6 +109,8 @@ namespace TagTool.Commands.Files
                     stream.Position = ScenarioTagIndexOffset;
                     writer.Write(entry.Value.Item2);
 
+                    bool using_mapinfo = false;
+
                     if (mapInfoDir != null)
                     {
                         var mapInfoFiles = mapInfoDir.GetFiles(mapName + ".mapinfo");
@@ -107,6 +118,7 @@ namespace TagTool.Commands.Files
                         if (mapInfoFiles != null && mapInfoFiles.Length > 0)
                         {
                             var mapInfoFile = mapInfoFiles[0];
+                            using_mapinfo = true;
 
                             using (var infoStream = mapInfoFile.OpenRead())
                             using (var infoReader = new BinaryReader(infoStream))
@@ -186,7 +198,15 @@ namespace TagTool.Commands.Files
                         }
                     }
                     
-                    Console.WriteLine($"Scenario tag index for {mapFile.Name}: 0x{entry.Value.Item2:X4}");
+                    if(using_mapinfo)
+                    {
+                        Console.WriteLine($"Scenario tag index for {mapFile.Name}: 0x{entry.Value.Item2:X4} (using map info)");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Scenario tag index for {mapFile.Name}: 0x{entry.Value.Item2:X4} (WARNING: not using map info)");
+                    }
+                    
                 }
             }
             
