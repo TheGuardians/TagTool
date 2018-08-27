@@ -13,7 +13,7 @@ namespace TagTool.Common
         /// </summary>
         public static readonly StringId Invalid = new StringId(0);
 
-        private readonly uint _value;
+        private uint _value;
 
         private byte IndexBits;
         private byte SetBits;
@@ -144,12 +144,14 @@ namespace TagTool.Common
             _value = value;
         }
 
-        /// <summary>
-        /// Gets the value of the stringID as a 32-bit integer.
-        /// </summary>
-        public uint Value
+		/// <summary>
+		/// Gets the value of the stringID as a 32-bit integer.
+		/// THERE BE DRAGONS HERE: Do not set this manually outside of serialization.
+		/// </summary>
+		public uint Value
         {
             get { return _value; }
+			set { this._value = value; }
         }
 
         /// <summary>

@@ -7,7 +7,10 @@ namespace TagTool.Cache
         private const int TypeShift = 29;
         private const uint OffsetMask = (uint.MaxValue >> (32 - TypeShift));
 
-        public uint Value { get; }
+		/// <summary>
+		/// THERE BE DRAGONS HERE: Do not set this manually outside of serialization.
+		/// </summary>
+		public uint Value { get; set; }
 
         public CacheAddressType Type => (CacheAddressType)(Value >> TypeShift);
         

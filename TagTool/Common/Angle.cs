@@ -1,10 +1,12 @@
 using System;
+using TagTool.HyperSerialization;
 
 namespace TagTool.Common
 {
     /// <summary>
     /// An angle value.
     /// </summary>
+	[BlamType(BlamType.Angle)]
     public struct Angle : IEquatable<Angle>, IComparable<Angle>
     {
         /// <summary>
@@ -12,10 +14,11 @@ namespace TagTool.Common
         /// </summary>
         public const float UnitConversion = (float)(180.0 / Math.PI);
 
-        /// <summary>
-        /// Gets the angle's value in radians.
-        /// </summary>
-        public float Radians { get; }
+		/// <summary>
+		/// Gets the angle's value in radians.
+		/// THERE BE DRAGONS HERE: Do not set this manually outside of serialization.
+		/// </summary>
+		public float Radians { get; set; }
 
         /// <summary>
         /// Gets the angle's value in degrees.

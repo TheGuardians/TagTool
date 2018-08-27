@@ -4,18 +4,47 @@ namespace TagTool.Common
 {
     public struct RealEulerAngles3d : IEquatable<RealEulerAngles3d>
     {
-        public Angle Yaw { get; }
+		private Angle _yaw;
+		public float YawValue
+		{
+			get { return this._yaw.Radians; }
+			set { this._yaw.Radians = value; }
+		}
+		public Angle Yaw
+		{
+			get { return this._yaw; }
+			private set { this._yaw = value; }
+		}
 
-        public Angle Pitch { get; }
+		private Angle _pitch;
+		public float PitchValue
+		{
+			get { return this._pitch.Radians; }
+			set { this._pitch.Radians = value; }
+		}
+		public Angle Pitch
+		{
+			get { return this._pitch; }
+			private set { this._pitch = value; }
+		}
 
-        public Angle Roll { get; }
+		private Angle _roll;
+		public float RollValue
+		{
+			get { return this._roll.Radians; }
+			set { this._roll.Radians = value; }
+		}
+		public Angle Roll
+		{
+			get { return this._roll; }
+			private set { this._roll = value; }
+		}
 
-
-        public RealEulerAngles3d(Angle yaw, Angle pitch, Angle roll)
+		public RealEulerAngles3d(Angle yaw, Angle pitch, Angle roll)
         {
-            Yaw = yaw;
-            Pitch = pitch;
-            Roll = roll;
+            this._yaw = yaw;
+            this._pitch = pitch;
+            this._roll = roll;
         }
 
         public bool Equals(RealEulerAngles3d other) =>
