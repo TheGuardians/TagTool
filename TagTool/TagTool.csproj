@@ -367,6 +367,13 @@
     <Compile Include="Common\Bitmask.cs" />
     <Compile Include="Common\Bounds.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Serialization2\BaseDictionary.cs" />
+    <Compile Include="Serialization2\Deserialize.cs" />
+    <Compile Include="Serialization2\BlamTypeAttribute.cs" />
+    <Compile Include="Serialization2\Serialize.cs" />
+    <Compile Include="Serialization2\StreamMultiplxr.cs" />
+    <Compile Include="Serialization2\WeakDictionary.cs" />
+    <Compile Include="Serialization2\WeakKeyReference.cs" />
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />

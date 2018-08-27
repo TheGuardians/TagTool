@@ -2,16 +2,36 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealEulerAngles2d : IEquatable<RealEulerAngles2d>
-    {
-        public Angle Yaw { get; }
+	public struct RealEulerAngles2d : IEquatable<RealEulerAngles2d>
+	{
+		private Angle _yaw;
+		public float YawValue
+		{
+			get { return this._yaw.Radians; }
+			set { this._yaw.Radians = value; }
+		}
+		public Angle Yaw
+		{
+			get { return this._yaw; }
+			private set { this._yaw = value; }
+		}
 
-        public Angle Pitch { get; }
+		private Angle _pitch;
+		public float PitchValue
+		{
+			get { return this._pitch.Radians; }
+			set { this._pitch.Radians = value; }
+		}
+		public Angle Pitch
+		{
+			get { return this._pitch; }
+			private set { this._pitch = value; }
+		}
 
-        public RealEulerAngles2d(Angle yaw, Angle pitch)
+		public RealEulerAngles2d(Angle yaw, Angle pitch)
         {
-            Yaw = yaw;
-            Pitch = pitch;
+            this._yaw = yaw;
+            this._pitch = pitch;
         }
 
         public bool Equals(RealEulerAngles2d other) =>
