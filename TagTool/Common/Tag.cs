@@ -57,15 +57,16 @@ namespace TagTool.Common
         }
 
         /// <summary>
-        /// Gets the value of the magic number as an integer.
+        /// Gets the value of the magic number as an integer. 
+		/// THERE BE DRAGONS HERE: Do not set this manually outside of serialization.
         /// </summary>
-        public readonly int Value;
+        public int Value { get; set; }
 
-        /// <summary>
-        /// Converts the magic number into its string representation.
-        /// </summary>
-        /// <returns>The string that the magic number looks like.</returns>
-        public override string ToString()
+		/// <summary>
+		/// Converts the magic number into its string representation.
+		/// </summary>
+		/// <returns>The string that the magic number looks like.</returns>
+		public override string ToString()
         {
             var i = 4;
             var chars = new char[4];

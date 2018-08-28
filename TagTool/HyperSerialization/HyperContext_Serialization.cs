@@ -1,7 +1,7 @@
 ﻿namespace TagTool.HyperSerialization
 {
-	class HyperSerializer
+	partial class HyperContext
 	{
-
+		
 	}
 }

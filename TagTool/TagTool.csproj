@@ -368,9 +368,10 @@
     <Compile Include="Common\Bounds.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="HyperSerialization\BaseDictionary.cs" />
-    <Compile Include="HyperSerialization\BlamTypeAttribute.cs" />
-    <Compile Include="HyperSerialization\HyperDeserializer.cs" />
-    <Compile Include="HyperSerialization\HyperSerializer.cs" />
+    <Compile Include="HyperSerialization\BlamType.cs" />
+    <Compile Include="HyperSerialization\HyperContext.cs" />
+    <Compile Include="HyperSerialization\HyperContext_Deserialization.cs" />
+    <Compile Include="HyperSerialization\HyperContext_Serialization.cs" />
     <Compile Include="HyperSerialization\StreamMultiplxr.cs" />
     <Compile Include="HyperSerialization\WeakDictionary.cs" />
     <Compile Include="HyperSerialization\WeakKeyReference.cs" />

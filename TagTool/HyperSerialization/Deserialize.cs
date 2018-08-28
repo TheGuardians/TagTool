@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,14 +10,16 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Shaders;
 using TagTool.Serialization;
+using TagTool.Shaders;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Serialization2
 {
-	class HyperDeserializer
+	class Deserializer2
 	{
-		private Task DeserializeBranch(ISerializationContext context, long offset, Stream stream, CacheVersion cache_version, Type structure_type, TagStructureInfo structure_info, object root_parent, FieldInfo field_info, int? list_index)
+		public static int ThreadModifier;
+
+		public Task DeserializeBranch(ISerializationContext context, long offset, Stream stream, CacheVersion cache_version, Type structure_type, TagStructureInfo structure_info, object root_parent, FieldInfo field_info, int? list_index)
 		{
 			var new_stream = new StreamMultiplxer(stream);
 			new_stream.Position = offset;//todo get structure size
@@ -167,10 +170,9 @@ namespace TagTool.HyperSerialization
 								break;
 
 							case RealEulerAngles3d realEulerAngles3D:
-								realEulerAngles3D = new RealEulerAngles3d(
-									Angle.FromRadians(reader.ReadSingle()),
-									 Angle.FromRadians(reader.ReadSingle()),
-									  Angle.FromRadians(reader.ReadSingle()));
+								realEulerAngles3D.YawValue = reader.ReadSingle();
+								realEulerAngles3D.PitchValue = reader.ReadSingle();
+								realEulerAngles3D.RollValue = reader.ReadSingle();
 								break;
 
 							case RealPoint2d realPoint2D:
@@ -271,11 +273,11 @@ namespace TagTool.HyperSerialization
 						if (cache_version > CacheVersion.Halo2Vista)
 							stream.Position += 4;
 
-						var list = (List<dynamic>)Activator.CreateInstance(structure_type, new object[] { count });
 
 						if (genericTypeArgument.IsPrimitive)
-							list = (List<dynamic>)DeserializePrimitiveList(genericType, genericTypeArgument, reader, count);
+							field.SetValue(parent, DeserializePrimitiveList(genericType, genericTypeArgument, reader, count));
 
+						var list = (dynamic)Activator.CreateInstance(structure_type, new object[] { count });
 						for (var i = 0; i < count; i++)
 						{
 							object value;
@@ -317,7 +319,7 @@ namespace TagTool.HyperSerialization
 
 						else if (list_index != null)
 						{
-							((List<dynamic>)root_parent)[list_index ?? 0] = parent;
+							((dynamic)root_parent)[list_index ?? 0] = parent;
 						}
 						else throw new Exception("Invalid usage");
 					}
@@ -332,85 +334,86 @@ namespace TagTool.HyperSerialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private object DeserializePrimitiveList(Type type, Type element_type, EndianReader reader, int count)
 		{
+			dynamic values;
 			switch (Type.GetTypeCode(element_type))
 			{
 				case TypeCode.Boolean:
-					var bools = new List<Boolean>(count);
+					values = new List<Boolean>(count);
 					for (var r = 0; r < count; r++)
-						bools[r] = reader.ReadBoolean();
-					return bools;
+						values[r] = reader.ReadBoolean();
+					return values;
 
 				case TypeCode.SByte:
-					var sbytes = new List<SByte>(count);
+					values = new List<SByte>(count);
 					for (var r = 0; r < count; r++)
-						sbytes[r] = reader.ReadSByte();
-					return sbytes;
+						values[r] = reader.ReadSByte();
+					return values;
 
 				case TypeCode.Byte:
-					var bytes = new List<Byte>(count);
+					values = new List<Byte>(count);
 					for (var r = 0; r < count; r++)
-						bytes[r] = reader.ReadByte();
-					return bytes;
+						values[r] = reader.ReadByte();
+					return values;
 
 				case TypeCode.Char:
-					var chars = new List<Char>(count);
+					values = new List<Char>(count);
 					for (var r = 0; r < count; r++)
-						chars[r] = reader.ReadChar();
-					return chars;
+						values[r] = reader.ReadChar();
+					return values;
 
 				case TypeCode.Int16:
-					var int16s = new List<Int16>(count);
+					values = new List<Int16>(count);
 					for (var r = 0; r < count; r++)
-						int16s[r] = reader.ReadInt16();
-					return int16s;
+						values[r] = reader.ReadInt16();
+					return values;
 
 				case TypeCode.UInt16:
-					var uint16s = new List<UInt16>(count);
+					values = new List<UInt16>(count);
 					for (var r = 0; r < count; r++)
-						uint16s[r] = reader.ReadUInt16();
-					return uint16s;
+						values[r] = reader.ReadUInt16();
+					return values;
 
 				case TypeCode.Single:
-					var singles = new List<Single>(count);
+					values = new List<Single>(count);
 					for (var r = 0; r < count; r++)
-						singles[r] = reader.ReadSingle();
-					return singles;
+						values[r] = reader.ReadSingle();
+					return values;
 
 				case TypeCode.Int32:
-					var int32s = new List<Int32>(count);
+					values = new List<Int32>(count);
 					for (var r = 0; r < count; r++)
-						int32s[r] = reader.ReadInt32();
-					return int32s;
+						values[r] = reader.ReadInt32();
+					return values;
 
 				case TypeCode.UInt32:
-					var uint32s = new List<UInt32>(count);
+					values = new List<UInt32>(count);
 					for (var r = 0; r < count; r++)
-						uint32s[r] = reader.ReadUInt32();
-					return uint32s;
+						values[r] = reader.ReadUInt32();
+					return values;
 
 				case TypeCode.Double:
-					var doubles = new List<Double>(count);
+					values = new List<Double>(count);
 					for (var r = 0; r < count; r++)
-						doubles[r] = reader.ReadDouble();
-					return doubles;
+						values[r] = reader.ReadDouble();
+					return values;
 
 				case TypeCode.Int64:
-					var int64s = new List<Int64>(count);
+					values = new List<Int64>(count);
 					for (var r = 0; r < count; r++)
-						int64s[r] = reader.ReadInt64();
-					return int64s;
+						values[r] = reader.ReadInt64();
+					return values;
 
 				case TypeCode.UInt64:
-					var uint64s = new List<UInt64>(count);
+					values = new List<UInt64>(count);
 					for (var r = 0; r < count; r++)
-						uint64s[r] = reader.ReadUInt64();
-					return uint64s;
+						values[r] = reader.ReadUInt64();
+					return values;
 
 				case TypeCode.Decimal:
-					var decimals = new List<Decimal>(count);
+					values = new List<Decimal>(count);
 					for (var r = 0; r < count; r++)
-						decimals[r] = reader.ReadDecimal();
-					return decimals;
+						values[r] = reader.ReadDecimal();
+					return values;
 
 				default:
 					throw new ArgumentException($"Unhandled PrimitiveCollection Type: {type.Name} <{element_type.Name}>");

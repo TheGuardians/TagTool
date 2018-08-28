@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TagTool
 {
     abstract class Include
     {
-        
-
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate int OpenCallBack(IntPtr thisPtr, D3D.INCLUDE_TYPE includeType, IntPtr fileNameRef, IntPtr pParentData, ref IntPtr dataRef, ref int bytesRef);
 

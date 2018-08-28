@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using TagTool.Serialization;
 
 namespace TagTool.Shaders
