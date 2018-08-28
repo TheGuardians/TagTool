@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace TagTool.Common
 {
-    public struct RealQuaternion
+    public struct RealQuaternion, IBlamType
     {
         public float I { get; }
         public float J { get; }

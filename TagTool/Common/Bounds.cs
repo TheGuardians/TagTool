@@ -2,7 +2,7 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct Bounds<T> : IBounds, IEquatable<Bounds<T>> where T : IComparable<T>
+    public struct Bounds<T> : IBounds, IBlamType, IEquatable<Bounds<T>> where T : IComparable<T>
     {
         /// <summary>
         /// Gets the lowerimum value within the range.

@@ -11,10 +11,11 @@ using TagTool.IO;
 using TagTool.Shaders;
 using TagTool.Serialization;
 using System.Collections;
+using System.Threading;
 
 namespace TagTool.HyperSerialization
 {
-	partial class HyperContext
+	partial class HyperSerializer
 	{
 		private static volatile int ThreadCounter;
 
@@ -26,7 +27,10 @@ namespace TagTool.HyperSerialization
 			Task task = new Task(() => {
 				Deserialize(new_stream, structure_type, structure_info, root_parent, field_info, list_index);
 			});
+
+			Interlocked.Increment(ref HyperSerializer.ThreadCounter);
 			task.Start();
+			Interlocked.Decrement(ref HyperSerializer.ThreadCounter);
 
 			//todo something smarter
 			if (ThreadCounter >= Environment.ProcessorCount)

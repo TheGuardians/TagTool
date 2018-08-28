@@ -6,15 +6,17 @@ using TagTool.Serialization;
 
 namespace TagTool.HyperSerialization
 {
-	partial class HyperContext : ISerializationContext
+	partial class HyperSerializer : ISerializationContext
 	{
 		private Stream RootStream;
 		private GameCacheContext CacheContext;
+		private bool DoesBranching;
 
-		public HyperContext(Stream rootStream, GameCacheContext cacheContext)
+		public HyperSerializer(Stream rootStream, GameCacheContext cacheContext, bool doesBranching = false)
 		{
 			this.RootStream = rootStream;
 			this.CacheContext = cacheContext;
+			this.DoesBranching = doesBranching;
 		}
 
 		public void BeginSerialize(TagStructureInfo info)

@@ -1,11 +1,14 @@
 ﻿using System;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Common
 {
 	[BlamType]
 	public interface IBlamType
 	{
-		void SetValues(ValueType[] values);
+		// If we redo all the blam types (RealEulerAngle2d etc) definitions to be assignable directly
+		// from an array of primitives, we can handle them in a much cleaner way.
+
+		// void SetValues(ValueType[] values);
 	}
 
 	public class BlamTypeAttribute : Attribute

@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealEulerAngles3d : IEquatable<RealEulerAngles3d>
-    {
+    public struct RealEulerAngles3d : IEquatable<RealEulerAngles3d>, IBlamType
+	{
 		private Angle _yaw;
 		public float YawValue
 		{

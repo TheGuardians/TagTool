@@ -2,8 +2,8 @@ using System.IO;
 
 namespace TagTool.Common
 {
-    public struct RealMatrix4x3
-    {
+    public struct RealMatrix4x3 : IBlamType
+	{
         public float m11 { get; set; }
         public float m12 { get; set; }
         public float m13 { get; set; }

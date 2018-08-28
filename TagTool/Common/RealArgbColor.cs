@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealArgbColor : IEquatable<RealArgbColor>
-    {
+    public struct RealArgbColor : IEquatable<RealArgbColor>, IBlamType
+	{
         public float Alpha { get; set; }
         public float Red { get; set; }
         public float Green { get; set; }
