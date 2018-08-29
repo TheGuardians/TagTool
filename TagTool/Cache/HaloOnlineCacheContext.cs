@@ -155,6 +155,59 @@ namespace TagTool.Cache
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
         }
 
+        public bool TryAllocateTag(out CachedTagInstance result, Type type, string name = null)
+        {
+            result = null;
+
+            try
+            {
+                var structure = ReflectionCache.GetTagStructureInfo(type, Version).Structure;
+
+                if (structure == null)
+                {
+                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
+                    return false;
+                }
+
+                var groupTag = new Tag(structure.Tag);
+
+                if (!TagGroup.Instances.ContainsKey(groupTag))
+                {
+                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
+                    return false;
+                }
+
+                result = TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+
+                if (result == null)
+                    return false;
+
+                if (name != null)
+                {
+                    TagNames[result.Index] = name;
+                    SaveTagNames();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public CachedTagInstance AllocateTag(Type type, string name = null)
+        {
+            if (TryAllocateTag(out var result, type, name))
+                return result;
+
+            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
+            return null;
+        }
+
+        public CachedTagInstance AllocateTag<T>(string name = null) => AllocateTag(typeof(T), name);
+
         /// <summary>
         /// Attempts to get a tag of a specific type from the current cache.
         /// </summary>
