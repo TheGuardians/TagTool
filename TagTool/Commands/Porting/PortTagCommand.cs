@@ -373,6 +373,15 @@ namespace TagTool.Commands.Porting
                     if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
                         continue;
 
+                    if (instance.IsInGroup("rm  ") && (Flags & PortingFlags.NoMs30) != 0)
+                    {
+                        var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
+                        var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
+
+                        if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
+                            continue;
+                    }
+
                     if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
                         if (Flags.HasFlag(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
