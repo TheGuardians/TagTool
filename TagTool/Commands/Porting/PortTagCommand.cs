@@ -590,7 +590,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Sound sound:
-                    blamDefinition = ConvertSound(cacheStream, resourceStreams, sound);
+                    blamDefinition = ConvertSound(cacheStream, resourceStreams, sound, blamTag.Name);
                     break;
 
                 case SoundLooping lsnd:
