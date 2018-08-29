@@ -167,7 +167,7 @@ namespace TagTool.Commands.Files
 
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
-                destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
+                destCacheContext.Serialize(destStream, cfgtTag, new CacheFileGlobalTags
                 {
                     GlobalTags = new List<TagReferenceBlock>
                     {
@@ -200,9 +200,7 @@ namespace TagTool.Commands.Files
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
 
-            var structureType = TagDefinition.Find(srcTag.Group.Tag);
-            var srcContext = new TagSerializationContext(srcStream, srcCacheContext, srcTag);
-            var tagData = srcCacheContext.Deserializer.Deserialize(srcContext, structureType);
+            var tagData = srcCacheContext.Deserialize(srcStream, srcTag);
 
             CachedTagInstance destTag = null;
 
@@ -226,24 +224,21 @@ namespace TagTool.Commands.Files
             if (NoVariants && tagData is MultiplayerGlobals mulg)
                 CleanMultiplayerGlobals(mulg);
 
-            if (structureType == typeof(Scenario))
+            if (tagData is Scenario scenario1)
             {
-                var scenario = (Scenario)tagData;
-
-                if (!MapScenarios.ContainsKey(scenario.MapId))
-                    MapScenarios[scenario.MapId] = destTag.Index;
+                if (!MapScenarios.ContainsKey(scenario1.MapId))
+                    MapScenarios[scenario1.MapId] = destTag.Index;
 
                 if (NoVariants)
-                    CleanScenario(srcStream, scenario);
+                    CleanScenario(srcStream, scenario1);
             }
 
             tagData = CopyData(tagData, srcCacheContext, srcStream, destCacheContext, destStream);
 
-            if (structureType == typeof(Scenario))
-                CopyScenario((Scenario)tagData);
+            if (tagData is Scenario scenario2)
+                CopyScenario(scenario2);
 
-            var destContext = new TagSerializationContext(destStream, destCacheContext, destTag);
-            destCacheContext.Serializer.Serialize(destContext, tagData);
+            destCacheContext.Serialize(destStream, destTag, tagData);
 
             var tagName = destCacheContext.TagNames.ContainsKey(destTag.Index) ?
                 destCacheContext.TagNames[destTag.Index] :
@@ -1062,10 +1057,7 @@ namespace TagTool.Commands.Files
                 return;
 
             if (MulgDefinition == null)
-            {
-                var context = new TagSerializationContext(srcStream, CacheContext, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
-                MulgDefinition = CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(context);
-            }
+                MulgDefinition = CacheContext.Deserialize<MultiplayerGlobals>(srcStream, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
 
             var weaponPalette = new List<Scenario.ScenarioPaletteEntry>();
 

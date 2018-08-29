@@ -53,18 +53,15 @@ namespace TagTool.Commands.Models
 
             using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
             {
-                var context = new TagSerializationContext(cacheStream, CacheContext, Definition.RenderModel);
-                var renderModel = CacheContext.Deserializer.Deserialize<RenderModel>(context);
+                var renderModel = CacheContext.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
 
                 foreach (var shader in renderModel.Materials)
                 {
-                    context = new TagSerializationContext(cacheStream, CacheContext, shader.RenderMethod);
-                    var renderMethod = (RenderMethod)CacheContext.Deserializer.Deserialize(context, TagDefinition.Find(shader.RenderMethod.Group.Tag));
+                    var renderMethod = (RenderMethod)CacheContext.Deserialize(cacheStream, shader.RenderMethod);
 
                     foreach (var property in renderMethod.ShaderProperties)
                     {
-                        context = new TagSerializationContext(cacheStream, CacheContext, property.Template);
-                        var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(context);
+                        var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                         for (var i = 0; i < template.ShaderMaps.Count; i++)
                         {
@@ -72,8 +69,7 @@ namespace TagTool.Commands.Models
 
                             var extractor = new BitmapDdsExtractor(CacheContext);
 
-                            context = new TagSerializationContext(cacheStream, CacheContext, property.ShaderMaps[i].Bitmap);
-                            var bitmap = CacheContext.Deserializer.Deserialize<Bitmap>(context);
+                            var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
                             var ddsOutDir = directory;
 
                             if (bitmap.Images.Count > 1)

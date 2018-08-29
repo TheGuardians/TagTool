@@ -334,7 +334,8 @@ namespace TagTool.Commands.Porting
                 edGroup = new TagGroup(
                     blamTag.GroupTag,
                     blamTag.ParentGroupTag,
-                    blamTag.GrandparentGroupTag, CacheContext.GetStringId(blamTag.GroupName));
+                    blamTag.GrandparentGroupTag,
+                    CacheContext.GetStringId(blamTag.GroupName));
             }
 
             if ((groupTag == "snd!") && Flags.HasFlag(PortingFlags.NoAudio))
@@ -351,6 +352,15 @@ namespace TagTool.Commands.Porting
                 foreach (var entry in CacheContext.TagNames.Where(i => i.Value == blamTag.Name))
                 {
                     var instance = CacheContext.GetTag(entry.Key);
+
+                    if (instance.IsInGroup("rm  ") && (Flags & PortingFlags.NoMs30) != 0)
+                    {
+                        var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
+                        var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
+
+                        if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
+                            continue;
+                    }
 
                     if (instance.Group.Tag == groupTag)
                         return edTag = instance;
@@ -631,8 +641,7 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
-            var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-            CacheContext.Serializer.Serialize(edContext, blamDefinition);
+            CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 

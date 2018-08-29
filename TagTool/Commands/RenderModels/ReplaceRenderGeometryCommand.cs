@@ -258,10 +258,7 @@ namespace TagTool.Commands.RenderModels
             Console.Write("Writing render_model tag data...");
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var context = new TagSerializationContext(cacheStream, CacheContext, Tag);
-                CacheContext.Serializer.Serialize(context, Definition);
-            }
+                CacheContext.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("done.");
             

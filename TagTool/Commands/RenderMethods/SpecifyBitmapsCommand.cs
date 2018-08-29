@@ -40,10 +40,7 @@ namespace TagTool.Commands.RenderMethods
                 RenderMethodTemplate template = null;
 
                 using (var cacheStream = CacheContext.OpenTagCacheRead())
-                {
-                    var context = new TagSerializationContext(cacheStream, CacheContext, property.Template);
-                    template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(context);
-                }
+                    template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.ShaderMaps.Count; i++)
                 {
@@ -66,10 +63,7 @@ namespace TagTool.Commands.RenderMethods
                     import.Bitmap = shaderMaps[import.MaterialType];
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var context = new TagSerializationContext(cacheStream, CacheContext, Tag);
-                CacheContext.Serializer.Serialize(context, Definition);
-            }
+                CacheContext.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");
 

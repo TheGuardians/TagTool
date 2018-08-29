@@ -77,8 +77,7 @@ namespace TagTool.Commands.Models
             RenderModel renderModel;
             using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
             {
-                var renderModelContext = new TagSerializationContext(cacheStream, CacheContext, Definition.RenderModel);
-                renderModel = CacheContext.Deserializer.Deserialize<RenderModel>(renderModelContext);
+                renderModel = CacheContext.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
             }
 
             if (renderModel.Geometry.Resource == null)
@@ -92,7 +91,7 @@ namespace TagTool.Commands.Models
             //
 
             var resourceContext = new ResourceSerializationContext(renderModel.Geometry.Resource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var resourceDefinition = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
             {

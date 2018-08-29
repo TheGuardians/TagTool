@@ -82,12 +82,11 @@ namespace TagTool.Commands.Files
                     if (!isB)
                         continue;
 
-                    var tagContext = new TagSerializationContext(tagsStream, CacheContext, tag);
-                    var tagDefinition = CacheContext.Deserializer.Deserialize(tagContext, TagDefinition.Find(tag.Group.Tag));
+                    var tagDefinition = CacheContext.Deserialize(tagsStream, tag);
 
                     tagDefinition = ConvertData(tagsStream, sourceStream, destStream, tagDefinition);
 
-                    CacheContext.Serializer.Serialize(tagContext, tagDefinition);
+                    CacheContext.Serialize(tagsStream, tag, tagDefinition);
                 }
             }
 

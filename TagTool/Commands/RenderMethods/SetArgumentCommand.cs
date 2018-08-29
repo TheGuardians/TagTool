@@ -49,10 +49,7 @@ namespace TagTool.Commands.RenderMethods
             var properties = Definition.ShaderProperties[0];
             
             using (var cacheStream = CacheContext.OpenTagCacheRead())
-            {
-                var context = new TagSerializationContext(cacheStream, CacheContext, properties.Template);
-                template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(context);
-            }
+                template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
 
             var argumentIndex = -1;
 

@@ -608,7 +608,7 @@ namespace TagTool.Commands.Porting
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edModeTag), edModeDefinition);
+                CacheContext.Serialize(cacheStream, edModeTag, edModeDefinition);
                 CacheContext.TagNames[edModeTag.Index] = isScenery ?
                     (unitName == "spartan" ?
                         $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
@@ -619,8 +619,8 @@ namespace TagTool.Commands.Porting
 
                 if (isScenery)
                 {
-                    CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edHlmtTag), edHlmtDefinition);
-                    CacheContext.Serializer.Serialize(new TagSerializationContext(cacheStream, CacheContext, edScenTag), edScenDefinition);
+                    CacheContext.Serialize(cacheStream, edHlmtTag, edHlmtDefinition);
+                    CacheContext.Serialize(cacheStream, edScenTag, edScenDefinition);
                     CacheContext.TagNames[edHlmtTag.Index] = CacheContext.TagNames[edScenTag.Index] = unitName == "spartan" ?
                         $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
                         $@"objects\characters\elite\mp_elite\armor\{variantName}";

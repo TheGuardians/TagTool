@@ -805,9 +805,10 @@ namespace TagTool.Commands.Porting
             foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("adlg"))
             {
                 edAdlg = tag;
+                break;
             }
-            var context = new TagSerializationContext(cacheStream, CacheContext, edAdlg);
-            adlg = CacheContext.Deserializer.Deserialize<AiDialogueGlobals>(context);
+
+            adlg = CacheContext.Deserialize<AiDialogueGlobals>(cacheStream, edAdlg);
 
             //Create empty udlg vocalization block and fill it with empty blocks matching adlg
 

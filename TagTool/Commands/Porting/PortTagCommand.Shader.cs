@@ -85,12 +85,7 @@ namespace TagTool.Commands.Porting
             var edRmt2Instance = FixRmt2Reference(cacheStream, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
-            {
-                var shaderInvalid = CacheContext.GetTag<Shader>(@"shaders\invalid");
-
-                var edContext2 = new TagSerializationContext(cacheStream, CacheContext, shaderInvalid);
-                return CacheContext.Deserializer.Deserialize<Shader>(edContext2);
-            }
+                return CacheContext.Deserialize<Shader>(cacheStream, CacheContext.GetTag<Shader>(@"shaders\invalid"));
 
             var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ? CacheContext.TagNames[edRmt2Instance.Index] : $"0x{edRmt2Instance.Index:X4}";
 
@@ -105,8 +100,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            var edContext = new TagSerializationContext(cacheStream, CacheContext, edRmt2Instance);
-            var edRmt2 = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(edContext);
+            var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
             foreach (var a in edRmt2.ShaderMaps)
                 edMaps.Add(CacheContext.StringIdCache.GetString(a.Name));
@@ -207,8 +201,7 @@ namespace TagTool.Commands.Porting
                 if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
                     continue;
 
-                var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
-                var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
+                var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
 
                 if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                     continue;
@@ -244,10 +237,8 @@ namespace TagTool.Commands.Porting
                 if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
                     continue;
 
-                var edRmt2Context = new TagSerializationContext(cacheStream, CacheContext, CacheContext.GetTag(edRmt2_.Key));
-                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(edRmt2Context);
-                var edPixlContext = new TagSerializationContext(cacheStream, CacheContext, edRmt2.PixelShader);
-                var edPixl = CacheContext.Deserialize<PixelShader>(edPixlContext);
+                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, CacheContext.GetTag(edRmt2_.Key));
+                var edPixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
 
                 if (bmPixl.DrawModes.Count > edPixl.DrawModes.Count || bmPixl.Shaders.Count > edPixl.Shaders.Count)
                     continue;
@@ -780,8 +771,7 @@ namespace TagTool.Commands.Porting
 
                 if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Name))
                 {
-                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
-                    var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
+                    var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
 
                     if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                         continue;
@@ -844,7 +834,7 @@ namespace TagTool.Commands.Porting
                 ConvertTagFunction(a.Function);
             }    
 
-            var pixlTag = CacheContext.Deserializer.Deserialize(new TagSerializationContext(cacheStream, CacheContext, edRmt2.PixelShader), TagDefinition.Find(edRmt2.PixelShader.Group.Tag));
+            var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
             var edPixl = (PixelShader)pixlTag;
 
             var blamContext = new CacheSerializationContext(ref BlamCache, blamCache.IndexItems.Find(x => x.ID == bmRmt2.PixelShader.Index));

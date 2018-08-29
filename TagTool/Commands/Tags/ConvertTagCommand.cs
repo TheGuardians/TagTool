@@ -118,10 +118,8 @@ namespace TagTool.Commands.Tags
             }
 
             // Deserialize the tag from the source cache
-            var structureType = TagDefinition.Find(srcTag.Group.Tag);
-            var srcContext = new TagSerializationContext(srcStream, srcCacheContext, srcTag);
-            var tagData = srcCacheContext.Deserializer.Deserialize(srcContext, structureType);
-            
+            var tagData = srcCacheContext.Deserialize(srcStream, srcTag);
+
             // Uncomment this to use 0x101F in place of shaders that need conversion
             /*if (tagData is RenderMethod)
             {
@@ -179,8 +177,7 @@ namespace TagTool.Commands.Tags
                 IsDecalShader = false;
 
             // Re-serialize into the destination cache
-            var destContext = new TagSerializationContext(destStream, destCacheContext, instance);
-            destCacheContext.Serializer.Serialize(destContext, tagData);
+            destCacheContext.Serialize(destStream, instance, tagData);
             return instance;
         }
 
@@ -694,16 +691,14 @@ namespace TagTool.Commands.Tags
                 return;
             using (var stream = destCacheContext.OpenTagCacheReadWrite())
             {
-                var firstDecalSystemContext = new TagSerializationContext(stream, destCacheContext, firstDecalSystemTag);
-                var firstDecalSystem = destCacheContext.Deserializer.Deserialize<DecalSystem>(firstDecalSystemContext);
+                var firstDecalSystem = destCacheContext.Deserialize<DecalSystem>(stream, firstDecalSystemTag);
                 foreach (var decalSystemTag in destCacheContext.TagCache.Index.FindAllInGroup("decs").Where(t => t.Index >= firstNewIndex))
                 {
                     TagPrinter.PrintTagShort(decalSystemTag);
-                    var context = new TagSerializationContext(stream, destCacheContext, decalSystemTag);
-                    var decalSystem = destCacheContext.Deserializer.Deserialize<DecalSystem>(context);
+                    var decalSystem = destCacheContext.Deserialize<DecalSystem>(stream, decalSystemTag);
                     foreach (var system in decalSystem.Decal)
                         system.RenderMethod.BaseRenderMethod = firstDecalSystem.Decal[0].RenderMethod.BaseRenderMethod;
-                    destCacheContext.Serializer.Serialize(context, decalSystem);
+                    destCacheContext.Serialize(stream, decalSystemTag, decalSystem);
                 }
             }
         }

@@ -52,8 +52,7 @@ namespace TagTool.Commands.Bitmaps
                     try
                     {
                 #endif
-                        var tagContext = new TagSerializationContext(tagsStream, CacheContext, tag);
-                        var bitmap = CacheContext.Deserializer.Deserialize<Bitmap>(tagContext);
+                        var bitmap = CacheContext.Deserialize<Bitmap>(tagsStream, tag);
                         var ddsOutDir = outDir;
 
                         if (bitmap.Images.Count > 1)

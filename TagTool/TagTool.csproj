@@ -257,7 +257,6 @@
     <Compile Include="Commands\Files\RelocateResourcesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceAllFilesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceFileCommand.cs" />
-    <Compile Include="Commands\Files\TestCommand.cs" />
     <Compile Include="Commands\Files\UpdateMapFilesCommand.cs" />
     <Compile Include="Commands\Files\VFilesContextFactory.cs" />
     <Compile Include="Commands\Geometry\DumpRenderGeometryCommand.cs" />
@@ -278,7 +277,6 @@
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
     <Compile Include="Commands\Porting\PortingContextFactory.cs" />
-    <Compile Include="Commands\Porting\PortingTestCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerEventsCommand.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.AI.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Animation.cs" />

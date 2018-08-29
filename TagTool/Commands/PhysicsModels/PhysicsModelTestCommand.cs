@@ -86,9 +86,7 @@ namespace TagTool.Commands.PhysicsModels
                     }
                 }
 
-                var context = new TagSerializationContext(stream, CacheContext, tag);
-                CacheContext.Serializer.Serialize(context, phmo);
-
+                CacheContext.Serialize(stream, tag, phmo);
             }
 
             Console.Write("Successfully imported phmo to: ");

@@ -58,7 +58,7 @@ namespace TagTool.Commands.Files
             Definition.Replace(file, data);
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serializer.Serialize(new TagSerializationContext(stream, CacheContext, Tag), Definition);
+                CacheContext.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Imported 0x{0:X} bytes.", data.Length);
 

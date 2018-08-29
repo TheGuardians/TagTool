@@ -109,10 +109,7 @@ namespace TagTool.Commands.Bitmaps
                 }
 
                 using (var tagsStream = CacheContext.OpenTagCacheReadWrite())
-                {
-                    var tagContext = new TagSerializationContext(tagsStream, CacheContext, Tag);
-                    CacheContext.Serializer.Serialize(tagContext, Bitmap);
-                }
+                    CacheContext.Serialize(tagsStream, Tag, Bitmap);
             }
             catch (Exception ex)
             {

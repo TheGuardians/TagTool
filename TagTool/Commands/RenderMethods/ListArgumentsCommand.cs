@@ -35,10 +35,7 @@ namespace TagTool.Commands.RenderMethods
                 RenderMethodTemplate template = null;
 
                 using (var cacheStream = CacheContext.OpenTagCacheRead())
-                {
-                    var context = new TagSerializationContext(cacheStream, CacheContext, property.Template);
-                    template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(context);
-                }
+                    template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.Arguments.Count; i++)
                 {

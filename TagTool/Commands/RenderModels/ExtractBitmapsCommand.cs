@@ -55,13 +55,11 @@ namespace TagTool.Commands.RenderModels
             {
                 foreach (var shader in Definition.Materials)
                 {
-                    var context = new TagSerializationContext(cacheStream, CacheContext, shader.RenderMethod);
-                    var renderMethod = (RenderMethod)CacheContext.Deserializer.Deserialize(context, TagDefinition.Find(shader.RenderMethod.Group.Tag));
+                    var renderMethod = (RenderMethod)CacheContext.Deserialize(cacheStream, shader.RenderMethod);
 
                     foreach (var property in renderMethod.ShaderProperties)
                     {
-                        context = new TagSerializationContext(cacheStream, CacheContext, property.Template);
-                        var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(context);
+                        var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                         for (var i = 0; i < template.ShaderMaps.Count; i++)
                         {
@@ -69,8 +67,7 @@ namespace TagTool.Commands.RenderModels
 
                             var extractor = new BitmapDdsExtractor(CacheContext);
 
-                            context = new TagSerializationContext(cacheStream, CacheContext, property.ShaderMaps[i].Bitmap);
-                            var bitmap = CacheContext.Deserializer.Deserialize<Bitmap>(context);
+                            var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
                             var ddsOutDir = directory;
 
                             if (bitmap.Images.Count > 1)

@@ -60,7 +60,7 @@ namespace TagTool.Commands.Files
             }
             
             using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serializer.Serialize(new TagSerializationContext(stream, CacheContext, Tag), Definition);
+                CacheContext.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Imported {0} files.", imported);
 

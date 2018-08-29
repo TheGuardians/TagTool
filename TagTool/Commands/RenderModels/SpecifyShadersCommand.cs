@@ -44,10 +44,7 @@ namespace TagTool.Commands.RenderModels
             }
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var context = new TagSerializationContext(cacheStream, CacheContext, Tag);
-                CacheContext.Serializer.Serialize(context, Definition);
-            }
+                CacheContext.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");
 

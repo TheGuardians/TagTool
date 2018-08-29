@@ -98,12 +98,10 @@ namespace TagTool.Commands.RenderModels
                 args.RemoveAt(0);
             }
 
-            RenderModel edMode;
+            RenderModel edMode = null;
+
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, destinationTag);
-                edMode = CacheContext.Deserializer.Deserialize<RenderModel>(edContext);
-            }
+                edMode = CacheContext.Deserialize<RenderModel>(cacheStream, destinationTag);
 
             // Get a list of the original nodes
             var nodeIndices = new Dictionary<string, int>();
@@ -332,11 +330,7 @@ namespace TagTool.Commands.RenderModels
             Console.Write("Writing render_model tag data...");
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var tag = destinationTag;
-                var context = new TagSerializationContext(cacheStream, CacheContext, tag);
-                CacheContext.Serializer.Serialize(context, renderModel);
-            }
+                CacheContext.Serialize(cacheStream, destinationTag, renderModel);
 
             Console.WriteLine("done.");
 

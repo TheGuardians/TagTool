@@ -29,10 +29,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             using (var stream = CacheContext.OpenTagCacheReadWrite())
-            {
-                var context = new TagSerializationContext(stream, CacheContext, Tag);
-                CacheContext.Serializer.Serialize(context, Value);
-            }
+                CacheContext.Serialize(stream, Tag, Value);
 
             Console.WriteLine("Done!");
 

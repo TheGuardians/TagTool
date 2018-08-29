@@ -64,8 +64,7 @@ namespace TagTool.Commands.Porting
                     return true;
                 }
 
-                var edContext = new TagSerializationContext(stream, CacheContext, edTag);
-                oldMulgDefinition = CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(edContext);
+                oldMulgDefinition = CacheContext.Deserialize<MultiplayerGlobals>(stream, edTag);
             }
 
             new PortTagCommand(CacheContext, BlamCache).Execute(new List<string> { "replace", "mulg", @"multiplayer\multiplayer_globals" });
@@ -78,8 +77,7 @@ namespace TagTool.Commands.Porting
                     return true;
                 }
 
-                var edContext = new TagSerializationContext(stream, CacheContext, edTag);
-                var mulgDefinition = CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(edContext);
+                var mulgDefinition = CacheContext.Deserialize<MultiplayerGlobals>(stream, edTag);
 
                 CopyEvents(oldMulgDefinition.Runtime[0].GeneralEvents, mulgDefinition.Runtime[0].GeneralEvents);
                 CopyEvents(oldMulgDefinition.Runtime[0].FlavorEvents, mulgDefinition.Runtime[0].FlavorEvents);
@@ -93,7 +91,7 @@ namespace TagTool.Commands.Porting
                 CopyEvents(oldMulgDefinition.Runtime[0].AssaultEvents, mulgDefinition.Runtime[0].AssaultEvents);
                 CopyEvents(oldMulgDefinition.Runtime[0].InfectionEvents, mulgDefinition.Runtime[0].InfectionEvents);
 
-                CacheContext.Serializer.Serialize(edContext, oldMulgDefinition);
+                CacheContext.Serialize(stream, edTag, oldMulgDefinition);
             }
 
             return true;

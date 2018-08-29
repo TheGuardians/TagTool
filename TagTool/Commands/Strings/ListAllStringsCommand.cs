@@ -46,7 +46,7 @@ namespace TagTool.Commands.Strings
             {
                 foreach (var unicTag in CacheContext.TagCache.Index.FindAllInGroup("unic"))
                 {
-                    var unic = CacheContext.Deserializer.Deserialize<MultilingualUnicodeStringList>(new TagSerializationContext(stream, CacheContext, unicTag));
+                    var unic = CacheContext.Deserialize<MultilingualUnicodeStringList>(stream, unicTag);
                     var strings = LocalizedStringPrinter.PrepareForDisplay(unic, CacheContext.StringIdCache, unic.Strings, language, filter);
 
                     if (strings.Count == 0)

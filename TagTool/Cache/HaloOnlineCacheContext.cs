@@ -6,6 +6,7 @@ using System.Linq;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
@@ -277,6 +278,15 @@ namespace TagTool.Cache
             
             throw new KeyNotFoundException(name);
         }
+
+        public T Deserialize<T>(Stream stream, CachedTagInstance instance) =>
+            Deserialize<T>(new TagSerializationContext(stream, this, instance));
+
+        public object Deserialize(Stream stream, CachedTagInstance instance) =>
+            Deserialize(new TagSerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+
+        public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
+            Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
 
         /// <summary>
         /// Attempts to parse a group tag or name.
@@ -704,6 +714,43 @@ namespace TagTool.Cache
 
             return cache;
         }
+
+        public T Deserialize<T>(PageableResource pageable) =>
+            Deserialize<T>(new ResourceSerializationContext(pageable));
+
+        public object Deserialize(PageableResource pageable)
+        {
+            switch (pageable.Resource.Type)
+            {
+                case TagResourceType.Animation:
+                    return Deserialize<ModelAnimationTagResource>(pageable);
+
+                case TagResourceType.Bink:
+                    return Deserialize<BinkResource>(pageable);
+
+                case TagResourceType.Bitmap:
+                case TagResourceType.BitmapInterleaved:
+                    return Deserialize<BitmapTextureInteropResource>(pageable);
+
+                case TagResourceType.Collision:
+                    return Deserialize<StructureBspTagResources>(pageable);
+
+                case TagResourceType.Pathfinding:
+                    return Deserialize<StructureBspCacheFileTagResources>(pageable);
+
+                case TagResourceType.RenderGeometry:
+                    return Deserialize<RenderGeometryApiResourceDefinition>(pageable);
+
+                case TagResourceType.Sound:
+                    return Deserialize<SoundResourceDefinition>(pageable);
+
+                default:
+                    throw new NotSupportedException(pageable.Resource.Type.ToString());
+            }
+        }
+
+        public void Serialize(PageableResource pageable, object definition) =>
+            Serialize(new ResourceSerializationContext(pageable), definition);
 
         private class LoadedResourceCache
         {

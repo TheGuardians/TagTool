@@ -47,7 +47,7 @@ namespace TagTool.Commands.Editing
             object definition = null;
 
             using (var stream = cacheContext.OpenTagCacheRead())
-                definition = cacheContext.Deserializer.Deserialize(new TagSerializationContext(stream, cacheContext, tag), TagDefinition.Find(tag.Group.Tag));
+                definition = cacheContext.Deserialize(stream, tag);
 
             switch (tag.Group.Tag.ToString())
             {

@@ -158,8 +158,7 @@ namespace TagTool.Commands.Tags
 
                     var groupName = CacheContext.GetString(instance.Group.Name);
 
-                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
-                    var tagDefinition = CacheContext.Deserialize(tagContext, TagDefinition.Find(instance.Group));
+                    var tagDefinition = CacheContext.Deserialize(cacheStream, instance);
 
                     FileInfo ExportResource(PageableResource pageable, string resourceGroup, string suffix = "")
                     {

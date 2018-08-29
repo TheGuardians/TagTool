@@ -164,8 +164,7 @@ namespace TagTool.Commands.Porting
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
                 CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
 
-                var edContext = new TagSerializationContext(cacheStream, CacheContext, edTag);
-                CacheContext.Serializer.Serialize(edContext, Lbsp);
+                CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
                 scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference
                 {

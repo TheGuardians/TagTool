@@ -410,8 +410,7 @@ namespace TagTool.Commands.Porting
                     default:
                         if (scnr.MapType == ScenarioMapType.Multiplayer)
                         {
-                            var sbspContext = new TagSerializationContext(cacheStream, CacheContext, scnr.StructureBsps[0].StructureBsp);
-                            var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(sbspContext);
+                            var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[0].StructureBsp);
 
                             createPrematchCamera = true;
                             position = new RealPoint3d(

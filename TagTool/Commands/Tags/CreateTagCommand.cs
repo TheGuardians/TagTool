@@ -124,10 +124,7 @@ namespace TagTool.Commands.Tags
                 if (instance == null)
                     instance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
 
-                var context = new TagSerializationContext(stream, CacheContext, instance);
-
-                var data = Activator.CreateInstance(TagDefinition.Find(groupTag));
-                CacheContext.Serializer.Serialize(context, data);
+                CacheContext.Serialize(stream, instance, Activator.CreateInstance(TagDefinition.Find(groupTag)));
             }
 
             var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?

@@ -132,12 +132,10 @@ namespace TagTool.Commands.CollisionModels
                     }
                 }
 
-                var context = new TagSerializationContext(stream, CacheContext, tag);
-                CacheContext.Serializer.Serialize(context, coll);
-
+                CacheContext.Serialize(stream, tag, coll);
             }
-            Console.WriteLine(
-                (n_objects == 1 ? "Added 1 collision." : "Added {0} collisions in one tag."), n_objects);
+
+            Console.WriteLine(n_objects == 1 ? "Added 1 collision." : "Added {0} collisions in one tag.", n_objects);
             Console.Write("Successfully imported coll to: ");
             TagPrinter.PrintTagShort(tag);
 
