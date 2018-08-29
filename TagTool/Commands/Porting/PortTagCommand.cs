@@ -53,7 +53,8 @@ namespace TagTool.Commands.Porting
             ShaderTest = 1 << 9,
             MatchShaders = 1 << 10,
             Memory = 1 << 11,
-            NoRmhg = 1 << 12
+            NoRmhg = 1 << 12,
+            NoMs30 = 1 << 13
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :

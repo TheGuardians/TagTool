@@ -14,7 +14,6 @@ namespace TagTool.Commands
     {
         static void Main(string[] args)
         {
-
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
