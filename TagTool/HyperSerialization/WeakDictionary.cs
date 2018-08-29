@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
-namespace TagTool.Serialization2
+namespace TagTool.HyperSerialization
 {
 	/// <summary>
 	/// A generic dictionary, which allows both its keys and values 

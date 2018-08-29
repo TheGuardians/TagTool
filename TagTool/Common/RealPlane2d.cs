@@ -5,8 +5,8 @@ namespace TagTool.Common
     /// <summary>
     /// A 2-dimensional plane in real space.
     /// </summary>
-    public struct RealPlane2d : IEquatable<RealPlane2d>
-    {
+    public struct RealPlane2d : IEquatable<RealPlane2d>, IBlamType
+	{
         /// <summary>
         /// The direction normal vector of the plane.
         /// </summary>

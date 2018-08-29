@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealPoint2d : IEquatable<RealPoint2d>
-    {
+    public struct RealPoint2d : IEquatable<RealPoint2d>, IBlamType
+	{
         public float X { get; set; }
         public float Y { get; set; }
 

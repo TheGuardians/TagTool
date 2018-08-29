@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealVector2d : IEquatable<RealVector2d>
-    {
+    public struct RealVector2d : IEquatable<RealVector2d>, IBlamType
+	{
         public float I { get; set; }
         public float J { get; set; }
 

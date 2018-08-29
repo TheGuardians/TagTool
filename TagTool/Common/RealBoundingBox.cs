@@ -2,7 +2,7 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RealBoundingBox
+    public struct RealBoundingBox : IBlamType
     {
         public Bounds<float> XBounds, YBounds, ZBounds;
 

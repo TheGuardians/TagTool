@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct Rectangle2d : IEquatable<Rectangle2d>
-    {
+    public struct Rectangle2d : IEquatable<Rectangle2d>, IBlamType
+	{
         public short Top { get; set; }
         public short Left { get; set; }
         public short Bottom { get; set; }

@@ -1,13 +1,11 @@
 using System;
-using TagTool.HyperSerialization;
 
 namespace TagTool.Common
 {
     /// <summary>
     /// An angle value.
     /// </summary>
-	[BlamType(BlamType.Angle)]
-    public struct Angle : IEquatable<Angle>, IComparable<Angle>
+    public struct Angle : IEquatable<Angle>, IComparable<Angle>, IBlamType
     {
         /// <summary>
         /// The value used to convert between degrees and radians.

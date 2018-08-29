@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct Point2d : IEquatable<Point2d>
-    {
+    public struct Point2d : IEquatable<Point2d>, IBlamType
+	{
         public short X { get; set; }
         public short Y { get; set; }
 

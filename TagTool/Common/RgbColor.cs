@@ -2,8 +2,8 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct RgbColor : IEquatable<RgbColor>
-    {
+    public struct RgbColor : IEquatable<RgbColor>, IBlamType
+	{
         public uint Value;
         
         public byte Red

@@ -26,4 +26,7 @@ namespace TagTool.Tags
         /// </summary>
         public uint DefinitionAddress;
     }
+
+	public interface ITagStructureReference
+	{ }
 }

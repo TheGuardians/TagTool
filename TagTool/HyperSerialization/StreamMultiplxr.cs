@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 
-namespace TagTool.Serialization2
+namespace TagTool.HyperSerialization
 {
 	class StreamMultiplxer : Stream
 	{

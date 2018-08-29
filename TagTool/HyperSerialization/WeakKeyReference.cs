@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TagTool.Serialization2
+namespace TagTool.HyperSerialization
 {
 	// Adds strong typing to WeakReference.Target using generics. Also,
 	// the Create factory method is used in place of a constructor

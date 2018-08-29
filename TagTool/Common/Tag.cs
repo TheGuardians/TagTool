@@ -6,8 +6,8 @@ namespace TagTool.Common
     /// <summary>
     /// Represents a magic number which looks like a string.
     /// </summary>
-    public struct Tag : IComparable<Tag>
-    {
+    public struct Tag : IComparable<Tag>, IBlamType
+	{
         /// <summary>
         /// The null tag representation.
         /// </summary>

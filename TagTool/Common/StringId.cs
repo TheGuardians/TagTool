@@ -6,8 +6,8 @@ namespace TagTool.Common
     /// <summary>
     /// A constant ID representing a debug string.
     /// </summary>
-    public struct StringId : IComparable<StringId>
-    {
+    public struct StringId : IComparable<StringId>, IBlamType
+	{
         /// <summary>
         /// A null stringID.
         /// </summary>

@@ -2,24 +2,26 @@ using System;
 
 namespace TagTool.Common
 {
-    public struct Bounds<T> : IEquatable<Bounds<T>> where T : IComparable<T>
+    public struct Bounds<T> : IBounds, IBlamType, IEquatable<Bounds<T>> where T : IComparable<T>
     {
         /// <summary>
         /// Gets the lowerimum value within the range.
         /// </summary>
         public T Lower { get; set; }
+		public object _Lower { get => this.Lower; set => this.Lower = (T)value; }
 
         /// <summary>
         /// Gets the upperimum value within the range.
         /// </summary>
         public T Upper { get; set; }
-        
-        /// <summary>
-        /// Creates a new range from a lowerimum and a upperimum value.
-        /// </summary>
-        /// <param name="lower">The lowerimum value of the range.</param>
-        /// <param name="upper">The upperimum value of the range.</param>
-        public Bounds(T lower, T upper)
+		public object _Upper { get => this.Upper; set => this.Upper = (T)value; }
+
+		/// <summary>
+		/// Creates a new range from a lowerimum and a upperimum value.
+		/// </summary>
+		/// <param name="lower">The lowerimum value of the range.</param>
+		/// <param name="upper">The upperimum value of the range.</param>
+		public Bounds(T lower, T upper)
         {
             Lower = lower;
             Upper = upper;
@@ -44,4 +46,10 @@ namespace TagTool.Common
 
         public override string ToString() => $"{{ Lower: {Lower}, Upper: {Upper} }}";
     }
+
+	public interface IBounds
+	{
+		object _Lower { get; set; }
+		object _Upper { get; set; }
+	}
 }

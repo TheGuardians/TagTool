@@ -1,29 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TagTool.Serialization2
+namespace TagTool.Common
 {
-	class BlamTypeAttribute : Attribute
+	[BlamType]
+	public interface IBlamType
 	{
-		public BlamType BlamType = BlamType.Unknown;
+		// If we redo all the blam types (RealEulerAngle2d etc) definitions to be assignable directly
+		// from an array of primitives, we can handle them in a much cleaner way.
 
-		public BlamTypeAttribute(BlamType fieldType = BlamType.Unknown)
+		// void SetValues(ValueType[] values);
+	}
+
+	public class BlamTypeAttribute : Attribute
+	{
+		public BlamType BlamType = BlamType.TagStructure;
+		public Type Type = null;
+		public Type ElementType = null;
+		public int ElementCount = 0;
+
+		public BlamTypeAttribute(BlamType fieldType = BlamType.TagStructure, Type Type = null, Type ElementType = null, int ElementCount = 0)
 		{
 			this.BlamType = fieldType;
 		}
 	}
 
-	enum BlamType
+	public enum BlamType
 	{
-		Unknown = -1,
-
-		// Generic Blam-structure (needs to be TypeCode.Object so we can check if a type has the `BlamTypeAttribute`
-		// and then if it doesn't just use the TypeCode._.
-		// `field.FieldType.GetCustomAttributes<BlamTypeAttribute>(true).First();`
-		Structure = TypeCode.Object,
+		// TagStructure
+		TagStructure = TypeCode.Object,
 
 		// SystemTypes
 		Empty = TypeCode.Empty,
