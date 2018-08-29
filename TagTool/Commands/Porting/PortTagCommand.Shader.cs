@@ -68,7 +68,7 @@ namespace TagTool.Commands.Porting
 
             // Loop only once trough all ED rmt2 tags and store them globally, string lists of their bitmaps and arguments
             if (Rmt2TagsInfo.Count == 0)
-                GetRmt2Info(cacheStream, CacheContext);
+                GetRmt2Info(cacheStream);
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = BlamCache.IndexItems.Find(x => x.ID == finalRm.ShaderProperties[0].Template.Index);
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = FixRmt2Reference(cacheStream, CacheContext, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = FixRmt2Reference(cacheStream, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
             {
@@ -197,27 +197,30 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private static void GetRmt2Info(Stream cacheStream, HaloOnlineCacheContext cacheContext)
+        private void GetRmt2Info(Stream cacheStream)
         {
             if (Rmt2TagsInfo.Count != 0)
                 return;
 
-            foreach (var instance in cacheContext.TagCache.Index)
+            foreach (var instance in CacheContext.TagCache.Index)
             {
-                if (instance == null || !instance.IsInGroup("rmt2") || !cacheContext.TagNames.ContainsKey(instance.Index))
+                if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
                     continue;
 
-                var tagContext = new TagSerializationContext(cacheStream, cacheContext, instance);
-                var template = cacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
+                var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
+                var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
+
+                if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
+                    continue;
 
                 var bitmaps = new List<string>();
                 var arguments = new List<string>();
 
                 foreach (var shaderMap in template.ShaderMaps)
-                    bitmaps.Add(cacheContext.StringIdCache.GetString(shaderMap.Name));
+                    bitmaps.Add(CacheContext.StringIdCache.GetString(shaderMap.Name));
 
                 foreach (var argument in template.Arguments)
-                    arguments.Add(cacheContext.StringIdCache.GetString(argument.Name));
+                    arguments.Add(CacheContext.StringIdCache.GetString(argument.Name));
 
                 Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { bitmaps, arguments });
             }
@@ -389,8 +392,11 @@ namespace TagTool.Commands.Porting
         [TagStructure(Name = "render_method_template", Tag = "rmt2")]
         private class RenderMethodTemplateFast // used to deserialize as fast as possible
         {
-            [TagField(Length = 18)]
-            public uint[] Unknown00 = new uint[18];
+            public CachedTagInstance VertexShader;
+            public CachedTagInstance PixelShader;
+
+            [TagField(Length = 10)]
+            public uint[] Unknown00 = new uint[10];
 
             public List<Argument> Arguments = new List<Argument>();
 
@@ -763,7 +769,7 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(Stream cacheStream, HaloOnlineCacheContext CacheContext, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private CachedTagInstance FixRmt2Reference(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
@@ -773,7 +779,15 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Name))
+                {
+                    var tagContext = new TagSerializationContext(cacheStream, CacheContext, instance);
+                    var template = CacheContext.Deserializer.Deserialize<RenderMethodTemplateFast>(tagContext);
+
+                    if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
+                        continue;
+
                     return instance;
+                }
             }
 
 			// if no tagname matches, find rmt2 tags based on the most common values in the name
