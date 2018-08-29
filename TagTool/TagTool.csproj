@@ -329,6 +329,7 @@
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
+    <Compile Include="Commands\Sounds\UseAudioCacheCommand.cs" />
     <Compile Include="Commands\Strings\ListAllStringsCommand.cs" />
     <Compile Include="Commands\Strings\StringIdCommand.cs" />
     <Compile Include="Commands\Tags\ConvertTagCommand.cs" />
