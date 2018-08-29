@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting
             return header;
         }
 
-        public static string ConvertSoundPermutation(byte[] buffer, int index, int count, int fileSize, byte channelCount, SampleRate sampleRate, bool loop, bool use_cache, string permutation_mp3_cachename)
+        public static string ConvertSoundPermutation(byte[] buffer, int index, int count, int fileSize, byte channelCount, SampleRate sampleRate, bool loop, bool useCache, string permutationMP3Cache)
         {
             Directory.CreateDirectory(@"Temp");
 
@@ -107,13 +107,13 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
-            string audiofile = use_cache ? permutation_mp3_cachename : "Temp\\permutation";
+            string audioFile = useCache ? permutationMP3Cache : "Temp\\permutation";
 
-            string tempXMA = $"{audiofile}.xma";
-            string tempWAV = $"{audiofile}.wav";
-            string fixedWAV = $"{audiofile}Truncated.wav";
-            string loopMP3 = $"{audiofile}Truncated.mp3";
-            string tempMP3 = $"{audiofile}.mp3";
+            string tempXMA = $"{audioFile}.xma";
+            string tempWAV = $"{audioFile}.wav";
+            string fixedWAV = $"{audioFile}Truncated.wav";
+            string loopMP3 = $"{audioFile}Truncated.mp3";
+            string tempMP3 = $"{audioFile}.mp3";
 
             //If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
 
@@ -138,8 +138,8 @@ namespace TagTool.Commands.Porting
                 goto CLEAN_FILES;
             }
 
-            try
-            {
+            //try
+            //{
                 using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
                 {
                     output.Write(CreateXMAHeader(fileSize, channelCount, sampleRate.GetSampleRateHz()));
@@ -152,7 +152,7 @@ namespace TagTool.Commands.Porting
                     //Use towav as the conversion is better
                     ProcessStartInfo info = new ProcessStartInfo(@"Tools\towav.exe")
                     {
-                        Arguments = tempXMA,
+                        Arguments = Path.GetFileName(tempXMA),
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         UseShellExecute = false,
@@ -273,20 +273,20 @@ namespace TagTool.Commands.Porting
                         output.Write(MP3stream, 0x2D, (int)size);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception caught. Failed to convert sound.", e);
-            }
-            finally
-            {
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("{0} Exception caught. Failed to convert sound.", e);
+            //}
+            //finally
+            //{
                 if (File.Exists(tempXMA))
                     File.Delete(tempXMA);
                 if (File.Exists(tempWAV))
                     File.Delete(tempWAV);
                 if (File.Exists(fixedWAV))
                     File.Delete(fixedWAV);
-            }
+            //}
             return tempMP3;
         }
 
@@ -476,8 +476,8 @@ namespace TagTool.Commands.Porting
                 //
 
                 permutationIndex = firstPermutationIndex;
-                bool use_cache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
-                var base_permutation_mp3_cachename = blamTag_Name != null ? Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, ComputeSha256Hash(blamTag_Name))  : null;
+                bool useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
+                var basePermutationMP3Cache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null ? Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, ComputeSha256Hash(blamTag_Name))  : null;
 
                 for (i = 0; i < permutationCount; i++)
                 {
@@ -510,11 +510,11 @@ namespace TagTool.Commands.Porting
                         loop = true;
                     }
 
-                    string permutationMP3 = use_cache ? $"{base_permutation_mp3_cachename}_{i}" : null;
+                    string permutationMP3 = useCache ? $"{basePermutationMP3Cache}_{i}" : null;
                     bool exists = !File.Exists($"{permutationMP3}.mp3");
-                    if ((permutationMP3 != null && exists) || !use_cache)
+                    if ((permutationMP3 != null && exists) || !useCache)
                     {
-                        permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, use_cache, permutationMP3);
+                        permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, useCache, permutationMP3);
                     }
                     else
                     {
@@ -542,7 +542,7 @@ namespace TagTool.Commands.Porting
                         Console.WriteLine("{0} Exception caught. Failed to write mp3 to file", e);
                     }
 
-                    if(!use_cache)
+                    if(!useCache)
                     {
                         if (File.Exists(permutationMP3))
                             File.Delete(permutationMP3);
