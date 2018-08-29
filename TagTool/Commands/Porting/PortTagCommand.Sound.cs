@@ -107,7 +107,7 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
-            string audiofile = permutation_mp3_cachename ?? "Temp\\permutation";
+            string audiofile = use_cache ? permutation_mp3_cachename : "Temp\\permutation";
 
             string tempXMA = $"{audiofile}.xma";
             string tempWAV = $"{audiofile}.wav";
@@ -158,11 +158,13 @@ namespace TagTool.Commands.Porting
                         UseShellExecute = false,
                         RedirectStandardError = false,
                         RedirectStandardOutput = false,
-                        RedirectStandardInput = false
+                        RedirectStandardInput = false,
+                        WorkingDirectory = Path.GetDirectoryName(tempXMA)
                     };
                     Process towav = Process.Start(info);
                     towav.WaitForExit();
-                    File.Move(@"permutation.wav", tempWAV);
+                    //if(!use_cache)
+                    //    File.Move(@"permutation.wav", tempWAV);
 
                     //towav wav header requires a modification to work with mp3loop
 
@@ -278,19 +280,12 @@ namespace TagTool.Commands.Porting
             }
             finally
             {
-                if(!use_cache)
-                {
-                    if (File.Exists(tempXMA))
-                        File.Delete(tempXMA);
-                    if (File.Exists(tempWAV))
-                        File.Delete(tempWAV);
-                    if (File.Exists(fixedWAV))
-                        File.Delete(fixedWAV);
-                    if (File.Exists(loopMP3))
-                        File.Delete(loopMP3);
-                    if (File.Exists(tempMP3))
-                        File.Delete(tempMP3);
-                }
+                if (File.Exists(tempXMA))
+                    File.Delete(tempXMA);
+                if (File.Exists(tempWAV))
+                    File.Delete(tempWAV);
+                if (File.Exists(fixedWAV))
+                    File.Delete(fixedWAV);
             }
             return tempMP3;
         }
@@ -482,7 +477,7 @@ namespace TagTool.Commands.Porting
 
                 permutationIndex = firstPermutationIndex;
                 bool use_cache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
-                var base_permutation_mp3_cachename = blamTag_Name != null ? ComputeSha256Hash(blamTag_Name) : null;
+                var base_permutation_mp3_cachename = blamTag_Name != null ? Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, ComputeSha256Hash(blamTag_Name))  : null;
 
                 for (i = 0; i < permutationCount; i++)
                 {
@@ -515,10 +510,15 @@ namespace TagTool.Commands.Porting
                         loop = true;
                     }
 
-                    string permutation_mp3_cachename = use_cache ? $"{base_permutation_mp3_cachename}_{i}" : null;
-                    if(permutation_mp3_cachename == null || !File.Exists($"{permutation_mp3_cachename}.mp3"))
+                    string permutationMP3 = use_cache ? $"{base_permutation_mp3_cachename}_{i}" : null;
+                    bool exists = !File.Exists($"{permutationMP3}.mp3");
+                    if ((permutationMP3 != null && exists) || !use_cache)
                     {
-                        permutation_mp3_cachename = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, use_cache, permutation_mp3_cachename);
+                        permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, use_cache, permutationMP3);
+                    }
+                    else
+                    {
+                        permutationMP3 += ".mp3";
                     }
 
                     uint permutationChunkSize = 0;
@@ -527,7 +527,7 @@ namespace TagTool.Commands.Porting
                     // Copy the permutation mp3 to the overall mp3
                     //
 
-                    byte[] permBuffer = File.ReadAllBytes(permutation_mp3_cachename);
+                    byte[] permBuffer = File.ReadAllBytes(permutationMP3);
                     try
                     {
                         using (Stream output = new FileStream(soundMP3, FileMode.Append, FileAccess.Write, FileShare.None))
@@ -542,8 +542,11 @@ namespace TagTool.Commands.Porting
                         Console.WriteLine("{0} Exception caught. Failed to write mp3 to file", e);
                     }
 
-                    if (File.Exists(permutationMP3))
-                        File.Delete(permutationMP3);
+                    if(!use_cache)
+                    {
+                        if (File.Exists(permutationMP3))
+                            File.Delete(permutationMP3);
+                    }
 
                     var chunkSize = (ushort)(permutationChunkSize & ushort.MaxValue);
 

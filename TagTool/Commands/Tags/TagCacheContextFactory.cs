@@ -6,6 +6,7 @@ using TagTool.Commands.Files;
 using TagTool.Commands.PhysicsModels;
 using TagTool.Commands.Porting;
 using TagTool.Commands.RenderModels;
+using TagTool.Commands.Sounds;
 using TagTool.Commands.Strings;
 
 namespace TagTool.Commands.Tags
@@ -62,8 +63,9 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
             context.AddCommand(new ExportTagModCommand(cacheContext));
             context.AddCommand(new Shaders.RegenerateShaders(cacheContext));
+            context.AddCommand(new UseAudioCacheCommand());
 
-			return context;
+            return context;
         }
     }
 }
