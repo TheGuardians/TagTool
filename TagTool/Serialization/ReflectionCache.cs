@@ -1,4 +1,4 @@
-﻿#define TEST_REFLECTION_CACHE
+﻿//#define TEST_REFLECTION_CACHE
 
 using System;
 using System.Collections.Generic;
