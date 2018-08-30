@@ -59,8 +59,8 @@ namespace TagTool.Commands.RenderMethods
             }
 
             foreach (var import in Definition.ImportData)
-                if (shaderMaps.ContainsKey(import.MaterialType))
-                    import.Bitmap = shaderMaps[import.MaterialType];
+                if (shaderMaps.ContainsKey(import.Name))
+                    import.Bitmap = shaderMaps[import.Name];
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
                 CacheContext.Serialize(cacheStream, Tag, Definition);

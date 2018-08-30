@@ -461,9 +461,9 @@ namespace TagTool.Commands.Tags
 
                 string rmt2Name = tagNames[shader.BaseRenderMethod.Index] + "_templates\\";
 
-                foreach (var val in shader.Unknown)
+                foreach (var val in shader.RenderMethodDefinitionOptionIndices)
                 {
-                    rmt2Name = rmt2Name + "_" + val.Unknown;
+                    rmt2Name = rmt2Name + "_" + val.OptionIndex;
                 }
 
                 if (!tagNames.ContainsKey(shader.ShaderProperties[0].Template.Index))
@@ -486,9 +486,9 @@ namespace TagTool.Commands.Tags
 
                 string name = baseRenderMethodName + "_templates\\";
 
-                foreach (var val in shader.Beam[0].RenderMethod.Unknown)
+                foreach (var val in shader.Beam[0].RenderMethod.RenderMethodDefinitionOptionIndices)
                 {
-                    name = name + "_" + val.Unknown;
+                    name = name + "_" + val.OptionIndex;
                 }
 
                 if (!tagNames.ContainsKey(shader.Beam[0].RenderMethod.ShaderProperties[0].Template.Index))
@@ -511,9 +511,9 @@ namespace TagTool.Commands.Tags
 
                 string name = baseRenderMethodName + "_templates\\";
 
-                foreach (var val in shader.Contrail[0].RenderMethod.Unknown)
+                foreach (var val in shader.Contrail[0].RenderMethod.RenderMethodDefinitionOptionIndices)
                 {
-                    name = name + "_" + val.Unknown;
+                    name = name + "_" + val.OptionIndex;
                 }
 
                 if (!tagNames.ContainsKey(shader.Contrail[0].RenderMethod.ShaderProperties[0].Template.Index))
@@ -536,9 +536,9 @@ namespace TagTool.Commands.Tags
 
                 string name = baseRenderMethodName + "_templates\\";
 
-                foreach (var val in shader.LightVolume[0].RenderMethod.Unknown)
+                foreach (var val in shader.LightVolume[0].RenderMethod.RenderMethodDefinitionOptionIndices)
                 {
-                    name = name + "_" + val.Unknown;
+                    name = name + "_" + val.OptionIndex;
                 }
 
                 if (!tagNames.ContainsKey(shader.LightVolume[0].RenderMethod.ShaderProperties[0].Template.Index))
@@ -561,9 +561,9 @@ namespace TagTool.Commands.Tags
 
                 string name = baseRenderMethodName + "_templates\\";
 
-                foreach (var val in shader.RenderMethod.Unknown)
+                foreach (var val in shader.RenderMethod.RenderMethodDefinitionOptionIndices)
                 {
-                    name = name + "_" + val.Unknown;
+                    name = name + "_" + val.OptionIndex;
                 }
 
                 if (!tagNames.ContainsKey(shader.RenderMethod.ShaderProperties[0].Template.Index))
@@ -588,9 +588,9 @@ namespace TagTool.Commands.Tags
 
                     string name = baseRenderMethodName + "_templates\\";
 
-                    foreach (var val in decalSystem.RenderMethod.Unknown)
+                    foreach (var val in decalSystem.RenderMethod.RenderMethodDefinitionOptionIndices)
                     {
-                        name = name + "_" + val.Unknown;
+                        name = name + "_" + val.OptionIndex;
                     }
 
                     if (!tagNames.ContainsKey(decalSystem.RenderMethod.ShaderProperties[0].Template.Index))

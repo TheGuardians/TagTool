@@ -172,9 +172,9 @@ namespace TagTool.Commands.Shaders
 
             // extract the render method definition arguments to rebuild the shader again
             List<int> shader_template_args = new List<int>();
-            foreach (var template_arg in rm_shader_definition.Unknown)
+            foreach (var template_arg in rm_shader_definition.RenderMethodDefinitionOptionIndices)
             {
-                shader_template_args.Add((int)template_arg.Unknown);
+                shader_template_args.Add((int)template_arg.OptionIndex);
             }
 
             // get the pixl shader that will be rebuilt

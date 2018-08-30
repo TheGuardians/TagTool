@@ -413,7 +413,7 @@ namespace TagTool.Commands.Porting
         public class RenderMethodFast
         {
             public CachedTagInstance BaseRenderMethod;
-            public List<RenderMethod.UnknownBlock> Unknown;
+            public List<RenderMethod.RenderMethodDefinitionOptionIndex> Unknown;
         }
 
         private static RenderMethod.ShaderProperty.Argument DefaultArgumentsValues(string arg)
