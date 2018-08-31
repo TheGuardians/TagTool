@@ -1,4 +1,4 @@
-﻿//#define TEST_REFLECTION_CACHE
+﻿#define TEST_REFLECTION_CACHE
 
 using System;
 using System.Collections.Generic;
@@ -12,17 +12,22 @@ namespace TagTool.Serialization
 	public static class ReflectionCache
 	{
 		/// <summary>
+		/// Disable this when working from multiple threads. Re-enable it when mult-threaded work is complete.
+		/// </summary>
+		public static bool IsEnabled = true;
+		
+		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> using <see cref="MemberInfoVersionKey"/> as keys,
 		/// and <see cref="TagStructureInfo"/> as values.
 		/// </summary>
-		private static readonly Dictionary<MemberInfoVersionKey, TagStructureInfo> _tagStructureInfos =
+		private static readonly Dictionary<MemberInfoVersionKey, TagStructureInfo> tagStructureInfos =
 			new Dictionary<MemberInfoVersionKey, TagStructureInfo> { };
 
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> using <see cref="MemberInfoVersionKey"/> as keys,
 		/// and <see cref="TagFieldEnumerator"/> as values.
 		/// </summary>
-		private static readonly Dictionary<MemberInfoVersionKey, TagFieldEnumerator> _tagFieldEnumerators =
+		private static readonly Dictionary<MemberInfoVersionKey, TagFieldEnumerator> tagFieldEnumerators =
 			new Dictionary<MemberInfoVersionKey, TagFieldEnumerator> { };
 
 		/// <summary>
@@ -34,9 +39,12 @@ namespace TagTool.Serialization
 		{
 
 #if TEST_REFLECTION_CACHE
+			if (!ReflectionCache.IsEnabled)
+				return new TagStructureInfo(type, version);
+
 			var key = new MemberInfoVersionKey(type, version);
-			if (!ReflectionCache._tagStructureInfos.TryGetValue(key, out TagStructureInfo info))
-				ReflectionCache._tagStructureInfos[key] = info = new TagStructureInfo(type, version);
+			if (!ReflectionCache.tagStructureInfos.TryGetValue(key, out TagStructureInfo info))
+				ReflectionCache.tagStructureInfos[key] = info = new TagStructureInfo(type, version);
 			return info;
 #else
 			return new TagStructureInfo(type, version);
@@ -50,9 +58,12 @@ namespace TagTool.Serialization
 		public static TagFieldEnumerator GetTagFieldEnumerator(TagStructureInfo info)
 		{
 #if TEST_REFLECTION_CACHE
+			if (!ReflectionCache.IsEnabled)
+				return new TagFieldEnumerator(info);
+			
 			var key = new MemberInfoVersionKey(info.Types[0], info.Version);
-			if (!ReflectionCache._tagFieldEnumerators.TryGetValue(key, out TagFieldEnumerator enumerator))
-				ReflectionCache._tagFieldEnumerators[key] = enumerator = new TagFieldEnumerator(info);
+			if (!ReflectionCache.tagFieldEnumerators.TryGetValue(key, out TagFieldEnumerator enumerator))
+				ReflectionCache.tagFieldEnumerators[key] = enumerator = new TagFieldEnumerator(info);
 
 			if (enumerator.IsFree)
 				return enumerator;
@@ -68,7 +79,11 @@ namespace TagTool.Serialization
 		/// </summary>
 		/// <param name="type">The <see cref="Type"/> used in lookup/creation.</param>
 		/// <param name="version">The <see cref="CacheVersion"/> used in lookup/creation. Defaults to <see cref="CacheVersion.Unknown"/></param>
-		public static TagFieldEnumerator GetTagFieldEnumerator(Type type, CacheVersion version = CacheVersion.Unknown) =>
-			ReflectionCache.GetTagFieldEnumerator(ReflectionCache.GetTagStructureInfo(type, version));
+		public static TagFieldEnumerator GetTagFieldEnumerator(Type type, CacheVersion version = CacheVersion.Unknown)
+		{
+			var info = ReflectionCache.GetTagStructureInfo(type, version);
+			var enumerator = ReflectionCache.GetTagFieldEnumerator(info);
+			return enumerator;
+		}
 	}
 }

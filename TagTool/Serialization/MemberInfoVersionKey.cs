@@ -12,20 +12,27 @@ namespace TagTool.Serialization
 	/// </summary>
 	public struct MemberInfoVersionKey : IEquatable<MemberInfoVersionKey>
 	{
-		private readonly MemberInfo _memberInfo;
-
-		private readonly int _metadataToken;
+		/// <summary>
+		/// The <see cref="Type"/>, <see cref="FieldInfo"/>, <see cref="PropertyInfo"/>, <see cref="MethodInfo"/>, etc.
+		/// that the key represents.
+		/// </summary>
+		private readonly MemberInfo memberInfo;
 
 		/// <summary>
 		/// Contains the <see cref="CacheVersion"/> that was used in construction, cast to an <see cref="int"/>.
 		/// </summary>
-		private readonly int _version;
+		private readonly int version;
+
+		/// <summary>
+		/// The <see cref="MemberInfo.MetadataToken"/>, of the <see cref="MemberInfoVersionKey.memberInfo"/>
+		/// </summary>
+		private readonly int metadataToken;
 
 		public MemberInfoVersionKey(MemberInfo memberInfo, CacheVersion version)
 		{
-			this._memberInfo = memberInfo;
-			this._metadataToken = memberInfo.MetadataToken;
-			this._version = (int)version;
+			this.memberInfo = memberInfo;
+			this.metadataToken = memberInfo.MetadataToken;
+			this.version = (int)version;
 		}
 
 		/// <summary>
@@ -33,7 +40,7 @@ namespace TagTool.Serialization
 		/// and <see cref="CacheVersion"/> used in construction.
 		/// </summary>
 		public override int GetHashCode() =>
-			(17 * 31 + this._metadataToken) * 31 + this._version;
+			(17 * 31 + this.metadataToken) * 31 + this.version;
 
 		/// <summary>
 		/// <c>true</c> if the <see cref="MemberInfo"/> and <see cref="CacheVersion"/> values of 
@@ -42,7 +49,7 @@ namespace TagTool.Serialization
 		/// </summary>
 		/// <param name="other"> The 'other' <see cref="MemberInfoVersionKey"/> to compare against. </param>
 		public bool Equals(MemberInfoVersionKey other) =>
-			this._memberInfo == other._memberInfo && this._version == other._version;
+			this.memberInfo == other.memberInfo && this.version == other.version;
 
 		/// <summary>
 		/// <c>true</c> if the <see cref="MemberInfo"/> and <see cref="CacheVersion"/> values of 
