@@ -887,8 +887,14 @@ namespace TagTool.Commands.Porting
             {
                 DrawModeIndex++;
 
-                var pixelShaderMode = (int)a.PixelShaderMode;
-                var vertexShaderMode = (int)a.VertexShaderMode;
+                //var pixelShaderMode = (int)a.PixelShaderMode;
+                //var vertexShaderMode = (int)a.VertexShaderMode;
+                // These are not modes. This is an indireciton table of packed 10_6 shorts
+                // from RMT2 ShaderDrawmodes to RegisterOffsets
+                // register_offset = ShaderDrawmodes[current_drawmode].Offset
+                var pixelShaderMode = -1;
+                var vertexShaderMode = -1;
+                throw new NotImplementedException();
 
                 var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleSampler;
                 var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleSampler >> 8;
@@ -1021,7 +1027,7 @@ namespace TagTool.Commands.Porting
                     finalRm.ShaderProperties[0].Functions = new List<RenderMethod.FunctionBlock>();
                     finalRm.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
                     finalRm.ShaderProperties[0].Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
-                    foreach (var b in edRmt2.DrawModeRegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same
+                    foreach (var b in edRmt2.RegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same
                         finalRm.ShaderProperties[0].Unknown3.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
 
                     return finalRm;

@@ -38,7 +38,7 @@ namespace TagTool.Commands.Shaders
             Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
 
             Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
-            Definition.DrawModeRegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+            Definition.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
 
             Definition.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
             Definition.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
