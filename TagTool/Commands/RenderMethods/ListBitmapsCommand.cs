@@ -39,9 +39,9 @@ namespace TagTool.Commands.RenderMethods
                 using (var cacheStream = CacheContext.OpenTagCacheRead())
                     template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                for (var i = 0; i < template.ShaderMaps.Count; i++)
+                for (var i = 0; i < template.SamplerArguments.Count; i++)
                 {
-                    var mapTemplate = template.ShaderMaps[i];
+                    var mapTemplate = template.SamplerArguments[i];
 
                     Console.WriteLine($"Bitmap {i} ({CacheContext.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4}");
                 }

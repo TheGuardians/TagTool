@@ -61,9 +61,9 @@ namespace TagTool.Commands.RenderModels
                     {
                         var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                        for (var i = 0; i < template.ShaderMaps.Count; i++)
+                        for (var i = 0; i < template.SamplerArguments.Count; i++)
                         {
-                            var mapTemplate = template.ShaderMaps[i];
+                            var mapTemplate = template.SamplerArguments[i];
 
                             var extractor = new BitmapDdsExtractor(CacheContext);
 

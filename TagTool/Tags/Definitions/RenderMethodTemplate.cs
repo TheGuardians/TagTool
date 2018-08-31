@@ -2,6 +2,8 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
+using System;
+using System.Runtime.InteropServices;
 
 namespace TagTool.Tags.Definitions
 {
@@ -29,7 +31,7 @@ namespace TagTool.Tags.Definitions
             Water_Shading,
             Dynamic_Light_Cinematic,
             Z_Only,
-            Sfx_Distort
+            Sfx_Distort,
         }
 
         public enum ShaderModeBitmask : uint
@@ -62,19 +64,39 @@ namespace TagTool.Tags.Definitions
         public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
         public List<DrawModeRegisterOffsetBlock> DrawModeRegisterOffsets;
         public List<ArgumentMapping> ArgumentMappings;
-        public List<ShaderArgument> Arguments;
-        public List<ShaderArgument> Unknown5;
-        public List<ShaderArgument> GlobalArguments;
-        public List<ShaderArgument> ShaderMaps;
+        public List<ShaderArgument> VectorArguments;
+        public List<ShaderArgument> IntegerArguments;
+        public List<ShaderArgument> BooleanArguments;
+        public List<ShaderArgument> SamplerArguments;
 
         [TagField(Padding = true, Length = 12)]
         public byte[] Unused;
 
+        // getters and setters put in here as this value is endian dependant
         [TagStructure(Size = 0x2)]
         public class DrawMode
         {
-            public ShaderMode PixelShaderMode;
-            public ShaderMode VertexShaderMode;
+            public ShaderMode PixelShaderMode
+            {
+                get => (ShaderMode)BitConverter.GetBytes(DrawModeData)[0];
+                set
+                {
+                    var bytes = BitConverter.GetBytes(DrawModeData);
+                    bytes[0] = (byte)value;
+                    DrawModeData = BitConverter.ToUInt16(bytes, 0);
+                }
+            }
+            public ShaderMode VertexShaderMode
+            {
+                get => (ShaderMode)BitConverter.GetBytes(DrawModeData)[1];
+                set
+                {
+                    var bytes = BitConverter.GetBytes(DrawModeData);
+                    bytes[1] = (byte)value;
+                    DrawModeData = BitConverter.ToUInt16(bytes, 0);
+                }
+            }
+            public ushort DrawModeData;
         }
 
         [TagStructure(Size = 0x1C)]

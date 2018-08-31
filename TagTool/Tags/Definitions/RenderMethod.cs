@@ -25,20 +25,24 @@ namespace TagTool.Tags.Definitions
             public short OptionIndex;
         }
 
+        [TagStructure(Size = 0x24)]
+        public class FunctionBlock
+        {
+            public int Unknown;
+            [TagField(Label = true)]
+            public StringId Name;
+            public uint Unknown2;
+            public uint Unknown3;
+            public TagFunction Function = new TagFunction { Data = new byte[0] };
+        }
+
         [TagStructure(Size = 0x3C)]
         public class ImportDatum
         {
             [TagField(Label = true)]
             public StringId Name;
 
-            public enum ImportDatumType : int
-            {
-                Sampler = 0,
-                IntegerColor = 1,
-                Float,
-                Color = 5
-            }
-            public ImportDatumType Type;
+            public RenderMethodOption.OptionBlock.OptionDataType Type;
             public CachedTagInstance Bitmap;
             public uint Unknown2;
             public int Unknown3;
@@ -50,17 +54,6 @@ namespace TagTool.Tags.Definitions
             public short Unknown9;
             public uint Unknown10;
             public List<FunctionBlock> Functions;
-
-            [TagStructure(Size = 0x24)]
-            public class FunctionBlock
-            {
-                public int Unknown;
-                [TagField(Label = true)]
-                public StringId Name;
-                public uint Unknown2;
-                public uint Unknown3;
-                public TagFunction Function = new TagFunction { Data = new byte[0] };
-            }
         }
 
         [TagStructure(Size = 0x84)]
@@ -71,7 +64,7 @@ namespace TagTool.Tags.Definitions
             public List<Argument> Arguments;
             public List<UnknownBlock1> Unknown;
             public uint Unknown2;
-            public List<DrawMode> DrawModes;
+            public List<RenderMethodTemplate.DrawMode> DrawModes;
             public List<UnknownBlock3> Unknown3;
             public List<ArgumentMapping> ArgumentMappings;
             public List<FunctionBlock> Functions;
@@ -97,7 +90,7 @@ namespace TagTool.Tags.Definitions
                 public sbyte Unknown2;
                 public byte BitmapFlags;
                 public sbyte UnknownBitmapIndexEnable;
-                public sbyte UvArgumentIndex;
+                public sbyte XFormArgumentIndex;
                 public sbyte Unknown3;
                 public sbyte Unknown4;
             }
@@ -113,12 +106,6 @@ namespace TagTool.Tags.Definitions
             public class UnknownBlock1
             {
                 public uint Unknown;
-            }
-
-            [TagStructure(Size = 0x2)]
-            public class DrawMode
-            {
-                public ushort DataHandle;
             }
 
             [TagStructure(Size = 0x6)]
@@ -195,17 +182,6 @@ namespace TagTool.Tags.Definitions
                 public short RegisterIndex;
                 public byte FunctionIndex;
                 public byte ArgumentIndex;
-            }
-
-            [TagStructure(Size = 0x24)]
-            public class FunctionBlock
-            {
-                public int Unknown;
-                [TagField(Label = true)]
-                public StringId Name;
-                public uint Unknown2;
-                public uint Unknown3;
-                public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
         }
     }

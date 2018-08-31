@@ -52,11 +52,11 @@ namespace TagTool.Tags.Definitions
             public enum OptionDataType : uint
             {
                 Sampler = 0,
-                Vector3 = 1,
+                Float4 = 1,
                 Float = 2,
-                Unknown = 3, // Probbaly integer?
+                Integer = 3,
                 Boolean = 4,
-                Vector4 = 5
+                IntegerColor = 5
             }
         }
     }

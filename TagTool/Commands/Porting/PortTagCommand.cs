@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
 
         private PortingFlags Flags { get; set; } = PortingFlags.Recursive | PortingFlags.Scripts | PortingFlags.MatchShaders;
@@ -61,7 +61,7 @@ namespace TagTool.Commands.Porting
             base(true,
 
                 "PortTag",
-                
+
                 "Ports a tag from the current cache file. Options are:" + Environment.NewLine +
                 "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
 
@@ -116,9 +116,9 @@ namespace TagTool.Commands.Porting
                         Flags &= ~PortingFlags.MatchShaders;
                         break;
 
-					case "replace":
-						Flags |= PortingFlags.Replace;
-						break;
+                    case "replace":
+                        Flags |= PortingFlags.Replace;
+                        break;
 
                     default:
                         {
@@ -134,7 +134,7 @@ namespace TagTool.Commands.Porting
 
                 args.RemoveAt(0);
             }
-            
+
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
             //
@@ -193,7 +193,7 @@ namespace TagTool.Commands.Porting
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
             var tagIdentifiers = tagSpecifier.Split('.');
-            
+
             if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
@@ -201,13 +201,13 @@ namespace TagTool.Commands.Porting
 
             List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
 
-			// find the CacheFile.IndexItem(s)
-			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
-				item => item != null && groupTag == item.GroupTag);
-			else result.Add( BlamCache.IndexItems.Find(
-				item => item != null && groupTag == item.GroupTag && tagName == item.Name));
+            // find the CacheFile.IndexItem(s)
+            if (tagName == "*") result = BlamCache.IndexItems.FindAll(
+                item => item != null && groupTag == item.GroupTag);
+            else result.Add(BlamCache.IndexItems.Find(
+                item => item != null && groupTag == item.GroupTag && tagName == item.Name));
 
-			if (result.Count == 0)
+            if (result.Count == 0)
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
             return result;
@@ -220,9 +220,9 @@ namespace TagTool.Commands.Porting
             try
             {
 #endif
-                var oldFlags = Flags;
-                result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
-                Flags = oldFlags;
+            var oldFlags = Flags;
+            result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
+            Flags = oldFlags;
 #if !DEBUG
             }
             catch (Exception e)
@@ -235,6 +235,20 @@ namespace TagTool.Commands.Porting
             }
 #endif
             return result;
+        }
+
+        private static void ResetRMT2(RenderMethodTemplate Definition)
+        {
+            Definition.DrawModeBitmask = 0;
+            Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+
+            Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
+            Definition.DrawModeRegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+
+            Definition.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.BooleanArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.SamplerArguments = new List<RenderMethodTemplate.ShaderArgument>();
         }
 
         private void GenerateCortanaRMT2Tag(List<int> options, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, out CachedTagInstance rmt2Instance, out RenderMethodTemplate rmt2)
@@ -259,6 +273,19 @@ namespace TagTool.Commands.Porting
                 var new_rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, new_rmt2_instance));
 
                 rmt2 = new_rmt2;
+
+                // update existing PIXL shader
+
+                CachedTagInstance current_pixl_instance = rmt2.PixelShader;
+                var current_pixl = CacheContext.Deserialize<PixelShader>(new TagSerializationContext(cacheStream, CacheContext, current_pixl_instance));
+
+                var shader_offset = current_pixl.DrawModes[12].Offset;
+
+                var shader_gen_result = HaloShaderGenerator.HaloShaderGenerator.GenerateShaderCortana(HaloShaderGenerator.Enums.ShaderStage.Active_Camo);
+
+                current_pixl.Shaders[shader_offset].PCShaderBytecode = shader_gen_result.Bytecode;
+
+                CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, current_pixl_instance), current_pixl);
             }
 
             CacheContext.TagNames[newPIXLInstance.Index] = template_name;
@@ -294,7 +321,7 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
                 case "rmcs": // there are no rmcs tags in ms23, disable completely for now
-                
+
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
@@ -325,7 +352,7 @@ namespace TagTool.Commands.Porting
                 case "rmt2":
 
                     // discard cortana shaders
-                    if(blamTag.Name.ToLower().Contains("cortana_template"))
+                    if (blamTag.Name.ToLower().Contains("cortana_template"))
                     {
                         if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
                             return rmt2Instance;
@@ -414,7 +441,7 @@ namespace TagTool.Commands.Porting
 
             var wasReplacing = Flags.HasFlag(PortingFlags.Replace);
             var wasNew = Flags.HasFlag(PortingFlags.New);
-            
+
             if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
@@ -487,7 +514,7 @@ namespace TagTool.Commands.Porting
 
             replacedTags.Add(blamTag.Name);
             ReplacedTags[groupTag] = replacedTags;
-            
+
             //
             // Allocate Eldorado Tag
             //
@@ -529,8 +556,8 @@ namespace TagTool.Commands.Porting
 
                 case Scenario scenario when Flags.HasFlag(PortingFlags.NoSquads):
                     scenario.Squads = new List<Scenario.Squad>();
-					break;
-				case Scenario scenario when Flags.HasFlag(PortingFlags.NoForgePalette):
+                    break;
+                case Scenario scenario when Flags.HasFlag(PortingFlags.NoForgePalette):
                     scenario.SandboxEquipment.Clear();
                     scenario.SandboxGoalObjects.Clear();
                     scenario.SandboxScenery.Clear();
@@ -540,12 +567,12 @@ namespace TagTool.Commands.Porting
                     scenario.SandboxWeapons.Clear();
                     break;
 
-                /*case ScenarioStructureBsp bsp:
-                    foreach (var instance in bsp.InstancedGeometryInstances)
-                        instance.Name = StringId.Invalid;
-                    break;*/
+                    /*case ScenarioStructureBsp bsp:
+                        foreach (var instance in bsp.InstancedGeometryInstances)
+                            instance.Name = StringId.Invalid;
+                        break;*/
             }
-            
+
             //
             // Perform automatic conversion on the Blam tag definition
             //
@@ -562,7 +589,7 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
                         sefc.GlobalHiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
-                        
+
                         foreach (var screenEffect in sefc.ScreenEffects)
                             screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
@@ -573,7 +600,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-				case Bitmap bitm:
+                case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);
                     break;
 
@@ -606,10 +633,10 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
-					//foreach (var even in effect.Events)
-						//foreach (var particleSystem in even.ParticleSystems)
-							//particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
-					break;
+                    //foreach (var even in effect.Events)
+                    //foreach (var particleSystem in even.ParticleSystems)
+                    //particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+                    break;
 
                 case Globals matg:
                     blamDefinition = ConvertGlobals(matg, cacheStream);
@@ -653,7 +680,7 @@ namespace TagTool.Commands.Porting
                 case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
                     break;
-                    
+
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);
                     break;
@@ -677,7 +704,7 @@ namespace TagTool.Commands.Porting
                 case SkyAtmParameters skya:
                     // Decrease secondary fog intensity (it's quite sickening in ms23)
                     // foreach (var atmosphere in skya.AtmosphereProperties)
-                        // atmosphere.FogIntensity2 /= 36.0f;
+                    // atmosphere.FogIntensity2 /= 36.0f;
                     break;
 
                 case Sound sound:
@@ -703,157 +730,20 @@ namespace TagTool.Commands.Porting
                 // Fix shotgun reloading
                 case Weapon weapon when blamTag.Name == "objects\\weapons\\rifle\\shotgun\\shotgun":
                     weapon.Unknown24 = 1 << 16;
-					break;
-				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
+                    break;
+                case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
                     foreach (var attach in weapon.Attachments)
-                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                        attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                     break;
 
                 case ShaderCortana shader_cortana:
 
-                    //CachedTagInstance newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
-                    //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
-
-                    //var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
-                    //var shader = CacheContext.Deserialize<Shader>(new TagSerializationContext(cacheStream, CacheContext, shader_instance));
-
-                    //ho_cortana_shader.ImportData = shader.ImportData;
-                    //ho_cortana_shader.ShaderProperties = shader.ShaderProperties;
-
-                    var shader_properties = shader_cortana.ShaderProperties[0];
-                    shader_properties.ShaderMaps = new List<RenderMethod.ShaderProperty.ShaderMap>();
-                    shader_properties.Arguments = new List<RenderMethod.ShaderProperty.Argument>();
-                    shader_properties.Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>();
-                    shader_properties.DrawModes = new List<RenderMethod.ShaderProperty.DrawMode>();
-                    shader_properties.Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
-                    shader_properties.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
-                    shader_properties.Functions = new List<RenderMethod.ShaderProperty.FunctionBlock>();
-
-                    var x = shader_cortana.Material.ToString();
-
-                    foreach(var import in shader_cortana.ImportData)
-                    {
-                        float argument1 = 0.0f;
-                        float argument2 = 0.0f;
-                        float argument3 = 0.0f;
-                        float argument4 = 0.0f;
-                        string name = CacheContext.GetString(import.Name);
-
-                        var argument_data = import.Functions.Count > 0 ? import.Functions[0].Function.Data : null;
-                        if(argument_data != null)
-                        {
-                            switch(import.Type)
-                            {
-                                case RenderMethod.ImportDatum.ImportDatumType.Sampler:
-                                    argument1 = 1.0f;
-                                    argument2 = 1.0f;
-                                    argument3 = 0.0f;
-                                    argument4 = 0.0f;
-                                    break;
-                                case RenderMethod.ImportDatum.ImportDatumType.Float:
-                                case RenderMethod.ImportDatum.ImportDatumType.Color:
-                                    break;
-                                case RenderMethod.ImportDatum.ImportDatumType.IntegerColor:
-                                    break;
-                                default:
-                                    throw new NotImplementedException();
-                            }
-
-                            var unknown0A = BitConverter.ToUInt16(argument_data, 0);
-                            var unknown0B = BitConverter.ToUInt16(argument_data, 2);
-
-                            switch(unknown0B)
-                            {
-                                case 0: // float
-
-                                    argument1 = BitConverter.ToSingle(argument_data, 4);
-                                    argument2 = BitConverter.ToSingle(argument_data, 8);
-                                    argument3 = BitConverter.ToSingle(argument_data, 12);
-                                    argument4 = BitConverter.ToSingle(argument_data, 16);
-
-                                    break;
-
-                                case 1: // integer or packed byte or something like that
-
-                                    var Iargument1 = BitConverter.ToUInt32(argument_data, 4);
-                                    var Iargument2 = BitConverter.ToUInt32(argument_data, 8);
-                                    var Iargument3 = BitConverter.ToUInt32(argument_data, 12);
-                                    var Iargument4 = BitConverter.ToUInt32(argument_data, 16);
-
-                                    var iblue = argument_data[4];
-                                    var igreen = argument_data[5];
-                                    var ired = argument_data[6];
-                                    var iunusedAlpha = argument_data[7];
-
-                                    var blue = (float)iblue / 255.0f;
-                                    var green = (float)igreen / 255.0f;
-                                    var red = (float)ired / 255.0f;
-                                    var unusedAlpha = (float)iunusedAlpha / 255.0f;
-
-                                    var ialpha = argument_data[16];
-                                    var alpha = (float)ialpha / 255.0f;
-
-                                    argument1 = red;
-                                    argument2 = green;
-                                    argument3 = blue;
-                                    argument4 = alpha;
-
-                                    break;
-                                default:
-                                    throw new NotImplementedException();
-                            }
-
-                            var unknown1 = BitConverter.ToUInt32(argument_data, 20);
-                            var unknown2 = BitConverter.ToUInt32(argument_data, 24);
-                            var unknown3 = BitConverter.ToUInt32(argument_data, 28);
-
-                            Console.WriteLine();
-                        }
-
-                        var function = import.Functions.Count > 1 ? import.Functions[1].Function.Data : null;
-                        //TODO: Import functions
-
-                        
-                    }
-
-                    RenderMethodTemplate template = null;
-                    if (shader_properties.Template == null)
-                    {
-                        var render_method_option_indices = shader_cortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
-                        GenerateCortanaRMT2Tag(
-                            render_method_option_indices,
-                            cacheStream,
-                            resourceStreams,
-                            out CachedTagInstance rmt2Instance,
-                            out RenderMethodTemplate rmt2);
-
-                        shader_properties.Template = rmt2Instance;
-                        template = rmt2;
-                    }
-                    else
-                    {
-                        template = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, shader_properties.Template));
-                    }
-
-                    if (shader_cortana.Material.Index == 0)
-                    {
-                        if(CacheContext.StringIdCache.Contains("default_material"))
-                        {
-                            shader_cortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
-                        }
-                    }
-
-                    //shader_cortana.Material = shader.Material;
-
-                    //ho_cortana_shader.BaseRenderMethod = shader.BaseRenderMethod;
-                    //CacheContext.TagNames[newCortanaShaderInstance.Index] = blamTag.Name;
-                    //CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newCortanaShaderInstance), ho_cortana_shader);
-                    //CacheContext.SaveTagNames();
+                    ConvertShaderCortana(shader_cortana, cacheStream, resourceStreams);
 
                     break;
 
                 case RenderMethodDefinition rmdf:
-                    
+
                     var shader_rmdf_instance = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
                     var shader_rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, shader_rmdf_instance));
 
@@ -868,7 +758,7 @@ namespace TagTool.Commands.Porting
             //
             // Finalize and serialize the new ElDorado tag definition
             //
-            
+
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 CacheContext.TagNames.Remove(edTag.Index);
@@ -881,6 +771,275 @@ namespace TagTool.Commands.Porting
             Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
+        }
+
+        private void ConvertShaderCortana(ShaderCortana shader_cortana, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
+        {
+            var render_method_option_indices = shader_cortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
+
+            //CachedTagInstance newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+            //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
+
+            var rmdf_instance = shader_cortana.BaseRenderMethod;
+            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, rmdf_instance));
+
+            //var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
+            //var shader = CacheContext.Deserialize<Shader>(new TagSerializationContext(cacheStream, CacheContext, shader_instance));
+
+            //ho_cortana_shader.ImportData = shader.ImportData;
+            //ho_cortana_shader.ShaderProperties = shader.ShaderProperties;
+
+            var shader_properties = shader_cortana.ShaderProperties[0];
+            shader_properties.ShaderMaps = new List<RenderMethod.ShaderProperty.ShaderMap>();
+            shader_properties.Arguments = new List<RenderMethod.ShaderProperty.Argument>();
+            shader_properties.Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>();
+            shader_properties.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+            shader_properties.Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
+            shader_properties.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
+            shader_properties.Functions = new List<RenderMethod.FunctionBlock>();
+
+            List<RenderMethodOption.OptionBlock> template_options = new List<RenderMethodOption.OptionBlock>();
+
+            for (int i = 0; i < rmdf.Methods.Count; i++)
+            {
+                var method = rmdf.Methods[i];
+                int selected_option_index = render_method_option_indices.Count > i ? render_method_option_indices[i] : 0;
+                var selected_option = method.ShaderOptions[selected_option_index];
+
+                var rmop_instance = selected_option.Option;
+                if (rmop_instance != null)
+                {
+                    var rmop = CacheContext.Deserialize<RenderMethodOption>(new TagSerializationContext(cacheStream, CacheContext, rmop_instance));
+
+                    template_options.AddRange(rmop.Options);
+                }
+            }
+
+            RenderMethodTemplate rmt2 = null;
+            if (shader_properties.Template == null)
+            {
+                GenerateCortanaRMT2Tag(
+                    render_method_option_indices,
+                    cacheStream,
+                    resourceStreams,
+                    out CachedTagInstance rmt2Instance,
+                    out RenderMethodTemplate newRMT2);
+
+                shader_properties.Template = rmt2Instance;
+                rmt2 = newRMT2;
+            }
+            else
+            {
+                rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, shader_properties.Template));
+            }
+            //shader_properties.DrawModes = rmt2.DrawModes;
+
+            var shader_arguments = new RenderMethod.ShaderProperty.Argument[rmt2.VectorArguments.Count];
+            var shader_maps = new RenderMethod.ShaderProperty.ShaderMap[rmt2.SamplerArguments.Count];
+            for (int i = 0; i < rmt2.SamplerArguments.Count; i++)
+            {
+                var shadermap = rmt2.SamplerArguments[i];
+                var name = shadermap.Name;
+                var name_str = CacheContext.GetString(name);
+
+                var shader_map = new RenderMethod.ShaderProperty.ShaderMap();
+
+                // Default Argument
+                var shader_map_arg = new RenderMethod.ShaderProperty.Argument();
+                shader_map_arg.Values = new float[4];
+                shader_map_arg.Values[0] = 1.0f;
+                shader_map_arg.Values[1] = 1.0f;
+                shader_map_arg.Values[2] = 0.0f;
+                shader_map_arg.Values[3] = 0.0f;
+
+                int xform_index = -1;
+                foreach (var arg in rmt2.VectorArguments)
+                {
+                    //NOTE: Shared name between Argumenst and Texture
+                    if (arg.Name.Index == name.Index)
+                    {
+                        xform_index = rmt2.VectorArguments.IndexOf(arg);
+                        break;
+                    }
+                }
+                if (xform_index == -1)
+                {
+                    Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
+                    shader_map.XFormArgumentIndex = 0;
+                }
+                shader_map.XFormArgumentIndex = (sbyte)xform_index;
+                shader_arguments[xform_index] = shader_map_arg;
+
+                //TODO: The rest of the shader_map information
+
+                foreach (var importData in shader_cortana.ImportData)
+                {
+                    if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                    if (importData.Name.Index != name.Index) continue;
+
+                    shader_map.Bitmap = importData.Bitmap;
+
+                    goto datafound;
+                }
+
+                foreach (var deafult_option in template_options)
+                {
+                    if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                    if (deafult_option.Name.Index != name.Index) continue;
+
+                    shader_map.Bitmap = deafult_option.Bitmap;
+
+                    goto datafound;
+                }
+
+                //TODO: Maybe we can do better than this, ie. custom shaders
+
+                //throw new Exception($"Import data not found for {name_str}");
+                Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
+                datafound:
+                shader_maps[i] = shader_map;
+            }
+            shader_properties.ShaderMaps = shader_maps.ToList();
+
+            var shader_functions = new List<RenderMethod.FunctionBlock>();
+            for (int rmt2ArgumentIndex = 0; rmt2ArgumentIndex < rmt2.VectorArguments.Count; rmt2ArgumentIndex++)
+            {
+                if (shader_arguments[rmt2ArgumentIndex] != null) continue;
+                var argument = rmt2.VectorArguments[rmt2ArgumentIndex];
+                var name = argument.Name;
+                var name_str = CacheContext.GetString(name);
+
+                RenderMethod.ShaderProperty.Argument shader_argument = new RenderMethod.ShaderProperty.Argument();
+
+                float arg0 = 0.0f;
+                float arg1 = 0.0f;
+                float arg2 = 0.0f;
+                float arg3 = 0.0f;
+
+                foreach (var importData in shader_cortana.ImportData)
+                {
+                    if (importData.Name.Index != name.Index) continue;
+
+                    var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
+                    if (argument_data != null)
+                    {
+                        switch (importData.Type)
+                        {
+                            case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                                arg0 = 1.0f;
+                                arg1 = 1.0f;
+                                arg2 = 0.0f;
+                                arg3 = 0.0f;
+                                break;
+                            case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                            case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                            case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                        }
+
+                        var unknown0A = BitConverter.ToUInt16(argument_data, 0);
+                        var unknown0B = BitConverter.ToUInt16(argument_data, 2);
+
+                        switch (unknown0B)
+                        {
+                            case 0: // float
+
+                                arg0 = BitConverter.ToSingle(argument_data, 4);
+                                arg1 = BitConverter.ToSingle(argument_data, 8);
+                                arg2 = BitConverter.ToSingle(argument_data, 12);
+                                arg3 = BitConverter.ToSingle(argument_data, 16);
+
+                                break;
+
+                            case 1: // integer or packed byte or something like that
+
+                                var Iargument1 = BitConverter.ToUInt32(argument_data, 4);
+                                var Iargument2 = BitConverter.ToUInt32(argument_data, 8);
+                                var Iargument3 = BitConverter.ToUInt32(argument_data, 12);
+                                var Iargument4 = BitConverter.ToUInt32(argument_data, 16);
+
+                                var iblue = argument_data[4];
+                                var igreen = argument_data[5];
+                                var ired = argument_data[6];
+                                var iunusedAlpha = argument_data[7];
+
+                                var blue = (float)iblue / 255.0f;
+                                var green = (float)igreen / 255.0f;
+                                var red = (float)ired / 255.0f;
+                                var unusedAlpha = (float)iunusedAlpha / 255.0f;
+
+                                var ialpha = argument_data[16];
+                                var alpha = (float)ialpha / 255.0f;
+
+                                arg0 = red;
+                                arg1 = green;
+                                arg2 = blue;
+                                arg3 = alpha;
+
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                        }
+
+                        var unknown1 = BitConverter.ToUInt32(argument_data, 20);
+                        var unknown2 = BitConverter.ToUInt32(argument_data, 24);
+                        var unknown3 = BitConverter.ToUInt32(argument_data, 28);
+
+                        Console.WriteLine();
+                    }
+
+                    for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
+                    {
+                        shader_functions.Add(importData.Functions[functionIndex]);
+                    }
+
+                    goto datafound;
+                }
+
+                foreach (var deafult_option in template_options)
+                {
+                    if (deafult_option.Name.Index != name.Index) continue;
+
+                    //TODO: Figure these bad boys out, I think its all just defaults but we should just
+                    // throw a warning if they're not part of the RMDF
+                    // (Don't throw warnings if we're using a custom shader RMDF
+
+                    goto datafound;
+                }
+
+                Console.WriteLine($"Waring: RMCT Conversion couldn't find a argument for {name_str}");
+                datafound:
+
+                //TODO: Maybe we can do better than this, ie. custom shaders
+
+                shader_argument.Values = new float[4];
+                shader_argument.Values[0] = arg0;
+                shader_argument.Values[1] = arg1;
+                shader_argument.Values[2] = arg2;
+                shader_argument.Values[3] = arg3;
+                
+                shader_arguments[rmt2ArgumentIndex] = shader_argument;
+            }
+            shader_properties.Arguments = shader_arguments.ToList();
+            //shader_properties.Functions = shader_functions;
+
+            if (shader_cortana.Material.Index == 0)
+            {
+                if (CacheContext.StringIdCache.Contains("default_material"))
+                {
+                    shader_cortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
+                }
+            }
+
+            //shader_cortana.Material = shader.Material;
+
+            //ho_cortana_shader.BaseRenderMethod = shader.BaseRenderMethod;
+            //CacheContext.TagNames[newCortanaShaderInstance.Index] = blamTag.Name;
+            //CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newCortanaShaderInstance), ho_cortana_shader);
+            //CacheContext.SaveTagNames();
+
         }
 
         private object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
@@ -944,18 +1103,18 @@ namespace TagTool.Commands.Porting
                         return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
                     }
 
-				case CollisionMoppCode collisionMopp:
-					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-					return collisionMopp;
+                case CollisionMoppCode collisionMopp:
+                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
+                    return collisionMopp;
 
-				case DamageReportingType damageReportingType:
-					return ConvertDamageReportingType(damageReportingType);
+                case DamageReportingType damageReportingType:
+                    return ConvertDamageReportingType(damageReportingType);
 
-				case GameObjectType gameObjectType:
-					return ConvertGameObjectType(gameObjectType);
+                case GameObjectType gameObjectType:
+                    return ConvertGameObjectType(gameObjectType);
 
-				case ObjectTypeFlags objectTypeFlags:
-					return ConvertObjectTypeFlags(objectTypeFlags);
+                case ObjectTypeFlags objectTypeFlags:
+                    return ConvertObjectTypeFlags(objectTypeFlags);
 
                 case BipedPhysicsFlags bipedPhysicsFlags:
                     return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
@@ -973,11 +1132,11 @@ namespace TagTool.Commands.Porting
                     return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 
                 case ScenarioObjectType scenarioObjectType:
-					return ConvertScenarioObjectType(scenarioObjectType);
+                    return ConvertScenarioObjectType(scenarioObjectType);
 
-				case SoundClass soundClass:
-					return soundClass.ConvertSoundClass(BlamCache.Version);
-			}
+                case SoundClass soundClass:
+                    return soundClass.ConvertSoundClass(BlamCache.Version);
+            }
 
             if (type.IsArray)
                 return ConvertArray(cacheStream, resourceStreams, (Array)data, definition, blamTagName);
@@ -1048,15 +1207,15 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
-			{
-				while (enumerator.Next())
-				{
-					var oldValue = enumerator.Field.GetValue(data);
-					var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-					enumerator.Field.SetValue(data, newValue);
-				}
-			}
+            using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
+            {
+                while (enumerator.Next())
+                {
+                    var oldValue = enumerator.Field.GetValue(data);
+                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                    enumerator.Field.SetValue(data, newValue);
+                }
+            }
             return data;
         }
 
@@ -1123,7 +1282,7 @@ namespace TagTool.Commands.Porting
 
             if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
                 throw new NotSupportedException(value ?? CacheContext.Version.ToString());
-            
+
             return damageReportingType;
         }
 
