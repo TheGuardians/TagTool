@@ -132,10 +132,6 @@ namespace TagTool.Commands.Editing
                     Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cacheContext, tag, (GlobalVertexShader)definition);
                     break;
 
-                case "rmdf":
-                    commandContext.AddCommand(new Shaders.ListMethodOptionParameters(cacheContext, tag, (RenderMethodDefinition)definition));
-                    break;
-
                 case "rmt2":
                     Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
                     break;

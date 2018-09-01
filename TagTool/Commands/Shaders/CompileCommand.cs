@@ -87,10 +87,8 @@ namespace TagTool.Commands.Shaders
                 }
             }
 
-			//new Disassemble(bytecode, out string disassembly);
-
-            //Console.WriteLine(disassembly);
-
+            var disassembly = D3DCompiler.Disassemble(bytecode);
+            Console.WriteLine(disassembly);
 
             if (typeof(T) == typeof(PixelShader) || typeof(T) == typeof(GlobalPixelShader))
             {

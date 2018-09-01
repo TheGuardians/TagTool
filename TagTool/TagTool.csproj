@@ -320,7 +320,6 @@
     <Compile Include="Commands\Shaders\DisassembleCommand.cs" />
     <Compile Include="Commands\Shaders\GenerateRenderMethodTemplate.cs" />
     <Compile Include="Commands\Shaders\GenerateShaderCommand.cs" />
-    <Compile Include="Commands\Shaders\ListMethodOptionParameters.cs" />
     <Compile Include="Commands\Shaders\RegenerateShaders.cs" />
     <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
