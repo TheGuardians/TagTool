@@ -107,10 +107,13 @@ namespace TagTool.Commands.Porting
                 if (xform_index == -1)
                 {
                     Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
-                    shader_map.XFormArgumentIndex = 0;
+                    xform_index = 0;
+                }
+                else
+                {
+                    shader_arguments[xform_index] = shader_map_arg;
                 }
                 shader_map.XFormArgumentIndex = (sbyte)xform_index;
-                shader_arguments[xform_index] = shader_map_arg;
 
                 //TODO: The rest of the shader_map information
 
@@ -119,9 +122,11 @@ namespace TagTool.Commands.Porting
                     if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
                     if (importData.Name.Index != name.Index) continue;
 
-                    shader_map.Bitmap = importData.Bitmap;
-
-                    goto datafound;
+                    if(importData.Bitmap != null)
+                    {
+                        shader_map.Bitmap = importData.Bitmap;
+                        goto datafound;
+                    }
                 }
 
                 foreach (var deafult_option in template_options)
@@ -137,8 +142,13 @@ namespace TagTool.Commands.Porting
                 //TODO: Maybe we can do better than this, ie. custom shaders
 
                 //throw new Exception($"Import data not found for {name_str}");
-                Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
+                
                 datafound:
+                if(shader_map.Bitmap == null)
+                {
+                    Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
+                    shader_map.Bitmap = CacheContext.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
+                }
                 shader_maps[i] = shader_map;
             }
             shader_properties.ShaderMaps = shader_maps.ToList();
@@ -165,6 +175,13 @@ namespace TagTool.Commands.Porting
                     var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
                     if (argument_data != null)
                     {
+                        var unknown0A = BitConverter.ToUInt16(argument_data, 0);
+                        var unknown0B = BitConverter.ToUInt16(argument_data, 2);
+
+                        var unknown1 = BitConverter.ToUInt32(argument_data, 20);
+                        var unknown2 = BitConverter.ToUInt32(argument_data, 24);
+                        var unknown3 = BitConverter.ToUInt32(argument_data, 28);
+
                         switch (importData.Type)
                         {
                             case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
@@ -173,61 +190,42 @@ namespace TagTool.Commands.Porting
                                 arg2 = 0.0f;
                                 arg3 = 0.0f;
                                 break;
-                            case RenderMethodOption.OptionBlock.OptionDataType.Float:
                             case RenderMethodOption.OptionBlock.OptionDataType.Float4:
-                            case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
-                                break;
-                            default:
-                                throw new NotImplementedException();
-                        }
-
-                        var unknown0A = BitConverter.ToUInt16(argument_data, 0);
-                        var unknown0B = BitConverter.ToUInt16(argument_data, 2);
-
-                        switch (unknown0B)
-                        {
-                            case 0: // float
-
                                 arg0 = BitConverter.ToSingle(argument_data, 4);
                                 arg1 = BitConverter.ToSingle(argument_data, 8);
                                 arg2 = BitConverter.ToSingle(argument_data, 12);
                                 arg3 = BitConverter.ToSingle(argument_data, 16);
-
                                 break;
+                            case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                                {
+                                    var Iargument1 = BitConverter.ToUInt32(argument_data, 4);
+                                    var Iargument2 = BitConverter.ToUInt32(argument_data, 8);
+                                    var Iargument3 = BitConverter.ToUInt32(argument_data, 12);
+                                    var Iargument4 = BitConverter.ToUInt32(argument_data, 16);
 
-                            case 1: // integer or packed byte or something like that
+                                    var iblue = argument_data[4];
+                                    var igreen = argument_data[5];
+                                    var ired = argument_data[6];
+                                    var iunusedAlpha = argument_data[7];
 
-                                var Iargument1 = BitConverter.ToUInt32(argument_data, 4);
-                                var Iargument2 = BitConverter.ToUInt32(argument_data, 8);
-                                var Iargument3 = BitConverter.ToUInt32(argument_data, 12);
-                                var Iargument4 = BitConverter.ToUInt32(argument_data, 16);
+                                    var blue = (float)iblue / 255.0f;
+                                    var green = (float)igreen / 255.0f;
+                                    var red = (float)ired / 255.0f;
+                                    var unusedAlpha = (float)iunusedAlpha / 255.0f;
 
-                                var iblue = argument_data[4];
-                                var igreen = argument_data[5];
-                                var ired = argument_data[6];
-                                var iunusedAlpha = argument_data[7];
+                                    var ialpha = argument_data[16];
+                                    var alpha = (float)ialpha / 255.0f;
 
-                                var blue = (float)iblue / 255.0f;
-                                var green = (float)igreen / 255.0f;
-                                var red = (float)ired / 255.0f;
-                                var unusedAlpha = (float)iunusedAlpha / 255.0f;
-
-                                var ialpha = argument_data[16];
-                                var alpha = (float)ialpha / 255.0f;
-
-                                arg0 = red;
-                                arg1 = green;
-                                arg2 = blue;
-                                arg3 = alpha;
-
+                                    arg0 = red;
+                                    arg1 = green;
+                                    arg2 = blue;
+                                    arg3 = alpha;
+                                }
                                 break;
+                            case RenderMethodOption.OptionBlock.OptionDataType.Float:
                             default:
                                 throw new NotImplementedException();
                         }
-
-                        var unknown1 = BitConverter.ToUInt32(argument_data, 20);
-                        var unknown2 = BitConverter.ToUInt32(argument_data, 24);
-                        var unknown3 = BitConverter.ToUInt32(argument_data, 28);
 
                         Console.WriteLine();
                     }
@@ -371,21 +369,20 @@ namespace TagTool.Commands.Porting
                 var srcRenderMethodExternArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
                 foreach (var src_arg in srcRenderMethodExternArguments)
                 {
-                    //var argument_mapping = new RenderMethodTemplate.ArgumentMapping();
-                    //argument_mapping.RegisterIndex = (ushort)src_arg.Register;
+                    var argument_mapping = new RenderMethodTemplate.ArgumentMapping();
+                    argument_mapping.RegisterIndex = (ushort)src_arg.Register;
 
-                    //foreach (var _enum in Enum.GetValues(typeof(RenderMethodTemplate.RenderMethodExtern)))
-                    //{
-                    //    if(_enum.ToString().ToLower() == src_arg.Name)
-                    //    {
-                    //        argument_mapping.ArgumentIndex = (byte)_enum;
-                    //        break;
-                    //    }
-                    //}
+                    foreach (var _enum in Enum.GetValues(typeof(RenderMethodTemplate.RenderMethodExtern)))
+                    {
+                        if (_enum.ToString().ToLower() == src_arg.Name)
+                        {
+                            argument_mapping.ArgumentIndex = (byte)_enum;
+                            break;
+                        }
+                    }
 
-                    //argument_mappings.Add(argument_mapping);
-
-                    //register_offsets.RenderMethodExternArguments_Count++;
+                    rmt2.ArgumentMappings.Add(argument_mapping);
+                    registerOffsets.RenderMethodExternArguments_Count++;
                 }
 
                 registerOffsets.SamplerArguments_Offset = (ushort)rmt2.ArgumentMappings.Count;
@@ -410,9 +407,9 @@ namespace TagTool.Commands.Porting
                 {
                     int index = GetArgumentIndex(samplerRegister.Name, rmt2.VectorArguments);
                     HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister xformRegister = null;
-                    foreach(var register in shader_gen_result.Registers)
+                    foreach (var register in shader_gen_result.Registers)
                     {
-                        if(register.Name == $"{samplerRegister.Name}_xform")
+                        if (register.Name == $"{samplerRegister.Name}_xform")
                         {
                             xformRegister = register;
                             break;
@@ -424,67 +421,31 @@ namespace TagTool.Commands.Porting
                     argumentMapping.RegisterIndex = (ushort)xformRegister.Register;
 
                     argumentMapping.ArgumentIndex = (byte)(index != -1 ? index : rmt2.VectorArguments.Count);
-                    registerOffsets.VectorArguments_Count++;
                     rmt2.ArgumentMappings.Add(argumentMapping);
 
                     var shaderArgument = new RenderMethodTemplate.ShaderArgument();
                     shaderArgument.Name = CacheContext.GetStringId(samplerRegister.Name);
                     rmt2.VectorArguments.Add(shaderArgument);
+
+                    registerOffsets.VectorArguments_Count++;
                 }
 
                 var srcVectorArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.Vector_Arguments);
-                foreach (var src_arg in srcVectorArguments)
+                foreach (var vectorRegister in srcVectorArguments)
                 {
-                    if (src_arg.IsXFormArgument) continue; // we've already added these
-                    var argument_mapping = new RenderMethodTemplate.ArgumentMapping();
-                    argument_mapping.RegisterIndex = (ushort)src_arg.Register;
-                    argument_mapping.ArgumentIndex = (byte)registerOffsets.VectorArguments_Count++;
+                    if (vectorRegister.IsXFormArgument) continue; // we've already added these
+                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
+                    argumentMapping.RegisterIndex = (ushort)vectorRegister.Register;
+                    argumentMapping.ArgumentIndex = (byte)rmt2.VectorArguments.Count;
+                    rmt2.ArgumentMappings.Add(argumentMapping);
 
-                    rmt2.ArgumentMappings.Add(argument_mapping);
+                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
+                    shaderArgument.Name = CacheContext.GetStringId(vectorRegister.Name);
+                    rmt2.VectorArguments.Add(shaderArgument);
+
+                    registerOffsets.VectorArguments_Count++;
                 }
             }
-
-
-
-
-            {
-                //TODO Hookup HaloShaderGenerator here
-                var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
-                var shader = CacheContext.Deserialize<Shader>(new TagSerializationContext(cacheStream, CacheContext, shader_instance));
-
-                var new_rmt2_instance = shader.ShaderProperties[0].Template;
-                var new_rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, new_rmt2_instance));
-
-                //rmt2.DrawModes = new_rmt2.DrawModes;
-                //rmt2.RegisterOffsets = new_rmt2.RegisterOffsets;
-                //rmt2.ArgumentMappings = new_rmt2.ArgumentMappings;
-                //rmt2.VectorArguments = new_rmt2.VectorArguments;
-                //rmt2.IntegerArguments = new_rmt2.IntegerArguments;
-                //rmt2.BooleanArguments = new_rmt2.BooleanArguments;
-                //rmt2.SamplerArguments = new_rmt2.SamplerArguments;
-
-
-
-                //rmt2 = new_rmt2;
-
-                //rmt2.PixelShader = newPIXLInstance;
-
-
-                //// update existing PIXL shader
-
-                //CachedTagInstance current_pixl_instance = rmt2.PixelShader;
-                //var current_pixl = CacheContext.Deserialize<PixelShader>(new TagSerializationContext(cacheStream, CacheContext, current_pixl_instance));
-
-                //var shader_offset = current_pixl.DrawModes[12].Offset;
-
-
-
-                //current_pixl.Shaders[shader_offset].PCShaderBytecode = shader_gen_result.Bytecode;
-
-                //CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, current_pixl_instance), current_pixl);
-            }
-
-
 
             CacheContext.TagNames[newPIXLInstance.Index] = template_name;
             CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newPIXLInstance), pixl);
