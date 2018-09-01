@@ -100,6 +100,20 @@ namespace TagTool.Tags.Definitions
             {
                 [TagField(Length = 4)]
                 public float[] Values;
+
+                private float[] _Values
+                {
+                    get
+                    {
+                        if(Values == null)
+                            Values = new float[4];
+                        return Values;
+                    }
+                }
+                public float Arg0 { get => _Values[0]; set => _Values[0] = value; }
+                public float Arg1 { get => _Values[1]; set => _Values[1] = value; }
+                public float Arg2 { get => _Values[2]; set => _Values[2] = value; }
+                public float Arg3 { get => _Values[3]; set => _Values[3] = value; }
             }
 
             [TagStructure(Size = 0x4)]

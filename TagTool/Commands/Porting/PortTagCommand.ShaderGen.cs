@@ -15,14 +15,14 @@ namespace TagTool.Commands.Porting
     partial class PortTagCommand
     {
 
-        private void ConvertShaderCortana(ShaderCortana shader_cortana, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private void ConvertShaderCortana(ShaderCortana shaderCortana, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            var render_method_option_indices = shader_cortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
+            var render_method_option_indices = shaderCortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
 
             //CachedTagInstance newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
             //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
 
-            var rmdf_instance = shader_cortana.BaseRenderMethod;
+            var rmdf_instance = shaderCortana.BaseRenderMethod;
             var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, rmdf_instance));
 
             //var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
@@ -31,7 +31,7 @@ namespace TagTool.Commands.Porting
             //ho_cortana_shader.ImportData = shader.ImportData;
             //ho_cortana_shader.ShaderProperties = shader.ShaderProperties;
 
-            var shader_properties = shader_cortana.ShaderProperties[0];
+            var shader_properties = shaderCortana.ShaderProperties[0];
             shader_properties.ShaderMaps = new List<RenderMethod.ShaderProperty.ShaderMap>();
             shader_properties.Arguments = new List<RenderMethod.ShaderProperty.Argument>();
             shader_properties.Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>();
@@ -40,7 +40,7 @@ namespace TagTool.Commands.Porting
             shader_properties.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
             shader_properties.Functions = new List<RenderMethod.FunctionBlock>();
 
-            List<RenderMethodOption.OptionBlock> template_options = new List<RenderMethodOption.OptionBlock>();
+            List<RenderMethodOption.OptionBlock> templateOptions = new List<RenderMethodOption.OptionBlock>();
 
             for (int i = 0; i < rmdf.Methods.Count; i++)
             {
@@ -53,7 +53,7 @@ namespace TagTool.Commands.Porting
                 {
                     var rmop = CacheContext.Deserialize<RenderMethodOption>(new TagSerializationContext(cacheStream, CacheContext, rmop_instance));
 
-                    template_options.AddRange(rmop.Options);
+                    templateOptions.AddRange(rmop.Options);
                 }
             }
 
@@ -76,200 +76,83 @@ namespace TagTool.Commands.Porting
             }
             //shader_properties.DrawModes = rmt2.DrawModes;
 
-            var shader_arguments = new RenderMethod.ShaderProperty.Argument[rmt2.VectorArguments.Count];
-            var shader_maps = new RenderMethod.ShaderProperty.ShaderMap[rmt2.SamplerArguments.Count];
-            for (int i = 0; i < rmt2.SamplerArguments.Count; i++)
+            var shaderFunctions = new List<RenderMethod.FunctionBlock>();
+            var shaderVectorArguments = new RenderMethod.ShaderProperty.Argument[rmt2.VectorArguments.Count];
+
+            var shaderSamplerArguments = new RenderMethod.ShaderProperty.ShaderMap[rmt2.SamplerArguments.Count];
+            for (int rmt2SamplerIndex = 0; rmt2SamplerIndex < rmt2.SamplerArguments.Count; rmt2SamplerIndex++)
             {
-                var shadermap = rmt2.SamplerArguments[i];
-                var name = shadermap.Name;
+                var rmt2SamplerArgument = rmt2.SamplerArguments[rmt2SamplerIndex];
+                var name = rmt2SamplerArgument.Name;
                 var name_str = CacheContext.GetString(name);
-
-                var shader_map = new RenderMethod.ShaderProperty.ShaderMap();
-
-                // Default Argument
-                var shader_map_arg = new RenderMethod.ShaderProperty.Argument();
-                shader_map_arg.Values = new float[4];
-                shader_map_arg.Values[0] = 1.0f;
-                shader_map_arg.Values[1] = 1.0f;
-                shader_map_arg.Values[2] = 0.0f;
-                shader_map_arg.Values[3] = 0.0f;
-
-                int xform_index = -1;
-                foreach (var arg in rmt2.VectorArguments)
+                var shaderSamplerArgument = new RenderMethod.ShaderProperty.ShaderMap();
                 {
-                    //NOTE: Shared name between Argumenst and Texture
-                    if (arg.Name.Index == name.Index)
+                    foreach (var importData in shaderCortana.ImportData)
                     {
-                        xform_index = rmt2.VectorArguments.IndexOf(arg);
-                        break;
+                        if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (importData.Name.Index != name.Index) continue;
+
+                        if (importData.Bitmap != null)
+                        {
+                            shaderSamplerArgument.Bitmap = importData.Bitmap;
+                            goto datafound;
+                        }
                     }
-                }
-                if (xform_index == -1)
-                {
-                    Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
-                    xform_index = 0;
-                }
-                else
-                {
-                    shader_arguments[xform_index] = shader_map_arg;
-                }
-                shader_map.XFormArgumentIndex = (sbyte)xform_index;
 
-                //TODO: The rest of the shader_map information
-
-                foreach (var importData in shader_cortana.ImportData)
-                {
-                    if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
-                    if (importData.Name.Index != name.Index) continue;
-
-                    if(importData.Bitmap != null)
+                    foreach (var deafult_option in templateOptions)
                     {
-                        shader_map.Bitmap = importData.Bitmap;
+                        if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
+                        if (deafult_option.Name.Index != name.Index) continue;
+
+                        shaderSamplerArgument.Bitmap = deafult_option.Bitmap;
+
                         goto datafound;
                     }
+
+                    shaderSamplerArguments[rmt2SamplerIndex] = shaderSamplerArgument;
+
+                    datafound:
+                    if (shaderSamplerArgument.Bitmap == null)
+                    {
+                        Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
+                        shaderSamplerArgument.Bitmap = CacheContext.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
+                    }
+                    shaderSamplerArguments[rmt2SamplerIndex] = shaderSamplerArgument;
                 }
 
-                foreach (var deafult_option in template_options)
                 {
-                    if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
-                    if (deafult_option.Name.Index != name.Index) continue;
-
-                    shader_map.Bitmap = deafult_option.Bitmap;
-
-                    goto datafound;
+                    int xform_index = GetExistingXFormArgumentIndex(name, rmt2.VectorArguments);
+                    if (xform_index == -1)
+                    {
+                        Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
+                        xform_index = 0;
+                    }
+                    else
+                    {
+                        var shaderVectorArgument = ProcessArgument(rmt2SamplerArgument, shaderFunctions, templateOptions, shaderCortana);
+                        shaderVectorArguments[xform_index] = shaderVectorArgument;
+                    }
+                    shaderSamplerArgument.XFormArgumentIndex = (sbyte)xform_index;
                 }
-
-                //TODO: Maybe we can do better than this, ie. custom shaders
-
-                //throw new Exception($"Import data not found for {name_str}");
-                
-                datafound:
-                if(shader_map.Bitmap == null)
-                {
-                    Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
-                    shader_map.Bitmap = CacheContext.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
-                }
-                shader_maps[i] = shader_map;
             }
-            shader_properties.ShaderMaps = shader_maps.ToList();
-
-            var shader_functions = new List<RenderMethod.FunctionBlock>();
+            shader_properties.ShaderMaps = shaderSamplerArguments.ToList();
+            
             for (int rmt2ArgumentIndex = 0; rmt2ArgumentIndex < rmt2.VectorArguments.Count; rmt2ArgumentIndex++)
             {
-                if (shader_arguments[rmt2ArgumentIndex] != null) continue;
-                var argument = rmt2.VectorArguments[rmt2ArgumentIndex];
-                var name = argument.Name;
-                var name_str = CacheContext.GetString(name);
+                if (shaderVectorArguments[rmt2ArgumentIndex] != null) continue;
+                var vectorArgument = rmt2.VectorArguments[rmt2ArgumentIndex];
 
-                RenderMethod.ShaderProperty.Argument shader_argument = new RenderMethod.ShaderProperty.Argument();
-
-                float arg0 = 0.0f;
-                float arg1 = 0.0f;
-                float arg2 = 0.0f;
-                float arg3 = 0.0f;
-
-                foreach (var importData in shader_cortana.ImportData)
-                {
-                    if (importData.Name.Index != name.Index) continue;
-
-                    var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
-                    if (argument_data != null)
-                    {
-                        var unknown0A = BitConverter.ToUInt16(argument_data, 0);
-                        var unknown0B = BitConverter.ToUInt16(argument_data, 2);
-
-                        var unknown1 = BitConverter.ToUInt32(argument_data, 20);
-                        var unknown2 = BitConverter.ToUInt32(argument_data, 24);
-                        var unknown3 = BitConverter.ToUInt32(argument_data, 28);
-
-                        switch (importData.Type)
-                        {
-                            case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
-                                arg0 = 1.0f;
-                                arg1 = 1.0f;
-                                arg2 = 0.0f;
-                                arg3 = 0.0f;
-                                break;
-                            case RenderMethodOption.OptionBlock.OptionDataType.Float4:
-                                arg0 = BitConverter.ToSingle(argument_data, 4);
-                                arg1 = BitConverter.ToSingle(argument_data, 8);
-                                arg2 = BitConverter.ToSingle(argument_data, 12);
-                                arg3 = BitConverter.ToSingle(argument_data, 16);
-                                break;
-                            case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
-                                {
-                                    var Iargument1 = BitConverter.ToUInt32(argument_data, 4);
-                                    var Iargument2 = BitConverter.ToUInt32(argument_data, 8);
-                                    var Iargument3 = BitConverter.ToUInt32(argument_data, 12);
-                                    var Iargument4 = BitConverter.ToUInt32(argument_data, 16);
-
-                                    var iblue = argument_data[4];
-                                    var igreen = argument_data[5];
-                                    var ired = argument_data[6];
-                                    var iunusedAlpha = argument_data[7];
-
-                                    var blue = (float)iblue / 255.0f;
-                                    var green = (float)igreen / 255.0f;
-                                    var red = (float)ired / 255.0f;
-                                    var unusedAlpha = (float)iunusedAlpha / 255.0f;
-
-                                    var ialpha = argument_data[16];
-                                    var alpha = (float)ialpha / 255.0f;
-
-                                    arg0 = red;
-                                    arg1 = green;
-                                    arg2 = blue;
-                                    arg3 = alpha;
-                                }
-                                break;
-                            case RenderMethodOption.OptionBlock.OptionDataType.Float:
-                            default:
-                                throw new NotImplementedException();
-                        }
-
-                        Console.WriteLine();
-                    }
-
-                    for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
-                    {
-                        shader_functions.Add(importData.Functions[functionIndex]);
-                    }
-
-                    goto datafound;
-                }
-
-                foreach (var deafult_option in template_options)
-                {
-                    if (deafult_option.Name.Index != name.Index) continue;
-
-                    //TODO: Figure these bad boys out, I think its all just defaults but we should just
-                    // throw a warning if they're not part of the RMDF
-                    // (Don't throw warnings if we're using a custom shader RMDF
-
-                    goto datafound;
-                }
-
-                Console.WriteLine($"Waring: RMCT Conversion couldn't find a argument for {name_str}");
-                datafound:
-
-                //TODO: Maybe we can do better than this, ie. custom shaders
-
-                shader_argument.Values = new float[4];
-                shader_argument.Values[0] = arg0;
-                shader_argument.Values[1] = arg1;
-                shader_argument.Values[2] = arg2;
-                shader_argument.Values[3] = arg3;
-
-                shader_arguments[rmt2ArgumentIndex] = shader_argument;
+                var shaderArgument = ProcessArgument(vectorArgument, shaderFunctions, templateOptions, shaderCortana);
+                shaderVectorArguments[rmt2ArgumentIndex] = shaderArgument;
             }
-            shader_properties.Arguments = shader_arguments.ToList();
-            //shader_properties.Functions = shader_functions;
+            shader_properties.Arguments = shaderVectorArguments.ToList();
+            shader_properties.Functions = shaderFunctions;
 
-            if (shader_cortana.Material.Index == 0)
+            if (shaderCortana.Material.Index == 0)
             {
                 if (CacheContext.StringIdCache.Contains("default_material"))
                 {
-                    shader_cortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
+                    shaderCortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
                 }
             }
 
@@ -282,18 +165,113 @@ namespace TagTool.Commands.Porting
 
         }
 
-        private static void ResetRMT2(RenderMethodTemplate Definition)
+        private int GetExistingXFormArgumentIndex(StringId name, List<RenderMethodTemplate.ShaderArgument> vectorArguments)
         {
-            Definition.DrawModeBitmask = 0;
-            Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+            int xform_index = -1;
+            foreach (var rmt2VectorArgument in vectorArguments)
+            {
+                //NOTE: Shared name between Argumenst and Texture
+                if (rmt2VectorArgument.Name.Index == name.Index)
+                {
+                    xform_index = vectorArguments.IndexOf(rmt2VectorArgument);
+                    break;
+                }
+            }
+            return xform_index;
+        }
 
-            Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
-            Definition.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+        private RenderMethod.ShaderProperty.Argument ProcessArgument(
+            RenderMethodTemplate.ShaderArgument vectorArgument,
+            List<RenderMethod.FunctionBlock> shaderFunctions,
+            List<RenderMethodOption.OptionBlock> templateOptions,
+            ShaderCortana shaderCortana)
+        {
+            RenderMethod.ShaderProperty.Argument shaderArgument = new RenderMethod.ShaderProperty.Argument();
 
-            Definition.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.BooleanArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.SamplerArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            var name = vectorArgument.Name;
+            var nameStr = CacheContext.GetString(name);
+
+            foreach (var importData in shaderCortana.ImportData)
+            {
+                if (importData.Name.Index != name.Index) continue;
+
+                var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
+                if (argument_data != null)
+                {
+                    var unknown0A = BitConverter.ToUInt16(argument_data, 0);
+                    var unknown0B = BitConverter.ToUInt16(argument_data, 2);
+
+                    var unknown1 = BitConverter.ToUInt32(argument_data, 20);
+                    var unknown2 = BitConverter.ToUInt32(argument_data, 24);
+                    var unknown3 = BitConverter.ToUInt32(argument_data, 28);
+
+                    switch (importData.Type)
+                    {
+                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                            shaderArgument.Arg0 = 1.0f;
+                            shaderArgument.Arg1 = 1.0f;
+                            shaderArgument.Arg2 = 0.0f;
+                            shaderArgument.Arg3 = 0.0f;
+                            break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                            shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
+                            shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
+                            shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
+                            shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
+                            break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                            {
+                                var iblue = argument_data[4];
+                                var igreen = argument_data[5];
+                                var ired = argument_data[6];
+                                var iunusedAlpha = argument_data[7];
+
+                                var blue = (float)iblue / 255.0f;
+                                var green = (float)igreen / 255.0f;
+                                var red = (float)ired / 255.0f;
+                                var unusedAlpha = (float)iunusedAlpha / 255.0f;
+
+                                var ialpha = argument_data[16];
+                                var alpha = (float)ialpha / 255.0f;
+
+                                shaderArgument.Arg0 = red;
+                                shaderArgument.Arg1 = green;
+                                shaderArgument.Arg2 = blue;
+                                shaderArgument.Arg3 = alpha;
+                            }
+                            break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    Console.WriteLine();
+                }
+
+                for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
+                {
+                    shaderFunctions.Add(importData.Functions[functionIndex]);
+                }
+
+                goto datafound;
+            }
+
+            foreach (var deafult_option in templateOptions)
+            {
+                if (deafult_option.Name.Index != name.Index) continue;
+
+                //TODO: Figure these bad boys out, I think its all just defaults but we should just
+                // throw a warning if they're not part of the RMDF
+                // (Don't throw warnings if we're using a custom shader RMDF
+
+                goto datafound;
+            }
+
+            //TODO: Maybe we can do better than this, ie. custom shaders
+            Console.WriteLine($"Waring: RMCT Conversion couldn't find a argument for {nameStr}");
+            datafound:
+
+            return shaderArgument;
         }
 
         int GetArgumentIndex(string name, List<RenderMethodTemplate.ShaderArgument> args)
