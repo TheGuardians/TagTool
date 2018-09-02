@@ -101,6 +101,7 @@ namespace TagTool.Commands
                 // Read and parse a command
                 Console.WriteLine();
                 Console.Write("{0}> ", contextStack.GetPath());
+                Console.Title = $"TagTool {contextStack.GetPath()}>";
                 var commandLine = Console.ReadLine();
                 if (commandLine == null)
                     break;
