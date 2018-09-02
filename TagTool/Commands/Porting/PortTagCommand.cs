@@ -16,16 +16,17 @@ namespace TagTool.Commands.Porting
 {
     public partial class PortTagCommand : Command
     {
+        private const PortingFlags DefaultFlags = PortingFlags.Recursive | PortingFlags.Scripts | PortingFlags.MatchShaders;
+
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
         private RenderGeometryConverter GeometryConverter { get; }
+        private PortingFlags Flags { get; set; }
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
-
-        private PortingFlags Flags { get; set; } = PortingFlags.Recursive | PortingFlags.Scripts | PortingFlags.MatchShaders;
 
         private static readonly string[] DoNotReplaceGroups = new[]
         {
@@ -95,6 +96,8 @@ namespace TagTool.Commands.Porting
             if (args.Count < 1)
                 return false;
 
+            Flags = DefaultFlags;
+
             var flagNames = Enum.GetNames(typeof(PortingFlags)).Select(name => name.ToLower());
             var flagValues = Enum.GetValues(typeof(PortingFlags)) as PortingFlags[];
 
@@ -123,7 +126,10 @@ namespace TagTool.Commands.Porting
                     default:
                         {
                             if (!flagNames.Contains(arg))
+                            {
+                                Flags = DefaultFlags;
                                 throw new FormatException($"Invalid {typeof(PortingFlags).FullName}: {args[0]}");
+                            }
 
                             for (var i = 0; i < flagNames.Count(); i++)
                                 if (arg == flagNames.ElementAt(i))
@@ -149,8 +155,13 @@ namespace TagTool.Commands.Porting
                     using (var cacheFileStream = CacheContext.OpenTagCacheRead())
                         cacheFileStream.CopyTo(cacheStream);
 
+                var oldFlags = Flags;
+
                 foreach (var blamTag in ParseLegacyTag(args[0]))
+                {
                     ConvertTag(cacheStream, resourceStreams, blamTag);
+                    Flags = oldFlags;
+                }
 
                 if (Flags.HasFlag(PortingFlags.Memory))
                     using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
