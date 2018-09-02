@@ -14,6 +14,7 @@ using TagTool.Audio;
 using System.Threading;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TagTool.Commands.Porting
 {
@@ -107,12 +108,11 @@ namespace TagTool.Commands.Porting
                 return null;
             }
 
-            string audioFile = useCache ? permutationMP3Cache : "Temp\\permutation";
-
+            string audioFile = permutationMP3Cache;
             string tempXMA = $"{audioFile}.xma";
             string tempWAV = $"{audioFile}.wav";
-            string fixedWAV = $"{audioFile}Truncated.wav";
-            string loopMP3 = $"{audioFile}Truncated.mp3";
+            string fixedWAV = $"{audioFile}_truncated.wav";
+            string loopMP3 = $"{audioFile}_truncated.mp3";
             string tempMP3 = $"{audioFile}.mp3";
 
             //If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
@@ -140,119 +140,102 @@ namespace TagTool.Commands.Porting
 
             //try
             //{
-                using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
+            using (EndianWriter output = new EndianWriter(File.OpenWrite(tempXMA), EndianFormat.BigEndian))
+            {
+                output.Write(CreateXMAHeader(fileSize, channelCount, sampleRate.GetSampleRateHz()));
+                output.Format = EndianFormat.LittleEndian;
+                output.Write(buffer, index, count);
+            }
+
+            if (channelCount == 1 || channelCount == 2)
+            {
+                //Use towav as the conversion is better
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\towav.exe")
                 {
-                    output.Write(CreateXMAHeader(fileSize, channelCount, sampleRate.GetSampleRateHz()));
-                    output.Format = EndianFormat.LittleEndian;
-                    output.Write(buffer, index, count);
-                }
+                    Arguments = Path.GetFileName(tempXMA),
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false,
+                    WorkingDirectory = Path.GetDirectoryName(tempXMA)
+                };
+                Process towav = Process.Start(info);
+                towav.WaitForExit();
+                //if(!use_cache)
+                //    File.Move(@"permutation.wav", tempWAV);
 
-                if (channelCount == 1 || channelCount == 2)
+                //towav wav header requires a modification to work with mp3loop
+
+                byte[] WAVstream = File.ReadAllBytes(tempWAV);
+                int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
+
+                //Loop will require further testing without the removed bits.
+
+                if (!loop)
                 {
-                    //Use towav as the conversion is better
-                    ProcessStartInfo info = new ProcessStartInfo(@"Tools\towav.exe")
-                    {
-                        Arguments = Path.GetFileName(tempXMA),
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        UseShellExecute = false,
-                        RedirectStandardError = false,
-                        RedirectStandardOutput = false,
-                        RedirectStandardInput = false,
-                        WorkingDirectory = Path.GetDirectoryName(tempXMA)
-                    };
-                    Process towav = Process.Start(info);
-                    towav.WaitForExit();
-                    //if(!use_cache)
-                    //    File.Move(@"permutation.wav", tempWAV);
-
-                    //towav wav header requires a modification to work with mp3loop
-
-                    byte[] WAVstream = File.ReadAllBytes(tempWAV);
-                    int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
-
-                    //Loop will require further testing without the removed bits.
-
-                    if (!loop)
-                    {
-                        var WAVFileSize = WAVstream.Length - 0x2C - removeBeginning;
-                        using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
-                        {
-                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
-                            output.Format = EndianFormat.LittleEndian;
-                            output.WriteBlock(WAVstream, 0x2C + removeBeginning, WAVFileSize);
-                        }
-                    }
-                    else
-                    {
-                        var WAVFileSize = WAVstream.Length - 0x2C;
-                        using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
-                        {
-                            output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
-                            output.Format = EndianFormat.LittleEndian;
-                            output.WriteBlock(WAVstream, 0x2C, WAVFileSize);
-                        }
-                    }
-                }
-                else
-                {
-                    ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
-                    {
-                        Arguments = "-i " + tempXMA + " " + tempWAV,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        UseShellExecute = false,
-                        RedirectStandardError = false,
-                        RedirectStandardOutput = false,
-                        RedirectStandardInput = false
-                    };
-                    Process ffmpeg = Process.Start(info);
-                    ffmpeg.WaitForExit();
-
-                    int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
-                    uint size = (uint)((new FileInfo(tempWAV).Length) - removeBeginning - 78);       //header size is 78 bytes.
-                    byte[] WAVstream = File.ReadAllBytes(tempWAV);
-                    var WAVFileSize = WAVstream.Length - 0x4E;
+                    var WAVFileSize = WAVstream.Length - 0x2C - removeBeginning;
                     using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
                     {
                         output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
-                        output.WriteBlock(WAVstream, 0x4E + removeBeginning, (int)size);
-                    }
-                }
-
-                //Convert to MP3 using ffmpeg or mp3loop
-
-                if (loop)
-                {
-                    if (channelCount >= 3)
-                    {
-                        //MP3Loop doesn't handle WAV files with more than 2 channels
-                        //fixedWAV now becomes the main audio file, headerless.
-                        tempMP3 = fixedWAV;
-                        fixedWAV = "~";
-                    }
-                    else
-                    {
-                        ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
-                        {
-                            Arguments = fixedWAV,
-                            CreateNoWindow = true,
-                            WindowStyle = ProcessWindowStyle.Hidden,
-                            UseShellExecute = false,
-                            RedirectStandardError = false,
-                            RedirectStandardOutput = false,
-                            RedirectStandardInput = false
-                        };
-                        Process mp3loop = Process.Start(info);
-                        mp3loop.WaitForExit();
-                        tempMP3 = loopMP3;
+                        output.Format = EndianFormat.LittleEndian;
+                        output.WriteBlock(WAVstream, 0x2C + removeBeginning, WAVFileSize);
                     }
                 }
                 else
                 {
-                    ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+                    var WAVFileSize = WAVstream.Length - 0x2C;
+                    using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
                     {
-                        Arguments = "-i " + fixedWAV + " -q:a 0 " + tempMP3, //No imposed bitrate for now
+                        output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
+                        output.Format = EndianFormat.LittleEndian;
+                        output.WriteBlock(WAVstream, 0x2C, WAVFileSize);
+                    }
+                }
+            }
+            else
+            {
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+                {
+                    Arguments = "-i " + tempXMA + " " + tempWAV,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process ffmpeg = Process.Start(info);
+                ffmpeg.WaitForExit();
+
+                int removeBeginning = (int)(1152 * channelCount * ((float)sampleRate.GetSampleRateHz() / 44100));
+                uint size = (uint)((new FileInfo(tempWAV).Length) - removeBeginning - 78);       //header size is 78 bytes.
+                byte[] WAVstream = File.ReadAllBytes(tempWAV);
+                var WAVFileSize = WAVstream.Length - 0x4E;
+                using (EndianWriter output = new EndianWriter(File.OpenWrite(fixedWAV), EndianFormat.BigEndian))
+                {
+                    output.WriteBlock(CreateWAVHeader(WAVFileSize, channelCount, sampleRate.GetSampleRateHz()));
+                    output.WriteBlock(WAVstream, 0x4E + removeBeginning, (int)size);
+                }
+            }
+
+            //Convert to MP3 using ffmpeg or mp3loop
+
+            if (loop)
+            {
+                if (channelCount >= 3)
+                {
+                    //MP3Loop doesn't handle WAV files with more than 2 channels
+                    //fixedWAV now becomes the main audio file, headerless.
+                    tempMP3 = fixedWAV;
+                    fixedWAV = "~";
+                }
+                else
+                {
+                    ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
+                    {
+                        Arguments = fixedWAV,
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         UseShellExecute = false,
@@ -260,19 +243,36 @@ namespace TagTool.Commands.Porting
                         RedirectStandardOutput = false,
                         RedirectStandardInput = false
                     };
-                    Process ffmpeg = Process.Start(info);
-                    ffmpeg.WaitForExit();
-
-                    //Remove MP3 header
-
-                    uint size = (uint)new FileInfo(tempMP3).Length - 0x2D;
-                    byte[] MP3stream = File.ReadAllBytes(tempMP3);
-
-                    using (Stream output = new FileStream(tempMP3, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        output.Write(MP3stream, 0x2D, (int)size);
-                    }
+                    Process mp3loop = Process.Start(info);
+                    mp3loop.WaitForExit();
+                    tempMP3 = loopMP3;
                 }
+            }
+            else
+            {
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+                {
+                    Arguments = "-i " + fixedWAV + " -q:a 0 " + tempMP3, //No imposed bitrate for now
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process ffmpeg = Process.Start(info);
+                ffmpeg.WaitForExit();
+
+                //Remove MP3 header
+
+                uint size = (uint)new FileInfo(tempMP3).Length - 0x2D;
+                byte[] MP3stream = File.ReadAllBytes(tempMP3);
+
+                using (Stream output = new FileStream(tempMP3, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    output.Write(MP3stream, 0x2D, (int)size);
+                }
+            }
             //}
             //catch (Exception e)
             //{
@@ -280,12 +280,11 @@ namespace TagTool.Commands.Porting
             //}
             //finally
             //{
-                if (File.Exists(tempXMA))
-                    File.Delete(tempXMA);
-                if (File.Exists(tempWAV))
-                    File.Delete(tempWAV);
-                if (File.Exists(fixedWAV))
-                    File.Delete(fixedWAV);
+
+            Tools.AsyncJobManager.CleanupFile(tempXMA, 30000);
+            Tools.AsyncJobManager.CleanupFile(tempWAV, 30000);
+            Tools.AsyncJobManager.CleanupFile(fixedWAV, 30000);
+
             //}
             return tempMP3;
         }
@@ -300,22 +299,100 @@ namespace TagTool.Commands.Porting
             return 10.0f * (float)Math.Log10(ratio);
         }
 
-        static string ComputeSha256Hash(string rawData)
+        static string GetTagFileFriendlyName(string tagname)
         {
-            // Create a SHA256   
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                // ComputeHash - returns byte array  
-                byte[] bytes = sha256Hash.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+            var pieces = tagname.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries);
+            var filename = String.Join("_", pieces);
+            return filename;
+        }
 
-                // Convert byte array to a string   
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
+        class ConvertSoundResult
+        {
+            public PermutationChunk PermutationChunk { get; internal set; }
+            public byte[] PermutationBuffer { get; internal set; }
+            public Permutation Permutation { get; internal set; }
+        }
+
+        private ConvertSoundResult ConvertSoundTask(
+            int i,
+            Stream cacheStream,
+            Dictionary<ResourceLocation, Stream> resourceStreams,
+            Sound sound,
+            PitchRange pitchRange,
+            Permutation permutation,
+            int permutationIndex,
+            byte[] resourceData,
+            int channelCount,
+            string basePermutationMP3Cache,
+            bool useCache
+            )
+        {
+            ConvertSoundResult result = new ConvertSoundResult();
+
+            //
+            // Get size and append MP3
+            //
+
+            int chunkIndex = BlamSoundGestalt.Permutations[permutationIndex].FirstPermutationChunkIndex;
+            int chunkCount = BlamSoundGestalt.Permutations[permutationIndex].PermutationChunkCount;
+
+            int begin = (int)BlamSoundGestalt.PermutationChunks[chunkIndex].Offset;
+            int count = (int)(BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Offset + BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Size + 65536 * BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Unknown1) - begin;
+
+            //
+            // Convert XMA permutation to MP3 headerless
+            //
+
+            var loop = false;
+            if (((ushort)sound.Flags & (ushort)Sound.FlagsValue.FitToAdpcmBlockSize) != 0)
+            {
+                loop = true;
             }
+
+            string permutationMP3 = $"{basePermutationMP3Cache}_{i}";
+            bool exists = !File.Exists($"{permutationMP3}.mp3");
+            if ((permutationMP3 != null && exists) || !useCache)
+            {
+                permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, useCache, permutationMP3);
+            }
+            else
+            {
+                permutationMP3 += ".mp3";
+            }
+
+            uint permutationChunkSize = 0;
+
+            //
+            // Copy the permutation mp3 to the overall mp3
+            //
+
+            byte[] permBuffer = File.ReadAllBytes(permutationMP3);
+            if (!useCache)
+            {
+                if (File.Exists(permutationMP3))
+                    File.Delete(permutationMP3);
+            }
+
+            permutationChunkSize = (uint)permBuffer.LongLength;
+
+            var chunkSize = (ushort)(permutationChunkSize & ushort.MaxValue);
+
+            var permutationChunk = new PermutationChunk
+            {
+                Offset = permutationChunkSize - permutationChunkSize,
+                Size = chunkSize,
+                Unknown2 = (byte)((permutationChunkSize - chunkSize) / 65536),
+                Unknown3 = 4,
+                RuntimeIndex = -1,
+                UnknownA = 0,
+                UnknownSize = 0
+            };
+
+            result.Permutation = permutation;
+            result.PermutationBuffer = permBuffer;
+            result.PermutationChunk = permutationChunk;
+
+            return result;
         }
 
         private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
@@ -360,12 +437,12 @@ namespace TagTool.Commands.Porting
 
             sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
 
-            Directory.CreateDirectory(@"Temp");
-            string soundMP3 = @"Temp\soundMP3.mp3";
-            if (File.Exists(soundMP3))
-                File.Delete(soundMP3);
+            //Directory.CreateDirectory(@"Temp");
+            //string soundMP3 = @"Temp\soundMP3.mp3";
+            //if (File.Exists(soundMP3))
+            //    File.Delete(soundMP3);
 
-
+            IEnumerable<byte> mp3_data_aggregate = new byte[0];
             uint LargestSampleCount = 0;
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
@@ -477,8 +554,19 @@ namespace TagTool.Commands.Porting
 
                 permutationIndex = firstPermutationIndex;
                 bool useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
-                var basePermutationMP3Cache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null ? Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, ComputeSha256Hash(blamTag_Name))  : null;
 
+                string basePermutationMP3Cache;
+                if(Sounds.UseAudioCacheCommand.AudioCacheDirectory != null)
+                {
+                    basePermutationMP3Cache = Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, GetTagFileFriendlyName(blamTag_Name));
+                }
+                else
+                {
+                    basePermutationMP3Cache = Path.Combine("Temp", GetTagFileFriendlyName(blamTag_Name));
+                }
+
+                Task<ConvertSoundResult>[] tasks = new Task<ConvertSoundResult>[permutationCount];
+                Permutation[] permutations = new Permutation[permutationCount];
                 for (i = 0; i < permutationCount; i++)
                 {
                     // For the permutation conversion to work properly, we must go through the permutation in chunk order.
@@ -490,82 +578,42 @@ namespace TagTool.Commands.Porting
                     permutation.PermutationNumber = (uint)permutationList[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
 
-                    //
-                    // Get size and append MP3
-                    //
-
-                    chunkIndex = BlamSoundGestalt.Permutations[permutationIndex].FirstPermutationChunkIndex;
-                    int chunkCount = BlamSoundGestalt.Permutations[permutationIndex].PermutationChunkCount;
-
-                    int begin = (int)BlamSoundGestalt.PermutationChunks[chunkIndex].Offset;
-                    int count = (int)(BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Offset + BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Size + 65536 * BlamSoundGestalt.PermutationChunks[chunkIndex + chunkCount - 1].Unknown1) - begin;
-
-                    //
-                    // Convert XMA permutation to MP3 headerless
-                    //
-
-                    var loop = false;
-                    if (((ushort)sound.Flags & (ushort)Sound.FlagsValue.FitToAdpcmBlockSize) != 0)
+                    permutations[i] = permutation;
+                }
+                for (i = 0; i < permutationCount; i++)
+                {
+                    Task<ConvertSoundResult> task = new Task<ConvertSoundResult>((_i) =>
                     {
-                        loop = true;
-                    }
+                        var _currentIndex = (int)_i;
 
-                    string permutationMP3 = useCache ? $"{basePermutationMP3Cache}_{i}" : null;
-                    bool exists = !File.Exists($"{permutationMP3}.mp3");
-                    if ((permutationMP3 != null && exists) || !useCache)
-                    {
-                        permutationMP3 = ConvertSoundPermutation(resourceData, begin, count, count + 52, (byte)channelCount, sound.SampleRate, loop, useCache, permutationMP3);
-                    }
-                    else
-                    {
-                        permutationMP3 += ".mp3";
-                    }
+                        return ConvertSoundTask(
+                            _currentIndex,
+                            cacheStream,
+                            resourceStreams,
+                            sound,
+                            pitchRange,
+                            permutations[_currentIndex],
+                            permutationIndex,
+                            resourceData,
+                            channelCount,
+                            basePermutationMP3Cache,
+                            useCache
+                            );
+                    }, i);
+                    task.Start();
+                    tasks[i] = task;
+                }
+                Task.WaitAll(tasks);
+                for (i = 0; i < permutationCount; i++)
+                {
+                    var task = tasks[i];
+                    var result = task.Result;
 
-                    uint permutationChunkSize = 0;
+                    // deferred setting
+                    result.Permutation.PermutationChunks.Add(result.PermutationChunk);
+                    pitchRange.Permutations.Add(result.Permutation);
 
-                    //
-                    // Copy the permutation mp3 to the overall mp3
-                    //
-
-                    byte[] permBuffer = File.ReadAllBytes(permutationMP3);
-                    try
-                    {
-                        using (Stream output = new FileStream(soundMP3, FileMode.Append, FileAccess.Write, FileShare.None))
-                        {
-                            output.Write(permBuffer, 0, permBuffer.Count());
-                            permutationChunkSize = (uint)permBuffer.Count();
-                            output.Dispose();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("{0} Exception caught. Failed to write mp3 to file", e);
-                    }
-
-                    if(!useCache)
-                    {
-                        if (File.Exists(permutationMP3))
-                            File.Delete(permutationMP3);
-                    }
-
-                    var chunkSize = (ushort)(permutationChunkSize & ushort.MaxValue);
-
-                    var permutationChunk = new PermutationChunk
-                    {
-                        Offset = (uint)new FileInfo(soundMP3).Length - permutationChunkSize,
-                        Size = chunkSize,
-                        Unknown2 = (byte)((permutationChunkSize - chunkSize) / 65536),
-                        Unknown3 = 4,
-                        RuntimeIndex = -1,
-                        UnknownA = 0,
-                        UnknownSize = 0
-                    };
-
-                    permutation.PermutationChunks.Add(permutationChunk);
-
-                    pitchRange.Permutations.Add(permutation);
-
-                    permutationIndex++;
+                    mp3_data_aggregate = mp3_data_aggregate.Concat(result.PermutationBuffer);
                 }
             }
 
@@ -701,61 +749,51 @@ namespace TagTool.Commands.Porting
                 }
             };
 
-            using (var dataStream = File.OpenRead(soundMP3))
+
+            var data = mp3_data_aggregate.ToArray();
+
+            var resourceContext = new ResourceSerializationContext(sound.Resource);
+            CacheContext.Serializer.Serialize(resourceContext,
+                new SoundResourceDefinition
+                {
+                    Data = new TagData(data.Length, new CacheAddress(CacheAddressType.Resource, 0))
+                });
+
+            var definitionFixup = new TagResource.ResourceFixup()
             {
-                var resourceContext = new ResourceSerializationContext(sound.Resource);
-                CacheContext.Serializer.Serialize(resourceContext,
-                    new SoundResourceDefinition
-                    {
-                        Data = new TagData(soundMP3.Length, new CacheAddress(CacheAddressType.Resource, 0))
-                    });
+                BlockOffset = 12,
+                Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
+            };
+            sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
-                var definitionFixup = new TagResource.ResourceFixup()
-                {
-                    BlockOffset = 12,
-                    Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
-                };
-                sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
+            sound.Resource.ChangeLocation(ResourceLocation.Audio);
+            var resource = sound.Resource;
 
-                sound.Resource.ChangeLocation(ResourceLocation.Audio);
-                var resource = sound.Resource;
+            if (resource == null)
+                throw new ArgumentNullException("resource");
 
-                if (resource == null)
-                    throw new ArgumentNullException("resource");
+            var cache = CacheContext.GetResourceCache(ResourceLocation.Audio);
 
-                if (!dataStream.CanRead)
-                    throw new ArgumentException("The input stream is not open for reading", "dataStream");
+            if (!resourceStreams.ContainsKey(ResourceLocation.Audio))
+            {
+                resourceStreams[ResourceLocation.Audio] = Flags.HasFlag(PortingFlags.Memory) ?
+                    new MemoryStream() :
+                    (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Audio);
 
-                var cache = CacheContext.GetResourceCache(ResourceLocation.Audio);
-
-                if (!resourceStreams.ContainsKey(ResourceLocation.Audio))
-                {
-                    resourceStreams[ResourceLocation.Audio] = Flags.HasFlag(PortingFlags.Memory) ?
-                        new MemoryStream() :
-                        (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Audio);
-
-                    if (Flags.HasFlag(PortingFlags.Memory))
-                        using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
-                            resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
-                }
-
-                var dataSize = (int)(dataStream.Length - dataStream.Position);
-                var data = new byte[dataSize];
-                dataStream.Read(data, 0, dataSize);
-
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Audio], data, out uint compressedSize);
-                resource.Page.CompressedBlockSize = compressedSize;
-                resource.Page.UncompressedBlockSize = (uint)dataSize;
-                resource.DisableChecksum();
-
-                for (int i = 0; i < 4; i++)
-                {
-                    sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
-                }
+                if (Flags.HasFlag(PortingFlags.Memory))
+                    using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Audio))
+                        resourceStream.CopyTo(resourceStreams[ResourceLocation.Audio]);
             }
 
-            if (File.Exists(soundMP3))
-                File.Delete(soundMP3);
+            resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Audio], data, out uint compressedSize);
+            resource.Page.CompressedBlockSize = compressedSize;
+            resource.Page.UncompressedBlockSize = (uint)data.Length;
+            resource.DisableChecksum();
+
+            for (int i = 0; i < 4; i++)
+            {
+                sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
+            }
 
             return sound;
         }

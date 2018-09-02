@@ -705,6 +705,7 @@
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
+    <Compile Include="Tools\AsyncJobManager.cs" />
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
