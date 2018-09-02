@@ -314,6 +314,7 @@
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ResourceDataCommand.cs" />
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
+    <Compile Include="Commands\Scenarios\DumpScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Shaders\CompileCommand.cs" />
