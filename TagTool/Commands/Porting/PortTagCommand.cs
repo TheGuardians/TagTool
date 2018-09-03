@@ -482,10 +482,10 @@ namespace TagTool.Commands.Porting
                     scenario.SandboxWeapons.Clear();
                     break;
 
-                    /*case ScenarioStructureBsp bsp:
-                        foreach (var instance in bsp.InstancedGeometryInstances)
-                            instance.Name = StringId.Invalid;
-                        break;*/
+                case ScenarioStructureBsp bsp: // named instanced geometry instances, useless unless we decompile bsp's
+                    foreach (var instance in bsp.InstancedGeometryInstances)
+                        instance.Name = StringId.Invalid;
+                    break;
             }
             
             //
