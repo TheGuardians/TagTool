@@ -40,6 +40,8 @@ namespace TagTool.Tools
         {
             Schedule((_timeoutMs) => {
 
+                Exception previous_error = null;
+                bool success = false;
                 var time = Stopwatch.StartNew();
                 while (time.ElapsedMilliseconds < (int)_timeoutMs)
                 {
@@ -47,10 +49,12 @@ namespace TagTool.Tools
                     {
                         if (File.Exists(filename as string))
                             File.Delete(filename as string);
+                        success = true;
                         break;
                     }
                     catch (IOException e)
                     {
+                        previous_error = e;
                         // access error
                         if (e.HResult != -2147024864)
                         {
@@ -62,9 +66,10 @@ namespace TagTool.Tools
                         }
                     }
                 }
-                // final iteration just throw normally
-                if (File.Exists(filename as string))
-                    File.Delete(filename as string);
+                if(!success)
+                {
+                    throw previous_error;
+                }
 
             }, timeoutMs);
         }
