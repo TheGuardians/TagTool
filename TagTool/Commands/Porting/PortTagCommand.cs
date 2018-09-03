@@ -9,6 +9,7 @@ using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.Serialization;
+using TagTool.Shaders;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
@@ -25,7 +26,7 @@ namespace TagTool.Commands.Porting
 
         private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
+        private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
         private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
 
         private static readonly string[] DoNotReplaceGroups = new[]
@@ -62,7 +63,7 @@ namespace TagTool.Commands.Porting
             base(true,
 
                 "PortTag",
-                
+
                 "Ports a tag from the current cache file. Options are:" + Environment.NewLine +
                 "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, " + 
                 "NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
@@ -120,9 +121,9 @@ namespace TagTool.Commands.Porting
                         Flags &= ~PortingFlags.MatchShaders;
                         break;
 
-					case "replace":
-						Flags |= PortingFlags.Replace;
-						break;
+                    case "replace":
+                        Flags |= PortingFlags.Replace;
+                        break;
 
                     default:
                         {
@@ -141,7 +142,7 @@ namespace TagTool.Commands.Porting
 
                 args.RemoveAt(0);
             }
-            
+
             var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
             //
@@ -205,7 +206,7 @@ namespace TagTool.Commands.Porting
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
             var tagIdentifiers = tagSpecifier.Split('.');
-            
+
             if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
@@ -213,13 +214,13 @@ namespace TagTool.Commands.Porting
 
             List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
 
-			// find the CacheFile.IndexItem(s)
-			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
-				item => item != null && groupTag == item.GroupTag);
-			else result.Add( BlamCache.IndexItems.Find(
-				item => item != null && groupTag == item.GroupTag && tagName == item.Name));
+            // find the CacheFile.IndexItem(s)
+            if (tagName == "*") result = BlamCache.IndexItems.FindAll(
+                item => item != null && groupTag == item.GroupTag);
+            else result.Add(BlamCache.IndexItems.Find(
+                item => item != null && groupTag == item.GroupTag && tagName == item.Name));
 
-			if (result.Count == 0)
+            if (result.Count == 0)
                 throw new Exception($"Invalid tag name: {tagSpecifier}");
 
             return result;
@@ -232,9 +233,9 @@ namespace TagTool.Commands.Porting
             try
             {
 #endif
-                var oldFlags = Flags;
-                result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
-                Flags = oldFlags;
+            var oldFlags = Flags;
+            result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
+            Flags = oldFlags;
 #if !DEBUG
             }
             catch (Exception e)
@@ -272,9 +273,35 @@ namespace TagTool.Commands.Porting
                     return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
                 case "rmcs": // there are no rmcs tags in ms23, disable completely for now
-                case "rmct": // Cortana shaders have no example in HO, they need a real port
+
                 case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
+
+                    //TODO: Someday we might be able to generate these, but for now lets just use the standard vertex shaders
+                case "glvs":
+                    return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
+                case "glps":
+                    return CacheContext.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
+                case "rmct":
+                    if(!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
+                    {
+                        return CacheContext.GetTag<Shader>(@"shaders\invalid");
+                    }
+                    break;
+                case "rmt2":
+                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
+                    {
+                        // discard cortana shaders
+                        if (blamTag.Name.ToLower().Contains("cortana_template"))
+                        {
+                            if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
+                                return rmt2Instance;
+
+                            return null; // This will be generated in the shader post
+                        }
+                    }
+                    // unsupported shaders use default behavior
+                    break;
 
                 case "rmhg" when Flags.HasFlag(PortingFlags.NoRmhg): // rmhg have register indexing issues currently
                     if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
@@ -429,7 +456,7 @@ namespace TagTool.Commands.Porting
 
             replacedTags.Add(blamTag.Name);
             ReplacedTags[groupTag] = replacedTags;
-            
+
             //
             // Allocate Eldorado Tag
             //
@@ -471,8 +498,8 @@ namespace TagTool.Commands.Porting
 
                 case Scenario scenario when Flags.HasFlag(PortingFlags.NoSquads):
                     scenario.Squads = new List<Scenario.Squad>();
-					break;
-				case Scenario scenario when Flags.HasFlag(PortingFlags.NoForgePalette):
+                    break;
+                case Scenario scenario when Flags.HasFlag(PortingFlags.NoForgePalette):
                     scenario.SandboxEquipment.Clear();
                     scenario.SandboxGoalObjects.Clear();
                     scenario.SandboxScenery.Clear();
@@ -487,7 +514,7 @@ namespace TagTool.Commands.Porting
                         instance.Name = StringId.Invalid;
                     break;
             }
-            
+
             //
             // Perform automatic conversion on the Blam tag definition
             //
@@ -504,7 +531,7 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
                         sefc.GlobalHiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
-                        
+
                         foreach (var screenEffect in sefc.ScreenEffects)
                             screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
@@ -515,7 +542,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-				case Bitmap bitm:
+                case Bitmap bitm:
                     blamDefinition = ConvertBitmap(bitm, resourceStreams);
                     break;
 
@@ -548,10 +575,10 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
-					//foreach (var even in effect.Events)
-						//foreach (var particleSystem in even.ParticleSystems)
-							//particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
-					break;
+                    //foreach (var even in effect.Events)
+                    //foreach (var particleSystem in even.ParticleSystems)
+                    //particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
+                    break;
 
                 case Globals matg:
                     blamDefinition = ConvertGlobals(matg, cacheStream);
@@ -595,7 +622,7 @@ namespace TagTool.Commands.Porting
                 case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
                     break;
-                    
+
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);
                     break;
@@ -619,7 +646,7 @@ namespace TagTool.Commands.Porting
                 case SkyAtmParameters skya:
                     // Decrease secondary fog intensity (it's quite sickening in ms23)
                     // foreach (var atmosphere in skya.AtmosphereProperties)
-                        // atmosphere.FogIntensity2 /= 36.0f;
+                    // atmosphere.FogIntensity2 /= 36.0f;
                     break;
 
                 case Sound sound:
@@ -645,17 +672,21 @@ namespace TagTool.Commands.Porting
                 // Fix shotgun reloading
                 case Weapon weapon when blamTag.Name == "objects\\weapons\\rifle\\shotgun\\shotgun":
                     weapon.Unknown24 = 1 << 16;
-					break;
-				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
+                    break;
+                case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
                     foreach (var attach in weapon.Attachments)
-                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                        attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                    break;
+
+                case ShaderCortana shader_cortana:
+                    ConvertShaderCortana(shader_cortana, cacheStream, resourceStreams);
                     break;
             }
 
             //
             // Finalize and serialize the new ElDorado tag definition
             //
-            
+
             if (blamDefinition == null) //If blamDefinition is null, return null tag.
             {
                 CacheContext.TagNames.Remove(edTag.Index);
@@ -731,18 +762,18 @@ namespace TagTool.Commands.Porting
                         return ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(i => i.ID == ((CachedTagInstance)data).Index));
                     }
 
-				case CollisionMoppCode collisionMopp:
-					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-					return collisionMopp;
+                case CollisionMoppCode collisionMopp:
+                    collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
+                    return collisionMopp;
 
-				case DamageReportingType damageReportingType:
-					return ConvertDamageReportingType(damageReportingType);
+                case DamageReportingType damageReportingType:
+                    return ConvertDamageReportingType(damageReportingType);
 
-				case GameObjectType gameObjectType:
-					return ConvertGameObjectType(gameObjectType);
+                case GameObjectType gameObjectType:
+                    return ConvertGameObjectType(gameObjectType);
 
-				case ObjectTypeFlags objectTypeFlags:
-					return ConvertObjectTypeFlags(objectTypeFlags);
+                case ObjectTypeFlags objectTypeFlags:
+                    return ConvertObjectTypeFlags(objectTypeFlags);
 
                 case BipedPhysicsFlags bipedPhysicsFlags:
                     return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
@@ -760,11 +791,11 @@ namespace TagTool.Commands.Porting
                     return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 
                 case ScenarioObjectType scenarioObjectType:
-					return ConvertScenarioObjectType(scenarioObjectType);
+                    return ConvertScenarioObjectType(scenarioObjectType);
 
-				case SoundClass soundClass:
-					return soundClass.ConvertSoundClass(BlamCache.Version);
-			}
+                case SoundClass soundClass:
+                    return soundClass.ConvertSoundClass(BlamCache.Version);
+            }
 
             if (type.IsArray)
                 return ConvertArray(cacheStream, resourceStreams, (Array)data, definition, blamTagName);
@@ -835,15 +866,15 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
-			{
-				while (enumerator.Next())
-				{
-					var oldValue = enumerator.Field.GetValue(data);
-					var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-					enumerator.Field.SetValue(data, newValue);
-				}
-			}
+            using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
+            {
+                while (enumerator.Next())
+                {
+                    var oldValue = enumerator.Field.GetValue(data);
+                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                    enumerator.Field.SetValue(data, newValue);
+                }
+            }
             return data;
         }
 
@@ -910,7 +941,7 @@ namespace TagTool.Commands.Porting
 
             if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
                 throw new NotSupportedException(value ?? CacheContext.Version.ToString());
-            
+
             return damageReportingType;
         }
 

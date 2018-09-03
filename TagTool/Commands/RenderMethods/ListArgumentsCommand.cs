@@ -37,11 +37,11 @@ namespace TagTool.Commands.RenderMethods
                 using (var cacheStream = CacheContext.OpenTagCacheRead())
                     template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                for (var i = 0; i < template.Arguments.Count; i++)
+                for (var i = 0; i < template.VectorArguments.Count; i++)
                 {
                     Console.WriteLine("");
 
-                    var argumentName = CacheContext.GetString(template.Arguments[i].Name);
+                    var argumentName = CacheContext.GetString(template.VectorArguments[i].Name);
                     var argumentValue = new RealQuaternion(property.Arguments[i].Values);
 
                     Console.WriteLine(string.Format("{0}:", argumentName));

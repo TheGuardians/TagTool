@@ -42,9 +42,9 @@ namespace TagTool.Commands.RenderMethods
                 using (var cacheStream = CacheContext.OpenTagCacheRead())
                     template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
-                for (var i = 0; i < template.ShaderMaps.Count; i++)
+                for (var i = 0; i < template.SamplerArguments.Count; i++)
                 {
-                    var mapTemplate = template.ShaderMaps[i];
+                    var mapTemplate = template.SamplerArguments[i];
 
                     Console.Write(string.Format("Please enter the {0} index: ", CacheContext.GetString(mapTemplate.Name)));
 
@@ -59,8 +59,8 @@ namespace TagTool.Commands.RenderMethods
             }
 
             foreach (var import in Definition.ImportData)
-                if (shaderMaps.ContainsKey(import.MaterialType))
-                    import.Bitmap = shaderMaps[import.MaterialType];
+                if (shaderMaps.ContainsKey(import.Name))
+                    import.Bitmap = shaderMaps[import.Name];
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
                 CacheContext.Serialize(cacheStream, Tag, Definition);

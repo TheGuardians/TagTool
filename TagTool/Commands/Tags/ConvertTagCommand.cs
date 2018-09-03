@@ -551,17 +551,22 @@ namespace TagTool.Commands.Tags
 
         private void FixRenderMethodTemplate(RenderMethodTemplate template)
         {
-            FixDrawModeList(template.DrawModes);
-            if (template.DrawModes.Count > 18)
-                template.DrawModes[18].PixelShaderMode = RenderMethodTemplate.ShaderMode.Default; // Use default z-only
+            //DrawMode.PixelShaderMode and DrawMode.VertexShaderMode are incorrect.
+            // RMT2.DrawModes is an indirection table of packed 10_6 shorts from
+            // the current drawmode index to the register offsets table
+            throw new NotImplementedException();
 
-            // Rebuild the bitmask of valid draw modes
-            template.DrawModeBitmask = 0;
-            for (var i = 0; i < template.DrawModes.Count; i++)
-            {
-                if (template.DrawModes[i].PixelShaderMode != RenderMethodTemplate.ShaderMode.Default)
-                    template.DrawModeBitmask |= (RenderMethodTemplate.ShaderModeBitmask)(1 << i);
-            }
+            //FixDrawModeList(template.DrawModes);
+            //if (template.DrawModes.Count > 18)
+            //    template.DrawModes[18].PixelShaderMode = RenderMethodTemplate.ShaderMode.Default; // Use default z-only
+
+            //// Rebuild the bitmask of valid draw modes
+            //template.DrawModeBitmask = 0;
+            //for (var i = 0; i < template.DrawModes.Count; i++)
+            //{
+            //    if (template.DrawModes[i].PixelShaderMode != RenderMethodTemplate.ShaderMode.Default)
+            //        template.DrawModeBitmask |= (RenderMethodTemplate.ShaderModeBitmask)(1 << i);
+            //}
         }
 
         private void FixRenderMethodDefinition(RenderMethodDefinition definition)

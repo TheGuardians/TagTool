@@ -53,9 +53,9 @@ namespace TagTool.Commands.RenderMethods
 
             var argumentIndex = -1;
 
-            for (var i = 0; i < template.Arguments.Count; i++)
+            for (var i = 0; i < template.VectorArguments.Count; i++)
             {
-                if (CacheContext.GetString(template.Arguments[i].Name) == argumentName)
+                if (CacheContext.GetString(template.VectorArguments[i].Name) == argumentName)
                 {
                     argumentIndex = i;
                     break;

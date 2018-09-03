@@ -38,12 +38,12 @@ namespace TagTool.Commands.Shaders
             Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
 
             Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
-            Definition.DrawModeRegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
+            Definition.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
 
-            Definition.Arguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.Unknown5 = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.GlobalArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            Definition.ShaderMaps = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.BooleanArguments = new List<RenderMethodTemplate.ShaderArgument>();
+            Definition.SamplerArguments = new List<RenderMethodTemplate.ShaderArgument>();
 
         }
 
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Shaders
 
                         if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Default))
                         {
-                            var bytecode = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
+                            var result = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
                                 HaloShaderGenerator.Enums.ShaderStage.Albedo,
                                 HaloShaderGenerator.Enums.Albedo.Default,
                                 HaloShaderGenerator.Enums.Bump_Mapping.Off,
@@ -98,7 +98,7 @@ namespace TagTool.Commands.Shaders
                                 HaloShaderGenerator.Enums.Soft_fade.Off
                             );
 
-                            Console.WriteLine($"Generated Shader : {bytecode?.Length ?? 0} bytes");
+                            Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
                             Definition.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Albedo;
                         }
@@ -111,7 +111,7 @@ namespace TagTool.Commands.Shaders
 
                         if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Beam, HaloShaderGenerator.Enums.ShaderStage.Default))
                         {
-                            var bytecode = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
+                            var result = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
                                 HaloShaderGenerator.Enums.ShaderStage.Albedo,
                                 HaloShaderGenerator.Enums.Albedo.Two_Change_Color,
                                 HaloShaderGenerator.Enums.Bump_Mapping.Off,
@@ -127,7 +127,7 @@ namespace TagTool.Commands.Shaders
                                 HaloShaderGenerator.Enums.Soft_fade.Off
                             );
 
-                            Console.WriteLine($"Generated BeamShader : {bytecode?.Length ?? 0} bytes");
+                            Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
 
                             Definition.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Default;
                         }

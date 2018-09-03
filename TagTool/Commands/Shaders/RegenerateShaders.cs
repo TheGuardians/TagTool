@@ -175,9 +175,9 @@ namespace TagTool.Commands.Shaders
 
             // extract the render method definition arguments to rebuild the shader again
             List<int> shader_template_args = new List<int>();
-            foreach (var template_arg in rm_shader_definition.Unknown)
+            foreach (var template_arg in rm_shader_definition.RenderMethodDefinitionOptionIndices)
             {
-                shader_template_args.Add((int)template_arg.Unknown);
+                shader_template_args.Add((int)template_arg.OptionIndex);
             }
 
             // get the pixl shader that will be rebuilt
@@ -192,15 +192,18 @@ namespace TagTool.Commands.Shaders
             // in the same rendering engine suite
             // Also "Shaders" includes shader, beam, contrail etc. this is important too
 
+            //TODO Clean this shit up
             string template_type = null;
             switch (rmdf_name)
             {
-                case "shaders\\shader":
+                case @"shaders\shader":
                     template_type = "shader_template";
-
                     //TODO: Regenerate all shaders based on RMT2 and set invalid shaders back to null
                     _RegenerateShaders(rmt2_definition, pixel_shader, shader_template_args.ToArray(), template_type);
-
+                    break;
+                case @"shaders\cortana":
+                    template_type = "cortana_template";
+                    _RegenerateShaders(rmt2_definition, pixel_shader, shader_template_args.ToArray(), template_type);
                     break;
                 default:
                     Console.WriteLine($"Error: Unknown rmdf {rmdf_name}");
@@ -240,10 +243,13 @@ namespace TagTool.Commands.Shaders
                 case "shader_templates":
                 case "shader_template":
                     template_type = typeof(Shader);
-                    //shader_rmdf = CacheContext.GetTag<RenderMethodDefinition>("shaders\\shader");
-                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == "shaders\\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
+                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
                     break;
-
+                case "cortana_templates":
+                case "cortana_template":
+                    template_type = typeof(ShaderCortana);
+                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\cortana").Select(item => CacheContext.GetTag(item.Key)).ToList();
+                    break;
                 case null:
                 case "*":
                     break;
@@ -362,7 +368,6 @@ namespace TagTool.Commands.Shaders
         bool RegenerateShader(
             RenderMethodTemplate rmt2,
             PixelShader pixl,
-            MethodInfo method,
             Int32[] shader_args,
             ShaderType type,
             ShaderStage shaderstage,
@@ -370,6 +375,20 @@ namespace TagTool.Commands.Shaders
             RenderMethodTemplate.ShaderMode mode
             )
         {
+            MethodInfo method = null;
+            switch(type)
+            {
+                case ShaderType.Shader:
+                    method = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
+                    break;
+                case ShaderType.Cortana:
+                    method = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShaderCortana");
+                    break;
+                default:
+                    return false;
+            }
+            if (method == null) return false;
+
             //TODO: Rewrite this crazyness
             if ((rmt2.DrawModeBitmask | bit) != 0)
             {
@@ -388,14 +407,15 @@ namespace TagTool.Commands.Shaders
                             break;
                     }
 
-                    byte[] bytecode = method.Invoke(null, GenerateShaderArgs) as byte[];
+                    var shaderGeneratorResult = method.Invoke(null, GenerateShaderArgs) as HaloShaderGenerator.ShaderGeneratorResult;
 
-                    if (bytecode == null) return false;
+                    if (shaderGeneratorResult?.Bytecode == null) return false;
 
                     var offset = pixl.DrawModes[(int)mode].Offset;
                     var count = pixl.DrawModes[(int)mode].Count;
 
-                    pixl.Shaders[offset].PCShaderBytecode = bytecode;
+                    var pixelShaderBlock = Porting.PortTagCommand.GeneratePixelShaderBlock(CacheContext, shaderGeneratorResult);
+                    pixl.Shaders[offset] = pixelShaderBlock;
 
                     rmt2.DrawModeBitmask |= bit;
 
@@ -410,67 +430,75 @@ namespace TagTool.Commands.Shaders
         {
             switch (shader_type)
             {
+                case "cortana_templates":
+                case "cortana_template":
+                    {
+                        RegenerateShader(
+                            rmt2,
+                            pixl,
+                            shader_args,
+                            ShaderType.Cortana,
+                            ShaderStage.Active_Camo,
+                            RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
+                            RenderMethodTemplate.ShaderMode.Active_Camo
+                        );
+                    }
+                    break;
+                    
+
                 case "shader_templates":
                 case "shader_template":
+                    {
+                        //RegenerateShader(
+                        //    rmt2,
+                        //    pixl,
+                        //    shader_args,
+                        //    ShaderType.Shader,
+                        //    ShaderStage.Albedo,
+                        //    RenderMethodTemplate.ShaderModeBitmask.Albedo,
+                        //    RenderMethodTemplate.ShaderMode.Albedo
+                        //);
 
-                    var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
+                        //RegenerateShader(
+                        //    rmt2,
+                        //    pixl,
+                        //    shader_args,
+                        //    ShaderType.Shader,
+                        //    ShaderStage.Active_Camo,
+                        //    RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
+                        //    RenderMethodTemplate.ShaderMode.Active_Camo
+                        //);
 
-                    //RegenerateShader(
-                    //    rmt2,
-                    //    pixl,
-                    //    GenerateShader,
-                    //    shader_args,
-                    //    ShaderType.Shader,
-                    //    ShaderStage.Albedo,
-                    //    RenderMethodTemplate.ShaderModeBitmask.Albedo,
-                    //    RenderMethodTemplate.ShaderMode.Albedo
-                    //);
+                        RegenerateShader(
+                            rmt2,
+                            pixl,
+                            shader_args,
+                            ShaderType.Shader,
+                            ShaderStage.Static_Prt_Ambient,
+                            RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Ambient,
+                            RenderMethodTemplate.ShaderMode.Static_Prt_Ambient
+                        );
 
-                    //RegenerateShader(
-                    //    rmt2,
-                    //    pixl,
-                    //    GenerateShader,
-                    //    shader_args,
-                    //    ShaderType.Shader,
-                    //    ShaderStage.Active_Camo,
-                    //    RenderMethodTemplate.ShaderModeBitmask.Active_Camo,
-                    //    RenderMethodTemplate.ShaderMode.Active_Camo
-                    //);
-
-                    RegenerateShader(
-                        rmt2,
-                        pixl,
-                        GenerateShader,
-                        shader_args,
-                        ShaderType.Shader,
-                        ShaderStage.Static_Prt_Ambient,
-                        RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Ambient,
-                        RenderMethodTemplate.ShaderMode.Static_Prt_Ambient
-                    );
-
-                    //RegenerateShader(
-                    //    rmt2,
-                    //    pixl,
-                    //    GenerateShader,
-                    //    shader_args,
-                    //    ShaderType.Shader,
-                    //    ShaderStage.Static_Prt_Linear,
-                    //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Linear,
-                    //    RenderMethodTemplate.ShaderMode.Static_Prt_Linear
-                    //);
-                    //RegenerateShader(
-                    //    rmt2,
-                    //    pixl,
-                    //    GenerateShader,
-                    //    shader_args,
-                    //    ShaderType.Shader,
-                    //    ShaderStage.Static_Prt_Quadratic,
-                    //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Quadratic,
-                    //    RenderMethodTemplate.ShaderMode.Static_Prt_Quadratic
-                    //);
-
+                        //RegenerateShader(
+                        //    rmt2,
+                        //    pixl,
+                        //    shader_args,
+                        //    ShaderType.Shader,
+                        //    ShaderStage.Static_Prt_Linear,
+                        //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Linear,
+                        //    RenderMethodTemplate.ShaderMode.Static_Prt_Linear
+                        //);
+                        //RegenerateShader(
+                        //    rmt2,
+                        //    pixl,
+                        //    shader_args,
+                        //    ShaderType.Shader,
+                        //    ShaderStage.Static_Prt_Quadratic,
+                        //    RenderMethodTemplate.ShaderModeBitmask.Static_Prt_Quadratic,
+                        //    RenderMethodTemplate.ShaderMode.Static_Prt_Quadratic
+                        //);
+                    }
                     break;
-
                 default:
                     break;
             }
