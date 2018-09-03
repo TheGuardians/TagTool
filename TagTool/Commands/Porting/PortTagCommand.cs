@@ -64,7 +64,8 @@ namespace TagTool.Commands.Porting
                 "PortTag",
                 
                 "Ports a tag from the current cache file. Options are:" + Environment.NewLine +
-                "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
+                "    Replace, Recursive, Single, New, UseNull, NoAudio, NoElites, NoForgePalette, " + 
+                "NoSquads, Scripts, NoScripts, ShaderTest, MatchShaders, NoShaders" + Environment.NewLine + Environment.NewLine +
 
                 "Replace: Replace tags of the same name when porting." + Environment.NewLine +
                 "Recursive: Recursively port all tag references available." + Environment.NewLine +
@@ -354,7 +355,8 @@ namespace TagTool.Commands.Porting
 
             var wasReplacing = Flags.HasFlag(PortingFlags.Replace);
             var wasNew = Flags.HasFlag(PortingFlags.New);
-            
+            var wasSingle = Flags.HasFlag(PortingFlags.Recursive);
+
             if (Flags.HasFlag(PortingFlags.NoElites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
@@ -397,7 +399,7 @@ namespace TagTool.Commands.Porting
                     {
                         if (Flags.HasFlag(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                         {
-                            if (!Flags.HasFlag(PortingFlags.Recursive))
+                            if (!Flags.HasFlag(PortingFlags.Recursive) && wasSingle)
                             {
                                 Flags &= ~PortingFlags.Replace;
                                 Flags |= PortingFlags.Recursive;
@@ -480,10 +482,10 @@ namespace TagTool.Commands.Porting
                     scenario.SandboxWeapons.Clear();
                     break;
 
-                /*case ScenarioStructureBsp bsp:
+                case ScenarioStructureBsp bsp: // named instanced geometry instances, useless unless we decompile bsp's
                     foreach (var instance in bsp.InstancedGeometryInstances)
                         instance.Name = StringId.Invalid;
-                    break;*/
+                    break;
             }
             
             //
