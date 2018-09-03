@@ -289,7 +289,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
                 case "rmt2":
-                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
+                    if (HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
                     {
                         // discard cortana shaders
                         if (blamTag.Name.ToLower().Contains("cortana_template"))

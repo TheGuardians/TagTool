@@ -219,6 +219,12 @@ namespace TagTool.Commands.Porting
                             shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
                             shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                            shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
+                            shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 4);
+                            shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 4);
+                            shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 4);
+                            break;
                         case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
                             {
                                 var iblue = argument_data[4];
@@ -240,12 +246,9 @@ namespace TagTool.Commands.Porting
                                 shaderArgument.Arg3 = alpha;
                             }
                             break;
-                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
                         default:
                             throw new NotImplementedException();
                     }
-
-                    Console.WriteLine();
                 }
 
                 for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
