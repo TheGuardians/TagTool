@@ -887,21 +887,19 @@ namespace TagTool.Commands.Porting
             {
                 DrawModeIndex++;
 
-                //var pixelShaderMode = (int)a.PixelShaderMode;
-                //var vertexShaderMode = (int)a.VertexShaderMode;
                 // These are not modes. This is an indireciton table of packed 10_6 shorts
                 // from RMT2 ShaderDrawmodes to RegisterOffsets
                 // register_offset = ShaderDrawmodes[current_drawmode].Offset
-                var pixelShaderMode = -1;
-                var vertexShaderMode = -1;
-                throw new NotImplementedException();
+                var drawmodeRegisterOffset = (int)a.Offset;
+                var drawmodeRegisterCount = (int)a.Count;
 
-                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleSampler;
-                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleSampler >> 8;
-                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleUnknown;
-                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleUnknown >> 8;
-                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleVector;
-                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].Unknown3[pixelShaderMode].DataHandleVector >> 8;
+
+                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler;
+                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler >> 8;
+                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown;
+                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown >> 8;
+                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector;
+                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector >> 8;
                 var ArgumentMappings = new List<ArgumentMapping>();
 
                 for (int j = 0; j < ArgumentMappingsCountSampler / 4; j++)
@@ -912,7 +910,7 @@ namespace TagTool.Commands.Porting
                         ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexSampler + j].ArgumentIndex, // i don't think i can use it to match stuf
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexSampler + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Sampler,
-                        ShaderIndex = pixelShaderMode,
+                        ShaderIndex = drawmodeRegisterOffset,
                         // WARNING i think drawmodes in rm aren't the same as in pixl, because rm drawmodes can point to a global shader .
                         // say rm.drawmodes[17]'s value is 13, pixl.drawmodes[17] would typically be 12
                     });
@@ -926,7 +924,7 @@ namespace TagTool.Commands.Porting
                         ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexUnknown + j].ArgumentIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexUnknown + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
-                        ShaderIndex = pixelShaderMode,
+                        ShaderIndex = drawmodeRegisterOffset,
                         // it's something else, uses a global shader or some shit, one water shader pointed to a vtsh in rasg, but not in H3, maybe coincidence
                         // yeah guaranteed rmdf's glvs or rasg shaders
                     });
@@ -940,14 +938,14 @@ namespace TagTool.Commands.Porting
                         ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexVector + j].ArgumentIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexVector + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
-                        ShaderIndex = pixelShaderMode,
+                        ShaderIndex = drawmodeRegisterOffset,
                     });
                 }
 
                 bmDrawmodesFunctions.Add(DrawModeIndex, new Unknown3Tagblock
                 {
-                    Unknown3Index = pixelShaderMode, // not shader index for rm and rmt2
-                    Unknown3Count = vertexShaderMode, // should always be 4 for enabled drawmodes
+                    Unknown3Index = drawmodeRegisterOffset, // not shader index for rm and rmt2
+                    Unknown3Count = drawmodeRegisterCount, // should always be 4 for enabled drawmodes
                     ArgumentMappingsIndexSampler = ArgumentMappingsIndexSampler,
                     ArgumentMappingsCountSampler = ArgumentMappingsCountSampler,
                     ArgumentMappingsIndexUnknown = ArgumentMappingsIndexUnknown, // no clue what it's used for, global shaders? i know one of the drawmodes will use one or more shaders from glvs, no idea if always or based on something
