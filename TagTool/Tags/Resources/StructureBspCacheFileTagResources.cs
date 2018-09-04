@@ -8,7 +8,7 @@ namespace TagTool.Tags.Resources
     public class StructureBspCacheFileTagResources
     {
         public TagBlock<ScenarioStructureBsp.UnknownRaw6th> UnknownRaw6ths;
-        public TagBlock<ScenarioStructureBsp.UnknownRaw1st> UnknownRaw1sts;
+        public TagBlock<ScenarioStructureBsp.Plane> Planes;
         public TagBlock<ScenarioStructureBsp.UnknownRaw7th> UnknownRaw7ths;
         public List<PathfindingDatum> PathfindingData;
 

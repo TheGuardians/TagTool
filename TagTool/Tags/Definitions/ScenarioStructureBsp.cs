@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
         public List<UnknownRaw6th> UnknownRaw6ths;
-        public List<UnknownRaw1st> UnknownRaw1sts;
+        public List<Plane> Planes;
         [TagField(Padding = true, Length = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] UnknownUnused1;
         public List<ClusterPortal> ClusterPortals;
@@ -124,12 +124,14 @@ namespace TagTool.Tags.Definitions
         public int UselessPadding4;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
         public int Unknown86;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown87;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown88;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown89;
+
         [TagField(MinVersion = CacheVersion.HaloOnline301003)]
         public uint Unknown90;
 
@@ -210,18 +212,18 @@ namespace TagTool.Tags.Definitions
         public class UnknownRaw6th
         {
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public short Unknown1StartIndexHalo3;
+            public short PlaneIndexOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public int Unknown1StartIndex;
+            public int PlaneIndexNew;
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public short Unknown1EntryCountHalo3;
+            public short PlaneCountOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public int Unknown1EntryCount;
+            public int PlaneCountNew;
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownRaw1st
+        public class Plane
         {
             public short ClusterIndex;
             public short Unknown;

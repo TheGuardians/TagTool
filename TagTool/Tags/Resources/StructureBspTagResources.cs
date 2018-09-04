@@ -105,14 +105,7 @@ namespace TagTool.Tags.Resources
         {
             public RealQuaternion Position;
             public float Radius;
-            public TagBlock<CollisionGeometry.Bsp3dNode> Bsp3dNodes;
-            public TagBlock<CollisionGeometry.Plane> Planes;
-            public TagBlock<CollisionGeometry.Leaf> Leaves;
-            public TagBlock<CollisionGeometry.Bsp2dReference> Bsp2dReferences;
-            public TagBlock<CollisionGeometry.Bsp2dNode> Bsp2dNodes;
-            public TagBlock<CollisionGeometry.Surface> Surfaces;
-            public TagBlock<CollisionGeometry.Edge> Edges;
-            public TagBlock<CollisionGeometry.Vertex> Vertices;
+            public CollisionBspBlock CollisionBsp;
             public List<CollisionBspBlock> CollisionGeometries;
             public List<CollisionMoppCodeResource> CollisionMoppCodes;
             public TagBlock<Unknown1Block> Unknown1;
@@ -120,10 +113,13 @@ namespace TagTool.Tags.Resources
             public TagBlock<Unknown3Block> Unknown3;
             public short MeshIndex;
             public short CompressionIndex;
+
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown4;
+
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public TagBlock<Unknown4Block> Unknown5;
+
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown6;
 
