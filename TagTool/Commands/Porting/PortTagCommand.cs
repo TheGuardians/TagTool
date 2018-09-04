@@ -493,7 +493,7 @@ namespace TagTool.Commands.Porting
             {
                 case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
                     foreach (var material in mode.Materials)
-                        material.RenderMethod = null;
+                        material.RenderMethod = CacheContext.GetTag<Shader>(@"shaders\invalid");
                     break;
 
                 case Scenario scenario when Flags.HasFlag(PortingFlags.NoSquads):
@@ -602,9 +602,9 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
-                case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
-                    blamDefinition = null;
-                    break;
+                //case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
+                    //blamDefinition = null;
+                    //break;
 
                 case PhysicsModel phmo:
                     blamDefinition = ConvertPhysicsModel(phmo);
@@ -619,9 +619,9 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-                case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
-                    blamDefinition = null;
-                    break;
+                //case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
+                    //blamDefinition = null;
+                    //break;
 
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);

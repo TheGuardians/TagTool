@@ -158,6 +158,18 @@ namespace TagTool.Geometry
             };
 
             //
+            // Load Blam resource data
+            //
+
+            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+
+            if (resourceData == null)
+            {
+                geometry.Resource.Resource.Type = TagResourceType.None;
+                return geometry;
+            }
+
+            //
             // Port Blam resource definition
             //
 
@@ -212,18 +224,6 @@ namespace TagTool.Geometry
                     definitionStream.Position = geometry.Resource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(dataContext);
                 }
-            }
-
-            //
-            // Load Blam resource data
-            //
-
-            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
-
-            if (resourceData == null)
-            {
-                geometry.Resource.Resource.Type = TagResourceType.None;
-                return geometry;
             }
 
             //

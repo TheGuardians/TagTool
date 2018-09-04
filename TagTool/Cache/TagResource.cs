@@ -51,16 +51,5 @@ namespace TagTool.Cache
             public CacheAddress Address;
             public int ResourceStructureTypeIndex;
         }
-
-        /// <summary>
-        /// D3D object types.
-        /// </summary>
-        public enum D3DObjectType : int
-        {
-            VertexBuffer,      // s_tag_d3d_vertex_buffer
-            IndexBuffer,       // s_tag_d3d_index_buffer
-            Texture,           // s_tag_d3d_texture
-            InterleavedTexture // s_tag_d3d_texture_interleaved
-        }
     }
 }
