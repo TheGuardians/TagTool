@@ -136,7 +136,7 @@ namespace TagTool.Commands.Porting
                 }
             }
             shader_properties.ShaderMaps = shaderSamplerArguments.ToList();
-            
+
             for (int rmt2ArgumentIndex = 0; rmt2ArgumentIndex < rmt2.VectorArguments.Count; rmt2ArgumentIndex++)
             {
                 if (shaderVectorArguments[rmt2ArgumentIndex] != null) continue;
@@ -208,10 +208,10 @@ namespace TagTool.Commands.Porting
                     switch (importData.Type)
                     {
                         case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
-                            shaderArgument.Arg0 = 1.0f;
-                            shaderArgument.Arg1 = 1.0f;
-                            shaderArgument.Arg2 = 0.0f;
-                            shaderArgument.Arg3 = 0.0f;
+                            shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
+                            shaderArgument.Arg1 = BitConverter.ToSingle(argument_data, 8);
+                            shaderArgument.Arg2 = BitConverter.ToSingle(argument_data, 12);
+                            shaderArgument.Arg3 = BitConverter.ToSingle(argument_data, 16);
                             break;
                         case RenderMethodOption.OptionBlock.OptionDataType.Float4:
                             shaderArgument.Arg0 = BitConverter.ToSingle(argument_data, 4);
@@ -248,6 +248,19 @@ namespace TagTool.Commands.Porting
                             break;
                         default:
                             throw new NotImplementedException();
+                    }
+                }
+                else
+                {
+                    // default arguments
+                    switch (importData.Type)
+                    {
+                        case RenderMethodOption.OptionBlock.OptionDataType.Sampler:
+                            shaderArgument.Arg0 = 1.0f;
+                            shaderArgument.Arg1 = 1.0f;
+                            shaderArgument.Arg2 = 0.0f;
+                            shaderArgument.Arg3 = 0.0f;
+                            break;
                     }
                 }
 
