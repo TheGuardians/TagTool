@@ -197,13 +197,10 @@ namespace TagTool.Tags.Definitions
                 public class Emitter
                 {
                     public StringId Name;
-                    public byte Version;
-                    public EmissionShapeValue EmissionShape;
+                    public ushort Flags;
 
-                    [TagField(Padding = true, Length = 1)]
+                    [TagField(Padding = true, Length = 2)]
                     public byte[] Unused;
-
-                    public FlagsValue EmitterFlags;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public float Unknown2;
@@ -438,9 +435,13 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30)]
                     public struct RuntimeMGpuData
                     {
-                        public int ConstantPerParticleProperties;
-                        public int ConstantOverTimeProperties;
-                        public int UsedParticleStates;
+                        public short Unknown1;
+                        public sbyte Unknown2;
+                        public sbyte Unknown3;
+                        public short Unknown4;
+                        public sbyte Unknown5;
+                        public sbyte Unknown6;
+                        public int Unknown7;
                         public List<Property> Properties;
                         public List<Function> Functions;
                         public List<Color> Colors;
