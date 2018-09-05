@@ -60,6 +60,17 @@ namespace TagTool.Cache
             return tag;
         }
 
+        public CachedTagInstance AllocateTag<T>()
+        {
+            var tagIndex = _tags.Count;
+            var type = TagGroup.Instances[TagDefinition.GetGroupTag<T>()];
+            var tag = new CachedTagInstance(tagIndex, type);
+            _tags.Add(tag);
+            return tag;
+        }
+
+        
+
         /// <summary>
         /// Reads a tag's raw data from the file, including its header.
         /// </summary>

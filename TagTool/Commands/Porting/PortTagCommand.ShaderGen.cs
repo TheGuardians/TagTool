@@ -14,67 +14,57 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-
-        private void ConvertShaderCortana(ShaderCortana shaderCortana, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private void ConvertShader(RenderMethod shader, Stream cacheStream)
         {
-            var render_method_option_indices = shaderCortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
+            //var rmdf_instance = shaderCortana.BaseRenderMethod;
+            //var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, rmdf_instance));
 
-            //CachedTagInstance newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
-            //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
-
-            var rmdf_instance = shaderCortana.BaseRenderMethod;
-            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, rmdf_instance));
-
-            //var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
-            //var shader = CacheContext.Deserialize<Shader>(new TagSerializationContext(cacheStream, CacheContext, shader_instance));
-
-            //ho_cortana_shader.ImportData = shader.ImportData;
-            //ho_cortana_shader.ShaderProperties = shader.ShaderProperties;
-
-            var shader_properties = shaderCortana.ShaderProperties[0];
+            var shader_properties = shader.ShaderProperties[0];
             shader_properties.ShaderMaps = new List<RenderMethod.ShaderProperty.ShaderMap>();
             shader_properties.Arguments = new List<RenderMethod.ShaderProperty.Argument>();
             shader_properties.Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>();
-            shader_properties.DrawModes = new List<RenderMethodTemplate.DrawMode>();
-            shader_properties.Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
-            shader_properties.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
+            //shader_properties.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+            shader_properties.DrawmodeFunctionOffsets = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
+            shader_properties.FunctionMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
             shader_properties.Functions = new List<RenderMethod.FunctionBlock>();
 
-            List<RenderMethodOption.OptionBlock> templateOptions = new List<RenderMethodOption.OptionBlock>();
-
-            for (int i = 0; i < rmdf.Methods.Count; i++)
-            {
-                var method = rmdf.Methods[i];
-                int selected_option_index = render_method_option_indices.Count > i ? render_method_option_indices[i] : 0;
-                var selected_option = method.ShaderOptions[selected_option_index];
-
-                var rmop_instance = selected_option.Option;
-                if (rmop_instance != null)
-                {
-                    var rmop = CacheContext.Deserialize<RenderMethodOption>(new TagSerializationContext(cacheStream, CacheContext, rmop_instance));
-
-                    templateOptions.AddRange(rmop.Options);
-                }
-            }
-
             RenderMethodTemplate rmt2 = null;
+            PixelShader pixl = null;
+            List<RenderMethodOption.OptionBlock> templateOptions;
+
             if (shader_properties.Template == null)
             {
-                GenerateCortanaRMT2Tag(
-                    render_method_option_indices,
+                RMT2Generator.GenerateRenderMethodTemplate(
+                    shader,
+                    CacheContext,
                     cacheStream,
-                    resourceStreams,
                     out CachedTagInstance rmt2Instance,
-                    out RenderMethodTemplate newRMT2);
+                    out CachedTagInstance pixlInstance,
+                    out CachedTagInstance vtshInstance,
+                    out RenderMethodTemplate _rmt2,
+                    out PixelShader _pixl,
+                    out VertexShader _vtsh,
+                    out List<RenderMethodOption.OptionBlock> _templateOptions);
 
                 shader_properties.Template = rmt2Instance;
-                rmt2 = newRMT2;
+                rmt2 = _rmt2;
+                pixl = _pixl;
+                templateOptions = _templateOptions;
             }
             else
             {
-                rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, shader_properties.Template));
+                rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, shader_properties.Template);
+                pixl = CacheContext.Deserialize<PixelShader>(cacheStream, rmt2.PixelShader);
+
+                RMT2Generator.CreateOptionsLists(
+                    shader,
+                    CacheContext,
+                    cacheStream,
+                    out List<int> _templateOptionsIndices,
+                    out List<RenderMethodOption.OptionBlock> _templateOptions);
+                templateOptions = _templateOptions;
             }
-            //shader_properties.DrawModes = rmt2.DrawModes;
+            shader_properties.DrawModes = rmt2.DrawModes;
 
             var shaderFunctions = new List<RenderMethod.FunctionBlock>();
             var shaderVectorArguments = new RenderMethod.ShaderProperty.Argument[rmt2.VectorArguments.Count];
@@ -87,10 +77,16 @@ namespace TagTool.Commands.Porting
                 var name_str = CacheContext.GetString(name);
                 var shaderSamplerArgument = new RenderMethod.ShaderProperty.ShaderMap();
                 {
-                    foreach (var importData in shaderCortana.ImportData)
+                    foreach (var importData in shader.ImportData)
                     {
                         if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
                         if (importData.Name.Index != name.Index) continue;
+
+                        if (importData.Unknown4 != 0)
+                        {
+                            shaderSamplerArgument.BitmapFlags = (byte)importData.Unknown5;
+                        }
+
 
                         if (importData.Bitmap != null)
                         {
@@ -129,7 +125,7 @@ namespace TagTool.Commands.Porting
                     }
                     else
                     {
-                        var shaderVectorArgument = ProcessArgument(rmt2SamplerArgument, shaderFunctions, templateOptions, shaderCortana);
+                        var shaderVectorArgument = ProcessArgument(rmt2SamplerArgument, shaderFunctions, templateOptions, shader);
                         shaderVectorArguments[xform_index] = shaderVectorArgument;
                     }
                     shaderSamplerArgument.XFormArgumentIndex = (sbyte)xform_index;
@@ -142,27 +138,28 @@ namespace TagTool.Commands.Porting
                 if (shaderVectorArguments[rmt2ArgumentIndex] != null) continue;
                 var vectorArgument = rmt2.VectorArguments[rmt2ArgumentIndex];
 
-                var shaderArgument = ProcessArgument(vectorArgument, shaderFunctions, templateOptions, shaderCortana);
+                var shaderArgument = ProcessArgument(vectorArgument, shaderFunctions, templateOptions, shader);
                 shaderVectorArguments[rmt2ArgumentIndex] = shaderArgument;
             }
             shader_properties.Arguments = shaderVectorArguments.ToList();
             shader_properties.Functions = shaderFunctions;
 
-            if (shaderCortana.Material.Index == 0)
+            shader_properties.DrawmodeFunctionOffsets.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
+
+            switch(shader)
             {
-                if (CacheContext.StringIdCache.Contains("default_material"))
-                {
-                    shaderCortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
-                }
+                case ShaderCortana shaderCortana:
+                    if (shaderCortana.Material.Index == 0)
+                    {
+                        if (CacheContext.StringIdCache.Contains("default_material"))
+                        {
+                            shaderCortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
+                        }
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-
-            //shader_cortana.Material = shader.Material;
-
-            //ho_cortana_shader.BaseRenderMethod = shader.BaseRenderMethod;
-            //CacheContext.TagNames[newCortanaShaderInstance.Index] = blamTag.Name;
-            //CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newCortanaShaderInstance), ho_cortana_shader);
-            //CacheContext.SaveTagNames();
-
         }
 
         private int GetExistingXFormArgumentIndex(StringId name, List<RenderMethodTemplate.ShaderArgument> vectorArguments)
@@ -184,14 +181,14 @@ namespace TagTool.Commands.Porting
             RenderMethodTemplate.ShaderArgument vectorArgument,
             List<RenderMethod.FunctionBlock> shaderFunctions,
             List<RenderMethodOption.OptionBlock> templateOptions,
-            ShaderCortana shaderCortana)
+            RenderMethod shader)
         {
             RenderMethod.ShaderProperty.Argument shaderArgument = new RenderMethod.ShaderProperty.Argument();
 
             var name = vectorArgument.Name;
             var nameStr = CacheContext.GetString(name);
 
-            foreach (var importData in shaderCortana.ImportData)
+            foreach (var importData in shader.ImportData)
             {
                 if (importData.Name.Index != name.Index) continue;
 
@@ -261,6 +258,21 @@ namespace TagTool.Commands.Porting
                             shaderArgument.Arg2 = 0.0f;
                             shaderArgument.Arg3 = 0.0f;
                             break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.IntegerColor:
+                            shaderArgument.Arg0 = 1.0f;
+                            shaderArgument.Arg1 = 1.0f;
+                            shaderArgument.Arg2 = 1.0f;
+                            shaderArgument.Arg3 = 1.0f;
+                            break;
+                        case RenderMethodOption.OptionBlock.OptionDataType.Float:
+                        case RenderMethodOption.OptionBlock.OptionDataType.Float4:
+                            shaderArgument.Arg0 = 0.0f;
+                            shaderArgument.Arg1 = 0.0f;
+                            shaderArgument.Arg2 = 0.0f;
+                            shaderArgument.Arg3 = 0.0f;
+                            break;
+                        default:
+                            throw new NotImplementedException();
                     }
                 }
 
@@ -290,204 +302,10 @@ namespace TagTool.Commands.Porting
             return shaderArgument;
         }
 
-        int GetArgumentIndex(string name, List<RenderMethodTemplate.ShaderArgument> args)
-        {
-            int index = -1;
-            for (int i = 0; i < args.Count; i++)
-            {
-                var varg = args[i];
-                if (name == CacheContext.GetString(varg.Name))
-                {
-                    index = i;
-                    break;
-                }
-            }
-            return index;
-        }
-
-        private void GenerateCortanaRMT2Tag(List<int> options, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, out CachedTagInstance rmt2Instance, out RenderMethodTemplate rmt2)
-        {
-            string template_name = $@"shaders\cortana_templates\_{string.Join("_", options)}";
-            rmt2 = new RenderMethodTemplate();
-            var rmt2_group = TagGroup.Instances[new TagStructureInfo(typeof(RenderMethodTemplate)).GroupTag];
-            rmt2Instance = CacheContext.TagCache.AllocateTag(rmt2_group);
-            var pixl = new PixelShader();
-            var pixlGroup = TagGroup.Instances[new TagStructureInfo(typeof(PixelShader)).GroupTag];
-            CachedTagInstance newPIXLInstance = CacheContext.TagCache.AllocateTag(pixlGroup);
-            var vtsh = new VertexShader();
-            var vtshGroup = TagGroup.Instances[new TagStructureInfo(typeof(VertexShader)).GroupTag];
-            CachedTagInstance newVTSHInstance = CacheContext.TagCache.AllocateTag(vtshGroup);
-
-            rmt2.PixelShader = newPIXLInstance;
-            rmt2.VertexShader = newVTSHInstance;
-
-            rmt2.DrawModeBitmask |= RenderMethodTemplate.ShaderModeBitmask.Active_Camo;
-
-            rmt2.VectorArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            rmt2.IntegerArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            rmt2.BooleanArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            rmt2.SamplerArguments = new List<RenderMethodTemplate.ShaderArgument>();
-            rmt2.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
-            rmt2.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();
-
-            pixl.Shaders = new List<PixelShaderBlock>();
-            pixl.DrawModes = new List<ShaderDrawMode>();
-            rmt2.DrawModes = new List<RenderMethodTemplate.DrawMode>();
-            foreach (RenderMethodTemplate.ShaderMode mode in Enum.GetValues(typeof(RenderMethodTemplate.ShaderMode)))
-            {
-                var pixelShaderDrawmode = new ShaderDrawMode();
-                pixl.DrawModes.Add(pixelShaderDrawmode);
-                var rmt2Drawmode = new RenderMethodTemplate.DrawMode();
-                rmt2.DrawModes.Add(rmt2Drawmode);
-
-                if (!HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(
-                    HaloShaderGenerator.Enums.ShaderType.Cortana,
-                    (HaloShaderGenerator.Enums.ShaderStage)(int)mode
-                    )) continue;
-
-                rmt2Drawmode.Offset = (ushort)rmt2.RegisterOffsets.Count();
-                rmt2Drawmode.Count = 1;
 
 
-                var shader_gen_result = HaloShaderGenerator.HaloShaderGenerator.GenerateShaderCortana(HaloShaderGenerator.Enums.ShaderStage.Active_Camo);
 
-                var pixelShaderBlock = GeneratePixelShaderBlock(CacheContext, shader_gen_result);
-                pixelShaderDrawmode.Count = 1;
-                pixelShaderDrawmode.Offset = (byte)pixl.Shaders.Count;
-                pixl.Shaders.Add(pixelShaderBlock);
 
-                var registerOffsets = new RenderMethodTemplate.DrawModeRegisterOffsetBlock();
-                rmt2.RegisterOffsets.Add(registerOffsets);
 
-                registerOffsets.RenderMethodExternArguments_Offset = (ushort)rmt2.ArgumentMappings.Count;
-                var srcRenderMethodExternArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
-                foreach (var src_arg in srcRenderMethodExternArguments)
-                {
-                    var argument_mapping = new RenderMethodTemplate.ArgumentMapping();
-                    argument_mapping.RegisterIndex = (ushort)src_arg.Register;
-
-                    foreach (var _enum in Enum.GetValues(typeof(RenderMethodTemplate.RenderMethodExtern)))
-                    {
-                        if (_enum.ToString().ToLower() == src_arg.Name)
-                        {
-                            argument_mapping.ArgumentIndex = (byte)_enum;
-                            break;
-                        }
-                    }
-
-                    rmt2.ArgumentMappings.Add(argument_mapping);
-                    registerOffsets.RenderMethodExternArguments_Count++;
-                }
-
-                registerOffsets.SamplerArguments_Offset = (ushort)rmt2.ArgumentMappings.Count;
-                var srcSamplerArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.TextureSampler_Arguments);
-                foreach (var samplerRegister in srcSamplerArguments)
-                {
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)samplerRegister.Register;
-                    argumentMapping.ArgumentIndex = (byte)registerOffsets.SamplerArguments_Count++;
-
-                    rmt2.ArgumentMappings.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(samplerRegister.Name);
-                    rmt2.SamplerArguments.Add(shaderArgument);
-
-                }
-
-                registerOffsets.VectorArguments_Offset = (ushort)rmt2.ArgumentMappings.Count;
-                // add xform args
-                foreach (var samplerRegister in srcSamplerArguments)
-                {
-                    int index = GetArgumentIndex(samplerRegister.Name, rmt2.VectorArguments);
-                    HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister xformRegister = null;
-                    foreach (var register in shader_gen_result.Registers)
-                    {
-                        if (register.Name == $"{samplerRegister.Name}_xform")
-                        {
-                            xformRegister = register;
-                            break;
-                        }
-                    }
-                    if (xformRegister == null) continue;
-
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)xformRegister.Register;
-
-                    argumentMapping.ArgumentIndex = (byte)(index != -1 ? index : rmt2.VectorArguments.Count);
-                    rmt2.ArgumentMappings.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(samplerRegister.Name);
-                    rmt2.VectorArguments.Add(shaderArgument);
-
-                    registerOffsets.VectorArguments_Count++;
-                }
-
-                var srcVectorArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.Vector_Arguments);
-                foreach (var vectorRegister in srcVectorArguments)
-                {
-                    if (vectorRegister.IsXFormArgument) continue; // we've already added these
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)vectorRegister.Register;
-                    argumentMapping.ArgumentIndex = (byte)rmt2.VectorArguments.Count;
-                    rmt2.ArgumentMappings.Add(argumentMapping);
-
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(vectorRegister.Name);
-                    rmt2.VectorArguments.Add(shaderArgument);
-
-                    registerOffsets.VectorArguments_Count++;
-                }
-            }
-
-            CacheContext.TagNames[newPIXLInstance.Index] = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newPIXLInstance), pixl);
-            CacheContext.TagNames[newVTSHInstance.Index] = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newVTSHInstance), vtsh);
-            CacheContext.TagNames[rmt2Instance.Index] = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, rmt2Instance), rmt2);
-
-            CacheContext.SaveTagNames();
-        }
-
-        public static PixelShaderBlock GeneratePixelShaderBlock(HaloOnlineCacheContext cacheContext, ShaderGeneratorResult shader_gen_result)
-        {
-            var pixelShaderBlock = new PixelShaderBlock();
-
-            pixelShaderBlock.PCShaderBytecode = shader_gen_result.Bytecode;
-            pixelShaderBlock.PCParameters = new List<ShaderParameter>();
-
-            foreach (var register in shader_gen_result.Registers)
-            {
-                ShaderParameter shaderParameter = new ShaderParameter();
-                shaderParameter.RegisterIndex = (ushort)register.Register;
-                shaderParameter.RegisterCount = (byte)register.Size;
-
-                switch (register.registerType)
-                {
-                    case HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.RegisterType.Boolean:
-                        shaderParameter.RegisterType = ShaderParameter.RType.Boolean;
-                        break;
-                    case HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.RegisterType.Integer:
-                        shaderParameter.RegisterType = ShaderParameter.RType.Integer;
-                        break;
-                    case HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.RegisterType.Sampler:
-                        shaderParameter.RegisterType = ShaderParameter.RType.Sampler;
-                        break;
-                    case HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.RegisterType.Vector:
-                        shaderParameter.RegisterType = ShaderParameter.RType.Vector;
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-
-                shaderParameter.ParameterName = cacheContext.GetStringId(register.Name);
-
-                pixelShaderBlock.PCParameters.Add(shaderParameter);
-            }
-
-            return pixelShaderBlock;
-        }
     }
 }

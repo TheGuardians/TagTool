@@ -35,7 +35,7 @@ namespace TagTool.Commands.Shaders
         private static void ResetRMT2(RenderMethodTemplate Definition)
         {
             Definition.DrawModeBitmask = 0;
-            Definition.DrawModes = new List<RenderMethodTemplate.DrawMode>();
+            Definition.DrawModes = new List<RenderMethodTemplate.OffsetCount_16>();
 
             Definition.ArgumentMappings = new List<RenderMethodTemplate.ArgumentMapping>();
             Definition.RegisterOffsets = new List<RenderMethodTemplate.DrawModeRegisterOffsetBlock>();

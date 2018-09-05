@@ -64,9 +64,9 @@ namespace TagTool.Tags.Definitions
             public List<Argument> Arguments;
             public List<UnknownBlock1> Unknown;
             public uint Unknown2;
-            public List<RenderMethodTemplate.DrawMode> DrawModes;
-            public List<UnknownBlock3> Unknown3;
-            public List<ArgumentMapping> ArgumentMappings;
+            public List<RenderMethodTemplate.OffsetCount_16> DrawModes;
+            public List<UnknownBlock3> DrawmodeFunctionOffsets;
+            public List<ArgumentMapping> FunctionMappings;
             public List<FunctionBlock> Functions;
             public int BitmapTransparency;
             public int Unknown7;
@@ -125,9 +125,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x6)]
             public class UnknownBlock3
             {
-                public short DataHandleSampler;
-                public short DataHandleUnknown;
-                public short DataHandleVector;
+                public RenderMethodTemplate.OffsetCount_16 DataHandleSampler;
+                public RenderMethodTemplate.OffsetCount_16 DataHandleUnknown;
+                public RenderMethodTemplate.OffsetCount_16 DataHandleVector;
             }
 
             [TagStructure(Size = 0x4)]

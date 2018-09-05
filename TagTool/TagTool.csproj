@@ -379,6 +379,7 @@
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />
+    <Compile Include="Shaders\RMT2Generator.cs" />
     <Compile Include="Tags\TagStructureReference.cs" />
     <Compile Include="Common\FunctionType.cs" />
     <Compile Include="Common\GameLanguage.cs" />

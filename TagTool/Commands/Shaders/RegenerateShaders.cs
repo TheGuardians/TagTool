@@ -413,8 +413,8 @@ namespace TagTool.Commands.Shaders
 
                     var offset = pixl.DrawModes[(int)mode].Offset;
                     var count = pixl.DrawModes[(int)mode].Count;
-
-                    var pixelShaderBlock = Porting.PortTagCommand.GeneratePixelShaderBlock(CacheContext, shaderGeneratorResult);
+                    
+                    var pixelShaderBlock = RMT2Generator.GeneratePixelShaderBlock(CacheContext, shaderGeneratorResult);
                     pixl.Shaders[offset] = pixelShaderBlock;
 
                     rmt2.DrawModeBitmask |= bit;
