@@ -347,6 +347,102 @@ namespace TagTool.Commands.Porting
             {
                 switch (tagName)
                 {
+                    case @"levels\multi\construct\construct":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(4.5471f, 1.8711f, 13.4354f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(-126.7653f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\isolation\isolation":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-14.4359f, -10.9502f, -5.2309f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(30f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\salvation\salvation":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-0.0762f, -0.1681f, 7.1527f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\snowbound\snowbound":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-7.1015f, 17.7492f, 3.9918f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(-90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\armory\armory":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-16.8807f, 0.0363f, -8.6872f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\chillout\chillout":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(0.7120f, -10.8107f, 5.3540f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\descent\descent":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-19.9727f, -0.0140f, -17.3611f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\docks\docks":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-28.5603f, 22.1670f, -3.9043f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\fortress\fortress":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-33.9909f, 3.4858f, -18.9907f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\ghosttown\ghosttown":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-10.6792f, 10.8319f, 5.6487f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\lockout\lockout":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-19.9729f, 0.4024f, -5.3355f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\midship\midship":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-5.7814f, 4.7866f, 4.5577f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\sidewinder\sidewinder":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-35.8092f, 42.7776f, 2.6463f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\spacecamp\spacecamp":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-8.7606f, 17.2195f, -0.3308f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\warehouse\warehouse":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-11.2818f, 0.2725f, 4.1475f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\sandbox\sandbox":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-24.9556f, -9.8958f, -17.2465f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
                     case @"levels\multi\guardian\guardian":
                         createPrematchCamera = true;
                         position = new RealPoint3d(-3.856011f, -1.605904f, 22.34261f);
