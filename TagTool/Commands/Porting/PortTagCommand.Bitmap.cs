@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private Bitmap ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private Bitmap ConvertBitmap(CacheFile.IndexItem blamTag, Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
             bitmap.UnknownB4 = 0;
@@ -60,7 +60,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch
                 {
-                    Console.WriteLine("Failed to port bitmap");
+                    Console.WriteLine($"Failed to port bitmap '{blamTag.Name}.{blamTag.GroupName}'.");
                     return null;
                 }
 #endif

@@ -56,7 +56,8 @@ namespace TagTool.Commands.Porting
             MatchShaders = 1 << 10,
             Memory = 1 << 11,
             NoRmhg = 1 << 12,
-            NoMs30 = 1 << 13
+            NoMs30 = 1 << 13,
+            Silent = 1 << 14
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -543,7 +544,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Bitmap bitm:
-                    blamDefinition = ConvertBitmap(bitm, resourceStreams);
+                    blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
                     break;
 
                 case CameraFxSettings cfxs:
@@ -696,7 +697,8 @@ namespace TagTool.Commands.Porting
 
             CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
-            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+            if (!Flags.HasFlag(PortingFlags.Silent))
+                Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
         }

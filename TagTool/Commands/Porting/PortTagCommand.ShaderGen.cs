@@ -114,7 +114,7 @@ namespace TagTool.Commands.Porting
                     datafound:
                     if (shaderSamplerArgument.Bitmap == null)
                     {
-                        Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader map for {name_str}");
+                        Console.WriteLine($"WARNING: RMCT Conversion couldn't find a shader map for {name_str}");
                         shaderSamplerArgument.Bitmap = CacheContext.GetTag<Bitmap>(@"shaders\default_bitmaps\bitmaps\gray_50_percent");
                     }
                     shaderSamplerArguments[rmt2SamplerIndex] = shaderSamplerArgument;
@@ -124,7 +124,7 @@ namespace TagTool.Commands.Porting
                     int xform_index = GetExistingXFormArgumentIndex(name, rmt2.VectorArguments);
                     if (xform_index == -1)
                     {
-                        Console.WriteLine($"Waring: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
+                        Console.WriteLine($"WARNING: RMCT Conversion couldn't find a shader xform argument for {name_str}. Defaulting to 0");
                         xform_index = 0;
                     }
                     else
@@ -284,7 +284,7 @@ namespace TagTool.Commands.Porting
             }
 
             //TODO: Maybe we can do better than this, ie. custom shaders
-            Console.WriteLine($"Waring: RMCT Conversion couldn't find a argument for {nameStr}");
+            Console.WriteLine($"WARNING: RMCT Conversion couldn't find a argument for {nameStr}");
             datafound:
 
             return shaderArgument;

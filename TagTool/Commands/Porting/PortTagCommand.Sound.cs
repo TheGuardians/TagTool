@@ -402,7 +402,7 @@ namespace TagTool.Commands.Porting
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
-                Console.WriteLine("Failed to sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
+                Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
                 return null;
             }
 
