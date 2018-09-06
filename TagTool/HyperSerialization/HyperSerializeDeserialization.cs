@@ -21,7 +21,7 @@ namespace TagTool.HyperSerialization
 
 		private Task DeserializeBranch(long offset, Stream stream, Type structure_type, TagStructureInfo structure_info, object root_parent, FieldInfo field_info, int? list_index)
 		{
-			var new_stream = new StreamMultiplxer(stream);
+			var new_stream = stream; // new StreamMultiplxer(stream);
 			new_stream.Position = offset;//todo get structure size
 
 			Task task = new Task(() => {
@@ -635,185 +635,12 @@ namespace TagTool.HyperSerialization
 
 		public PixelShaderReference DeserializePixelShaderReference(EndianReader reader)
 		{
-			// This reference is a uint32 pointer, we'll be moving the stream position around. Right before returning
-			// from this method 'reader.SeekTo(endPosition)' will bring us to where the serializer expects the next
-			// bit of data to be.
-			var endPosition = reader.BaseStream.Position + 0x04;
-
-			var headerAddress = reader.ReadUInt32();
-
-			if (headerAddress < 1)
-				return null;
-
-			var headerOffset = this.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
-			reader.SeekTo(headerOffset);
-
-			PixelShaderHeader header = null;
-			// header = (PixelShaderHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(PixelShaderHeader)));
 			throw new NotImplementedException();
-
-			if (header.ShaderDataAddress == 0)
-				return null;
-
-			var debugHeaderOffset = reader.Position;
-			ShaderDebugHeader debugHeader = null;
-			// debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(ShaderDebugHeader)));
-			throw new NotImplementedException();
-
-			if ((debugHeader.Magic >> 16) != 0x102A)
-				return null;
-
-			if (debugHeader.StructureSize == 0)
-				return null;
-
-			reader.SeekTo(debugHeaderOffset);
-			var debugData = reader.ReadBytes((int)debugHeader.StructureSize);
-
-			var updbName = "";
-
-			if (debugHeader.UpdbPointerOffset != 0)
-			{
-				reader.SeekTo(debugHeaderOffset + (long)debugHeader.UpdbPointerOffset);
-				var updbNameLength = reader.ReadUInt64();
-
-				if (updbNameLength > 0)
-					updbName = new string(reader.ReadChars((int)updbNameLength));
-			}
-
-			var totalSize = debugHeader.ShaderDataSize;
-			var constantSize = 0U;
-			var codeSize = totalSize;
-
-			if (debugHeader.CodeHeaderOffset != 0)
-			{
-				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
-				constantSize = reader.ReadUInt32();
-				codeSize = reader.ReadUInt32();
-			}
-
-			var constant_block_offset = this.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
-			reader.SeekTo(constant_block_offset);
-			var constantData = reader.ReadBytes((int)constantSize);
-
-			var shader_data_block_offset = constant_block_offset + constantSize;
-			reader.SeekTo(shader_data_block_offset);
-			var shaderData = reader.ReadBytes((int)codeSize);
-
-			reader.SeekTo(endPosition);
-
-			var info = new XboxShaderInfo
-			{
-				DataAddress = shader_data_block_offset,
-				DebugInfoOffset = (uint)debugHeaderOffset,
-				DebugInfoSize = debugHeader.StructureSize,
-				DatabasePath = updbName,
-				DataSize = totalSize,
-				ConstantDataSize = constantSize,
-				CodeDataSize = codeSize
-			};
-
-			return new PixelShaderReference
-			{
-				Info = info,
-				UpdbName = updbName,
-				Header = header,
-				DebugHeader = debugHeader,
-				DebugData = debugData,
-				ShaderData = shaderData,
-				ConstantData = constantData
-			};
 		}
 
 		public VertexShaderReference DeserializeVertexShaderReference(EndianReader reader)
 		{
-			// This reference is a uint32 pointer, we'll be moving the stream position around. Right before returning
-			// from this method 'reader.SeekTo(endPosition)' will bring us to where the serializer expects the next
-			// bit of data to be.
-			var endPosition = reader.BaseStream.Position + 0x04;
-
-			var headerAddress = reader.ReadUInt32();
-
-			if (headerAddress < 1)
-				return null;
-
-			var headerOffset = this.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
-			reader.SeekTo(headerOffset + 0x4 * sizeof(uint));
-
-			VertexShaderHeader header = null;
-			// header = (VertexShaderHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(VertexShaderHeader)));
 			throw new NotImplementedException();
-
-			if (header.ShaderDataAddress == 0)
-				return null;
-
-			var debugHeaderOffset = reader.Position;
-			ShaderDebugHeader debugHeader = null;
-			// debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, ReflectionCache.GetTagStructureInfo(typeof(ShaderDebugHeader)));
-			throw new NotImplementedException();
-
-			if ((debugHeader.Magic >> 16) != 0x102A)
-				return null;
-
-			if (debugHeader.StructureSize == 0)
-				return null;
-
-			reader.SeekTo(debugHeaderOffset);
-			var debugData = reader.ReadBytes((int)debugHeader.StructureSize);
-
-			var updbName = "";
-
-			if (debugHeader.UpdbPointerOffset != 0)
-			{
-				reader.SeekTo(debugHeaderOffset + (long)debugHeader.UpdbPointerOffset);
-				var updbNameLength = reader.ReadUInt64();
-
-				if (updbNameLength > 0)
-					updbName = new string(reader.ReadChars((int)updbNameLength));
-			}
-
-			var totalSize = debugHeader.ShaderDataSize;
-			var constantSize = 0U;
-			var codeSize = totalSize;
-
-			if (debugHeader.CodeHeaderOffset != 0)
-			{
-				reader.SeekTo(debugHeaderOffset + debugHeader.CodeHeaderOffset);
-				constantSize = reader.ReadUInt32();
-				codeSize = reader.ReadUInt32();
-			}
-
-			var constant_block_offset = this.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
-			reader.SeekTo(constant_block_offset);
-			var constantData = reader.ReadBytes((int)constantSize);
-
-			var shader_data_block_offset = constant_block_offset + constantSize;
-			reader.SeekTo(shader_data_block_offset);
-			var shaderData = reader.ReadBytes((int)codeSize);
-
-			reader.SeekTo(endPosition);
-
-			var info = new XboxShaderInfo
-			{
-				DataAddress = shader_data_block_offset,
-				DebugInfoOffset = (uint)debugHeaderOffset,
-				DebugInfoSize = debugHeader.StructureSize,
-				DatabasePath = updbName,
-				DataSize = totalSize,
-				ConstantDataSize = constantSize,
-				CodeDataSize = codeSize
-			};
-
-			return new VertexShaderReference
-			{
-				Info = info,
-				UpdbName = updbName,
-				Header = header,
-				DebugHeader = debugHeader,
-				DebugData = debugData,
-				ShaderData = shaderData,
-				ConstantData = constantData
-			};
 		}
-
 	}
 }

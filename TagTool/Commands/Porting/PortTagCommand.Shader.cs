@@ -384,31 +384,31 @@ namespace TagTool.Commands.Porting
         }
 
         [TagStructure(Name = "render_method_template", Tag = "rmt2")]
-        private class RenderMethodTemplateFast // used to deserialize as fast as possible
+        public class RenderMethodTemplateFast // used to deserialize as fast as possible
         {
             public CachedTagInstance VertexShader;
             public CachedTagInstance PixelShader;
 
             [TagField(Length = 10)]
-            public uint[] Unknown00 = new uint[10];
+            public uint[] Unknown00;
 
-            public List<Argument> Arguments = new List<Argument>();
+            public List<Argument> Arguments;
 
             [TagField(Length = 6)]
-            public uint[] Unknown02 = new uint[6];
+            public uint[] Unknown02;
 
-            public List<ShaderMap> ShaderMaps = new List<ShaderMap>();
+            public List<ShaderMap> ShaderMaps;
 
             [TagStructure]
             public class Argument
             {
-                public StringId Name = StringId.Invalid;
+                public StringId Name;
             }
 
             [TagStructure]
             public class ShaderMap
             {
-                public StringId Name = StringId.Invalid;
+                public StringId Name;
             }
         }
 

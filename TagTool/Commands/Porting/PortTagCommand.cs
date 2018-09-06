@@ -866,16 +866,14 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-            using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
-            {
-                while (enumerator.Next())
-                {
-                    var oldValue = enumerator.Field.GetValue(data);
-                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                    enumerator.Field.SetValue(data, newValue);
-                }
-            }
-            return data;
+            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, CacheContext.Version))
+			{
+			    var oldValue = tagFieldInfo.GetValue(data);
+			    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+			    tagFieldInfo.SetValue(data, newValue);
+			}
+
+			return data;
         }
 
         private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)

@@ -10,6 +10,7 @@ using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using TagTool.Tools;
 
 namespace TagTool.Commands.Porting
 {
@@ -80,7 +81,9 @@ namespace TagTool.Commands.Porting
                 Height = (uint)info.Height,
                 MipMapCount = (uint)info.MipmapCount
             };
+
             BitmapDdsFormatDetection.SetUpHeaderForFormat(info.Format, result);
+
             switch (info.Type)
             {
                 case BitmapType.CubeMap:
@@ -95,6 +98,7 @@ namespace TagTool.Commands.Porting
                     result.SurfaceInfoFlags = DdsSurfaceInfoFlags.Volume;
                     break;
             }
+
             return result;
         }
 
@@ -300,21 +304,17 @@ namespace TagTool.Commands.Porting
 
         private byte[] CompressBitmap(BlamBitmap blamBitmap, BitmapFormat format, byte[] image, bool noMips)
         {
-            string tempBitmap = @"Temp\bitmap.dds";
+            string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 
-            if (!File.Exists(@"Temp"))
+            if (!Directory.Exists(@"Temp"))
                 Directory.CreateDirectory(@"Temp");
 
-            if (File.Exists(tempBitmap))
-                File.Delete(tempBitmap);
-
             //Write input image, assuming format is A8R8G8B8
-            using (var outStream = File.Open(tempBitmap, FileMode.Create, FileAccess.Write))
+            using (var outStream = File.Create(tempBitmap))
             {
-                var header = CreateDdsHeader(blamBitmap,true);
+                var header = CreateDdsHeader(blamBitmap, true);
                 header.WriteTo(outStream);
                 outStream.Write(image, 0, image.Length);
-
             }
 
             string args = " ";
@@ -350,7 +350,7 @@ namespace TagTool.Commands.Porting
                     return null;
             }
 
-            args += @"Temp\bitmap.dds " + @"Temp\bitmap.dds";
+            args += $"{tempBitmap} {tempBitmap}";
 
             ProcessStartInfo info = new ProcessStartInfo(@"Tools\nvcompress.exe")
             {
@@ -371,15 +371,17 @@ namespace TagTool.Commands.Porting
                 var dds = DdsHeader.Read(ddsStream);
                 var dataSize = (int)(ddsStream.Length - ddsStream.Position);
 
-
                 blamBitmap.Type = BitmapDdsFormatDetection.DetectType(dds);
                 blamBitmap.Format = BitmapDdsFormatDetection.DetectFormat(dds);
-                blamBitmap.Height = (int)dds.Height;
+
+				blamBitmap.Height = (int)dds.Height;
                 blamBitmap.Width = (int)dds.Width;
-                blamBitmap.MipMapCount = (int)dds.MipMapCount-1;
+
+				blamBitmap.MipMapCount = (int)dds.MipMapCount-1;
                 if (blamBitmap.MipMapCount < 0)
                     blamBitmap.MipMapCount = 0;
-                blamBitmap.RawSize = dataSize;
+
+				blamBitmap.RawSize = dataSize;
 
                 if(format == BitmapFormat.Dxn)
                 {
@@ -387,8 +389,10 @@ namespace TagTool.Commands.Porting
                     {
                         var width = blamBitmap.Width;
                         var height = blamBitmap.Height;
-                        dataSize = width*height;
-                        blamBitmap.MipMapCount = 0;
+
+						dataSize = width * height;
+
+						blamBitmap.MipMapCount = 0;
                         while ((width >= 8) && (height >= 8))
                         {
                             width /= 2;
@@ -403,13 +407,10 @@ namespace TagTool.Commands.Porting
                 byte[] raw = new byte[dataSize];
                 ddsStream.Read(raw, 0, dataSize);
                 result = raw;
-
             }
 
-            if (File.Exists(tempBitmap))
-                File.Delete(tempBitmap);
-           
-            return result;
+			AsyncJobManager.CleanupFile(tempBitmap, 30_000);
+			return result;
         }
 
         private byte[] ConvertBlamBitmapData(byte[] raw, BlamBitmap blamBitmap)
@@ -455,6 +456,7 @@ namespace TagTool.Commands.Porting
                     noMips = false;
                     genMips = true;
                     break;
+
                 //Converted to A8Y8
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.Dxt5a:
@@ -718,7 +720,6 @@ namespace TagTool.Commands.Porting
 
         private byte[] ConvertBlamCubeData(byte[] raw, BlamBitmap blamBitmap)
         {
-
             blamBitmap.MipMapCount = 0;
 
             byte[] result;
@@ -810,9 +811,8 @@ namespace TagTool.Commands.Porting
                     Array.Copy(tempBuffer, 0, result, i * realSize, realSize);
                 }
             }
+
             return result;
-
-
         }
 
         private void SetTagData(BlamBitmap blamBitmap, Bitmap.Image image)

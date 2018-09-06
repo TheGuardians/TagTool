@@ -61,6 +61,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <DocumentationFile>bin\x64\Debug\Documentation.xml</DocumentationFile>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -367,15 +368,11 @@
     <Compile Include="Common\Bitmask.cs" />
     <Compile Include="Common\Bounds.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
-    <Compile Include="HyperSerialization\BaseDictionary.cs" />
     <Compile Include="HyperSerialization\BlamType.cs" />
     <Compile Include="HyperSerialization\HyperSerializer.cs" />
     <Compile Include="HyperSerialization\HyperSerializeDeserialization.cs" />
     <Compile Include="HyperSerialization\HyperSerializerSerialization.cs" />
     <Compile Include="HyperSerialization\IHyperSerializationContext.cs" />
-    <Compile Include="HyperSerialization\StreamMultiplxr.cs" />
-    <Compile Include="HyperSerialization\WeakDictionary.cs" />
-    <Compile Include="HyperSerialization\WeakKeyReference.cs" />
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />
@@ -529,7 +526,7 @@
     <Compile Include="Serialization\ResourceSerializationContext.cs" />
     <Compile Include="Serialization\TagDeserializer.cs" />
     <Compile Include="Serialization\TagFieldAttribute.cs" />
-    <Compile Include="Serialization\TagFieldEnumerator.cs" />
+    <Compile Include="Serialization\TagFieldEnumerable.cs" />
     <Compile Include="Serialization\TagSerializationContext.cs" />
     <Compile Include="Serialization\TagSerializer.cs" />
     <Compile Include="Serialization\TagStructureAttribute.cs" />

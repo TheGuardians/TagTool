@@ -68,9 +68,8 @@ namespace TagTool.Commands.Porting
             var blockNameLow = blockName.ToLower();
             var blockNameSnake = blockName.ToSnakeCase();
 
-			FieldInfo field;
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
-				field = enumerator.Find(f =>
+			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+				.Find(f =>
 					f.Name == blockName ||
 					f.Name.ToLower() == blockNameLow ||
 					f.Name.ToSnakeCase() == blockNameSnake);

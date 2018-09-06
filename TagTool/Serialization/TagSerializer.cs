@@ -60,9 +60,8 @@ namespace TagTool.Serialization
         {
             var baseOffset = block.Stream.Position;
 
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(info))
-				while (enumerator.Next())
-					SerializeProperty(info.Version, context, tagStream, block, structure, enumerator, baseOffset);
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(info))
+				SerializeProperty(info.Version, context, tagStream, block, structure, tagFieldInfo, baseOffset);
 
             // Honor the struct size if it's defined
             if (info.TotalSize > 0)
@@ -85,22 +84,22 @@ namespace TagTool.Serialization
         /// <param name="tagStream">The stream to write completed blocks of tag data to.</param>
         /// <param name="block">The temporary block to write incomplete tag data to.</param>
         /// <param name="instance">The object that the property belongs to.</param>
-        /// <param name="enumerator">The field enumerator.</param>
+        /// <param name="tagFieldInfo">The field enumerator.</param>
         /// <param name="baseOffset">The base offset of the structure from the start of its block.</param>
         /// <exception cref="System.InvalidOperationException">Offset for property \ + property.Name + \ is outside of its structure</exception>
-        private void SerializeProperty(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldEnumerator enumerator, long baseOffset)
+        private void SerializeProperty(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (enumerator.Attribute.Local == true)
+            if (tagFieldInfo.Attribute.Local == true)
                 return;
 
-            if (enumerator.Attribute.Offset >= 0)
-                block.Stream.Position = baseOffset + enumerator.Attribute.Offset;
+            if (tagFieldInfo.Attribute.Offset >= 0)
+                block.Stream.Position = baseOffset + tagFieldInfo.Attribute.Offset;
 
             SerializeValue(version, context, tagStream, block,
-                enumerator.Field.GetValue(instance), enumerator.Attribute, enumerator.Field.FieldType);
+                tagFieldInfo.GetValue(instance), tagFieldInfo.Attribute, tagFieldInfo.FieldType);
 
-            if (enumerator.Attribute.Size > 0)
-                block.Stream.Position = block.Stream.Position + enumerator.Attribute.Size;
+            if (tagFieldInfo.Attribute.Size > 0)
+                block.Stream.Position = block.Stream.Position + tagFieldInfo.Attribute.Size;
         }
 
         /// <summary>

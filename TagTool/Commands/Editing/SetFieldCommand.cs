@@ -83,9 +83,8 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			FieldInfo field;
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
-				field = enumerator.Find(f =>
+			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+				.Find(f =>
 					f.Name == fieldName ||
 					f.Name.ToLower() == fieldNameLow ||
 					f.Name.ToSnakeCase() == fieldNameSnake);
