@@ -1017,8 +1017,15 @@ namespace TagTool.Commands.Porting
             }
 
             // one final check
-            // nope nopenopenepe this needs to be verified against it's pixl tag, not global registers
-            var validEDRegisters = new List<int> { 000, 001, 002, 003, 004, 005, 006, 007, 008, 009, 010, 011, 012, 013, 014, 015, 016, 017, 018, 023, 024, 025, 026, 027, 028, 030, 031, 032, 033, 034, 035, 036, 037, 038, 039, 040, 041, 042, 043, 044, 045, 046, 047, 048, 049, 050, 051, 053, 057, 058, 059, 060, 061, 062, 063, 064, 065, 066, 067, 068, 069, 070, 071, 072, 073, 074, 075, 076, 077, 078, 079, 080, 081, 082, 083, 084, 085, 086, 087, 088, 089, 090, 091, 092, 093, 094, 095, 096, 097, 099, 100, 102, 103, 104, 105, 106, 107, 108, 109, 114, 120, 121, 122, 164, 168, 172, 173, 174, 175, 190, 191, 200, 201, 203, 204, 210, 211, 212, 213, 215, 216, 217, 218, 219, 220, 221, 222 };
+            // Gather all register indexes from pixl tag. Then check against all the converted register indexes. 
+            // It should detect registers that are invalid and would crash, but it does not verify if the register is valid.
+            var validEDRegisters = new List<int>();
+
+            foreach (var a in edPixl.Shaders)
+                foreach (var b in a.PCParameters)
+                    if (!validEDRegisters.Contains(b.RegisterIndex))
+                        validEDRegisters.Add(b.RegisterIndex);
+
             foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
             {
                 if (!validEDRegisters.Contains((a.RegisterIndex)))

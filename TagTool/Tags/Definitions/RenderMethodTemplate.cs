@@ -156,7 +156,7 @@ namespace TagTool.Tags.Definitions
         }
 
         // getters and setters put in here as this value is endian dependant
-        [TagStructure(Size = 0x2)]
+        [TagStructure(Size = 0x0)]
         public class DrawMode : PackedInteger_10_6
         {
 
