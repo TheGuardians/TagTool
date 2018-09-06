@@ -81,8 +81,11 @@ namespace TagTool.Commands.RenderModels
                     if (permutation.MeshCount > 1)
                         throw new NotSupportedException("multiple permutation meshes");
 
+                    if (permutation.MeshIndex == -1)
+                        continue;
+
                     var permName = CacheContext.GetString(permutation.Name);
-                    var meshName = $"{regionName}_{permName}Mesh";
+                    var meshName = $"{regionName.Replace('_', '-')}_{permName.Replace('_', '-')}Mesh";
 
                     var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
 
