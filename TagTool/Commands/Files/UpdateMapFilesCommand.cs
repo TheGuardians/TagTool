@@ -123,11 +123,11 @@ namespace TagTool.Commands.Files
                             using (var infoStream = mapInfoFile.OpenRead())
                             using (var infoReader = new BinaryReader(infoStream))
                             {
-                                var mapNames = new char[12][];
+                                var mapNames = new byte[12][];
 
                                 infoStream.Position = 0x44;
                                 for (var i = 0; i < 12; i++)
-                                    mapNames[i] = infoReader.ReadChars(0x40);
+                                    mapNames[i] = infoReader.ReadBytes(0x40);
 
                                 stream.Position = 0x33D4;
                                 foreach (var mapNameUnicode in mapNames)
