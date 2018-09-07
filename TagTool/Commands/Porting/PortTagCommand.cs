@@ -9,7 +9,6 @@ using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.Serialization;
-using TagTool.Shaders;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
@@ -622,6 +621,10 @@ namespace TagTool.Commands.Porting
                 // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
                 case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
                     blamDefinition = null;
+                    break;
+
+                case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
+                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds.rmsh");
                     break;
 
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:

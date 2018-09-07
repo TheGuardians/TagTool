@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = FixRmt2Reference(cacheStream, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
                 return CacheContext.Deserialize<Shader>(cacheStream, CacheContext.GetTag<Shader>(@"shaders\invalid"));
@@ -760,8 +760,24 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private CachedTagInstance FixRmt2Reference(Stream cacheStream, string blamTagName, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
+            if (blamTagName == @"levels\multi\snowbound\sky\shaders\skydome")
+            {
+                try
+                {
+                    return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
+                }
+                catch
+                {
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                    }
+                    catch { }
+                }
+            }
+
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
             foreach (var instance in CacheContext.TagCache.Index)

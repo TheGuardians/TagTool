@@ -46,7 +46,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeLightprobeDeathDelay;
         public float RuntimeLocalSpaceDeathDelay;
         public List<ConicalDistribution> ConicalDistributions;
-        
+
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
@@ -190,17 +190,20 @@ namespace TagTool.Tags.Definitions
                 public float Unknown16;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
-                
+
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
                 [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
                 public class Emitter
                 {
                     public StringId Name;
-                    public ushort Flags;
+                    public byte Version;
+                    public EmissionShapeValue EmissionShape;
 
-                    [TagField(Padding = true, Length = 2)]
+                    [TagField(Padding = true, Length = 1)]
                     public byte[] Unused;
+
+                    public FlagsValue EmitterFlags;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public float Unknown2;
@@ -279,7 +282,7 @@ namespace TagTool.Tags.Definitions
 
                     [TagField(Format = "World Units Per Second Per Second")]
                     public ParticleSelfAccelerationData ParticleSelfAcceleration;
-                    
+
                     [TagField(Format = "World Units Per Second")]
                     public TagMapping ParticleVelocity;
 
@@ -435,13 +438,9 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30)]
                     public struct RuntimeMGpuData
                     {
-                        public short Unknown1;
-                        public sbyte Unknown2;
-                        public sbyte Unknown3;
-                        public short Unknown4;
-                        public sbyte Unknown5;
-                        public sbyte Unknown6;
-                        public int Unknown7;
+                        public int ConstantPerParticleProperties;
+                        public int ConstantOverTimeProperties;
+                        public int UsedParticleStates;
                         public List<Property> Properties;
                         public List<Function> Functions;
                         public List<Color> Colors;
@@ -591,7 +590,7 @@ namespace TagTool.Tags.Definitions
         AngularVelocityDelta,
         TypeSpecificScale
     }
-    
+
     public enum ParticleCoordinateSystem : short
     {
         World,
