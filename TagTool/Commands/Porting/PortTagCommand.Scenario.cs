@@ -687,7 +687,6 @@ namespace TagTool.Commands.Porting
             if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
             {
                 Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
-
                 return;
             }
 
@@ -778,7 +777,7 @@ namespace TagTool.Commands.Porting
             // If no match was found, the opcode is currently unsupported.
             //
 
-            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3})");
+            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
 
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
