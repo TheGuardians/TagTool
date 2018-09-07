@@ -162,11 +162,11 @@ namespace TagTool.Tags.Definitions
                 public int BlockOffset;
                 public int Address;
 
-                [TagField(Local = true)]
+                [TagField(Runtime = true)]
                 public int Type;
-                [TagField(Local = true)]
+                [TagField(Runtime = true)]
                 public int Offset;
-                [TagField(Local = true)]
+                [TagField(Runtime = true)]
                 public int RawAddress;
             }
 

@@ -84,7 +84,7 @@ namespace TagTool.Serialization
         /// <exception cref="System.InvalidOperationException">Offset for property is outside of its structure</exception>
         public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (tagFieldInfo.Attribute.Local == true)
+            if (tagFieldInfo.Attribute.Runtime == true)
                 return;
 
             if (tagFieldInfo.Attribute.Padding == true)

@@ -89,7 +89,7 @@ namespace TagTool.Serialization
         /// <exception cref="System.InvalidOperationException">Offset for property \ + property.Name + \ is outside of its structure</exception>
         private void SerializeProperty(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (tagFieldInfo.Attribute.Local == true)
+            if (tagFieldInfo.Attribute.Runtime == true)
                 return;
 
             if (tagFieldInfo.Attribute.Offset >= 0)

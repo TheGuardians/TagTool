@@ -16,6 +16,26 @@ namespace TagTool.Tags.Definitions
         public List<Size> Sizes;
         public List<Segment> Segments;
 
+        [TagField(Runtime = true)]
+        public bool InteropDataBuilt = false;
+
+        public void BuildInteropData()
+        {
+            if (InteropDataBuilt)
+                return;
+
+            foreach (var segmentation in Segments)
+                segmentation.UpdatePageData(RawPages);
+
+            foreach (var page in RawPages)
+                page.CalculateSegmentSizes();
+
+            foreach (var segmentation in Segments)
+                segmentation.UpdateSegmentData(RawPages);
+
+            InteropDataBuilt = true;
+        }
+
         [TagStructure(Size = 0x10)]
         public class CompressionCodec
         {
@@ -63,70 +83,62 @@ namespace TagTool.Tags.Definitions
             public short BlockAssetCount;
             public short Unknown3;
 
-            [TagField(Local = true)]
+            [TagField(Runtime = true)]
             public List<int> SegmentOffsets = new List<int>();
 
-            [TagField(Local = true)]
+            [TagField(Runtime = true)]
             public List<int> SegmentSizes = new List<int>();
 
-            [TagField(Local = true)]
+            [TagField(Runtime = true)]
             public byte[] PageData = null;
 
-            public void AddSegment(int offset)
+            public void AddSegment(int segmentOffset)
             {
-                if (UncompressedBlockSize != 0 && !SegmentOffsets.Contains(offset))
+                if (UncompressedBlockSize != 0 && !SegmentOffsets.Contains(segmentOffset))
                 {
-                    SegmentOffsets.Add(offset);
-                    SegmentSizes.Add(-1); // we'll update this when we post-process in 'CalculateSegmentSizes'
+                    SegmentOffsets.Add(segmentOffset);
+                    SegmentSizes.Add(-1);
                 }
             }
 
             public void CalculateSegmentSizes()
             {
-                // If this page isn't null
-                if (UncompressedBlockSize == 0) return;
+                if (UncompressedBlockSize == 0)
+                    return;
 
-                // We work backwards to find the sizes as we can just find the 
-                // distances between each segment. For the last segment we can 
-                // just use the page size minus the offset to find it's size
-                int last_element = SegmentOffsets.Count - 1;
+                var index = SegmentOffsets.Count - 1;
 
-                // TODO: there should be at least one segment referencing this page...?
-                if (last_element == -1)
+                if (index == -1)
                 {
                     SegmentOffsets.Add(0);
                     SegmentSizes.Add(UncompressedBlockSize);
                 }
-                // we only have one element so no point in loopin'
-                else if (last_element == 0) SegmentSizes[0] = UncompressedBlockSize;
+                else if (index == 0)
+                {
+                    SegmentSizes[0] = UncompressedBlockSize;
+                }
                 else
                 {
-                    // figure out the segment sizes via the next
-                    // segment's offset after 'x' segment
-                    SegmentOffsets.Sort(); // loop depends on the offsets being linear
+                    SegmentOffsets.Sort();
 
-                    // Figure out the last segment first. This used to be done 
-                    // in the for loop with a check 'x == last_element' but doing 
-                    // it here leaves out that boolean check and possible code 
-                    // jump in the result code
-                    SegmentSizes[last_element] = UncompressedBlockSize - SegmentOffsets[last_element];
-                    for (int x = last_element - 1; x >= 0; x--)
-                        SegmentSizes[x] = SegmentOffsets[x + 1] - SegmentOffsets[x];
+                    SegmentSizes[index] = UncompressedBlockSize - SegmentOffsets[index];
+
+                    for (var i = index - 1; i >= 0; i--)
+                        SegmentSizes[i] = SegmentOffsets[i + 1] - SegmentOffsets[i];
                 }
             }
 
-            public int GetSegmentSize(int segment_offset)
+            public int GetSegmentSize(int segmentOffset)
             {
-                // Offsets are aligned with Sizes so the indices are transferable
-                int x = SegmentOffsets.IndexOf(segment_offset);
+                var result = SegmentOffsets.IndexOf(segmentOffset);
 
-                if (x != -1) // make sure the size has been post-processed first
-                    x = SegmentSizes[x];
+                if (result != -1)
+                    result = SegmentSizes[result];
 
-                return x;
+                return result;
             }
 
-            public byte[] GetSegmentData(CacheFileGen3 cf, CacheFileResourceLayoutTable owner, int segment_offset)
+            public byte[] GetSegmentData(CacheFileGen3 cf, CacheFileResourceLayoutTable owner, int segmentOffset)
             {
                 if (PageData == null)
                 {
@@ -162,14 +174,15 @@ namespace TagTool.Tags.Definitions
                     }
                 }
 
-                int segment_size = GetSegmentSize(segment_offset);
-                if (segment_size == -1) return null; // offset was either invalid or sizes haven't been post-processed
+                var segmentSize = GetSegmentSize(segmentOffset);
 
-                byte[] segment_data = new byte[segment_size];
-                // Extract the segment data from the page
-                Array.Copy(PageData, segment_offset, segment_data, 0, segment_data.Length);
+                if (segmentSize == -1)
+                    return null;
 
-                return segment_data;
+                var segmentData = new byte[segmentSize];
+                Array.Copy(PageData, segmentOffset, segmentData, 0, segmentData.Length);
+
+                return segmentData;
             }
         }
 
@@ -190,12 +203,36 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, Align = 0x8)]
         public class Segment
         {
-            public short PrimaryPageIndex;
-            public short SecondaryPageIndex;
-            public int PrimarySegmentOffset;
-            public int SecondarySegmentOffset;
-            public short PrimarySizeIndex;
-            public short SecondarySizeIndex;
+            public short RequiredPageIndex;
+            public short OptionalPageIndex;
+            public int RequiredSegmentOffset;
+            public int OptionalSegmentOffset;
+            public short RequiredSizeIndex;
+            public short OptionalSizeIndex;
+
+            [TagField(Runtime = true)]
+            public int RequiredSize = -1;
+
+            [TagField(Runtime = true)]
+            public int OptionalSize = -1;
+
+            public void UpdatePageData(List<RawPage> pages)
+            {
+                if (RequiredPageIndex > 0)
+                    pages[RequiredPageIndex].AddSegment(RequiredSegmentOffset);
+
+                if (OptionalSegmentOffset > 0)
+                    pages[OptionalSegmentOffset].AddSegment(OptionalSegmentOffset);
+            }
+
+            public void UpdateSegmentData(List<RawPage> pages)
+            {
+                if (RequiredPageIndex > 0)
+                    RequiredSize = pages[RequiredPageIndex].GetSegmentSize(RequiredSegmentOffset);
+
+                if (OptionalSegmentOffset > 0)
+                    OptionalSize = pages[OptionalSegmentOffset].GetSegmentSize(OptionalSegmentOffset);
+            }
         }
     }
 }
