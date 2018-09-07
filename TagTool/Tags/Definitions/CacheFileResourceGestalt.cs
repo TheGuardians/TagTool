@@ -24,11 +24,7 @@ namespace TagTool.Tags.Definitions
         public short Flags;
         public List<ResourceType> ResourceTypes;
         public List<ResourceStructureType> ResourceStructureTypes;
-        public List<CompressionCodec> CompressionCodecs;
-        public List<ExternalCacheReference> ExternalCacheReferences; 
-        public List<RawPage> RawPages;
-        public List<Size> Sizes;
-        public List<Segment> Segments;
+        public CacheFileResourceLayoutTable ResourceLayoutTable = new CacheFileResourceLayoutTable();
         public List<TagResource> TagResources;
         public List<Zoneset> DesignerZonesets;
         public List<Zoneset> GlobalZoneset;
@@ -142,79 +138,6 @@ namespace TagTool.Tags.Definitions
             public byte[] Guid;
             [TagField(Label = true)]
             public StringId Name;
-        }
-
-        [TagStructure(Size = 0x10)]
-        public class CompressionCodec
-        {
-            [TagField(Length = 16)]
-            public byte[] Guid;
-        }
-
-        [TagStructure(Size = 0x108, Align = 0x10)]
-        public class ExternalCacheReference
-        {
-            [TagField(Length = 0x12)]
-            public string MapPath;
-
-            [TagField(Length = 0xEE)]
-            public byte[] UnusedData;
-
-            public short Unknown;
-            public short Unknown2;
-            public uint Unknown3;
-        }
-
-        [TagStructure(Size = 0x58, Align = 0x8)]
-        public class RawPage
-        {
-            public short Salt;
-            public byte Flags;
-            public byte CompressionCodecIndex;
-            public short SharedCacheIndex;
-            public short Unknown;
-
-            public int BlockOffset;
-            public uint CompressedBlockSize;
-            public uint UncompressedBlockSize;
-            public uint CrcChecksum;
-
-            [TagField(Length = 20)]
-            public byte[] EntireBufferHash;
-
-            [TagField(Length = 20)]
-            public byte[] FirstChunkHash;
-
-            [TagField(Length = 20)]
-            public byte[] LastChunkHash;
-
-            public short BlockAssetCount;
-            public short Unknown3;
-        }
-
-        [TagStructure(Size = 0x10, Align = 0x8)]
-        public class Size
-        {
-            public int OverallSize;
-            public List<Part> Parts;
-
-            [TagStructure(Size = 0x8)]
-            public class Part
-            {
-                public int Unknown;
-                public int Size;
-            }
-        }
-
-        [TagStructure(Size = 0x10, Align = 0x8)]
-        public class Segment
-        {
-            public short PrimaryPageIndex;
-            public short SecondaryPageIndex;
-            public int PrimarySegmentOffset;
-            public int SecondarySegmentOffset;
-            public short PrimarySizeIndex;
-            public short SecondarySizeIndex;
         }
 
         [TagStructure(Size = 0x40)]
