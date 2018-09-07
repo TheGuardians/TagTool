@@ -218,20 +218,20 @@ namespace TagTool.Tags.Definitions
 
             public void UpdatePageData(List<RawPage> pages)
             {
-                if (RequiredPageIndex > 0)
+                if (RequiredPageIndex != -1)
                     pages[RequiredPageIndex].AddSegment(RequiredSegmentOffset);
 
-                if (OptionalSegmentOffset > 0)
-                    pages[OptionalSegmentOffset].AddSegment(OptionalSegmentOffset);
+                if (OptionalPageIndex != -1 && RequiredSegmentOffset != OptionalSegmentOffset)
+                    pages[OptionalPageIndex].AddSegment(OptionalSegmentOffset);
             }
 
             public void UpdateSegmentData(List<RawPage> pages)
             {
-                if (RequiredPageIndex > 0)
+                if (RequiredPageIndex != -1)
                     RequiredSize = pages[RequiredPageIndex].GetSegmentSize(RequiredSegmentOffset);
 
-                if (OptionalSegmentOffset > 0)
-                    OptionalSize = pages[OptionalSegmentOffset].GetSegmentSize(OptionalSegmentOffset);
+                if (OptionalPageIndex != -1 && RequiredSegmentOffset != OptionalSegmentOffset)
+                    OptionalSize = pages[OptionalPageIndex].GetSegmentSize(OptionalSegmentOffset);
             }
         }
     }
