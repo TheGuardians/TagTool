@@ -159,13 +159,49 @@ namespace TagTool.Cache
             }
         }
 
-        /// <summary>
-        /// Compares two version numbers.
-        /// </summary>
-        /// <param name="lhs">The left-hand version number.</param>
-        /// <param name="rhs">The right-hand version number.</param>
-        /// <returns>A positive value if the left version is newer, a negative value if the right version is newer, and 0 if the versions are equivalent.</returns>
-        public static int Compare(CacheVersion lhs, CacheVersion rhs)
+		/// <summary>
+		/// Checks if a <see cref="CacheVersion"/> is in Little-Endian or Big-Endian.
+		/// </summary>
+		/// <param name="version">The <see cref="CacheVersion"/> to check the endianness of.</param>
+		/// <returns>True if the <see cref="CacheVersion"/> is Little-Endian, false otherwise.</returns>
+		public static bool IsLittleEndian(CacheVersion version)
+		{
+			switch (version)
+			{
+				case CacheVersion.Halo3Retail:
+				case CacheVersion.Halo3ODST:
+				case CacheVersion.HaloReach:
+					return false;
+				case CacheVersion.Halo2Xbox:
+				case CacheVersion.Halo2Vista:
+				case CacheVersion.HaloOnline106708:
+				case CacheVersion.HaloOnline235640:
+				case CacheVersion.HaloOnline301003:
+				case CacheVersion.HaloOnline327043:
+				case CacheVersion.HaloOnline372731:
+				case CacheVersion.HaloOnline416097:
+				case CacheVersion.HaloOnline430475:
+				case CacheVersion.HaloOnline454665:
+				case CacheVersion.HaloOnline449175:
+				case CacheVersion.HaloOnline498295:
+				case CacheVersion.HaloOnline530605:
+				case CacheVersion.HaloOnline532911:
+				case CacheVersion.HaloOnline554482:
+				case CacheVersion.HaloOnline571627:
+				case CacheVersion.HaloOnline700123:
+					return true;
+				default:
+					throw new NotImplementedException(version.ToString());
+			}
+		}
+
+		/// <summary>
+		/// Compares two version numbers.
+		/// </summary>
+		/// <param name="lhs">The left-hand version number.</param>
+		/// <param name="rhs">The right-hand version number.</param>
+		/// <returns>A positive value if the left version is newer, a negative value if the right version is newer, and 0 if the versions are equivalent.</returns>
+		public static int Compare(CacheVersion lhs, CacheVersion rhs)
         {
             // Assume the enum values are in order by release date
             return (int)lhs - (int)rhs;

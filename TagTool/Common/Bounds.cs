@@ -8,13 +8,11 @@ namespace TagTool.Common
         /// Gets the lowerimum value within the range.
         /// </summary>
         public T Lower { get; set; }
-		public object _Lower { get => this.Lower; set => this.Lower = (T)value; }
 
         /// <summary>
         /// Gets the upperimum value within the range.
         /// </summary>
         public T Upper { get; set; }
-		public object _Upper { get => this.Upper; set => this.Upper = (T)value; }
 
 		/// <summary>
 		/// Creates a new range from a lowerimum and a upperimum value.
@@ -47,9 +45,5 @@ namespace TagTool.Common
         public override string ToString() => $"{{ Lower: {Lower}, Upper: {Upper} }}";
     }
 
-	public interface IBounds
-	{
-		object _Lower { get; set; }
-		object _Upper { get; set; }
-	}
+	public interface IBounds { }
 }

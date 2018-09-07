@@ -369,10 +369,10 @@
     <Compile Include="Common\Bounds.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="HyperSerialization\BlamType.cs" />
+    <Compile Include="HyperSerialization\EndianByteArray.cs" />
     <Compile Include="HyperSerialization\HyperSerializer.cs" />
-    <Compile Include="HyperSerialization\HyperSerializeDeserialization.cs" />
-    <Compile Include="HyperSerialization\HyperSerializerSerialization.cs" />
-    <Compile Include="HyperSerialization\IHyperSerializationContext.cs" />
+    <Compile Include="HyperSerialization\HyperDeserializer.cs" />
+    <Compile Include="HyperSerialization\TaskBag.cs" />
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />
@@ -730,6 +730,7 @@
     <Reference Include="LZ4, Version=1.0.15.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
       <HintPath>..\packages\lz4net.1.0.15.93\lib\net4-client\LZ4.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Xml" />

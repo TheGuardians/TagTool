@@ -9,7 +9,7 @@ namespace TagTool.Cache
     /// <summary>
     /// Describes a tag in a tag cache.
     /// </summary>
-    public class CachedTagInstance
+    public class CachedTagInstance : IBlamType
     {
         private List<uint> _pointerOffsets = new List<uint>();
         private List<uint> _resourceOffsets = new List<uint>();
