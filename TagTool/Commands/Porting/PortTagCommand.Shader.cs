@@ -188,9 +188,6 @@ namespace TagTool.Commands.Porting
                         }
                     };
 
-            if (finalRm.ShaderProperties[0].Unknown7 >= 2)
-                finalRm.ShaderProperties[0].Unknown7 += 2;
-
             return finalRm;
         }
 
