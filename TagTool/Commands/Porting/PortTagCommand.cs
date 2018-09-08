@@ -624,7 +624,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
-                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds.rmsh");
+                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
                     break;
 
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
