@@ -1,11 +1,9 @@
 ﻿using TagTool.Bitmaps;
 using TagTool.Cache;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Models
 {

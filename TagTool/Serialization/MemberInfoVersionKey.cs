@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using TagTool.Cache;
-using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
-	/// <summary>
-	/// Combines a <see cref="MemberInfo"/>.MetadataToken and (<see cref="int"/>)<see cref="CacheVersion"/> into
-	/// a unified value which can be used as a key into a <see cref="Dictionary{TKey, TValue}"/>.
-	/// </summary>
-	public struct MemberInfoVersionKey : IEquatable<MemberInfoVersionKey>
+    /// <summary>
+    /// Combines a <see cref="MemberInfo"/>.MetadataToken and (<see cref="int"/>)<see cref="CacheVersion"/> into
+    /// a unified value which can be used as a key into a <see cref="Dictionary{TKey, TValue}"/>.
+    /// </summary>
+    public struct MemberInfoVersionKey : IEquatable<MemberInfoVersionKey>
 	{
 		/// <summary>
 		/// The <see cref="Type"/>, <see cref="FieldInfo"/>, <see cref="PropertyInfo"/>, <see cref="MethodInfo"/>, etc.

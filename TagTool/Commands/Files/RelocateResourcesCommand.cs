@@ -5,7 +5,6 @@ using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Files
 {

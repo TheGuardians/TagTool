@@ -6,7 +6,6 @@ using TagTool.Bitmaps;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.Bitmaps
 {

@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
-using System.Linq;
 
 namespace TagTool.Commands.Files
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.CSharp;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,7 +14,7 @@ using TagTool.Tags;
 
 namespace TagTool.HyperSerialization
 {
-	public static class HyperDeserializer
+    public static class HyperDeserializer
 	{
 		public static T Deserialize<T>(byte[] data, CachedTagInstance tag, GameCacheContext cacheContext)
 		{

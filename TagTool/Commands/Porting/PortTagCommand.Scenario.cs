@@ -6,7 +6,6 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -1008,15 +1007,15 @@ namespace TagTool.Commands.Porting
         
         public void AdjustScripts(Scenario scnr, string tagName)
         {
-            tagName = tagName.Split("\\".ToCharArray()).Last();
+            var mapName = tagName.Split("\\".ToCharArray()).Last();
 
-            if (tagName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
-                tagName = "mainmenu_odst";
+            if (mapName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
+                mapName = "mainmenu_odst";
 
-            if (!DisabledScriptsString.ContainsKey(tagName))
+            if (!DisabledScriptsString.ContainsKey(mapName))
                 return;
 
-            foreach (var line in DisabledScriptsString[tagName])
+            foreach (var line in DisabledScriptsString[mapName])
             {
                 var items = line.Split(",".ToCharArray());
 
@@ -1035,6 +1034,33 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
+            }
+
+            if (mapName == "010_jungle")
+            {
+                // player0 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2448].Opcode = 0x115;
+                scnr.ScriptExpressions[2449].Opcode = 0x115;
+                scnr.ScriptExpressions[2451].Opcode = 0x00C;
+                scnr.ScriptExpressions[2451].Data[0] = 21;
+
+                // player1 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2456].Opcode = 0x115;
+                scnr.ScriptExpressions[2457].Opcode = 0x115;
+                scnr.ScriptExpressions[2459].Opcode = 0x00C;
+                scnr.ScriptExpressions[2459].Data[0] = 21;
+
+                // player2 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2464].Opcode = 0x115;
+                scnr.ScriptExpressions[2465].Opcode = 0x115;
+                scnr.ScriptExpressions[2467].Opcode = 0x00C;
+                scnr.ScriptExpressions[2467].Data[0] = 21;
+
+                // player3 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2472].Opcode = 0x115;
+                scnr.ScriptExpressions[2473].Opcode = 0x115;
+                scnr.ScriptExpressions[2475].Opcode = 0x00C;
+                scnr.ScriptExpressions[2475].Data[0] = 21;
             }
         }
 

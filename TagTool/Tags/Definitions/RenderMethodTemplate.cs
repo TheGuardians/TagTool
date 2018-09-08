@@ -2,8 +2,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
-using System;
-using System.Runtime.InteropServices;
 
 namespace TagTool.Tags.Definitions
 {

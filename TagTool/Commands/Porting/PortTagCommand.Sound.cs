@@ -12,8 +12,6 @@ using System.Linq;
 using TagTool.Tags;
 using TagTool.Audio;
 using System.Threading;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TagTool.Commands.Porting
