@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Diagnostics;
 
 namespace TagTool.Commands.Shaders
 {
