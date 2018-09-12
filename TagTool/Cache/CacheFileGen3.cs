@@ -300,7 +300,8 @@ namespace TagTool.Cache
             int index = (Loc.OptionalPageIndex != -1) ? Loc.OptionalPageIndex : Loc.RequiredPageIndex;
             int locOffset = (Loc.OptionalSegmentOffset != -1) ? Loc.OptionalSegmentOffset : Loc.RequiredSegmentOffset;
 
-            if (index == -1 || locOffset == -1) return null;
+            if (index == -1 || locOffset == -1)
+                return null;
 
             if (ResourceLayoutTable.RawPages[index].BlockOffset == -1)
             {
