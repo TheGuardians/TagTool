@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x68, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "effect", Tag = "effe", Size = 0x70, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "effect", Tag = "effe", Size = 0x70, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x60, MinVersion = CacheVersion.HaloReach)]
     public class Effect
     {
@@ -16,13 +16,13 @@ namespace TagTool.Tags.Definitions
         public float OverlapThreshold;
         public float ContinueIfWithin;
         public float DeathDelay;
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown1;
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown2;
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown3;
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown4;
         public short LoopStartEvent;
         public EffectPriority Priority;
@@ -50,7 +50,7 @@ namespace TagTool.Tags.Definitions
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
-        [TagStructure(Size = 0xC)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class Location
         {
@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
             public EffectPriority Priority;
         }
 
-        [TagStructure(Size = 0x44)]
+        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
         public class Event
         {
@@ -94,7 +94,7 @@ namespace TagTool.Tags.Definitions
             public List<Acceleration> Accelerations;
             public List<ParticleSystem> ParticleSystems;
 
-            [TagStructure(Size = 0x60)]
+            [TagStructure(Size = 0x60, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
             public class Part
             {
@@ -150,7 +150,7 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class ParticleSystem
             {
@@ -192,7 +192,7 @@ namespace TagTool.Tags.Definitions
                 public float Unknown17;
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
+                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
                 public class Emitter
                 {

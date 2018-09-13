@@ -440,7 +440,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (Flags.HasFlag(PortingFlags.New) && !Flags.HasFlag(PortingFlags.Recursive))
+            if (Flags.HasFlag(PortingFlags.New) && (!Flags.HasFlag(PortingFlags.Recursive) && wasSingle))
             {
                 Flags &= ~PortingFlags.New;
                 Flags |= PortingFlags.Recursive;
