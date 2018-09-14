@@ -63,13 +63,13 @@ namespace TagTool.Serialization
         {
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(info))
-			{
-				while (enumerator.Next())
-					DeserializeProperty(reader, context, instance, enumerator, baseOffset);
-				if (enumerator.Info.TotalSize > 0)
-					reader.BaseStream.Position = baseOffset + enumerator.Info.TotalSize;
-			}
+
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(info))
+				DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
+
+			if (info.TotalSize > 0)
+					reader.BaseStream.Position = baseOffset + info.TotalSize;
+
             return instance;
         }
 
@@ -79,26 +79,26 @@ namespace TagTool.Serialization
         /// <param name="reader">The reader.</param>
         /// <param name="context">The serialization context to use.</param>
         /// <param name="instance">The instance to store the property to.</param>
-        /// <param name="enumerator">The active element enumerator.</param>
+        /// <param name="tagFieldInfo">The active element enumerator.</param>
         /// <param name="baseOffset">The offset of the start of the structure.</param>
         /// <exception cref="System.InvalidOperationException">Offset for property is outside of its structure</exception>
-        public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldEnumerator enumerator, long baseOffset)
+        public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (enumerator.Attribute.Local == true)
+            if (tagFieldInfo.Attribute.Runtime == true)
                 return;
 
-            if (enumerator.Attribute.Padding == true)
+            if (tagFieldInfo.Attribute.Padding == true)
             {
-                reader.BaseStream.Position += enumerator.Attribute.Length;
+                reader.BaseStream.Position += tagFieldInfo.Attribute.Length;
             }
             else
             {
-                if (enumerator.Attribute.Offset >= 0)
-                    reader.BaseStream.Position = baseOffset + enumerator.Attribute.Offset;
+                if (tagFieldInfo.Attribute.Offset >= 0)
+                    reader.BaseStream.Position = baseOffset + tagFieldInfo.Attribute.Offset;
                 var startOffset = reader.BaseStream.Position;
-                enumerator.Field.SetValue(instance, DeserializeValue(reader, context, enumerator.Attribute, enumerator.Field.FieldType));
-                if (enumerator.Attribute.Size > 0)
-                    reader.BaseStream.Position = startOffset + enumerator.Attribute.Size; // Honor the value's size if it has one set
+                tagFieldInfo.SetValue(instance, DeserializeValue(reader, context, tagFieldInfo.Attribute, tagFieldInfo.FieldType));
+                if (tagFieldInfo.Attribute.Size > 0)
+                    reader.BaseStream.Position = startOffset + tagFieldInfo.Attribute.Size; // Honor the value's size if it has one set
             }
         }
 

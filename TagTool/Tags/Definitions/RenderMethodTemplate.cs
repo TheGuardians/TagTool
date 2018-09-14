@@ -2,8 +2,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
 using System.Collections.Generic;
-using System;
-using System.Runtime.InteropServices;
 
 namespace TagTool.Tags.Definitions
 {
@@ -154,7 +152,7 @@ namespace TagTool.Tags.Definitions
 
             public ushort Integer;
         }
-
+		
         [TagStructure(Size = 0x1C)]
         public class DrawModeRegisterOffsetBlock
         {

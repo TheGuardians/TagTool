@@ -12,8 +12,6 @@ using System.Linq;
 using TagTool.Tags;
 using TagTool.Audio;
 using System.Threading;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TagTool.Commands.Porting
@@ -402,7 +400,7 @@ namespace TagTool.Commands.Porting
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\mp3loop.exe") || !File.Exists(@"Tools\towav.exe"))
             {
-                Console.WriteLine("Failed to sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
+                Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
                 return null;
             }
 
@@ -556,7 +554,7 @@ namespace TagTool.Commands.Porting
                 bool useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
 
                 string basePermutationMP3Cache;
-                if(Sounds.UseAudioCacheCommand.AudioCacheDirectory != null)
+                if (Sounds.UseAudioCacheCommand.AudioCacheDirectory != null)
                 {
                     basePermutationMP3Cache = Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, GetTagFileFriendlyName(blamTag_Name));
                 }

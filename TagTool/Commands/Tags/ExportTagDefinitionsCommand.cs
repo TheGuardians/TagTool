@@ -39,7 +39,6 @@ namespace TagTool.Commands.Tags
                 var tagGroupName = CacheContext.GetString(tagGroup.Name);
                 var tagStructureInfo = ReflectionCache.GetTagStructureInfo(entry.Value, CacheContext.Version);
 
-				using (var enumerator = ReflectionCache.GetTagFieldEnumerator(tagStructureInfo))
 				using (var stream = File.Create(Path.Combine(destDir.FullName, $"{tagGroupName}.hpp")))
 				using (var writer = new StreamWriter(stream))
 				{
@@ -52,8 +51,9 @@ namespace TagTool.Commands.Tags
 					writer.WriteLine(@"    namespace Tags");
 					writer.WriteLine(@"    {");
 
-					while (enumerator.Next())
-						PrintField(writer, enumerator);
+
+					foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(tagStructureInfo))
+						PrintField(writer, tagFieldInfo);
 				}
             }
 
@@ -67,11 +67,10 @@ namespace TagTool.Commands.Tags
             return Regex.Replace(name, regex, "_").Trim();
         }
 
-        private void PrintField(StreamWriter writer, TagFieldEnumerator enumerator)
+        private void PrintField(StreamWriter writer, TagFieldInfo tagFieldInfo)
         {
-            var field = enumerator.Field;
-            var type = field.FieldType;
-            var name = SanitizeName(field.Name);
+            var type = tagFieldInfo.FieldType;
+            var name = SanitizeName(tagFieldInfo.Name);
         }
     }
 }

@@ -58,7 +58,8 @@ namespace TagTool.Commands.Porting
             Memory = 1 << 11,
             NoRmhg = 1 << 12,
             NoMs30 = 1 << 13,
-            HaloShaderGenerator = 1 << 14
+            HaloShaderGenerator = 1 << 14,
+			Silent = 1 << 15
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -469,7 +470,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (Flags.HasFlag(PortingFlags.New) && !Flags.HasFlag(PortingFlags.Recursive))
+            if (Flags.HasFlag(PortingFlags.New) && (!Flags.HasFlag(PortingFlags.Recursive) && wasSingle))
             {
                 Flags &= ~PortingFlags.New;
                 Flags |= PortingFlags.Recursive;
@@ -522,7 +523,7 @@ namespace TagTool.Commands.Porting
             {
                 case RenderModel mode when BlamCache.Version < CacheVersion.Halo3Retail:
                     foreach (var material in mode.Materials)
-                        material.RenderMethod = CacheContext.GetTag<Shader>(@"shaders\invalid");
+                        material.RenderMethod = null;
                     break;
 
                 case Scenario scenario when Flags.HasFlag(PortingFlags.NoSquads):
@@ -572,7 +573,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Bitmap bitm:
-                    blamDefinition = ConvertBitmap(bitm, resourceStreams);
+                    blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
                     break;
 
                 case CameraFxSettings cfxs:
@@ -631,9 +632,9 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
-                //case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
-                    //blamDefinition = null;
-                    //break;
+                case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
+                    blamDefinition = null;
+                    break;
 
                 case PhysicsModel phmo:
                     blamDefinition = ConvertPhysicsModel(phmo);
@@ -648,9 +649,13 @@ namespace TagTool.Commands.Porting
                     break;
 
                 // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-                //case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
-                    //blamDefinition = null;
-                    //break;
+                case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
+                    blamDefinition = null;
+                    break;
+
+                case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
+                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
+                    break;
 
                 case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
                     blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);
@@ -726,7 +731,8 @@ namespace TagTool.Commands.Porting
 
             CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
-            Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+            if (!Flags.HasFlag(PortingFlags.Silent))
+                Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
         }
@@ -900,16 +906,14 @@ namespace TagTool.Commands.Porting
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
-            using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
-            {
-                while (enumerator.Next())
-                {
-                    var oldValue = enumerator.Field.GetValue(data);
-                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                    enumerator.Field.SetValue(data, newValue);
-                }
-            }
-            return data;
+            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, CacheContext.Version))
+			{
+			    var oldValue = tagFieldInfo.GetValue(data);
+			    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+			    tagFieldInfo.SetValue(data, newValue);
+			}
+
+			return data;
         }
 
         private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)

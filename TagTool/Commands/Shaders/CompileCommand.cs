@@ -1,7 +1,4 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Geometry;
-using TagTool.Serialization;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using System;

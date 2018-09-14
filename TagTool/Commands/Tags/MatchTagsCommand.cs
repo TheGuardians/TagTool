@@ -138,25 +138,25 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private static void CompareBlocks(object leftData, CacheVersion leftVersion, object rightData, CacheVersion rightVersion, TagVersionMap result, Queue<QueuedTag> tagQueue)
+        private static void CompareBlocks(object dataA, CacheVersion versionA, object dataB, CacheVersion versionB, TagVersionMap result, Queue<QueuedTag> tagQueue)
         {
-            if (leftData == null || rightData == null)
+            if (dataA == null || dataB == null)
                 return;
-            var type = leftData.GetType();
+            var type = dataA.GetType();
             if (type == typeof(CachedTagInstance))
             {
                 // If the objects are tags, then we've found a match
-                var leftTag = (CachedTagInstance)leftData;
-                var rightTag = (CachedTagInstance)rightData;
-                if (leftTag.Group.Tag != rightTag.Group.Tag)
+                var tagA = (CachedTagInstance)dataA;
+                var tagB = (CachedTagInstance)dataB;
+                if (tagA.Group.Tag != tagB.Group.Tag)
                     return;
-                if (leftTag.IsInGroup("rmt2") || leftTag.IsInGroup("rmdf") || leftTag.IsInGroup("vtsh") || leftTag.IsInGroup("pixl") || leftTag.IsInGroup("rm  ") || leftTag.IsInGroup("bitm"))
+                if (tagA.IsInGroup("rmt2") || tagA.IsInGroup("rmdf") || tagA.IsInGroup("vtsh") || tagA.IsInGroup("pixl") || tagA.IsInGroup("rm  ") || tagA.IsInGroup("bitm"))
                     return;
-                var translated = result.Translate(leftVersion, leftTag.Index, rightVersion);
+                var translated = result.Translate(versionA, tagA.Index, versionB);
                 if (translated >= 0)
                     return;
-                result.Add(leftVersion, leftTag.Index, rightVersion, rightTag.Index);
-                tagQueue.Enqueue(new QueuedTag { Tag = rightTag });
+                result.Add(versionA, tagA.Index, versionB, tagB.Index);
+                tagQueue.Enqueue(new QueuedTag { Tag = tagB });
             }
             else if (type.IsArray)
             {
@@ -164,12 +164,12 @@ namespace TagTool.Commands.Tags
                     return;
 
                 // If the objects are arrays, then loop through each element
-                var leftArray = (Array)leftData;
-                var rightArray = (Array)rightData;
-                if (leftArray.Length != rightArray.Length)
+                var arrayA = (Array)dataA;
+                var arrayB = (Array)dataB;
+                if (arrayA.Length != arrayB.Length)
                     return; // If the sizes are different, we probably can't compare them
-                for (var i = 0; i < leftArray.Length; i++)
-                    CompareBlocks(leftArray.GetValue(i), leftVersion, rightArray.GetValue(i), rightVersion, result, tagQueue);
+                for (var i = 0; i < arrayA.Length; i++)
+                    CompareBlocks(arrayA.GetValue(i), versionA, arrayB.GetValue(i), versionB, result, tagQueue);
             }
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
@@ -178,46 +178,51 @@ namespace TagTool.Commands.Tags
 
                 // If the objects are lists, then loop through each element
                 var countProperty = type.GetProperty("Count");
-                var leftCount = (int)countProperty.GetValue(leftData);
-                var rightCount = (int)countProperty.GetValue(rightData);
-                if (leftCount != rightCount)
+                var countA = (int)countProperty.GetValue(dataA);
+                var countB = (int)countProperty.GetValue(dataB);
+                if (countA != countB)
                     return; // If the sizes are different, we probably can't compare them
                 var getItem = type.GetMethod("get_Item");
-                for (var i = 0; i < leftCount; i++)
+                for (var i = 0; i < countA; i++)
                 {
-                    var leftItem = getItem.Invoke(leftData, new object[] { i });
-                    var rightItem = getItem.Invoke(rightData, new object[] { i });
-                    CompareBlocks(leftItem, leftVersion, rightItem, rightVersion, result, tagQueue);
+                    var itemA = getItem.Invoke(dataA, new object[] { i });
+                    var itemB = getItem.Invoke(dataB, new object[] { i });
+                    CompareBlocks(itemA, versionA, itemB, versionB, result, tagQueue);
                 }
             }
             else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
+				var tagFieldInfosA = ReflectionCache.GetTagFieldEnumerable(dataA.GetType(), versionA);
+				var tagFieldInfosB = ReflectionCache.GetTagFieldEnumerable(dataB.GetType(), versionB);
+
 				// The objects are structures
-				using (var left = ReflectionCache.GetTagFieldEnumerator(leftData.GetType(), leftVersion))
-				using (var right = ReflectionCache.GetTagFieldEnumerator(rightData.GetType(), rightVersion))
-					while (left.Next() && right.Next())
-					{
-						// Keep going on the left until the field is on the right
-						while (!CacheVersionDetection.IsBetween(rightVersion, left.Attribute.MinVersion, left.Attribute.MaxVersion))
-						{
-							if (!left.Next())
-								return;
-						}
+				for (int a = 0, b = 0; a < tagFieldInfosA.Count && b < tagFieldInfosB.Count; a++, b++)
+				{
+					var tagFieldInfoA = tagFieldInfosA[a];
+					var tagFieldInfoB = tagFieldInfosB[b];
 
-						// Keep going on the right until the field is on the left
-						while (!CacheVersionDetection.IsBetween(leftVersion, right.Attribute.MinVersion, right.Attribute.MaxVersion))
-						{
-							if (!right.Next())
-								return;
-						}
-						if (left.Field.MetadataToken != right.Field.MetadataToken)
-							throw new InvalidOperationException("WTF, left and right fields don't match!");
+					// Keep going on the left until the field is on the right
+					while (!CacheVersionDetection.IsBetween(versionB, tagFieldInfoA.Attribute.MinVersion, tagFieldInfoA.Attribute.MaxVersion))
+						if (++a < tagFieldInfosA.Count)
+							tagFieldInfoA = tagFieldInfosA[a];
+						else
+							return;
 
-						// Process the fields
-						var leftFieldData = left.Field.GetValue(leftData);
-						var rightFieldData = right.Field.GetValue(rightData);
-						CompareBlocks(leftFieldData, leftVersion, rightFieldData, rightVersion, result, tagQueue);
-					}
+					// Keep going on the right until the field is on the left
+					while (!CacheVersionDetection.IsBetween(versionA, tagFieldInfoB.Attribute.MinVersion, tagFieldInfoB.Attribute.MaxVersion))
+						if (++b < tagFieldInfosB.Count)
+							tagFieldInfoB = tagFieldInfosB[b];
+						else
+							return;
+
+					if (tagFieldInfoA.MetadataToken != tagFieldInfoB.MetadataToken)
+						throw new InvalidOperationException("WTF, left and right fields don't match!");
+
+					// Process the fields
+					var fieldDataA = tagFieldInfoA.GetValue(dataA);
+					var fieldDataB = tagFieldInfoB.GetValue(dataB);
+					CompareBlocks(fieldDataA, versionA, fieldDataB, versionB, result, tagQueue);
+				}
 			}
         }
 

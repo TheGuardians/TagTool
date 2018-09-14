@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.RenderMethods
 {

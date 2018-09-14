@@ -1,15 +1,10 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
-using TagTool.Geometry;
-using TagTool.Serialization;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Common;
 using System.Linq;
-using static TagTool.Tags.Definitions.RenderMethodTemplate.DrawModeRegisterOffsetBlock;
 
 namespace TagTool.Commands.Shaders
 {

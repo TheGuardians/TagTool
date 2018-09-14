@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
-using System.Linq;
 
 namespace TagTool.Commands.Files
 {
@@ -312,13 +311,12 @@ namespace TagTool.Commands.Files
 
         private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, destCacheContext.Version))
-				while (enumerator.Next())
-				{
-					var oldValue = enumerator.Field.GetValue(data);
-					var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-					enumerator.Field.SetValue(data, newValue);
-				}
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, destCacheContext.Version))
+			{
+				var oldValue = tagFieldInfo.GetValue(data);
+				var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+				tagFieldInfo.SetValue(data, newValue);
+			}
 
 			return data;
         }

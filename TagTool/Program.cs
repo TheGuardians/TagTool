@@ -27,7 +27,7 @@ namespace TagTool.Commands
                 Console.WriteLine($"Tag Tool [{Assembly.GetExecutingAssembly().GetName().Version}]");
                 Console.WriteLine();
                 Console.WriteLine("Please report any bugs and/or feature requests at");
-                Console.WriteLine("<https://gitlab.com/TheGuardians/TagTool/issues>.");
+                Console.WriteLine("<https://github.com/TheGuardians-CI/TagTool/issues>.");
                 Console.WriteLine();
             }
 

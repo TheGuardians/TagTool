@@ -245,6 +245,8 @@ namespace TagTool.Cache
                         throw new InvalidOperationException();
 
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
+                    ResourceLayoutTable.BuildInteropData();
+
                     break;
                 }
             }
@@ -292,18 +294,19 @@ namespace TagTool.Cache
 
             var Loc = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
 
-            if (Loc.PrimaryPageIndex == -1 || Loc.PrimarySegmentOffset == -1)
+            if (Loc.RequiredPageIndex == -1 || Loc.RequiredSegmentOffset == -1)
                 return null;
 
-            int index = (Loc.SecondaryPageIndex != -1) ? Loc.SecondaryPageIndex : Loc.PrimaryPageIndex;
-            int locOffset = (Loc.SecondarySegmentOffset != -1) ? Loc.SecondarySegmentOffset : Loc.PrimarySegmentOffset;
+            int index = (Loc.OptionalPageIndex != -1) ? Loc.OptionalPageIndex : Loc.RequiredPageIndex;
+            int locOffset = (Loc.OptionalSegmentOffset != -1) ? Loc.OptionalSegmentOffset : Loc.RequiredSegmentOffset;
 
-            if (index == -1 || locOffset == -1) return null;
+            if (index == -1 || locOffset == -1)
+                return null;
 
             if (ResourceLayoutTable.RawPages[index].BlockOffset == -1)
             {
-                index = Loc.PrimaryPageIndex;
-                locOffset = Loc.PrimarySegmentOffset;
+                index = Loc.RequiredPageIndex;
+                locOffset = Loc.RequiredSegmentOffset;
             }
 
             var Pool = ResourceLayoutTable.RawPages[index];
@@ -365,12 +368,12 @@ namespace TagTool.Cache
 
             var segment = ResourceLayoutTable.Segments[entry.PlaySegmentIndex];
 
-            if (segment.PrimaryPageIndex == -1 || segment.PrimarySegmentOffset == -1 || segment.PrimarySizeIndex == -1 || segment.SecondarySizeIndex == -1)
+            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1 || segment.RequiredSizeIndex == -1 || segment.OptionalSizeIndex == -1)
                 return null;
 
-            var sRaw = ResourceLayoutTable.Sizes[segment.SecondarySizeIndex];
-            var reqPage = ResourceLayoutTable.RawPages[segment.PrimaryPageIndex];
-            var optPage = ResourceLayoutTable.RawPages[segment.SecondaryPageIndex];
+            var sRaw = ResourceLayoutTable.Sizes[segment.OptionalSizeIndex];
+            var reqPage = ResourceLayoutTable.RawPages[segment.RequiredPageIndex];
+            var optPage = ResourceLayoutTable.RawPages[segment.OptionalPageIndex];
 
             if (size == 0) size = (reqPage.CompressedBlockSize != 0) ? reqPage.CompressedBlockSize : optPage.CompressedBlockSize;
 
@@ -406,7 +409,7 @@ namespace TagTool.Cache
                 er.SeekTo(offset);
                 buffer = er.ReadBytes(reqPage.CompressedBlockSize);
 
-                Array.Copy(buffer, segment.PrimarySegmentOffset, data, 0, reqSize);
+                Array.Copy(buffer, segment.RequiredSegmentOffset, data, 0, reqSize);
 
                 if (er != Reader)
                 {
@@ -417,7 +420,7 @@ namespace TagTool.Cache
             #endregion
 
             #region OPTIONAL
-            if (segment.SecondaryPageIndex != -1 && optSize > 0)
+            if (segment.OptionalPageIndex != -1 && optSize > 0)
             {
                 if (optPage.SharedCacheIndex != -1)
                 {
@@ -442,7 +445,7 @@ namespace TagTool.Cache
                 if (buffer.Length > data.Length)
                     data = buffer;
                 else
-                    Array.Copy(buffer, segment.SecondarySegmentOffset, data, reqSize, optSize);
+                    Array.Copy(buffer, segment.OptionalSegmentOffset, data, reqSize, optSize);
 
 
                 if (er != Reader)

@@ -158,18 +158,6 @@ namespace TagTool.Geometry
             };
 
             //
-            // Load Blam resource data
-            //
-
-            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
-
-            if (resourceData == null)
-            {
-                geometry.Resource.Resource.Type = TagResourceType.None;
-                return geometry;
-            }
-
-            //
             // Port Blam resource definition
             //
 
@@ -227,6 +215,27 @@ namespace TagTool.Geometry
             }
 
             //
+            // Load Blam resource data
+            //
+
+            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+            var generateParticles = false;
+
+            if (resourceData == null)
+            {
+                if (geometry.Meshes.Count == 1 && geometry.Meshes[0].Type == VertexType.ParticleModel)
+                {
+                    generateParticles = true;
+                    resourceData = new byte[0];
+                }
+                else
+                {
+                    geometry.Resource.Resource.Type = TagResourceType.None;
+                    return geometry;
+                }
+            }
+
+            //
             // Convert Blam data to ElDorado data
             //
 
@@ -265,29 +274,67 @@ namespace TagTool.Geometry
                     }
                 }
 
-                for (int i = 0, prevVertCount = -1; i < resourceDefinition.VertexBuffers.Count; i++, prevVertCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count)
+                if (generateParticles)
                 {
-                    blamResourceStream.Position = resourceDefinition.VertexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[i].Offset;
-                    ConvertVertexBuffer(resourceDefinition, blamResourceStream, dataStream, i, prevVertCount);
+                    var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, dataStream);
+
+                    StreamUtil.Align(dataStream, 4);
+
+                    resourceDefinition.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
+                    {
+                        Definition = new VertexBufferDefinition
+                        {
+                            Format = VertexBufferFormat.ParticleModel,
+                            Data = new TagData
+                            {
+                                Size = 32,
+                                Unused4 = 0,
+                                Unused8 = 0,
+                                Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position),
+                                Unused10 = 0
+                            }
+                        }
+                    });
+
+                    var vertexBuffer = resourceDefinition.VertexBuffers.Last().Definition;
+
+                    for (var j = 0; j < 3; j++)
+                        outVertexStream.WriteParticleModelVertex(new ParticleModelVertex
+                        {
+                            Position = new RealVector3d(),
+                            Texcoord = new RealVector2d(),
+                            Normal = new RealVector3d()
+                        });
+
+                    geometry.Meshes[0].VertexBufferIndices[0] = (ushort)resourceDefinition.VertexBuffers.IndexOf(resourceDefinition.VertexBuffers.Last());
+                    geometry.Meshes[0].IndexBufferIndices[0] = CreateIndexBuffer(resourceDefinition, dataStream, 3);
                 }
-
-                for (var i = 0; i < resourceDefinition.IndexBuffers.Count; i++)
+                else
                 {
-                    blamResourceStream.Position = resourceDefinition.IndexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[resourceDefinition.VertexBuffers.Count * 2 + i].Offset;
-                    ConvertIndexBuffer(resourceDefinition, blamResourceStream, dataStream, i);
-                }
+                    for (int i = 0, prevVertCount = -1; i < resourceDefinition.VertexBuffers.Count; i++, prevVertCount = resourceDefinition.VertexBuffers[i - 1].Definition.Count)
+                    {
+                        blamResourceStream.Position = resourceDefinition.VertexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[i].Offset;
+                        ConvertVertexBuffer(resourceDefinition, blamResourceStream, dataStream, i, prevVertCount);
+                    }
 
-                foreach (var mesh in geometry.Meshes)
-                {
-                    if (!mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
-                        continue;
+                    for (var i = 0; i < resourceDefinition.IndexBuffers.Count; i++)
+                    {
+                        blamResourceStream.Position = resourceDefinition.IndexBuffers[i].Definition.Data.Address.Offset; // resourceEntry.ResourceFixups[resourceDefinition.VertexBuffers.Count * 2 + i].Offset;
+                        ConvertIndexBuffer(resourceDefinition, blamResourceStream, dataStream, i);
+                    }
 
-                    var indexCount = 0;
+                    foreach (var mesh in geometry.Meshes)
+                    {
+                        if (!mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+                            continue;
 
-                    foreach (var part in mesh.Parts)
-                        indexCount += part.IndexCount;
+                        var indexCount = 0;
 
-                    mesh.IndexBufferIndices[0] = CreateIndexBuffer(resourceDefinition, dataStream, indexCount);
+                        foreach (var part in mesh.Parts)
+                            indexCount += part.IndexCount;
+
+                        mesh.IndexBufferIndices[0] = CreateIndexBuffer(resourceDefinition, dataStream, indexCount);
+                    }
                 }
 
                 //

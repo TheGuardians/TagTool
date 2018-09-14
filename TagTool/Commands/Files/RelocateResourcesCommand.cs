@@ -5,7 +5,6 @@ using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Files
 {
@@ -167,13 +166,12 @@ namespace TagTool.Commands.Files
 
         private object ConvertStructure(Stream tagsStream, Stream sourceStream, Stream destStream, object data, Type type)
         {
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(type, CacheContext.Version))
-				while (enumerator.Next())
-				{
-					var oldValue = enumerator.Field.GetValue(data);
-					var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
-					enumerator.Field.SetValue(data, newValue);
-				}
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, CacheContext.Version))
+			{
+				var oldValue = tagFieldInfo.GetValue(data);
+				var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
+				tagFieldInfo.SetValue(data, newValue);
+			}
 
             return data;
         }

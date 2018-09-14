@@ -7,7 +7,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.RenderModels
 {

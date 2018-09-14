@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using TagTool.Cache;
-using TagTool.Serialization;
 using TagTool.Commands.Common;
 
 namespace TagTool.Commands.PhysicsModels

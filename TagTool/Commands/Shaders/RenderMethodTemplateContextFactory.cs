@@ -1,5 +1,4 @@
 ﻿using TagTool.Cache;
-using TagTool.Commands;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Shaders

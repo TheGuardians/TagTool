@@ -1,5 +1,4 @@
 using TagTool.Serialization;
-using System.Collections.Generic;
 
 namespace TagTool.Ai
 {

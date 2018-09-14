@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TagTool.Cache;
 using TagTool.Serialization;
 
@@ -93,9 +92,8 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			FieldInfo field;
-			using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
-				field = enumerator.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
+			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
             var fieldType = field.FieldType;
 
@@ -168,31 +166,30 @@ namespace TagTool.Commands.Editing
 
             if (isTagStructure)
             {
-				using (var enumerator = ReflectionCache.GetTagFieldEnumerator(elementType))
-					while (enumerator.Next())
+				foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(elementType))
+				{
+					var fieldType = tagFieldInfo.FieldType;
+
+					if (fieldType.IsArray && tagFieldInfo.Attribute.Length > 0)
 					{
-						var fieldType = enumerator.Field.FieldType;
+						var array = (IList)Activator.CreateInstance(tagFieldInfo.FieldType,
+							new object[] { tagFieldInfo.Attribute.Length });
 
-						if (fieldType.IsArray && enumerator.Attribute.Length > 0)
+						for (var i = 0; i < tagFieldInfo.Attribute.Length; i++)
+							array[i] = CreateElement(fieldType.GetElementType());
+					}
+					else
+					{
+						try
 						{
-							var array = (IList)Activator.CreateInstance(enumerator.Field.FieldType,
-								new object[] { enumerator.Attribute.Length });
-
-							for (var i = 0; i < enumerator.Attribute.Length; i++)
-								array[i] = CreateElement(fieldType.GetElementType());
+							tagFieldInfo.SetValue(element, CreateElement(tagFieldInfo.FieldType));
 						}
-						else
+						catch
 						{
-							try
-							{
-								enumerator.Field.SetValue(element, CreateElement(enumerator.Field.FieldType));
-							}
-							catch
-							{
-								enumerator.Field.SetValue(element, null);
-							}
+							tagFieldInfo.SetValue(element, null);
 						}
 					}
+				}
 			}
 
             return element;

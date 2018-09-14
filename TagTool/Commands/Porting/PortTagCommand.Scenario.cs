@@ -6,7 +6,6 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -347,6 +346,102 @@ namespace TagTool.Commands.Porting
             {
                 switch (tagName)
                 {
+                    case @"levels\multi\construct\construct":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(4.5471f, 1.8711f, 13.4354f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(-126.7653f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\isolation\isolation":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-14.4359f, -10.9502f, -5.2309f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(30f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\salvation\salvation":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-0.0762f, -0.1681f, 7.1527f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\multi\snowbound\snowbound":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-7.1015f, 17.7492f, 3.9918f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(-90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\armory\armory":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-16.8807f, 0.0363f, -8.6872f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\chillout\chillout":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(0.7120f, -10.8107f, 5.3540f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(90f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\descent\descent":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-19.9727f, -0.0140f, -17.3611f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\docks\docks":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-28.5603f, 22.1670f, -3.9043f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\fortress\fortress":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-33.9909f, 3.4858f, -18.9907f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\ghosttown\ghosttown":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-10.6792f, 10.8319f, 5.6487f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\lockout\lockout":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-19.9729f, 0.4024f, -5.3355f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\midship\midship":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-5.7814f, 4.7866f, 4.5577f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\sidewinder\sidewinder":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-35.8092f, 42.7776f, 2.6463f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\spacecamp\spacecamp":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-8.7606f, 17.2195f, -0.3308f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\warehouse\warehouse":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-11.2818f, 0.2725f, 4.1475f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
+                    case @"levels\dlc\sandbox\sandbox":
+                        createPrematchCamera = true;
+                        position = new RealPoint3d(-24.9556f, -9.8958f, -17.2465f);
+                        orientation = new RealEulerAngles3d(Angle.FromDegrees(0f), Angle.FromDegrees(0f), Angle.FromDegrees(0f));
+                        break;
+
                     case @"levels\multi\guardian\guardian":
                         createPrematchCamera = true;
                         position = new RealPoint3d(-3.856011f, -1.605904f, 22.34261f);
@@ -591,7 +686,6 @@ namespace TagTool.Commands.Porting
             if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
             {
                 Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
-
                 return;
             }
 
@@ -682,7 +776,7 @@ namespace TagTool.Commands.Porting
             // If no match was found, the opcode is currently unsupported.
             //
 
-            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3})");
+            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
 
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
@@ -913,15 +1007,15 @@ namespace TagTool.Commands.Porting
         
         public void AdjustScripts(Scenario scnr, string tagName)
         {
-            tagName = tagName.Split("\\".ToCharArray()).Last();
+            var mapName = tagName.Split("\\".ToCharArray()).Last();
 
-            if (tagName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
-                tagName = "mainmenu_odst";
+            if (mapName == "mainmenu" && BlamCache.Version == CacheVersion.Halo3ODST)
+                mapName = "mainmenu_odst";
 
-            if (!DisabledScriptsString.ContainsKey(tagName))
+            if (!DisabledScriptsString.ContainsKey(mapName))
                 return;
 
-            foreach (var line in DisabledScriptsString[tagName])
+            foreach (var line in DisabledScriptsString[mapName])
             {
                 var items = line.Split(",".ToCharArray());
 
@@ -940,6 +1034,33 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
+            }
+
+            if (mapName == "010_jungle")
+            {
+                // player0 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2448].Opcode = 0x115;
+                scnr.ScriptExpressions[2449].Opcode = 0x115;
+                scnr.ScriptExpressions[2451].Opcode = 0x00C;
+                scnr.ScriptExpressions[2451].Data[0] = 21;
+
+                // player1 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2456].Opcode = 0x115;
+                scnr.ScriptExpressions[2457].Opcode = 0x115;
+                scnr.ScriptExpressions[2459].Opcode = 0x00C;
+                scnr.ScriptExpressions[2459].Data[0] = 21;
+
+                // player2 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2464].Opcode = 0x115;
+                scnr.ScriptExpressions[2465].Opcode = 0x115;
+                scnr.ScriptExpressions[2467].Opcode = 0x00C;
+                scnr.ScriptExpressions[2467].Data[0] = 21;
+
+                // player3 dam_pelican vehicle_test_seat
+                scnr.ScriptExpressions[2472].Opcode = 0x115;
+                scnr.ScriptExpressions[2473].Opcode = 0x115;
+                scnr.ScriptExpressions[2475].Opcode = 0x00C;
+                scnr.ScriptExpressions[2475].Data[0] = 21;
             }
         }
 

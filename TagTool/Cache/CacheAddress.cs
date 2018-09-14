@@ -1,8 +1,9 @@
 using System;
+using TagTool.Common;
 
 namespace TagTool.Cache
 {
-    public struct CacheAddress : IComparable<CacheAddress>, IEquatable<CacheAddress>
+    public struct CacheAddress : IComparable<CacheAddress>, IEquatable<CacheAddress>, IBlamType
     {
         private const int TypeShift = 29;
         private const uint OffsetMask = (uint.MaxValue >> (32 - TypeShift));

@@ -4,7 +4,6 @@ using System.IO;
 using TagTool.Bitmaps;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.Bitmaps
 {

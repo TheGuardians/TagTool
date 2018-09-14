@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TagTool.Cache;
 using TagTool.Serialization;
 
@@ -74,9 +73,8 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			FieldInfo field;
-            using (var enumerator = ReflectionCache.GetTagFieldEnumerator(Structure))
-				field = enumerator.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
+			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
             var fieldType = field.FieldType;
 

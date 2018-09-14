@@ -55,9 +55,9 @@ namespace TagTool.Serialization
         public bool Short { get; set; } = false;
 
         /// <summary>
-        /// Determines if the tag field is part of the tag data, or used for tool purposes only.
+        /// Determines if the tag field is used only at runtime (do not serialize).
         /// </summary>
-        public bool Local { get; set; } = false;
+        public bool Runtime { get; set; } = false;
 
         /// <summary>
         /// The minimum cache version the tag field is present in.

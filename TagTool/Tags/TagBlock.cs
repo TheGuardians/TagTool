@@ -20,7 +20,7 @@ namespace TagTool.Tags
 
         public int Unused;
 
-        [TagField(Local = true)]
+        [TagField(Runtime = true)]
         private List<T> Elements = new List<T>();
 
         int ICollection<T>.Count => Elements.Count;
