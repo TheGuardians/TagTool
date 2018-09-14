@@ -309,6 +309,7 @@ namespace TagTool.Commands.Porting
             public PermutationChunk PermutationChunk { get; internal set; }
             public byte[] PermutationBuffer { get; internal set; }
             public Permutation Permutation { get; internal set; }
+            public uint PermutationChunkSize { get; internal set; }
         }
 
         private ConvertSoundResult ConvertSoundTask(
@@ -377,7 +378,7 @@ namespace TagTool.Commands.Porting
 
             var permutationChunk = new PermutationChunk
             {
-                Offset = permutationChunkSize - permutationChunkSize,
+                Offset = 0,
                 Size = chunkSize,
                 Unknown2 = (byte)((permutationChunkSize - chunkSize) / 65536),
                 Unknown3 = 4,
@@ -389,6 +390,7 @@ namespace TagTool.Commands.Porting
             result.Permutation = permutation;
             result.PermutationBuffer = permBuffer;
             result.PermutationChunk = permutationChunk;
+            result.PermutationChunkSize = permutationChunkSize;
 
             return result;
         }
@@ -601,13 +603,17 @@ namespace TagTool.Commands.Porting
                     task.Start();
                     tasks[i] = task;
                 }
-                Task.WaitAll(tasks);
+                uint current_offset = 0;
                 for (i = 0; i < permutationCount; i++)
                 {
                     var task = tasks[i];
+                    task.Wait();
                     var result = task.Result;
 
                     // deferred setting
+
+                    result.PermutationChunk.Offset = current_offset;
+                    current_offset += result.PermutationChunkSize;
                     result.Permutation.PermutationChunks.Add(result.PermutationChunk);
                     pitchRange.Permutations.Add(result.Permutation);
 
