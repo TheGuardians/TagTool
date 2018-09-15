@@ -1980,36 +1980,41 @@ namespace TagTool.Tags.Definitions
             {
                 public RealPoint3d Position;
                 public short ReferenceFrame;
-                public short Unknown;
+                public short Unknown1;
                 public FlagsValue Flags;
-                public short Unknown2;
+                public PostureFlagsValue PostureFlags;
                 public short AreaIndex;
                 public short ClusterIndex;
-                public short Unknown3;
-                public short Unknown4;
+                public uint Unknown3;
                 public RealEulerAngles2d Normal;
-                public uint Unknown5;
+                public uint Unknown4;
 
                 [Flags]
                 public enum FlagsValue : ushort
                 {
-                    None,
-                    Open,
-                    Partial,
-                    Closed = 4,
-                    Mobile = 8,
-                    WallLean = 16,
-                    Perch = 32,
-                    GroundPoint = 64,
-                    DynamicCoverPoint = 128,
-                    Bit8 = 256,
-                    Bit9 = 512,
-                    Bit10 = 1024,
-                    Bit11 = 2048,
-                    Bit12 = 4096,
-                    Bit13 = 8192,
-                    Bit14 = 16384,
-                    Bit15 = 32768,
+                    None = 0,
+                    Open = 1 << 0,
+                    Partial = 1 << 1,
+                    Closed = 1 << 2,
+                    Mobile = 1 << 3,
+                    WallLean = 1 << 4,
+                    Perch = 1 << 5,
+                    GroundPoint = 1 << 6,
+                    DynamicCoverPoint = 1 << 7,
+                    AutomaticallyGenerated = 1 << 8,
+                    NavVolume = 1 << 9,
+                    CenterBunkering = 1 << 10
+                }
+
+                [Flags]
+                public enum PostureFlagsValue : ushort
+                {
+                    None = 0,
+                    CornerLeft = 1 << 0,
+                    CornerRight = 1 << 1,
+                    Bunker = 1 << 2,
+                    BunkerHigh = 1 << 3,
+                    BunkerLow = 1 << 4
                 }
             }
 
@@ -3092,14 +3097,15 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class UnknownBlock4
         {
-            public short Unknown;
-            public short Unknown2;
-            public short Unknown3;
-            public short Unknown4;
+            public uint ObjectHandle;
+            public short OriginBspIndex;
+            public ScenarioObjectType ObjectType;
+            public ScenarioInstance.SourceValue Source;
+            public ScenarioInstance.BspPolicyValue BspPolicy;
+            public sbyte Unknown3;
             public short Unknown5;
             public short Unknown6;
             public short Unknown7;
-            public short Unknown8;
         }
 
         [Flags]
