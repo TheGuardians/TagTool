@@ -1985,9 +1985,10 @@ namespace TagTool.Tags.Definitions
                 public PostureFlagsValue PostureFlags;
                 public short AreaIndex;
                 public short ClusterIndex;
-                public uint Unknown3;
+                public short Unknown3;
+                public short Unknown4;
                 public RealEulerAngles2d Normal;
-                public uint Unknown4;
+                public uint Unknown5;
 
                 [Flags]
                 public enum FlagsValue : ushort
