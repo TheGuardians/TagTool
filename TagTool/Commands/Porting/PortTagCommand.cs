@@ -9,7 +9,6 @@ using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.Serialization;
-using TagTool.Shaders;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
@@ -56,13 +55,8 @@ namespace TagTool.Commands.Porting
             MatchShaders = 1 << 10,
             Memory = 1 << 11,
             NoRmhg = 1 << 12,
-<<<<<<< HEAD
             NoMs30 = 1 << 13,
-            HaloShaderGenerator = 1 << 14,
-			Silent = 1 << 15
-=======
-            NoMs30 = 1 << 13
->>>>>>> parent of 2ed2f36... Shader Porting Improvements
+            Silent = 1 << 14
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :

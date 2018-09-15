@@ -152,18 +152,14 @@ namespace TagTool.Tags.Definitions
 
             public ushort Integer;
         }
-<<<<<<< HEAD
-		
-=======
 
         // getters and setters put in here as this value is endian dependant
-        [TagStructure(Size = 0x2)]
+        [TagStructure(Size = 0x0)]
         public class DrawMode : PackedInteger_10_6
         {
 
         }
 
->>>>>>> parent of 2ed2f36... Shader Porting Improvements
         [TagStructure(Size = 0x1C)]
         public class DrawModeRegisterOffsetBlock
         {

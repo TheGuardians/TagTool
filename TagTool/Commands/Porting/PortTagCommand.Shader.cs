@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
@@ -82,7 +81,7 @@ namespace TagTool.Commands.Porting
                 bmArgs.Add(BlamCache.Strings.GetItemByID(a.Name.Index));
 
             // Find a HO equivalent rmt2
-            var edRmt2Instance = FixRmt2Reference(cacheStream, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
+            var edRmt2Instance = FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
                 return CacheContext.Deserialize<Shader>(cacheStream, CacheContext.GetTag<Shader>(@"shaders\invalid"));
@@ -187,9 +186,6 @@ namespace TagTool.Commands.Porting
                             Unknown = 1
                         }
                     };
-
-            if (finalRm.ShaderProperties[0].Unknown7 >= 2)
-                finalRm.ShaderProperties[0].Unknown7 += 2;
 
             return finalRm;
         }
@@ -384,31 +380,31 @@ namespace TagTool.Commands.Porting
         }
 
         [TagStructure(Name = "render_method_template", Tag = "rmt2")]
-        private class RenderMethodTemplateFast // used to deserialize as fast as possible
+        public class RenderMethodTemplateFast // used to deserialize as fast as possible
         {
             public CachedTagInstance VertexShader;
             public CachedTagInstance PixelShader;
 
             [TagField(Length = 10)]
-            public uint[] Unknown00 = new uint[10];
+            public uint[] Unknown00;
 
-            public List<Argument> Arguments = new List<Argument>();
+            public List<Argument> Arguments;
 
             [TagField(Length = 6)]
-            public uint[] Unknown02 = new uint[6];
+            public uint[] Unknown02;
 
-            public List<ShaderMap> ShaderMaps = new List<ShaderMap>();
+            public List<ShaderMap> ShaderMaps;
 
             [TagStructure]
             public class Argument
             {
-                public StringId Name = StringId.Invalid;
+                public StringId Name;
             }
 
             [TagStructure]
             public class ShaderMap
             {
-                public StringId Name = StringId.Invalid;
+                public StringId Name;
             }
         }
 
@@ -763,8 +759,24 @@ namespace TagTool.Commands.Porting
             }
         }
         
-        private CachedTagInstance FixRmt2Reference(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
+        private CachedTagInstance FixRmt2Reference(Stream cacheStream, string blamTagName, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
+            if (blamTagName == @"levels\multi\snowbound\sky\shaders\skydome")
+            {
+                try
+                {
+                    return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
+                }
+                catch
+                {
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                    }
+                    catch { }
+                }
+            }
+
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
             foreach (var instance in CacheContext.TagCache.Index)
@@ -1017,8 +1029,15 @@ namespace TagTool.Commands.Porting
             }
 
             // one final check
-            // nope nopenopenepe this needs to be verified against it's pixl tag, not global registers
-            var validEDRegisters = new List<int> { 000, 001, 002, 003, 004, 005, 006, 007, 008, 009, 010, 011, 012, 013, 014, 015, 016, 017, 018, 023, 024, 025, 026, 027, 028, 030, 031, 032, 033, 034, 035, 036, 037, 038, 039, 040, 041, 042, 043, 044, 045, 046, 047, 048, 049, 050, 051, 053, 057, 058, 059, 060, 061, 062, 063, 064, 065, 066, 067, 068, 069, 070, 071, 072, 073, 074, 075, 076, 077, 078, 079, 080, 081, 082, 083, 084, 085, 086, 087, 088, 089, 090, 091, 092, 093, 094, 095, 096, 097, 099, 100, 102, 103, 104, 105, 106, 107, 108, 109, 114, 120, 121, 122, 164, 168, 172, 173, 174, 175, 190, 191, 200, 201, 203, 204, 210, 211, 212, 213, 215, 216, 217, 218, 219, 220, 221, 222 };
+            // Gather all register indexes from pixl tag. Then check against all the converted register indexes. 
+            // It should detect registers that are invalid and would crash, but it does not verify if the register is valid.
+            var validEDRegisters = new List<int>();
+
+            foreach (var a in edPixl.Shaders)
+                foreach (var b in a.PCParameters)
+                    if (!validEDRegisters.Contains(b.RegisterIndex))
+                        validEDRegisters.Add(b.RegisterIndex);
+
             foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
             {
                 if (!validEDRegisters.Contains((a.RegisterIndex)))
