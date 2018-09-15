@@ -827,8 +827,6 @@ namespace TagTool.Commands.Porting
 
 		private RenderMethod FixFunctions(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
-            return finalRm;
-
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
                 return finalRm;
@@ -857,7 +855,7 @@ namespace TagTool.Commands.Porting
 
             var RegistersList = new Dictionary<int, string>();
 
-            foreach (var a in finalRm.ShaderProperties[0].FunctionMappings)
+            foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
                 if (!RegistersList.ContainsKey(a.RegisterIndex))
                     RegistersList.Add(a.RegisterIndex, "");
 
@@ -899,26 +897,20 @@ namespace TagTool.Commands.Porting
                 var drawmodeRegisterCount = (int)a.Count;
 
 
-                //var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler;
-                //var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler >> 8;
-                //var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown;
-                //var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown >> 8;
-                //var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector;
-                //var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector >> 8;
-                var ArgumentMappingsIndexSampler = 0;
-                var ArgumentMappingsCountSampler = 0;
-                var ArgumentMappingsIndexUnknown = 0;
-                var ArgumentMappingsCountUnknown = 0;
-                var ArgumentMappingsIndexVector = 0;
-                var ArgumentMappingsCountVector = 0;
+                var ArgumentMappingsIndexSampler = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler;
+                var ArgumentMappingsCountSampler = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleSampler >> 8;
+                var ArgumentMappingsIndexUnknown = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown;
+                var ArgumentMappingsCountUnknown = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleUnknown >> 8;
+                var ArgumentMappingsIndexVector = (byte)finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector;
+                var ArgumentMappingsCountVector = finalRm.ShaderProperties[0].Unknown3[drawmodeRegisterOffset].DataHandleVector >> 8;
                 var ArgumentMappings = new List<ArgumentMapping>();
 
                 for (int j = 0; j < ArgumentMappingsCountSampler / 4; j++)
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexSampler + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexSampler + j].ArgumentIndex, // i don't think i can use it to match stuf
+                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexSampler + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexSampler + j].ArgumentIndex, // i don't think i can use it to match stuf
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexSampler + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Sampler,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -931,8 +923,8 @@ namespace TagTool.Commands.Porting
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexUnknown + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexUnknown + j].ArgumentIndex,
+                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexUnknown + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexUnknown + j].ArgumentIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexUnknown + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -945,8 +937,8 @@ namespace TagTool.Commands.Porting
                 {
                     ArgumentMappings.Add(new ArgumentMapping
                     {
-                        RegisterIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexVector + j].RegisterIndex,
-                        ArgumentIndex = finalRm.ShaderProperties[0].FunctionMappings[ArgumentMappingsIndexVector + j].ArgumentIndex,
+                        RegisterIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexVector + j].RegisterIndex,
+                        ArgumentIndex = finalRm.ShaderProperties[0].ArgumentMappings[ArgumentMappingsIndexVector + j].ArgumentIndex,
                         ArgumentMappingsTagblockIndex = ArgumentMappingsIndexVector + j,
                         RegisterType = TagTool.Shaders.ShaderParameter.RType.Vector,
                         ShaderIndex = drawmodeRegisterOffset,
@@ -1021,23 +1013,23 @@ namespace TagTool.Commands.Porting
                     continue;
 
                 foreach (var b in a.Value.ArgumentMappings)
-                    finalRm.ShaderProperties[0].FunctionMappings[b.ArgumentMappingsTagblockIndex].RegisterIndex = (short)b.EDRegisterIndex;
+                    finalRm.ShaderProperties[0].ArgumentMappings[b.ArgumentMappingsTagblockIndex].RegisterIndex = (short)b.EDRegisterIndex;
             }
 
             // one final check
             // nope nopenopenepe this needs to be verified against it's pixl tag, not global registers
             var validEDRegisters = new List<int> { 000, 001, 002, 003, 004, 005, 006, 007, 008, 009, 010, 011, 012, 013, 014, 015, 016, 017, 018, 023, 024, 025, 026, 027, 028, 030, 031, 032, 033, 034, 035, 036, 037, 038, 039, 040, 041, 042, 043, 044, 045, 046, 047, 048, 049, 050, 051, 053, 057, 058, 059, 060, 061, 062, 063, 064, 065, 066, 067, 068, 069, 070, 071, 072, 073, 074, 075, 076, 077, 078, 079, 080, 081, 082, 083, 084, 085, 086, 087, 088, 089, 090, 091, 092, 093, 094, 095, 096, 097, 099, 100, 102, 103, 104, 105, 106, 107, 108, 109, 114, 120, 121, 122, 164, 168, 172, 173, 174, 175, 190, 191, 200, 201, 203, 204, 210, 211, 212, 213, 215, 216, 217, 218, 219, 220, 221, 222 };
-            foreach (var a in finalRm.ShaderProperties[0].FunctionMappings)
+            foreach (var a in finalRm.ShaderProperties[0].ArgumentMappings)
             {
                 if (!validEDRegisters.Contains((a.RegisterIndex)))
                 {
                     // Abort, disable functions
                     finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>(); // no idea what it does, but it crashes sometimes if it's null. on Shrine, it's the shader loop effect
                     finalRm.ShaderProperties[0].Functions = new List<RenderMethod.FunctionBlock>();
-                    finalRm.ShaderProperties[0].FunctionMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
-                    finalRm.ShaderProperties[0].DrawmodeFunctionOffsets = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
+                    finalRm.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
+                    finalRm.ShaderProperties[0].Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
                     foreach (var b in edRmt2.RegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same
-                        finalRm.ShaderProperties[0].DrawmodeFunctionOffsets.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
+                        finalRm.ShaderProperties[0].Unknown3.Add(new RenderMethod.ShaderProperty.UnknownBlock3());
 
                     return finalRm;
                 }

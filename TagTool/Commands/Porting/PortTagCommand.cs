@@ -1,4 +1,3 @@
-using HaloShaderGenerator.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -57,9 +56,13 @@ namespace TagTool.Commands.Porting
             MatchShaders = 1 << 10,
             Memory = 1 << 11,
             NoRmhg = 1 << 12,
+<<<<<<< HEAD
             NoMs30 = 1 << 13,
             HaloShaderGenerator = 1 << 14,
 			Silent = 1 << 15
+=======
+            NoMs30 = 1 << 13
+>>>>>>> parent of 2ed2f36... Shader Porting Improvements
         }
 
         public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
@@ -85,8 +88,7 @@ namespace TagTool.Commands.Porting
                 "ShaderTest: TBD." + Environment.NewLine +
                 "MatchShaders: Attempts to match any shader tags using existing render method tags when porting." + Environment.NewLine +
                 "NoShaders: Uses default shader tags when porting." + Environment.NewLine +
-                "Memory: Keeps cache in memory until the porting process is complete." + Environment.NewLine +
-                "HaloShaderGenerator: Ports supported shaders using the Halo Shader Generator library.",
+                "Memory: Keeps cache in memory until the porting process is complete.",
 
                 "PortTag [Options] <Tag>",
 
@@ -127,11 +129,6 @@ namespace TagTool.Commands.Porting
 
                     case "replace":
                         Flags |= PortingFlags.Replace;
-                        break;
-
-                    case "hsg":
-                    case "haloshadergenerator":
-                        Flags |= PortingFlags.HaloShaderGenerator;
                         break;
 
                     default:
@@ -278,34 +275,21 @@ namespace TagTool.Commands.Porting
                 case "sncl": // always use the default sncl tag
                     return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
-                    // Someday we might be able to generate these, but for now lets just use the standard vertex shaders
+                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
+                    return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+
+                case "rmcs": // there are no rmcs tags in ms23, disable completely for now
+
+                case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
+                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
+
+                    //TODO: Someday we might be able to generate these, but for now lets just use the standard vertex shaders
                 case "glvs":
                     return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
                 case "glps":
                     return CacheContext.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
-                    
-                case "rmw ":
-                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded || !RMT2Generator.IsTemplateSupported(ShaderType.Water))
-                    {
-                        // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
-                        return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
-                    }
-                    break;
-                case "rmcs ":
-                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded || !RMT2Generator.IsTemplateSupported(ShaderType.Custom))
-                    {
-                        // there are no rmcs tags in ms23, disable completely for now
-                        return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                    }
-                    break;
                 case "rmct":
-                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded || !RMT2Generator.IsTemplateSupported(ShaderType.Cortana))
-                    {
-                        return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                    }
-                    break;
-                case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
-                    if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded || !RMT2Generator.IsTemplateSupported(ShaderType.Black))
+                    if(!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
                     {
                         return CacheContext.GetTag<Shader>(@"shaders\invalid");
                     }
@@ -313,16 +297,17 @@ namespace TagTool.Commands.Porting
                 case "rmt2":
                     if (HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
                     {
-                        if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
-                            return rmt2Instance;
+                        // discard cortana shaders
+                        if (blamTag.Name.ToLower().Contains("cortana_template"))
+                        {
+                            if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
+                                return rmt2Instance;
 
-                        return null; // we will generate this in post if its supported
+                            return null; // This will be generated in the shader post
+                        }
                     }
-                    return null; // never port an rmt2 tag
-                case "vtsh":
-                    return null; // never port an vtsh tag
-                case "pixl":
-                    return null; // never port an pixl tag
+                    // unsupported shaders use default behavior
+                    break;
 
                 case "rmhg" when Flags.HasFlag(PortingFlags.NoRmhg): // rmhg have register indexing issues currently
                     if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
@@ -362,27 +347,18 @@ namespace TagTool.Commands.Porting
                         return CacheContext.GetTag<Particle>(@"fx\particles\energy\sparks\impact_spark_orange");
 
                     case "rmd ":
-                        if (!Flags.HasFlag(PortingFlags.HaloShaderGenerator) && RMT2Generator.IsTemplateSupported(ShaderType.Decal))
-                            return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
-                        break;
+                        return CacheContext.GetTag<ShaderDecal>(@"objects\gear\human\military\shaders\human_military_decals");
+
                     case "rmfl":
-                        if (!Flags.HasFlag(PortingFlags.HaloShaderGenerator) && RMT2Generator.IsTemplateSupported(ShaderType.Foliage))
-                            return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
-                        break;
+                        return CacheContext.GetTag<ShaderFoliage>(@"levels\multi\riverworld\shaders\riverworld_tree_leafa");
+
                     case "rmtr":
-                        if(!Flags.HasFlag(PortingFlags.HaloShaderGenerator) && RMT2Generator.IsTemplateSupported(ShaderType.Terrain))
-                            return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
-                        break;
+                        return CacheContext.GetTag<ShaderTerrain>(@"levels\multi\riverworld\shaders\riverworld_ground");
+
                     case "rmrd":
-                        return CacheContext.GetTag<Shader>(@"shaders\invalid"); // what is rmrd???
                     case "rmsh":
-                        if (!Flags.HasFlag(PortingFlags.HaloShaderGenerator) && RMT2Generator.IsTemplateSupported(ShaderType.Shader))
-                            return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                        break;
                     case "rmss":
-                        if (!Flags.HasFlag(PortingFlags.HaloShaderGenerator) && RMT2Generator.IsTemplateSupported(ShaderType.Screen))
-                            return CacheContext.GetTag<Shader>(@"shaders\invalid");
-                        break;
+                        return CacheContext.GetTag<Shader>(@"shaders\invalid");
                 }
             }
 
@@ -712,9 +688,8 @@ namespace TagTool.Commands.Porting
                         attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                     break;
 
-                case ShaderBlack shader_black:
                 case ShaderCortana shader_cortana:
-                    ConvertShader(blamDefinition as RenderMethod, cacheStream);
+                    ConvertShaderCortana(shader_cortana, cacheStream, resourceStreams);
                     break;
             }
 
@@ -824,11 +799,7 @@ namespace TagTool.Commands.Porting
 
                 case RenderMethod renderMethod when Flags.HasFlag(PortingFlags.MatchShaders):
                     ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
-                    if(Flags.HasFlag(PortingFlags.HaloShaderGenerator) && (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded || RMT2Generator.IsTemplateSupported(ShaderType.Shader)))
-                    {
-                        return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
-                    }
-                    return renderMethod;
+                    return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 
                 case ScenarioObjectType scenarioObjectType:
                     return ConvertScenarioObjectType(scenarioObjectType);

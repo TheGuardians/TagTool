@@ -31,7 +31,33 @@ namespace TagTool.Commands.Shaders
             Definition = definition;
         }
 
-        
+        public object[] CreateArguments(MethodInfo method, ShaderStage stage, Int32[] template)
+        {
+            var _params = method.GetParameters();
+            object[] input_params = new object[_params.Length];
+
+            for(int i=0;i<_params.Length;i++)
+            {
+                if (i == 0) input_params[0] = stage;
+                else
+                {
+                    var template_index = i - 1;
+                    if(template_index < template.Length)
+                    {
+                        var _enum = Enum.ToObject(_params[i].ParameterType, template[template_index]);
+                        input_params[i] = _enum;
+                    }
+                    else
+                    {
+                        var _enum = Enum.ToObject(_params[i].ParameterType, 0);
+                        input_params[i] = _enum;
+                    }
+                    
+                }
+            }
+
+            return input_params;
+        }
 
         public override object Execute(List<string> args)
         {
@@ -83,7 +109,7 @@ namespace TagTool.Commands.Shaders
                     if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Albedo))
                     {
                         var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
-                        var GenerateShaderArgs = RMT2Generator.CreateShaderGeneratorArguments(GenerateShader, shader_stage, shader_args);
+                        var GenerateShaderArgs = CreateArguments(GenerateShader, shader_stage, shader_args);
                         bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
 
                         Console.WriteLine(bytecode?.Length ?? -1);

@@ -114,7 +114,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance VertexShader;
         public CachedTagInstance PixelShader;
         public ShaderModeBitmask DrawModeBitmask;
-        public List<OffsetCount_16> DrawModes; // Entries in here correspond to an enum in the EXE
+        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
         public List<DrawModeRegisterOffsetBlock> RegisterOffsets;
         public List<ArgumentMapping> ArgumentMappings;
         public List<ShaderArgument> VectorArguments;
@@ -126,7 +126,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x2)]
-        public class OffsetCount_16
+        public class PackedInteger_10_6
         {
             public ushort Offset { get => GetOffset(); set => SetOffset(value); }
             public ushort Count { get => GetCount(); set => SetCount(value); }
@@ -152,7 +152,18 @@ namespace TagTool.Tags.Definitions
 
             public ushort Integer;
         }
+<<<<<<< HEAD
 		
+=======
+
+        // getters and setters put in here as this value is endian dependant
+        [TagStructure(Size = 0x2)]
+        public class DrawMode : PackedInteger_10_6
+        {
+
+        }
+
+>>>>>>> parent of 2ed2f36... Shader Porting Improvements
         [TagStructure(Size = 0x1C)]
         public class DrawModeRegisterOffsetBlock
         {
