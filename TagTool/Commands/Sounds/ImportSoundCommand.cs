@@ -104,17 +104,8 @@ namespace TagTool.Commands.Sounds
             //
 
             var chunkSize = (ushort)fileSize;
-            
-            var permutationChunk = new PermutationChunk
-            {
-                Offset = 0,
-                Size = chunkSize,
-                Unknown2 = (byte)((fileSize - chunkSize) / 65536),
-                Unknown3 = 4,
-                RuntimeIndex = -1,
-                UnknownA = 0,
-                UnknownSize = 0
-            };
+
+            var permutationChunk = new PermutationChunk(0, chunkSize);
 
             var permutation = Definition.PitchRanges[0].Permutations[0];
 

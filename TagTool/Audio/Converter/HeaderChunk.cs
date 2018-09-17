@@ -142,6 +142,49 @@ namespace TagTool.Audio.Converter
         
     }
 
+    class WAVFMTChunk : HeaderChunk
+    {
+        int SubchunkSize;
+        short PCMLinearQuantization = 1;
+        short Channels;
+        int SampleRate;
+        int ByteRate;
+        short BlockAlign;
+        short BitsPerSecond;
+
+        public WAVFMTChunk(int channels, int sampleRate, int PCMType = 0x10)
+        {
+            Name = 0x666D7420;
+            SubchunkSize = PCMType;
+            Channels = (short)channels;
+            SampleRate = sampleRate;
+            ByteRate = SampleRate * Channels * 2;
+            BlockAlign = (short)(Channels * 2);
+            BitsPerSecond = 0x10;
+            ChunkSize = 0x18;
+        }
+
+        override public void WriteChunk(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Name);
+            writer.Format = EndianFormat.LittleEndian;
+            writer.Write(SubchunkSize);
+            writer.Write(PCMLinearQuantization);
+            writer.Write(Channels);
+            writer.Write(SampleRate);
+            writer.Write(ByteRate);
+            writer.Write(BlockAlign);
+            writer.Write(BitsPerSecond);
+        }
+
+        override public void ReadChunk(EndianReader reader)
+        {
+            return;
+        }
+
+    }
+
     class DataChunk : HeaderChunk
     {
         byte[] Data;

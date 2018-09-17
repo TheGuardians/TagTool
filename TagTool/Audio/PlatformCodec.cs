@@ -9,7 +9,13 @@ namespace TagTool.Audio
     public class PlatformCodec
     {
         [TagField(HaloOnlineOnly = true)]
-        public short Unknown;
+        public byte Unknown1;
+
+        /// <summary>
+        /// Should be 0 in most cases. Seems to be used to determine streaming or loading.
+        /// </summary>
+        [TagField(HaloOnlineOnly = true)]
+        public byte LoadMode;
 
         [TagField(Gen3Only = true)]
         public SampleRate SampleRate;
