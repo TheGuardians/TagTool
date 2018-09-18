@@ -280,6 +280,7 @@
     <Compile Include="Commands\Porting\EditTagCommand.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\ListFieldsCommand.cs" />
+    <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
     <Compile Include="Commands\Porting\PortingContextFactory.cs" />
