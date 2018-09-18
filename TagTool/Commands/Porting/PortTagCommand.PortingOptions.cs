@@ -108,7 +108,7 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Allow writing output to the console.")]
 			Print = 1 << 14,
 
-			// No [IODescription] here means we'll flag names as the description.
+			// No [PortingFlagDescription] here means we'll flag names as the description.
 			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print
 		}
 
@@ -130,13 +130,13 @@ namespace TagTool.Commands.Porting
 		/// Sets flags explicitly (<see cref="PortTagCommand.Flags"/> |= <see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to set.</param>
-		private PortingFlags SetFlag(PortingFlags flags) => this.Flags |= flags;
+		private PortingFlags SetFlags(PortingFlags flags) => this.Flags |= flags;
 
 		/// <summary>
 		/// Removes flags explicitly (<see cref="PortTagCommand.Flags"/> &amp;= ~<see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to remove.</param>
-		private PortingFlags RemoveFlag(PortingFlags flags) => this.Flags &= ~flags;
+		private PortingFlags RemoveFlags(PortingFlags flags) => this.Flags &= ~flags;
 
 		/// <summary>
 		/// Toggles flags on or off (<see cref="PortTagCommand.Flags"/> ^= <see cref="PortingFlags"/>).
@@ -145,8 +145,7 @@ namespace TagTool.Commands.Porting
 		private PortingFlags ToggleFlags(PortingFlags flags) => this.Flags ^= flags;
 
 		/// <summary>
-		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>. Assumes
-		/// the last element is not an option that should be parsed (It's a tag identifier in PortTag).
+		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParsePortingOptions(List<string> args)
@@ -181,9 +180,9 @@ namespace TagTool.Commands.Porting
 				for (var i = 0; i < flagNames.Count(); i++)
 					if (arg == flagNames.ElementAt(i))
 						if (toggleOn)
-							this.SetFlag(flagValues[i]);
+							this.SetFlags(flagValues[i]);
 						else
-							this.RemoveFlag(flagValues[i]);
+							this.RemoveFlags(flagValues[i]);
 
 				args.RemoveAt(0);
 			}

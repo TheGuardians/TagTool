@@ -139,10 +139,10 @@ namespace TagTool.Commands.Porting
             {
                 var wasReplacing = FlagsAllSet(PortingFlags.Replace);
 
-				RemoveFlag(PortingFlags.Replace);
+				RemoveFlags(PortingFlags.Replace);
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
 				if (wasReplacing)
-					SetFlag(PortingFlags.Replace);
+					SetFlags(PortingFlags.Replace);
 
                 Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
                 Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
