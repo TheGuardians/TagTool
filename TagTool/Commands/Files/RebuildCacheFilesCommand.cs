@@ -103,8 +103,8 @@ namespace TagTool.Commands.Files
                     //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
                         //CacheContext.TagNames.Remove(tag.Index);
 
-                //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
-                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
+                CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
+                //var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
                 var defaultBitmapNames = new[]
                 {
@@ -166,21 +166,21 @@ namespace TagTool.Commands.Files
 
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
-                destCacheContext.Serialize(destStream, cfgtTag, new CacheFileGlobalTags
+                /*destCacheContext.Serialize(destStream, cfgtTag, new CacheFileGlobalTags
                 {
                     GlobalTags = new List<TagReferenceBlock>
                     {
                         new TagReferenceBlock { Instance = destCacheContext.GetTag<Globals>(@"globals\globals") }
                     }
-                });
+                });*/
 
-                /*foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in CacheContext.TagCache.Index)
                 {
                     if (instance == null || !instance.IsInGroup("scnr"))
                         continue;
 
                     CopyTag(instance, CacheContext, srcStream, destCacheContext, destStream);
-                }*/
+                }
             }
 
             destCacheContext.SaveTagNames();
@@ -190,11 +190,11 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
+            if (srcTag == null)// || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
                 return null;
 
-            if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
-                return null; // kill it with fucking fire
+            //if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
+                //return null; // kill it with fucking fire
             
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
@@ -729,7 +729,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("mauler"),
-                    Vehicle = null, //CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\mauler\mauler")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\mauler\mauler")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
