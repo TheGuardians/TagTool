@@ -202,7 +202,7 @@ namespace TagTool.Commands.Porting
 
                 var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
 
-                if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
+                if (!FlagsAllSet(PortingFlags.Ms30) && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                     continue;
 
                 var bitmaps = new List<string>();
@@ -788,7 +788,7 @@ namespace TagTool.Commands.Porting
                 {
                     var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
 
-                    if ((Flags & PortingFlags.NoMs30) != 0 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
+                    if (!FlagsAllSet(PortingFlags.Ms30) && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                         continue;
 
                     return instance;

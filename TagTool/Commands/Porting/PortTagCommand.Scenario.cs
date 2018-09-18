@@ -342,7 +342,7 @@ namespace TagTool.Commands.Porting
             var position = new RealPoint3d();
             var orientation = new RealEulerAngles3d();
 
-            if (Flags.HasFlag(PortingFlags.Recursive))
+            if (FlagsAllSet(PortingFlags.Recursive))
             {
                 switch (tagName)
                 {
@@ -525,7 +525,7 @@ namespace TagTool.Commands.Porting
             // Convert scripts
             //
 
-            if (Flags.HasFlag(PortingFlags.Scripts))
+            if (FlagsAllSet(PortingFlags.Scripts))
             {
                 foreach (var global in scnr.Globals)
                 {
@@ -903,7 +903,7 @@ namespace TagTool.Commands.Porting
 
         public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
-            if (!Flags.HasFlag(PortingFlags.Recursive))
+            if (!FlagsAllSet(PortingFlags.Recursive))
                 return;
 
             var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));

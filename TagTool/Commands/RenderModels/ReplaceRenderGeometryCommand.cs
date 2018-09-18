@@ -10,273 +10,273 @@ using System.Linq;
 
 namespace TagTool.Commands.RenderModels
 {
-    class ReplaceRenderGeometryCommand : Command
-    {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
-        private RenderModel Definition { get; }
+	class ReplaceRenderGeometryCommand : Command
+	{
+		private HaloOnlineCacheContext CacheContext { get; }
+		private CachedTagInstance Tag { get; }
+		private RenderModel Definition { get; }
 
-        public ReplaceRenderGeometryCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
-            base(false,
+		public ReplaceRenderGeometryCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition) :
+			base(false,
 
-                "ReplaceRenderGeometry",
-                "Replaces the render_geometry of the current render_model tag.",
-                
-                "ReplaceRenderGeometry <COLLADA Scene>",
+				"ReplaceRenderGeometry",
+				"Replaces the render_geometry of the current render_model tag.",
 
-                "Replaces the render_geometry of the current render_model tag " +
-                "with geometry compiled from a COLLADA scene file (.DAE)")
-        {
-            CacheContext = cacheContext;
-            Tag = tag;
-            Definition = definition;
-        }
-        
-        public override object Execute(List<string> args)
-        {
-            if (args.Count != 1)
-                return false;
+				"ReplaceRenderGeometry <COLLADA Scene>",
 
-            var stringIdCount = CacheContext.StringIdCache.Strings.Count;
-            
-            var sceneFile = new FileInfo(args[0]);
+				"Replaces the render_geometry of the current render_model tag " +
+				"with geometry compiled from a COLLADA scene file (.DAE)")
+		{
+			CacheContext = cacheContext;
+			Tag = tag;
+			Definition = definition;
+		}
 
-            if (!sceneFile.Exists)
-                throw new FileNotFoundException(sceneFile.FullName);
+		public override object Execute(List<string> args)
+		{
+			if (args.Count != 1)
+				return false;
 
-            if (sceneFile.Extension.ToLower() != ".dae")
-                throw new FormatException($"Input file is not COLLADA format: {sceneFile.FullName}");
+			var stringIdCount = CacheContext.StringIdCache.Strings.Count;
 
-            Scene scene;
+			var sceneFile = new FileInfo(args[0]);
 
-            using (var importer = new AssimpContext())
-            {
-                scene = importer.ImportFile(sceneFile.FullName,
-                    PostProcessSteps.CalculateTangentSpace |
-                    PostProcessSteps.GenerateNormals |
-                    PostProcessSteps.SortByPrimitiveType |
-                    PostProcessSteps.Triangulate);
-            }
+			if (!sceneFile.Exists)
+				throw new FileNotFoundException(sceneFile.FullName);
 
-            var builder = new RenderModelBuilder(CacheContext.Version);
-            var nodes = new Dictionary<string, sbyte>();
-            var materialIndices = new Dictionary<string, short>();
+			if (sceneFile.Extension.ToLower() != ".dae")
+				throw new FormatException($"Input file is not COLLADA format: {sceneFile.FullName}");
 
-            foreach (var oldNode in Definition.Nodes)
-            {
-                var name = CacheContext.GetString(oldNode.Name);
+			Scene scene;
 
-                nodes[name] = builder.AddNode(oldNode);
-            }
+			using (var importer = new AssimpContext())
+			{
+				scene = importer.ImportFile(sceneFile.FullName,
+					PostProcessSteps.CalculateTangentSpace |
+					PostProcessSteps.GenerateNormals |
+					PostProcessSteps.SortByPrimitiveType |
+					PostProcessSteps.Triangulate);
+			}
 
-            foreach (var region in Definition.Regions)
-            {
-                builder.BeginRegion(region.Name);
+			var builder = new RenderModelBuilder(CacheContext.Version);
+			var nodes = new Dictionary<string, sbyte>();
+			var materialIndices = new Dictionary<string, short>();
 
-                var regionName = CacheContext.GetString(region.Name);
+			foreach (var oldNode in Definition.Nodes)
+			{
+				var name = CacheContext.GetString(oldNode.Name);
 
-                foreach (var permutation in region.Permutations)
-                {
-                    if (permutation.MeshCount > 1)
-                        throw new NotSupportedException("multiple permutation meshes");
+				nodes[name] = builder.AddNode(oldNode);
+			}
 
-                    if (permutation.MeshIndex == -1)
-                        continue;
+			foreach (var region in Definition.Regions)
+			{
+				builder.BeginRegion(region.Name);
 
-                    var permName = CacheContext.GetString(permutation.Name);
-                    var meshName = $"{regionName.Replace('_', '-')}_{permName.Replace('_', '-')}Mesh";
+				var regionName = CacheContext.GetString(region.Name);
 
-                    var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
+				foreach (var permutation in region.Permutations)
+				{
+					if (permutation.MeshCount > 1)
+						throw new NotSupportedException("multiple permutation meshes");
 
-                    if (permMeshes.Count == 0)
-                        throw new Exception($"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+					if (permutation.MeshIndex == -1)
+						continue;
 
-                    permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
-                    
-                    // Build a multipart mesh from the model data,
-                    // with each model mesh mapping to a part of one large mesh and having its own material
-                    ushort partStartVertex = 0;
-                    ushort partStartIndex = 0;
+					var permName = CacheContext.GetString(permutation.Name);
+					var meshName = $"{regionName.Replace('_', '-')}_{permName.Replace('_', '-')}Mesh";
 
-                    var rigidVertices = new List<RigidVertex>();
-                    var skinnedVertices = new List<SkinnedVertex>();
+					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
 
-                    var indices = new List<ushort>();
+					if (permMeshes.Count == 0)
+						throw new Exception($"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
 
-                    var vertexType = Definition.Geometry.Meshes[permutation.MeshIndex].Type;
-                    var rigidNode = Definition.Geometry.Meshes[permutation.MeshIndex].RigidNodeIndex;
+					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
 
-                    builder.BeginPermutation(permutation.Name);
-                    builder.BeginMesh();
+					// Build a multipart mesh from the model data,
+					// with each model mesh mapping to a part of one large mesh and having its own material
+					ushort partStartVertex = 0;
+					ushort partStartIndex = 0;
 
-                    foreach (var mesh in permMeshes)
-                    {
-                        for (var i = 0; i < mesh.VertexCount; i++)
-                        {
-                            var position = mesh.Vertices[i];
-                            var normal = mesh.Normals[i];
+					var rigidVertices = new List<RigidVertex>();
+					var skinnedVertices = new List<SkinnedVertex>();
 
-                            Vector3D uv;
+					var indices = new List<ushort>();
 
-                            try
-                            {
-                                uv = mesh.TextureCoordinateChannels[0][i];
-                            }
-                            catch
-                            {
-                                Console.WriteLine($"WARNING: Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
-                                uv = new Vector3D();
-                            }
+					var vertexType = Definition.Geometry.Meshes[permutation.MeshIndex].Type;
+					var rigidNode = Definition.Geometry.Meshes[permutation.MeshIndex].RigidNodeIndex;
 
-                            var tangent = mesh.Tangents.Count != 0 ? mesh.Tangents[i] : new Vector3D();
-                            var bitangent = mesh.BiTangents.Count != 0 ? mesh.BiTangents[i] : new Vector3D();
+					builder.BeginPermutation(permutation.Name);
+					builder.BeginMesh();
 
-                            if (vertexType == VertexType.Skinned)
-                            {
-                                var blendIndicesList = new List<byte>();
-                                var blendWeightsList = new List<float>();
+					foreach (var mesh in permMeshes)
+					{
+						for (var i = 0; i < mesh.VertexCount; i++)
+						{
+							var position = mesh.Vertices[i];
+							var normal = mesh.Normals[i];
 
-                                foreach (var bone in mesh.Bones)
-                                {
-                                    foreach (var vertexInfo in bone.VertexWeights)
-                                    {
-                                        if (vertexInfo.VertexID == i)
-                                        {
-                                            // HAX BELOW
-                                            //if (bone.Name.StartsWith("_"))
-                                                //bone.Name = bone.Name.Substring(4);
-                                            //if (bone.Name.EndsWith("2"))
-                                                //bone.Name = bone.Name.Replace("2", "_tip");
-                                            //else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
-                                                //bone.Name = bone.Name.Replace("1", "_low");
-                                            blendIndicesList.Add((byte)nodes[bone.Name]);
-                                            blendWeightsList.Add(vertexInfo.Weight);
-                                        }
-                                    }
-                                }
+							Vector3D uv;
 
-                                var blendIndices = new byte[4];
-                                var blendWeights = new float[4];
+							try
+							{
+								uv = mesh.TextureCoordinateChannels[0][i];
+							}
+							catch
+							{
+								Console.WriteLine($"WARNING: Missing texture coordinate for vertex {i} in '{regionName}:{permName}'");
+								uv = new Vector3D();
+							}
 
-                                for (int j = 0; j < blendIndicesList.Count; j++)
-                                {
-                                    if (j < 4)
-                                        blendIndices[j] = blendIndicesList[j];
-                                }
+							var tangent = mesh.Tangents.Count != 0 ? mesh.Tangents[i] : new Vector3D();
+							var bitangent = mesh.BiTangents.Count != 0 ? mesh.BiTangents[i] : new Vector3D();
 
-                                for (int j = 0; j < blendWeightsList.Count; j++)
-                                {
-                                    if (j < 4)
-                                        blendWeights[j] = blendWeightsList[j];
-                                }
+							if (vertexType == VertexType.Skinned)
+							{
+								var blendIndicesList = new List<byte>();
+								var blendWeightsList = new List<float>();
 
-                                skinnedVertices.Add(new SkinnedVertex
-                                {
-                                    Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
-                                    Texcoord = new RealVector2d(uv.X, -uv.Y),
-                                    Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
-                                    Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
-                                    Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),
-                                    BlendIndices = blendIndices,
-                                    BlendWeights = blendWeights
-                                });
-                            }
-                            else
-                            {
-                                rigidVertices.Add(new RigidVertex
-                                {
-                                    Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
-                                    Texcoord = new RealVector2d(uv.X, -uv.Y),
-                                    Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
-                                    Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
-                                    Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),
-                                });
-                            }
-                        }
+								foreach (var bone in mesh.Bones)
+								{
+									foreach (var vertexInfo in bone.VertexWeights)
+									{
+										if (vertexInfo.VertexID == i)
+										{
+											// HAX BELOW
+											//if (bone.Name.StartsWith("_"))
+											//bone.Name = bone.Name.Substring(4);
+											//if (bone.Name.EndsWith("2"))
+											//bone.Name = bone.Name.Replace("2", "_tip");
+											//else if (bone.Name != "spine1" && bone.Name.EndsWith("1"))
+											//bone.Name = bone.Name.Replace("1", "_low");
+											blendIndicesList.Add((byte)nodes[bone.Name]);
+											blendWeightsList.Add(vertexInfo.Weight);
+										}
+									}
+								}
 
-                        // Build the index buffer
-                        var meshIndices = mesh.GetIndices();
-                        indices.AddRange(meshIndices.Select(i => (ushort)(i + partStartVertex)));
+								var blendIndices = new byte[4];
+								var blendWeights = new float[4];
 
-                        // Define a material and part for this mesh
-                        var meshMaterial = scene.Materials[mesh.MaterialIndex];
+								for (int j = 0; j < blendIndicesList.Count; j++)
+								{
+									if (j < 4)
+										blendIndices[j] = blendIndicesList[j];
+								}
 
-                        short materialIndex = 0;
+								for (int j = 0; j < blendWeightsList.Count; j++)
+								{
+									if (j < 4)
+										blendWeights[j] = blendWeightsList[j];
+								}
 
-                        if (materialIndices.ContainsKey(meshMaterial.Name))
-                            materialIndex = materialIndices[meshMaterial.Name];
-                        else
-                            materialIndex = materialIndices[meshMaterial.Name] = builder.AddMaterial(new RenderMaterial
-                            {
-                                RenderMethod = CacheContext.TagCache.Index[0x3AB0],
-                            });
+								skinnedVertices.Add(new SkinnedVertex
+								{
+									Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
+									Texcoord = new RealVector2d(uv.X, -uv.Y),
+									Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
+									Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
+									Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),
+									BlendIndices = blendIndices,
+									BlendWeights = blendWeights
+								});
+							}
+							else
+							{
+								rigidVertices.Add(new RigidVertex
+								{
+									Position = new RealQuaternion(position.X * 0.01f, position.Y * 0.01f, position.Z * 0.01f, 1),
+									Texcoord = new RealVector2d(uv.X, -uv.Y),
+									Normal = new RealVector3d(normal.X, normal.Y, normal.Z),
+									Tangent = new RealQuaternion(tangent.X, tangent.Y, tangent.Z, 1),
+									Binormal = new RealVector3d(bitangent.X, bitangent.Y, bitangent.Z),
+								});
+							}
+						}
 
-                        builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
-                        builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
-                        builder.EndPart();
+						// Build the index buffer
+						var meshIndices = mesh.GetIndices();
+						indices.AddRange(meshIndices.Select(i => (ushort)(i + partStartVertex)));
 
-                        // Move to the next part
-                        partStartVertex += (ushort)mesh.VertexCount;
-                        partStartIndex += (ushort)meshIndices.Length;
-                    }
-                    
-                    // Bind the vertex and index buffers
-                    if (vertexType == VertexType.Skinned)
-                        builder.BindSkinnedVertexBuffer(skinnedVertices);
-                    else
-                        builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
+						// Define a material and part for this mesh
+						var meshMaterial = scene.Materials[mesh.MaterialIndex];
 
-                    builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
+						short materialIndex = 0;
 
-                    builder.EndMesh();
-                    builder.EndPermutation();
-                }
+						if (materialIndices.ContainsKey(meshMaterial.Name))
+							materialIndex = materialIndices[meshMaterial.Name];
+						else
+							materialIndex = materialIndices[meshMaterial.Name] = builder.AddMaterial(new RenderMaterial
+							{
+								RenderMethod = CacheContext.TagCache.Index[0x3AB0],
+							});
 
-                builder.EndRegion();
-            }
+						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
+						builder.DefineSubPart(partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
+						builder.EndPart();
 
-            using (var resourceStream = new MemoryStream())
-            {
-                Console.Write("Building render_geometry...");
+						// Move to the next part
+						partStartVertex += (ushort)mesh.VertexCount;
+						partStartIndex += (ushort)meshIndices.Length;
+					}
 
-                var newDefinition = builder.Build(CacheContext.Serializer, resourceStream);
-                Definition.Regions = newDefinition.Regions;
-                Definition.Geometry = newDefinition.Geometry;
-                Definition.Nodes = newDefinition.Nodes;
-                Definition.Materials = newDefinition.Materials;
-                
-                resourceStream.Position = 0;
+					// Bind the vertex and index buffers
+					if (vertexType == VertexType.Skinned)
+						builder.BindSkinnedVertexBuffer(skinnedVertices);
+					else
+						builder.BindRigidVertexBuffer(rigidVertices, rigidNode);
 
-                Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(Definition.Geometry.Resource, resourceStream);
+					builder.BindIndexBuffer(indices, IndexBufferFormat.TriangleList);
 
-                Console.WriteLine("done.");
-            }
+					builder.EndMesh();
+					builder.EndPermutation();
+				}
 
-            //
-            // TODO: Build the new render_model and update the original render_model here...
-            //
+				builder.EndRegion();
+			}
 
-            Console.Write("Writing render_model tag data...");
+			using (var resourceStream = new MemoryStream())
+			{
+				Console.Write("Building render_geometry...");
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(cacheStream, Tag, Definition);
+				var newDefinition = builder.Build(CacheContext.Serializer, resourceStream);
+				Definition.Regions = newDefinition.Regions;
+				Definition.Geometry = newDefinition.Geometry;
+				Definition.Nodes = newDefinition.Nodes;
+				Definition.Materials = newDefinition.Materials;
 
-            Console.WriteLine("done.");
-            
-            if (stringIdCount != CacheContext.StringIdCache.Strings.Count)
-            {
-                Console.Write("Saving string ids...");
+				resourceStream.Position = 0;
 
-                using (var stream = CacheContext.OpenStringIdCacheReadWrite())
-                    CacheContext.StringIdCache.Save(stream);
+				Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
+				CacheContext.AddResource(Definition.Geometry.Resource, resourceStream);
 
-                Console.WriteLine("done");
-            }
+				Console.WriteLine("done.");
+			}
 
-            Console.WriteLine("Replaced render_geometry successfully.");
+			//
+			// TODO: Build the new render_model and update the original render_model here...
+			//
 
-            return true;
-        }
-    }
+			Console.Write("Writing render_model tag data...");
+
+			using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+				CacheContext.Serialize(cacheStream, Tag, Definition);
+
+			Console.WriteLine("done.");
+
+			if (stringIdCount != CacheContext.StringIdCache.Strings.Count)
+			{
+				Console.Write("Saving string ids...");
+
+				using (var stream = CacheContext.OpenStringIdCacheReadWrite())
+					CacheContext.StringIdCache.Save(stream);
+
+				Console.WriteLine("done");
+			}
+
+			Console.WriteLine("Replaced render_geometry successfully.");
+
+			return true;
+		}
+	}
 }
