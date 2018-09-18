@@ -64,9 +64,9 @@ namespace TagTool.Commands.Porting
 
             var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-            using (var cacheStream = FlagsAllSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenTagCacheReadWrite())
+            using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenTagCacheReadWrite())
             {
-                if (FlagsAllSet(PortingFlags.Memory))
+                if (FlagIsSet(PortingFlags.Memory))
                     using (var cacheFileStream = CacheContext.OpenTagCacheRead())
                         cacheFileStream.CopyTo(cacheStream);
 
@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
                     Flags = oldFlags;
                 }
 
-                if (FlagsAllSet(PortingFlags.Memory))
+                if (FlagIsSet(PortingFlags.Memory))
                     using (var cacheFileStream = CacheContext.OpenTagCacheReadWrite())
                     {
                         cacheFileStream.Seek(0, SeekOrigin.Begin);
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in resourceStreams)
             {
-                if (FlagsAllSet(PortingFlags.Memory))
+                if (FlagIsSet(PortingFlags.Memory))
                     using (var resourceFileStream = CacheContext.OpenResourceCacheReadWrite(entry.Key))
                     {
                         resourceFileStream.Seek(0, SeekOrigin.Begin);
@@ -216,15 +216,15 @@ namespace TagTool.Commands.Porting
                     // unsupported shaders use default behavior
                     break;
 
-                case "rmhg" when !FlagsAllSet(PortingFlags.Rmhg): // rmhg have register indexing issues currently
+                case "rmhg" when !FlagIsSet(PortingFlags.Rmhg): // rmhg have register indexing issues currently
                     if (CacheContext.TryGetTag<ShaderHalogram>(blamTag.Name, out var rmhgInstance))
                         return rmhgInstance;
                     return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
                 // Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-                case "rmdf" when FlagsAllSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+                case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
                     return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
-                case "rmdf" when FlagsAllSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+                case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
                     Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
                     return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
             }
@@ -290,14 +290,14 @@ namespace TagTool.Commands.Porting
                     CacheContext.GetStringId(blamTag.GroupName));
             }
 
-            if ((groupTag == "snd!") && !FlagsAllSet(PortingFlags.Audio))
+            if ((groupTag == "snd!") && !FlagIsSet(PortingFlags.Audio))
                 return null;
 
-            var wasReplacing = FlagsAllSet(PortingFlags.Replace);
-            var wasNew = FlagsAllSet(PortingFlags.New);
-            var wasSingle = FlagsAllSet(PortingFlags.Recursive);
+            var wasReplacing = FlagIsSet(PortingFlags.Replace);
+            var wasNew = FlagIsSet(PortingFlags.New);
+            var wasSingle = FlagIsSet(PortingFlags.Recursive);
 
-            if (!FlagsAllSet(PortingFlags.Elites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
+            if (!FlagIsSet(PortingFlags.Elites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                 return null;
 
             if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
@@ -306,7 +306,7 @@ namespace TagTool.Commands.Porting
                 {
                     var instance = CacheContext.GetTag(entry.Key);
 
-                    if (instance.IsInGroup("rm  ") && !FlagsAllSet(PortingFlags.Ms30))
+                    if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
                     {
                         var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
                         var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
@@ -319,14 +319,14 @@ namespace TagTool.Commands.Porting
                         return edTag = instance;
                 }
             }
-            else if (!FlagsAllSet(PortingFlags.New))
+            else if (!FlagIsSet(PortingFlags.New))
             {
                 foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
                 {
                     if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
                         continue;
 
-                    if (instance.IsInGroup("rm  ") && !FlagsAllSet(PortingFlags.Ms30))
+                    if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
                     {
                         var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
                         var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
@@ -337,9 +337,9 @@ namespace TagTool.Commands.Porting
 
                     if (CacheContext.TagNames[instance.Index] == blamTag.Name)
                     {
-                        if (FlagsAllSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
+                        if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                         {
-                            if (!FlagsAllSet(PortingFlags.Recursive) && wasSingle)
+                            if (!FlagIsSet(PortingFlags.Recursive) && wasSingle)
 								ToggleFlags(PortingFlags.Replace | PortingFlags.Recursive);
 
                             edTag = instance;
@@ -350,7 +350,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (FlagsAllSet(PortingFlags.New) && !FlagsAllSet(PortingFlags.Recursive) && wasSingle)
+            if (FlagIsSet(PortingFlags.New) && !FlagIsSet(PortingFlags.Recursive) && wasSingle)
 				ToggleFlags(PortingFlags.New | PortingFlags.Recursive);
 
             //
@@ -370,7 +370,7 @@ namespace TagTool.Commands.Porting
 
             if (edTag == null)
             {
-                if (FlagsAllSet(PortingFlags.UseNull))
+                if (FlagIsSet(PortingFlags.UseNull))
                 {
                     var i = CacheContext.TagCache.Index.ToList().FindIndex(n => n == null);
 
@@ -403,10 +403,10 @@ namespace TagTool.Commands.Porting
                         material.RenderMethod = null;
                     break;
 
-                case Scenario scenario when !FlagsAllSet(PortingFlags.Squads):
+                case Scenario scenario when !FlagIsSet(PortingFlags.Squads):
                     scenario.Squads = new List<Scenario.Squad>();
                     break;
-                case Scenario scenario when !FlagsAllSet(PortingFlags.ForgePalette):
+                case Scenario scenario when !FlagIsSet(PortingFlags.ForgePalette):
                     scenario.SandboxEquipment.Clear();
                     scenario.SandboxGoalObjects.Clear();
                     scenario.SandboxScenery.Clear();
@@ -607,7 +607,7 @@ namespace TagTool.Commands.Porting
 
             CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
-            if (FlagsAllSet(PortingFlags.Print))
+            if (FlagIsSet(PortingFlags.Print))
                 Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
 
             return edTag;
@@ -652,7 +652,7 @@ namespace TagTool.Commands.Porting
 
                 case CachedTagInstance tag:
                     {
-                        if (!FlagsAllSet(PortingFlags.Recursive))
+                        if (!FlagIsSet(PortingFlags.Recursive))
                         {
                             foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
                             {
@@ -698,7 +698,7 @@ namespace TagTool.Commands.Porting
                         throw new NotSupportedException(propertyType.Halo2.ToString());
                     break;
 
-                case RenderMethod renderMethod when FlagsAllSet(PortingFlags.MatchShaders):
+                case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
                     ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
                     return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 

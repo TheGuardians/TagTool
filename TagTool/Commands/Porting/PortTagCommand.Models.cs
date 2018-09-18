@@ -847,11 +847,11 @@ namespace TagTool.Commands.Porting
 
                 if (!resourceStreams.ContainsKey(ResourceLocation.ResourcesB))
                 {
-                    resourceStreams[ResourceLocation.ResourcesB] = FlagsAllSet(PortingFlags.Memory) ?
+                    resourceStreams[ResourceLocation.ResourcesB] = FlagIsSet(PortingFlags.Memory) ?
                         new MemoryStream() :
                         (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.ResourcesB);
 
-                    if (FlagsAllSet(PortingFlags.Memory))
+                    if (FlagIsSet(PortingFlags.Memory))
                         using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.ResourcesB))
                             resourceStream.CopyTo(resourceStreams[ResourceLocation.ResourcesB]);
                 }

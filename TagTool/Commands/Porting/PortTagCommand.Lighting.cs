@@ -137,7 +137,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var entry in scenarioLightmap.Lightmaps)
             {
-                var wasReplacing = FlagsAllSet(PortingFlags.Replace);
+                var wasReplacing = FlagIsSet(PortingFlags.Replace);
 
 				RemoveFlags(PortingFlags.Replace);
                 var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);

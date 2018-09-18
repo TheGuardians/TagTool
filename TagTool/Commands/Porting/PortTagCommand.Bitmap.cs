@@ -278,11 +278,11 @@ namespace TagTool.Commands.Porting
 
                 if (!resourceStreams.ContainsKey(ResourceLocation.Textures))
                 {
-                    resourceStreams[ResourceLocation.Textures] = FlagsAllSet(PortingFlags.Memory) ?
+                    resourceStreams[ResourceLocation.Textures] = FlagIsSet(PortingFlags.Memory) ?
                         new MemoryStream() :
                         (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Textures);
 
-                    if (FlagsAllSet(PortingFlags.Memory))
+                    if (FlagIsSet(PortingFlags.Memory))
                         using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Textures))
                             resourceStream.CopyTo(resourceStreams[ResourceLocation.Textures]);
                 }

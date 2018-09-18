@@ -120,6 +120,14 @@ namespace TagTool.Commands.Porting
 		private bool FlagsAllSet(PortingFlags flags) => (this.Flags & flags) == flags;
 
 		/// <summary>
+		/// True if the flag is set (this is 100% the same as <see cref="FlagsAnySet(PortingFlags)"/>,
+		/// other than the name.
+		/// </summary>
+		/// <param name="flag"></param>
+		/// <returns></returns>
+		private bool FlagIsSet(PortingFlags flag) => (this.Flags & flag) != 0;
+
+		/// <summary>
 		/// True if ANY of the supplied <see cref="PortingFlags"/> are set, false if none are:
 		/// (<see cref="PortTagCommand.Flags"/> &amp; flags) != 0
 		/// </summary>
@@ -160,9 +168,10 @@ namespace TagTool.Commands.Porting
 				var arg = args[a].ToLower();
 
 				// Support legacy arguments
-				arg = arg.Replace("single", $"!{nameof(PortingFlags.Recursive).ToLower()}");
-				arg = arg.Replace("noshaders", $"!{nameof(PortingFlags.MatchShaders).ToLower()}");
-				arg = arg.Replace("silent", $"!{nameof(PortingFlags.Print).ToLower()}");
+				arg = arg.Replace("single", $"!{nameof(PortingFlags.Recursive)}");
+				arg = arg.Replace("noshaders", $"!{nameof(PortingFlags.MatchShaders)}");
+				arg = arg.Replace("silent", $"!{nameof(PortingFlags.Print)}");
+				arg = arg.ToLower(); // do this again incase the argument was replaced
 
 				// Use '!' or 'No' to negate an argument.
 				var toggleOn = !(arg.StartsWith("!") || arg.StartsWith("no"));
