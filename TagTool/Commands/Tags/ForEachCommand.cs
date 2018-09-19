@@ -79,8 +79,19 @@ namespace TagTool.Commands.Tags
                         CacheContext.TagNames[instance.Index] :
                         $"0x{instance.Index:X4}";
 
-                    if (pattern != null && !Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
-                        continue;
+                    if (pattern != null)
+                    {
+                        try
+                        {
+                            if (!Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
+                                continue;
+                        }
+                        catch
+                        {
+                            if (!tagName.Contains(pattern))
+                                continue;
+                        }
+                    }
 
                     var definition = CacheContext.Deserialize(stream, instance);
                     ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
