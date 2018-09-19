@@ -101,7 +101,7 @@ namespace TagTool.Commands.Tags
                     $"0x{tag.Index:X4}";
 
                 var groupName = CacheContext.GetString(tag.Group.Name);
-
+                
                 if (named)
                 {
                     if (!CacheContext.TagNames.ContainsKey(tag.Index))

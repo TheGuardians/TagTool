@@ -54,15 +54,55 @@ namespace TagTool.Commands.Tags
 
             args.RemoveAt(0);
 
+            var startFilter = "";
+            var endFilter = "";
+            var filter = "";
+
             string pattern = null;
 
-            if (args[0].ToLower() == "named:")
+            while (args[0].EndsWith(":"))
             {
-                if (args.Count < 3)
-                    return false;
+                switch (args[0].ToLower())
+                {
+                    case "regex:":
+                        if (args.Count < 3)
+                            return false;
+                        pattern = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
 
-                pattern = args[1];
-                args.RemoveRange(0, 2);
+                    case "starts:":
+                    case "startswith:":
+                    case "starts_with:":
+                    case "starting:":
+                    case "startingwith:":
+                    case "starting_with:":
+                    case "start_filter:":
+                    case "starting_filter:":
+                        startFilter = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
+
+                    case "ends:":
+                    case "ending:":
+                    case "endingwith:":
+                    case "ending_with:":
+                    case "endswith:":
+                    case "ends_with:":
+                    case "end_filter:":
+                    case "ending_filter:":
+                        endFilter = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
+
+                    case "named:":
+                    case "filter:":
+                    case "contains:":
+                    case "containing:":
+                        filter = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
+                }
             }
 
             var rootContext = ContextStack.Context;
@@ -79,32 +119,33 @@ namespace TagTool.Commands.Tags
                         CacheContext.TagNames[instance.Index] :
                         $"0x{instance.Index:X4}";
 
-                    if (pattern != null)
+                    try
                     {
-                        try
-                        {
-                            if (!Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
-                                continue;
-                        }
-                        catch
-                        {
-                            if (!tagName.Contains(pattern))
-                                continue;
-                        }
+                        if (pattern != null && !Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
+                            continue;
                     }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
+                        continue;
 
                     var definition = CacheContext.Deserialize(stream, instance);
                     ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
 
+                    Console.WriteLine();
                     Console.WriteLine($"{tagName}.{groupName}:");
                     ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
-                    Console.WriteLine();
 
                     while (ContextStack.Context != rootContext) ContextStack.Pop();
 
                     if (!isConst)
                         CacheContext.Serialize(stream, instance, definition);
                 }
+
+                Console.WriteLine();
             }
 
             return true;
