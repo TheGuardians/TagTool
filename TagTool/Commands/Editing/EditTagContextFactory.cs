@@ -25,7 +25,7 @@ namespace TagTool.Commands.Editing
     {
         public static XmlDocument Documentation { get; } = new XmlDocument();
 
-        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag)
+        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object definition)
         {
             var documentationPath = $"{new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName}\\TagTool.xml";
 
@@ -43,11 +43,6 @@ namespace TagTool.Commands.Editing
             }
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-
-            object definition = null;
-
-            using (var stream = cacheContext.OpenTagCacheRead())
-                definition = cacheContext.Deserialize(stream, tag);
 
             switch (tag.Group.Tag.ToString())
             {

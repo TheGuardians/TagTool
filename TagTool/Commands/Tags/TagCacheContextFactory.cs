@@ -13,11 +13,11 @@ namespace TagTool.Commands.Tags
 {
     public static class TagCacheContextFactory
     {
-        public static CommandContext Create(CommandContextStack stack, HaloOnlineCacheContext cacheContext)
+        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext)
         {
-            var context = new CommandContext(stack.Context, "tags");
+            var context = new CommandContext(contextStack.Context, "tags");
 
-            context.AddCommand(new HelpCommand(stack));
+            context.AddCommand(new HelpCommand(contextStack));
             context.AddCommand(new ClearCommand());
             context.AddCommand(new DumpLogCommand());
             context.AddCommand(new EchoCommand());
@@ -40,7 +40,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListNullTagsCommand(cacheContext));
             context.AddCommand(new CreateTagCommand(cacheContext));
             context.AddCommand(new ExtractAllTagsCommand(cacheContext));
-            context.AddCommand(new Editing.EditTagCommand(stack, cacheContext));
+            context.AddCommand(new Editing.EditTagCommand(contextStack, cacheContext));
             context.AddCommand(new CollisionModelTestCommand(cacheContext));
             context.AddCommand(new PhysicsModelTestCommand(cacheContext));
             context.AddCommand(new StringIdCommand(cacheContext));
@@ -59,10 +59,11 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
             context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new RebuildStringIdsCommand(cacheContext));
-            context.AddCommand(new OpenCacheFileCommand(stack, cacheContext));
+            context.AddCommand(new OpenCacheFileCommand(contextStack, cacheContext));
             context.AddCommand(new ExportTagModCommand(cacheContext));
             context.AddCommand(new Shaders.RegenerateShaders(cacheContext));
             context.AddCommand(new UseAudioCacheCommand());
+            context.AddCommand(new ForEachCommand(contextStack, cacheContext));
 
             return context;
         }
