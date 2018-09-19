@@ -7,7 +7,7 @@ namespace TagTool.Serialization
     /// Attribute for a serializable structure in a tag.
     /// If a structure has more than one of these attributes, then all attributes with version restrictions will be checked first.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class TagStructureAttribute : Attribute
     {
         /// <summary>

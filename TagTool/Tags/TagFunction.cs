@@ -50,7 +50,7 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-        public struct ScalarFunctionHeader
+		public /*was_struct*/ class ScalarFunctionHeader
         {
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
@@ -64,7 +64,7 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-        public struct ColorFunctionHeader
+		public /*was_struct*/ class ColorFunctionHeader
         {
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
@@ -79,45 +79,45 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x8)]
-        public struct IdentityData
+		public /*was_struct*/ class IdentityData
         {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-        public struct ConstantData
+		public /*was_struct*/ class ConstantData
         {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-        public struct TransitionData
+		public /*was_struct*/ class TransitionData
         {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-        public struct PeriodicData
+		public /*was_struct*/ class PeriodicData
         {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0xC)]
-        public struct LinearData
+		public /*was_struct*/ class LinearData
         {
             public float Unknown;
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x14)]
-        public struct MultiLinearKeyData
+		public /*was_struct*/ class MultiLinearKeyData
         {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x18)]
-        public struct SplineData
+		public /*was_struct*/ class SplineData
         {
             public float Unknown;
             public RealPoint2d Point1;
@@ -125,21 +125,21 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x14)]
-        public struct MultiSplineData
+		public /*was_struct*/ class MultiSplineData
         {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x14)]
-        public struct ExponentData
+		public /*was_struct*/ class ExponentData
         {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x20)]
-        public struct Spline2Data
+		public /*was_struct*/ class Spline2Data
         {
             public float Unknown1;
             public RealPoint2d Point1;

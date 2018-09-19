@@ -587,7 +587,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x4)]
-    public struct WeaponFlags
+	public /*was_struct*/ class WeaponFlags
     {
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public OldWeaponFlags OldFlags;

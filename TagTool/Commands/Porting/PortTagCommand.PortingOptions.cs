@@ -118,7 +118,7 @@ namespace TagTool.Commands.Porting
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to check.</param>
 		private bool FlagsAllSet(PortingFlags flags) => (this.Flags & flags) == flags;
-
+		
 		/// <summary>
 		/// True if the flag is set (this is 100% the same as <see cref="FlagsAnySet(PortingFlags)"/>,
 		/// other than the name.
@@ -192,7 +192,7 @@ namespace TagTool.Commands.Porting
 							this.SetFlags(flagValues[i]);
 						else
 							this.RemoveFlags(flagValues[i]);
-
+				
 				args.RemoveAt(0);
 			}
 		}

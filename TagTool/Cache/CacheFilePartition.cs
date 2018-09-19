@@ -6,7 +6,7 @@ namespace TagTool.Cache
     /// A partition within a cache file.
     /// </summary>
     [TagStructure(Size = 0x8)]
-    public struct CacheFilePartition
+	public /*was_struct*/ class CacheFilePartition
     {
         /// <summary>
         /// The base address of the cache file partition.

@@ -202,7 +202,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public struct Motor
+		public /*was_struct*/ class Motor
         {
             public MotorType Type;
             public short Index;

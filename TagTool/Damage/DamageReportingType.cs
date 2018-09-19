@@ -4,7 +4,7 @@ using TagTool.Serialization;
 namespace TagTool.Damage
 {
     [TagStructure(Size = 0x1)]
-    public struct DamageReportingType
+    public /*was_struct*/ class DamageReportingType
     {
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
         public Halo2RetailValue Halo2Retail;

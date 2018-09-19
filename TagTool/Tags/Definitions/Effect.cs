@@ -340,7 +340,7 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-                    public struct TranslationalOffsetData
+					public /*was_struct*/ class TranslationalOffsetData
                     {
                         public TagMapping Mapping;
                         public RealPoint3d StartingInterpolant;
@@ -348,7 +348,7 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-                    public struct RelativeDirectionData
+					public /*was_struct*/ class RelativeDirectionData
                     {
                         public TagMapping Mapping;
                         public RealEulerAngles3d DirectionAt0;
@@ -357,7 +357,7 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
                     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
-                    public struct ParticleMovementData
+					public /*was_struct*/ class ParticleMovementData
                     {
                         public CachedTagInstance Template;
 
@@ -428,7 +428,7 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-                    public struct ParticleSelfAccelerationData
+					public /*was_struct*/ class ParticleSelfAccelerationData
                     {
                         public TagMapping Mapping;
                         public RealVector3d StartingInterpolant;
@@ -436,7 +436,7 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x30)]
-                    public struct RuntimeMGpuData
+					public /*was_struct*/ class RuntimeMGpuData
                     {
                         public int ConstantPerParticleProperties;
                         public int ConstantOverTimeProperties;
@@ -446,21 +446,21 @@ namespace TagTool.Tags.Definitions
                         public List<Color> Colors;
 
                         [TagStructure(Size = 0x10)]
-                        public struct Property
+						public /*was_struct*/ class Property
                         {
                             [TagField(Length = 4)]
                             public float[] Data;
                         }
 
                         [TagStructure(Size = 0x40)]
-                        public struct Function
+						public /*was_struct*/ class Function
                         {
                             [TagField(Length = 16)]
                             public float[] Data;
                         }
 
                         [TagStructure(Size = 0x10)]
-                        public struct Color
+						public /*was_struct*/ class Color
                         {
                             [TagField(Length = 4)]
                             public float[] Data;

@@ -20,7 +20,6 @@
 				this.Flop[value] = flip;
 			}
 		}
-
 		public TFlip this[TFlop flop]
 		{
 			get => this.Flop[flop];
@@ -73,6 +72,11 @@
 		{
 			var flopKey = this.Flip[flipKey];
 			return this.Flip.Remove(flipKey) && this.Flop.Remove(flopKey);
+		}
+		public bool Remove(TFlop flopKey)
+		{
+			var flipKey = this.Flop[flopKey];
+			return this.Flop.Remove(flopKey) && this.Flip.Remove(flipKey);
 		}
 
 		public bool Remove(KeyValuePair<TFlip, TFlop> flipFlop)

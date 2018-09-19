@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     /// ElDewrito Forge globals.
     /// </summary>
     [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x80)]
-    public struct ForgeGlobalsDefinition
+	public /*was_struct*/ class ForgeGlobalsDefinition
     {
         /// <summary>
         /// The "invisible" render method.
@@ -72,7 +72,7 @@ namespace TagTool.Tags.Definitions
         /// A material reference for ReForge objects.
         /// </summary>
         [TagStructure(Size = 0x30)]
-        public struct ReForgeMaterial
+		public /*was_struct*/ class ReForgeMaterial
         {
             [TagField(Length = 32)]
             public string Name;
@@ -110,7 +110,7 @@ namespace TagTool.Tags.Definitions
         /// A single item of the Forge object palette.
         /// </summary>
         [TagStructure(Size = 0x40)]
-        public struct PaletteItem
+		public /*was_struct*/ class PaletteItem
         {
             /// <summary>
             /// The name of the palette item.
@@ -163,7 +163,7 @@ namespace TagTool.Tags.Definitions
             /// A property setter descriptor.
             /// </summary>
             [TagStructure(Size = 0x2C)]
-            public struct Setter
+			public /*was_struct*/ class Setter
             {
                 /// <summary>
                 /// The target of the property setter.
@@ -202,7 +202,7 @@ namespace TagTool.Tags.Definitions
         /// A weather effect reference descriptor.
         /// </summary>
         [TagStructure(Size = 0x30)]
-        public struct WeatherEffect
+		public /*was_struct*/ class WeatherEffect
         {
             /// <summary>
             /// The name of the weather effect.
@@ -230,7 +230,7 @@ namespace TagTool.Tags.Definitions
         /// A Forge sky descriptor.
         /// </summary>
         [TagStructure(Size = 0xAC)]
-        public struct Sky
+		public /*was_struct*/ class Sky
         {
             /// <summary>
             /// The name of the sky.
