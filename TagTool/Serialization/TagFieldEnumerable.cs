@@ -129,4 +129,4 @@ namespace TagTool.Serialization
 		public FieldInfo Find(Predicate<FieldInfo> match) =>
 			TagFieldInfos.Find(f => match.Invoke(f.FieldInfo))?.FieldInfo ?? null;
 	}
-} 
+}
