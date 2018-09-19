@@ -21,7 +21,7 @@ namespace TagTool.Commands.Tags
                 "ForEach",
                 "Executes a command on every instance of the specified tag group.",
                 
-                "ForEach <Tag Group> <Command...>",
+                "ForEach [Const] <Tag Group> <Command...>",
                 
                 "Executes a command on every instance of the specified tag group.")
         {
@@ -31,6 +31,17 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
+            if (args.Count < 1)
+                return false;
+
+            var isConst = false;
+
+            if (args[0].ToLower() == "const")
+            {
+                args.RemoveAt(0);
+                isConst = true;
+            }
+
             if (args.Count < 1)
                 return false;
 
@@ -64,7 +75,9 @@ namespace TagTool.Commands.Tags
                     Console.WriteLine();
 
                     while (ContextStack.Context != rootContext) ContextStack.Pop();
-                    CacheContext.Serialize(stream, instance, definition);
+
+                    if (!isConst)
+                        CacheContext.Serialize(stream, instance, definition);
                 }
             }
 
