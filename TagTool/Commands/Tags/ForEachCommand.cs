@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Commands.Editing;
@@ -21,7 +22,7 @@ namespace TagTool.Commands.Tags
                 "ForEach",
                 "Executes a command on every instance of the specified tag group.",
                 
-                "ForEach [Const] <Tag Group> <Command...>",
+                "ForEach [Const] <Tag Group> [Named: <Regex>] <Command...>",
                 
                 "Executes a command on every instance of the specified tag group.")
         {
@@ -31,7 +32,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1)
+            if (args.Count < 2)
                 return false;
 
             var isConst = false;
@@ -42,7 +43,7 @@ namespace TagTool.Commands.Tags
                 isConst = true;
             }
 
-            if (args.Count < 1)
+            if (args.Count < 2)
                 return false;
 
             if (!CacheContext.TryParseGroupTag(args[0], out var groupTag))
@@ -52,6 +53,17 @@ namespace TagTool.Commands.Tags
             }
 
             args.RemoveAt(0);
+
+            string pattern = null;
+
+            if (args[0].ToLower() == "named:")
+            {
+                if (args.Count < 3)
+                    return false;
+
+                pattern = args[1];
+                args.RemoveRange(0, 2);
+            }
 
             var rootContext = ContextStack.Context;
             var groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
@@ -66,6 +78,9 @@ namespace TagTool.Commands.Tags
                     var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
                         CacheContext.TagNames[instance.Index] :
                         $"0x{instance.Index:X4}";
+
+                    if (pattern != null && !Regex.IsMatch(tagName, pattern, RegexOptions.IgnoreCase))
+                        continue;
 
                     var definition = CacheContext.Deserialize(stream, instance);
                     ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
