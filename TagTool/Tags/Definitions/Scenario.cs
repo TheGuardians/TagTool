@@ -241,7 +241,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance GlobalLighting;
         public CachedTagInstance Lightmap;
         public CachedTagInstance PerformanceThrottles;
-        public List<UnknownBlock4> Unknown134;
+        public List<AiObjectId> AiObjectIds;
         public List<AiObjective> AiObjectives;
         public List<DesignerZoneSet> DesignerZoneSets;
         public List<UnknownBlock5> Unknown135;
@@ -1809,20 +1809,14 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3ODST)]
             public class SpawnPoint
             {
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public SquadDifficultyFlags DifficultyFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown1;
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown2Old;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown2New;
+                public uint Unknown2;
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown3Old;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown3New;
+                public uint Unknown3;
 
                 [TagField(Label = true)]
                 public StringId Name;
@@ -3096,17 +3090,16 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class UnknownBlock4
+        public class AiObjectId
         {
             public uint ObjectHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public ScenarioInstance.SourceValue Source;
-            public ScenarioInstance.BspPolicyValue BspPolicy;
-            public sbyte Unknown3;
+            public short Unknown3;
+            public short Unknown4;
             public short Unknown5;
             public short Unknown6;
-            public short Unknown7;
         }
 
         [Flags]

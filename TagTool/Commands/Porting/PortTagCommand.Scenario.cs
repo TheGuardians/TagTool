@@ -240,9 +240,6 @@ namespace TagTool.Commands.Porting
                         {
                             var newSpawnPoint = spawnPoint.DeepClone();
 
-                            newSpawnPoint.Unknown2New = (uint)newSpawnPoint.Unknown2Old;
-                            newSpawnPoint.Unknown3New = (uint)newSpawnPoint.Unknown3Old;
-
                             newSpawnPoint.Name = (StringId)ConvertData(cacheStream, resourceStreams, newSpawnPoint.Name, scnr, tagName);
 
                             newSpawnPoint.InitialEquipmentIndex = -1;

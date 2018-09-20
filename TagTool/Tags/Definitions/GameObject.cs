@@ -184,6 +184,7 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Attachment2;
             public StringId Marker;
             public ChangeColorValue ChangeColor;
+            public FlagsValue Flags;
             public short Unknown;
             public StringId PrimaryScale;
             public StringId SecondaryScale;
@@ -196,13 +197,21 @@ namespace TagTool.Tags.Definitions
                 TheaterVisionMode = 1 << 1
             }
 
-            public enum ChangeColorValue : short
+            public enum ChangeColorValue : sbyte
             {
                 None,
                 Primary,
                 Secondary,
                 Tertiary,
                 Quaternary
+            }
+
+            [Flags]
+            public enum FlagsValue : byte
+            {
+                None,
+                ForceAlwaysOn = 1 << 0,
+                EffectSizeScaleFromObjectScale = 1 << 1
             }
         }
         
@@ -266,7 +275,7 @@ namespace TagTool.Tags.Definitions
             public ObjectTypeValue ObjectType;
             public byte TeleporterFlags;
             public sbyte Unknown;
-            public byte Flags;
+            public FlagsValue Flags;
             public ObjectShapeValue Shape;
             public SpawnTimerModeValue SpawnTimerMode;
             public short SpawnTime;
@@ -290,6 +299,7 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown11;
             public CachedTagInstance Unknown12;
             public CachedTagInstance Unknown13;
+
             public enum EngineFlagsValue : ushort
             {
                 None = 0,
@@ -332,6 +342,20 @@ namespace TagTool.Tags.Definitions
             VipBoundaryObjective,
             VipDestinationObjective,
             JuggernautDestinationObjective
+        }
+
+        [Flags]
+        public enum FlagsValue : byte
+        {
+            None,
+            OnlyRenderInEditor = 1 << 0,
+            ValidInitialPlayerSpawn = 1 << 1,
+            FixedBoundaryOrientation = 1 << 2,
+            InheritOwningTeamColor = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7
         }
 
         public enum SpawnTimerModeValue : sbyte
