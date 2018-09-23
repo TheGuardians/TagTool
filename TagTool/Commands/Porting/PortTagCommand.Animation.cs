@@ -179,7 +179,6 @@ namespace TagTool.Commands.Porting
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type4:
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type5:
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type6:
-                            case ModelAnimationTagResource.AnimationCompressionFormats.Type7:
 
                                 var overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Overlay>(dataContext);
 
@@ -295,6 +294,131 @@ namespace TagTool.Commands.Porting
 
                                 break;
                             #endregion
+
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type7:
+                                overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Overlay>(dataContext);
+
+                                CacheContext.Serializer.Serialize(dataContext, overlay);
+
+                                var animation = new Codec7_FrametimingCounts
+                                {
+                                    RotationNodes = new List<uint>(),
+                                    PositionNodes = new List<uint>(),
+                                    ScaleNodes = new List<uint>(),
+                                };
+
+                                var overlayCodecPosition = member.AnimationData.Address.Offset + member.OverlayOffset;
+
+                                // A list of uint values. Each node has one uint. Each uint is the number of frames the animation contains.
+                                var FramesCount = new ModelAnimationTagResource.GroupMember.PositionFramesCountPerNode();
+                                blamResourceStream.Position = overlayCodecPosition + 0x30; // codec has a fixed size
+                                dataStream.Position = blamResourceStream.Position;
+                                for (int i = 0; i < codec.RotationNodeCount; i++)
+                                {
+                                    FramesCount = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFramesCountPerNode>(dataContext); // just need a short
+
+                                    CacheContext.Serializer.Serialize(dataContext, FramesCount);
+
+                                    animation.RotationNodes.Add(FramesCount.X);
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.PositionFrameInfoOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                for (int i = 0; i < codec.PositionNodeCount; i++)
+                                {
+                                    FramesCount = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFramesCountPerNode>(dataContext);
+
+                                    CacheContext.Serializer.Serialize(dataContext, FramesCount);
+
+                                    animation.PositionNodes.Add(FramesCount.X);
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.ScaleFrameInfoOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                for (int i = 0; i < codec.ScaleNodeCount; i++)
+                                {
+                                    FramesCount = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFramesCountPerNode>(dataContext);
+
+                                    CacheContext.Serializer.Serialize(dataContext, FramesCount);
+
+                                    animation.ScaleNodes.Add(FramesCount.X);
+                                }
+
+                                // A list of short. Each node has animation.RotationNodes.FramesCount shorts. Each short is an index for each frame in this animation. The index means at what time in the real animation does this frame take place. Interpolation nonsense.
+                                blamResourceStream.Position = overlayCodecPosition + overlay.RotationKeyframesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.RotationNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext)); // just shorts
+                                    }
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.PositionKeyframesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.PositionNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext)); // just shorts
+                                    }
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.ScaleKeyframesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.ScaleNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext)); // just shorts
+                                    }
+                                }
+
+                                // Frames that are used as interpolation. so they can interpolate a few frames to make a large animation
+                                blamResourceStream.Position = overlayCodecPosition + overlay.RotationFramesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.RotationNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
+                                    }
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.PositionFramesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.PositionNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext)); // just shorts
+                                    }
+                                }
+
+                                blamResourceStream.Position = overlayCodecPosition + overlay.ScaleFramesOffset;
+                                dataStream.Position = blamResourceStream.Position;
+                                foreach (var node in animation.ScaleNodes)
+                                {
+                                    var frameCount = (byte)node; // no idea what the upper part of the int is
+
+                                    for (int i = 0; i < frameCount; i++)
+                                    {
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext)); // just shorts
+                                    }
+                                }
+
+                                break;
 
                             #region Type8
                             case ModelAnimationTagResource.AnimationCompressionFormats.Type8:
@@ -460,6 +584,13 @@ namespace TagTool.Commands.Porting
             }
 
             return definition;
+        }
+
+        private class Codec7_FrametimingCounts
+        {
+            public List<uint> RotationNodes;
+            public List<uint> PositionNodes;
+            public List<uint> ScaleNodes;
         }
     }
 }
