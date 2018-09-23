@@ -333,6 +333,7 @@
     <Compile Include="Commands\Shaders\RegenerateShaders.cs" />
     <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
+    <Compile Include="Commands\Sounds\ExportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
