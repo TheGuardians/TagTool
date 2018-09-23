@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -707,13 +708,13 @@ namespace TagTool.Commands.Porting
 
                 case SoundClass soundClass:
                     return soundClass.ConvertSoundClass(BlamCache.Version);
+
+				// We could just pattern match IList here to catch both of these, but this is more visually clear.
+				case Array _:
+				case IList _:
+					data = ConvertCollection(cacheStream, resourceStreams, data as IList, definition, blamTagName);
+					return data;
             }
-
-            if (type.IsArray)
-                return ConvertArray(cacheStream, resourceStreams, (Array)data, definition, blamTagName);
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(cacheStream, resourceStreams, data, type, definition, blamTagName);
 
             if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
             {
@@ -741,40 +742,20 @@ namespace TagTool.Commands.Porting
             return data;
         }
 
-        private Array ConvertArray(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Array array, object definition, string blamTagName)
-        {
-            if (array.GetType().GetElementType().IsPrimitive)
-                return array;
+		private IList ConvertCollection(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, string blamTagName)
+		{
+			if (data is null || data.Count == 0 || data[0].GetType().IsPrimitive)
+				return data;
 
-            for (var i = 0; i < array.Length; i++)
-            {
-                var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                array.SetValue(newValue, i);
-            }
+			for (var i = 0; i < data.Count; i++)
+			{
+				var oldValue = data[i];
+				var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+				data[i] = newValue;
+			}
 
-            return array;
-        }
-
-        private object ConvertList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object list, Type type, object definition, string blamTagName)
-        {
-            if (type.GenericTypeArguments[0].IsPrimitive)
-                return list;
-
-            var count = (int)type.GetProperty("Count").GetValue(list);
-
-            var getItem = type.GetMethod("get_Item");
-            var setItem = type.GetMethod("set_Item");
-
-            for (var i = 0; i < count; i++)
-            {
-                var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                setItem.Invoke(list, new object[] { i, newValue });
-            }
-
-            return list;
-        }
+			return data;
+		}
 
         private object ConvertStructure(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, Type type, object definition, string blamTagName)
         {
