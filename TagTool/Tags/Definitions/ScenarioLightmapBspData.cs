@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1B4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1EC, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ScenarioLightmapBspData
-    {
+    public class ScenarioLightmapBspData : TagStructure
+	{
         public short Unknown;
         public short BspIndex;
         public int StructureChecksum;
@@ -96,8 +96,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused1;
 
         [TagStructure(Size = 0x10)]
-        public class InstancedMesh
-        {
+        public class InstancedMesh : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -105,15 +105,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public short Unknown;
             public short Unknown2;
         }
 
         [TagStructure(Size = 0x8)]
-        public class InstancedGeometryBlock
-        {
+        public class InstancedGeometryBlock : TagStructure
+		{
             public short Unknown;
             public short InstancedMeshIndex;
             public short UnknownBIndex;
@@ -121,8 +121,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x48)]
-        public class UnknownBBlock
-        {
+        public class UnknownBBlock : TagStructure
+		{
             public short Unknown1;
             public short Unknown2;
             public short Unknown3;
@@ -163,26 +163,26 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x18)]
-    public class ScenarioLightmapBspDataSection
-    {
+    public class ScenarioLightmapBspDataSection : TagStructure
+	{
         public List<Header> Headers;
         public VertexList VertexLists;
 
         [TagStructure(Size = 0xC)]
-        public class VertexList
-        {
+        public class VertexList : TagStructure
+		{
             public List<Datum> Vertex;
 
             [TagStructure(Size = 0x1)]
-			public /*was_struct*/ class Datum
-            {
+			public /*was_struct*/ class Datum : TagStructure
+			{
                 public byte Value;
             }
         }
 
         [TagStructure(Size = 0x2C)]
-        public class Header
-        {
+        public class Header : TagStructure
+		{
             public short Unknown00;
             public short Unknown01;
             public short Unknown02;

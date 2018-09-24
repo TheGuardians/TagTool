@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions
     /// ElDewrito Forge globals.
     /// </summary>
     [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x80)]
-	public /*was_struct*/ class ForgeGlobalsDefinition
-    {
+	public /*was_struct*/ class ForgeGlobalsDefinition : TagStructure
+	{
         /// <summary>
         /// The "invisible" render method.
         /// </summary>
@@ -72,8 +72,8 @@ namespace TagTool.Tags.Definitions
         /// A material reference for ReForge objects.
         /// </summary>
         [TagStructure(Size = 0x30)]
-		public /*was_struct*/ class ReForgeMaterial
-        {
+		public /*was_struct*/ class ReForgeMaterial : TagStructure
+		{
             [TagField(Length = 32)]
             public string Name;
 
@@ -110,8 +110,8 @@ namespace TagTool.Tags.Definitions
         /// A single item of the Forge object palette.
         /// </summary>
         [TagStructure(Size = 0x40)]
-		public /*was_struct*/ class PaletteItem
-        {
+		public /*was_struct*/ class PaletteItem : TagStructure
+		{
             /// <summary>
             /// The name of the palette item.
             /// </summary>
@@ -163,8 +163,8 @@ namespace TagTool.Tags.Definitions
             /// A property setter descriptor.
             /// </summary>
             [TagStructure(Size = 0x2C)]
-			public /*was_struct*/ class Setter
-            {
+			public /*was_struct*/ class Setter : TagStructure
+			{
                 /// <summary>
                 /// The target of the property setter.
                 /// </summary>
@@ -202,8 +202,8 @@ namespace TagTool.Tags.Definitions
         /// A weather effect reference descriptor.
         /// </summary>
         [TagStructure(Size = 0x30)]
-		public /*was_struct*/ class WeatherEffect
-        {
+		public /*was_struct*/ class WeatherEffect : TagStructure
+		{
             /// <summary>
             /// The name of the weather effect.
             /// </summary>
@@ -230,8 +230,8 @@ namespace TagTool.Tags.Definitions
         /// A Forge sky descriptor.
         /// </summary>
         [TagStructure(Size = 0xAC)]
-		public /*was_struct*/ class Sky
-        {
+		public /*was_struct*/ class Sky : TagStructure
+		{
             /// <summary>
             /// The name of the sky.
             /// </summary>

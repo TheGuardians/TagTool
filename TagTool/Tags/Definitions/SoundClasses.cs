@@ -6,8 +6,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0xC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundClasses
-    {
+    public class SoundClasses : TagStructure
+	{
         public List<Class> Classes;
 
         [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
@@ -16,8 +16,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x98, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloOnline106708)]
-        public class Class
-        {
+        public class Class : TagStructure
+		{
             public short MaxSoundsPerTag;
             public short MaxSoundsPerObject;
             public int PreemptionTime;

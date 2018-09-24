@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0xF0, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0x208, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "chud_globals_definition", Tag = "chgd", Size = 0x2C0, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ChudGlobalsDefinition
+    public class ChudGlobalsDefinition : TagStructure
 	{
 		public List<HudGlobal> HudGlobals;
 		public List<HudShader> HudShaders;
@@ -195,8 +195,8 @@ namespace TagTool.Tags.Definitions
 		[TagStructure(Size = 0x208, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x23C, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x2B0, MinVersion = CacheVersion.HaloOnline106708)]
-		public class HudGlobal
-        {
+		public class HudGlobal : TagStructure
+		{
             [TagField(Label = true)]
             public BipedValue Biped;
 
@@ -358,7 +358,7 @@ namespace TagTool.Tags.Definitions
 			[TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x130, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.HaloOnline106708)]
-			public class HudAttribute
+			public class HudAttribute : TagStructure
 			{
 				public ResolutionFlagValue ResolutionFlags;
 
@@ -557,8 +557,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline498295)]
-            public class HudSound
-            {
+            public class HudSound : TagStructure
+			{
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public CachedTagInstance SpartanSound;
 
@@ -654,8 +654,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x14)]
-                public class BipedData
-                {
+                public class BipedData : TagStructure
+				{
                     [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public BipedTypeValue_ODST BipedType_ODST;
 
@@ -689,23 +689,23 @@ namespace TagTool.Tags.Definitions
 			}
 
 			[TagStructure(Size = 0x4)]
-			public class MultiplayerMedal
-            {
+			public class MultiplayerMedal : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Medal;
 			}
 		}
 
 		[TagStructure(Size = 0x20)]
-		public class HudShader
+		public class HudShader : TagStructure
 		{
             public CachedTagInstance VertexShader;
             public CachedTagInstance PixelShader;
         }
 
         [TagStructure(Size = 0x40)]
-		public class UnusedCortanaEffectBlock
-        {
+		public class UnusedCortanaEffectBlock : TagStructure
+		{
 			public uint Unknown;
 			public uint Unknown2;
 			public uint Unknown3;
@@ -725,13 +725,13 @@ namespace TagTool.Tags.Definitions
 		}
 
 		[TagStructure(Size = 0x10)]
-		public class UnknownBlock2
+		public class UnknownBlock2 : TagStructure
 		{
 			public uint Unknown;
 			public List<UnknownBlock> Unknown2;
 
 			[TagStructure(Size = 0xE4)]
-			public class UnknownBlock
+			public class UnknownBlock : TagStructure
 			{
 				public uint Unknown;
 				public uint Unknown2;
@@ -788,8 +788,8 @@ namespace TagTool.Tags.Definitions
 		}
 
 		[TagStructure(Size = 0x14)]
-		public class PlayerTrainingDatum
-        {
+		public class PlayerTrainingDatum : TagStructure
+		{
             [TagField(Label = true)]
             public StringId DisplayString;
 			public short MaxDisplayTime;

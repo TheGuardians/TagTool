@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x58, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ScenarioLightmap
-    {
+    public class ScenarioLightmap : TagStructure
+	{
         public uint Unknown;
 
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -30,8 +30,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown8;
 
         [TagStructure(Size = 0x10)]
-        public class LightmapDataReference
-        {
+        public class LightmapDataReference : TagStructure
+		{
             public CachedTagInstance LightmapData;
         }
         
@@ -58,8 +58,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x5C)]
-        public class Airprobe
-        {
+        public class Airprobe : TagStructure
+		{
             public RealPoint3d Position;
             public StringId Name;
             public AirprobeFlags Flags;
@@ -77,8 +77,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x50)]
-        public class UnknownBlock2
-        {
+        public class UnknownBlock2 : TagStructure
+		{
             public uint Unknown;
             public short Unknown2;
             public byte Unknown3;
@@ -122,8 +122,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2C)]
-        public class UnknownBlock3
-        {
+        public class UnknownBlock3 : TagStructure
+		{
             public uint Unknown;
             public short Unknown2;
             public short Unknown3;
@@ -136,8 +136,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock> Unknown10;
 
             [TagStructure(Size = 0x54)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;

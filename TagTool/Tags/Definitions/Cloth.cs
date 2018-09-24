@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cloth", Tag = "clwd", Size = 0x94)]
-    public class Cloth
-    {
+    public class Cloth : TagStructure
+	{
         public ClothFlags Flags;
         public StringId MarkerAttachmentName;
         public StringId SecondMarkerAttachmentName;
@@ -25,23 +25,23 @@ namespace TagTool.Tags.Definitions
         public List<Link> Links;
 
         [TagStructure(Size = 0x8)]
-        public class CollisionSphere
-        {
+        public class CollisionSphere : TagStructure
+		{
             [TagField(Label = true)]
             public StringId ObjectMarkerName;
             public float Radius;
         }
 
         [TagStructure(Size = 0x14)]
-        public class Vertex
-        {
+        public class Vertex : TagStructure
+		{
             public RealPoint3d Position;
             public RealVector2d Uv;
         }
         
         [TagStructure(Size = 0x8)]
-        public class Link
-        {
+        public class Link : TagStructure
+		{
             public short Index1;
             public short Index2;
             public float DefaultDistance;
@@ -62,8 +62,8 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x30)]
-    public class ClothProperties
-    {
+    public class ClothProperties : TagStructure
+	{
         public ClothIntegrationType IntegrationType;
         public short NumberIterations;
         public float Weight;

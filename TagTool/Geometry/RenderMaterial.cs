@@ -11,8 +11,8 @@ namespace TagTool.Geometry
     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline571627)]
     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnline700123)]
-    public class RenderMaterial
-    {
+    public class RenderMaterial : TagStructure
+	{
         /// <summary>
         /// The OLD render method tag to use to render the material.
         /// </summary>
@@ -35,8 +35,8 @@ namespace TagTool.Geometry
         public sbyte Unknown4;
 
         [TagStructure(Size = 0x14)]
-        public class Skin
-        {
+        public class Skin : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public CachedTagInstance RenderMethod;
@@ -44,8 +44,8 @@ namespace TagTool.Geometry
 
         [TagStructure(Size = 0x2, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
-        public class PropertyType
-        {
+        public class PropertyType : TagStructure
+		{
             [TagField(Label = true, MaxVersion = CacheVersion.Halo2Vista)]
             public Halo2Value Halo2;
 
@@ -71,8 +71,8 @@ namespace TagTool.Geometry
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
-        public class Property
-        {
+        public class Property : TagStructure
+		{
             public PropertyType Type;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]

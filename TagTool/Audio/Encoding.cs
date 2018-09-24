@@ -3,8 +3,8 @@
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x1)]
-    public class Encoding
-    {
+    public class Encoding : TagStructure
+	{
         public EncodingValue value;
 
         public enum EncodingValue : sbyte

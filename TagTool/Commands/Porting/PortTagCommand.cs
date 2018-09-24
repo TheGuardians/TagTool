@@ -616,16 +616,12 @@ namespace TagTool.Commands.Porting
 
         private object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
         {
-            if (data == null)
-                return null;
-
-            var type = data.GetType();
-
-            if (type.IsPrimitive)
-                return data;
-
             switch (data)
             {
+				case null:
+				case ValueType _ when !(data is StringId):
+					return data;
+
                 case TagFunction tagFunction:
                     return ConvertTagFunction(tagFunction);
 
@@ -697,7 +693,7 @@ namespace TagTool.Commands.Porting
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
                         throw new NotSupportedException(propertyType.Halo2.ToString());
-                    break;
+                    return propertyType;
 
                 case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
                     ConvertData(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
@@ -714,30 +710,36 @@ namespace TagTool.Commands.Porting
 				case IList _:
 					data = ConvertCollection(cacheStream, resourceStreams, data as IList, definition, blamTagName);
 					return data;
-            }
 
-            if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-            {
-                data = ConvertStructure(cacheStream, resourceStreams, data, type, definition, blamTagName);
+				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
+					data = ConvertStructure(cacheStream, resourceStreams, data, data.GetType(), definition, blamTagName);
+					renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+					return renderGeometry;
 
-                switch (data)
-                {
-                    case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
-                        return GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+				case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
+					data = ConvertStructure(cacheStream, resourceStreams, data, data.GetType(), definition, blamTagName);
+					if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
+						throw new NotSupportedException(part.TypeOld.ToString());
+					return part;
 
-                    case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
-                        if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
-                            throw new NotSupportedException(part.TypeOld.ToString());
-                        break;
+				case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
+					data = ConvertStructure(cacheStream, resourceStreams, data, data.GetType(), definition, blamTagName);
+					property.IntValue = property.ShortValue;
+					return property;
 
-                    case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
-                        property.IntValue = property.ShortValue;
-                        break;
+				case Model.GlobalDamageInfoBlock newDamageInfo:
+					data = ConvertStructure(cacheStream, resourceStreams, data, data.GetType(), definition, blamTagName);
+					newDamageInfo = ConvertNewDamageInfo(newDamageInfo);
+					return newDamageInfo;
 
-                    case Model.GlobalDamageInfoBlock newDamageInfo:
-                        return ConvertNewDamageInfo(newDamageInfo);
-                }
-            }
+				case TagStructure _:
+					data = ConvertStructure(cacheStream, resourceStreams, data, data.GetType(), definition, blamTagName);
+					return data;
+
+				default:
+					Console.WriteLine($"Unhandled type in `ConvertData`: {data.GetType().FullName}");
+					break;
+			}
 
             return data;
         }

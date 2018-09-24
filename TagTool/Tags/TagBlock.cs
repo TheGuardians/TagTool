@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0xC)]
-    public class TagBlock<T> : IList<T>
+    public class TagBlock<T> : TagStructure, IList<T>
     {
         /// <summary>
         /// The count of the referenced block.

@@ -5,15 +5,15 @@ using TagTool.Common;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_widget_scale_animation_definition", Tag = "wscl", Size = 0x24)]
-    public class GuiWidgetScaleAnimationDefinition
-    {
+    public class GuiWidgetScaleAnimationDefinition : TagStructure
+	{
         public uint AnimationFlags;
         public List<AnimationDefinitionBlock> AnimationDefinition;
         public TagFunction Function;
 
         [TagStructure(Size = 0x24)]
-        public class AnimationDefinitionBlock
-        {
+        public class AnimationDefinitionBlock : TagStructure
+		{
             public uint Frame;
             public AnchorValue Anchor;
             public short Unknown;

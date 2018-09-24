@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sky_atm_parameters", Tag = "skya", Size = 0x4C, MinVersion = CacheVersion.Halo3Retail,MaxVersion = CacheVersion.HaloOnline454665)]
     [TagStructure(Name = "sky_atm_parameters", Tag = "skya", Size = 0x54, MinVersion = CacheVersion.HaloOnline498295)]
-    public class SkyAtmParameters
-    {
+    public class SkyAtmParameters : TagStructure
+	{
         public int Unknown1;
         public CachedTagInstance FogBitmap;
         public float Unknown2;
@@ -29,8 +29,8 @@ namespace TagTool.Tags.Definitions
         public List<UnderwaterBlock> Underwater;
         
         [TagStructure(Size = 0xA4)]
-        public class AtmosphereProperty
-        {
+        public class AtmosphereProperty : TagStructure
+		{
             public short Unknown1;
             public short Unknown2;
             public StringId Name;
@@ -71,8 +71,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnderwaterBlock
-        {
+        public class UnderwaterBlock : TagStructure
+		{
             public StringId Name;
             public RealArgbColor Color;
         }

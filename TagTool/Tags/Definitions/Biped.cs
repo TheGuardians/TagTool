@@ -192,8 +192,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class WeaponCameraHeightBlock
-        {
+        public class WeaponCameraHeightBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Class;
             public float StandingHeightFraction;
@@ -213,8 +213,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class UnknownFunctionBlock
-        {
+        public class UnknownFunctionBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -223,8 +223,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class ContactPoint
-        {
+        public class ContactPoint : TagStructure
+		{
             [TagField(Label = true)]
             public StringId MarkerName;
         }

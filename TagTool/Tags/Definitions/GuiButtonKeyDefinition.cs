@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_button_key_definition", Tag = "bkey", Size = 0x54)]
-    public class GuiButtonKeyDefinition
-    {
+    public class GuiButtonKeyDefinition : TagStructure
+	{
         public uint Flags;
         public StringId Name;
         public short Unknown;
@@ -26,8 +26,8 @@ namespace TagTool.Tags.Definitions
         public List<BitmapWidget> BitmapWidgets;
 
         [TagStructure(Size = 0x4C)]
-        public class TextWidget
-        {
+        public class TextWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -50,8 +50,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x6C)]
-        public class BitmapWidget
-        {
+        public class BitmapWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;

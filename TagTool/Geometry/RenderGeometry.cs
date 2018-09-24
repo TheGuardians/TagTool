@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Geometry
 {
     [TagStructure(Name = "render_geometry", Size = 0x84)]
-    public class RenderGeometry
-    {
+    public class RenderGeometry : TagStructure
+	{
         /// <summary>
         /// The runtime flags of the render geometry.
         /// </summary>
@@ -71,8 +71,8 @@ namespace TagTool.Geometry
         public byte[] Unused;
 
         [TagStructure(Size = 0x30)]
-        public class BoundingSphere
-        {
+        public class BoundingSphere : TagStructure
+		{
             public RealPlane3d Plane;
             public RealPoint3d Position;
             public float Radius;
@@ -85,8 +85,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x18)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public byte UnknownByte1;
             public byte UnknownByte2;
             public short Unknown2;
@@ -94,41 +94,41 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x20)]
-        public class UnknownSection
-        {
+        public class UnknownSection : TagStructure
+		{
             [TagField(Align = 0x10)]
             public byte[] Unknown;
 
             public List<UnknownBlock> Unknown2;
 
             [TagStructure(Size = 0x2)]
-			public /*was_struct*/ class UnknownBlock
-            {
+			public /*was_struct*/ class UnknownBlock : TagStructure
+			{
                 public short Unknown;
             }
         }
 
         [TagStructure(Size = 0xC)]
-		public /*was_struct*/ class PerMeshNodeMap
-        {
+		public /*was_struct*/ class PerMeshNodeMap : TagStructure
+		{
             public List<NodeIndex> NodeIndices;
 
             [TagStructure(Size = 0x1)]
-			public /*was_struct*/ class NodeIndex
-            {
+			public /*was_struct*/ class NodeIndex : TagStructure
+			{
                 public byte Node;
             }
         }
 
         [TagStructure(Size = 0xC)]
-        public class PerMeshSubpartVisibilityBlock
-        {
+        public class PerMeshSubpartVisibilityBlock : TagStructure
+		{
             public List<BoundingSphere> BoundingSpheres;
         }
 
         [TagStructure(Size = 0x10)]
-        public class PerMeshLodDatum
-        {
+        public class PerMeshLodDatum : TagStructure
+		{
             public List<Index> Indices;
 
             public short VertexBufferIndex;
@@ -137,8 +137,8 @@ namespace TagTool.Geometry
             public byte[] Unused;
 
             [TagStructure(Size = 0x4)]
-			public /*was_struct*/ class Index
-            {
+			public /*was_struct*/ class Index : TagStructure
+			{
                 public int Value;
             }
         }

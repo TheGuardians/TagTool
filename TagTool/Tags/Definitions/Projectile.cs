@@ -113,8 +113,8 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x40)]
-        public class MaterialResponse
-        {
+        public class MaterialResponse : TagStructure
+		{
             public FlagBits Flags;
             public ResponseValue DefaultResponse;
             [TagField(Label = true)]
@@ -184,8 +184,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30)]
-        public class BruteGrenadeProperty
-        {
+        public class BruteGrenadeProperty : TagStructure
+		{
             public Bounds<Angle> AngularVelocityRange;
             public Angle SpinAngularVelocity;
             public float AngularDamping;
@@ -200,14 +200,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class FireBombGrenadeProperty
-        {
+        public class FireBombGrenadeProperty : TagStructure
+		{
             public float ProjectionOffset;
         }
 
         [TagStructure(Size = 0xC)]
-        public class ShotgunProperty
-        {
+        public class ShotgunProperty : TagStructure
+		{
             public short Amount;
             public short Distance;
             public float Accuracy;

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace TagTool.Shaders
 {
     [TagStructure(Size = 0x50)]
-    public class ShaderData
-    {
+    public class ShaderData : TagStructure
+	{
         public byte[] Unknown1;
         public byte[] PcCompiledShader;
         public List<ShaderParameter> XboxParameters;

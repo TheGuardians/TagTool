@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x18)]
-    public class AiMissionDialogueLineVariant
-    {
+    public class AiMissionDialogueLineVariant : TagStructure
+	{
         [TagField(Label = true)]
         public StringId Designation;
         public CachedTagInstance Sound;

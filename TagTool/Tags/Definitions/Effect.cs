@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x68, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x70, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x60, MinVersion = CacheVersion.HaloReach)]
-    public class Effect
-    {
+    public class Effect : TagStructure
+	{
         public EffectFlags Flags;
         public uint FixedRandomSeed;
         public float OverlapThreshold;
@@ -52,8 +52,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
-        public class Location
-        {
+        public class Location : TagStructure
+		{
             public StringId MarkerName;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public int Unknown1;
@@ -73,8 +73,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
-        public class Event
-        {
+        public class Event : TagStructure
+		{
             public StringId Name;
             public int Unknown;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -96,8 +96,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x60, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
-            public class Part
-            {
+            public class Part : TagStructure
+			{
                 public EffectEnvironment CreateInEnvironment;
                 public EffectViolenceMode CreateInDisposition;
                 public short PrimaryLocation;
@@ -121,8 +121,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class Acceleration
-            {
+            public class Acceleration : TagStructure
+			{
                 public CreateInEnvironmentValue CreateInEnvironment;
                 public CreateInDispositionValue CreateInDisposition;
 
@@ -152,8 +152,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
-            public class ParticleSystem
-            {
+            public class ParticleSystem : TagStructure
+			{
                 public EffectEventPriority Priority;
                 public sbyte GameMode;
                 public sbyte Unknown3;
@@ -194,8 +194,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
                 [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
-                public class Emitter
-                {
+                public class Emitter : TagStructure
+				{
                     public StringId Name;
                     public byte Version;
                     public EmissionShapeValue EmissionShape;
@@ -340,16 +340,16 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-					public /*was_struct*/ class TranslationalOffsetData
-                    {
+					public /*was_struct*/ class TranslationalOffsetData : TagStructure
+					{
                         public TagMapping Mapping;
                         public RealPoint3d StartingInterpolant;
                         public RealPoint3d EndingInterpolant;
                     }
 
                     [TagStructure(Size = 0x38)]
-					public /*was_struct*/ class RelativeDirectionData
-                    {
+					public /*was_struct*/ class RelativeDirectionData : TagStructure
+					{
                         public TagMapping Mapping;
                         public RealEulerAngles3d DirectionAt0;
                         public RealEulerAngles3d DirectionAt1;
@@ -357,8 +357,8 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
                     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
-					public /*was_struct*/ class ParticleMovementData
-                    {
+					public /*was_struct*/ class ParticleMovementData : TagStructure
+					{
                         public CachedTagInstance Template;
 
                         public FlagsValue Flags;
@@ -387,8 +387,8 @@ namespace TagTool.Tags.Definitions
                         }
 
                         [TagStructure(Size = 0x18)]
-                        public class Movement
-                        {
+                        public class Movement : TagStructure
+						{
                             public TypeValue Tyoe;
                             public FlagsValue Flags;
 
@@ -419,8 +419,8 @@ namespace TagTool.Tags.Definitions
                             }
 
                             [TagStructure(Size = 0x24)]
-                            public class Parameter
-                            {
+                            public class Parameter : TagStructure
+							{
                                 public int ParameterId;
                                 public TagMapping Property;
                             }
@@ -428,16 +428,16 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-					public /*was_struct*/ class ParticleSelfAccelerationData
-                    {
+					public /*was_struct*/ class ParticleSelfAccelerationData : TagStructure
+					{
                         public TagMapping Mapping;
                         public RealVector3d StartingInterpolant;
                         public RealVector3d EndingInterpolant;
                     }
 
                     [TagStructure(Size = 0x30)]
-					public /*was_struct*/ class RuntimeMGpuData
-                    {
+					public /*was_struct*/ class RuntimeMGpuData : TagStructure
+					{
                         public int ConstantPerParticleProperties;
                         public int ConstantOverTimeProperties;
                         public int UsedParticleStates;
@@ -446,22 +446,22 @@ namespace TagTool.Tags.Definitions
                         public List<Color> Colors;
 
                         [TagStructure(Size = 0x10)]
-						public /*was_struct*/ class Property
-                        {
+						public /*was_struct*/ class Property : TagStructure
+						{
                             [TagField(Length = 4)]
                             public float[] Data;
                         }
 
                         [TagStructure(Size = 0x40)]
-						public /*was_struct*/ class Function
-                        {
+						public /*was_struct*/ class Function : TagStructure
+						{
                             [TagField(Length = 16)]
                             public float[] Data;
                         }
 
                         [TagStructure(Size = 0x10)]
-						public /*was_struct*/ class Color
-                        {
+						public /*was_struct*/ class Color : TagStructure
+						{
                             [TagField(Length = 4)]
                             public float[] Data;
                         }
@@ -471,8 +471,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class ConicalDistribution
-        {
+        public class ConicalDistribution : TagStructure
+		{
             public short ProjectionYawCount;
             public short ProjectionPitchCount;
             public float DistributionExponent;
@@ -480,8 +480,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
-        public class LoopingSounds
-        {
+        public class LoopingSounds : TagStructure
+		{
             public CachedTagInstance LoopingSound;
             public sbyte LocationIndex;
             public sbyte EventIndex;

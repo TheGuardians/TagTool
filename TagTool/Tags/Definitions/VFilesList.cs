@@ -12,8 +12,8 @@ namespace TagTool.Tags.Definitions
     /// Contains a list of vfiles.
     /// </summary>
     [TagStructure(Name = "vfiles_list", Tag = "vfsl", Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
-    public class VFilesList
-    {
+    public class VFilesList : TagStructure
+	{
         /// <summary>
         /// The files in the list.
         /// </summary>
@@ -104,8 +104,8 @@ namespace TagTool.Tags.Definitions
     /// Contains information about a vfile.
     /// </summary>
     [TagStructure(Size = 0x208)]
-    public class VFileInfo
-    {
+    public class VFileInfo : TagStructure
+	{
         /// <summary>
         /// The name of the file (e.g. "hf2p_weapons_categories.ps").
         /// </summary>

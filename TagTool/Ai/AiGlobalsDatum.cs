@@ -7,8 +7,8 @@ namespace TagTool.Ai
 {
     [TagStructure(Size = 0x1B0, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x144, MinVersion = CacheVersion.Halo3ODST)]
-    public class AiGlobalsDatum
-    {
+    public class AiGlobalsDatum : TagStructure
+	{
         public float InfantryOnAiWeaponDamageScale;
         public float VehicleOnAiWeaponDamageScale;
         public float PlayerOnAiWeaponDamageScale;
@@ -131,8 +131,8 @@ namespace TagTool.Ai
         public uint Unknown32;
 
         [TagStructure(Size = 0xC)]
-        public class GravemindPropertyBlock
-        {
+        public class GravemindPropertyBlock : TagStructure
+		{
             public float MinimumRetreatTime;
             public float IdealRetreatTime;
             public float MaximumRetreatTime;

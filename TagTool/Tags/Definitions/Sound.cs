@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0xD8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0x20, MinVersion = CacheVersion.HaloReach)]
-    public class Sound
-    {
+    public class Sound : TagStructure
+	{
         public FlagsValue Flags;
 
         [TagField(HaloOnlineOnly = true)]
@@ -77,8 +77,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1D)]
-        public class SoundCacheFileGestaltReference
-        {
+        public class SoundCacheFileGestaltReference : TagStructure
+		{
             public byte PitchRangeCount;
             public short PlatformCodecIndex;
             public short PitchRangeIndex;

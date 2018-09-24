@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnline106708)]
-    public class PhysicsModel
-    {
+    public class PhysicsModel : TagStructure
+	{
         public PhysicsModelFlags Flags;
         public float Mass;
         public float LowFrequencyDeactivationScale;
@@ -88,8 +88,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class DampedSprintMotor
-        {
+        public class DampedSprintMotor : TagStructure
+		{
             public StringId Name;
             public float MaximumForce;
             public float MinimumForce;
@@ -99,8 +99,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class PositionMotor
-        {
+        public class PositionMotor : TagStructure
+		{
             public StringId Name;
             public float MaximumForce;
             public float MinimumForce;
@@ -148,8 +148,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x68)]
-        public class PhantomType
-        {
+        public class PhantomType : TagStructure
+		{
             public PhantomTypeFlags Flags; // NOTE: This has to be adjusted when converting because of the new armor object type. The "Ignores Armor" bit was inserted at position 8.
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
@@ -202,27 +202,27 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-		public /*was_struct*/ class Motor
-        {
+		public /*was_struct*/ class Motor : TagStructure
+		{
             public MotorType Type;
             public short Index;
         }
 
         [TagStructure(Size = 0x18)]
-        public class PoweredChain
-        {
+        public class PoweredChain : TagStructure
+		{
             public List<Node> Nodes;
             public List<Constraint> Constraints;
 
             [TagStructure(Size = 0x2, Align = 0x8)]
-            public class Node
-            {
+            public class Node : TagStructure
+			{
                 public short NodeIndex;
             }
 
             [TagStructure(Size = 0x10)]
-            public class Constraint
-            {
+            public class Constraint : TagStructure
+			{
                 public ConstraintType ConstraintType;
                 public short ConstraintIndex;
                 public Motor MotorX;
@@ -232,8 +232,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class NodeEdge
-        {
+        public class NodeEdge : TagStructure
+		{
             public short NodeAGlobalMaterialIndex;
             public short NodeBGlobalMaterialIndex;
             public short NodeA;
@@ -243,8 +243,8 @@ namespace TagTool.Tags.Definitions
             public StringId NodeBMaterial;
 
             [TagStructure(Size = 0x24)]
-            public class Constraint
-            {
+            public class Constraint : TagStructure
+			{
                 public ConstraintType Type;
                 public short Index;
                 public ConstraintFlags Flags;
@@ -263,16 +263,16 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0xC)]
-                public class RagdollMotor
-                {
+                public class RagdollMotor : TagStructure
+				{
                     public Motor TwistMotor;
                     public Motor ConeMotor;
                     public Motor PlaneMotor;
                 }
 
                 [TagStructure(Size = 0x4)]
-                public class LimitedHingeMotor
-                {
+                public class LimitedHingeMotor : TagStructure
+				{
                     public Motor Motor;
                 }
             }
@@ -290,8 +290,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xB0, Align = 0x10)]
-        public class RigidBody
-        {
+        public class RigidBody : TagStructure
+		{
             public short Node;
             public short Region;
             public short Permutations;
@@ -351,8 +351,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class Material
-        {
+        public class Material : TagStructure
+		{
             public StringId Name;
             public StringId MaterialName;
             public short PhantomType;
@@ -362,8 +362,8 @@ namespace TagTool.Tags.Definitions
 
         
         [TagStructure(Size = 0x40)]
-        public class Shape
-        {
+        public class Shape : TagStructure
+		{
             public StringId Name;
             public short MaterialIndex;
             public short GlobalMaterialIndex;
@@ -481,8 +481,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
-        public class PolyhedronFourVector
-        {
+        public class PolyhedronFourVector : TagStructure
+		{
             public RealVector3d FourVectorsX;
             public float FourVectorsXRadius;
 
@@ -494,8 +494,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]
-        public class PolyhedronPlaneEquation
-        {
+        public class PolyhedronPlaneEquation : TagStructure
+		{
             public float Unknown;
             public float Unknown2;
             public float Unknown3;
@@ -503,8 +503,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x50, Align = 0x10)]
-        public class List
-        {
+        public class List : TagStructure
+		{
             public int Unknown;
             public short Size;
             public short Count;
@@ -529,8 +529,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class ListShape
-        {
+        public class ListShape : TagStructure
+		{
             public HavokShapeType ShapeType;
             public short ShapeIndex;
             public uint Unknown;
@@ -539,8 +539,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20, Align = 0x10)]
-        public class Mopp
-        {
+        public class Mopp : TagStructure
+		{
             public int Unknown;
             public short Size;
             public short Count;
@@ -554,8 +554,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x78, Align = 0x10)]
-        public class HingeConstraint
-        {
+        public class HingeConstraint : TagStructure
+		{
             public StringId Name;
             public short NodeA;
             public short NodeB;
@@ -575,8 +575,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x94)]
-        public class RagdollConstraint
-        {
+        public class RagdollConstraint : TagStructure
+		{
             public StringId Name;
             public short NodeA;
             public short NodeB;
@@ -600,28 +600,28 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class Region
-        {
+        public class Region : TagStructure
+		{
             public StringId Name;
             public List<Permutation> Permutations;
 
             [TagStructure(Size = 0x10)]
-            public class Permutation
-            {
+            public class Permutation : TagStructure
+			{
                 public StringId Name;
                 public List<RigidBody> RigidBodies;
 
                 [TagStructure(Size = 0x2)]
-                public class RigidBody
-                {
+                public class RigidBody : TagStructure
+				{
                     public short RigidBodyIndex;
                 }
             }
         }
 
         [TagStructure(Size = 0xC)]
-        public class Node
-        {
+        public class Node : TagStructure
+		{
             public StringId Name;
             public ushort Flags;
             public short Parent;
@@ -630,8 +630,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x84)]
-        public class LimitedHingeConstraint
-        {
+        public class LimitedHingeConstraint : TagStructure
+		{
             public StringId Name;
             public short NodeA;
             public short NodeB;
@@ -653,8 +653,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2C, Align = 0x10)]
-        public class Phantom
-        {
+        public class Phantom : TagStructure
+		{
             public int Unknown;
             public short Size;
             public short Count;

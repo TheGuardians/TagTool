@@ -9,8 +9,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloOnline106708)]
-    public class CustomPlayback
-    {
+    public class CustomPlayback : TagStructure
+	{
         public uint Unknown1;
         public uint Unknown2;
         public uint Unknown3;
@@ -42,8 +42,8 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x48)]
-        public class FilterBlock
-        {
+        public class FilterBlock : TagStructure
+		{
             public int FilterType;
             public int FilterWidth;
 

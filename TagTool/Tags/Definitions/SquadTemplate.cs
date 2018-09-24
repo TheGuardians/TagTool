@@ -8,14 +8,14 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "squad_template", Tag = "sqtm", Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
-    public class SquadTemplate
-    {
+    public class SquadTemplate : TagStructure
+	{
         public StringId Name;
         public List<CellTemplate> CellTemplates;
         
         [TagStructure(Size = 0x60)]
-        public class CellTemplate
-        {
+        public class CellTemplate : TagStructure
+		{
             public StringId Name;
 
             public DifficultyFlagsValue DifficultyFlags;
@@ -57,8 +57,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x20)]
-            public class ObjectBlock
-            {
+            public class ObjectBlock : TagStructure
+			{
                 public DifficultyFlagsValue DifficultyFlags;
 
                 [TagField(Padding = true, Length = 2)]

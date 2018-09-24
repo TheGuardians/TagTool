@@ -8,8 +8,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x14)]
-    public class TagFunction
-    {
+    public class TagFunction : TagStructure
+	{
         public byte[] Data;
 
         public enum TagFunctionType : sbyte
@@ -50,7 +50,7 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-		public /*was_struct*/ class ScalarFunctionHeader
+		public /*was_struct*/ class ScalarFunctionHeader : TagStructure
         {
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
@@ -64,8 +64,8 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-		public /*was_struct*/ class ColorFunctionHeader
-        {
+		public /*was_struct*/ class ColorFunctionHeader : TagStructure
+		{
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
             public TagFunctionOutputType OutputType;
@@ -79,68 +79,68 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x8)]
-		public /*was_struct*/ class IdentityData
-        {
+		public /*was_struct*/ class IdentityData : TagStructure
+		{
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public /*was_struct*/ class ConstantData
-        {
+		public /*was_struct*/ class ConstantData : TagStructure
+		{
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public /*was_struct*/ class TransitionData
-        {
+		public /*was_struct*/ class TransitionData : TagStructure
+		{
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public /*was_struct*/ class PeriodicData
-        {
+		public /*was_struct*/ class PeriodicData : TagStructure
+		{
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0xC)]
-		public /*was_struct*/ class LinearData
-        {
+		public /*was_struct*/ class LinearData : TagStructure
+		{
             public float Unknown;
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x14)]
-		public /*was_struct*/ class MultiLinearKeyData
-        {
+		public /*was_struct*/ class MultiLinearKeyData : TagStructure
+		{
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x18)]
-		public /*was_struct*/ class SplineData
-        {
+		public /*was_struct*/ class SplineData : TagStructure
+		{
             public float Unknown;
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x14)]
-		public /*was_struct*/ class MultiSplineData
-        {
+		public /*was_struct*/ class MultiSplineData : TagStructure
+		{
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x14)]
-		public /*was_struct*/ class ExponentData
-        {
+		public /*was_struct*/ class ExponentData : TagStructure
+		{
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x20)]
-		public /*was_struct*/ class Spline2Data
-        {
+		public /*was_struct*/ class Spline2Data : TagStructure
+		{
             public float Unknown1;
             public RealPoint2d Point1;
             public RealPoint2d Point2;

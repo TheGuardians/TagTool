@@ -8,8 +8,8 @@ namespace TagTool.Geometry
 {
     [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x5C, MinVersion = CacheVersion.Halo3Retail)]
-    public class CollisionGeometry
-    {
+    public class CollisionGeometry : TagStructure
+	{
         public List<Bsp3dNode> Bsp3dNodes;
         public List<Plane> Planes;
         public List<Leaf> Leaves;
@@ -50,8 +50,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x8, Align = 0x8)]
-        public class Bsp3dNode
-        {
+        public class Bsp3dNode : TagStructure
+		{
             public ulong Value;
 
             public short Plane
@@ -135,8 +135,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]
-        public class Plane
-        {
+        public class Plane : TagStructure
+		{
             public RealPlane3d Value;
         }
 
@@ -149,8 +149,8 @@ namespace TagTool.Geometry
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3Retail)]
-        public class Leaf
-        {
+        public class Leaf : TagStructure
+		{
             public LeafFlags Flags;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -170,15 +170,15 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x4)]
-        public class Bsp2dReference
-        {
+        public class Bsp2dReference : TagStructure
+		{
             public short PlaneIndex;
             public short Bsp2dNodeIndex;
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]
-        public class Bsp2dNode
-        {
+        public class Bsp2dNode : TagStructure
+		{
             public RealPlane2d Plane;
             public short LeftChild;
             public short RightChild;
@@ -199,8 +199,8 @@ namespace TagTool.Geometry
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
-        public class Surface
-        {
+        public class Surface : TagStructure
+		{
             public short Plane;
 
             public short FirstEdge;
@@ -229,8 +229,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0xC)]
-        public class Edge
-        {
+        public class Edge : TagStructure
+		{
             public short StartVertex;
             public short EndVertex;
             public short ForwardEdge;
@@ -240,8 +240,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]
-        public class Vertex
-        {
+        public class Vertex : TagStructure
+		{
             public RealPoint3d Point;
             public short FirstEdge;
             public short Sink;

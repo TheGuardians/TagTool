@@ -61,7 +61,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <DocumentationFile>bin\x64\Debug\Documentation.xml</DocumentationFile>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -387,6 +387,7 @@
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />
+    <Compile Include="StartupTests.cs" />
     <Compile Include="Tags\TagStructureReference.cs" />
     <Compile Include="Common\FunctionType.cs" />
     <Compile Include="Common\GameLanguage.cs" />

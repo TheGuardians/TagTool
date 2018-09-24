@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x58)]
-    public class CharacterRetreatProperties
-    {
+    public class CharacterRetreatProperties : TagStructure
+	{
         public CharacterRetreatFlags Flags;
         public float ShieldThreshold;
         public float ScaryTargetThreshold;

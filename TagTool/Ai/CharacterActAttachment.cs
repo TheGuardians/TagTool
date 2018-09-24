@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x1C)]
-    public class CharacterActAttachment
-    {
+    public class CharacterActAttachment : TagStructure
+	{
         [TagField(Label = true)]
         public StringId Name;
         public CachedTagInstance ChildObject;

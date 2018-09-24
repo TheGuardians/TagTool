@@ -11,8 +11,8 @@ namespace TagTool.Geometry
     /// </summary>
     [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x4C, MinVersion = CacheVersion.Halo3Retail)]
-    public class Mesh
-    {
+    public class Mesh : TagStructure
+	{
         public List<Part> Parts;
         public List<SubPart> SubParts;
 
@@ -90,8 +90,8 @@ namespace TagTool.Geometry
         /// </summary>
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
-        public class Part
-        {
+        public class Part : TagStructure
+		{
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public PartTypeOld TypeOld;
 
@@ -218,8 +218,8 @@ namespace TagTool.Geometry
         /// A subpart of a mesh which can be rendered selectively.
         /// </summary>
         [TagStructure(Size = 0x8)]
-        public class SubPart
-        {
+        public class SubPart : TagStructure
+		{
             /// <summary>
             /// The index of the first vertex in the subpart.
             /// </summary>
@@ -253,8 +253,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x14)]
-        public class VisibilityBinding
-        {
+        public class VisibilityBinding : TagStructure
+		{
             public RealPoint3d Position;
             public float Radius;
             public byte NodeIndex;
@@ -264,8 +264,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x44)]
-        public class RawPoint
-        {
+        public class RawPoint : TagStructure
+		{
             public RealPoint3d Position;
 
             [TagField(Length = 4)]
@@ -282,8 +282,8 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0xC4)]
-        public class RawVertex
-        {
+        public class RawVertex : TagStructure
+		{
             public RawPoint Point = new RawPoint();
             public RealPoint2d Texcoord;
             public RealVector3d Normal;
@@ -300,14 +300,14 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x2)]
-        public class StripIndex
-        {
+        public class StripIndex : TagStructure
+		{
             public short Index;
         }
 
         [TagStructure(Size = 0x20)]
-        public class VertexBuffer
-        {
+        public class VertexBuffer : TagStructure
+		{
             public byte TypeIndex;
             public byte StrideIndex;
 
@@ -316,42 +316,42 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x4)]
-        public class RigidPointGroup
-        {
+        public class RigidPointGroup : TagStructure
+		{
             public byte RigidNodeIndex;
             public byte PointIndex;
             public short PointCount;
         }
 
         [TagStructure(Size = 0x2)]
-        public class PointDataIndex
-        {
+        public class PointDataIndex : TagStructure
+		{
             public short Index;
         }
 
         [TagStructure(Size = 0x1)]
-        public class NodeMapping
-        {
+        public class NodeMapping : TagStructure
+		{
             public byte NodeIndex;
         }
 
         [TagStructure(Size = 0x10)]
-        public class InstancedGeometryBlock
-        {
+        public class InstancedGeometryBlock : TagStructure
+		{
             public short Section1;
             public short Section2;
             public List<ContentsBlock> Contents;
 
             [TagStructure(Size = 0x2)]
-			public /*was_struct*/ class ContentsBlock
-            {
+			public /*was_struct*/ class ContentsBlock : TagStructure
+			{
                 public short Value;
             }
         }
 
         [TagStructure(Size = 0x2)]
-		public /*was_struct*/ class WaterBlock
-        {
+		public /*was_struct*/ class WaterBlock : TagStructure
+		{
             public short Value;
         }
     }

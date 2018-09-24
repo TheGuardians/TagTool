@@ -49,8 +49,8 @@ namespace TagTool.Tags.Definitions
         public float AnkleIkScale;
 
         [TagStructure(Name = "buckle_setting", Size = 0x5C)]
-        public class BuckleSetting
-        {
+        public class BuckleSetting : TagStructure
+		{
             /// <summary>
             /// How many seconds until the giant reaches the ground.
             /// </summary>

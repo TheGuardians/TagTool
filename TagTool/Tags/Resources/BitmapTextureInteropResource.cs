@@ -7,8 +7,8 @@ namespace TagTool.Tags.Resources
     /// Resource definition data for bitmap textures.
     /// </summary>
     [TagStructure(Name = "bitmap_texture_interop_resource", Size = 0xC)]
-    public class BitmapTextureInteropResource
-    {
+    public class BitmapTextureInteropResource : TagStructure
+	{
         /// <summary>
         /// The texture object.
         /// </summary>
@@ -18,8 +18,8 @@ namespace TagTool.Tags.Resources
         /// Describes a bitmap.
         /// </summary>
         [TagStructure(Size = 0x40)]
-        public class BitmapDefinition
-        {
+        public class BitmapDefinition : TagStructure
+		{
             /// <summary>
             /// The reference to the bitmap data.
             /// </summary>

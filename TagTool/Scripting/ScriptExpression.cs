@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Scripting
 {
     [TagStructure(Size = 0x18)]
-    public class ScriptExpression
-    {
+    public class ScriptExpression : TagStructure
+	{
         public ushort Salt;
         public ushort Opcode;
         public ScriptValueType ValueType; // 30 max length

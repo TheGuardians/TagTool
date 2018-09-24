@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x20)]
-    public class TagMapping
-    {
+    public class TagMapping : TagStructure
+	{
         public VariableTypeValue InputVariable;
         public VariableTypeValue RangeVariable;
         public OutputModifierValue OutputModifier;

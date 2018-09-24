@@ -194,8 +194,8 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x38)]
-        public class TargetTrackingBlock
-        {
+        public class TargetTrackingBlock : TagStructure
+		{
             public List<TrackingType> TrackingTypes;
             public float AcquireTime;
             public float GraceTime;
@@ -204,8 +204,8 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance LockedSound;
 
             [TagStructure(Size = 0x4)]
-            public class TrackingType
-            {
+            public class TrackingType : TagStructure
+			{
                 public StringId TrackingType2;
             }
         }
@@ -258,15 +258,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class FirstPersonBlock
-        {
+        public class FirstPersonBlock : TagStructure
+		{
             public CachedTagInstance FirstPersonModel;
             public CachedTagInstance FirstPersonAnimations;
         }
 
         [TagStructure(Size = 0x80)]
-        public class Magazine
-        {
+        public class Magazine : TagStructure
+		{
             public uint Flags;
             public short RoundsRecharged;
             public short RoundsTotalInitial;
@@ -291,8 +291,8 @@ namespace TagTool.Tags.Definitions
             public List<MagazineEquipmentBlock> MagazineEquipment;
 
             [TagStructure(Size = 0x14)]
-            public class MagazineEquipmentBlock
-            {
+            public class MagazineEquipmentBlock : TagStructure
+			{
                 public short Rounds0ForMax;
                 public short Unknown;
                 public CachedTagInstance Equipment;
@@ -300,8 +300,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x90)]
-        public class Trigger
-        {
+        public class Trigger : TagStructure
+		{
             public uint Flags;
             public ButtonUsedValue ButtonUsed;
             public BehaviorValue Behavior;
@@ -382,8 +382,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x134, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnline106708)]
-        public class Barrel
-        {
+        public class Barrel : TagStructure
+		{
             public uint Flags;
             public Bounds<float> RoundsPerSecond;
             public float AccelerationTime;
@@ -500,50 +500,50 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class FiringPenaltyFunctionBlock
-            {
+            public class FiringPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class FiringCrouchedPenaltyFunctionBlock
-            {
+            public class FiringCrouchedPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class MovingPenaltyFunctionBlock
-            {
+            public class MovingPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class TurningPenaltyFunctionBlock
-            {
+            public class TurningPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class DualFiringPenaltyFunctionBlock
-            {
+            public class DualFiringPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class DualFiringCrouchedPenaltyFunctionBlock
-            {
+            public class DualFiringCrouchedPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class DualMovingPenaltyFunctionBlock
-            {
+            public class DualMovingPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
             [TagStructure(Size = 0x14)]
-            public class DualTurningPenaltyFunctionBlock
-            {
+            public class DualTurningPenaltyFunctionBlock : TagStructure
+			{
                 public TagFunction Function = new TagFunction { Data = new byte[0] };
             }
 
@@ -560,8 +560,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC4)]
-            public class FiringEffect
-            {
+            public class FiringEffect : TagStructure
+			{
                 public short ShotCountLowerBound;
                 public short ShotCountUpperBound;
                 public CachedTagInstance FiringEffect2;
@@ -580,15 +580,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class FirstPersonOffsetBlock
-        {
+        public class FirstPersonOffsetBlock : TagStructure
+		{
             public RealVector3d Offset;
         }
     }
 
     [TagStructure(Size = 0x4)]
-	public /*was_struct*/ class WeaponFlags
-    {
+	public /*was_struct*/ class WeaponFlags : TagStructure
+	{
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public OldWeaponFlags OldFlags;
 

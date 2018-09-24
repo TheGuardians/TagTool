@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_looping", Tag = "lsnd", Size = 0x40, MinVersion = CacheVersion.Halo3Retail)]
-    public class SoundLooping
-    {
+    public class SoundLooping : TagStructure
+	{
         public SoundLoopingFlags Flags;
         public float MartySMusicTime;
         public float Unknown1;
@@ -163,8 +163,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x90, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
-        public class Track
-        {
+        public class Track : TagStructure
+		{
             public StringId Name;
             public uint Flags;
             public float Gain;
@@ -210,8 +210,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class DetailSound
-        {
+        public class DetailSound : TagStructure
+		{
             public StringId Name;
             public CachedTagInstance Sound;
             public Bounds<float> RandomPeriodBounds;

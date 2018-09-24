@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0xE4)]
-    public class CharacterMorphProperties
-    {
+    public class CharacterMorphProperties : TagStructure
+	{
         public CachedTagInstance MorphCharacter1;
         public CachedTagInstance MorphCharacter2;
         public CachedTagInstance MorphCharacter3;

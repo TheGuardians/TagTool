@@ -8,8 +8,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cache_file_resource_layout_table", Size = 0x3C, Tag = "play")]
-    public class CacheFileResourceLayoutTable
-    {
+    public class CacheFileResourceLayoutTable : TagStructure
+	{
         public List<CompressionCodec> CompressionCodecs;
         public List<ExternalCacheReference> ExternalCacheReferences;
         public List<RawPage> RawPages;
@@ -37,15 +37,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class CompressionCodec
-        {
+        public class CompressionCodec : TagStructure
+		{
             [TagField(Length = 0x10)]
             public byte[] Guid;
         }
 
         [TagStructure(Size = 0x108)]
-        public class ExternalCacheReference
-        {
+        public class ExternalCacheReference : TagStructure
+		{
             [TagField(Length = 0x12)]
             public string MapPath;
 
@@ -58,8 +58,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x58, Align = 0x8)]
-        public class RawPage
-        {
+        public class RawPage : TagStructure
+		{
             public short Salt;
             public byte Flags;
             public byte CompressionCodecIndex;
@@ -187,22 +187,22 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10, Align = 0x8)]
-        public class Size
-        {
+        public class Size : TagStructure
+		{
             public int OverallSize;
             public List<Part> Parts;
 
             [TagStructure(Size = 0x8)]
-            public class Part
-            {
+            public class Part : TagStructure
+			{
                 public int Unknown;
                 public int Size;
             }
         }
 
         [TagStructure(Size = 0x10, Align = 0x8)]
-        public class Segment
-        {
+        public class Segment : TagStructure
+		{
             public short RequiredPageIndex;
             public short OptionalPageIndex;
             public int RequiredSegmentOffset;

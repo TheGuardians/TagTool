@@ -6,16 +6,16 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "particle_emitter_custom_points", Tag = "pecp", Size = 0x34)]
-    public class ParticleEmitterCustomPoints
-    {
+    public class ParticleEmitterCustomPoints : TagStructure
+	{
         public CachedTagInstance ParticleModel;
         public RealVector3d CompressionScale;
         public RealVector3d CompressionOffset;
         public List<Point> Points;
 
         [TagStructure(Size = 0xA)]
-        public class Point
-        {
+        public class Point : TagStructure
+		{
             public short PositionX;
             public short PositionY;
             public short PositionZ;

@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x44)]
-    public class PlaybackParameter
-    {
+    public class PlaybackParameter : TagStructure
+	{
         public FieldDisableFlagsValue FieldDisableFlags;
         public float DistanceA;
         public float DistanceB;

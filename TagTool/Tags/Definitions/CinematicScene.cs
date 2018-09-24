@@ -7,8 +7,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cinematic_scene", Tag = "cisc", Size = 0x78, MinVersion = CacheVersion.Halo3Retail)]
-    public class CinematicScene
-    {
+    public class CinematicScene : TagStructure
+	{
         public StringId Name;
 
         [TagField(Length = 32)]
@@ -25,8 +25,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown3;
         
         [TagStructure(Size = 0x74)]
-        public class PuppetBlock
-        {
+        public class PuppetBlock : TagStructure
+		{
             [TagField(Length = 32)]
             public string ImportName;
 
@@ -48,8 +48,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock> Unknown7;
 
             [TagStructure(Size = 0x38)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public uint Unknown1;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -66,8 +66,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0xA4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xBC, MinVersion = CacheVersion.Halo3ODST)]
-        public class ShotBlock
-        {
+        public class ShotBlock : TagStructure
+		{
             public byte[] OpeningImportScripts;
             public int Unknown1;
             public uint Unknown2;
@@ -99,8 +99,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
-            public class LightingBlock
-            {
+            public class LightingBlock : TagStructure
+			{
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown;
 
@@ -111,8 +111,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x2C)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public uint Unknown1;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -125,16 +125,16 @@ namespace TagTool.Tags.Definitions
                 public List<UnknownBlock2> Unknown9;
 
                 [TagStructure(Size =0x4)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public uint Unknown;
                 }
 
             }
 
             [TagStructure(Size = 0x24)]
-            public class SoundBlock
-            {
+            public class SoundBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Sound;
                 public int Frame;
@@ -145,8 +145,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x18)]
-            public class BackgroundSoundBlock
-            {
+            public class BackgroundSoundBlock : TagStructure
+			{
                 public uint Unknown1;
                 [TagField(Label = true)]
                 public CachedTagInstance Sound;
@@ -154,8 +154,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x1C)]
-            public class EffectBlock
-            {
+            public class EffectBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Effect;
                 public int Frame;
@@ -164,16 +164,16 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class FunctionBlock
-            {
+            public class FunctionBlock : TagStructure
+			{
                 public int OwnerPuppetIndex;
                 [TagField(Label = true)]
                 public StringId TargetFunctionName;
                 public List<UnknownBlock2> Unknown;
 
                 [TagStructure(Size = 0x10)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public uint Unknown1;
                     public int Unknown2;
                     public float Unknown3;
@@ -182,8 +182,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x18)]
-            public class ScreenEffectBlock
-            {
+            public class ScreenEffectBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Effect;
                 public int StartFrame;
@@ -191,23 +191,23 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class CortanaEffectBlock
-            {
+            public class CortanaEffectBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Effect;
                 public uint Unknown;
             }
 
             [TagStructure(Size = 0x18)]
-            public class ImportScriptBlock
-            {
+            public class ImportScriptBlock : TagStructure
+			{
                 public int Frame;
                 public byte[] ImportScript;
             }
 
             [TagStructure(Size = 0x44)]
-            public class FrameBlock
-            {
+            public class FrameBlock : TagStructure
+			{
                 public RealPoint3d Position;
                 public float Unknown1;
                 public float Unknown2;
@@ -237,21 +237,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class TextureCameraBlock
-        {
+        public class TextureCameraBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public StringId Unknown;
             public List<CameraShotBlock> Shots;
 
             [TagStructure(Size = 0xC)]
-            public class CameraShotBlock
-            {
+            public class CameraShotBlock : TagStructure
+			{
                 public List<FrameBlock> Frames;
 
                 [TagStructure(Size = 0x48)]
-                public class FrameBlock
-                {
+                public class FrameBlock : TagStructure
+				{
                     public uint UnknownIndex;
                     public RealPoint3d Position;
                     public float Unknown1;

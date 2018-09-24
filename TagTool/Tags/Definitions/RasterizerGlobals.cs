@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "rasterizer_globals", Size = 0xA4, Tag = "rasg", MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "rasterizer_globals", Size = 0xAC, Tag = "rasg", MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "rasterizer_globals", Size = 0xBC, Tag = "rasg", MinVersion = CacheVersion.HaloOnline106708)]
-    public class RasterizerGlobals
-    {
+    public class RasterizerGlobals : TagStructure
+	{
         public List<DefaultBitmap> DefaultBitmaps;
         public List<DefaultRasterizerBitmap> DefaultRasterizerBitmaps;
         public CachedTagInstance VertexShaderSimple;
@@ -43,21 +43,21 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x14)]
-        public class DefaultBitmap
-        {
+        public class DefaultBitmap : TagStructure
+		{
             public int Unknown;
             public CachedTagInstance Bitmap;
         }
 
         [TagStructure(Size = 0x10)]
-        public class DefaultRasterizerBitmap
-        {
+        public class DefaultRasterizerBitmap : TagStructure
+		{
             public CachedTagInstance Bitmap;
         }
 
         [TagStructure(Size = 0x20)]
-        public class DefaultShader
-        {
+        public class DefaultShader : TagStructure
+		{
             public CachedTagInstance VertexShader;
             public CachedTagInstance PixelShader;
         }

@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Shaders
 {
     [TagStructure(Size = 0x28)]
-    public class PixelShaderHeader
-    {
+    public class PixelShaderHeader : TagStructure
+	{
 		public uint Unknown0;
 		public uint Unknown4;
 		public uint Unknown8;

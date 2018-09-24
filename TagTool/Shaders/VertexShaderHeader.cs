@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Shaders
 {
     [TagStructure(Size = 0x368)]
-    public class VertexShaderHeader
-    {
+    public class VertexShaderHeader : TagStructure
+	{
         public uint Unknown0;
         public uint Unknown4;
         public uint Unknown8;

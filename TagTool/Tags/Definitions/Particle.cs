@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "particle", Tag = "prt3", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Particle
-    {
+    public class Particle : TagStructure
+	{
         public int Flags;
         public List<Attachment> Attachments;
         public AppearanceFlagsValue AppearanceFlags;
@@ -56,8 +56,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class Attachment
-        {
+        public class Attachment : TagStructure
+		{
             [TagField(Label = true)]
             public CachedTagInstance Type;
             public TriggerValue Trigger;
@@ -119,15 +119,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class RuntimeMSpritesBlock
-        {
+        public class RuntimeMSpritesBlock : TagStructure
+		{
             [TagField(Length = 4)]
             public float[] RuntimeGpuSpriteArray = new float[4];
         }
 
         [TagStructure(Size = 0x10)]
-        public class RuntimeMFramesBlock
-        {
+        public class RuntimeMFramesBlock : TagStructure
+		{
             [TagField(Length = 4)]
             public float[] RuntimeMCount = new float[4];
         }

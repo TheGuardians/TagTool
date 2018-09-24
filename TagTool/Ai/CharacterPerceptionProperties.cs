@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x2C)]
-    public class CharacterPerceptionProperties
-    {
+    public class CharacterPerceptionProperties : TagStructure
+	{
         public CharacterPerceptionMode Mode;
         public CharacterPerceptionFlags Flags;
         public float MaxVisionDistance;

@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x8)]
-    public class CharacterCombatformProperties
-    {
+    public class CharacterCombatformProperties : TagStructure
+	{
         /// <summary>
         /// Distance at which the combatform will be forced into berserking.
         /// </summary>

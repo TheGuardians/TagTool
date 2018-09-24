@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x50)]
-    public class CharacterLookProperties
-    {
+    public class CharacterLookProperties : TagStructure
+	{
         public RealEulerAngles2d MaximumAimingDeviation;
         public RealEulerAngles2d MaximumLookingDeviation;
         public RealEulerAngles2d RuntimeAimingDeviationCosines;

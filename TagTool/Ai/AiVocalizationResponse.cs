@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0xC)]
-    public class AiVocalizationResponse
-    {
+    public class AiVocalizationResponse : TagStructure
+	{
         [TagField(Label = true)]
         public StringId VocalizationName;
         public AiVocalizationResponseFlags Flags;

@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_dialogue_constants", Tag = "spk!", Size = 0x28, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_dialogue_constants", Tag = "spk!", Size = 0x30, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundDialogueConstants
-    {
+    public class SoundDialogueConstants : TagStructure
+	{
         public float AlmostNever;
         public float Rarely;
         public float Somewhat;

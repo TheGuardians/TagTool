@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
-    public class CameraFxSettings
-    {
+    public class CameraFxSettings : TagStructure
+	{
         public FlagsValue Flags;
         public short Unknown;
         public float OverexposureAmount;
@@ -153,8 +153,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x58)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public float Unknown;
             public int Unknown2;
             public TagFunction Unknown3 = new TagFunction { Data = new byte[0] };
@@ -164,16 +164,16 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class UnknownBlock2
-        {
+        public class UnknownBlock2 : TagStructure
+		{
             public int Unknown;
             public float Unknown2;
             public float Unknown3;
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock3
-        {
+        public class UnknownBlock3 : TagStructure
+		{
             public float Unknown;
             public float Unknown2;
             public float Unknown3;
@@ -182,8 +182,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock4
-        {
+        public class UnknownBlock4 : TagStructure
+		{
             public float Unknown;
             public float Unknown2;
             public float Unknown3;
@@ -192,8 +192,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x94)]
-        public class UnknownBlock5
-        {
+        public class UnknownBlock5 : TagStructure
+		{
             public int Unknown;
             public float Unknown2;
             public float Unknown3;
@@ -234,8 +234,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x28)]
-        public class UnknownBlock6
-        {
+        public class UnknownBlock6 : TagStructure
+		{
             public int Unknown;
             public float Unknown2;
             public float Unknown3;

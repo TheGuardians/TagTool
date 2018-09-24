@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_environment", Tag = "snde", Size = 0x48, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_environment", Tag = "snde", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundEnvironment
-    {
+    public class SoundEnvironment : TagStructure
+	{
         public uint Unknown1;
         public short Priority;
         public short Unknown2;

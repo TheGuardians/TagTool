@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xAC, MinVersion = CacheVersion.HaloOnline235640)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
-    public class Bitmap
-    {
+    public class Bitmap : TagStructure
+	{
         /// <summary>
         /// Choose how you are using this bitmap
         /// </summary>
@@ -112,14 +112,14 @@ namespace TagTool.Tags.Definitions
         public int UnknownB4;
 
         [TagStructure(Size = 0x8)]
-        public class TightBinding
-        {
+        public class TightBinding : TagStructure
+		{
             public RealPoint2d UV;
         }
 
         [TagStructure(Size = 0x28)]
-        public class UsageOverride
-        {
+        public class UsageOverride : TagStructure
+		{
             /// <summary>
             /// 0.0 to use xenon curve (default)
             /// </summary>
@@ -138,8 +138,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-        public class Sequence
-        {
+        public class Sequence : TagStructure
+		{
             [TagField(Label = true, Length = 32)]
             public string Name;
 
@@ -152,8 +152,8 @@ namespace TagTool.Tags.Definitions
             public List<Sprite> Sprites;
 
             [TagStructure(Size = 0x20)]
-            public class Sprite
-            {
+            public class Sprite : TagStructure
+			{
                 public short BitmapIndex;
 
                 [TagField(Padding = true, Length = 2)]
@@ -173,8 +173,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline106708)]
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
-        public class Image
-        {
+        public class Image : TagStructure
+		{
             /// <summary>
             /// The group tag signature of the image.
             /// </summary>
@@ -264,8 +264,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class BitmapResource
-        {
+        public class BitmapResource : TagStructure
+		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public int ZoneAssetHandleOld;
             [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]

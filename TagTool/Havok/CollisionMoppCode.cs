@@ -13,7 +13,7 @@ namespace TagTool.Havok
         public byte[] Unused = new byte[3];
 
         [TagStructure(Size = 0x1)]
-		public /*was_struct*/ class Datum
+		public /*was_struct*/ class Datum : TagStructure
         {
             public byte Value;
         }

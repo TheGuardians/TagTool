@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0xB0, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0x1E4, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0x1E0, MinVersion = CacheVersion.HaloReach)]
-    public class ShieldImpact
-    {
+    public class ShieldImpact : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ShieldImpactFlags Flags;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -49,8 +49,8 @@ namespace TagTool.Tags.Definitions
         /// 'shield_intensity' can be used as an input to any of the animation function curves below.
         /// </summary>
         [TagStructure(Size = 0x8)]
-        public class ShieldIntensityBlock
-        {
+        public class ShieldIntensityBlock : TagStructure
+		{
             public float RecentDamageIntensity;
             public float CurrentDamageIntensity;
         }
@@ -64,8 +64,8 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
-        public class ShieldEdgeBlock
-        {
+        public class ShieldEdgeBlock : TagStructure
+		{
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public float OneIfOvershield;
             public float DepthFadeRange;            //In world units
@@ -84,8 +84,8 @@ namespace TagTool.Tags.Definitions
         /// You can specify separate sharpness values for the edge and the center.
         /// </summary>
         [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnline106708)]
-        public class PlasmaBlock
-        {
+        public class PlasmaBlock : TagStructure
+		{
             public float PlasmaDepthFadeRange;      //In world units
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTagInstance PlasmaNoiseBitmap1;
@@ -108,8 +108,8 @@ namespace TagTool.Tags.Definitions
         //
         [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-        public class H3ValuesBlock
-        {
+        public class H3ValuesBlock : TagStructure
+		{
             public float Unknown1;
             public float Unknown2;
             public float Unknown3;
@@ -144,8 +144,8 @@ namespace TagTool.Tags.Definitions
         /// You can specify separate sharpness values for the edge and the center.
         /// </summary>
         [TagStructure(Size = 0x60)]
-        public class ExtrusionOscillationBlock
-        {
+        public class ExtrusionOscillationBlock : TagStructure
+		{
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTagInstance OscillationBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
@@ -166,8 +166,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class HitResponseBlock
-        {
+        public class HitResponseBlock : TagStructure
+		{
             /// <summary>
             /// The hit time of the hit response in seconds.
             /// </summary>
@@ -197,8 +197,8 @@ namespace TagTool.Tags.Definitions
     /// recent_shield_damage}
     /// </summary>
     [TagStructure(Size = 0x1C)]
-    public class ShieldImpactFunction
-    {
+    public class ShieldImpactFunction : TagStructure
+	{
         public StringId InputVariable;
         public StringId RangeVariable;
         public TagFunction Function = new TagFunction { Data = new byte[0] };

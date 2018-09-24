@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x1)]
-    public class SoundClass
-    {
+    public class SoundClass : TagStructure
+	{
         [TagField(Version = CacheVersion.Halo3Retail)]
         public SoundClassHalo3Retail Halo3Retail;
 

@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "decorator_set", Tag = "dctr", Size = 0x80)]
-    public class DecoratorSet
-    {
+    public class DecoratorSet : TagStructure
+	{
         public CachedTagInstance Model;
         public uint Unknown;
         public uint Unknown2;

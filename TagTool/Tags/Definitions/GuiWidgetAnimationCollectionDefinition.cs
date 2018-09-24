@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x240, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST)]
-    public class GuiWidgetAnimationCollectionDefinition
-    {
+    public class GuiWidgetAnimationCollectionDefinition : TagStructure
+	{
         public CachedTagInstance Unknown;
         public CachedTagInstance Unknown2;
         public CachedTagInstance Unknown3;

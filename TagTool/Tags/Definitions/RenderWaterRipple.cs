@@ -6,8 +6,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_water_ripple", Tag = "rwrd", Size = 0x4C, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "render_water_ripple", Tag = "rwrd", Size = 0x50, MinVersion = CacheVersion.Halo3ODST)]
-    public class RenderWaterRipple
-    {
+    public class RenderWaterRipple : TagStructure
+	{
         public TypeFlagsValue TypeFlags;
 
         //

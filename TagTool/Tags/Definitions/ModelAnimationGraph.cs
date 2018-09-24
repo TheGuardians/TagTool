@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0xBC, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x104, MinVersion = CacheVersion.Halo3Retail)]
-    public class ModelAnimationGraph
-    {
+    public class ModelAnimationGraph : TagStructure
+	{
         public CachedTagInstance ParentAnimationGraph;
         public AnimationInheritanceFlags InheritanceFlags;
         public AnimationPrivateFlags PrivateFlags;
@@ -70,8 +70,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class SkeletonNode
-        {
+        public class SkeletonNode : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public short NextSiblingNodeIndex;
@@ -129,16 +129,16 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
-        public class AnimationTagReference
-        {
+        public class AnimationTagReference : TagStructure
+		{
             public CachedTagInstance Reference;
             public AnimationTagReferenceFlags Flags;
             public short Unknown;
         }
 
         [TagStructure(Size = 0x1C)]
-        public class BlendScreen
-        {
+        public class BlendScreen : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Label;
             public Angle RightYawPerFrame;
@@ -152,8 +152,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class Leg
-        {
+        public class Leg : TagStructure
+		{
             public StringId FootMarker;
             public Bounds<float> FootBounds;
             public StringId AnkleMarker;
@@ -185,8 +185,8 @@ namespace TagTool.Tags.Definitions
         
         [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
-        public class Animation
-        {
+        public class Animation : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
 
@@ -453,15 +453,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class FrameEvent
-            {
+            public class FrameEvent : TagStructure
+			{
                 public FrameEventType Type;
                 public short Frame;
             }
 
             [TagStructure(Size = 0x8)]
-            public class SoundEvent
-            {
+            public class SoundEvent : TagStructure
+			{
                 public short Sound;
                 public short Frame;
                 public StringId MarkerName;
@@ -470,8 +470,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST)]
-            public class EffectEvent
-            {
+            public class EffectEvent : TagStructure
+			{
                 public short Effect;
                 public short Frame;
                 [TagField(MinVersion = CacheVersion.Halo2Vista)]
@@ -500,8 +500,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class DialogueEvent
-            {
+            public class DialogueEvent : TagStructure
+			{
                 public DialogueEventType EventType;
                 public short Frame;
             }
@@ -517,8 +517,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x1C)]
-            public class ObjectSpaceParentNode
-            {
+            public class ObjectSpaceParentNode : TagStructure
+			{
                 public short NodeIndex;
                 public ObjectSpaceParentNodeFlags Flags;
                 public short RotationX;
@@ -530,15 +530,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class LegAnchoringBlock
-            {
+            public class LegAnchoringBlock : TagStructure
+			{
                 public short LegIndex;
                 public short Unknown;
                 public List<UnknownBlock> Unknown2;
 
                 [TagStructure(Size = 0x14)]
-                public class UnknownBlock
-                {
+                public class UnknownBlock : TagStructure
+				{
                     public short Frame1a;
                     public short Frame2a;
                     public short Frame1b;
@@ -552,8 +552,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
-        public class Mode
-        {
+        public class Mode : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Label;
             public List<WeaponClassBlock> WeaponClass;
@@ -569,8 +569,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
-            public class WeaponClassBlock
-            {
+            public class WeaponClassBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Label;
 
@@ -582,8 +582,8 @@ namespace TagTool.Tags.Definitions
                 public List<SyncActionGroup> SyncActionGroups;
 
                 [TagStructure(Size = 0x34)]
-                public class WeaponTypeBlock
-                {
+                public class WeaponTypeBlock : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Label;
 
@@ -599,8 +599,8 @@ namespace TagTool.Tags.Definitions
                     public List<PrecacheListBlock> LowPrecache;
 
                     [TagStructure(Size = 0x8)]
-                    public class Entry
-                    {
+                    public class Entry : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId Label;
                         public short GraphIndex;
@@ -609,8 +609,8 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
                     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
-                    public class DeathAndDamageBlock
-                    {
+                    public class DeathAndDamageBlock : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId Label;
 
@@ -618,13 +618,13 @@ namespace TagTool.Tags.Definitions
 
                         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
                         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
-                        public class Direction
-                        {
+                        public class Direction : TagStructure
+						{
                             public List<Region> Regions;
 
                             [TagStructure(Size = 0x4)]
-                            public class Region
-                            {
+                            public class Region : TagStructure
+							{
                                 public short GraphIndex;
                                 public short Animation;
                             }
@@ -633,8 +633,8 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
                     [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
-                    public class Transition
-                    {
+                    public class Transition : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId FullName;
                         public StringId StateName;
@@ -644,8 +644,8 @@ namespace TagTool.Tags.Definitions
                         public List<Destination> Destinations;
 
                         [TagStructure(Size = 0x14)]
-                        public class Destination
-                        {
+                        public class Destination : TagStructure
+						{
                             [TagField(Label = true)]
                             public StringId FullName;
                             public StringId ModeName;
@@ -669,30 +669,30 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x4)]
-                    public class PrecacheListBlock
-                    {
+                    public class PrecacheListBlock : TagStructure
+					{
                         public int CacheBlockIndex;
                     }
                 }
 
                 [TagStructure(Size = 0x10)]
-                public class SyncActionGroup
-                {
+                public class SyncActionGroup : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Name;
                     public List<SyncAction> SyncActions;
 
                     [TagStructure(Size = 0x1C)]
-                    public class SyncAction
-                    {
+                    public class SyncAction : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId Name;
                         public List<SameTypeParticipant> SameTypeParticipants;
                         public List<OtherParticipant> OtherParticipants;
 
                         [TagStructure(Size = 0x30)]
-                        public class SameTypeParticipant
-                        {
+                        public class SameTypeParticipant : TagStructure
+						{
                             public ParticipantFlags Flags;
                             public short GraphIndex;
                             public short Animation;
@@ -714,8 +714,8 @@ namespace TagTool.Tags.Definitions
                         }
 
                         [TagStructure(Size = 0x14)]
-                        public class OtherParticipant
-                        {
+                        public class OtherParticipant : TagStructure
+						{
                             public ParticipantFlags Flags;
                             public CachedTagInstance ObjectType;
 
@@ -731,16 +731,16 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class ModeIkBlock
-            {
+            public class ModeIkBlock : TagStructure
+			{
                 public StringId Marker;
                 public StringId AttachToMarker;
             }
         }
 
         [TagStructure(Size = 0x28)]
-        public class VehicleSuspensionBlock
-        {
+        public class VehicleSuspensionBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Label;
             public short GraphIndex;
@@ -756,8 +756,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class ObjectOverlay
-        {
+        public class ObjectOverlay : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Label;
             public short GraphIndex;
@@ -788,8 +788,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail)]
-        public class Inheritance
-        {
+        public class Inheritance : TagStructure
+		{
             public CachedTagInstance InheritedGraph;
             public List<NodeMapBlock> NodeMap;
             public List<NodeMapFlag> NodeMapFlags;
@@ -797,29 +797,29 @@ namespace TagTool.Tags.Definitions
             public InheritanceListFlags Flags;
 
             [TagStructure(Size = 0x2)]
-            public class NodeMapBlock
-            {
+            public class NodeMapBlock : TagStructure
+			{
                 public short LocalNode;
             }
 
             [TagStructure(Size = 0x4)]
-            public class NodeMapFlag
-            {
+            public class NodeMapFlag : TagStructure
+			{
                 public int LocalNodeFlags;
             }
         }
 
         [TagStructure(Size = 0x8)]
-        public class WeaponListBlock
-        {
+        public class WeaponListBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId WeaponName;
             public StringId WeaponClass;
         }
 
         [TagStructure(Size = 0x3C)]
-        public class AdditionalNodeDataBlock
-        {
+        public class AdditionalNodeDataBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId NodeName;
             public RealQuaternion DefaultRotation;
@@ -830,8 +830,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class CacheBlock
-        {
+        public class CacheBlock : TagStructure
+		{
             [TagField(Short = true)]
             public CachedTagInstance Owner;
 
@@ -845,8 +845,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class CacheUnknown
-        {
+        public class CacheUnknown : TagStructure
+		{
             public int Unknown1;
             public int Unknown2;
             public int Unknown3;
@@ -856,8 +856,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class ResourceGroup
-        {
+        public class ResourceGroup : TagStructure
+		{
             public int MemberCount;
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]

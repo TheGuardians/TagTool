@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(MaxVersion = CacheVersion.Halo3Retail, Size = 0x1D4, Name = "character", Tag = "char")]
     [TagStructure(MinVersion = CacheVersion.Halo3ODST, Size = 0x1F8, Name = "character", Tag = "char")]
-    public class Character
-    {
+    public class Character : TagStructure
+	{
         public uint Flags;
         public CachedTagInstance ParentCharacter;
         public CachedTagInstance Unit;

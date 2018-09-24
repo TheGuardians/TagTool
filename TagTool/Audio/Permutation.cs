@@ -7,8 +7,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Permutation
-    {
+    public class Permutation : TagStructure
+	{
         [TagField(Gen3Only = true)]
         public short ImportNameIndex;
         [TagField(HaloOnlineOnly = true)]

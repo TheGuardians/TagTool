@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
-    public class BreakableSurface
-    {
+    public class BreakableSurface : TagStructure
+	{
         public float MaximumVitality;
         public CachedTagInstance Effect;
         public CachedTagInstance Sound;
@@ -21,8 +21,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused1;
 
         [TagStructure(Size = 0x24)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public byte[] Unknown3;

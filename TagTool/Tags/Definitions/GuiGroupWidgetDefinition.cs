@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_group_widget_definition", Tag = "grup", Size = 0x5C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "gui_group_widget_definition", Tag = "grup", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
-    public class GuiGroupWidgetDefinition
-    {
+    public class GuiGroupWidgetDefinition : TagStructure
+	{
         public uint Flags;
         public StringId Name;
         public short Unknown;
@@ -31,8 +31,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown2;
 
         [TagStructure(Size = 0x80)]
-        public class ListWidget
-        {
+        public class ListWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -55,8 +55,8 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance DownArrowBitmap;
 
             [TagStructure(Size = 0x30)]
-            public class ListWidgetItem
-            {
+            public class ListWidgetItem : TagStructure
+			{
                 public uint Flags;
                 public StringId Name;
                 public short Unknown;
@@ -75,8 +75,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C)]
-        public class TextWidget
-        {
+        public class TextWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -99,8 +99,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x6C)]
-        public class BitmapWidget
-        {
+        public class BitmapWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -144,8 +144,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x94)]
-        public class ModelWidget
-        {
+        public class ModelWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -184,8 +184,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock3> Unknown24;
 
             [TagStructure(Size = 0xA0)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public StringId Biped;
                 public uint Unknown;
                 public uint Unknown2;
@@ -223,21 +223,21 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown34;
 
                 [TagStructure(Size = 0x14)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public byte[] Unknown;
                 }
             }
 
             [TagStructure(Size = 0x14)]
-            public class UnknownBlock2
-            {
+            public class UnknownBlock2 : TagStructure
+			{
                 public byte[] Unknown;
             }
 
             [TagStructure(Size = 0x14)]
-            public class UnknownBlock3
-            {
+            public class UnknownBlock3 : TagStructure
+			{
                 public StringId Unknown;
                 public uint Unknown2;
                 public uint Unknown3;

@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x38)]
-    public class CharacterSwarmProperties
-    {
+    public class CharacterSwarmProperties : TagStructure
+	{
         public short ScatterKilledCount;
 
         [TagField(Padding = true, Length = 2)]

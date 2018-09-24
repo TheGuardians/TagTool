@@ -6,8 +6,8 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640)]
-    public class RawPage
-    {
+    public class RawPage : TagStructure
+	{
         public short Salt;
 
         /// <summary>

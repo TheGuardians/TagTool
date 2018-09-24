@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x80)]
-    public class CharacterVitalityProperties
-    {
+    public class CharacterVitalityProperties : TagStructure
+	{
         public CharacterVitalityFlags Flags;
         public float NormalBodyVitality;
         public float NormalShieldVitality;

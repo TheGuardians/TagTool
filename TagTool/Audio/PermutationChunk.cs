@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x14)]
-    public class PermutationChunk
-    {
+    public class PermutationChunk : TagStructure
+	{
         public int Offset;
 
         /// <summary>

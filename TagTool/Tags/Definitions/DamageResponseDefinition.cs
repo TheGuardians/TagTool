@@ -7,16 +7,16 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
-    public class DamageResponseDefinition
-    {
+    public class DamageResponseDefinition : TagStructure
+	{
         public List<ResponseBlock> Responses;
 
         [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0xC0)]
-        public class ResponseBlock
-        {
+        public class ResponseBlock : TagStructure
+		{
             public ResponseTypeValue ResponseType;
             public short Unknown;
             public short Unknown2;

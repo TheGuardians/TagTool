@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "leaf_system", Tag = "lswd", Size = 0x58)]
-    public class LeafSystem
-    {
+    public class LeafSystem : TagStructure
+	{
         public FlagBits Flags;
         public StringId MarkerAttachName;
         [TagField(ValidTags = new[] { "bitm" })]
@@ -36,8 +36,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class LeafType
-        {
+        public class LeafType : TagStructure
+		{
             public short BitmapSpriteIndex;
             [TagField(Padding = true, Length = 2)]
             public byte[] Unused;

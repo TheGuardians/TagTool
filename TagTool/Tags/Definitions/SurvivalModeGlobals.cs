@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SurvivalModeGlobals
-    {
+    public class SurvivalModeGlobals : TagStructure
+	{
         public uint Unknown;
         public CachedTagInstance InGameStrings;
         public CachedTagInstance TimerSound;
@@ -25,8 +25,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x10C, MinVersion = CacheVersion.HaloOnline106708)]
-        public class SurvivalEvent
-        {
+        public class SurvivalEvent : TagStructure
+		{
             public ushort Flags;
             public TypeValue Type;
             [TagField(Label = true)]
@@ -113,22 +113,22 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class ArmorCustomization
-        {
+        public class ArmorCustomization : TagStructure
+		{
             [TagField(Label = true)]
             public StringId CharacterName;
             public List<Region> Regions;
 
             [TagStructure(Size = 0x10)]
-            public class Region
-            {
+            public class Region : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId RegionName;
                 public List<Permutation> Permutations;
 
                 [TagStructure(Size = 0x1C)]
-                public class Permutation
-                {
+                public class Permutation : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Name;
                     public StringId Description;
@@ -138,8 +138,8 @@ namespace TagTool.Tags.Definitions
                     public List<Variant> Variants;
 
                     [TagStructure(Size = 0x8)]
-                    public class Variant
-                    {
+                    public class Variant : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId Region;
                         public StringId Permutation;

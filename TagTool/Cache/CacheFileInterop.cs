@@ -6,8 +6,8 @@ namespace TagTool.Cache
     /// 
     /// </summary>
     [TagStructure(Size = 0x30)]
-    public sealed class CacheFileInterop
-    {
+    public sealed class CacheFileInterop : TagStructure
+	{
         /// <summary>
         /// 
         /// </summary>

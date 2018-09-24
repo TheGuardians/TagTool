@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xB0 , MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xB4, MinVersion = CacheVersion.Halo3ODST)]
-    public class Cinematic
-    {
+    public class Cinematic : TagStructure
+	{
         public uint Unknown1;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -44,8 +44,8 @@ namespace TagTool.Tags.Definitions
         public byte[] ImportScript3;
 
         [TagStructure(Size = 0x4)]
-		public /*was_struct*/ class SceneIndex
-        {
+		public /*was_struct*/ class SceneIndex : TagStructure
+		{
             public uint Value;
         }
     }

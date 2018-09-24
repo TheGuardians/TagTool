@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_list_widget_definition", Tag = "lst3", Size = 0x70)]
-    public class GuiListWidgetDefinition
-    {
+    public class GuiListWidgetDefinition : TagStructure
+	{
         public uint Flags;
         public StringId Name;
         public short Unknown;
@@ -29,8 +29,8 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance DownArrowBitmap;
 
         [TagStructure(Size = 0x30)]
-        public class ListWidgetItem
-        {
+        public class ListWidgetItem : TagStructure
+		{
             public uint Flags;
             public StringId Name;
             public short Unknown;

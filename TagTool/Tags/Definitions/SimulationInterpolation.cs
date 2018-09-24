@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "simulation_interpolation", Tag = "siin", Size = 0xF4)]
-    public class SimulationInterpolation
-    {
+    public class SimulationInterpolation : TagStructure
+	{
         public uint Unknown;
         public uint Unknown2;
         public uint Unknown3;

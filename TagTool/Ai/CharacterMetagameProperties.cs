@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x8)]
-    public class CharacterMetagameProperties
-    {
+    public class CharacterMetagameProperties : TagStructure
+	{
         public CharacterMetagameFlags Flags;
         public CharacterMetagameUnit Unit;
         public CharacterMetagameClassification Classification;

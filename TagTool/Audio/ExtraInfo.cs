@@ -7,8 +7,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ExtraInfo
-    {
+    public class ExtraInfo : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<LanguagePermutation> LanguagePermutations;
 
@@ -24,13 +24,13 @@ namespace TagTool.Audio
         public uint Unknown4;
 
         [TagStructure(Size = 0xC)]
-        public class LanguagePermutation
-        {
+        public class LanguagePermutation : TagStructure
+		{
             public List<RawInfoBlock> RawInfo;
 
             [TagStructure(Size = 0x7C)]
-            public class RawInfoBlock
-            {
+            public class RawInfoBlock : TagStructure
+			{
                 public StringId SkipFractionName;
                 public uint Unknown1;
                 public uint Unknown2;
@@ -64,8 +64,8 @@ namespace TagTool.Audio
                 public int Unknown24;
 
                 [TagStructure(Size = 0x18)]
-                public class Unknown
-                {
+                public class Unknown : TagStructure
+				{
                     public uint Unknown1;
                     public uint Unknown2;
                     public uint Unknown3;
@@ -77,15 +77,15 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x2C)]
-        public class EncodedPermutationSection
-        {
+        public class EncodedPermutationSection : TagStructure
+		{
             public byte[] EncodedData;
             public List<SoundDialogueInfoBlock> SoundDialogueInfo;
             public List<UnknownBlock> Unknown;
 
             [TagStructure(Size = 0x10)]
-            public class SoundDialogueInfoBlock
-            {
+            public class SoundDialogueInfoBlock : TagStructure
+			{
                 public uint MouthDataOffset;
                 public uint MouthDataLength;
                 public uint LipsyncDataOffset;
@@ -93,13 +93,13 @@ namespace TagTool.Audio
             }
 
             [TagStructure(Size = 0xC)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public List<UnknownBlock2> Unknown;
 
                 [TagStructure(Size = 0x28)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public float Unknown1;
                     public float Unknown2;
                     public float Unknown3;
@@ -108,15 +108,15 @@ namespace TagTool.Audio
                     public List<UnknownBlock2_2> Unknown6;
 
                     [TagStructure(Size = 0x8)]
-                    public class UnknownBlock2_1
-                    {
+                    public class UnknownBlock2_1 : TagStructure
+					{
                         public uint Unknown1;
                         public uint Unknown2;
                     }
 
                     [TagStructure(Size = 0x8)]
-                    public class UnknownBlock2_2
-                    {
+                    public class UnknownBlock2_2 : TagStructure
+					{
                         public short Unknown1;
                         public sbyte Unknown2;
                         public sbyte Unknown3;

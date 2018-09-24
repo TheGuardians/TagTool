@@ -89,8 +89,8 @@ namespace TagTool.Tags.Definitions
         public float Unknown32;
 
         [TagStructure(Size = 0x58)]
-        public class TankEngineMotionProperty
-        {
+        public class TankEngineMotionProperty : TagStructure
+		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
             public float Unknown;
@@ -111,8 +111,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-        public class EngineMotionProperty
-        {
+        public class EngineMotionProperty : TagStructure
+		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
             public Angle MaximumLeftTurn;
@@ -127,8 +127,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C)]
-        public class DropshipMotionProperty
-        {
+        public class DropshipMotionProperty : TagStructure
+		{
             public float ForwardAcceleration;
             public float BackwardAcceleration;
             public float Unknown;
@@ -151,8 +151,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x70)]
-        public class AntigravityMotionProperty
-        {
+        public class AntigravityMotionProperty : TagStructure
+		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
             public float MaximumForwardSpeed;
@@ -188,8 +188,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x64, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloOnline106708)]
-        public class JetEngineMotionProperty
-        {
+        public class JetEngineMotionProperty : TagStructure
+		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
             public Angle MaximumLeftTurn;
@@ -221,16 +221,16 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708)]
-        public class TurretProperty
-        {
+        public class TurretProperty : TagStructure
+		{
             public float Unknown;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown2;
         }
 
         [TagStructure(Size = 0x74)]
-        public class HelicopterMotionProperty
-        {
+        public class HelicopterMotionProperty : TagStructure
+		{
             public Angle MaximumLeftTurn;
             public Angle MaximumRightTurnNegative;
             public Angle Unknown;
@@ -263,8 +263,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x70)]
-        public class AntigravityEngineMotionProperty
-        {
+        public class AntigravityEngineMotionProperty : TagStructure
+		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
             public Angle MaximumLeftTurn;
@@ -291,8 +291,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x030)]
-        public class AutoturretEquipmentBlock
-        {
+        public class AutoturretEquipmentBlock : TagStructure
+		{
             public Angle Unknown;
             public float Unknown2;
             public float Unknown3;
@@ -308,8 +308,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C)]
-        public class AntiGravityPoint
-        {
+        public class AntiGravityPoint : TagStructure
+		{
             public StringId MarkerName;
             public uint Flags;
             public float AntigravStrength;
@@ -333,8 +333,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C)]
-        public class FrictionPoint
-        {
+        public class FrictionPoint : TagStructure
+		{
             public StringId MarkerName;
             public uint Flags;
             public float FractionOfTotalMass;
@@ -374,8 +374,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x330)]
-        public class PhantomShape
-        {
+        public class PhantomShape : TagStructure
+		{
             public int Unknown;
             public short Size;
             public short Count;
@@ -588,8 +588,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44)]
-        public class Gear
-        {
+        public class Gear : TagStructure
+		{
             public float MinTorque;
             public float MaxTorque;
             public float PeakTorqueScale;

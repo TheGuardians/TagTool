@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x7C)]
-    public class CharacterChargeProperties
-    {
+    public class CharacterChargeProperties : TagStructure
+	{
         public CharacterChargeFlags Flags;
         public float MeleeConsiderRange;
         public float MeleeChance;

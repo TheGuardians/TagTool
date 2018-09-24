@@ -7,16 +7,16 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "multiplayer_globals", Tag = "mulg", Size = 0x18)]
-    public class MultiplayerGlobals
-    {
+    public class MultiplayerGlobals : TagStructure
+	{
         public List<UniversalBlock> Universal;
         public List<RuntimeBlock> Runtime;
 
         [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xD8, MaxVersion = CacheVersion.HaloOnline449175)]
         [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloOnline498295)]
-        public class UniversalBlock
-        {
+        public class UniversalBlock : TagStructure
+		{
             public CachedTagInstance RandomPlayerNameStrings;
 
             public CachedTagInstance TeamNameStrings;
@@ -54,28 +54,28 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance EngineSettings;
 
             [TagStructure(Size = 0xC)]
-            public class TeamColor
-            {
+            public class TeamColor : TagStructure
+			{
                 public RealRgbColor Color;
             }
 
             [TagStructure(Size = 0x10)]
-            public class Halo3ArmorCustomizationBlock
-            {
+            public class Halo3ArmorCustomizationBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId CharacterName;
                 public List<Region> Regions;
 
                 [TagStructure(Size = 0x10)]
-                public class Region
-                {
+                public class Region : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Name;
                     public List<Permuation> Permuations;
 
                     [TagStructure(Size = 0x1C)]
-                    public class Permuation
-                    {
+                    public class Permuation : TagStructure
+					{
                         [TagField(Label = true)]
                         public StringId Name;
                         public StringId Description;
@@ -107,8 +107,8 @@ namespace TagTool.Tags.Definitions
                         }
 
                         [TagStructure(Size = 0x8)]
-                        public class VariantBlock
-                        {
+                        public class VariantBlock : TagStructure
+						{
                             [TagField(Label = true)]
                             public StringId Region;
                             public StringId Permutation;
@@ -118,16 +118,16 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class HaloOnlineArmorCustomizationBlock
-            {
+            public class HaloOnlineArmorCustomizationBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId ArmorObjectRegion;
                 public StringId BipedRegion;
                 public List<Permutation> Permutations;
 
                 [TagStructure(Size = 0x30)]
-                public class Permutation
-                {
+                public class Permutation : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Name;
                     public CachedTagInstance ThirdPersonArmorObject;
@@ -140,8 +140,8 @@ namespace TagTool.Tags.Definitions
             }
             
             [TagStructure(Size = 0x18)]
-            public class EquipmentBlock
-            {
+            public class EquipmentBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public CachedTagInstance Equipment;
@@ -150,15 +150,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public int Unknown;
                 public int Unknown2;
             }
 
             [TagStructure(Size = 0x18)]
-            public class GameVariantWeapon
-            {
+            public class GameVariantWeapon : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public float RandomChance;
@@ -166,31 +166,31 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class GameVariantVehicle
-            {
+            public class GameVariantVehicle : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public CachedTagInstance Vehicle;
             }
 
             [TagStructure(Size = 0x14)]
-            public class GameVariantEquipmentBlock
-            {
+            public class GameVariantEquipmentBlock : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public CachedTagInstance Grenade;
             }
 
             [TagStructure(Size = 0x10)]
-            public class WeaponSet
-            {
+            public class WeaponSet : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public List<Substitution> Substitutions;
 
                 [TagStructure(Size = 0x8)]
-                public class Substitution
-                {
+                public class Substitution : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId OriginalWeapon;
                     public StringId SubstitutedWeapon;
@@ -198,15 +198,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class VehicleSet
-            {
+            public class VehicleSet : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public List<Substitution> Substitutions;
 
                 [TagStructure(Size = 0x8)]
-                public class Substitution
-                {
+                public class Substitution : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId OriginalVehicle;
                     public StringId SubstitutedVehicle;
@@ -215,8 +215,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnline498295)]
-            public class PodiumAnimation
-            {
+            public class PodiumAnimation : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance AnimationGraph;
                 [TagField(MinVersion = CacheVersion.HaloOnline498295)]
@@ -227,8 +227,8 @@ namespace TagTool.Tags.Definitions
                 public List<MoveAnimation> MoveAnimations;
 
                 [TagStructure]
-                public class StanceAnimation
-                {
+                public class StanceAnimation : TagStructure
+				{
                     [TagField(Label = true, Length = 32)]
                     public string Name;
                     public StringId BaseAnimation;
@@ -239,8 +239,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure]
-                public class MoveAnimation
-                {
+                public class MoveAnimation : TagStructure
+				{
                     [TagField(Label = true, Length = 32)]
                     public string Name;
                     public StringId InAnimation;
@@ -256,8 +256,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x2A8, MaxVersion = CacheVersion.HaloOnline449175)]
         [TagStructure(Size = 0x308, MinVersion = CacheVersion.HaloOnline498295)]
-        public class RuntimeBlock
-        {
+        public class RuntimeBlock : TagStructure
+		{
             public CachedTagInstance SandboxEditorUnit;
             public CachedTagInstance SandboxEditorObject;
             public CachedTagInstance Flag;
@@ -330,15 +330,15 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance MenuMusic4;
 
             [TagStructure(Size = 0x10)]
-            public class Sound
-            {
+            public class Sound : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Type;
             }
 
             [TagStructure(Size = 0x10)]
-            public class LoopingSound
-            {
+            public class LoopingSound : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Type;
             }
@@ -346,8 +346,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x10C, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x20C, MinVersion = CacheVersion.HaloOnline498295)]
-            public class EventBlock
-            {
+            public class EventBlock : TagStructure
+			{
                 public ushort Flags;
                 public TypeValue Type;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -503,8 +503,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x21C, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnline106708)]
-            public class MultiplayerConstant
-            {
+            public class MultiplayerConstant : TagStructure
+			{
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;
@@ -618,8 +618,8 @@ namespace TagTool.Tags.Definitions
                 public StringId NetpointContestedString;
 
                 [TagStructure(Size = 0x20)]
-                public class Weapon
-                {
+                public class Weapon : TagStructure
+				{
                     [TagField(Label = true)]
                     public CachedTagInstance Type;
                     public float Unknown1;
@@ -629,8 +629,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x20)]
-                public class Vehicle
-                {
+                public class Vehicle : TagStructure
+				{
                     [TagField(Label = true)]
                     public CachedTagInstance Type;
                     public float Unknown1;
@@ -640,8 +640,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x1C)]
-                public class Projectile
-                {
+                public class Projectile : TagStructure
+				{
                     [TagField(Label = true)]
                     public CachedTagInstance Type;
                     public float Unknown;
@@ -650,8 +650,8 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x14)]
-                public class EquipmentBlock
-                {
+                public class EquipmentBlock : TagStructure
+				{
                     [TagField(Label = true)]
                     public CachedTagInstance Type;
                     public float Unknown;
@@ -659,8 +659,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x24)]
-            public class StateResponse
-            {
+            public class StateResponse : TagStructure
+			{
                 public ushort Flags;
                 public short Unknown;
                 [TagField(Label = true)]

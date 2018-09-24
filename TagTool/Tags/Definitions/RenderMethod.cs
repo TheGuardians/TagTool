@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
-    public class RenderMethod
-    {
+    public class RenderMethod : TagStructure
+	{
         public CachedTagInstance BaseRenderMethod;
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
@@ -20,14 +20,14 @@ namespace TagTool.Tags.Definitions
         public int Unknown2; // usually -1
 
         [TagStructure(Size = 0x2)]
-        public class RenderMethodDefinitionOptionIndex
-        {
+        public class RenderMethodDefinitionOptionIndex : TagStructure
+		{
             public short OptionIndex;
         }
 
         [TagStructure(Size = 0x24)]
-        public class FunctionBlock
-        {
+        public class FunctionBlock : TagStructure
+		{
             public int Unknown;
             [TagField(Label = true)]
             public StringId Name;
@@ -37,8 +37,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class ImportDatum
-        {
+        public class ImportDatum : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
 
@@ -57,8 +57,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x84)]
-        public class ShaderProperty
-        {
+        public class ShaderProperty : TagStructure
+		{
             public CachedTagInstance Template;
             public List<ShaderMap> ShaderMaps;
             public List<Argument> Arguments;
@@ -81,8 +81,8 @@ namespace TagTool.Tags.Definitions
             public short Unknown16;
 
             [TagStructure(Size = 0x18)]
-            public class ShaderMap
-            {
+            public class ShaderMap : TagStructure
+			{
                 [TagField(Label = true)]
                 public CachedTagInstance Bitmap;
                 public sbyte Unknown;
@@ -96,8 +96,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class Argument
-            {
+            public class Argument : TagStructure
+			{
                 [TagField(Length = 4)]
                 public float[] Values;
 
@@ -117,22 +117,22 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class UnknownBlock1
-            {
+            public class UnknownBlock1 : TagStructure
+			{
                 public uint Unknown;
             }
 
             [TagStructure(Size = 0x6)]
-            public class UnknownBlock3
-            {
+            public class UnknownBlock3 : TagStructure
+			{
                 public short DataHandleSampler;
                 public short DataHandleUnknown;
                 public short DataHandleVector;
             }
 
             [TagStructure(Size = 0x4)]
-            public class ArgumentMapping
-            {
+            public class ArgumentMapping : TagStructure
+			{
                 public enum RenderMethodExternalValue : byte
                 {
                     None = 0x00,

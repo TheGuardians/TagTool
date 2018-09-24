@@ -6,8 +6,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_bitmap_widget_definition", Tag = "bmp3", Size = 0x5C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "gui_bitmap_widget_definition", Tag = "bmp3", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
-    public class GuiBitmapWidgetDefinition
-    {
+    public class GuiBitmapWidgetDefinition : TagStructure
+	{
         public uint Flags;
         public StringId Name;
         public short Unknown;

@@ -4,8 +4,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "point_physics", Tag = "pphy", Size = 0x40)]
-    public class PointPhysics
-    {
+    public class PointPhysics : TagStructure
+	{
         public FlagBits Flags;
 
         public float RuntimeMassOverRadiusCubed;

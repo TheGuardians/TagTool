@@ -12,8 +12,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1B4, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1B8, MinVersion = CacheVersion.HaloOnline498295)]
-    public partial class Model
-    {
+    public partial class Model : TagStructure
+	{
         public CachedTagInstance RenderModel;
 
         public CachedTagInstance CollisionModel;
@@ -148,8 +148,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x50, MinVersion = CacheVersion.Halo3ODST)]
-        public class Variant
-        {
+        public class Variant : TagStructure
+		{
             public StringId Name;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -192,8 +192,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
-            public class Region
-            {
+            public class Region : TagStructure
+			{
                 public StringId Name;
 
                 public sbyte RenderModelRegionIndex;
@@ -215,8 +215,8 @@ namespace TagTool.Tags.Definitions
                 public SortOrderValue SortOrder;
 
                 [TagStructure(Size = 0x24)]
-                public class Permutation
-                {
+                public class Permutation : TagStructure
+				{
                     public StringId Name;
                     public sbyte RenderModelPermutationIndex;
 
@@ -245,8 +245,8 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x20)]
-                    public class State
-                    {
+                    public class State : TagStructure
+					{
                         public StringId Name;
                         public sbyte Unknown;
                         public PropertyFlagsValue PropertyFlags;
@@ -299,8 +299,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
-            public class Object
-            {
+            public class Object : TagStructure
+			{
                 public StringId ParentMarker;
                 public StringId ChildMarker;
 
@@ -312,14 +312,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public uint Unknown;
         }
 
         [TagStructure(Size = 0x18)]
-        public class InstanceGroup
-        {
+        public class InstanceGroup : TagStructure
+		{
             public StringId Name;
             public ChoiceValue Choice;
             public List<InstanceMember> InstanceMembers;
@@ -333,8 +333,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
-            public class InstanceMember
-            {
+            public class InstanceMember : TagStructure
+			{
                 public int SubgroupIndex;
                 public StringId InstanceName;
                 public float Probability;
@@ -351,8 +351,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class Material
-        {
+        public class Material : TagStructure
+		{
             public StringId Name;
             public MaterialTypeValue MaterialType;
             public short DamageSectionIndex;
@@ -404,8 +404,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x140, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x100, MinVersion = CacheVersion.Halo3Retail)]
-        public class GlobalDamageInfoBlock
-        {
+        public class GlobalDamageInfoBlock : TagStructure
+		{
             public FlagsValue Flags;
 
             /// <summary>
@@ -584,8 +584,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x44)]
-            public class DamageSection
-            {
+            public class DamageSection : TagStructure
+			{
                 public StringId Name;
                 public FlagsValue Flags;
                 public float VitalityPercentage;
@@ -623,8 +623,8 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x68, MaxVersion = CacheVersion.Halo2Vista)]
                 [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
-                public class InstantResponse
-                {
+                public class InstantResponse : TagStructure
+				{
                     public ResponseTypeValue ResponseType;
                     public ConstraintDamageTypeValue ConstraintDamageType;
 
@@ -781,8 +781,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class Node
-            {
+            public class Node : TagStructure
+			{
                 public short Unknown;
                 public short Unknown2;
                 public uint Unknown3;
@@ -792,8 +792,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail)]
-            public class DamageSeat
-            {
+            public class DamageSeat : TagStructure
+			{
                 public StringId SeatLabel;
                 public float DirectDamageScale;
                 public float DamageTransferFallOffRadius;
@@ -804,8 +804,8 @@ namespace TagTool.Tags.Definitions
                 public List<RegionSpecificDamageBlock> RegionSpecificDamage;
 
                 [TagStructure(Size = 0x2C)]
-                public class RegionSpecificDamageBlock
-                {
+                public class RegionSpecificDamageBlock : TagStructure
+				{
                     public StringId DamageRegionName;
                     public short RuntimeDamageRegionIndex;
 
@@ -827,8 +827,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x14)]
-            public class DamageConstraint
-            {
+            public class DamageConstraint : TagStructure
+			{
                 public StringId PhysicsModelConstraintName;
                 public StringId DamageConstraintName;
                 public StringId DamageConstraintGroupName;
@@ -850,8 +850,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
-        public class Target
-        {
+        public class Target : TagStructure
+		{
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public uint Unknown;
 
@@ -910,8 +910,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
-        public class CollisionRegion
-        {
+        public class CollisionRegion : TagStructure
+		{
             public StringId Name;
             public sbyte CollisionRegionIndex;
             public sbyte PhysicsRegionIndex;
@@ -920,8 +920,8 @@ namespace TagTool.Tags.Definitions
             public List<Permutation> Permutations;
 
             [TagStructure(Size = 0x8)]
-            public class Permutation
-            {
+            public class Permutation : TagStructure
+			{
                 public StringId Name;
                 public FlagsValue Flags;
                 public sbyte CollisionPermutationIndex;
@@ -945,8 +945,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x5C)]
-        public class Node
-        {
+        public class Node : TagStructure
+		{
             public StringId Name;
             public short ParentNode;
             public short FirstChildNode;
@@ -959,8 +959,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class ModelObjectDatum
-        {
+        public class ModelObjectDatum : TagStructure
+		{
             public TypeValue Type;
             public short Unknown;
             public RealPoint3d Offset;
@@ -1050,8 +1050,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44)]
-        public class ScenarioLoadParametersBlock
-        {
+        public class ScenarioLoadParametersBlock : TagStructure
+		{
             public CachedTagInstance Scenario;
             public byte[] Data;
 
@@ -1060,22 +1060,22 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class UnknownBlock2
-        {
+        public class UnknownBlock2 : TagStructure
+		{
             public StringId Region;
             public StringId Permutation;
         }
 
         [TagStructure(Size = 0x8)]
-        public class UnknownBlock3
-        {
+        public class UnknownBlock3 : TagStructure
+		{
             public StringId Unknown;
             public uint Unknown2;
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock4
-        {
+        public class UnknownBlock4 : TagStructure
+		{
             public StringId Marker;
             public uint Unknown;
             public StringId Marker2;
@@ -1084,8 +1084,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class UnknownTarget
-        {
+        public class UnknownTarget : TagStructure
+		{
             public StringId MarkerName;
             public float Unknown;
         }

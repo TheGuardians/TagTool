@@ -6,8 +6,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x24)]
-    public class DecalSystem
-    {
+    public class DecalSystem : TagStructure
+	{
         public FlagsValue Flags;
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x74)]
-        public class DecalDefinitionBlock
-        {
+        public class DecalDefinitionBlock : TagStructure
+		{
             public StringId DecalName;
 
             public FlagsValue Flags;
