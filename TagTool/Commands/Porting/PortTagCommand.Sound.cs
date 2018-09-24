@@ -323,7 +323,7 @@ namespace TagTool.Commands.Porting
                 //
 
                 var pitchRange = BlamSoundGestalt.PitchRanges[pitchRangeIndex];
-                pitchRange.ImportName = (StringId)ConvertData(cacheStream, resourceStreams, BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name, null, null);
+                pitchRange.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[pitchRange.ImportNameIndex].Name);
                 pitchRange.PitchRangeParameters = BlamSoundGestalt.PitchRangeParameters[pitchRange.PitchRangeParametersIndex];
                 pitchRange.Unknown1 = 0;
                 pitchRange.Unknown2 = 0;
@@ -385,7 +385,7 @@ namespace TagTool.Commands.Porting
                     var gestaltPermIndex = permutationIndex + pitchRange.FirstPermutationIndex;
                     var permutation = BlamSoundGestalt.GetPermutation(gestaltPermIndex);
 
-                    permutation.ImportName = (StringId)ConvertData(cacheStream, resourceStreams, BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name, null, null);
+                    permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[permutationIndex];

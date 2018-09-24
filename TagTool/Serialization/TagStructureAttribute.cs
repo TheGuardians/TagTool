@@ -50,6 +50,24 @@ namespace TagTool.Serialization
 
 	public class TagStructure
 	{
+		protected virtual void PreConvert(CacheVersion from, CacheVersion to)
+		{
+			throw new NotImplementedException();
+		}
 
+		protected virtual void MainConvert(CacheVersion from, CacheVersion to)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected virtual void PostConvert(CacheVersion from, CacheVersion to)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Convert(CacheVersion from, CacheVersion to)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
