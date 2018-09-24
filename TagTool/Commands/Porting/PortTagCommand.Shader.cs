@@ -843,10 +843,10 @@ namespace TagTool.Commands.Porting
             if (finalRm.ShaderProperties[0].Functions.Count == 0)
                 return finalRm;
 
-            foreach (var a in finalRm.ShaderProperties[0].Functions)
+            foreach (var function in finalRm.ShaderProperties[0].Functions)
             {
-                a.Name = (StringId)ConvertData(cacheStream, resourceStreams, a.Name, null, null);
-                ConvertTagFunction(a.Function);
+                function.Name = ConvertStringId(function.Name);
+                ConvertTagFunction(function.Function);
             }    
 
             var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);

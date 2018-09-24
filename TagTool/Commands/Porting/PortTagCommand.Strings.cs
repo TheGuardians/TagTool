@@ -79,7 +79,7 @@ namespace TagTool.Commands.Porting
             {
                 var pair = table[i];
                 var stringBlock = new LocalizedString {
-                    StringID = (StringId)ConvertData(cacheStream, resourceStreams, new StringId((uint)pair.Key, BlamCache.Version), null, null),
+                    StringID = ConvertStringId(new StringId((uint)pair.Key, BlamCache.Version)),
                     StringIDStr = null,
                 };
 

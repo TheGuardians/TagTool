@@ -140,7 +140,7 @@ namespace TagTool.Commands.Porting
                 var wasReplacing = FlagIsSet(PortingFlags.Replace);
 
 				RemoveFlags(PortingFlags.Replace);
-                var Lbsp = (ScenarioLightmapBspData)ConvertData(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
+				var Lbsp = ConvertStructure(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
 				if (wasReplacing)
 					SetFlags(PortingFlags.Replace);
 
