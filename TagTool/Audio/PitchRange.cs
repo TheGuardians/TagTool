@@ -7,8 +7,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloOnline106708)]
-    public class PitchRange
-    {
+    public class PitchRange : TagStructure
+	{
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short ImportNameIndex;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -38,7 +38,6 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown8;
 
-
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short EncodedPermutationDataIndex;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -46,7 +45,7 @@ namespace TagTool.Audio
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short EncodedPermutationCount;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short FirstPermutationIndex;
+        public ushort FirstPermutationIndex;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<Permutation> Permutations;

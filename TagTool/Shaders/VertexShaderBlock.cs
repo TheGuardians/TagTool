@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Shaders
 {
     [TagStructure(Size = 0x50)]
-    public class VertexShaderBlock
-    {
+    public class VertexShaderBlock : TagStructure
+	{
         public byte[] Unknown;
         public byte[] PCShaderBytecode;
         public List<ShaderParameter> XboxParameters;

@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x84, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1D0, MinVersion = CacheVersion.HaloOnline106708)]
-    public class RenderModel
-    {
+    public class RenderModel : TagStructure
+	{
         public StringId Name;
         public FlagsValue Flags;
         public short Version;
@@ -113,8 +113,8 @@ namespace TagTool.Tags.Definitions
         /// A region of a model.
         /// </summary>
         [TagStructure(Size = 0x10)]
-        public class Region
-        {
+        public class Region : TagStructure
+		{
             /// <summary>
             /// The name of the region.
             /// </summary>
@@ -143,8 +143,8 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST)]
-            public class Permutation
-            {
+            public class Permutation : TagStructure
+			{
                 /// <summary>
                 /// The name of the permutation as a string id.
                 /// </summary>
@@ -201,8 +201,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x5C)]
-        public class Section
-        {
+        public class Section : TagStructure
+		{
             public RenderGeometryClassification GlobalGeometryClassification;
 
             [TagField(Padding = true, Length = 2)]
@@ -247,14 +247,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class InvalidSectionPairBit
-        {
+        public class InvalidSectionPairBit : TagStructure
+		{
             public int Bits;
         }
 
         [TagStructure(Size = 0xC)]
-        public class SectionGroup
-        {
+        public class SectionGroup : TagStructure
+		{
             public DetailLevelFlags DetailLevels;
             public short Unknown;
             public List<CompoundNode> CompoundNodes;
@@ -272,8 +272,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class CompoundNode
-            {
+            public class CompoundNode : TagStructure
+			{
                 [TagField(Length = 4)]
                 public sbyte[] NodeIndices = new sbyte[4];
 
@@ -305,8 +305,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class InstancePlacement
-        {
+        public class InstancePlacement : TagStructure
+		{
             public StringId Name;
             public int NodeIndex;
             public float Scale;
@@ -325,8 +325,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x60)]
-        public class Node
-        {
+        public class Node : TagStructure
+		{
             public StringId Name;
             public short ParentNode;
             public short FirstChildNode;
@@ -343,21 +343,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1)]
-        public struct NodeIndex
-        {
+		public /*was_struct*/ class NodeIndex : TagStructure
+		{
             public byte Node;
         }
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
-        public class MarkerGroup
-        {
+        public class MarkerGroup : TagStructure
+		{
             public StringId Name;
             public List<Marker> Markers;
 
             [TagStructure(Size = 0x24)]
-            public class Marker
-            {
+            public class Marker : TagStructure
+			{
                 public sbyte RegionIndex;
                 public sbyte PermutationIndex;
                 public sbyte NodeIndex;
@@ -369,8 +369,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x58)]
-        public class PrtInfoBlock
-        {
+        public class PrtInfoBlock : TagStructure
+		{
             public ushort ShOrder;
             public ushort NumberOfClusters;
             public ushort PcaVectorsPerCluster;
@@ -401,54 +401,54 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Runtime;
 
             [TagStructure(Size = 0xC)]
-            public class LodInfoBlock
-            {
+            public class LodInfoBlock : TagStructure
+			{
                 public uint ClusterOffset;
                 public List<SectionInfoBlock> SectionInfo;
 
                 [TagStructure(Size = 0x8)]
-                public class SectionInfoBlock
-                {
+                public class SectionInfoBlock : TagStructure
+				{
                     public int SectionIndex;
                     public uint PcaDataOffset;
                 }
             }
 
             [TagStructure(Size = 0x4)]
-            public class ClusterBasisBlock
-            {
+            public class ClusterBasisBlock : TagStructure
+			{
                 public float BasisData;
             }
 
             [TagStructure(Size = 0x4)]
-            public class RawPcaDatum
-            {
+            public class RawPcaDatum : TagStructure
+			{
                 public float PcaData;
             }
         }
 
         [TagStructure(Size = 0x8)]
-        public class SectionRenderLeaf
-        {
+        public class SectionRenderLeaf : TagStructure
+		{
             public List<NodeRenderLeaf> NodeRenderLeaves;
 
             [TagStructure(Size = 0x10)]
-            public class NodeRenderLeaf
-            {
+            public class NodeRenderLeaf : TagStructure
+			{
                 public List<CollisionLeaf> CollisionLeaves;
                 public List<SurfaceReference> SurfaceReferences;
 
                 [TagStructure(Size = 0x8)]
-                public class CollisionLeaf
-                {
+                public class CollisionLeaf : TagStructure
+				{
                     public short Cluster;
                     public short SurfaceReferenceCount;
                     public int FirstSurfaceReferenceIndex;
                 }
 
                 [TagStructure(Size = 0x8)]
-                public class SurfaceReference
-                {
+                public class SurfaceReference : TagStructure
+				{
                     public short StripIndex;
                     public short LightmapTriangleIndex;
                     public int BspNodeIndex;
@@ -457,8 +457,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class TagBlock17
-        {
+        public class TagBlock17 : TagStructure
+		{
             public float Unknown0;
             public float Unknown4;
             public float Unknown8;
@@ -469,8 +469,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x150)]
-        public class TagBlock18
-        {
+        public class TagBlock18 : TagStructure
+		{
             public float Unknown0;
             public float Unknown4;
             public float Unknown8;
@@ -558,8 +558,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Align = 0x10, Size = 0x20)]
-        public class RuntimeNodeOrientation
-        {
+        public class RuntimeNodeOrientation : TagStructure
+		{
             public RealQuaternion Rotation;
             public RealPoint3d Translation;
             public float Scale;

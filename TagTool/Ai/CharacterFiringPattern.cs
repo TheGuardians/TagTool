@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x40)]
-    public class CharacterFiringPattern
-    {
+    public class CharacterFiringPattern : TagStructure
+	{
         public float RateOfFire;
         public float TargetTracking;
         public float TargetLeading;

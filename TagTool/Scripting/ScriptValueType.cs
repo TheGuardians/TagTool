@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Scripting
 {
     [TagStructure(Size = 0x2)]
-    public class ScriptValueType
-    {
+    public class ScriptValueType : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public Halo3RetailValue Halo3Retail;
 

@@ -7,16 +7,16 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "beam_system", Tag = "beam", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "beam_system", Tag = "beam", Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
-    public class BeamSystem
-    {
+    public class BeamSystem : TagStructure
+	{
         public List<BeamSystemBlock> Beam;
 
         [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x208, Align = 0x10)]
-        public class BeamSystemBlock
-        {
+        public class BeamSystemBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public RenderMethod RenderMethod;
@@ -59,8 +59,8 @@ namespace TagTool.Tags.Definitions
 
             
             [TagStructure(Size = 0x10, Align = 0x10)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -68,8 +68,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x40, Align = 0x10)]
-            public class CompiledFunction
-            {
+            public class CompiledFunction : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -89,8 +89,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10, Align = 0x10)]
-            public class CompiledColorFunction
-            {
+            public class CompiledColorFunction : TagStructure
+			{
                 public RealRgbColor Color;
                 public float Magnitude;
             }

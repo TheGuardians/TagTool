@@ -7,16 +7,16 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0xC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundEffectCollection
-    {
+    public class SoundEffectCollection : TagStructure
+	{
         public List<SoundEffect> SoundEffects;
 
         [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x4C)]
-        public class SoundEffect
-        {
+        public class SoundEffect : TagStructure
+		{
             public StringId Name;
             public uint Unknown;
             public uint Unknown2;
@@ -30,8 +30,8 @@ namespace TagTool.Tags.Definitions
             public List<SoundEffectBlock> SoundEffect2;
 
             [TagStructure(Size = 0x48)]
-            public class FilterBlock
-            {
+            public class FilterBlock : TagStructure
+			{
                 public int FilterType;
                 public int FilterWidth;
                 public Bounds<float> LeftFrequencyScale;
@@ -45,8 +45,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x30)]
-            public class PitchLFOBlock
-            {
+            public class PitchLFOBlock : TagStructure
+			{
                 public Bounds<float> DelayScale;
                 public Bounds<float> DelayRandomBaseVariance;
                 public Bounds<float> FrequencyScale;
@@ -56,8 +56,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x40)]
-            public class FilterLFOBlock
-            {
+            public class FilterLFOBlock : TagStructure
+			{
                 public Bounds<float> DelayScale;
                 public Bounds<float> DelayRandomBaseVariance;
                 public Bounds<float> FrequencyScale;
@@ -70,8 +70,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x48)]
-            public class SoundEffectBlock
-            {
+            public class SoundEffectBlock : TagStructure
+			{
                 public CachedTagInstance SoundEffectTemplate;
                 public List<Component> Components;
                 public List<TemplateCollectionBlock> TemplateCollection;
@@ -85,22 +85,22 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown8;
 
                 [TagStructure(Size = 0x18)]
-                public class Component
-                {
+                public class Component : TagStructure
+				{
                     public CachedTagInstance Sound;
                     public uint Gain;
                     public int Flags;
                 }
 
                 [TagStructure(Size = 0x10)]
-                public class TemplateCollectionBlock
-                {
+                public class TemplateCollectionBlock : TagStructure
+				{
                     public StringId DSPEffect;
                     public List<Parameter> Parameters;
 
                     [TagStructure(Size = 0x2C)]
-                    public class Parameter
-                    {
+                    public class Parameter : TagStructure
+					{
                         public StringId Name;
                         public float Unknown;
                         public float Unknown2;

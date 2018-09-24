@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ParticlePhysics
-    {
+    public class ParticlePhysics : TagStructure
+	{
         public CachedTagInstance Template;
         public FlagsValue Flags;
         public List<Movement> Movements;
@@ -29,8 +29,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class Movement
-        {
+        public class Movement : TagStructure
+		{
             public TypeValue Type;
             public short Unknown1;
             public List<Parameter> Parameters;
@@ -46,8 +46,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x24)]
-            public class Parameter
-            {
+            public class Parameter : TagStructure
+			{
                 public int ParameterId;
                 public byte Unknown1;
                 public byte Unknown2;

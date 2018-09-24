@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x14)]
-    public class TagData
-    {
+    public class TagData : TagStructure
+	{
         /// <summary>
         /// The size of the referenced data in bytes.
         /// </summary>

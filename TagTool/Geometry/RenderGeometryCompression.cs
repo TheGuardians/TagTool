@@ -9,8 +9,8 @@ namespace TagTool.Geometry
     /// </summary>
     [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Retail)]
-    public class RenderGeometryCompression
-    {
+    public class RenderGeometryCompression : TagStructure
+	{
         /// <summary>
         /// The flags of the geometry compression.
         /// </summary>

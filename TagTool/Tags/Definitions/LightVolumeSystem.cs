@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "light_volume_system", Tag = "ltvl", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
-    public class LightVolumeSystem
-    {
+    public class LightVolumeSystem : TagStructure
+	{
         public List<LightVolumeSystemBlock> LightVolume;
 
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
@@ -37,8 +37,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x17C)]
-        public class LightVolumeSystemBlock
-        {
+        public class LightVolumeSystemBlock : TagStructure
+		{
             public StringId LightVolumeName;
             public RenderMethod RenderMethod;
 
@@ -70,22 +70,22 @@ namespace TagTool.Tags.Definitions
             public List<RuntimeGpuColor> RuntimeGpuColors;
 
             [TagStructure(Size = 0x10)]
-            public class RuntimeGpuProperty
-            {
+            public class RuntimeGpuProperty : TagStructure
+			{
                 [TagField(Length = 4)]
                 public float[] Values = new float[4];
             }
 
             [TagStructure(Size = 0x40)]
-            public class RuntimeGpuFunction
-            {
+            public class RuntimeGpuFunction : TagStructure
+			{
                 [TagField(Length = 16)]
                 public float[] Values = new float[16];
             }
 
             [TagStructure(Size = 0x10)]
-            public class RuntimeGpuColor
-            {
+            public class RuntimeGpuColor : TagStructure
+			{
                 public float Red;
                 public float Green;
                 public float Blue;

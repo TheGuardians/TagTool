@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "achievements", Tag = "achi", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "achievements", Tag = "achi", Size = 0x18, MaxVersion = CacheVersion.HaloOnline106708)]
-    public class Achievements
+    public class Achievements : TagStructure
     {
         public List<AchievementInformationBlock> AchievementInformation;
 
@@ -15,7 +15,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x18)]
-        public class AchievementInformationBlock
+        public class AchievementInformationBlock : TagStructure
         {
             public int Unknown;
             public int Unknown2;

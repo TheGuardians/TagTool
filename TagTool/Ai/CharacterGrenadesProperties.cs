@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x3C)]
-    public class CharacterGrenadesProperties
-    {
+    public class CharacterGrenadesProperties : TagStructure
+	{
         public int GrenadesFlags;
         [TagField(Label = true)]
         public CharacterGrenadeType GrenadeType;

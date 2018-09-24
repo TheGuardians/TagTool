@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Antenna
-    {
+    public class Antenna : TagStructure
+	{
         public StringId AttachmentMarkerName;
         public CachedTagInstance Bitmaps;
         public CachedTagInstance Physics;
@@ -25,8 +25,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x40)]
-        public class Vertex
-        {
+        public class Vertex : TagStructure
+		{
             public RealEulerAngles2d Angles;
             public float Length;
             public short SequenceIndex;

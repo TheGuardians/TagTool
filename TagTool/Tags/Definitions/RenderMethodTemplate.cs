@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84)]
-    public class RenderMethodTemplate
-    {
+    public class RenderMethodTemplate : TagStructure
+	{
         public enum RenderMethodExtern : byte
         {
             none,
@@ -126,8 +126,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x2)]
-        public class PackedInteger_10_6
-        {
+        public class PackedInteger_10_6 : TagStructure
+		{
             public ushort Offset { get => GetOffset(); set => SetOffset(value); }
             public ushort Count { get => GetCount(); set => SetCount(value); }
 
@@ -156,13 +156,13 @@ namespace TagTool.Tags.Definitions
         // getters and setters put in here as this value is endian dependant
         [TagStructure(Size = 0x0)]
         public class DrawMode : PackedInteger_10_6
-        {
+		{
 
         }
 
         [TagStructure(Size = 0x1C)]
-        public class DrawModeRegisterOffsetBlock
-        {
+        public class DrawModeRegisterOffsetBlock : TagStructure
+		{
             public enum DrawModeRegisterOffsetType
             {
                 SamplerArguments,
@@ -270,8 +270,8 @@ namespace TagTool.Tags.Definitions
         /// Binds an argument in the render method tag to a pixel shader constant.
         /// </summary>
         [TagStructure(Size = 0x4)]
-        public class ArgumentMapping
-        {
+        public class ArgumentMapping : TagStructure
+		{
             /// <summary>
             /// The GPU register to bind the argument to.
             /// </summary>
@@ -287,8 +287,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class ShaderArgument
-        {
+        public class ShaderArgument : TagStructure
+		{
             public StringId Name;
         }
     }

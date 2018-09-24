@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0xE0)]
-    public class CharacterWeaponsProperties
-    {
+    public class CharacterWeaponsProperties : TagStructure
+	{
         public CharacterWeaponFlags Flags;
         [TagField(Label = true)]
         public CachedTagInstance Weapon;

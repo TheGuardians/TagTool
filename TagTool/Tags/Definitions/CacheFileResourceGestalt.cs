@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cache_file_resource_gestalt", Size = 0x214, Tag = "zone")]
-    public class CacheFileResourceGestalt
-    {
+    public class CacheFileResourceGestalt : TagStructure
+	{
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public MapTypeHalo3RetailValue MapTypeHalo3Retail;
 
@@ -119,8 +119,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class ResourceType
-        {
+        public class ResourceType : TagStructure
+		{
             [TagField(Length = 16)]
             public byte[] Guid;
             public short Unknown;
@@ -132,8 +132,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class ResourceStructureType
-        {
+        public class ResourceStructureType : TagStructure
+		{
             [TagField(Length = 16)]
             public byte[] Guid;
             [TagField(Label = true)]
@@ -141,8 +141,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-        public class TagResource
-        {
+        public class TagResource : TagStructure
+		{
             public CachedTagInstance ParentTag;
             public ushort Salt;
             public byte ResourceTypeIndex;
@@ -157,8 +157,8 @@ namespace TagTool.Tags.Definitions
             public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
 
             [TagStructure(Size = 0x8)]
-            public class ResourceFixup
-            {
+            public class ResourceFixup : TagStructure
+			{
                 public int BlockOffset;
                 public int Address;
 
@@ -171,8 +171,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class ResourceDefinitionFixup
-            {
+            public class ResourceDefinitionFixup : TagStructure
+			{
                 public uint Address;
                 public int ResourceStructureTypeIndex;
             }
@@ -180,8 +180,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloReach)]
-        public class Zoneset
-        {
+        public class Zoneset : TagStructure
+		{
             public List<MemoryPoolBlock> RequiredRawPool;
             public uint Unknown;
             public uint Unknown2;
@@ -240,14 +240,14 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class MemoryPoolBlock
-            {
+            public class MemoryPoolBlock : TagStructure
+			{
                 public MemberFlagsValue ActiveMembers;
             }
 
             [TagStructure(Size = 0x14)]
-            public class ResourceType
-            {
+            public class ResourceType : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -257,8 +257,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class ScenarioZonesetGroup
-        {
+        public class ScenarioZonesetGroup : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public int BspGroupIndex;
@@ -348,8 +348,8 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -358,29 +358,29 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class PredictionABlock
-        {
+        public class PredictionABlock : TagStructure
+		{
             public uint Key;
         }
 
         [TagStructure(Size = 0x8)]
-        public class PredictionBBlock
-        {
+        public class PredictionBBlock : TagStructure
+		{
             public short OverallIndex;
             public short ACount;
             public int AIndex;
         }
 
         [TagStructure(Size = 0x4)]
-        public class PredictionCBlock
-        {
+        public class PredictionCBlock : TagStructure
+		{
             public short OverallIndex;
             public short BIndex;
         }
 
         [TagStructure(Size = 0x8)]
-        public class PredictionDTag
-        {
+        public class PredictionDTag : TagStructure
+		{
             public short CCount;
             public short CIndex;
             public short ACount;
@@ -388,8 +388,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class PredictionD2Tag
-        {
+        public class PredictionD2Tag : TagStructure
+		{
             public CachedTagInstance Tag;
             public int FirstValue;
             public int SecondValue;

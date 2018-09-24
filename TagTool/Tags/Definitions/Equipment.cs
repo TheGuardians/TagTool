@@ -87,8 +87,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused4;
 
         [TagStructure(Size = 0x3C)]
-        public class EquipmentCameraBlock
-        {
+        public class EquipmentCameraBlock : TagStructure
+		{
             public short Flags;
             public short Unknown;
             public StringId CameraMarkerName;
@@ -103,14 +103,14 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock> Unknown5;
 
             [TagStructure(Size = 0x10)]
-            public class CameraTrack
-            {
+            public class CameraTrack : TagStructure
+			{
                 public CachedTagInstance Track;
             }
 
             [TagStructure(Size = 0x4C)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -134,8 +134,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class HealthPackBlock
-        {
+        public class HealthPackBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public float ShieldsGiven;
@@ -145,8 +145,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class PowerupBlock
-        {
+        public class PowerupBlock : TagStructure
+		{
             public PowerupTraitSetValue PowerupTraitSet;
 
             public enum PowerupTraitSetValue : int
@@ -158,8 +158,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x34)]
-        public class ObjectCreationBlock
-        {
+        public class ObjectCreationBlock : TagStructure
+		{
             public CachedTagInstance Object;
             public CachedTagInstance Unknown;
             public uint Unknown2;
@@ -170,8 +170,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30)]
-        public class DestructionBlock
-        {
+        public class DestructionBlock : TagStructure
+		{
             public CachedTagInstance DestroyEffect;
             public CachedTagInstance DestroyDamageEffect;
             public uint Unknown;
@@ -181,8 +181,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class RadarManipulationBlock
-        {
+        public class RadarManipulationBlock : TagStructure
+		{
             public uint Unknown;
             public float FakeBlipRadius;
             public int FakeBlipCount;
@@ -190,15 +190,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class InvisibilityBlock
-        {
+        public class InvisibilityBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
         }
 
         [TagStructure(Size = 0x2C)]
-        public class InvincibilityBlock
-        {
+        public class InvincibilityBlock : TagStructure
+		{
             public StringId NewPlayerMaterial;
             public short NewPlayerMaterialGlobalIndex;
             public short Unknown;
@@ -208,35 +208,35 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class RegeneratorBlock
-        {
+        public class RegeneratorBlock : TagStructure
+		{
             public CachedTagInstance RegeneratingEffect;
         }
 
         [TagStructure(Size = 0x8)]
-        public class NewHealthPackBlock
-        {
+        public class NewHealthPackBlock : TagStructure
+		{
             public float Unknown1;
             public float Unknown2;
         }
 
         [TagStructure(Size = 0x14)]
-        public class ForcedReloadBlock
-        {
+        public class ForcedReloadBlock : TagStructure
+		{
             public CachedTagInstance Effect;
             public uint Unknown;
         }
 
         [TagStructure(Size = 0x20)]
-        public class ConcussiveBlastBlock
-        {
+        public class ConcussiveBlastBlock : TagStructure
+		{
             public CachedTagInstance Unknown;
             public CachedTagInstance Unknown2;
         }
 
         [TagStructure(Size = 0x28)]
-        public class TankModeBlock
-        {
+        public class TankModeBlock : TagStructure
+		{
             public StringId NewPlayerMaterial;
             public uint Unknown;
             public uint Unknown2;
@@ -247,8 +247,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x34)]
-        public class MagPulseBlock
-        {
+        public class MagPulseBlock : TagStructure
+		{
             public CachedTagInstance Unknown;
             public CachedTagInstance Unknown2;
             public CachedTagInstance Unknown3;
@@ -256,8 +256,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x6C)]
-        public class HologramBlock
-        {
+        public class HologramBlock : TagStructure
+		{
             public uint Unknown;
             public CachedTagInstance ActiveEffect;
             public CachedTagInstance Unknown2;
@@ -272,8 +272,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C)]
-        public class ReactiveArmorBlock
-        {
+        public class ReactiveArmorBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -284,8 +284,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x34)]
-        public class BombRunBlock
-        {
+        public class BombRunBlock : TagStructure
+		{
             public int Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -296,30 +296,30 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class ArmorLockBlock
-        {
+        public class ArmorLockBlock : TagStructure
+		{
             public CachedTagInstance Unknown;
             public CachedTagInstance Unknown2;
         }
 
         [TagStructure(Size = 0x24)]
-        public class AdrenalineBlock
-        {
+        public class AdrenalineBlock : TagStructure
+		{
             public uint Unknown;
             public CachedTagInstance Unknown2;
             public CachedTagInstance Unknown3;
         }
 
         [TagStructure(Size = 0x14)]
-        public class LightningStrikeBlock
-        {
+        public class LightningStrikeBlock : TagStructure
+		{
             public uint Unknown;
             public CachedTagInstance Unknown2;
         }
 
         [TagStructure(Size = 0x24)]
-        public class ScramblerBlock
-        {
+        public class ScramblerBlock : TagStructure
+		{
             public uint Unknown;
             public CachedTagInstance Unknown2;
             public int Unknown3;
@@ -329,8 +329,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class WeaponJammerBlock
-        {
+        public class WeaponJammerBlock : TagStructure
+		{
             public uint Unknown;
             public CachedTagInstance Unknown2;
             public int Unknown3;
@@ -340,8 +340,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x34)]
-        public class AmmoPackBlock
-        {
+        public class AmmoPackBlock : TagStructure
+		{
             public uint Unknown;
             public int Unknown2;
             public int Unknown3;
@@ -352,8 +352,8 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown7;
 
             [TagStructure(Size = 0x18)]
-            public class Weapon
-            {
+            public class Weapon : TagStructure
+			{
                 public StringId Name;
                 public CachedTagInstance WeaponObject;
                 public int Unknown;
@@ -361,8 +361,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class VisionBlock
-        {
+        public class VisionBlock : TagStructure
+		{
             public CachedTagInstance ScreenEffect;
             public CachedTagInstance Unknown;
         }

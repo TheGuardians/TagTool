@@ -11,8 +11,8 @@ namespace TagTool.Tags.Definitions
     /// Contains a list of localized strings.
     /// </summary>
     [TagStructure(Name = "multilingual_unicode_string_list", Tag = "unic", Size = 0x50)]
-    public class MultilingualUnicodeStringList
-    {
+    public class MultilingualUnicodeStringList : TagStructure
+	{
         /// <summary>
         /// The strings in the list.
         /// </summary>
@@ -97,8 +97,8 @@ namespace TagTool.Tags.Definitions
     /// A localized string.
     /// </summary>
     [TagStructure(Size = 0x54)]
-    public class LocalizedString
-    {
+    public class LocalizedString : TagStructure
+	{
         /// <summary>
         /// The string's stringID.
         /// </summary>

@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "structure_design", Tag = "sddt", Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "structure_design", Tag = "sddt", Size = 0x44, MinVersion = CacheVersion.Halo3ODST)]
-    public class StructureDesign
-    {
+    public class StructureDesign : TagStructure
+	{
         public int Version;
 
         public List<CollisionMoppCode> SoftCeilingMoppCodes;
@@ -29,8 +29,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44)]
-        public class SoftCeilingTriangle
-        {
+        public class SoftCeilingTriangle : TagStructure
+		{
             public RealPlane3d Plane;
             public RealPoint3d BoundingSphereCenter;
             public float BoundingSphereRadius;
@@ -40,8 +40,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class SoftCeiling
-        {
+        public class SoftCeiling : TagStructure
+		{
             public StringId Name;
             public SoftCeilingType Type;
 
@@ -52,28 +52,28 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class WaterGroup
-        {
+        public class WaterGroup : TagStructure
+		{
             public StringId Name;
         }
 
         [TagStructure(Size = 0x10)]
-        public class WaterPlane
-        {
+        public class WaterPlane : TagStructure
+		{
             public RealPlane3d Plane;
         }
 
         [TagStructure(Size = 0x24)]
-        public class WaterDebugTriangle
-        {
+        public class WaterDebugTriangle : TagStructure
+		{
             public RealPoint3d Point1;
             public RealPoint3d Point2;
             public RealPoint3d Point3;
         }
 
         [TagStructure(Size = 0x2C)]
-        public class WaterInstance
-        {
+        public class WaterInstance : TagStructure
+		{
             public short WaterNameIndex;
 
             [TagField(Padding = true, Length = 2)]

@@ -6,8 +6,8 @@ namespace TagTool.Ai
 {
     [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
-    public class CharacterInspectProperties
-    {
+    public class CharacterInspectProperties : TagStructure
+	{
         /// <summary>
         /// World Units; Distance from object at which to stop and turn on the inspection light.
         /// </summary>

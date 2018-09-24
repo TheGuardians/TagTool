@@ -9,8 +9,8 @@ namespace TagTool.Tags.Resources
     /// Resource definition data for renderable geometry.
     /// </summary>
     [TagStructure(Name = "render_geometry_api_resource_definition", Size = 0x30)]
-    public class RenderGeometryApiResourceDefinition
-    {
+    public class RenderGeometryApiResourceDefinition : TagStructure
+	{
         [TagField(Padding = true, Length = 12)]
         public byte[] Unused1;
 
@@ -33,8 +33,8 @@ namespace TagTool.Tags.Resources
     /// </summary>
     [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
-    public class VertexBufferDefinition
-    {
+    public class VertexBufferDefinition : TagStructure
+	{
         /// <summary>
         /// The number of vertices in the buffer.
         /// </summary>
@@ -67,8 +67,8 @@ namespace TagTool.Tags.Resources
     /// </summary>
     [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
-    public class IndexBufferDefinition
-    {
+    public class IndexBufferDefinition : TagStructure
+	{
         /// <summary>
         /// The primitive type to use for the index buffer.
         /// </summary>

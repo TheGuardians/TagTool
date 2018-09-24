@@ -6,14 +6,14 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "multiplayer_variant_settings_interface_definition", Tag = "goof", Size = 0x10)]
-    public class MultiplayerVariantSettingsInterfaceDefinition
-    {
+    public class MultiplayerVariantSettingsInterfaceDefinition : TagStructure
+	{
         public int Unknown;
         public List<GameEngineSetting> GameEngineSettings;
 
         [TagStructure(Size = 0x14)]
-        public class GameEngineSetting
-        {
+        public class GameEngineSetting : TagStructure
+		{
             public StringId Name;
             public SettingCategoryValue SettingCategory;
             public List<Option> Options;
@@ -240,8 +240,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x3C)]
-            public class Option
-            {
+            public class Option : TagStructure
+			{
                 public CachedTagInstance ExplicitSubmenu;
                 public CachedTagInstance TemplateBasedSubmenu;
                 public SettingCategoryValue SubmenuSettingCategory;

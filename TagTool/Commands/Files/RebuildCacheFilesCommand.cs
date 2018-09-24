@@ -37,7 +37,7 @@ namespace TagTool.Commands.Files
         {
             if (args.Count < 1 || args.Count > 2)
                 return false;
-            
+
             while (args.Count > 1)
             {
                 switch (args[0].ToLower())
@@ -96,12 +96,12 @@ namespace TagTool.Commands.Files
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
                 //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
-                    //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                        //CacheContext.TagNames.Remove(tag.Index);
+                //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                //CacheContext.TagNames.Remove(tag.Index);
 
                 //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("pixl"))
-                    //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                        //CacheContext.TagNames.Remove(tag.Index);
+                //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
+                //CacheContext.TagNames.Remove(tag.Index);
 
                 //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
                 var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
@@ -158,7 +158,7 @@ namespace TagTool.Commands.Files
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmhg").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
-                    //CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                //CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
 
@@ -184,7 +184,7 @@ namespace TagTool.Commands.Files
             }
 
             destCacheContext.SaveTagNames();
-            
+
             return true;
         }
 
@@ -195,7 +195,7 @@ namespace TagTool.Commands.Files
 
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
                 return null; // kill it with fucking fire
-            
+
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
 
@@ -242,7 +242,7 @@ namespace TagTool.Commands.Files
             var tagName = destCacheContext.TagNames.ContainsKey(destTag.Index) ?
                 destCacheContext.TagNames[destTag.Index] :
                 $"0x{destTag.Index:X2}";
-            
+
             return destTag;
         }
 
@@ -261,7 +261,7 @@ namespace TagTool.Commands.Files
 
             if (type == typeof(PageableResource))
                 return CopyResource((PageableResource)data, srcCacheContext, destCacheContext);
-            
+
             if (type.IsArray)
                 return CopyArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream);
 
@@ -311,14 +311,14 @@ namespace TagTool.Commands.Files
 
         private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, destCacheContext.Version))
-			{
-				var oldValue = tagFieldInfo.GetValue(data);
-				var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-				tagFieldInfo.SetValue(data, newValue);
-			}
+            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, destCacheContext.Version))
+            {
+                var oldValue = tagFieldInfo.GetValue(data);
+                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+                tagFieldInfo.SetValue(data, newValue);
+            }
 
-			return data;
+            return data;
         }
 
         private PageableResource CopyResource(PageableResource pageable, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)

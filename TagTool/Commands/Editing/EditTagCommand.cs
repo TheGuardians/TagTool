@@ -9,6 +9,9 @@ namespace TagTool.Commands.Editing
         private CommandContextStack ContextStack { get; }
         private HaloOnlineCacheContext CacheContext { get; }
 
+        public CachedTagInstance TagInstance { get; private set; }
+        public object TagDefinition { get; private set; }
+
         public EditTagCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) : base(
             false,
 
@@ -32,15 +35,20 @@ namespace TagTool.Commands.Editing
 
             var oldContext = ContextStack.Context;
 
-            ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, tag));
+            TagInstance = tag;
 
-            var groupName = CacheContext.GetString(tag.Group.Name);
-            var tagName = $"0x{tag.Index:X4}";
+            using (var stream = CacheContext.OpenTagCacheRead())
+                TagDefinition = CacheContext.Deserialize(stream, TagInstance);
 
-            if (CacheContext.TagNames.ContainsKey(tag.Index))
+            ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, TagInstance, TagDefinition));
+
+            var groupName = CacheContext.GetString(TagInstance.Group.Name);
+            var tagName = $"0x{TagInstance.Index:X4}";
+
+            if (CacheContext.TagNames.ContainsKey(TagInstance.Index))
             {
-                tagName = CacheContext.TagNames[tag.Index];
-                tagName = $"(0x{tag.Index:X4}) {tagName.Substring(tagName.LastIndexOf('\\') + 1)}";
+                tagName = CacheContext.TagNames[TagInstance.Index];
+                tagName = $"(0x{TagInstance.Index:X4}) {tagName.Substring(tagName.LastIndexOf('\\') + 1)}";
             }
 
             Console.WriteLine($"Tag {tagName}.{groupName} has been opened for editing.");

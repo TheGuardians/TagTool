@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x140, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x14C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x150, MinVersion = CacheVersion.HaloOnline106708)]
-    public class UserInterfaceSoundsDefinition
-    {
+    public class UserInterfaceSoundsDefinition : TagStructure
+	{
         public CachedTagInstance Error;
         public CachedTagInstance VerticalNavigation;
         public CachedTagInstance HorizontalNavigation;
@@ -38,8 +38,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x14)]
-        public class AtlasSound
-        {
+        public class AtlasSound : TagStructure
+		{
             public StringId Name;
             public CachedTagInstance Sound;
         }

@@ -5,8 +5,8 @@ namespace TagTool.Ai
 {
     [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo3ODST)]
-    public class CharacterEngageProperties
-    {
+    public class CharacterEngageProperties : TagStructure
+	{
         public CharacterEngageFlags Flags;
         public uint Unknown;
         public float CrouchDangerThreshold;

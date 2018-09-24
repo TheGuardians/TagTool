@@ -11,8 +11,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline571627)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123)]
-    public class Globals
-    {
+    public class Globals : TagStructure
+	{
         [TagField(Padding = true, Length = 172)]
         public byte[] Unused;
 
@@ -155,20 +155,20 @@ namespace TagTool.Tags.Definitions
         public uint Unknown276;
         
 		[TagStructure(Size = 0xC)]
-		public class DamageTableBlock
+		public class DamageTableBlock : TagStructure
 		{
 			public List<DamageGroup> DamageGroups;
 
 			[TagStructure(Size = 0x10)]
-			public class DamageGroup
-            {
+			public class DamageGroup : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
 				public List<ArmorModifier> ArmorModifiers;
 
 				[TagStructure(Size = 0x8)]
-				public class ArmorModifier
-                {
+				public class ArmorModifier : TagStructure
+				{
                     [TagField(Label = true)]
                     public StringId Name;
 					public float DamageMultiplier;
@@ -179,8 +179,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x88, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x70, MaxVersion = CacheVersion.HaloOnline449175)]
         [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloOnline498295)]
-        public class PlayerControlBlock
-        {
+        public class PlayerControlBlock : TagStructure
+		{
             public float MagnetismFriction;
             public float MagnetismAdhesion;
             public float InconsequentialTargetScale;
@@ -235,8 +235,8 @@ namespace TagTool.Tags.Definitions
             public float Unknown10;
 
             [TagStructure(Size = 0x28)]
-            public class CrosshairLocationBlock
-            {
+            public class CrosshairLocationBlock : TagStructure
+			{
                 public float DefaultCrosshairLocationY;
                 public uint Unknown;
                 public float CenteredCrosshairLocationY;
@@ -249,15 +249,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure]
-            public class LookFunctionBlock
-            {
+            public class LookFunctionBlock : TagStructure
+			{
                 public float Scale;
             }
         }
 
         [TagStructure(Size = 0x284)]
-        public class DifficultyBlock
-        {
+        public class DifficultyBlock : TagStructure
+		{
             public float EasyEnemyDamage;
             public float NormalEnemyDamage;
             public float HardEnemyDamage;
@@ -422,8 +422,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44)]
-        public class Grenade
-        {
+        public class Grenade : TagStructure
+		{
             public short MaximumCount;
             public short Unknown;
 
@@ -453,8 +453,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x120, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnline106708)]
-        public class InterfaceTagsBlock
-        {
+        public class InterfaceTagsBlock : TagStructure
+		{
             public CachedTagInstance Spinner;
             public CachedTagInstance Obsolete;
             public CachedTagInstance ScreenColorTable;
@@ -478,8 +478,8 @@ namespace TagTool.Tags.Definitions
             public List<GfxUiString> GfxUiStrings;
 
             [TagStructure(Size = 0x30)]
-            public class GfxUiString
-            {
+            public class GfxUiString : TagStructure
+			{
                 [TagField(Label = true, Length = 32)]
                 public string Name;
                 public CachedTagInstance Strings;
@@ -489,8 +489,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xC0, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xCC, MinVersion = CacheVersion.HaloOnline106708)]
-        public class PlayerInformationBlock
-        {
+        public class PlayerInformationBlock : TagStructure
+		{
             public float WalkingSpeed;
             public float RunForward;
             public float RunBackward;
@@ -530,8 +530,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST)]
-        public class PlayerRepresentationBlock
-        {
+        public class PlayerRepresentationBlock : TagStructure
+		{
             [TagField(Label = true, MinVersion = CacheVersion.Halo3ODST)]
             public StringId Name;
 
@@ -550,8 +550,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x78)]
-        public class FallingDamageBlock
-        {
+        public class FallingDamageBlock : TagStructure
+		{
             public Bounds<float> HarmfulFallingDistanceBounds;
 
             [TagField(ValidTags = new[] { "jpt!" })]
@@ -580,8 +580,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class UnknownBlock //Single block
-        {
+        public class UnknownBlock : TagStructure //Single block
+		{
             public uint Unknown1; //100
             public uint Unknown2; //1
             public uint Unknown3; //1
@@ -621,8 +621,8 @@ namespace TagTool.Tags.Definitions
         
         [TagStructure(Size = 0x170, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x178, MinVersion = CacheVersion.HaloOnline106708)]
-        public class Material
-        {
+        public class Material : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public StringId ParentName;
@@ -705,8 +705,8 @@ namespace TagTool.Tags.Definitions
             public short Unknown4;
 
             [TagStructure(Size = 0x28)]
-            public class WaterDragProperty
-            {
+            public class WaterDragProperty : TagStructure
+			{
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;
@@ -720,8 +720,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-            public class UnderwaterProxy
-            {
+            public class UnderwaterProxy : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId SurfaceName;
                 public StringId SubmergedName;
@@ -731,15 +731,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class ColorBlock
-        {
+        public class ColorBlock : TagStructure
+		{
             public RealRgbColor Color;
         }
 
         [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST)]
-        public class CinematicAnchorBlock
-        {
+        public class CinematicAnchorBlock : TagStructure
+		{
             public CachedTagInstance CinematicAnchor;
 
             public float Unknown1;
@@ -750,8 +750,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x98, MinVersion = CacheVersion.Halo3ODST)]
-        public class MetagameGlobal
-        {
+        public class MetagameGlobal : TagStructure
+		{
             public List<Medal> Medals;
             public List<MultiplierBlock> Difficulty;
             public List<MultiplierBlock> PrimarySkulls;
@@ -806,8 +806,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
-            public class Medal
-            { 
+            public class Medal : TagStructure
+			{ 
                 public float Multiplier;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -821,15 +821,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class MultiplierBlock
-            {
+            public class MultiplierBlock : TagStructure
+			{
                 public float Multiplier;
             }
         }
 
         [TagStructure(Size = 0x44)]
-        public class LocaleGlobalsBlock
-        {
+        public class LocaleGlobalsBlock : TagStructure
+		{
             public uint Unknown1;
             public uint Unknown2;
 
@@ -848,8 +848,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class DamageReportingType
-        {
+        public class DamageReportingType : TagStructure
+		{
             public short Index;
             public short Version;
             [TagField(Label = true, Length = 32)]

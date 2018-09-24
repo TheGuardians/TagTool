@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "chud_definition", Tag = "chdt", Size = 0x18)]
-    public class ChudDefinition
-    {
+    public class ChudDefinition : TagStructure
+	{
         public List<HudWidget> HudWidgets;
         public int LowClipCutoff;
         public int LowAmmoCutoff;
@@ -16,8 +16,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
-        public class HudWidget
-        {
+        public class HudWidget : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
@@ -55,8 +55,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline571627)]
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline700123)]
-            public class StateDatum
-            {
+            public class StateDatum : TagStructure
+			{
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public Engine_H3 EngineFlags_H3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -759,8 +759,8 @@ namespace TagTool.Tags.Definitions
 			}
 
             [TagStructure(Size = 0x1C)]
-            public class PlacementDatum
-            {
+            public class PlacementDatum : TagStructure
+			{
                 [TagField(Label = true)]
                 public AnchorValue Anchor;
                 public short Unknown;
@@ -813,8 +813,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
-            public class AnimationDatum
-            {
+            public class AnimationDatum : TagStructure
+			{
                 //HUD Initialize Animation
                 public AnimationFlags HUDInitializeFlags;
                 public AnimationFunction HUDInitializeFunction;
@@ -876,8 +876,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
-            public class RenderDatum
-            {
+            public class RenderDatum : TagStructure
+			{
                 [TagField(Label = true)]
                 public ShaderIndexValue ShaderIndex;
                 public short Unknown;
@@ -1346,8 +1346,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x54)]
-            public class BitmapWidget
-            {
+            public class BitmapWidget : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
@@ -1391,8 +1391,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
-            public class TextWidget
-            {
+            public class TextWidget : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;

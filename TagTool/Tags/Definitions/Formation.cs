@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "formation", Tag = "form", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "formation", Tag = "form", Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Formation
-    {
+    public class Formation : TagStructure
+	{
         public StringId Name;
         public List<Primitive> Primitives;
 
@@ -17,8 +17,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
         
         [TagStructure(Size = 0x24)]
-        public class Primitive
-        {
+        public class Primitive : TagStructure
+		{
             public FlagBits Flags;
             public short Priority;
             public short Capacity;
@@ -39,8 +39,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class Point
-            {
+            public class Point : TagStructure
+			{
                 public Angle Angle;
                 public float Offset;
             }

@@ -11,8 +11,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x388, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ScenarioStructureBsp
-    {
+    public class ScenarioStructureBsp : TagStructure
+	{
         public int BspChecksum;
         public FlagsValue Flags;
         public ContentPolicyFlagsValue ContentPolicyFlags;
@@ -156,36 +156,36 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x28)]
-        public class SeamIdentifier
-        {
+        public class SeamIdentifier : TagStructure
+		{
             [TagField(Length = 4)]
             public int[] SeamIDs;
             public List<Edge> EdgeMapping;
             public List<Cluster> ClusterMapping;
 
             [TagStructure(Size = 0x4)]
-            public class Edge
-            {
+            public class Edge : TagStructure
+			{
                 public int StructureEdgeIndex;
             }
 
             [TagStructure(Size = 0x10)]
-            public class Cluster
-            {
+            public class Cluster : TagStructure
+			{
                 public int ClusterIndex;
                 public RealPoint3d ClusterCenter;
             }
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownRaw7th
-        {
+        public class UnknownRaw7th : TagStructure
+		{
             public int SeamIndex;
         }
 
         [TagStructure(Size = 0x18)]
-        public class CollisionMaterial
-        {
+        public class CollisionMaterial : TagStructure
+		{
             [TagField(Label = true)]
             public CachedTagInstance RenderMethod;
             public short RuntimeGlobalMaterialIndex;
@@ -202,15 +202,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1)]
-        public class Leaf
-        {
+        public class Leaf : TagStructure
+		{
             public byte Cluster;
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
-        public class UnknownRaw6th
-        {
+        public class UnknownRaw6th : TagStructure
+		{
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short PlaneIndexOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -223,15 +223,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class Plane
-        {
+        public class Plane : TagStructure
+		{
             public short ClusterIndex;
             public short Unknown;
         }
 
         [TagStructure(Size = 0x28)]
-        public class ClusterPortal
-        {
+        public class ClusterPortal : TagStructure
+		{
             public short BackCluster;
             public short FrontCluster;
             public int PlaneIndex;
@@ -252,15 +252,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-            public struct Vertex
-            {
+			public /*was_struct*/ class Vertex : TagStructure
+			{
                 public RealPoint3d Position;
             }
         }
 
         [TagStructure(Size = 0x78)]
-        public class UnknownBlock2
-        {
+        public class UnknownBlock2 : TagStructure
+		{
             [TagField(Length = 32)]
             public string Name;
 
@@ -295,16 +295,16 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class FogBlock
-        {
+        public class FogBlock : TagStructure
+		{
             public StringId Name;
             public short Unknown;
             public short Unknown2;
         }
 
         [TagStructure(Size = 0x30)]
-        public class CameraEffect
-        {
+        public class CameraEffect : TagStructure
+		{
             public StringId Name;
             public CachedTagInstance Effect;
             public sbyte Unknown;
@@ -320,8 +320,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x34)]
-        public class DetailObject
-        {
+        public class DetailObject : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -335,14 +335,14 @@ namespace TagTool.Tags.Definitions
             public uint Unknown11;
 
             [TagStructure(Size = 0x20)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public List<UnknownBlock2> Unknown;
                 public byte[] Unknown2;
 
                 [TagStructure(Size = 0x10)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public uint Unknown;
                     public uint Unknown2;
                     public uint Unknown3;
@@ -352,8 +352,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xDC)]
-        public class Cluster
-        {
+        public class Cluster : TagStructure
+		{
             public Bounds<float> BoundsX;
             public Bounds<float> BoundsY;
             public Bounds<float> BoundsZ;
@@ -404,21 +404,21 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock2> Unknown25;
 
             [TagStructure(Size = 0x2)]
-            public class Portal
-            {
+            public class Portal : TagStructure
+			{
                 public short PortalIndex;
             }
 
             [TagStructure(Size = 0x1)]
-            public class Seam
-            {
+            public class Seam : TagStructure
+			{
                 public sbyte SeamIndex;
             }
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnline106708)]
-            public class DecoratorGrid
-            {
+            public class DecoratorGrid : TagStructure
+			{
                 public short Amount;
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -460,15 +460,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class ObjectPlacement
-            {
+            public class ObjectPlacement : TagStructure
+			{
                 public short Unknown;
                 public short Unknown2;
             }
 
             [TagStructure(Size = 0x10)]
-            public class UnknownBlock2
-            {
+            public class UnknownBlock2 : TagStructure
+			{
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;
@@ -478,21 +478,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-        public struct SkyOwnerClusterBlock
-        {
+		public /*was_struct*/ class SkyOwnerClusterBlock : TagStructure
+		{
             public short Value;
         }
 
         [TagStructure(Size = 0x18)]
-        public class ConveyorSurface
-        {
+        public class ConveyorSurface : TagStructure
+		{
             public RealVector3d U;
             public RealVector3d V;
         }
 
         [TagStructure(Size = 0x20)]
-        public class BreakableSurface
-        {
+        public class BreakableSurface : TagStructure
+		{
             public uint Unknown1;
             public uint Unknown2;
             public uint Unknown3;
@@ -504,8 +504,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xA0)]
-        public class PathfindingDatum
-        {
+        public class PathfindingDatum : TagStructure
+		{
             public List<Sector> Sectors;
             public List<Link> Links;
             public List<Reference> References;
@@ -524,8 +524,8 @@ namespace TagTool.Tags.Definitions
             public List<Unknown4Block> Unknown4s;
 
             [TagStructure(Size = 0x8)]
-            public class Sector
-            {
+            public class Sector : TagStructure
+			{
                 public FlagsValue PathfindingSectorFlags;
                 public short HintIndex;
                 public int FirstLink;
@@ -554,8 +554,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class Link
-            {
+            public class Link : TagStructure
+			{
                 public short Vertex1;
                 public short Vertex2;
                 public FlagsValue LinkFlags;
@@ -589,28 +589,28 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class Reference
-            {
+            public class Reference : TagStructure
+			{
                 public int NodeOrSectorIndex;
             }
 
             [TagStructure(Size = 0x14)]
-            public class Bsp2dNode
-            {
+            public class Bsp2dNode : TagStructure
+			{
                 public RealPlane2d Plane;
                 public int LeftChild;
                 public int RightChild;
             }
 
             [TagStructure(Size = 0xC)]
-            public class Vertex
-            {
+            public class Vertex : TagStructure
+			{
                 public RealPoint3d Position;
             }
 
             [TagStructure(Size = 0x18)]
-            public class ObjectReference
-            {
+            public class ObjectReference : TagStructure
+			{
                 public int Unknown;
                 public List<UnknownBlock> Unknown2;
                 public int Unknown3;
@@ -618,8 +618,8 @@ namespace TagTool.Tags.Definitions
                 public short Unknown5;
 
                 [TagStructure(Size = 0x18)]
-                public class UnknownBlock
-                {
+                public class UnknownBlock : TagStructure
+				{
                     public sbyte Unknown1;
                     public sbyte Unknown2;
                     public sbyte Unknown3;
@@ -630,16 +630,16 @@ namespace TagTool.Tags.Definitions
                     public int Unknown8;
 
                     [TagStructure(Size = 0x4)]
-                    public class UnknownBlock2
-                    {
+                    public class UnknownBlock2 : TagStructure
+					{
                         public int Unknown;
                     }
                 }
             }
 
             [TagStructure(Size = 0x14)]
-            public class PathfindingHint
-            {
+            public class PathfindingHint : TagStructure
+			{
                 public HintTypeValue HintType;
                 public short SquadGroupFilter; // block index
                 public int HintData0;
@@ -685,49 +685,49 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class InstancedGeometryReference
-            {
+            public class InstancedGeometryReference : TagStructure
+			{
                 public short PathfindingObjectIndex;
                 public short Unknown;
             }
 
             [TagStructure(Size = 0x4)]
-            public class Unknown1Block
-            {
+            public class Unknown1Block : TagStructure
+			{
                 public uint Unknown;
             }
 
             [TagStructure(Size = 0xC)]
-            public class Unknown2Block
-            {
+            public class Unknown2Block : TagStructure
+			{
                 public List<UnknownBlock> Unknown;
 
                 [TagStructure(Size = 0x4)]
-                public class UnknownBlock
-                {
+                public class UnknownBlock : TagStructure
+				{
                     public int Unknown;
                 }
             }
 
             [TagStructure(Size = 0x14)]
-            public class Unknown3Block
-            {
+            public class Unknown3Block : TagStructure
+			{
                 public short Unknown1;
                 public short Unknown2;
                 public float Unknown3;
                 public List<UnknownBlock> Unknown4;
 
                 [TagStructure(Size = 0x4)]
-                public class UnknownBlock
-                {
+                public class UnknownBlock : TagStructure
+				{
                     public short Unknown;
                     public short Unknown2;
                 }
             }
 
             [TagStructure(Size = 0x4)]
-            public class Unknown4Block
-            {
+            public class Unknown4Block : TagStructure
+			{
                 public short Unknown;
                 public short Unknown2;
             }
@@ -735,8 +735,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.Halo3ODST)]
-        public class BackgroundSoundEnvironmentPaletteBlock
-        {
+        public class BackgroundSoundEnvironmentPaletteBlock : TagStructure
+		{
             public StringId Name;
             public CachedTagInstance SoundEnvironment;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -793,8 +793,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x3C)]
-        public class Marker
-        {
+        public class Marker : TagStructure
+		{
             [TagField(Length = 32)]
             public string Name;
             public RealQuaternion Rotation;
@@ -802,14 +802,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-        public class RuntimeLight
-        {
+        public class RuntimeLight : TagStructure
+		{
             public short LightIndex;
         }
 
         [TagStructure(Size = 0x24)]
-        public class RuntimeDecal
-        {
+        public class RuntimeDecal : TagStructure
+		{
             public short PaletteIndex;
             public sbyte Yaw;
             public sbyte Pitch;
@@ -819,8 +819,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class EnvironmentObjectPaletteBlock
-        {
+        public class EnvironmentObjectPaletteBlock : TagStructure
+		{
             public CachedTagInstance Definition;
             public CachedTagInstance Model;
             public ObjectTypeValue ObjectType;
@@ -848,8 +848,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x6C)]
-        public class EnvironmentObject
-        {
+        public class EnvironmentObject : TagStructure
+		{
             [TagField(Length = 32)]
             public string Name;
             public RealQuaternion Rotation;
@@ -874,8 +874,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnline106708)]
-        public class InstancedGeometryInstance
-        {
+        public class InstancedGeometryInstance : TagStructure
+		{
             public float Scale;
             public RealMatrix4x3 Matrix;
             public short InstanceDefinition;
@@ -921,8 +921,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail, Align = 0x10)]
             [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST, Align = 0x10)]
-            public class CollisionDefinition
-            {
+            public class CollisionDefinition : TagStructure
+			{
                 public int Unknown;
                 public short Size;
                 public short Count;
@@ -967,37 +967,37 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C)]
-        public class UnknownSoundClustersBlock
-        {
+        public class UnknownSoundClustersBlock : TagStructure
+		{
             public short BackgroundSoundEnvironmentIndex;
             public short Unknown;
             public List<PortalDesignatorBlock> PortalDesignators;
             public List<InteriorClusterIndexBlock> InteriorClusterIndices;
 
             [TagStructure(Size = 0x2)]
-            public class PortalDesignatorBlock
-            {
+            public class PortalDesignatorBlock : TagStructure
+			{
                 public short PortalDesignator;
             }
 
             [TagStructure(Size = 0x2)]
-            public class InteriorClusterIndexBlock
-            {
+            public class InteriorClusterIndexBlock : TagStructure
+			{
                 public short InteriorClusterIndex;
             }
         }
 
         [TagStructure(Size = 0x14)]
-        public class TransparentPlane
-        {
+        public class TransparentPlane : TagStructure
+		{
             public short MeshIndex;
             public short PartIndex;
             public RealPlane3d Plane;
         }
         
         [TagStructure(Size = 0x20)]
-        public class BreakableSurfaceKeyTableBlock
-        {
+        public class BreakableSurfaceKeyTableBlock : TagStructure
+		{
             public short InstancedGeometryIndex;
             public sbyte BreakableSurfaceIndex;
             public byte BreakableSurfaceSubIndex;
@@ -1008,8 +1008,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class LeafSystem
-        {
+        public class LeafSystem : TagStructure
+		{
             public short Unknown;
             public short Unknown2;
             public CachedTagInstance LeafSystem2;

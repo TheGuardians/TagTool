@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x104, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnline106708)]
-    public abstract class GameObject
-    {
+    public abstract class GameObject : TagStructure
+	{
         public GameObjectType ObjectType;
         public GameObjectFlags ObjectFlags;
         public float BoundingRadius;
@@ -98,8 +98,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x28)]
-        public class EarlyMoverProperty
-        {
+        public class EarlyMoverProperty : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public Bounds<float> XBounds;
@@ -110,8 +110,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST)]
-        public class AiProperty
-        {
+        public class AiProperty : TagStructure
+		{
             public FlagsValue Flags;
             public StringId AiTypeName;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -153,8 +153,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2C)]
-        public class Function
-        {
+        public class Function : TagStructure
+		{
             public FlagsValue Flags;
             public StringId ImportName;
             public StringId ExportName;
@@ -176,14 +176,15 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo3ODST)]
-        public class Attachment
-        {
+        public class Attachment : TagStructure
+		{
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public AtlasFlagsValue AtlasFlags;
             [TagField(Label = true)]
             public CachedTagInstance Attachment2;
             public StringId Marker;
             public ChangeColorValue ChangeColor;
+            public FlagsValue Flags;
             public short Unknown;
             public StringId PrimaryScale;
             public StringId SecondaryScale;
@@ -196,7 +197,7 @@ namespace TagTool.Tags.Definitions
                 TheaterVisionMode = 1 << 1
             }
 
-            public enum ChangeColorValue : short
+            public enum ChangeColorValue : sbyte
             {
                 None,
                 Primary,
@@ -204,17 +205,25 @@ namespace TagTool.Tags.Definitions
                 Tertiary,
                 Quaternary
             }
+
+            [Flags]
+            public enum FlagsValue : byte
+            {
+                None,
+                ForceAlwaysOn = 1 << 0,
+                EffectSizeScaleFromObjectScale = 1 << 1
+            }
         }
         
         [TagStructure(Size = 0x18)]
-        public class ChangeColor
-        {
+        public class ChangeColor : TagStructure
+		{
             public List<InitialPermutation> InitialPermutations;
             public List<Function> Functions;
 
             [TagStructure(Size = 0x20)]
-            public class InitialPermutation
-            {
+            public class InitialPermutation : TagStructure
+			{
                 public float Weight;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
@@ -223,8 +232,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x28)]
-            public class Function
-            {
+            public class Function : TagStructure
+			{
                 [TagField(Padding = true, Length = 4)]
                 public byte[] Unused = new byte[4];
 
@@ -245,8 +254,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class PredictedResource
-        {
+        public class PredictedResource : TagStructure
+		{
             public short Type;
             public short ResourceIndex;
             [TagField(Short = true)]
@@ -254,19 +263,19 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1)]
-        public class NodeMap
-        {
+        public class NodeMap : TagStructure
+		{
             public sbyte TargetNode;
         }
 
         [TagStructure(Size = 0xC4)]
-        public class MultiplayerObjectProperty
-        {
+        public class MultiplayerObjectProperty : TagStructure
+		{
             public EngineFlagsValue EngineFlags;
             public ObjectTypeValue ObjectType;
             public byte TeleporterFlags;
             public sbyte Unknown;
-            public byte Flags;
+            public FlagsValue Flags;
             public ObjectShapeValue Shape;
             public SpawnTimerModeValue SpawnTimerMode;
             public short SpawnTime;
@@ -290,6 +299,7 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown11;
             public CachedTagInstance Unknown12;
             public CachedTagInstance Unknown13;
+
             public enum EngineFlagsValue : ushort
             {
                 None = 0,
@@ -334,6 +344,20 @@ namespace TagTool.Tags.Definitions
             JuggernautDestinationObjective
         }
 
+        [Flags]
+        public enum FlagsValue : byte
+        {
+            None,
+            OnlyRenderInEditor = 1 << 0,
+            ValidInitialPlayerSpawn = 1 << 1,
+            FixedBoundaryOrientation = 1 << 2,
+            InheritOwningTeamColor = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7
+        }
+
         public enum SpawnTimerModeValue : sbyte
         {
             DefaultOne,
@@ -349,8 +373,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class ModelObjectDatum
-        {
+        public class ModelObjectDatum : TagStructure
+		{
             public TypeValue Type;
             public short Unknown;
             public RealPoint3d Offset;
@@ -425,8 +449,8 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x2)]
-    public class GameObjectType
-    {
+    public class GameObjectType : TagStructure
+	{
         [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] Unused1;
 
@@ -507,8 +531,8 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x2)]
-    public class ObjectTypeFlags
-    {
+    public class ObjectTypeFlags : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public ObjectTypeFlagsHalo3Retail Halo3Retail;
 
@@ -520,8 +544,8 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x1)]
-    public class ScenarioObjectType
-    {
+    public class ScenarioObjectType : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public GameObjectTypeHalo3Retail Halo3Retail;
 

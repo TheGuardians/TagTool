@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x88, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x8C, MinVersion = CacheVersion.HaloOnline106708)]
-    public class GameEngineSettingsDefinition
-    {
+    public class GameEngineSettingsDefinition : TagStructure
+	{
         public FlagsValue Flags;
         public List<TraitProfile> TraitProfiles;
         public List<SlayerVariant> SlayerVariants;
@@ -34,8 +34,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40)]
-        public class TraitProfile
-        {
+        public class TraitProfile : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public List<ShieldsAndHealthBlock> ShieldsAndHealth;
@@ -45,8 +45,8 @@ namespace TagTool.Tags.Definitions
             public List<Sensor> Sensors;
 
             [TagStructure(Size = 0x8)]
-            public class ShieldsAndHealthBlock
-            {
+            public class ShieldsAndHealthBlock : TagStructure
+			{
                 public DamageResistanceValue DamageResistance;
                 public ShieldMultiplierValue ShieldMultiplier;
                 public ShieldRechargeRateValue ShieldRechargeRate;
@@ -116,8 +116,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class WeaponsAndDamageBlock
-            {
+            public class WeaponsAndDamageBlock : TagStructure
+			{
                 public DamageModifierValue DamageModifier;
                 public GrenadeRegenerationValue GrenadeRegeneration;
                 public WeaponPickupValue WeaponPickup;
@@ -175,8 +175,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class MovementBlock
-            {
+            public class MovementBlock : TagStructure
+			{
                 public PlayerSpeedValue PlayerSpeed;
                 public PlayerGravityValue PlayerGravity;
                 public VehicleUseValue VehicleUse;
@@ -217,8 +217,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class AppearanceBlock
-            {
+            public class AppearanceBlock : TagStructure
+			{
                 public ActiveCamoValue ActiveCamo;
                 public WaypointValue Waypoint;
                 public AuraValue Aura;
@@ -270,8 +270,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class Sensor
-            {
+            public class Sensor : TagStructure
+			{
                 public MotionTrackerModeValue MotionTrackerMode;
                 public MotionTrackerRangeValue MotionTrackerRange;
 
@@ -300,8 +300,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnline106708)]
-        public abstract class BaseVariant
-        {
+        public abstract class BaseVariant : TagStructure
+		{
             [TagField(Label = true, Length = 32, MinVersion = CacheVersion.HaloOnline106708)]
             public string NameAscii;
             [TagField(Label = true)]
@@ -313,8 +313,8 @@ namespace TagTool.Tags.Definitions
             public List<MapOverride> MapOverrides;
 
             [TagStructure(Size = 0x8)]
-            public class GeneralSetting
-            {
+            public class GeneralSetting : TagStructure
+			{
                 public FlagsValue Flags;
                 public sbyte TimeLimit;
                 public sbyte NumberOfRounds;
@@ -340,8 +340,8 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
-            public class RespawnSetting
-            {
+            public class RespawnSetting : TagStructure
+			{
                 public FlagsValue Flags;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
@@ -375,8 +375,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class SocialSetting
-            {
+            public class SocialSetting : TagStructure
+			{
                 public FlagsValue Flags;
 
                 [Flags]
@@ -395,8 +395,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x20)]
-            public class MapOverride
-            {
+            public class MapOverride : TagStructure
+			{
                 public FlagsValue Flags;
                 public StringId BasePlayerTraitProfile;
                 public StringId WeaponSet;

@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x54)]
-    public class CharacterCoverProperties
-    {
+    public class CharacterCoverProperties : TagStructure
+	{
         public CharacterCoverFlags Flags;
         public Bounds<float> HideBehindCoverTime;
         public float CoverVitalityThreshold;

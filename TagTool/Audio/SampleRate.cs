@@ -3,8 +3,8 @@
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x1)]
-    public class SampleRate
-    {
+    public class SampleRate : TagStructure
+	{
         public SampleRateValue value;
 
         public enum SampleRateValue : sbyte

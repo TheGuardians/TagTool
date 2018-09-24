@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x188, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "vision_mode", Tag = "vmdx", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
-    public class VisionMode
-    {
+    public class VisionMode : TagStructure
+	{
         public sbyte Unknown;
         public sbyte Unknown2;
         public sbyte Unknown3;

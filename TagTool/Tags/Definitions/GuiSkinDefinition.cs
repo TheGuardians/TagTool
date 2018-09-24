@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "gui_skin_definition", Tag = "skn3", Size = 0x1C, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "gui_skin_definition", Tag = "skn3", Size = 0x28, MinVersion = CacheVersion.Halo3ODST)]
-    public class GuiSkinDefinition
-    {
+    public class GuiSkinDefinition : TagStructure
+	{
         public uint Unknown;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
@@ -17,8 +17,8 @@ namespace TagTool.Tags.Definitions
         public List<ModelWidget> ModelWidgets;
 
         [TagStructure(Size = 0x4C)]
-        public class TextWidget
-        {
+        public class TextWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -41,8 +41,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x6C)]
-        public class BitmapWidget
-        {
+        public class BitmapWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -86,8 +86,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x94)]
-        public class ModelWidget
-        {
+        public class ModelWidget : TagStructure
+		{
             public CachedTagInstance Parent;
             public uint Flags;
             public StringId Name;
@@ -126,8 +126,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock3> Unknown24;
 
             [TagStructure(Size = 0xA0)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public StringId Biped;
                 public uint Unknown;
                 public uint Unknown2;
@@ -165,21 +165,21 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown34;
 
                 [TagStructure(Size = 0x14)]
-                public class UnknownBlock2
-                {
+                public class UnknownBlock2 : TagStructure
+				{
                     public byte[] Unknown;
                 }
             }
 
             [TagStructure(Size = 0x14)]
-            public class UnknownBlock2
-            {
+            public class UnknownBlock2 : TagStructure
+			{
                 public byte[] Unknown;
             }
 
             [TagStructure(Size = 0x14)]
-            public class UnknownBlock3
-            {
+            public class UnknownBlock3 : TagStructure
+			{
                 public StringId Unknown;
                 public uint Unknown2;
                 public uint Unknown3;

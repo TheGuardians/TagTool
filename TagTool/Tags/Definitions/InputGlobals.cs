@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "input_globals", Tag = "inpg", Size = 0x34)]
-    public class InputGlobals
-    {
+    public class InputGlobals : TagStructure
+	{
         public int Unknown;
         public float Unknown2;
         public byte[] Unknown3;

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x14)]
-    public class CharacterVariant
-    {
+    public class CharacterVariant : TagStructure
+	{
         [TagField(Label = true)]
         public StringId VariantName;
         public short VariantIndex;

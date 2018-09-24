@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Cache;
 
 namespace TagTool.Serialization
@@ -27,6 +28,9 @@ namespace TagTool.Serialization
 		/// </summary>
 		private static readonly Dictionary<MemberInfoVersionKey, TagFieldEnumerable> TagFieldEnumerables =
 			new Dictionary<MemberInfoVersionKey, TagFieldEnumerable> { };
+
+		private static readonly Dictionary<MemberInfoVersionKey, TagStructureAttribute> TagStructureAttributes =
+			new Dictionary<MemberInfoVersionKey, TagStructureAttribute> { };
 
 		/// <summary>
 		/// Finds a cached <see cref="TagStructureInfo"/> or creates a new one (and caches it for later use).
@@ -84,6 +88,56 @@ namespace TagTool.Serialization
 			var info = ReflectionCache.GetTagStructureInfo(type, version);
 			var enumerator = ReflectionCache.GetTagFieldEnumerable(info);
 			return enumerator;
+		}
+
+		public static TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
+		{
+			if (ReflectionCache.IsEnabled)
+			{
+				var key = new MemberInfoVersionKey(type, version);
+				if (!ReflectionCache.TagStructureAttributes.TryGetValue(key, out TagStructureAttribute attribute))
+					lock (ReflectionCache.TagStructureInfos)
+					{
+						if (!ReflectionCache.TagStructureAttributes.TryGetValue(key, out attribute))
+							ReflectionCache.TagStructureAttributes[key] = attribute = GetStructureAttribute(type, version);
+					}
+
+				return attribute;
+			}
+
+			return GetStructureAttribute(type, version);
+		}
+
+		public static bool IsTagStructure(Type type, CacheVersion version = CacheVersion.Unknown)
+		{
+			if (ReflectionCache.IsEnabled)
+			{
+				var key = new MemberInfoVersionKey(type, version);
+				if (!ReflectionCache.TagStructureAttributes.TryGetValue(key, out TagStructureAttribute attribute))
+					lock (ReflectionCache.TagStructureInfos)
+					{
+						if (!ReflectionCache.TagStructureAttributes.TryGetValue(key, out attribute))
+							ReflectionCache.TagStructureAttributes[key] = attribute = GetStructureAttribute(type, version);
+					}
+
+				return attribute != null;
+			}
+
+			return GetStructureAttribute(type, version) != null;
+		}
+
+		private static TagStructureAttribute GetStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
+		{
+			// First match against any TagStructureAttributes that have version restrictions
+			var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
+				.Cast<TagStructureAttribute>()
+				.Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
+				.FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
+
+			// If nothing was found, find the first attribute without any version restrictions
+			return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
+				.Cast<TagStructureAttribute>()
+				.FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown);
 		}
 	}
 }

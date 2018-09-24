@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0xD0)]
-    public class CharacterVehicleProperties
-    {
+    public class CharacterVehicleProperties : TagStructure
+	{
         public CachedTagInstance Unit;
         public CachedTagInstance Style;
         public uint VehicleFlags;

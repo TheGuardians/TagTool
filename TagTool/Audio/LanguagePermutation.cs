@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x94, MinVersion = CacheVersion.HaloReach)]
-    public class LanguagePermutation
-    {
+    public class LanguagePermutation : TagStructure
+	{
         public int ParentPermutationIndex;
 
         public Permutation English;
@@ -22,8 +22,8 @@ namespace TagTool.Audio
         public Permutation Polish;
 
         [TagStructure(Size = 0xC)]
-        public class Permutation
-        {
+        public class Permutation : TagStructure
+		{
             public uint SampleSize;
             public int FirstPermutationChunkIndex;
             public int PermutationChunkCount;

@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x28)]
-    public class CharacterPreSearchProperties
-    {
+    public class CharacterPreSearchProperties : TagStructure
+	{
         public CharacterPreSearchFlags Flags;
         public Bounds<float> MinimumPreSearchTime;
         public Bounds<float> MaximumPreSearchTime;

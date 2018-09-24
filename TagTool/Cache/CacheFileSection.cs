@@ -6,8 +6,8 @@ namespace TagTool.Cache
     /// A virtual section of a cache file.
     /// </summary>
     [TagStructure(Size = 0x8)]
-    public class CacheFileSection
-    {
+    public class CacheFileSection : TagStructure
+	{
         /// <summary>
         /// The virtual address of the cache file interop section.
         /// </summary>

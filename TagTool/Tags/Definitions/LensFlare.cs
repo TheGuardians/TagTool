@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x98, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnline106708)]
-    public class LensFlare
-    {
+    public class LensFlare : TagStructure
+	{
         public Angle FalloffAngle;
         public Angle CutoffAngle;
 
@@ -121,8 +121,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloOnline106708)]
-        public class Reflection
-        {
+        public class Reflection : TagStructure
+		{
             public FlagsValue Flags;
 
             public short BitmapIndex;
@@ -193,14 +193,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class BrightnessBlock
-        {
+        public class BrightnessBlock : TagStructure
+		{
             public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
 
         [TagStructure(Size = 0x24)]
-        public class ColorBlock
-        {
+        public class ColorBlock : TagStructure
+		{
             public StringId InputVariable;
 
             public StringId RangeVariable;
@@ -223,8 +223,8 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x14)]
-        public class RotationBlock
-        {
+        public class RotationBlock : TagStructure
+		{
             public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
     }

@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x2C)]
-    public class CharacterMovementProperties
-    {
+    public class CharacterMovementProperties : TagStructure
+	{
         public CharacterMovementFlags Flags;
         public float PathfindingRadius;
         public float DestinationRadius;

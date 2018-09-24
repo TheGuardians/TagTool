@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x34)]
-    public class CharacterPlacementProperties
-    {
+    public class CharacterPlacementProperties : TagStructure
+	{
         [TagField(Padding = true, Length = 4)]
         public byte[] Unused;
 

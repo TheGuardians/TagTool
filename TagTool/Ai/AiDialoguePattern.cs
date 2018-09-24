@@ -4,7 +4,7 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x34)]
-    public class AiDialoguePattern
+    public class AiDialoguePattern : TagStructure
     {
         public AiDialogueType DialogueType;
         public short VocalizationsIndex;

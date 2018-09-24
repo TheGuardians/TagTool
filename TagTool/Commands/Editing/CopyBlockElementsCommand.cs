@@ -23,7 +23,7 @@ namespace TagTool.Commands.Editing
                   "CopyBlockElements",
                   "Copies block elements from one tag to another.",
 
-                  "CopyBlockElements <block name> [count = *] [index = 0]",
+                  "CopyBlockElements <block name> [index = 0] [count = *]",
 
                   "Copies block elements from one tag to another.")
         {
@@ -81,24 +81,24 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-            var count = -1;
+            var index = 0;
 
             if (args.Count > 1 && args[1] != "*")
             {
-                if (!int.TryParse(args[1], out count) || count < 0)
+                if (!int.TryParse(args[1], out index) || index < 0)
                 {
-                    Console.WriteLine($"Invalid count specified: {args[1]}");
+                    Console.WriteLine($"Invalid index specified: {args[1]}");
                     return false;
                 }
             }
 
-            var index = 0;
+            var count = -1;
 
             if (args.Count > 2)
             {
-                if (!int.TryParse(args[2], out index) || index < 1)
+                if (!int.TryParse(args[2], out count) || count < 1)
                 {
-                    Console.WriteLine($"Invalid index specified: {args[2]}");
+                    Console.WriteLine($"Invalid count specified: {args[2]}");
                     return false;
                 }
             }

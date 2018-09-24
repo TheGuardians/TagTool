@@ -6,8 +6,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Promotion
-    {
+    public class Promotion : TagStructure
+	{
         public List<Rule> Rules;
         public List<RuntimeTimer> RuntimeTimers;
         public int Unknown1;
@@ -22,8 +22,8 @@ namespace TagTool.Audio
         public uint Unknown11;
 
         [TagStructure(Size = 0x10)]
-        public class Rule
-        {
+        public class Rule : TagStructure
+		{
             public short PitchRangeIndex;
             public short MaximumPlayingCount;
             public float SuppressionTime;
@@ -32,8 +32,8 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x4)]
-        public class RuntimeTimer
-        {
+        public class RuntimeTimer : TagStructure
+		{
             public int Unknown;
         }
     }

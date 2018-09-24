@@ -7,16 +7,16 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "contrail_system", Tag = "cntl", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
-    public class ContrailSystem
-    {
+    public class ContrailSystem : TagStructure
+	{
         public List<ContrailSystemBlock> Contrail;
 
         [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x26C, Align = 0x10)]
-        public class ContrailSystemBlock
-        {
+        public class ContrailSystemBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public uint Unknown1;
@@ -74,8 +74,8 @@ namespace TagTool.Tags.Definitions
             public List<CompiledColorFunction> CompiledColorFunctions;
 
             [TagStructure(Size = 0x10, Align = 0x10)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -83,8 +83,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x40, Align = 0x10)]
-            public class CompiledFunction
-            {
+            public class CompiledFunction : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -104,8 +104,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10, Align = 0x10)]
-            public class CompiledColorFunction
-            {
+            public class CompiledColorFunction : TagStructure
+			{
                 public float Red;
                 public float Green;
                 public float Blue;

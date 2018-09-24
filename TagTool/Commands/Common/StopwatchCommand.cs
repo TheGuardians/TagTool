@@ -28,53 +28,56 @@ namespace TagTool.Commands.Common
 			if (args.Count == 0)
 				return false;
 
-			foreach (var arg in args)
+			for (var a = 0; a < args.Count; a++)
 			{
+				var arg = args[a].ToLower();
 				switch (arg)
 				{
 					case "print":
-                        var r = _stopWatch.ElapsedMilliseconds;
+						{
+							var r = StopwatchCommand._stopWatch.ElapsedMilliseconds;
 
-						// days
-						var d = r / 86_400_000;
-						r -= d * 86_400_000;
-						
-						// hours
-						var h = r / 3_600_000;
-						r -= h * 3_600_000;
+							// days
+							var d = r / 86_400_000;
+							r -= d * 86_400_000;
 
-						// minutes
-						var m = r / 60_000;
-						r -= m * 60_000;
+							// hours
+							var h = r / 3_600_000;
+							r -= h * 3_600_000;
 
-						// seconds
-						var s = r / 1_000;
-						r -= s * 1_000;
+							// minutes
+							var m = r / 60_000;
+							r -= m * 60_000;
 
-						var output = "";
-						output += d > 0 ? $"{d}d " : "";
-						output += h > 0 ? $"{h}h " : "";
-						output += m > 0 ? $"{m}m " : "";
-						output += s > 0 ? $"{s}s " : "";
-						output += r > 0 ? $"{r}ms" : "";
-						output = output != "" ? output : "GOOD GOLLY THAT WAS FAST";
+							// seconds
+							var s = r / 1_000;
+							r -= s * 1_000;
 
-						var startColor = Console.ForegroundColor;
-						Console.ForegroundColor = ConsoleColor.DarkCyan;
-						Console.WriteLine(output);
-						Console.ForegroundColor = startColor;
+							var output = "";
+							output += d > 0 ? $"{d}d " : "";
+							output += h > 0 ? $"{h}h " : "";
+							output += m > 0 ? $"{m}m " : "";
+							output += s > 0 ? $"{s}s " : "";
+							output += r > 0 ? $"{r}ms" : "";
+							output = output != "" ? output : "GOOD GOLLY THAT WAS FAST";
+
+							var startColor = Console.ForegroundColor;
+							Console.ForegroundColor = ConsoleColor.DarkCyan;
+							Console.WriteLine(output);
+							Console.ForegroundColor = startColor;
+						}
 						break;
 					case "reset":
-						_stopWatch.Reset();
+						StopwatchCommand._stopWatch.Reset();
 						break;
 					case "restart":
-						_stopWatch.Restart();
+						StopwatchCommand._stopWatch.Restart();
 						break;
 					case "start":
-						_stopWatch.Start();
+						StopwatchCommand._stopWatch.Start();
 						break;
 					case "stop":
-						_stopWatch.Stop();
+						StopwatchCommand._stopWatch.Stop();
 						break;
 					default:
 						return false;

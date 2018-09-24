@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "damage_effect", Tag = "jpt!", Size = 0xF4, MinVersion = CacheVersion.HaloOnline106708)]
-    public class DamageEffect
-    {
+    public class DamageEffect : TagStructure
+	{
         public float RadiusMin;
         public float RadiusMax;
         public float CutoffScale;
@@ -96,8 +96,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x70)]
-        public class PlayerResponseBlock
-        {
+        public class PlayerResponseBlock : TagStructure
+		{
             public ResponseTypeValue ResponseType;
             public short Unknown;
             public TypeValue Type;

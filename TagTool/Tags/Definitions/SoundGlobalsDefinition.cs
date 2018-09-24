@@ -5,8 +5,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundGlobalsDefinition
-    {
+    public class SoundGlobalsDefinition : TagStructure
+	{
         [TagField(ValidTags = new[] { "sncl" })]
         public CachedTagInstance SoundClasses;
 

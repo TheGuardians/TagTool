@@ -61,7 +61,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <DocumentationFile>bin\x64\Debug\Documentation.xml</DocumentationFile>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -168,6 +168,11 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Audio\Converter\CacheSoundResult.cs" />
+    <Compile Include="Audio\Converter\HeaderChunk.cs" />
+    <Compile Include="Audio\Converter\SoundFile.cs" />
+    <Compile Include="Audio\Converter\WAV.cs" />
+    <Compile Include="Audio\Converter\XMA.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\BitmapDdsExtractor.cs" />
     <Compile Include="Bitmaps\BitmapDdsFormatDetection.cs" />
@@ -275,6 +280,7 @@
     <Compile Include="Commands\Porting\EditTagCommand.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\ListFieldsCommand.cs" />
+    <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortArmorVariantCommand.cs" />
     <Compile Include="Commands\Porting\PortingContextFactory.cs" />
@@ -291,6 +297,7 @@
     <Compile Include="Commands\Porting\PortTagCommand.Lighting.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Models.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Physics.cs" />
+    <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Scenario.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Shader.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.ShaderGen.cs" />
@@ -326,6 +333,7 @@
     <Compile Include="Commands\Shaders\RegenerateShaders.cs" />
     <Compile Include="Commands\Shaders\RenderMethodTemplateContextFactory.cs" />
     <Compile Include="Commands\Shaders\ShaderContextFactory.cs" />
+    <Compile Include="Commands\Sounds\ExportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
     <Compile Include="Commands\Sounds\ResourceDataCommand.cs" />
     <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
@@ -340,6 +348,7 @@
     <Compile Include="Commands\Tags\ExportTagModCommand.cs" />
     <Compile Include="Commands\Tags\ExtractAllTagsCommand.cs" />
     <Compile Include="Commands\Tags\ExtractTagCommand.cs" />
+    <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\GenerateTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\GetMapInfoCommand.cs" />
     <Compile Include="Commands\Tags\GetTagAddressCommand.cs" />
@@ -367,6 +376,8 @@
     <Compile Include="Common\ArrayUtil.cs" />
     <Compile Include="Common\Bitmask.cs" />
     <Compile Include="Common\Bounds.cs" />
+    <Compile Include="Extensions\EnumExtensions.cs" />
+    <Compile Include="Extensions\FlipFlopDictionary.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="HyperSerialization\BlamType.cs" />
     <Compile Include="HyperSerialization\EndianByteArray.cs" />
@@ -376,6 +387,7 @@
     <Compile Include="Serialization\MemberInfoVersionKey.cs" />
     <Compile Include="Serialization\ReflectionCache.cs" />
     <Compile Include="Serialization\TagFieldInfo.cs" />
+    <Compile Include="StartupTests.cs" />
     <Compile Include="Tags\TagStructureReference.cs" />
     <Compile Include="Common\FunctionType.cs" />
     <Compile Include="Common\GameLanguage.cs" />

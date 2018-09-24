@@ -7,8 +7,8 @@ namespace TagTool.Ai
 {
     [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3ODST)]
-    public class AiVocalization
-    {
+    public class AiVocalization : TagStructure
+	{
         [TagField(Label = true)]
         public StringId Name;
         public short ParentIndex;

@@ -5,8 +5,8 @@ using TagTool.Serialization;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "light", Tag = "ligh", Size = 0x94, MinVersion = CacheVersion.Halo3Retail)]
-    public class Light
-    {
+    public class Light : TagStructure
+	{
         public uint Flags;
         public TypeValue Type;
         public short Unknown;

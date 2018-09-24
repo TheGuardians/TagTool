@@ -5,8 +5,8 @@ namespace TagTool.Cache
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
-    public class TagResource
-    {
+    public class TagResource : TagStructure
+	{
         public CachedTagInstance ParentTag;
         public ushort Salt;
         public TagResourceType Type;
@@ -39,15 +39,15 @@ namespace TagTool.Cache
         public int Unknown2;
 
         [TagStructure(Size = 0x8)]
-        public class ResourceFixup
-        {
+        public class ResourceFixup : TagStructure
+		{
             public uint BlockOffset;
             public CacheAddress Address;
         }
 
         [TagStructure(Size = 0x8)]
-        public class ResourceDefinitionFixup
-        {
+        public class ResourceDefinitionFixup : TagStructure
+		{
             public CacheAddress Address;
             public int ResourceStructureTypeIndex;
         }

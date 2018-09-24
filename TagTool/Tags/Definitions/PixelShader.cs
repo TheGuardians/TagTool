@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "pixel_shader", Tag = "pixl", Size = 0x20)]
-    public class PixelShader
-    {
+    public class PixelShader : TagStructure
+	{
         public uint Unknown;
         public List<ShaderDrawMode> DrawModes;
         public uint Unknown3;

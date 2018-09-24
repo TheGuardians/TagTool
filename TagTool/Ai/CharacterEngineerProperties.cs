@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x38)]
-    public class CharacterEngineerProperties
-    {
+    public class CharacterEngineerProperties : TagStructure
+	{
         /// <summary>
         /// World Units; The amount that the engineer attempts to rise before dying.
         /// </summary>

@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Shaders
 {
     [TagStructure(Size = 0x1C)]
-    public class ShaderDebugHeader
-    {
+    public class ShaderDebugHeader : TagStructure
+	{
         public uint Magic;
         public uint StructureSize;
         public uint ShaderDataSize;

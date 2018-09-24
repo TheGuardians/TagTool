@@ -73,21 +73,17 @@ namespace TagTool.Serialization
         private void Analyze(Type mainType, CacheVersion version)
         {
             // Get the attribute for the main structure type
-            Structure = GetStructureAttribute(mainType, version);
+            Structure = ReflectionCache.GetTagStructureAttribute(mainType, version);
             if (Structure == null)
                 throw new InvalidOperationException("No TagStructure attribute which matches the target version was found on " + mainType.Name);
 
-			// ATTENTION: If the exception above is thrown, it is likely a mishandled type in TagFieldInfo.GetFieldSize(), 
-			// which causes the type to be treated as a structure. The below line will print the mishandled type which will 
-			// need a case added/fixed in TagFieldInfo.GetFieldSize(). Refer to TagSerializer/TagDeserializer to find sizes.
-			// Console.WriteLine(mainType.Name);
 
 			// Scan through the type's inheritance hierarchy and analyze each TagStructure attribute
 			var currentType = mainType;
             Types = new List<Type>();
             while (currentType != null)
             {
-                var attrib = (currentType != mainType) ? GetStructureAttribute(currentType, version) : Structure;
+                var attrib = (currentType != mainType) ? ReflectionCache.GetTagStructureAttribute(currentType, version) : Structure;
                 if (attrib != null)
                 {
                     Types.Add(currentType);
@@ -104,20 +100,6 @@ namespace TagTool.Serialization
                 }
                 currentType = currentType.BaseType;
             }
-        }
-
-        private static TagStructureAttribute GetStructureAttribute(Type type, CacheVersion version)
-        {
-            // First match against any TagStructureAttributes that have version restrictions
-            var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
-                .Cast<TagStructureAttribute>()
-                .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
-                .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
-
-            // If nothing was found, find the first attribute without any version restrictions
-            return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
-                .Cast<TagStructureAttribute>()
-                .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown);
         }
     }
 }

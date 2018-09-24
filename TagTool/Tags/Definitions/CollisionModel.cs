@@ -9,8 +9,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44)]
-    public class CollisionModel
-    {
+    public class CollisionModel : TagStructure
+	{
         public int CollisionModelChecksum;
 
         [TagField(Padding = true, Length = 12)]
@@ -24,22 +24,22 @@ namespace TagTool.Tags.Definitions
         public List<Node> Nodes;
         
         [TagStructure(Size = 0x4)]
-        public class Material
-        {
+        public class Material : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
         }
 
         [TagStructure(Size = 0x10)]
-        public class Region
-        {
+        public class Region : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public List<Permutation> Permutations;
 
             [TagStructure(Size = 0x28)]
-            public class Permutation
-            {
+            public class Permutation : TagStructure
+			{
                 [TagField(Label = true)]
                 public StringId Name;
                 public List<Bsp> Bsps;
@@ -47,8 +47,8 @@ namespace TagTool.Tags.Definitions
                 public List<CollisionMoppCode> BspMoppCodes;
 
                 [TagStructure(Size = 0x64)]
-                public class Bsp
-                {
+                public class Bsp : TagStructure
+				{
                     public short NodeIndex;
 
                     [TagField(Padding = true, Length = 2)]
@@ -59,8 +59,8 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3ODST)]
                 [TagStructure(Size = 0x80, MaxVersion = CacheVersion.HaloOnline106708)]
-                public class BspPhysicsBlock
-                {
+                public class BspPhysicsBlock : TagStructure
+				{
                     public int Unknown;
                     public short Size;
                     public short Count;
@@ -112,8 +112,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class PathfindingSphere
-        {
+        public class PathfindingSphere : TagStructure
+		{
             public short Node;
             public PathfindingSphereFlags Flags;
             public RealPoint3d Center;
@@ -128,8 +128,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class Node
-        {
+        public class Node : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
             public NodeFlags Flags;

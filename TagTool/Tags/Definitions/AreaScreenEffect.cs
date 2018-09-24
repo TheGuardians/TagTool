@@ -9,8 +9,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0xC, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
-    public class AreaScreenEffect
-    {
+    public class AreaScreenEffect : TagStructure
+	{
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public GlobalFlagBits GlobalFlags;
 
@@ -41,8 +41,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x84, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xE8, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloOnline106708)]
-        public class ScreenEffectBlock
-        {
+        public class ScreenEffectBlock : TagStructure
+		{
             [TagField(Label = true)]
             public StringId Name;
 

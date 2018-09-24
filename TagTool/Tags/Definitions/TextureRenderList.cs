@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     // TODO: Update this for cert_ms30_oct19
     [TagStructure(Name = "texture_render_list", Tag = "trdf", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
-    public class TextureRenderList
-    {
+    public class TextureRenderList : TagStructure
+	{
         public List<Bitmap> Bitmaps;
         public List<Light> Lights;
         public List<Bink> Binks;
@@ -19,8 +19,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown3;
 
         [TagStructure(Size = 0x110)]
-        public class Bitmap
-        {
+        public class Bitmap : TagStructure
+		{
             public int Index;
             [TagField(Length = 256)] public string Filename;
             public int Unknown;
@@ -30,8 +30,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.HaloOnline571627)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline700123)]
-        public class Light
-        {
+        public class Light : TagStructure
+		{
             [TagField(MaxVersion = CacheVersion.HaloOnline571627)]
             public List<UnknownBlock> Unknown;
 
@@ -48,8 +48,8 @@ namespace TagTool.Tags.Definitions
             public float Unknown5;
 
             [TagStructure(Size = 0x28)]
-            public class UnknownBlock
-            {
+            public class UnknownBlock : TagStructure
+			{
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;
@@ -61,15 +61,15 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30)]
-        public class Bink
-        {
+        public class Bink : TagStructure
+		{
             [TagField(Length = 32)] public string Name;
             public CachedTagInstance Bink2;
         }
 
         [TagStructure(Size = 0x4C)]
-        public class Mannequin
-        {
+        public class Mannequin : TagStructure
+		{
             public int Unknown;
             public CachedTagInstance Biped;
             public int Unknown2;
@@ -89,8 +89,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x64)]
-        public class Weapon
-        {
+        public class Weapon : TagStructure
+		{
             [TagField(Length = 32)] public string Name;
             public CachedTagInstance Weapon2;
             public float Unknown;

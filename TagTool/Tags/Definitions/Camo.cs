@@ -5,8 +5,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camo", Tag = "cmoe", Size = 0x40)]
-    public class Camo
-    {
+    public class Camo : TagStructure
+	{
         public CamoFlags Flags;
 
         [TagField(Padding = true, Length = 2)]
@@ -24,8 +24,8 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x1C)]
-    public class CamoMapping
-    {
+    public class CamoMapping : TagStructure
+	{
         public StringId InputVariable;
         public StringId RangeVariable;
         public TagFunction Mapping;

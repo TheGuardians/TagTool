@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 namespace TagTool.Cache
 {
     [TagStructure(Size = 0xE090, MinVersion = CacheVersion.HaloOnline106708)]
-    public class MapVariant
-    {
+    public class MapVariant : TagStructure
+	{
         public ulong ID; // not sure about this
 
         [TagField(Length = 16, CharSet = CharSet.Unicode)]
@@ -60,8 +60,8 @@ namespace TagTool.Cache
         public byte[] Unused = new byte[320];
 
         [TagStructure(Size = 0x54)]
-        public class Placement
-        {
+        public class Placement : TagStructure
+		{
             public ushort PlacementFlags;
             public ushort Unknown02;
             public uint ObjectIndex;
@@ -86,8 +86,8 @@ namespace TagTool.Cache
         }
 
         [TagStructure(Size = 0xC)]
-        public class BudgetEntry
-        {
+        public class BudgetEntry : TagStructure
+		{
             public int TagIndex;
             public byte RuntimeMin;
             public byte RuntimeMax;

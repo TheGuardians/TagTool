@@ -6,8 +6,8 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "style", Tag = "styl", Size = 0x5C, MinVersion = CacheVersion.Halo3Retail)]
-    public class Style
-    {
+    public class Style : TagStructure
+	{
         [TagField(Length = 32)]
         public string Name;
 
@@ -40,8 +40,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class SpecialMovementBlock
-        {
+        public class SpecialMovementBlock : TagStructure
+		{
             public SpecialMovementFlags SpecialMovement1;
 
             [Flags]
@@ -58,8 +58,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x20)]
-        public class BehaviorListBlock
-        {
+        public class BehaviorListBlock : TagStructure
+		{
             [TagField(Length = 32)]
             public string BehaviorName;
         }

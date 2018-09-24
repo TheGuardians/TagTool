@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "text_value_pair_definition", Tag = "sily", Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
-    public class TextValuePairDefinition
-    {
+    public class TextValuePairDefinition : TagStructure
+	{
         public ParameterValue Parameter;
         public StringId Name;
         public StringId Description;
@@ -644,8 +644,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class TextValuePair
-        {
+        public class TextValuePair : TagStructure
+		{
             public byte Flags;
             public ExpectedValueTypeValue ExpectedValueType;
             public short Unknown;

@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x84, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x90, MinVersion = CacheVersion.HaloOnline106708)]
-    public class GuiModelWidgetDefinition
-    {
+    public class GuiModelWidgetDefinition : TagStructure
+	{
         public uint Flags;
         public StringId Name;
         public short Unknown;
@@ -77,8 +77,8 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
-        public class CameraRefinement
-        {
+        public class CameraRefinement : TagStructure
+		{
             public StringId Biped2;
             public uint Unknown;
             public uint Unknown2;
@@ -125,21 +125,21 @@ namespace TagTool.Tags.Definitions
             public uint Unknown34;
 
             [TagStructure(Size = 0x14)]
-            public class ZoomData
-            {
+            public class ZoomData : TagStructure
+			{
                 public TagFunction Unknown;
             }
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public TagFunction Unknown;
         }
 
         [TagStructure(Size = 0x14)]
-        public class TexCam
-        {
+        public class TexCam : TagStructure
+		{
             public StringId Name;
             public Bounds<float> XBounds;   
             public Bounds<float> YBounds;

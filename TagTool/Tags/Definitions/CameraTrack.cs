@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
-    public class CameraTrack
-    {
+    public class CameraTrack : TagStructure
+	{
         public CameraTrackFlags Flags;
 
         [TagField(Padding = true, Length = 3)]
@@ -21,8 +21,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused2 = new byte[4];
 
         [TagStructure(Size = 0x1C)]
-        public class CameraPoint
-        {
+        public class CameraPoint : TagStructure
+		{
             public RealVector3d Position;
             public RealQuaternion Orientation;
         }

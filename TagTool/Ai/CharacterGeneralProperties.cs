@@ -3,8 +3,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x1C)]
-    public class CharacterGeneralProperties
-    {
+    public class CharacterGeneralProperties : TagStructure
+	{
         public CharacterGeneralFlags Flags;
 
         public AiActorType ActorType;

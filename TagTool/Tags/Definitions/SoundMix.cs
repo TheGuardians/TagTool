@@ -6,8 +6,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x70, MinVersion = CacheVersion.Halo3Retail,MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x74, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "sound_mix", Tag = "snmx", Size = 0x80, MinVersion = CacheVersion.HaloOnline106708)]
-    public class SoundMix
-    {
+    public class SoundMix : TagStructure
+	{
         public float LeftStereoGain;
         public float RightStereoGain;
         public float LeftStereoGain2;

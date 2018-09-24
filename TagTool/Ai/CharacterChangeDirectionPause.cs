@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x8)]
-    public class CharacterChangeDirectionPause
-    {
+    public class CharacterChangeDirectionPause : TagStructure
+	{
         public Angle DirectionChangeAngle;
         public int StationaryChange;
     }

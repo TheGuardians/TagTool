@@ -7,8 +7,8 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0xE, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
-    public class PitchRangeParameter
-    {
+    public class PitchRangeParameter : TagStructure
+	{
         public short NaturalPitch;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

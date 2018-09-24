@@ -19,6 +19,7 @@ namespace TagTool.Commands.Sounds
         {
             commandContext.AddCommand(new ImportSoundCommand(cacheContext, tag, sound));
             commandContext.AddCommand(new ResourceDataCommand(cacheContext, tag, sound));
+            commandContext.AddCommand(new ExportSoundCommand(cacheContext, tag, sound));
         }
     }
 }

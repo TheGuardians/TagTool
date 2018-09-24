@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "muffin", Tag = "mffn", Size = 0x38)]
-    public class Muffin
-    {
+    public class Muffin : TagStructure
+	{
         public CachedTagInstance RenderModel;
         public uint Unknown;
         public uint Unknown2;
@@ -17,16 +17,16 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock> Unknown5;
 
         [TagStructure(Size = 0x8)]
-        public class LocationsBlock
-        {
+        public class LocationsBlock : TagStructure
+		{
             public StringId Name;
             public short Unknown;
             public short Unknown2;
         }
 
         [TagStructure(Size = 0x70)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public short Unknown;
             public short Unknown2;
             public uint Unknown3;

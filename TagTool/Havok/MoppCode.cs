@@ -4,8 +4,8 @@ using TagTool.Serialization;
 namespace TagTool.Havok
 {
     [TagStructure(Size = 0x30)]
-    public class MoppCode
-    {
+    public class MoppCode : TagStructure
+	{
         [TagField(Padding = true, Length = 4)]
         public byte[] Unused1 = new byte[4];
 

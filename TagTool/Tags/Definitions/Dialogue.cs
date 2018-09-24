@@ -7,8 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x30, MinVersion = CacheVersion.HaloOnline106708)]
-    public class Dialogue
-    {
+    public class Dialogue : TagStructure
+	{
         public CachedTagInstance GlobalDialogueInfo;
         public uint Flags;
         public List<Vocalization> Vocalizations;
@@ -18,8 +18,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagStructure(Size = 0x18)]
-        public class Vocalization
-        {
+        public class Vocalization : TagStructure
+		{
             public ushort Flags;
             public short Unknown;
             public StringId Name;

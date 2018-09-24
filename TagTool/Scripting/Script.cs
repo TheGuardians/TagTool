@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace TagTool.Scripting
 {
     [TagStructure(Size = 0x34)]
-    public class Script
-    {
+    public class Script : TagStructure
+	{
         [TagField(Length = 32)]
         public string ScriptName;
         public ScriptType Type;

@@ -6,8 +6,8 @@ namespace TagTool.Tags
     /// Points to a D3D-related object.
     /// </summary>
     [TagStructure(Size = 0xC)]
-    public class TagStructureReference<TDefinition>
-    {
+    public class TagStructureReference<TDefinition> : TagStructure
+	{
         /// <summary>
         /// The definition data for the object.
         /// </summary>
@@ -26,7 +26,4 @@ namespace TagTool.Tags
         /// </summary>
         public uint DefinitionAddress;
     }
-
-	public interface ITagStructureReference
-	{ }
 }

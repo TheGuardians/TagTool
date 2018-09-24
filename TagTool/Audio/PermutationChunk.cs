@@ -5,38 +5,39 @@ using TagTool.Serialization;
 namespace TagTool.Audio
 {
     [TagStructure(Size = 0x14)]
-    public class PermutationChunk
-    {
-        public uint Offset;
+    public class PermutationChunk : TagStructure
+	{
+        public int Offset;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public FlagsValue Flags;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public byte Unknown1; // size extra byte for big endian
+        /// <summary>
+        /// Encoded size, to get the real size apply a mask of 0x3FFFFF. It should always have the bit 0x400000 activated.
+        /// </summary>
+        public int EncodedSize;
 
-        public ushort Size;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte Unknown2; // size extra byte for little endian
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte Unknown3; // always 4?
-
+        /// <summary>
+        /// Changes at runtime depending on the g_xbox_sound data array index
+        /// </summary>
         public int RuntimeIndex;
         public int UnknownA;
         public int UnknownSize;
 
-        [Flags]
-        public enum FlagsValue : byte
+        public PermutationChunk()
         {
-            None = 0,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            HasUnknownAValue = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7
+            Offset = 0;
+            EncodedSize = 0x4000000;
+            RuntimeIndex = -1;
+            UnknownA = 0;
+            UnknownSize = 0;
         }
+
+        public PermutationChunk(int offset, int size)
+        {
+            Offset = offset;
+            EncodedSize = (0x3FFFFFF & size) + 0x4000000;
+            RuntimeIndex = -1;
+            UnknownA = 0;
+            UnknownSize = 0;
+        }
+        
     }
 }

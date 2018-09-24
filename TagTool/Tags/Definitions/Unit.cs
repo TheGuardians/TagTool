@@ -174,8 +174,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class MetagameProperty
-        {
+        public class MetagameProperty : TagStructure
+		{
             public byte Flags;
             public UnitType Unit;
             public UnitClassification Classification;
@@ -231,14 +231,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class CameraTrackBlock
-        {
+        public class CameraTrackBlock : TagStructure
+		{
             public CachedTagInstance CameraTrack;
         }
 
         [TagStructure(Size = 0x4C)]
-        public class UnknownBlock
-        {
+        public class UnknownBlock : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -261,8 +261,8 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x4C)]
-        public class UnknownBlock2
-        {
+        public class UnknownBlock2 : TagStructure
+		{
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -300,21 +300,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class Posture
-        {
+        public class Posture : TagStructure
+		{
             public StringId Name;
             public RealVector3d PillOffset;
         }
 
         [TagStructure(Size = 0x10)]
-        public class HudInterface
-        {
+        public class HudInterface : TagStructure
+		{
             public CachedTagInstance UnitHudInterface;
         }
 
         [TagStructure(Size = 0x14)]
-        public class DialogueVariant
-        {
+        public class DialogueVariant : TagStructure
+		{
             public short VariantNumber;
             public short Unknown;
             public CachedTagInstance Dialogue;
@@ -329,21 +329,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class PoweredSeat
-        {
+        public class PoweredSeat : TagStructure
+		{
             public float DriverPowerupTime;
             public float DriverPowerdownTime;
         }
 
         [TagStructure(Size = 0x10)]
-        public class Weapon
-        {
+        public class Weapon : TagStructure
+		{
             public CachedTagInstance Weapon2;
         }
 
         [TagStructure(Size = 0x38)]
-        public class TargetTrackingBlock
-        {
+        public class TargetTrackingBlock : TagStructure
+		{
             public List<TrackingType> TrackingTypes;
             public float AcquireTime;
             public float GraceTime;
@@ -352,15 +352,15 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance LockedSound;
 
             [TagStructure(Size = 0x4)]
-            public class TrackingType
-            {
+            public class TrackingType : TagStructure
+			{
                 public StringId TrackingType2;
             }
         }
 
         [TagStructure(Size = 0xE4)]
-        public class Seat
-        {
+        public class Seat : TagStructure
+		{
             public uint Flags;
             public StringId SeatAnimation;
             public StringId SeatMarkerName;
@@ -433,8 +433,8 @@ namespace TagTool.Tags.Definitions
             }
             
             [TagStructure(Size = 0x4C)]
-            public class CameraAccelerationBlock
-            {
+            public class CameraAccelerationBlock : TagStructure
+			{
                 public uint Unknown;
                 public uint Unknown2;
                 public uint Unknown3;
@@ -457,8 +457,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10)]
-            public class UnitHudInterfaceBlock
-            {
+            public class UnitHudInterfaceBlock : TagStructure
+			{
                 public CachedTagInstance UnitHudInterface;
             }
         }

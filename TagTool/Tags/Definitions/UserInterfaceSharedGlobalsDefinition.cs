@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3D0, MinVersion = CacheVersion.HaloOnline106708)]
-    public class UserInterfaceSharedGlobalsDefinition
-    {
+    public class UserInterfaceSharedGlobalsDefinition : TagStructure
+	{
         public short IncTextUpdatePeriod;
         public short IncTextBlockCharacter;
         public float NearClipPlaneDistance;
@@ -144,56 +144,56 @@ namespace TagTool.Tags.Definitions
         public List<ARGBlock> ARG;
 
         [TagStructure(Size = 0x24)]
-        public class ARGBlock
-        {
+        public class ARGBlock : TagStructure
+		{
             public StringId Name;
             public CachedTagInstance Audio;
             public CachedTagInstance Timing;
         }
 
         [TagStructure(Size = 0x14)]
-        public class TextColorBlock
-        {
+        public class TextColorBlock : TagStructure
+		{
             public StringId Name;
             public RealArgbColor Color;
         }
 
         [TagStructure(Size = 0x30)]
-        public class PlayerColor
-        {
+        public class PlayerColor : TagStructure
+		{
             public List<PlayerTextColorBlock> PlayerTextColor;
             public List<TeamTextColorBlock> TeamTextColor;
             public List<PlayerUiColorBlock> PlayerUiColor;
             public List<TeamUiColorBlock> TeamUiColor;
 
             [TagStructure(Size = 0x10)]
-            public class PlayerTextColorBlock
-            {
+            public class PlayerTextColorBlock : TagStructure
+			{
                 public RealArgbColor Color;
             }
 
             [TagStructure(Size = 0x10)]
-            public class TeamTextColorBlock
-            {
+            public class TeamTextColorBlock : TagStructure
+			{
                 public RealArgbColor Color;
             }
 
             [TagStructure(Size = 0x10)]
-            public class PlayerUiColorBlock
-            {
+            public class PlayerUiColorBlock : TagStructure
+			{
                 public RealArgbColor Color;
             }
 
             [TagStructure(Size = 0x10)]
-            public class TeamUiColorBlock
-            {
+            public class TeamUiColorBlock : TagStructure
+			{
                 public RealArgbColor Color;
             }
         }
 
         [TagStructure(Size = 0x10)]
-        public class Alert
-        {
+        public class Alert : TagStructure
+		{
             public StringId Name;
             public byte Flags;
             public sbyte Unknown;
@@ -213,8 +213,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x28)]
-        public class Dialog
-        {
+        public class Dialog : TagStructure
+		{
             public StringId Name;
             public short Unknown;
             public short Unknown2;
@@ -238,14 +238,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class GlobalDataSource
-        {
+        public class GlobalDataSource : TagStructure
+		{
             public CachedTagInstance DataSource;
         }
 
         [TagStructure(Size = 0x154)]
-        public class UiWidgetBiped
-        {
+        public class UiWidgetBiped : TagStructure
+		{
             [TagField(Length = 32)] public string AppearanceBipedName;
             [TagField(Length = 32)] public string AppearanceAiSquadName;
             public StringId AppearanceAiLocationName;
