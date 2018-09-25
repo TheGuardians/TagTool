@@ -72,7 +72,7 @@ namespace TagTool.Cache
         /// <typeparam name="T">The type of the tag definition.</typeparam>
         /// <param name="name">The name of the tag.</param>
         /// <returns>The tag of the specified type with the specified name from the current cache.</returns>
-        public abstract CachedTagInstance GetTag<T>(string name);
+        public abstract CachedTagInstance GetTag<T>(string name) where T : TagStructure;
 
         /// <summary>
         /// Gets the string associated with the specified id from the current cache.

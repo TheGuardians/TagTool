@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Common;
 using System;
 
 namespace TagTool.Serialization
@@ -33,7 +34,7 @@ namespace TagTool.Serialization
 		/// <summary>
 		/// The name of the tag group that the structure applies to.
 		/// </summary>
-		public string Tag { get; set; }
+		public string Tag { get; set; } = Common.Tag.Null.ToString();
 
 		/// <summary>
 		/// The minimum engine version which the structure applies to.

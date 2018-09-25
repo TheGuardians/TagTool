@@ -735,7 +735,7 @@ namespace TagTool.Commands.Porting
 			if ((type.IsValueType && type != typeof(StringId)) ||
 				type == typeof(string))
 				return data;
-
+			
 			// convert each element
 			for (var i = 0; i < data.Count; i++)
 			{

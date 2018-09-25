@@ -356,7 +356,8 @@ namespace TagTool.Cache
                     return "<unknown>";
                 }
 
-                var structure = TagDefinition.Types[groupTag].GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute;
+				var type = TagDefinition.Types[groupTag];
+				var structure = ReflectionCache.GetTagStructureAttribute(type);
 
                 return structure.Name;
             }

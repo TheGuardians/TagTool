@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Commands.Files
 {
@@ -195,8 +196,9 @@ namespace TagTool.Commands.Files
 
             if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
                 return null; // kill it with fucking fire
+							 // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-            if (ConvertedTags.ContainsKey(srcTag.Index))
+			if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
 
             var tagData = srcCacheContext.Deserialize(srcStream, srcTag);
@@ -248,70 +250,43 @@ namespace TagTool.Commands.Files
 
         private object CopyData(object data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (data == null)
-                return null;
+			switch (data)
+			{
+				case null:
+				case string _:
+				case ValueType _:
+					return data;
+				case CachedTagInstance tag:
+					return CopyTag(tag, srcCacheContext, srcStream, destCacheContext, destStream);
+				case PageableResource resource:
+					return CopyResource(resource, srcCacheContext, destCacheContext);
+				case TagStructure structure:
+					return CopyStructure(structure, srcCacheContext, srcStream, destCacheContext, destStream);
+				case IList collection:
+					return CopyCollection(collection, srcCacheContext, srcStream, destCacheContext, destStream);
+			}
 
-            var type = data.GetType();
-
-            if (type.IsPrimitive)
-                return data;
-
-            if (type == typeof(CachedTagInstance))
-                return CopyTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream);
-
-            if (type == typeof(PageableResource))
-                return CopyResource((PageableResource)data, srcCacheContext, destCacheContext);
-
-            if (type.IsArray)
-                return CopyArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream);
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return CopyList(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
-
-            if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return CopyStructure(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
-
-            return data;
+			return data;
         }
 
-        private Array CopyArray(Array array, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
+		private IList CopyCollection(IList collection, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
+		{
+			if (collection.GetType().GetElementType().IsPrimitive)
+				return collection;
+
+			for (var i = 0; i < collection.Count; i++)
+			{
+				var oldValue = collection[i];
+				var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+				collection[i] = newValue;
+			}
+
+			return collection;
+		}
+
+        private T CopyStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream) where T : TagStructure
         {
-            if (array.GetType().GetElementType().IsPrimitive)
-                return array;
-
-            for (var i = 0; i < array.Length; i++)
-            {
-                var oldValue = array.GetValue(i);
-                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-                array.SetValue(newValue, i);
-            }
-
-            return array;
-        }
-
-        private object CopyList(object list, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
-        {
-            if (type.GenericTypeArguments[0].IsPrimitive)
-                return list;
-
-            var count = (int)type.GetProperty("Count").GetValue(list);
-            var getItem = type.GetMethod("get_Item");
-            var setItem = type.GetMethod("set_Item");
-
-            for (var i = 0; i < count; i++)
-            {
-                var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-
-                setItem.Invoke(list, new object[] { i, newValue });
-            }
-
-            return list;
-        }
-
-        private object CopyStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
-        {
-            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, destCacheContext.Version))
+            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
                 var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);

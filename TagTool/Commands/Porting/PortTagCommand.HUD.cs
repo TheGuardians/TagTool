@@ -304,33 +304,16 @@ namespace TagTool.Commands.Porting
         /// <summary>
         /// Adds shared values from flags2 to flags1.
         /// </summary>
-        private flagsType1 GetEquivalentFlags<flagsType1, flagsType2>(flagsType1 flags1, flagsType2 flags2) where flagsType1 : struct, IConvertible
+        private E1 GetEquivalentFlags<E1, E2>(E1 flags1, E2 flags2) where E1 : unmanaged, Enum where E2 : unmanaged, Enum
         {
-            //Check params are enums.
-            if(!(flags2 is Enum) || !(flags1 is Enum))
-            {
-                Console.WriteLine("GetEquivalentFlags called with a non enum parameter.");
-                return flags1;
-            }
-
-            //Check for [Flags] attrib
-            object[] hoFlagsAttributes = typeof(flagsType1).GetCustomAttributes(typeof(FlagsAttribute), false);
-            object[] h3FlagsAttributes = typeof(flagsType2).GetCustomAttributes(typeof(FlagsAttribute), false);
-
-            if (hoFlagsAttributes.Count() < 1 || h3FlagsAttributes.Count() < 1)
-            {
-                Console.WriteLine("GetEquivalentFlags called with a non flags enum parameter.");
-                return flags1;
-            }
-
-            //Get enum values
-            flagsType1[] flagsType1Values = (flagsType1[])Enum.GetValues(typeof(flagsType1));
-            flagsType2[] flagsType2Values = (flagsType2[])Enum.GetValues(typeof(flagsType2));
+             //Get enum values
+            E1[] flagsType1Values = (E1[])Enum.GetValues(typeof(E1));
+            E2[] flagsType2Values = (E2[])Enum.GetValues(typeof(E2));
 
             //Seperate flags for individual comparison.
-            List<flagsType2> flags2Values = new List<flagsType2>();
+            List<E2> flags2Values = new List<E2>();
 
-            foreach (flagsType2 flagsType2Value in flagsType2Values)
+            foreach (E2 flagsType2Value in flagsType2Values)
             {
                 //Ignore the None value.
                 if (flagsType2Value.ToString() == "None")
@@ -344,13 +327,13 @@ namespace TagTool.Commands.Porting
 
             //Compare
             int flags1Int = 0;
-            foreach (flagsType2 flag2 in flags2Values)
+            foreach (E2 flag2 in flags2Values)
             {
                 string flag2String = flag2.ToString();
-                var flags1EnumType = Nullable.GetUnderlyingType(typeof(flagsType1));
+                var flags1EnumType = Nullable.GetUnderlyingType(typeof(E1));
                 try
                 {
-                    flagsType1 flag1 = (flagsType1)Enum.Parse(typeof(flagsType1), flag2String);
+                    E1 flag1 = (E1)Enum.Parse(typeof(E1), flag2String);
                     flags1Int |= (int)Convert.ChangeType(flag1, typeof(int));
                 }
                 catch (ArgumentException)
@@ -358,31 +341,25 @@ namespace TagTool.Commands.Porting
                     continue;
                 }
             }
-            return (flagsType1)(Enum.ToObject(typeof(flagsType1), flags1Int));
+            return (E1)(Enum.ToObject(typeof(E1), flags1Int));
         }
 
         /// <summary>
         /// If the value of enum1 has a value with the same name as the value of enum2, return it.
         /// </summary>
-        private enumType1 GetEquivalentValue<enumType1, enumType2>(enumType1 enum1, enumType2 enum2) where enumType1 : struct, IConvertible
+        private E1 GetEquivalentValue<E1, E2>(E1 enum1, E2 enum2) where E1 : unmanaged, Enum where E2 : unmanaged, Enum
         {
-            //Check params are enums.
-            if (!(enum1 is Enum) || !(enum2 is Enum))
-            {
-                Console.WriteLine("GetEquivalentFlags called with a non-enum parameter.");
-                return enum1;
-            }
 
             //Get enum values
-            enumType1[] enumType1Values = (enumType1[])Enum.GetValues(typeof(enumType1));
-            enumType2[] enumType2Values = (enumType2[])Enum.GetValues(typeof(enumType2));
+            var enumType1Values = Enum.GetValues(typeof(E1)) as E1[];
+            var enumType2Values = Enum.GetValues(typeof(E2)) as E2[];
 
             //Compare
             string enum2String = enum2.ToString();
 
             try
             {
-                return (enumType1)Enum.Parse(typeof(enumType1), enum2String);
+                return (E1)Enum.Parse(typeof(E1), enum2String);
             }
             catch (Exception)
             {

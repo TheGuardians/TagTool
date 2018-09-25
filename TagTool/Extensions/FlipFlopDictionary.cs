@@ -2,7 +2,7 @@
 {
 	/// <summary>
 	/// A Bi-Directional Dictionary where keys are also values, and values are also keys.
-	/// Duplicate Keys AND Values not supported.
+	/// *** NO DUPLICATE KEYS OR VALUES ***.
 	/// </summary>
 	/// <typeparam name="TFlip"></typeparam>
 	/// <typeparam name="TFlop"></typeparam>

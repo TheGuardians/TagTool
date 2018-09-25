@@ -13,11 +13,6 @@ namespace TagTool.Serialization
 	public class TagFieldEnumerable : IEnumerable<TagFieldInfo>
 	{
 		/// <summary>
-		/// Default <see cref="TagFieldAttribute"/> to use when none is found for a field.
-		/// </summary>
-		private static readonly TagFieldAttribute DefaultFieldAttribute = new TagFieldAttribute();
-
-		/// <summary>
 		/// Collection of <see cref="Serialization.TagFieldInfo"/> for a <see cref="TagStructureInfo"/> in a given
 		/// <see cref="CacheVersion"/>.
 		/// </summary>
@@ -78,7 +73,7 @@ namespace TagTool.Serialization
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attribute = field.GetCustomAttributes(typeof(TagFieldAttribute), false).FirstOrDefault() as TagFieldAttribute ?? DefaultFieldAttribute;
+					var attribute = ReflectionCache.GetTagFieldAttribute(field);
 
 					if (attribute.Gen3Only)
 					{

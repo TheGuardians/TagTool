@@ -10,6 +10,8 @@ namespace TagTool.Serialization
     [AttributeUsage(AttributeTargets.Field)]
     public class TagFieldAttribute : Attribute
     {
+		public static readonly TagFieldAttribute Default = new TagFieldAttribute();
+
         /// <summary>
         /// The offset of the value from the beginning of the structure.
         /// If this is -1 (default), then the current stream position will be used.

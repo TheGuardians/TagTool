@@ -149,8 +149,8 @@ namespace TagTool.Cache
             if (TryGetTag<T>(name, out var result))
                 return result;
 
-            var attributes = typeof(T).GetCustomAttributes(typeof(TagStructureAttribute), false);
-            var typeName = attributes == null ? typeof(T).Name.ToSnakeCase() : ((TagStructureAttribute)attributes[0]).Name;
+			var attribute = ReflectionCache.GetTagStructureAttribute(typeof(T));
+            var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
         }
@@ -206,7 +206,8 @@ namespace TagTool.Cache
             return null;
         }
 
-        public CachedTagInstance AllocateTag<T>(string name = null) => AllocateTag(typeof(T), name);
+        public CachedTagInstance AllocateTag<T>(string name = null) where T : TagStructure
+			=> AllocateTag(typeof(T), name);
 
         /// <summary>
         /// Attempts to get a tag of a specific type from the current cache.
@@ -215,7 +216,7 @@ namespace TagTool.Cache
         /// <param name="name">The name of the tag.</param>
         /// <param name="result">The resulting tag.</param>
         /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag<T>(string name, out CachedTagInstance result)
+        public bool TryGetTag<T>(string name, out CachedTagInstance result) where T : TagStructure
         {
             if (TagDefinition.Types.Values.Contains(typeof(T)))
             {
@@ -351,7 +352,8 @@ namespace TagTool.Cache
         {
             if (TagDefinition.TryFind(name, out var type))
             {
-                result = new Tag((type.GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute).Tag);
+				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+                result = new Tag(attribute.Tag);
                 return true;
             }
 

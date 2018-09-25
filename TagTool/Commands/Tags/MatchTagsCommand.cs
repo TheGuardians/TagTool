@@ -8,6 +8,7 @@ using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Commands.Tags
 {
@@ -142,55 +143,49 @@ namespace TagTool.Commands.Tags
         {
             if (dataA == null || dataB == null)
                 return;
-            var type = dataA.GetType();
-            if (type == typeof(CachedTagInstance))
+
+            if (dataA is CachedTagInstance)
             {
                 // If the objects are tags, then we've found a match
-                var tagA = (CachedTagInstance)dataA;
-                var tagB = (CachedTagInstance)dataB;
+                var tagA = dataA as CachedTagInstance;
+                var tagB = dataB as CachedTagInstance;
+
                 if (tagA.Group.Tag != tagB.Group.Tag)
                     return;
+
                 if (tagA.IsInGroup("rmt2") || tagA.IsInGroup("rmdf") || tagA.IsInGroup("vtsh") || tagA.IsInGroup("pixl") || tagA.IsInGroup("rm  ") || tagA.IsInGroup("bitm"))
                     return;
+
                 var translated = result.Translate(versionA, tagA.Index, versionB);
                 if (translated >= 0)
                     return;
+
                 result.Add(versionA, tagA.Index, versionB, tagB.Index);
                 tagQueue.Enqueue(new QueuedTag { Tag = tagB });
             }
-            else if (type.IsArray)
-            {
-                if (type.GetElementType().IsPrimitive)
-                    return;
 
-                // If the objects are arrays, then loop through each element
-                var arrayA = (Array)dataA;
-                var arrayB = (Array)dataB;
-                if (arrayA.Length != arrayB.Length)
-                    return; // If the sizes are different, we probably can't compare them
-                for (var i = 0; i < arrayA.Length; i++)
-                    CompareBlocks(arrayA.GetValue(i), versionA, arrayB.GetValue(i), versionB, result, tagQueue);
-            }
-            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            else if (dataA is IList) // Compare lists and arrays
             {
-                if (type.GenericTypeArguments[0].IsPrimitive)
-                    return;
+				var collectionA = dataA as IList;
+				var collectionB = dataB as IList;
 
-                // If the objects are lists, then loop through each element
-                var countProperty = type.GetProperty("Count");
-                var countA = (int)countProperty.GetValue(dataA);
-                var countB = (int)countProperty.GetValue(dataB);
-                if (countA != countB)
-                    return; // If the sizes are different, we probably can't compare them
-                var getItem = type.GetMethod("get_Item");
-                for (var i = 0; i < countA; i++)
-                {
-                    var itemA = getItem.Invoke(dataA, new object[] { i });
-                    var itemB = getItem.Invoke(dataB, new object[] { i });
-                    CompareBlocks(itemA, versionA, itemB, versionB, result, tagQueue);
-                }
+				if (collectionA.Count == 0 || collectionA[0].GetType().IsPrimitive)
+					return;
+
+				// If the sizes are different, we probably can't compare them
+				if (collectionA.Count != collectionB.Count)
+					return;
+
+				// Compare each element
+				for (var i = 0; i < collectionA.Count; i++)
+				{
+					var itemA = collectionA[i];
+					var itemB = collectionB[i];
+					CompareBlocks(itemA, versionA, itemB, versionB, result, tagQueue);
+				}
             }
-            else if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
+
+            else if (dataA is TagStructure)
             {
 				var tagFieldInfosA = ReflectionCache.GetTagFieldEnumerable(dataA.GetType(), versionA);
 				var tagFieldInfosB = ReflectionCache.GetTagFieldEnumerable(dataB.GetType(), versionB);

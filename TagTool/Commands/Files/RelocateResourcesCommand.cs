@@ -5,6 +5,7 @@ using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 
 namespace TagTool.Commands.Files
 {
@@ -94,9 +95,7 @@ namespace TagTool.Commands.Files
 
         private object ConvertData(Stream tagsStream, Stream sourceStream, Stream destStream, object data)
         {
-            if (data == null)
-                return null;
-
+  
             var type = data.GetType();
 
             if (type == typeof(PageableResource))
@@ -114,59 +113,54 @@ namespace TagTool.Commands.Files
                 return resource;
             }
 
-            if (type.IsPrimitive)
-                return data;
-            
-            if (type.IsArray)
-                return ConvertArray(tagsStream, sourceStream, destStream, (Array)data);
+   			switch (data)
+			{
+				case null:
+				case string _:
+				case ValueType _:
+					return data;
+				case PageableResource resource:
+					return ConvertPageableResource(sourceStream, destStream, resource);
+				case TagStructure structure:
+					return ConvertStructure(tagsStream, sourceStream, destStream, structure);
+				case IList collection:
+					return ConvertCollection(tagsStream, sourceStream, destStream, collection);
+			}
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(tagsStream, sourceStream, destStream, data, type);
+			return data;
+		}
 
-            if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(tagsStream, sourceStream, destStream, data, type);
+		private PageableResource ConvertPageableResource(Stream sourceStream, Stream destStream, PageableResource resource)
+		{
+			if (resource.GetLocation(out var location) && location == ResourceLocation.ResourcesB)
+			{
+				resource.ChangeLocation(ResourceLocation.Resources);
 
-            return data;
-        }
+				var resourceData = ResourcesB.ExtractRaw(sourceStream, resource.Page.Index, resource.Page.CompressedBlockSize);
+				resource.Page.Index = Resources.AddRaw(destStream, resourceData);
+			}
 
-        private Array ConvertArray(Stream tagsStream, Stream sourceStream, Stream destStream, Array array)
+			return resource;
+		}
+
+		private IList ConvertCollection(Stream tagsStream, Stream sourceStream, Stream destStream, IList collection)
+		{
+			if (collection.GetType().GetElementType().IsPrimitive)
+				return collection;
+			
+			for (var i = 0; i < collection.Count; i++)
+			{
+				var oldValue = collection[i];
+				var newValue = ConvertData(tagsStream, sourceStream, destStream, destStream);
+				collection[i] = newValue;
+			}
+
+			return collection;
+		}
+
+		private T ConvertStructure<T>(Stream tagsStream, Stream sourceStream, Stream destStream, T data) where T : TagStructure
         {
-            if (array.GetType().GetElementType().IsPrimitive)
-                return array;
-
-            for (var i = 0; i < array.Length; i++)
-            {
-                var oldValue = array.GetValue(i);
-                var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
-                array.SetValue(newValue, i);
-            }
-
-            return array;
-        }
-
-        private object ConvertList(Stream tagsStream, Stream sourceStream, Stream destStream, object list, Type type)
-        {
-            if (type.GenericTypeArguments[0].IsPrimitive)
-                return list;
-
-            var count = (int)type.GetProperty("Count").GetValue(list);
-
-            var getItem = type.GetMethod("get_Item");
-            var setItem = type.GetMethod("set_Item");
-
-            for (var i = 0; i < count; i++)
-            {
-                var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);
-                setItem.Invoke(list, new object[] { i, newValue });
-            }
-
-            return list;
-        }
-
-        private object ConvertStructure(Stream tagsStream, Stream sourceStream, Stream destStream, object data, Type type)
-        {
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, CacheContext.Version))
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);

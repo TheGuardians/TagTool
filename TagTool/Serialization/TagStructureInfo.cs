@@ -75,7 +75,7 @@ namespace TagTool.Serialization
             // Get the attribute for the main structure type
             Structure = ReflectionCache.GetTagStructureAttribute(mainType, version);
             if (Structure == null)
-                throw new InvalidOperationException("No TagStructure attribute which matches the target version was found on " + mainType.Name);
+                throw new InvalidOperationException($"No `{nameof(TagStructureAttribute)}` for `{version.ToString()}` found on `{mainType.Name}`.");
 
 
 			// Scan through the type's inheritance hierarchy and analyze each TagStructure attribute

@@ -34,13 +34,10 @@ namespace TagTool.Commands.Shaders
 
         public override object Execute(List<string> args)
         {
-			ReflectionCache.IsEnabled = false;
-
             if (args.Count <= 0) return false;
 
             Regenerate(args[0]?.ToLower());
 
-			ReflectionCache.IsEnabled = true;
 			return true;
         }
 
