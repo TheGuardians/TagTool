@@ -10,6 +10,7 @@ using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.Serialization;
+using TagTool.Shaders;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
@@ -36,6 +37,8 @@ namespace TagTool.Commands.Porting
 			"rmt2"
 		};
 
+		private readonly Dictionary<Tag, CachedTagInstance> DefaultTags = new Dictionary<Tag, CachedTagInstance> { };
+
 		public PortTagCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
 			base(true,
 
@@ -47,6 +50,9 @@ namespace TagTool.Commands.Porting
 			CacheContext = cacheContext;
 			BlamCache = blamCache;
 			GeometryConverter = new RenderGeometryConverter(cacheContext, blamCache);
+
+			foreach (var tagType in TagDefinition.Types.Keys)
+				DefaultTags[tagType] = CacheContext.TagCache.Index.FindFirstInGroup(tagType);
 		}
 
 		public override object Execute(List<string> args)
@@ -292,7 +298,11 @@ namespace TagTool.Commands.Porting
 			}
 
 			if ((groupTag == "snd!") && !FlagIsSet(PortingFlags.Audio))
-				return null;
+			{
+				PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultSoundName);
+				CacheContext.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTagInstance result);
+				return result;
+			}
 
 			var wasReplacing = FlagIsSet(PortingFlags.Replace);
 			var wasNew = FlagIsSet(PortingFlags.New);
@@ -717,6 +727,10 @@ namespace TagTool.Commands.Porting
 				case TagStructure tagStructure: // much faster to pattern match a type than to check for custom attributes.
 					tagStructure = ConvertStructure(cacheStream, resourceStreams, tagStructure, definition, blamTagName);
 					return data;
+
+				case PixelShaderReference _:
+				case VertexShaderReference _:
+					return null;
 
 				default:
 					Console.WriteLine($"WARNING: Unhandled type in `ConvertData`: {data.GetType().Name} (probably harmless).");

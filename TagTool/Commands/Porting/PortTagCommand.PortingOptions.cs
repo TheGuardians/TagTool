@@ -192,8 +192,6 @@ namespace TagTool.Commands.Porting
 							this.SetFlags(flagValues[i]);
 						else
 							this.RemoveFlags(flagValues[i]);
-				
-				args.RemoveAt(0);
 			}
 		}
 
