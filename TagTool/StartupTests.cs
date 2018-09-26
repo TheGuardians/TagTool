@@ -1,11 +1,6 @@
-﻿//#define STARTUP_TESTS_ENABLED
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Serialization;
 
 namespace TagTool.Commands
@@ -16,36 +11,47 @@ namespace TagTool.Commands
 
 		public static void Run()
 		{
-#if DEBUG && STARTUP_TESTS_ENABLED
+#if DEBUG
 			foreach (var method in typeof(StartupTests).GetRuntimeMethods())
 			{
-				if (method.IsDefined(typeof(StartupTestAttribute)))
+				var info = method.GetCustomAttribute<StartupTestAttribute>();
+				if (info is null || !info.Enabled)
+					continue;
+
+				// Print the test startup info.
+				var color = Console.ForegroundColor;
+				Console.ForegroundColor = ConsoleColor.Magenta;
+				Console.WriteLine(info.Text);
+				Console.ForegroundColor = color;
+
+				// Start a timer and run the test.
+				bool success = true;
+				var testDelegate = method.CreateDelegate(typeof(TestDelegate)) as TestDelegate;
+				var sw = Stopwatch.StartNew();
+				testDelegate(ref success);
+
+				// Print the time the test took.
+				var milliseconds = sw.ElapsedMilliseconds;
+				var output = milliseconds.FormatMilliseconds();
+				var startColor = Console.ForegroundColor;
+				Console.ForegroundColor = ConsoleColor.DarkCyan;
+				Console.WriteLine(output);
+
+				// Print test results.
+				if (success)
 				{
-					var info = method.GetCustomAttribute<StartupTestAttribute>();
-					if (!info.Enabled)
-						continue;
-
-					bool success = true;
-					var color = Console.ForegroundColor;
-					Console.ForegroundColor = ConsoleColor.Magenta;
-					Console.WriteLine(info.Text);
-					Console.ForegroundColor = color;
-					(method.CreateDelegate(typeof(TestDelegate)) as TestDelegate)(ref success);
-
-					if (success)
-					{
-						Console.ForegroundColor = ConsoleColor.Green;
-						Console.WriteLine("		*** SUCCESS ***");
-					}
-					else
-					{
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine("		*** FAILURE ***");
-					}
-
-					Console.ForegroundColor = color;
-					Console.WriteLine();
+					Console.ForegroundColor = ConsoleColor.Green;
+					Console.WriteLine("		*** SUCCESS ***");
 				}
+				else
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Debug.WriteLine("		*** FAILURE ***");
+				}
+
+				// Set color back and write an empty line.
+				Console.ForegroundColor = color;
+				Console.WriteLine();
 			}
 #endif
 		}

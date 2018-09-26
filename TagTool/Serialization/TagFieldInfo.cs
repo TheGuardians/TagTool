@@ -90,6 +90,9 @@ namespace TagTool.Serialization
 			var ownerType = tagFieldInfo.DeclaringType;
 			var valueType = tagFieldInfo.FieldType;
 
+			if (ownerType.IsGenericTypeDefinition)
+				ownerType = ownerType.MakeGenericType(valueType);
+
 			// Parameter "target", the object on which to set the field `field`.
 			var ownerParam = Expression.Parameter(typeof(object));
 

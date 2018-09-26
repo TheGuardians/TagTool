@@ -19,7 +19,7 @@ namespace TagTool.Commands.Tags
 
             context.AddCommand(new HelpCommand(contextStack));
             context.AddCommand(new ClearCommand());
-            context.AddCommand(new DumpLogCommand());
+			context.AddCommand(new DumpLogCommand());
             context.AddCommand(new EchoCommand());
             context.AddCommand(new SetLocaleCommand());
 			context.AddCommand(new StopwatchCommand());

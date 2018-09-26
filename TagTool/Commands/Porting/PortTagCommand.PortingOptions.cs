@@ -192,8 +192,6 @@ namespace TagTool.Commands.Porting
 							this.SetFlags(flagValues[i]);
 						else
 							this.RemoveFlags(flagValues[i]);
-				
-				args.RemoveAt(0);
 			}
 		}
 
@@ -208,24 +206,23 @@ namespace TagTool.Commands.Porting
 				"Available Options:" + Environment.NewLine +
 				Environment.NewLine;
 
-			var padCount = Enum.GetNames(typeof(PortingFlags)).Max(flagName => flagName.Length) + 1;
-			var padChar = ' ';
+			var padCount = Enum.GetNames(typeof(PortingFlags)).Max(flagName => flagName.Length);
 
 			foreach (var portingFlagInfo in typeof(PortingFlags).GetMembers(BindingFlags.Public | BindingFlags.Static).OrderBy(m => m.MetadataToken))
 			{
-				var attr = (PortingFlagDescriptionAttribute)portingFlagInfo.GetCustomAttributes(typeof(PortingFlagDescriptionAttribute), false).FirstOrDefault();
+				var attr = portingFlagInfo.GetCustomAttribute<PortingFlagDescriptionAttribute>(false);
 
 				// Use the attribute description for the flags help-description.
 				if (attr != null)
-					info += $"{portingFlagInfo.Name.PadRight(padCount, padChar)}- " +
+					info += $"{portingFlagInfo.Name.PadRight(padCount)} - " +
 						$"{attr.Description}" + Environment.NewLine;
 
 				// Use the flags sub-set of the flag for the flags help-description
 				else
 				{
 					var portingFlags = (PortingFlags)Enum.Parse(typeof(PortingFlags), portingFlagInfo.Name);
-					info += $"{portingFlagInfo.Name.PadRight(padCount, padChar)}- " +
-						$"{string.Join(" & ", portingFlags.GetIndividualFlags())}" + Environment.NewLine;
+					info += $"{portingFlagInfo.Name.PadRight(padCount)} - " +
+						$"{string.Join(", ", portingFlags.GetIndividualFlags())}" + Environment.NewLine;
 				}
 			}
 

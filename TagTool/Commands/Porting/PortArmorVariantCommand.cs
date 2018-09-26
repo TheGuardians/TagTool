@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Commands.Porting
 {
@@ -632,30 +633,23 @@ namespace TagTool.Commands.Porting
 
         private object ConvertData(Stream cacheStream, object data, bool replace)
         {
-            if (data == null)
-                return null;
+			switch (data)
+			{
+				case StringId stringId:
+					return ConvertStringId(stringId);
+				case null:
+				case string _:
+				case ValueType _:
+					return data;
+				case CachedTagInstance tag:
+					return null;
+				case TagStructure structure:
+					return ConvertStructure(cacheStream, structure, replace);
+				case IList collection:
+					return ConvertCollection(cacheStream, collection, replace);
+			}
 
-            var type = data.GetType();
-
-            if (type.IsPrimitive)
-                return data;
-
-            if (type == typeof(CachedTagInstance))
-                return null;
-
-            if (type == typeof(StringId))
-                return ConvertStringId((StringId)data);
-
-            if (type.IsArray)
-                return ConvertArray(cacheStream, (Array)data, replace);
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(cacheStream, data, type, replace);
-
-            if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(cacheStream, data, type, replace);
-
-            return data;
+			return data;
         }
 
         private StringId ConvertStringId(StringId stringId)
@@ -676,44 +670,24 @@ namespace TagTool.Commands.Porting
             return CacheContext.GetStringId(value);
         }
 
-        private Array ConvertArray(Stream cacheStream, Array array, bool replace)
+		private IList ConvertCollection(Stream cacheStream, IList collection, bool replace)
+		{
+			if (collection.GetType().GetElementType().IsPrimitive)
+				return collection;
+
+			for (var i = 0; i < collection.Count; i++)
+			{
+				var oldValue = collection[i];
+				var newValue = ConvertData(cacheStream, oldValue, replace);
+				collection[i] = newValue;
+			}
+
+			return collection;
+		}
+
+        private T ConvertStructure<T>(Stream cacheStream, T data, bool replace) where T : TagStructure
         {
-            if (array.GetType().GetElementType().IsPrimitive)
-                return array;
-
-            for (var i = 0; i < array.Length; i++)
-            {
-                var oldValue = array.GetValue(i);
-                var newValue = ConvertData(cacheStream, oldValue, replace);
-                array.SetValue(newValue, i);
-            }
-
-            return array;
-        }
-
-        private object ConvertList(Stream cacheStream, object list, Type type, bool replace)
-        {
-            if (type.GenericTypeArguments[0].IsPrimitive)
-                return list;
-
-            var count = (int)type.GetProperty("Count").GetValue(list);
-
-            var getItem = type.GetMethod("get_Item");
-            var setItem = type.GetMethod("set_Item");
-
-            for (var i = 0; i < count; i++)
-            {
-                var oldValue = getItem.Invoke(list, new object[] { i });
-                var newValue = ConvertData(cacheStream, oldValue, replace);
-                setItem.Invoke(list, new object[] { i, newValue });
-            }
-
-            return list;
-        }
-
-        private object ConvertStructure(Stream cacheStream, object data, Type type, bool replace)
-        {
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, CacheContext.Version))
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = ConvertData(cacheStream, oldValue, replace);

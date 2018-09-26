@@ -12,6 +12,7 @@ using TagTool.Tags.Resources;
 using TagTool.Scripting;
 using TagTool.Commands.Common;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Commands.Tags
 {
@@ -182,33 +183,34 @@ namespace TagTool.Commands.Tags
 
         private object Convert(object data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
-            if (data == null)
-                return null;
-            var type = data.GetType();
-            if (type.IsPrimitive)
-                return data;
-            if (type == typeof(StringId))
-                return ConvertStringID((StringId)data, srcCacheContext, destCacheContext);
-            if (type == typeof(CachedTagInstance))
-                return ConvertTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
-            if (type == typeof(PageableResource))
-                return ConvertResource((PageableResource)data, srcCacheContext, destCacheContext);
-            if (type == typeof(RenderGeometry))
-                return ConvertGeometry((RenderGeometry)data, srcCacheContext, destCacheContext);
-            if (type == typeof(GameObjectType))
-                return ConvertGameObjectType((GameObjectType)data, srcCacheContext, destCacheContext);
-            if (type == typeof(ObjectTypeFlags))
-                return ConvertObjectTypeFlags((ObjectTypeFlags)data, srcCacheContext, destCacheContext);
-            if (type == typeof(ScenarioObjectType))
-                return ConvertScenarioObjectType((ScenarioObjectType)data, srcCacheContext, destCacheContext);
-            if (type.IsArray)
-                return ConvertArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ConvertList(data, type, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
-            if (type.GetCustomAttributes(typeof(TagStructureAttribute), false).Length > 0)
-                return ConvertStructure(data, type, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
-            return data;
-        }
+			switch (data)
+			{
+				case StringId stringId:
+					return ConvertStringID(stringId, srcCacheContext, destCacheContext);
+				case null:
+				case string _:
+				case ValueType _:
+					return data;
+				case CachedTagInstance cachedTagInstance:
+					return ConvertTag(cachedTagInstance, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+				case PageableResource pageableResource:
+					return ConvertResource(pageableResource, srcCacheContext, destCacheContext);
+				case RenderGeometry renderGeometry:
+					return ConvertGeometry(renderGeometry, srcCacheContext, destCacheContext);
+				case GameObjectType gameObjectType:
+					return ConvertGameObjectType(gameObjectType, srcCacheContext, destCacheContext);
+				case ObjectTypeFlags objectTypeFlags:
+					return ConvertObjectTypeFlags(objectTypeFlags, srcCacheContext, destCacheContext);
+				case ScenarioObjectType scenarioObjectType:
+					return ConvertScenarioObjectType(scenarioObjectType, srcCacheContext, destCacheContext);
+				case TagStructure tagStructure:
+					return ConvertStructure(tagStructure, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+				case IList collection:
+					return ConvertCollection(collection, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+			}
+
+			return data;
+		}
 
         private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags data, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
@@ -248,10 +250,24 @@ namespace TagTool.Commands.Tags
             return list;
         }
 
-        private object ConvertStructure(object data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+		private IList ConvertCollection(IList collection, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+		{
+			if (collection.Count == 0 || collection[0].GetType().IsPrimitive)
+				return collection;
+
+			for (var i = 0; i < collection.Count; i++)
+			{
+				var oldValue = collection[i];
+				var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+				collection[i] = newValue;
+			}
+			return collection;
+		}
+
+		private T ConvertStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
         {
 			// Convert each field
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(type, destCacheContext.Version))
+			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);

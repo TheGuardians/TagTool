@@ -6,95 +6,98 @@ using TagTool.Serialization;
 
 namespace TagTool.Tags
 {
-    public static class TagDefinition
-    {
-        /// <summary>
-        /// Finds the structure type corresponding to a group tag.
-        /// </summary>
-        /// <param name="groupTag">The group tag of the group to search for.</param>
-        /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
-        public static Type Find(Tag groupTag)
-        {
-            Types.TryGetValue(groupTag, out var result);
-            return result;
-        }
+	public static class TagDefinition
+	{
+		/// <summary>
+		/// Finds the structure type corresponding to a group tag.
+		/// </summary>
+		/// <param name="groupTag">The group tag of the group to search for.</param>
+		/// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
+		public static Type Find(Tag groupTag)
+		{
+			Types.TryGetValue(groupTag, out var result);
+			return result;
+		}
 
-        public static bool TryFind(Tag groupTag, out Type result) =>
-            Types.TryGetValue(groupTag, out result);
+		public static bool TryFind(Tag groupTag, out Type result) =>
+			Types.TryGetValue(groupTag, out result);
 
-        /// <summary>
-        /// Finds the structure type corresponding to a group.
-        /// </summary>
-        /// <param name="group">The group to search for.</param>
-        /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
-        public static Type Find(TagGroup group) => Find(group.Tag);
+		/// <summary>
+		/// Finds the structure type corresponding to a group.
+		/// </summary>
+		/// <param name="group">The group to search for.</param>
+		/// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
+		public static Type Find(TagGroup group) => Find(group.Tag);
 
-        public static bool TryFind(TagGroup group, out Type result) =>
-            TryFind(group.Tag, out result);
+		public static bool TryFind(TagGroup group, out Type result) =>
+			TryFind(group.Tag, out result);
 
-        /// <summary>
-        /// Finds the structure type corresponding to a group tag.
-        /// </summary>
-        /// <param name="group">The group name or group tag of the tag definition.</param>
-        /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
-        public static Type Find(string group)
-        {
-            foreach (var entry in Types)
-            {
-                var type = entry.Value;
-                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+		/// <summary>
+		/// Finds the structure type corresponding to a group tag.
+		/// </summary>
+		/// <param name="group">The group name or group tag of the tag definition.</param>
+		/// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
+		public static Type Find(string group)
+		{
+			foreach (var entry in Types)
+			{
+				var type = entry.Value;
+				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+				if (attribute.Name == group)
+					return type;
+			}
 
-                if (attr?.Name == group)
-                    return type;
-            }
+			return Find(new Tag(group));
+		}
 
-            return Find(new Tag(group));
-        }
+		public static bool TryFind(string group, out Type result)
+		{
+			foreach (var entry in Types)
+			{
+				var type = entry.Value;
+				var attribute = ReflectionCache.GetTagStructureAttribute(type);
 
-        public static bool TryFind(string group, out Type result)
-        {
-            foreach (var entry in Types)
-            {
-                var type = entry.Value;
-                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+				if (attribute.Name == group)
+				{
+					result = type;
+					return true;
+				}
+			}
 
-                if (attr?.Name == group)
-                {
-                    result = type;
-                    return true;
-                }
-            }
+			return TryFind(new Tag(group), out result);
+		}
 
-            return TryFind(new Tag(group), out result);
-        }
+		/// <summary>
+		/// Checks to see if a tag definition exists.
+		/// </summary>
+		/// <param name="groupTag">The group tag of the tag definition.</param>
+		/// <returns>true if the tag definition exists.</returns>
+		public static bool Exists(Tag groupTag) => Types.ContainsKey(groupTag);
 
-        /// <summary>
-        /// Checks to see if a tag definition exists.
-        /// </summary>
-        /// <param name="groupTag">The group tag of the tag definition.</param>
-        /// <returns>true if the tag definition exists.</returns>
-        public static bool Exists(Tag groupTag) => Types.ContainsKey(groupTag);
+		/// <summary>
+		/// Checks to see if a tag definition exists.
+		/// </summary>
+		/// <param name="group">The group name or group tag of the tag definition.</param>
+		/// <returns>true if the tag definition exists.</returns>
+		public static bool Exists(string group)
+		{
+			foreach (var entry in Types)
+			{
+				var type = entry.Value;
+				var attribute = ReflectionCache.GetTagStructureAttribute(type);
 
-        /// <summary>
-        /// Checks to see if a tag definition exists.
-        /// </summary>
-        /// <param name="group">The group name or group tag of the tag definition.</param>
-        /// <returns>true if the tag definition exists.</returns>
-        public static bool Exists(string group)
-        {
-            foreach (var entry in Types)
-            {
-                var type = entry.Value;
-                var attr = type.GetCustomAttributes(typeof(TagStructureAttribute), false)?[0] as TagStructureAttribute ?? null;
+				if (attribute.Name == group)
+					return true;
+			}
 
-                if (attr?.Name == group)
-                    return true;
-            }
+			return Exists(new Tag(group));
+		}
 
-            return Exists(new Tag(group));
-        }
-
-        public static Tag GetGroupTag<T>() => new Tag((typeof(T).GetCustomAttributes(typeof(TagStructureAttribute), false)[0] as TagStructureAttribute)?.Tag ?? Tag.Null.ToString());
+		public static Tag GetGroupTag<T>()
+		{
+			var attribute = ReflectionCache.GetTagStructureAttribute(typeof(T));
+			return new Tag(attribute.Tag);
+		}
 
         public static readonly Dictionary<Tag, Type> Types = new Dictionary<Tag, Type>
         {
