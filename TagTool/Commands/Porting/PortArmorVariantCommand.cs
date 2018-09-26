@@ -248,7 +248,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup("rm  "))
                     {
-                        if (CacheContext.TagNames.ContainsKey(instance.Index) && CacheContext.TagNames[instance.Index] == blamRenderMethodTag.Name)
+                        if (instance?.Name == blamRenderMethodTag.Name)
                         {
                             renderMethodExists = true;
                             material.RenderMethod = instance;
@@ -610,7 +610,7 @@ namespace TagTool.Commands.Porting
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
                 CacheContext.Serialize(cacheStream, edModeTag, edModeDefinition);
-                CacheContext.TagNames[edModeTag.Index] = isScenery ?
+                edModeTag.Name = isScenery ?
                     (unitName == "spartan" ?
                         $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
                         $@"objects\characters\elite\mp_elite\armor\{variantName}") :
@@ -622,7 +622,7 @@ namespace TagTool.Commands.Porting
                 {
                     CacheContext.Serialize(cacheStream, edHlmtTag, edHlmtDefinition);
                     CacheContext.Serialize(cacheStream, edScenTag, edScenDefinition);
-                    CacheContext.TagNames[edHlmtTag.Index] = CacheContext.TagNames[edScenTag.Index] = unitName == "spartan" ?
+                    edScenTag.Name = unitName == "spartan" ?
                         $@"objects\characters\masterchief\mp_masterchief\armor\{variantName}" :
                         $@"objects\characters\elite\mp_elite\armor\{variantName}";
                 }

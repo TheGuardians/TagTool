@@ -11,7 +11,7 @@ namespace TagTool.Cache
         /// <summary>
         /// The tag data's group.
         /// </summary>
-        public TagGroup Group { get; set; } = TagGroup.Null;
+        public TagGroup Group { get; set; } = TagGroup.None;
 
         /// <summary>
         /// The offset of the main structure in the tag data.

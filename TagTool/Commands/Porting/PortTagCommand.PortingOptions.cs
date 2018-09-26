@@ -75,8 +75,8 @@ namespace TagTool.Commands.Porting
 			/// <summary>
 			/// TBD.
 			/// </summary>
-			[PortingFlagDescription("TBD.")]
-			ShaderTest = 1 << 9,
+			//[PortingFlagDescription("TBD.")]
+			//ShaderTest = 1 << 9,
 
 			/// <summary>
 			/// Attempt to match shaders to existing tags.

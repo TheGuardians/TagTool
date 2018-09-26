@@ -83,7 +83,13 @@ namespace TagTool.Commands.Tags
                 writer.Close();
             }
 
-            CacheContext.TagNames = tagNames;
+            foreach (var instance in CacheContext.TagCache.Index)
+            {
+                if (instance == null || !tagNames.ContainsKey(instance.Index))
+                    continue;
+
+                instance.Name = tagNames[instance.Index];
+            }
 
             return true;
         }

@@ -84,7 +84,7 @@ namespace TagTool.Commands.Shaders
                 }
 
                 var rmdf_index = rm_shader_definition.BaseRenderMethod.Index;
-                rmdf_name = CacheContext.TagNames.ContainsKey(rmdf_index) ? CacheContext.TagNames[rmdf_index] : rmdf_index.ToString("X");
+                rmdf_name = CacheContext.GetTag(rmdf_index)?.Name ?? rmdf_index.ToString("X");
             }
 
             return false;
@@ -121,7 +121,7 @@ namespace TagTool.Commands.Shaders
                 rmt2_definition = CacheContext.Deserializer.Deserialize<RenderMethodTemplate>(rmt2_context);
 
                 // console output
-                rmt2_name = CacheContext.TagNames.ContainsKey(rmt2_context.Tag.Index) ? CacheContext.TagNames[rmt2_context.Tag.Index] : rmt2_context.Tag.Index.ToString("X");
+                rmt2_name = rmt2_context?.Tag?.Name ?? rmt2_context.Tag.Index.ToString("X");
                 Console.WriteLine($"Regenerating {rmt2_name}");
             }
 
@@ -237,12 +237,12 @@ namespace TagTool.Commands.Shaders
                 case "shader_templates":
                 case "shader_template":
                     template_type = typeof(Shader);
-                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
+                    //shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\shader").Select(item => CacheContext.GetTag(item.Key)).ToList();
                     break;
                 case "cortana_templates":
                 case "cortana_template":
                     template_type = typeof(ShaderCortana);
-                    shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\cortana").Select(item => CacheContext.GetTag(item.Key)).ToList();
+                    //shader_rmdfs = CacheContext.TagNames.Where(item => item.Value == @"shaders\cortana").Select(item => CacheContext.GetTag(item.Key)).ToList();
                     break;
                 case null:
                 case "*":

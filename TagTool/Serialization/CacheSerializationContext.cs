@@ -106,7 +106,7 @@ namespace TagTool.Serialization
                     item.ParentGroupTag,
                     item.GrandparentGroupTag,
                     BlamCache.CacheContext?.GetStringId(item.GroupName) ?? StringId.Invalid) :
-                TagGroup.Null;
+                TagGroup.None;
 
             if (index == -1 || group.BelongsTo(Tag.Null))
                 return null;

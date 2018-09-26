@@ -43,13 +43,7 @@ namespace TagTool.Commands.Editing
             ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, TagInstance, TagDefinition));
 
             var groupName = CacheContext.GetString(TagInstance.Group.Name);
-            var tagName = $"0x{TagInstance.Index:X4}";
-
-            if (CacheContext.TagNames.ContainsKey(TagInstance.Index))
-            {
-                tagName = CacheContext.TagNames[TagInstance.Index];
-                tagName = $"(0x{TagInstance.Index:X4}) {tagName.Substring(tagName.LastIndexOf('\\') + 1)}";
-            }
+            var tagName = TagInstance?.Name ?? $"0x{TagInstance.Index:X4}";
 
             Console.WriteLine($"Tag {tagName}.{groupName} has been opened for editing.");
             Console.WriteLine("New commands are now available. Enter \"help\" to view them.");

@@ -159,7 +159,7 @@ namespace TagTool.Commands.Porting
             //shader_cortana.Material = shader.Material;
 
             //ho_cortana_shader.BaseRenderMethod = shader.BaseRenderMethod;
-            //CacheContext.TagNames[newCortanaShaderInstance.Index] = blamTag.Name;
+            //newCortanaShaderInstance.Name = blamTag.Name;
             //CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newCortanaShaderInstance), ho_cortana_shader);
             //CacheContext.SaveTagNames();
 
@@ -441,11 +441,11 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            CacheContext.TagNames[newPIXLInstance.Index] = template_name;
+            newPIXLInstance.Name = template_name;
             CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newPIXLInstance), pixl);
-            CacheContext.TagNames[newVTSHInstance.Index] = template_name;
+            newVTSHInstance.Name = template_name;
             CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newVTSHInstance), vtsh);
-            CacheContext.TagNames[rmt2Instance.Index] = template_name;
+            rmt2Instance.Name = template_name;
             CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, rmt2Instance), rmt2);
 
             CacheContext.SaveTagNames();

@@ -125,9 +125,7 @@ namespace TagTool.Commands.Tags
                 if (groupTags.Length != 0 && !dependency.IsInGroup(groupTags))
                     continue;
 
-                var tagName = CacheContext.TagNames.ContainsKey(dependency.Index) ?
-                    CacheContext.TagNames[dependency.Index] :
-                    $"0x{dependency.Index:X4}";
+                var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
                 Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{CacheContext.GetString(dependency.Group.Name)}");
             }
@@ -145,9 +143,7 @@ namespace TagTool.Commands.Tags
 
             foreach (var dependency in dependsOn)
             {
-                var tagName = CacheContext.TagNames.ContainsKey(dependency.Index) ?
-                    CacheContext.TagNames[dependency.Index] :
-                    $"0x{dependency.Index:X4}";
+                var tagName = dependency?.Name ?? $"0x{dependency.Index:X4}";
 
                 Console.WriteLine($"[Index: 0x{dependency.Index:X4}, Offset: 0x{dependency.HeaderOffset:X8}, Size: 0x{dependency.TotalSize:X4}] {tagName}.{CacheContext.GetString(dependency.Group.Name)}");
             }

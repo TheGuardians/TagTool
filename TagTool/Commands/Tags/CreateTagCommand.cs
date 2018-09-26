@@ -126,9 +126,7 @@ namespace TagTool.Commands.Tags
                 CacheContext.Serialize(stream, instance, Activator.CreateInstance(TagDefinition.Find(groupTag)));
             }
 
-            var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                CacheContext.TagNames[instance.Index] :
-                $"0x{instance.Index:X4}";
+            var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
             Console.WriteLine($"[Index: 0x{instance.Index:X4}, Offset: 0x{instance.HeaderOffset:X8}, Size: 0x{instance.TotalSize:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}");
 

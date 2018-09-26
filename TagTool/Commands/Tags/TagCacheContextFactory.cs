@@ -57,7 +57,6 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new Bitmaps.ExtractBitmapsCommand(cacheContext));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
-            context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new RebuildStringIdsCommand(cacheContext));
             context.AddCommand(new OpenCacheFileCommand(contextStack, cacheContext));
             context.AddCommand(new ExportTagModCommand(cacheContext));

@@ -103,7 +103,7 @@ namespace TagTool.Commands.Files
 
                     if (!retainedTags.Contains(i))
                     {
-                        var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ? CacheContext.TagNames[tag.Index] : $"0x{tag.Index:X4}";
+                        var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
                         var tagGroupName = CacheContext.GetString(tag.Group.Name);
 
                         Console.Write($"Nulling {tagName}.{tagGroupName}...");

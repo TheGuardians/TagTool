@@ -20,17 +20,6 @@ namespace TagTool.Cache
         // Size of a tag header with no dependencies or offsets
         private const uint TagHeaderSize = 0x24;
 
-        public CachedTagInstance(int index)
-        {
-            Index = index;
-        }
-
-        public CachedTagInstance(int index, TagGroup group)
-        {
-            Index = index;
-            Group = group;
-        }
-
         /// <summary>
         /// Gets the tag's index.
         /// </summary>
@@ -62,6 +51,11 @@ namespace TagTool.Cache
         public uint Checksum { get; private set; }
 
         /// <summary>
+        /// The name of the tag instance.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// Gets the indices of tags that this tag depends on.
         /// </summary>
         public ReadOnlySet<int> Dependencies { get; private set; } = new ReadOnlySet<int>(new HashSet<int>());
@@ -82,6 +76,19 @@ namespace TagTool.Cache
         /// See the remarks for <see cref="PointerOffsets"/>.
         /// </remarks>
         public IReadOnlyList<uint> ResourcePointerOffsets => _resourceOffsets;
+
+        public CachedTagInstance(int index, string name = null) :
+            this(index, TagGroup.None, name)
+        {
+        }
+
+        public CachedTagInstance(int index, TagGroup group, string name = null)
+        {
+            Index = index;
+            Group = group;
+            if (name != null)
+                Name = name;
+        }
 
         /// <summary>
         /// Determines whether the tag belongs to a tag group.

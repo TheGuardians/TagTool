@@ -115,9 +115,7 @@ namespace TagTool.Commands.Tags
                     if (instance == null || !instance.IsInGroup(groupTag))
                         continue;
 
-                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                        CacheContext.TagNames[instance.Index] :
-                        $"0x{instance.Index:X4}";
+                    var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
                     try
                     {

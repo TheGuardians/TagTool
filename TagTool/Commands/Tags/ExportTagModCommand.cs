@@ -94,7 +94,7 @@ namespace TagTool.Commands.Tags
                         continue;
 
                     var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                        CacheContext.TagNames[instance.Index] :
+                        instance.Name :
                         $"0x{instance.Index:X4}";
 
                     Console.WriteLine($"[Index: 0x{instance.Index:X4}, Offset: 0x{instance.HeaderOffset:X8}, Size: 0x{instance.TotalSize:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}");
@@ -112,9 +112,7 @@ namespace TagTool.Commands.Tags
                     if (instance == null)
                         continue;
 
-                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                        CacheContext.TagNames[instance.Index] :
-                        $"0x{instance.Index:X4}";
+                    var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
                     var groupName = CacheContext.GetString(instance.Group.Name);
 
@@ -150,9 +148,7 @@ namespace TagTool.Commands.Tags
                     if (instance == null)
                         continue;
 
-                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                        CacheContext.TagNames[instance.Index] :
-                        $"0x{instance.Index:X4}";
+                    var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
                     var groupName = CacheContext.GetString(instance.Group.Name);
 

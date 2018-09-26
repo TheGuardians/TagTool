@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 CachedTagInstance edTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("aigl")]);
-                CacheContext.TagNames[edTag.Index] = "globals\ai_globals";
+                edTag.Name = "globals\ai_globals";
                 CacheContext.Serialize(cacheStream, edTag, aigl);
                 matg.AiGlobals = edTag;
                 matg.AiGlobalsOld = new List<AiGlobalsDatum>();

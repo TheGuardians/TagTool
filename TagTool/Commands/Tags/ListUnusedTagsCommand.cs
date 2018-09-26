@@ -58,9 +58,7 @@ namespace TagTool.Commands.Tags
                 if (depCounts.ContainsKey(i))
                     continue;
 
-                var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
-                    CacheContext.TagNames[tag.Index] :
-                    "<unnamed>";
+                var tagName = tag.Name ?? "<unnamed>";
 
                 Console.Write($"{tagName} ");
                 TagPrinter.PrintTagShort(tag);

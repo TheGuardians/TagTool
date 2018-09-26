@@ -37,11 +37,11 @@ namespace TagTool.Commands.Tags
 
             if (args.Count < 2)
             {
-                CacheContext.TagNames.Remove(tag.Index);
+                tag.Name = null;
                 return true;
             }
 
-            CacheContext.TagNames[tag.Index] = args[1];
+            tag.Name = args[1];
 
             Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {args[1]}.{CacheContext.GetString(tag.Group.Name)}");
 

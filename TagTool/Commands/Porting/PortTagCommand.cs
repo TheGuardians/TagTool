@@ -229,18 +229,18 @@ namespace TagTool.Commands.Porting
 					return CacheContext.GetTag<ShaderHalogram>(@"objects\ui\shaders\editor_gizmo");
 
 				// Don't port rmdf tags when using ShaderTest (MatchShaders doesn't port either but that's handled elsewhere).
-				case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
-				case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
-					Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
-					return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
+				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					//return CacheContext.GetTag<RenderMethodDefinition>(blamTag.Name);
+				//case "rmdf" when FlagIsSet(PortingFlags.ShaderTest) && !CacheContext.TagNames.ContainsValue(blamTag.Name) && BlamCache.Version >= CacheVersion.Halo3Retail:
+					//Console.WriteLine($"WARNING: Unable to locate `{blamTag.Name}.rmdf`; using `shaders\\shader.rmdf` instead.");
+					//return CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
 			}
 
 			//
 			// Handle shader tags when not porting or matching shaders
 			//
 
-			if (!FlagsAnySet(PortingFlags.ShaderTest | PortingFlags.MatchShaders) &&
+			if (!FlagsAnySet(/*PortingFlags.ShaderTest | */PortingFlags.MatchShaders) &&
 				(RenderMethodTagGroups.Contains(groupTag) || EffectTagGroups.Contains(groupTag)))
 			{
 				switch (groupTag.ToString())
@@ -313,9 +313,10 @@ namespace TagTool.Commands.Porting
 
 			if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
 			{
-				foreach (var entry in CacheContext.TagNames.Where(i => i.Value == blamTag.Name))
+				foreach (var instance in CacheContext.TagCache.Index)
 				{
-					var instance = CacheContext.GetTag(entry.Key);
+                    if (instance == null || !instance.IsInGroup(blamTag.GroupTag) || instance.Name == null || instance.Name != blamTag.Name)
+                        continue;
 
 					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
 					{
@@ -332,9 +333,9 @@ namespace TagTool.Commands.Porting
 			}
 			else if (!FlagIsSet(PortingFlags.New))
 			{
-				foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
+				foreach (var instance in CacheContext.TagCache.Index)
 				{
-					if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
+					if (instance == null || !instance.IsInGroup(groupTag) || instance.Name == null || instance.Name != blamTag.Name)
 						continue;
 
 					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
@@ -344,21 +345,19 @@ namespace TagTool.Commands.Porting
 
 						if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
 							continue;
-					}
+                    }
 
-					if (CacheContext.TagNames[instance.Index] == blamTag.Name)
-					{
-						if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
-						{
-							if (!FlagIsSet(PortingFlags.Recursive) && wasSingle)
-								ToggleFlags(PortingFlags.Replace | PortingFlags.Recursive);
+                    if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
+                    {
+                        if (!FlagIsSet(PortingFlags.Recursive) && wasSingle)
+                            ToggleFlags(PortingFlags.Replace | PortingFlags.Recursive);
 
-							edTag = instance;
-							break;
-						}
-						else return edTag = instance;
-					}
-				}
+                        edTag = instance;
+                        break;
+                    }
+
+                    return edTag = instance;
+                }
 			}
 
 			if (FlagIsSet(PortingFlags.New) && !FlagIsSet(PortingFlags.Recursive) && wasSingle)
@@ -394,7 +393,7 @@ namespace TagTool.Commands.Porting
 				}
 			}
 
-			CacheContext.TagNames[edTag.Index] = blamTag.Name;
+			edTag.Name = blamTag.Name;
 
 			//
 			// Load the Blam tag definition
@@ -611,7 +610,6 @@ namespace TagTool.Commands.Porting
 
 			if (blamDefinition == null) //If blamDefinition is null, return null tag.
 			{
-				CacheContext.TagNames.Remove(edTag.Index);
 				CacheContext.TagCache.Index[edTag.Index] = null;
 				return null;
 			}
@@ -619,7 +617,7 @@ namespace TagTool.Commands.Porting
 			CacheContext.Serialize(cacheStream, edTag, blamDefinition);
 
 			if (FlagIsSet(PortingFlags.Print))
-				Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {CacheContext.TagNames[edTag.Index]}.{CacheContext.GetString(edTag.Group.Name)}");
+				Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{CacheContext.GetString(edTag.Group.Name)}");
 
 			return edTag;
 		}
@@ -646,10 +644,10 @@ namespace TagTool.Commands.Porting
 						{
 							foreach (var instance in CacheContext.TagCache.Index.FindAllInGroup(tag.Group))
 							{
-								if (instance == null || !CacheContext.TagNames.ContainsKey(instance.Index))
+								if (instance == null || instance.Name == null)
 									continue;
 
-								if (CacheContext.TagNames[instance.Index] == blamTagName)
+								if (instance.Name == blamTagName)
 									return instance;
 							}
 
@@ -898,21 +896,18 @@ namespace TagTool.Commands.Porting
 			if (index == -1)
 				return null;
 
-			var instance = BlamCache.IndexItems.Find(i => i.ID == index);
+			var blamTag = BlamCache.IndexItems.Find(i => i.ID == index);
 
-			if (instance != null)
-			{
-				var tags = CacheContext.TagCache.Index.FindAllInGroup(instance.GroupTag);
+            if (blamTag == null)
+            {
+                foreach (var instance in CacheContext.TagCache.Index)
+                {
+                    if (instance == null || !instance.IsInGroup(blamTag.GroupTag) || instance.Name == null || instance.Name != blamTag.Name || instance.Index >= maxIndex)
+                        continue;
 
-				foreach (var tag in tags)
-				{
-					if (!CacheContext.TagNames.ContainsKey(tag.Index))
-						continue;
-
-					if (instance.Name == CacheContext.TagNames[tag.Index] && tag.Index < maxIndex)
-						return tag;
-				}
-			}
+                    return instance;
+                }
+            }
 
 			return null;
 		}

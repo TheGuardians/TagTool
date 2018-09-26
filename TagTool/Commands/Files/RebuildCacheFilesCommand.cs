@@ -107,7 +107,7 @@ namespace TagTool.Commands.Files
                 //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
                 var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
-                var defaultBitmapNames = new[]
+                var defaultBitmapNames = new List<string>
                 {
                     @"shaders\default_bitmaps\bitmaps\gray_50_percent",
                     @"shaders\default_bitmaps\bitmaps\alpha_grey50",
@@ -132,24 +132,12 @@ namespace TagTool.Commands.Files
                     @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
                 };
 
-                foreach (var tagName in defaultBitmapNames)
+                foreach (var tag in CacheContext.TagCache.Index)
                 {
-                    if (!CacheContext.TagNames.ContainsValue(tagName))
+                    if (tag == null || !tag.IsInGroup("bitm") || tag.Name == null || !defaultBitmapNames.Contains(tag.Name))
                         continue;
 
-                    foreach (var entry in CacheContext.TagNames)
-                    {
-                        var tag = CacheContext.GetTag(entry.Key);
-
-                        if (tag == null || !tag.IsInGroup("bitm"))
-                            continue;
-
-                        if (tagName == entry.Value)
-                        {
-                            CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
-                            break;
-                        }
-                    }
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
                 }
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
@@ -194,7 +182,7 @@ namespace TagTool.Commands.Files
             if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
                 return null;
 
-            if (srcCacheContext.TagNames.ContainsKey(srcTag.Index) && srcCacheContext.TagNames[srcTag.Index].StartsWith("hf2p"))
+            if (srcTag?.Name?.StartsWith("hf2p") ?? false)
                 return null; // kill it with fucking fire
 							 // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
@@ -209,7 +197,7 @@ namespace TagTool.Commands.Files
             {
                 if (destCacheContext.TagCache.Index[i] == null)
                 {
-                    destCacheContext.TagCache.Index[i] = destTag = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag]);
+                    destCacheContext.TagCache.Index[i] = destTag = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag], srcTag?.Name);
                     break;
                 }
             }
@@ -218,9 +206,6 @@ namespace TagTool.Commands.Files
                 destTag = destCacheContext.TagCache.AllocateTag(srcTag.Group);
 
             ConvertedTags[srcTag.Index] = destTag;
-
-            if (srcCacheContext.TagNames.ContainsKey(srcTag.Index))
-                destCacheContext.TagNames[destTag.Index] = srcCacheContext.TagNames[srcTag.Index];
 
             if (NoVariants && tagData is MultiplayerGlobals mulg)
                 CleanMultiplayerGlobals(mulg);
@@ -240,10 +225,6 @@ namespace TagTool.Commands.Files
                 CopyScenario(scenario2);
 
             destCacheContext.Serialize(destStream, destTag, tagData);
-
-            var tagName = destCacheContext.TagNames.ContainsKey(destTag.Index) ?
-                destCacheContext.TagNames[destTag.Index] :
-                $"0x{destTag.Index:X2}";
 
             return destTag;
         }

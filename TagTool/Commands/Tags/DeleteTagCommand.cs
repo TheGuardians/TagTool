@@ -45,9 +45,7 @@ namespace TagTool.Commands.Tags
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
-                var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
-                    CacheContext.TagNames[tag.Index] :
-                    "<unnamed>";
+                var tagName = tag.Name ?? "<unnamed>";
 
                 Console.Write($"Nulling {tagName}.{CacheContext.GetString(tag.Group.Name)}...");
                 CacheContext.TagCache.Index[tag.Index] = null;

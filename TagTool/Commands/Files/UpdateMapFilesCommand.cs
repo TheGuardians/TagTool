@@ -64,9 +64,8 @@ namespace TagTool.Commands.Files
 
             foreach (var entry in scenarioIndices)
             {
-                var scenarioPath = CacheContext.TagNames.ContainsKey(entry.Value.Item2) ?
-                    CacheContext.TagNames[entry.Value.Item2] :
-                    $"0x{entry.Value:X4}";
+                var scnrTag = CacheContext.GetTag(entry.Value.Item2);
+                var scenarioPath = scnrTag?.Name ?? $"0x{entry.Value:X4}";
 
                 var mapName = scenarioPath.Split('\\').Last();
                 var mapFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, $"{mapName}.map"));

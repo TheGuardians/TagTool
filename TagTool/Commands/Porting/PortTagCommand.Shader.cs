@@ -86,7 +86,7 @@ namespace TagTool.Commands.Porting
             if (edRmt2Instance == null)
                 return CacheContext.Deserialize<Shader>(cacheStream, CacheContext.GetTag<Shader>(@"shaders\invalid"));
 
-            var edRmt2Tagname = CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) ? CacheContext.TagNames[edRmt2Instance.Index] : $"0x{edRmt2Instance.Index:X4}";
+            var edRmt2Tagname = edRmt2Instance.Name ?? $"0x{edRmt2Instance.Index:X4}";
 
             // pRmsh pRmt2 now potentially have a new value
             if (pRmt2 != 0)
@@ -177,7 +177,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (CacheContext.TagNames.ContainsKey(edRmt2Instance.Index) && RmhgUnknownTemplates.Contains(CacheContext.TagNames[edRmt2Instance.Index]))
+            if (RmhgUnknownTemplates.Contains(edRmt2Instance.Name))
                 if (finalRm.ShaderProperties[0].Unknown.Count == 0)
                     finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>
                     {
@@ -197,7 +197,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var instance in CacheContext.TagCache.Index)
             {
-                if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
+                if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                     continue;
 
                 var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
@@ -232,11 +232,13 @@ namespace TagTool.Commands.Porting
             {
                 var rmt2Type = bmRmt2Instance.Name.Split("\\".ToArray())[1];
 
+                var edRmt2Tag = CacheContext.GetTag(edRmt2_.Key);
+
                 // Ignore all rmt2 that are not of the same type. 
-                if (!CacheContext.TagNames[edRmt2_.Key].Contains(rmt2Type))
+                if (edRmt2Tag == null || !(edRmt2Tag.Name?.Contains(rmt2Type) ?? false))
                     continue;
 
-                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, CacheContext.GetTag(edRmt2_.Key));
+                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Tag);
                 var edPixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
 
                 if (bmPixl.DrawModes.Count > edPixl.DrawModes.Count || bmPixl.Shaders.Count > edPixl.Shaders.Count)
@@ -315,7 +317,12 @@ namespace TagTool.Commands.Porting
             // rmt2 tagnames have a bunch of values, they're tagblock indexes in rmdf methods.ShaderOptions
             foreach (var d in edRmt2BestStats)
             {
-                var edSplit = CacheContext.TagNames[d.rmt2TagIndex].Split("\\".ToCharArray());
+                var dInstance = CacheContext.GetTag(d.rmt2TagIndex);
+
+                if (dInstance == null || dInstance.Name == null)
+                    continue;
+
+                var edSplit = dInstance.Name.Split("\\".ToCharArray());
                 var edType = edSplit[1];
                 var edRmdfValues = edSplit[2].Split("_".ToCharArray()).ToList();
                 edRmdfValues.RemoveAt(0);
@@ -781,10 +788,10 @@ namespace TagTool.Commands.Porting
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
             foreach (var instance in CacheContext.TagCache.Index)
             {
-                if (instance == null || !instance.IsInGroup("rmt2") || !CacheContext.TagNames.ContainsKey(instance.Index))
+                if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                     continue;
 
-                if (CacheContext.TagNames[instance.Index].StartsWith(blamRmt2Tag.Name))
+                if (instance.Name.StartsWith(blamRmt2Tag.Name))
                 {
                     var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
 
@@ -825,17 +832,24 @@ namespace TagTool.Commands.Porting
 
 		private void FixRmdfTagRef(RenderMethod finalRm)
 		{
-			// Set rmdf
 			var rmdfName = BlamCache.IndexItems.Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
-			if (CacheContext.TagNames.ContainsValue(rmdfName))
-				finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(rmdfName);
-			else
-			{
-				// all ms23 rmdf tags need to exist, using rmsh's rmdf for all rm's is a bad idea
-				finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
-				Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
-			}
-		}
+
+            foreach (var instance in CacheContext.TagCache.Index)
+            {
+                if (instance == null || !instance.IsInGroup("rmdf") || instance.Name == null)
+                    continue;
+
+                if (instance.Name == rmdfName)
+                {
+                    finalRm.BaseRenderMethod = instance;
+                    return;
+                }
+            }
+
+            // Note: All ms23 rmdf tags need to exist. Using shader rmdf for all render methods is a bad idea
+            finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
+            Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
+        }
 
 		private RenderMethod FixFunctions(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {

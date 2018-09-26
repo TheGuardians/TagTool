@@ -162,7 +162,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
-                CacheContext.TagNames[edTag.Index] = blamTagName + "_data";
+                edTag.Name = blamTagName + "_data";
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 

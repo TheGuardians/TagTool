@@ -201,9 +201,7 @@ namespace TagTool.Commands.Editing
                 {
                     var instance = (CachedTagInstance)newValue;
 
-                    var tagName = CacheContext.TagNames.ContainsKey(instance.Index) ?
-                        CacheContext.TagNames[instance.Index] :
-                        $"0x{instance.Index:X4}";
+                    var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
                     valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
                 }

@@ -41,7 +41,7 @@ namespace TagTool.Tags
         /// <summary>
         /// Represents a "null" tag group.
         /// </summary>
-        public static readonly TagGroup Null = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
+        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
 
         /// <summary>
         /// A dictionary of available tag groups.

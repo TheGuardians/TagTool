@@ -18,8 +18,10 @@ namespace TagTool.Cache
         public HaloOnlineCacheContext(DirectoryInfo directory) :
             base(directory)
         {
+            var tagNames = LoadTagNames();
+
             using (var stream = OpenTagCacheRead())
-                TagCache = new TagCache(stream);
+                TagCache = new TagCache(stream, tagNames);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTagCache(TagCache, out var closestVersion)))
                 Version = closestVersion;
@@ -38,8 +40,6 @@ namespace TagTool.Cache
 
             using (var stream = OpenStringIdCacheRead())
                 StringIdCache = new StringIdCache(stream, stringIdResolver);
-
-            LoadTagNames();
 
             TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, GetStringId("object"));
             TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, GetStringId("item"));
@@ -64,11 +64,6 @@ namespace TagTool.Cache
                 return files[0];
             }
         }
-
-        /// <summary>
-        /// A dictionary of tag names.
-        /// </summary>
-        public Dictionary<int, string> TagNames { get; set; } = new Dictionary<int, string>();
 
         /// <summary>
         /// The tag cache.
@@ -101,7 +96,7 @@ namespace TagTool.Cache
 
                 // Load the new resource cache file
                 stream.Position = 0;
-                cache = new TagCache(stream);
+                cache = new TagCache(stream, new Dictionary<int, string>());
             }
 
             return cache;
@@ -177,16 +172,10 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+                result = TagCache.AllocateTag(TagGroup.Instances[groupTag], name);
 
                 if (result == null)
                     return false;
-
-                if (name != null)
-                {
-                    TagNames[result.Index] = name;
-                    SaveTagNames();
-                }
             }
             catch (Exception e)
             {
@@ -222,14 +211,9 @@ namespace TagTool.Cache
             {
                 var groupTag = TagDefinition.Types.First(entry => entry.Value == typeof(T)).Key;
 
-                foreach (var entry in TagNames)
+                foreach (var instance in TagCache.Index)
                 {
-                    if (entry.Value != name)
-                        continue;
-
-                    var instance = TagCache.Index[entry.Key];
-
-                    if (instance.IsInGroup(groupTag))
+                    if (instance.IsInGroup(groupTag) && instance.Name == name)
                     {
                         result = instance;
                         return true;
@@ -307,14 +291,9 @@ namespace TagTool.Cache
 
             var tagName = namePieces[0];
 
-            foreach (var nameEntry in TagNames)
+            foreach (var instance in TagCache.Index)
             {
-                if (nameEntry.Value != tagName)
-                    continue;
-
-                var instance = TagCache.Index[nameEntry.Key];
-
-                if (instance.Group.Tag == groupTag)
+                if (instance.IsInGroup(groupTag) && instance.Name == name)
                 {
                     result = instance;
                     return true;
@@ -377,6 +356,9 @@ namespace TagTool.Cache
         /// <returns>The resulting group tag.</returns>
         public Tag ParseGroupTag(string name)
         {
+            if (name == "****" || name == "null")
+                return Tag.Null;
+
             if (TryParseGroupTag(name, out var result))
                 return result;
 
@@ -387,8 +369,10 @@ namespace TagTool.Cache
         /// Loads tag file names from the appropriate tag_list.csv file.
         /// </summary>
         /// <param name="path">The path to the tag_list.csv file.</param>
-        public void LoadTagNames(string path = null)
+        public Dictionary<int, string> LoadTagNames(string path = null)
         {
+            var names = new Dictionary<int, string>();
+
             if (path == null)
                 path = Path.Combine(Directory.FullName, "tag_list.csv");
 
@@ -407,8 +391,8 @@ namespace TagTool.Cache
                         if (!int.TryParse(indexString, NumberStyles.HexNumber, null, out int tagIndex))
                             tagIndex = -1;
 
-                        if (tagIndex < 0 || tagIndex >= TagCache.Index.Count || TagCache.Index[tagIndex] == null)
-                            continue;
+                        //if (tagIndex < 0 || tagIndex >= TagCache.Index.Count || TagCache.Index[tagIndex] == null)
+                            //continue;
 
                         var nameString = line.Substring(separatorIndex + 1);
 
@@ -418,12 +402,14 @@ namespace TagTool.Cache
                             nameString = nameString.Substring(lastSpaceIndex + 1, nameString.Length - lastSpaceIndex - 1);
                         }
 
-                        TagNames[tagIndex] = nameString;
+                        names[tagIndex] = nameString;
                     }
 
                     reader.Close();
                 }
             }
+
+            return names;
         }
 
         /// <summary>
@@ -439,12 +425,9 @@ namespace TagTool.Cache
 
             using (var csvWriter = new StreamWriter(csvFile.Create()))
             {
-                var entries = TagNames.ToList();
-                entries.Sort((a, b) => a.Key.CompareTo(b.Key));
-
-                foreach (var entry in entries)
-                    if (TagCache.Index[entry.Key] != null && !entry.Value.ToLower().StartsWith("0x"))
-                        csvWriter.WriteLine($"0x{entry.Key:X8},{entry.Value}");
+                foreach (var instance in TagCache.Index)
+                    if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
+                        csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
             }
         }
         #endregion

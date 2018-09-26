@@ -50,7 +50,7 @@ namespace TagTool.Commands.Tags
                     if (instance == null)
                         continue;
 
-                    var tagName = CacheContext.TagNames[instance.Index] + "." + CacheContext.GetString(instance.Group.Name);
+                    var tagName = instance.Name + "." + CacheContext.GetString(instance.Group.Name);
                     var tagPath = Path.Combine(directory, tagName);
                     var tagDirectory = Path.GetDirectoryName(tagPath);
 

@@ -30,12 +30,12 @@ namespace TagTool.Cache
         /// Opens a tags.dat file from a stream.
         /// </summary>
         /// <param name="stream">The stream to open.</param>
-        public TagCache(Stream stream)
+        public TagCache(Stream stream, Dictionary<int, string> names)
         {
             Index = new TagCacheIndex(_tags);
 
             if (stream.Length != 0)
-                Load(new BinaryReader(stream));
+                Load(new BinaryReader(stream), names);
         }
 
         /// <summary>
@@ -44,18 +44,20 @@ namespace TagTool.Cache
         /// You can give the tag data by using one of the overwrite functions.
         /// </summary>
         /// <returns>The allocated tag.</returns>
-        public CachedTagInstance AllocateTag() => AllocateTag(TagGroup.Null);
+        public CachedTagInstance AllocateTag() => AllocateTag(TagGroup.None);
+
 
         /// <summary>
         /// Allocates a new tag at the end of the tag list without updating the file.
         /// You can give the tag data by using one of the overwrite functions.
         /// </summary>
         /// <param name="type">The tag's type information.</param>
+        /// <param name="name">The name of the tag instance.</param>
         /// <returns>The allocated tag.</returns>
-        public CachedTagInstance AllocateTag(TagGroup type)
+        public CachedTagInstance AllocateTag(TagGroup type, string name = null)
         {
             var tagIndex = _tags.Count;
-            var tag = new CachedTagInstance(tagIndex, type);
+            var tag = new CachedTagInstance(tagIndex, type, name);
             _tags.Add(tag);
             return tag;
         }
@@ -154,7 +156,7 @@ namespace TagTool.Cache
                 throw new ArgumentNullException(nameof(tag));
             else if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            else if (data.Group == TagGroup.Null)
+            else if (data.Group == TagGroup.None)
                 throw new ArgumentException("Cannot assign a tag to a null tag group");
             else if (data.Data == null)
                 throw new ArgumentException("The tag data buffer is null");
@@ -298,7 +300,7 @@ namespace TagTool.Cache
         /// Reads the tags.dat file.
         /// </summary>
         /// <param name="reader">The stream to read from.</param>
-        private void Load(BinaryReader reader)
+        private void Load(BinaryReader reader, Dictionary<int, string> names)
         {
             // Read file header
             reader.BaseStream.Position = 0x4;
@@ -322,8 +324,15 @@ namespace TagTool.Cache
                     _tags.Add(null);
                     continue;
                 }
-                var tag = new CachedTagInstance(i) { HeaderOffset = headerOffsets[i] };
+
+                string name = null;
+
+                if (names.ContainsKey(i))
+                    name = names[i];
+
+                var tag = new CachedTagInstance(i, name) { HeaderOffset = headerOffsets[i] };
                 _tags.Add(tag);
+
                 reader.BaseStream.Position = tag.HeaderOffset;
                 tag.ReadHeader(reader);
             }

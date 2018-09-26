@@ -33,14 +33,7 @@ namespace TagTool.Commands.Editing
                 Documentation.Load(documentationPath);
 
             var groupName = cacheContext.GetString(tag.Group.Name);
-
-            var tagName = $"0x{tag.Index:X4}";
-
-            if (cacheContext.TagNames.ContainsKey(tag.Index))
-            {
-                tagName = cacheContext.TagNames[tag.Index];
-                tagName = $"(0x{tag.Index:X4}) {tagName.Substring(tagName.LastIndexOf('\\') + 1)}";
-            }
+            var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
 

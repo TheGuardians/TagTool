@@ -60,7 +60,7 @@ namespace TagTool.Commands.Tags
             // Load destination cache files
             var destCacheContext = new HaloOnlineCacheContext(new DirectoryInfo(targetDir));
             using (var stream = destCacheContext.OpenTagCacheRead())
-                destCacheContext.TagCache = new TagCache(stream);
+                destCacheContext.TagCache = new TagCache(stream, destCacheContext.LoadTagNames());
             
             Console.WriteLine();
             Console.WriteLine("CONVERTING FROM VERSION {0} TO {1}", CacheVersionDetection.GetBuildName(CacheContext.Version), CacheVersionDetection.GetBuildName(destCacheContext.Version));
@@ -155,10 +155,7 @@ namespace TagTool.Commands.Tags
                 }
                 else
                 {
-                    if (srcCacheContext.TagNames.ContainsKey(srcTag.Index))
-                        destCacheContext.TagNames[srcTag.Index] = srcCacheContext.TagNames[srcTag.Index];
-                    
-                    destCacheContext.TagCache.Index[srcTag.Index] = instance = new CachedTagInstance(srcTag.Index, TagGroup.Instances[srcTag.Group.Tag]);
+                    destCacheContext.TagCache.Index[srcTag.Index] = instance = new CachedTagInstance(srcTag.Index, TagGroup.Instances[srcTag.Group.Tag], srcTag.Name);
                 }
             }
 

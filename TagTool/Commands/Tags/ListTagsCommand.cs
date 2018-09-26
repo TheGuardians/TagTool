@@ -40,7 +40,7 @@ namespace TagTool.Commands.Tags
             var endFilter = "";
             var filter = "";
 
-            while (args.Count > 1)
+            while (args.Count >= 1)
             {
                 switch (args[0].ToLower())
                 {
@@ -96,27 +96,23 @@ namespace TagTool.Commands.Tags
                 if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
 
-                var tagName = CacheContext.TagNames.ContainsKey(tag.Index) ?
-                    CacheContext.TagNames[tag.Index] :
-                    $"0x{tag.Index:X4}";
-
                 var groupName = CacheContext.GetString(tag.Group.Name);
                 
                 if (named)
                 {
-                    if (!CacheContext.TagNames.ContainsKey(tag.Index))
+                    if (tag.Name == null)
                         continue;
 
-                    if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
+                    if (!tag.Name.StartsWith(startFilter) || !tag.Name.Contains(filter) || !tag.Name.EndsWith(endFilter))
                         continue;
                 }
                 
-                if (unnamed && !CacheContext.TagNames.ContainsKey(tag.Index))
+                if (unnamed && tag.Name == null)
                     Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {groupName} ({tag.Group.Tag})");
-                else if (named && CacheContext.TagNames.ContainsKey(tag.Index))
-                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tagName}.{groupName}");
+                else if (named && tag.Name != null)
+                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tag.Name}.{groupName}");
                 else if (!named && !unnamed)
-                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tagName}.{groupName}");
+                    Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tag.Name}.{groupName}");
             }
 
             return true;
