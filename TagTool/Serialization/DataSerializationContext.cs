@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using System;
 using System.IO;
+using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
@@ -64,6 +65,11 @@ namespace TagTool.Serialization
         public CachedTagInstance GetTagByIndex(int index)
         {
             return null;
+        }
+
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
         }
 
         private class GenericDataBlock : IDataBlock

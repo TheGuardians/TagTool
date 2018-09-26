@@ -113,5 +113,10 @@ namespace TagTool.Serialization
 
             return new CachedTagInstance(index, group);
         }
+
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

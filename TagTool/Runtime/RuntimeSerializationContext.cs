@@ -3,6 +3,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using System;
 using System.IO;
+using TagTool.Tags;
 
 namespace TagTool.Runtime
 {
@@ -48,6 +49,11 @@ namespace TagTool.Runtime
         public CachedTagInstance GetTagByIndex(int index)
         {
             return (index >= 0 && index < CacheContext.TagCache.Index.Count) ? CacheContext.TagCache.Index[index] : null;
+        }
+
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
         }
 
         private class DataBlock : IDataBlock

@@ -86,6 +86,11 @@ namespace TagTool.Serialization
             throw new InvalidOperationException("Resource definitions cannot contain tag references");
         }
 
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new InvalidOperationException("Resource definitions cannot contain tag references");
+        }
+
         public IDataBlock CreateBlock()
         {
             return new ResourceDataBlock(this);

@@ -82,6 +82,16 @@ namespace TagTool.Serialization
             return (index >= 0 && index < Context.TagCache.Index.Count) ? Context.TagCache.Index[index] : null;
         }
 
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            if (group == TagGroup.None)
+                foreach (var instance in Context.TagCache.Index)
+                    if ((instance?.IsInGroup(group) ?? false) && (instance?.Name?.Equals(name) ?? false))
+                        return instance;
+
+            throw new ArgumentException(nameof(group), new FormatException());
+        }
+
         public IDataBlock CreateBlock()
         {
             return new TagDataBlock(this);

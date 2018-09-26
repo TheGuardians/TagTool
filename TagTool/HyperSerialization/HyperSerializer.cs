@@ -3,6 +3,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.HyperSerialization
 {
@@ -47,11 +48,16 @@ namespace TagTool.HyperSerialization
 		public CachedTagInstance GetTagByIndex(int index)
 		{
 			throw new NotImplementedException();
-		}
+        }
 
-		public IDataBlock CreateBlock()
+        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDataBlock CreateBlock()
 		{
 			throw new NotImplementedException();
 		}
-	}
+    }
 }
