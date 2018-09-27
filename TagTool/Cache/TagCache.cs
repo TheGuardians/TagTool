@@ -30,6 +30,7 @@ namespace TagTool.Cache
         /// Opens a tags.dat file from a stream.
         /// </summary>
         /// <param name="stream">The stream to open.</param>
+        /// <param name="names">The dictionary of tag instance names.</param>
         public TagCache(Stream stream, Dictionary<int, string> names)
         {
             Index = new TagCacheIndex(_tags);
@@ -300,6 +301,7 @@ namespace TagTool.Cache
         /// Reads the tags.dat file.
         /// </summary>
         /// <param name="reader">The stream to read from.</param>
+        /// <param name="names">The dictionary of tag instance names.</param>
         private void Load(BinaryReader reader, Dictionary<int, string> names)
         {
             // Read file header

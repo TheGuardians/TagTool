@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TagTool.Cache;
+﻿using System.Collections.Generic;
 using TagTool.Common;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {
-	public static class PortingConstants
+    public static class PortingConstants
 	{
 		public static readonly IReadOnlyList<Tag> RenderMethodGroups = new[] 
 		{

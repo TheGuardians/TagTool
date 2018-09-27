@@ -144,7 +144,7 @@ namespace TagTool.Cache
             if (TryGetTag<T>(name, out var result))
                 return result;
 
-			var attribute = ReflectionCache.GetTagStructureAttribute(typeof(T));
+			var attribute = TagDefinition.GetTagStructureAttribute(typeof(T));
             var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
@@ -156,7 +156,7 @@ namespace TagTool.Cache
 
             try
             {
-                var structure = ReflectionCache.GetTagStructureInfo(type, Version).Structure;
+                var structure = TagDefinition.GetTagStructureInfo(type, Version).Structure;
 
                 if (structure == null)
                 {
@@ -207,9 +207,9 @@ namespace TagTool.Cache
         /// <returns>True if the tag was found, false otherwise.</returns>
         public bool TryGetTag<T>(string name, out CachedTagInstance result) where T : TagStructure
         {
-            if (TagDefinition.Types.Values.Contains(typeof(T)))
+            if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
             {
-                var groupTag = TagDefinition.Types.First(entry => entry.Value == typeof(T)).Key;
+                var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
 
                 foreach (var instance in TagCache.Index)
                 {
@@ -316,7 +316,7 @@ namespace TagTool.Cache
             Deserialize<T>(new TagSerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagInstance instance) =>
-            Deserialize(new TagSerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
 
         public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
             Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
@@ -329,9 +329,9 @@ namespace TagTool.Cache
         /// <returns>True if the group tag was parsed, false otherwise.</returns>
         public bool TryParseGroupTag(string name, out Tag result)
         {
-            if (TagDefinition.TryFind(name, out var type))
+            if (Tags.TagDefinition.TryFind(name, out var type))
             {
-				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+				var attribute = TagDefinition.GetTagStructureAttribute(type);
                 result = new Tag(attribute.Tag);
                 return true;
             }

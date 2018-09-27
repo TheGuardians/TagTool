@@ -1,9 +1,9 @@
 using TagTool.Havok;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using System;
 using System.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {

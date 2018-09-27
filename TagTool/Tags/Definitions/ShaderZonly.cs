@@ -1,5 +1,3 @@
-using TagTool.Serialization;
-
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "shader_zonly", Tag = "rmzo", Size = 0x8)]

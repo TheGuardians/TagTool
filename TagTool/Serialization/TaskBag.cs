@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Serialization
 {
 	public class TaskBag : Task
 	{

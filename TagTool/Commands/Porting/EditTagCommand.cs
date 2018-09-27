@@ -75,7 +75,7 @@ namespace TagTool.Commands.Porting
             var tagName = $"(0x{tag.ID:X8}) {tag.Name.Substring(tag.Name.LastIndexOf('\\') + 1)}";
 
             var tagType = TagDefinition.Find(groupTag);
-            var structure = ReflectionCache.GetTagStructureInfo(tagType);
+            var structure = TagDefinition.GetTagStructureInfo(tagType);
 
             var definition = BlamCache.Deserializer.Deserialize(new CacheSerializationContext(ref BlamCache, tag), tagType);
 

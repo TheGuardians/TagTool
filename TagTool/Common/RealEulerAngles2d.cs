@@ -7,31 +7,31 @@ namespace TagTool.Common
 		private Angle _yaw;
 		public float YawValue
 		{
-			get { return this._yaw.Radians; }
-			set { this._yaw.Radians = value; }
+			get { return _yaw.Radians; }
+			set { _yaw.Radians = value; }
 		}
 		public Angle Yaw
 		{
-			get { return this._yaw; }
-			private set { this._yaw = value; }
+			get { return _yaw; }
+			private set { _yaw = value; }
 		}
 
 		private Angle _pitch;
 		public float PitchValue
 		{
-			get { return this._pitch.Radians; }
-			set { this._pitch.Radians = value; }
+			get { return _pitch.Radians; }
+			set { _pitch.Radians = value; }
 		}
 		public Angle Pitch
 		{
-			get { return this._pitch; }
-			private set { this._pitch = value; }
+			get { return _pitch; }
+			private set { _pitch = value; }
 		}
 
 		public RealEulerAngles2d(Angle yaw, Angle pitch)
         {
-            this._yaw = yaw;
-            this._pitch = pitch;
+            _yaw = yaw;
+            _pitch = pitch;
         }
 
         public bool Equals(RealEulerAngles2d other) =>

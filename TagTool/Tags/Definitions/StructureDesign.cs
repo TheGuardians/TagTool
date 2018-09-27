@@ -1,7 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
-using TagTool.Serialization;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions

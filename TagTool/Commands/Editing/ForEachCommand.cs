@@ -1,5 +1,5 @@
 ﻿using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -80,7 +80,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+			var field = TagDefinition.GetTagFieldEnumerable(Structure)
 				.Find(f =>
 					f.Name == fieldName ||
 					f.Name.ToLower() == fieldNameLow ||

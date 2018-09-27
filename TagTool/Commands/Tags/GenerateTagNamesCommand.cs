@@ -5,8 +5,8 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Tags
 {

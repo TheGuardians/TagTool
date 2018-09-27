@@ -13,81 +13,81 @@
 
 		public TFlop this[TFlip flip]
 		{
-			get => this.Flip[flip];
+			get => Flip[flip];
 			set
 			{
-				this.Flip[flip] = value;
-				this.Flop[value] = flip;
+				Flip[flip] = value;
+				Flop[value] = flip;
 			}
 		}
 		public TFlip this[TFlop flop]
 		{
-			get => this.Flop[flop];
+			get => Flop[flop];
 			set
 			{
-				this.Flop[flop] = value;
-				this.Flip[value] = flop;
+				Flop[flop] = value;
+				Flip[value] = flop;
 			}
 		}
 
-		public ICollection<TFlip> Keys => this.Flip.Keys;
+		public ICollection<TFlip> Keys => Flip.Keys;
 
-		public ICollection<TFlop> Values => this.Flop.Keys;
+		public ICollection<TFlop> Values => Flop.Keys;
 
-		public int Count => this.Flip.Count;
+		public int Count => Flip.Count;
 
-		public bool IsReadOnly => this.Flip.IsReadOnly;
+		public bool IsReadOnly => Flip.IsReadOnly;
 
 		public void Add(TFlip flip, TFlop flop)
 		{
-			this.Flip.Add(flip, flop);
-			this.Flop.Add(flop, flip);
+			Flip.Add(flip, flop);
+			Flop.Add(flop, flip);
 		}
 
 		public void Add(KeyValuePair<TFlip, TFlop> flipFlop)
 		{
 			var flopFlip = new KeyValuePair<TFlop, TFlip>(flipFlop.Value, flipFlop.Key);
-			this.Flip.Add(flipFlop);
-			this.Flop.Add(flopFlip);
+			Flip.Add(flipFlop);
+			Flop.Add(flopFlip);
 		}
 
 		public void Clear()
 		{
-			this.Flip.Clear();
-			this.Flop.Clear();
+			Flip.Clear();
+			Flop.Clear();
 		}
 
-		public bool Contains(KeyValuePair<TFlip, TFlop> flipFlop) => this.Flip.Contains(flipFlop);
-		public bool Contains(KeyValuePair<TFlop, TFlip> flopFlip) => this.Flop.Contains(flopFlip);
+		public bool Contains(KeyValuePair<TFlip, TFlop> flipFlop) => Flip.Contains(flipFlop);
+		public bool Contains(KeyValuePair<TFlop, TFlip> flopFlip) => Flop.Contains(flopFlip);
 
-		public bool ContainsKey(TFlip flip) => this.Flip.ContainsKey(flip);
-		public bool ContainsKey(TFlop flop) => this.Flop.ContainsKey(flop);
+		public bool ContainsKey(TFlip flip) => Flip.ContainsKey(flip);
+		public bool ContainsKey(TFlop flop) => Flop.ContainsKey(flop);
 
-		public void CopyTo(KeyValuePair<TFlip, TFlop>[] array, int arrayIndex) => this.Flip.CopyTo(array, arrayIndex);
-		public void CopyTo(KeyValuePair<TFlop, TFlip>[] array, int arrayIndex) => this.Flop.CopyTo(array, arrayIndex);
+		public void CopyTo(KeyValuePair<TFlip, TFlop>[] array, int arrayIndex) => Flip.CopyTo(array, arrayIndex);
+		public void CopyTo(KeyValuePair<TFlop, TFlip>[] array, int arrayIndex) => Flop.CopyTo(array, arrayIndex);
 
-		public IEnumerator<KeyValuePair<TFlip, TFlop>> GetEnumerator() => this.Flip.GetEnumerator();
+		public IEnumerator<KeyValuePair<TFlip, TFlop>> GetEnumerator() => Flip.GetEnumerator();
 
 		public bool Remove(TFlip flipKey)
 		{
-			var flopKey = this.Flip[flipKey];
-			return this.Flip.Remove(flipKey) && this.Flop.Remove(flopKey);
+			var flopKey = Flip[flipKey];
+			return Flip.Remove(flipKey) && Flop.Remove(flopKey);
 		}
 		public bool Remove(TFlop flopKey)
 		{
-			var flipKey = this.Flop[flopKey];
-			return this.Flop.Remove(flopKey) && this.Flip.Remove(flipKey);
+			var flipKey = Flop[flopKey];
+			return Flop.Remove(flopKey) && Flip.Remove(flipKey);
 		}
 
 		public bool Remove(KeyValuePair<TFlip, TFlop> flipFlop)
 		{
 			var flopFlip = new KeyValuePair<TFlop, TFlip>(flipFlop.Value, flipFlop.Key);
-			return this.Flip.Remove(flipFlop) && this.Flop.Remove(flopFlip);
+			return Flip.Remove(flipFlop) && Flop.Remove(flopFlip);
 		}
 
-		public bool TryGetValue(TFlip flip, out TFlop flop) => this.Flip.TryGetValue(flip, out flop);
-		public bool TryGetValue(TFlop flop, out TFlip flip) => this.Flop.TryGetValue(flop, out flip);
+		public bool TryGetValue(TFlip flip, out TFlop flop) => Flip.TryGetValue(flip, out flop);
+		public bool TryGetValue(TFlop flop, out TFlip flip) => Flop.TryGetValue(flop, out flip);
 
-		IEnumerator IEnumerable.GetEnumerator() => this.Flip.GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => Flip.GetEnumerator();
 	}
 }

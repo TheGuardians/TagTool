@@ -1,5 +1,3 @@
-using TagTool.Serialization;
-
 namespace TagTool.Tags
 {
     /// <summary>

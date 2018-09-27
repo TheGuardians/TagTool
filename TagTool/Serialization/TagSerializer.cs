@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
@@ -35,7 +36,7 @@ namespace TagTool.Serialization
         public void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
         {
             // Serialize the structure to a data block
-            var info = ReflectionCache.GetTagStructureInfo(tagStructure.GetType(), Version);
+            var info = TagDefinition.GetTagStructureInfo(tagStructure.GetType(), Version);
             context.BeginSerialize(info);
             var tagStream = new MemoryStream();
             var structBlock = context.CreateBlock();
@@ -60,7 +61,7 @@ namespace TagTool.Serialization
         {
             var baseOffset = block.Stream.Position;
 
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(info))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(info))
 				SerializeProperty(info.Version, context, tagStream, block, structure, tagFieldInfo, baseOffset);
 
             // Honor the struct size if it's defined
@@ -243,9 +244,9 @@ namespace TagTool.Serialization
             else if (valueType == typeof(Angle))
                 block.Writer.Write(((Angle)value).Radians);
             else if (valueType == typeof(VertexShaderReference))
-                block.Writer.Write(0); // TODO: fix this. (not used in halo online)
+                block.Writer.Write(0); // TODO: fix  (not used in halo online)
             else if (valueType == typeof(PixelShaderReference))
-                block.Writer.Write(0); // TODO: fix this. (not used in halo online)
+                block.Writer.Write(0); // TODO: fix  (not used in halo online)
             else if (valueType.IsArray)
                 SerializeInlineArray(version, context, tagStream, block, (Array)value, valueInfo, valueType);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
@@ -257,7 +258,7 @@ namespace TagTool.Serialization
                 if (value == null)
                     value = Activator.CreateInstance(valueType);
 
-                SerializeStruct(context, tagStream, block, ReflectionCache.GetTagStructureInfo(valueType, version), value);
+                SerializeStruct(context, tagStream, block, TagDefinition.GetTagStructureInfo(valueType, version), value);
             }
         }
 
@@ -410,7 +411,7 @@ namespace TagTool.Serialization
 
             try
             {
-                structure = ReflectionCache.GetTagStructureInfo(elementType, Version).Structure;
+                structure = TagDefinition.GetTagStructureInfo(elementType, Version).Structure;
             }
             catch
             {

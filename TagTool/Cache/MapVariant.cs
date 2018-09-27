@@ -1,5 +1,5 @@
 ﻿using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System.Runtime.InteropServices;
 
 namespace TagTool.Cache

@@ -1,10 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using TagTool.Cache;
+using TagTool.Common;
 
-namespace TagTool.Serialization
+namespace TagTool.Tags
 {
     /// <summary>
     /// Utility class for analyzing a tag structure type's inheritance hierarchy.
@@ -73,17 +72,16 @@ namespace TagTool.Serialization
         private void Analyze(Type mainType, CacheVersion version)
         {
             // Get the attribute for the main structure type
-            Structure = ReflectionCache.GetTagStructureAttribute(mainType, version);
+            Structure = TagDefinition.GetTagStructureAttribute(mainType, version);
             if (Structure == null)
                 throw new InvalidOperationException($"No `{nameof(TagStructureAttribute)}` for `{version.ToString()}` found on `{mainType.Name}`.");
-
 
 			// Scan through the type's inheritance hierarchy and analyze each TagStructure attribute
 			var currentType = mainType;
             Types = new List<Type>();
             while (currentType != null)
             {
-                var attrib = (currentType != mainType) ? ReflectionCache.GetTagStructureAttribute(currentType, version) : Structure;
+                var attrib = (currentType != mainType) ? TagDefinition.GetTagStructureAttribute(currentType, version) : Structure;
                 if (attrib != null)
                 {
                     Types.Add(currentType);

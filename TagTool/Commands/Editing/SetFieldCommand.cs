@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 using TagTool.Tags;
 using ResourceLocation = TagTool.Common.ResourceLocation;
 
@@ -82,7 +81,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+			var field = TagDefinition.GetTagFieldEnumerable(Structure)
 				.Find(f =>
 					f.Name == fieldName ||
 					f.Name.ToLower() == fieldNameLow ||

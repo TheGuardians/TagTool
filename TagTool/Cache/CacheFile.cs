@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Xml;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -34,16 +32,14 @@ namespace TagTool.Cache
         public CacheFileResourceGestalt ResourceGestalt;
         public CacheFileResourceLayoutTable ResourceLayoutTable;
 
-        public string Build => CacheVersionDetection.GetBuildName(Version);
+        public abstract string LocalesKey {get;}
+        public abstract string StringsKey {get;}
+        public abstract string TagsKey {get;}
+        public abstract string NetworkKey {get;}
+        public abstract string StringMods { get; }
 
-        public XmlNode BuildInfo => GetBuildNode(Build);
-        public XmlNode VersionInfo => GetVersionNode(BuildInfo.Attributes["version"].Value);
-
-        public string LocalesKey => BuildInfo.Attributes["localesKey"].Value;
-        public string StringsKey => BuildInfo.Attributes["stringsKey"].Value;
-        public string TagsKey => BuildInfo.Attributes["tagsKey"].Value;
-        public string NetworkKey => BuildInfo.Attributes["networkKey"].Value;
-        public string StringMods => BuildInfo.Attributes["stringMods"].Value;
+        public abstract int LocaleGlobalsOffset { get; }
+        public abstract int LocaleGlobalsSize { get; }
 
         public CacheFile(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory)
         {
@@ -93,22 +89,22 @@ namespace TagTool.Cache
             public StringTable(CacheFile cache)
             {
                 Cache = cache;
-                var reader = this.Cache.Reader;
-                var cacheHeader = this.Cache.Header;
+                var reader = Cache.Reader;
+                var cacheHeader = Cache.Header;
 
                 reader.SeekTo(cacheHeader.StringIDsIndicesOffset);
                 int[] indices = new int[cacheHeader.StringIDsCount];
-                for (int i = 0; i < cacheHeader.StringIDsCount; i++)
+                for (var i = 0; i < cacheHeader.StringIDsCount; i++)
                 {
                     indices[i] = reader.ReadInt32();
-                    this.Add("");
+                    Add("");
                 }
 
                 reader.SeekTo(cacheHeader.StringIDsBufferOffset);
 
                 EndianReader newReader = null;
 
-                if (this.Cache.StringsKey == "" || this.Cache.StringsKey == null)
+                if (Cache.StringsKey == "" || Cache.StringsKey == null)
                 {
                     newReader = new EndianReader(new MemoryStream(reader.ReadBytes(cacheHeader.StringIDsBufferSize)), EndianFormat.BigEndian);
                 }
@@ -118,7 +114,7 @@ namespace TagTool.Cache
                     newReader = new EndianReader(reader.DecryptAesSegment(cacheHeader.StringIDsBufferSize, Cache.StringsKey));
                 }
 
-                for (int i = 0; i < indices.Length; i++)
+                for (var i = 0; i < indices.Length; i++)
                 {
                     if (indices[i] == -1)
                     {
@@ -215,60 +211,53 @@ namespace TagTool.Cache
 
         public class LocaleTable : List<LocalizedString>
         {
-            protected CacheFile cache;
-
-            public LocaleTable(CacheFile Cache, GameLanguage Lang)
+            public LocaleTable(CacheFile cache, GameLanguage language)
             {
-                cache = Cache;
-                var reader = cache.Reader;
-                var CH = cache.Header;
-
                 int matgOffset = -1;
-                foreach (IndexItem item in cache.IndexItems)
-                    if (item.GroupTag == "matg")
+
+                foreach (var item in cache.IndexItems)
+                {
+                    if (item.IsInGroup("matg"))
                     {
                         matgOffset = item.Offset;
                         break;
                     }
-
-                if (matgOffset == -1) return;
-
-                var buildInfo = cache.BuildInfo;
-                int localeStart = int.Parse(buildInfo.Attributes["localesStart"].Value);
-                reader.SeekTo(matgOffset + localeStart + (int)Lang * int.Parse(buildInfo.Attributes["languageSize"].Value));
-
-                int localeCount = reader.ReadInt32();
-                int tableSize = reader.ReadInt32();
-
-                var indexOffset = (int)(reader.ReadInt32() + CH.Interop.UnknownBaseAddress);
-                var tableOffset = (int)(reader.ReadInt32() + CH.Interop.UnknownBaseAddress);
-
-                #region Read Indices
-                reader.SeekTo(indexOffset);
-                int[] indices = new int[localeCount];
-                for (int i = 0; i < localeCount; i++)
-                {
-                    Add(new LocalizedString(reader.ReadInt32(), "", i));
-                    indices[i] = reader.ReadInt32();  
                 }
-                #endregion
 
-                #region Read Names
-                reader.SeekTo(tableOffset);
+                if (matgOffset == -1)
+                    return;
+
+                cache.Reader.SeekTo(matgOffset + cache.LocaleGlobalsOffset + ((int)language * cache.LocaleGlobalsSize));
+
+                var localeCount = cache.Reader.ReadInt32();
+                var tableSize = cache.Reader.ReadInt32();
+                var indexOffset = (int)(cache.Reader.ReadInt32() + cache.Header.Interop.UnknownBaseAddress);
+                var tableOffset = (int)(cache.Reader.ReadInt32() + cache.Header.Interop.UnknownBaseAddress);
+
+                cache.Reader.SeekTo(indexOffset);
+                var indices = new int[localeCount];
+
+                for (var i = 0; i < localeCount; i++)
+                {
+                    Add(new LocalizedString(cache.Reader.ReadInt32(), "", i));
+                    indices[i] = cache.Reader.ReadInt32();  
+                }
+
+                cache.Reader.SeekTo(tableOffset);
 
                 EndianReader newReader = null;
 
-                if (cache.LocalesKey == "" || cache.LocalesKey == null)
+                if (cache.LocalesKey == null || cache.LocalesKey == "")
                 {
-                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(tableSize)), EndianFormat.BigEndian);
+                    newReader = new EndianReader(new MemoryStream(cache.Reader.ReadBytes(tableSize)), EndianFormat.BigEndian);
                 }
                 else
                 {
-                    reader.BaseStream.Position = tableOffset;
-                    newReader = new EndianReader(reader.DecryptAesSegment(tableSize, cache.LocalesKey));
+                    cache.Reader.BaseStream.Position = tableOffset;
+                    newReader = new EndianReader(cache.Reader.DecryptAesSegment(tableSize, cache.LocalesKey));
                 }
 
-                for (int i = 0; i < indices.Length; i++)
+                for (var i = 0; i < indices.Length; i++)
                 {
                     if (indices[i] == -1)
                     {                        
@@ -294,9 +283,9 @@ namespace TagTool.Cache
                     }
                     this[i].String= newReader.ReadString(length);
                 }
+
                 newReader.Close();
                 newReader.Dispose();
-                #endregion
             }
         }
 
@@ -350,14 +339,14 @@ namespace TagTool.Cache
 
             private string GetGen2GroupName(Tag groupTag)
             {
-                if (!TagDefinition.Types.ContainsKey(groupTag))
+                if (!Tags.TagDefinition.Types.ContainsKey(groupTag))
                 {
                     Console.WriteLine($"WARNING: Tag definition not found for group tag '{groupTag}'");
                     return "<unknown>";
                 }
 
-				var type = TagDefinition.Types[groupTag];
-				var structure = ReflectionCache.GetTagStructureAttribute(type);
+				var type = Tags.TagDefinition.Types[groupTag];
+				var structure = TagDefinition.GetTagStructureAttribute(type);
 
                 return structure.Name;
             }
@@ -447,85 +436,5 @@ namespace TagTool.Cache
         {
             throw new NotImplementedException();
         }
-
-        public static XmlNode GetBuildNode(string build)
-        {
-            XmlNode retNode = null;
-            using (var xml = new MemoryStream(Encoding.ASCII.GetBytes(TagTool.Properties.Resources.Builds)))
-            {
-                var xmlDoc = new XmlDocument();
-                xmlDoc.Load(xml);
-                var element = xmlDoc.DocumentElement;
-
-                for (int i = 0; i < element.ChildNodes.Count; i++)
-                {
-                    if (element.ChildNodes[i].Name.ToLower() != "build") continue;
-
-                    if (element.ChildNodes[i].Attributes["string"].Value == build)
-                    {
-                        if (element.ChildNodes[i].Attributes["inherits"].Value != "")
-                            return GetBuildNode(element.ChildNodes[i].Attributes["inherits"].Value);
-
-                        retNode = element.ChildNodes[i];
-                        break;
-                    }
-                }
-            }
-
-            if (retNode == null)
-                throw new Exception("Build " + "\"" + build + "\"" + " was not found!");
-
-            return retNode;
-        }
-
-        public static XmlNode GetVersionNode(string ver)
-        {
-            XmlNode retNode = null;
-            using (var xml = new MemoryStream(Encoding.ASCII.GetBytes(TagTool.Properties.Resources.Versions)))
-            {
-                var xmlDoc = new XmlDocument();
-                xmlDoc.Load(xml);
-                var element = xmlDoc.DocumentElement;
-
-                for (int i = 0; i < element.ChildNodes.Count; i++)
-                {
-                    if (element.ChildNodes[i].Name.ToLower() != "version") continue;
-
-                    if (element.ChildNodes[i].Attributes["name"].Value == ver)
-                    {
-                        retNode = element.ChildNodes[i];
-                        break;
-                    }
-                }
-            }
-
-            if (retNode == null)
-                throw new Exception("Version " + "\"" + ver + "\"" + " was not found!");
-
-            return retNode;
-        }
-
-        public static XmlNode GetVertexNode(string ver)
-        {
-            XmlNode retNode = null;
-            using (var xml = new MemoryStream(Encoding.ASCII.GetBytes(TagTool.Properties.Resources.VertexBuffer)))
-            {
-                var xmlDoc = new XmlDocument();
-                xmlDoc.Load(xml);
-                var element = xmlDoc.DocumentElement;
-
-                foreach (XmlNode node in element.ChildNodes)
-                {
-                    if (node.Attributes["Game"].Value == ver)
-                    {
-                        retNode = node;
-                        break;
-                    }
-                }
-            }
-
-            return retNode;
-        }
-
     }
 }

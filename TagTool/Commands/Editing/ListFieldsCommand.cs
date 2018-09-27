@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Common;
 using TagTool.Cache;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
@@ -37,7 +36,7 @@ namespace TagTool.Commands.Editing
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";
 
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(Structure))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(Structure))
 			{
 				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Padding == true)
 					continue;
@@ -104,7 +103,7 @@ namespace TagTool.Commands.Editing
 				var fieldName = $"{tagFieldInfo.DeclaringType.FullName}.{tagFieldInfo.Name}".Replace("+", ".");
 				var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldName}')]");
 
-				Console.WriteLine("{0}: {1} = {2} {3}", nameString, typeString, valueString,
+                Console.WriteLine("{0}: {1} = {2} {3}", nameString, typeString, valueString,
 					documentationNode != null ?
 						$":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
 						"");

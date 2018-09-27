@@ -1,12 +1,11 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Tags;
 using System.Collections;
 
 namespace TagTool.Commands.Files
@@ -267,7 +266,7 @@ namespace TagTool.Commands.Files
 
         private T CopyStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream) where T : TagStructure
         {
-            foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
+            foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
                 var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);

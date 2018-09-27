@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System.Collections.Generic;
 
 namespace TagTool.Ai

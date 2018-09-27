@@ -6,13 +6,13 @@ using TagTool.Common;
 using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Geometry;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Scripting;
 using TagTool.Commands.Common;
-using TagTool.Tags;
 using System.Collections;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Tags
 {
@@ -264,7 +264,7 @@ namespace TagTool.Commands.Tags
 		private T ConvertStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
         {
 			// Convert each field
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);

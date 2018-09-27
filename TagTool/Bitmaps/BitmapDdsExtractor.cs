@@ -1,11 +1,11 @@
 using TagTool.Cache;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.IO;
 using System.Text;
+using TagTool.Serialization;
 
 namespace TagTool.Bitmaps
 {

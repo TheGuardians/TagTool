@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using TagTool.IO;
 
 namespace TagTool.Audio.Converter

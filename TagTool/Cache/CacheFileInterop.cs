@@ -1,4 +1,4 @@
-﻿using TagTool.Serialization;
+﻿using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -47,7 +47,7 @@ namespace TagTool.Cache
             var type = CacheFileSectionType.Debug;
 
             var section = Sections[(int)type];
-            section.InitializeCacheOffset(cache_offset, this.IsNull);
+            section.InitializeCacheOffset(cache_offset, IsNull);
 
             var release_offset = DebugSectionSize;
 
@@ -58,7 +58,7 @@ namespace TagTool.Cache
                 if (section.Size == 0)
                     continue;
 
-                section.InitializeCacheOffset(release_offset, this.IsNull);
+                section.InitializeCacheOffset(release_offset, IsNull);
             }
         }
     }

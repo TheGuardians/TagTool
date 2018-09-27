@@ -1,5 +1,3 @@
-using TagTool.Serialization;
-
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "chud_widget_parallax_data", Tag = "cprl", Size = 0x10)]

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Editing
             CacheContext = cacheContext;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = ReflectionCache.GetTagStructureInfo(value.GetType(), CacheContext.Version);
+            Structure = TagDefinition.GetTagStructureInfo(value.GetType(), CacheContext.Version);
             Owner = value;
         }
 
@@ -67,7 +67,7 @@ namespace TagTool.Commands.Editing
             var blockNameLow = blockName.ToLower();
             var blockNameSnake = blockName.ToSnakeCase();
 
-			var field = ReflectionCache.GetTagFieldEnumerable(Structure)
+			var field = TagDefinition.GetTagFieldEnumerable(Structure)
 				.Find(f =>
 					f.Name == blockName ||
 					f.Name.ToLower() == blockNameLow ||
@@ -125,7 +125,7 @@ namespace TagTool.Commands.Editing
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = ReflectionCache.GetTagStructureInfo(blockValue.GetType());
+            var blockStructure = TagDefinition.GetTagStructureInfo(blockValue.GetType());
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(CacheContext, blockStructure, blockValue));

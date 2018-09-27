@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
-using TagTool.Tags;
 using System.Collections;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Tags
 {
@@ -187,8 +187,8 @@ namespace TagTool.Commands.Tags
 
             else if (dataA is TagStructure)
             {
-				var tagFieldInfosA = ReflectionCache.GetTagFieldEnumerable(dataA.GetType(), versionA);
-				var tagFieldInfosB = ReflectionCache.GetTagFieldEnumerable(dataB.GetType(), versionB);
+				var tagFieldInfosA = TagDefinition.GetTagFieldEnumerable(dataA.GetType(), versionA);
+				var tagFieldInfosB = TagDefinition.GetTagFieldEnumerable(dataB.GetType(), versionB);
 
 				// The objects are structures
 				for (int a = 0, b = 0; a < tagFieldInfosA.Count && b < tagFieldInfosB.Count; a++, b++)

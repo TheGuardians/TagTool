@@ -6,15 +6,15 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
 
-namespace TagTool.Serialization
+namespace TagTool.Tags
 {
 	/// <summary>
-	/// Class for pairing of <see cref="System.Reflection.FieldInfo"/> and <see cref="Serialization.TagFieldAttribute"/>.
+	/// Class for pairing of <see cref="System.Reflection.FieldInfo"/> and <see cref="TagFieldAttribute"/>.
 	/// </summary>
 	public class TagFieldInfo
 	{
 		/// <summary>
-		/// Constructs a <see cref="TagFieldInfo"/> from a <see cref="System.Reflection.FieldInfo"/> and <see cref="Serialization.TagFieldAttribute"/>.
+		/// Constructs a <see cref="TagFieldInfo"/> from a <see cref="System.Reflection.FieldInfo"/> and <see cref="TagFieldAttribute"/>.
 		/// </summary>
 		/// <param name="field">The <see cref="System.Reflection.FieldInfo"/> for the field.</param>
 		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the field.</param>
@@ -22,12 +22,12 @@ namespace TagTool.Serialization
 		/// <param name="size">The size of the field (in bytes).</param>
 		public TagFieldInfo(FieldInfo field, TagFieldAttribute attribute, uint offset, uint size)
 		{
-			this.FieldInfo = field;
-			this.Size = size;
-			this.Offset = offset;
-			this.Attribute = attribute;
-			this.SetValue = TagFieldInfo.CreateSetter(this);
-			this.GetValue = TagFieldInfo.CreateGetter(this);
+			FieldInfo = field;
+			Size = size;
+			Offset = offset;
+			Attribute = attribute;
+			SetValue = TagFieldInfo.CreateSetter(this);
+			GetValue = TagFieldInfo.CreateGetter(this);
 		}
 
 		/// <summary>
@@ -36,13 +36,13 @@ namespace TagTool.Serialization
 		public FieldInfo FieldInfo { get; }
 
 		// Expose the FieldInfo's properties more directly.
-		public MemberTypes MemberType => this.FieldInfo.MemberType;
-		public string Name => this.FieldInfo.Name;
-		public Type DeclaringType => this.FieldInfo.DeclaringType;
-		public Type ReflectedType => this.FieldInfo.ReflectedType;
-		public int MetadataToken => this.FieldInfo.MetadataToken;
-		public Module Module => this.FieldInfo.Module;
-		public Type FieldType => this.FieldInfo.FieldType;
+		public MemberTypes MemberType => FieldInfo.MemberType;
+		public string Name => FieldInfo.Name;
+		public Type DeclaringType => FieldInfo.DeclaringType;
+		public Type ReflectedType => FieldInfo.ReflectedType;
+		public int MetadataToken => FieldInfo.MetadataToken;
+		public Module Module => FieldInfo.Module;
+		public Type FieldType => FieldInfo.FieldType;
 
 		/// <summary>
 		/// Gets the field size (in bytes) that was used in construction.
@@ -55,7 +55,7 @@ namespace TagTool.Serialization
 		public uint Offset { get; }
 
 		/// <summary>
-		/// Gets the <see cref="Serialization.TagFieldAttribute"/> that was used in construction.
+		/// Gets the <see cref="TagFieldAttribute"/> that was used in construction.
 		/// </summary>
 		public TagFieldAttribute Attribute { get; }
 
@@ -219,7 +219,7 @@ namespace TagTool.Serialization
 
 				// Assume the field is a structure
 				default:
-					return ReflectionCache.GetTagStructureInfo(type, attr.Version).TotalSize;
+					return TagDefinition.GetTagStructureInfo(type, attr.Version).TotalSize;
 			}
 		}
 	}

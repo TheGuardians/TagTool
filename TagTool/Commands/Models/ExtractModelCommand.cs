@@ -1,13 +1,13 @@
 ﻿using TagTool.Cache;
 using TagTool.Geometry;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Models
 {
@@ -450,7 +450,7 @@ namespace TagTool.Commands.Models
                                     amfWriter.Write((byte)255);
                                     amfWriter.Write(0);
                                     continue;
-                                    //throw new Exception("no weights on a weighted node. report this.");
+                                    //throw new Exception("no weights on a weighted node. report ");
                                 }
 
                                 if (count != 4) amfWriter.Write((byte)255);
@@ -531,7 +531,7 @@ namespace TagTool.Commands.Models
                                 amfWriter.Write((byte)255);
                                 amfWriter.Write(0);
                                 continue;
-                                //throw new Exception("no weights on a weighted node. report this.");
+                                //throw new Exception("no weights on a weighted node. report ");
                             }
 
                             if (count != 4) amfWriter.Write((byte)255);

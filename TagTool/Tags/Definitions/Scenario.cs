@@ -1,7 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using System;
 using System.Collections.Generic;
 using TagTool.Ai;

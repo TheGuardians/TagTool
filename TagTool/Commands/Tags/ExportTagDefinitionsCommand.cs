@@ -1,9 +1,8 @@
 ﻿using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Tags
 {
@@ -37,7 +36,7 @@ namespace TagTool.Commands.Tags
             {
                 var tagGroup = TagGroup.Instances[entry.Key];
                 var tagGroupName = CacheContext.GetString(tagGroup.Name);
-                var tagStructureInfo = ReflectionCache.GetTagStructureInfo(entry.Value, CacheContext.Version);
+                var tagStructureInfo = TagDefinition.GetTagStructureInfo(entry.Value, CacheContext.Version);
 
 				using (var stream = File.Create(Path.Combine(destDir.FullName, $"{tagGroupName}.hpp")))
 				using (var writer = new StreamWriter(stream))
@@ -52,8 +51,8 @@ namespace TagTool.Commands.Tags
 					writer.WriteLine(@"    {");
 
 
-					foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(tagStructureInfo))
-						PrintField(writer, tagFieldInfo);
+					foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(tagStructureInfo))
+                        PrintField(writer, tagFieldInfo);
 				}
             }
 

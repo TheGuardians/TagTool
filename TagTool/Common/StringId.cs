@@ -151,7 +151,7 @@ namespace TagTool.Common
 		public uint Value
         {
             get { return _value; }
-			set { this._value = value; }
+			set { _value = value; }
         }
 
         /// <summary>

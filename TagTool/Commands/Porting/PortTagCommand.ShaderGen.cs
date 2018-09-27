@@ -1,14 +1,14 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
 using TagTool.Shaders;
 using HaloShaderGenerator;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {
@@ -363,8 +363,10 @@ namespace TagTool.Commands.Porting
                 var srcRenderMethodExternArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.RenderMethodExtern_Arguments);
                 foreach (var src_arg in srcRenderMethodExternArguments)
                 {
-                    var argument_mapping = new RenderMethodTemplate.ArgumentMapping();
-                    argument_mapping.RegisterIndex = (ushort)src_arg.Register;
+                    var argument_mapping = new RenderMethodTemplate.ArgumentMapping
+                    {
+                        RegisterIndex = (ushort)src_arg.Register
+                    };
 
                     foreach (var _enum in Enum.GetValues(typeof(RenderMethodTemplate.RenderMethodExtern)))
                     {
@@ -383,14 +385,18 @@ namespace TagTool.Commands.Porting
                 var srcSamplerArguments = shader_gen_result.Registers.Where(r => r.Scope == HaloShaderGenerator.ShaderGeneratorResult.ShaderRegister.ShaderRegisterScope.TextureSampler_Arguments);
                 foreach (var samplerRegister in srcSamplerArguments)
                 {
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)samplerRegister.Register;
-                    argumentMapping.ArgumentIndex = (byte)registerOffsets.SamplerArguments_Count++;
+                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping
+                    {
+                        RegisterIndex = (ushort)samplerRegister.Register,
+                        ArgumentIndex = (byte)registerOffsets.SamplerArguments_Count++
+                    };
 
                     rmt2.ArgumentMappings.Add(argumentMapping);
 
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(samplerRegister.Name);
+                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
+                    {
+                        Name = CacheContext.GetStringId(samplerRegister.Name)
+                    };
                     rmt2.SamplerArguments.Add(shaderArgument);
 
                 }
@@ -411,14 +417,18 @@ namespace TagTool.Commands.Porting
                     }
                     if (xformRegister == null) continue;
 
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)xformRegister.Register;
+                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping
+                    {
+                        RegisterIndex = (ushort)xformRegister.Register,
 
-                    argumentMapping.ArgumentIndex = (byte)(index != -1 ? index : rmt2.VectorArguments.Count);
+                        ArgumentIndex = (byte)(index != -1 ? index : rmt2.VectorArguments.Count)
+                    };
                     rmt2.ArgumentMappings.Add(argumentMapping);
 
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(samplerRegister.Name);
+                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
+                    {
+                        Name = CacheContext.GetStringId(samplerRegister.Name)
+                    };
                     rmt2.VectorArguments.Add(shaderArgument);
 
                     registerOffsets.VectorArguments_Count++;
@@ -428,13 +438,17 @@ namespace TagTool.Commands.Porting
                 foreach (var vectorRegister in srcVectorArguments)
                 {
                     if (vectorRegister.IsXFormArgument) continue; // we've already added these
-                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping();
-                    argumentMapping.RegisterIndex = (ushort)vectorRegister.Register;
-                    argumentMapping.ArgumentIndex = (byte)rmt2.VectorArguments.Count;
+                    var argumentMapping = new RenderMethodTemplate.ArgumentMapping
+                    {
+                        RegisterIndex = (ushort)vectorRegister.Register,
+                        ArgumentIndex = (byte)rmt2.VectorArguments.Count
+                    };
                     rmt2.ArgumentMappings.Add(argumentMapping);
 
-                    var shaderArgument = new RenderMethodTemplate.ShaderArgument();
-                    shaderArgument.Name = CacheContext.GetStringId(vectorRegister.Name);
+                    var shaderArgument = new RenderMethodTemplate.ShaderArgument
+                    {
+                        Name = CacheContext.GetStringId(vectorRegister.Name)
+                    };
                     rmt2.VectorArguments.Add(shaderArgument);
 
                     registerOffsets.VectorArguments_Count++;
@@ -453,16 +467,19 @@ namespace TagTool.Commands.Porting
 
         public static PixelShaderBlock GeneratePixelShaderBlock(HaloOnlineCacheContext cacheContext, ShaderGeneratorResult shader_gen_result)
         {
-            var pixelShaderBlock = new PixelShaderBlock();
-
-            pixelShaderBlock.PCShaderBytecode = shader_gen_result.Bytecode;
-            pixelShaderBlock.PCParameters = new List<ShaderParameter>();
+            var pixelShaderBlock = new PixelShaderBlock
+            {
+                PCShaderBytecode = shader_gen_result.Bytecode,
+                PCParameters = new List<ShaderParameter>()
+            };
 
             foreach (var register in shader_gen_result.Registers)
             {
-                ShaderParameter shaderParameter = new ShaderParameter();
-                shaderParameter.RegisterIndex = (ushort)register.Register;
-                shaderParameter.RegisterCount = (byte)register.Size;
+                ShaderParameter shaderParameter = new ShaderParameter
+                {
+                    RegisterIndex = (ushort)register.Register,
+                    RegisterCount = (byte)register.Size
+                };
 
                 switch (register.registerType)
                 {

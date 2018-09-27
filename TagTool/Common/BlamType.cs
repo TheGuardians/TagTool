@@ -20,7 +20,7 @@ namespace TagTool.Common
 
 		public BlamTypeAttribute(BlamType fieldType = BlamType.TagStructure, Type Type = null, Type ElementType = null, int ElementCount = 0)
 		{
-			this.BlamType = fieldType;
+			BlamType = fieldType;
 		}
 	}
 

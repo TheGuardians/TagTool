@@ -1,8 +1,8 @@
-using TagTool.Cache;
 using System;
 using System.Runtime.InteropServices;
+using TagTool.Cache;
 
-namespace TagTool.Serialization
+namespace TagTool.Tags
 {
     /// <summary>
     /// Attribute for automatically-serializable values in a tag.

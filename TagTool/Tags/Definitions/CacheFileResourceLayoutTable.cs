@@ -1,4 +1,3 @@
-using TagTool.Serialization;
 using System.Collections.Generic;
 using TagTool.Cache;
 using System.IO;

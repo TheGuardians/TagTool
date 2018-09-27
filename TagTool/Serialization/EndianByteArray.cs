@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Serialization
 {
 	public class EndianBytes
 	{
@@ -11,15 +11,15 @@ namespace TagTool.HyperSerialization
 
 		public EndianBytes(byte[] data, bool isLittleEndian = true)
 		{
-			this.Data = data;
-			this.IsLittleEndian = isLittleEndian;
-			this.NeedsEndianSwap = this.IsLittleEndian != BitConverter.IsLittleEndian;
+			Data = data;
+			IsLittleEndian = isLittleEndian;
+			NeedsEndianSwap = IsLittleEndian != BitConverter.IsLittleEndian;
 		}
 
 		public byte[] ReadBytes(ref int offset, int count)
 		{
 			var bytes = new byte[count];
-			Array.Copy(this.Data, offset, bytes, 0, count);
+			Array.Copy(Data, offset, bytes, 0, count);
 			offset += count;
 			return bytes;
 		}
@@ -27,11 +27,11 @@ namespace TagTool.HyperSerialization
 		public Boolean ToBoolean(ref int offset)
 		{
 			var size = 1;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToBoolean(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToBoolean(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -39,11 +39,11 @@ namespace TagTool.HyperSerialization
 		public Byte ToByte(ref int offset)
 		{
 			var size = 1;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = (Byte)this.Data[offset];
+				Array.Reverse(Data, offset, size);
+			var value = (Byte)Data[offset];
 			offset += size;
 			return value;
 		}
@@ -51,11 +51,11 @@ namespace TagTool.HyperSerialization
 		public SByte ToSByte(ref int offset)
 		{
 			var size = 1;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = (SByte)this.Data[offset];
+				Array.Reverse(Data, offset, size);
+			var value = (SByte)Data[offset];
 			offset += size;
 			return value;
 		}
@@ -63,11 +63,11 @@ namespace TagTool.HyperSerialization
 		public Char ToChar(ref int offset)
 		{
 			var size = 2;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToChar(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToChar(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -75,11 +75,11 @@ namespace TagTool.HyperSerialization
 		public Int16 ToInt16(ref int offset)
 		{
 			var size = 2;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToInt16(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToInt16(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -87,11 +87,11 @@ namespace TagTool.HyperSerialization
 		public UInt16 ToUInt16(ref int offset)
 		{
 			var size = 2;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToUInt16(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToUInt16(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -99,11 +99,11 @@ namespace TagTool.HyperSerialization
 		public Single ToSingle(ref int offset)
 		{
 			var size = 4;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToSingle(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToSingle(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -111,11 +111,11 @@ namespace TagTool.HyperSerialization
 		public Int32 ToInt32(ref int offset)
 		{
 			var size = 4;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToInt32(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToInt32(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -123,11 +123,11 @@ namespace TagTool.HyperSerialization
 		public UInt32 ToUInt32(ref int offset)
 		{
 			var size = 4;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToUInt32(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToUInt32(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -135,11 +135,11 @@ namespace TagTool.HyperSerialization
 		public Double ToDouble(ref int offset)
 		{
 			var size = 8;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToDouble(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToDouble(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -147,11 +147,11 @@ namespace TagTool.HyperSerialization
 		public Int64 ToInt64(ref int offset)
 		{
 			var size = 8;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToInt64(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToInt64(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -159,11 +159,11 @@ namespace TagTool.HyperSerialization
 		public UInt64 ToUInt64(ref int offset)
 		{
 			var size = 8;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToUInt64(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToUInt64(Data, offset);
 			offset += size;
 			return value;
 		}
@@ -171,12 +171,12 @@ namespace TagTool.HyperSerialization
 		public Decimal ToDecimal(ref int offset)
 		{
 			var size = 16;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
+				Array.Reverse(Data, offset, size);
 			var bytes = new byte[size];
-			Array.Copy(this.Data, offset, bytes, 0, size);
+			Array.Copy(Data, offset, bytes, 0, size);
 
 			Int32[] bits = new Int32[4];
 			for (int i = 0; i <= 15; i += 4)
@@ -190,11 +190,11 @@ namespace TagTool.HyperSerialization
 		public Int32 ToPointer(ref int offset)
 		{
 			var size = 4;
-			if (offset + size >= this.Data.Length)
+			if (offset + size >= Data.Length)
 				throw new IndexOutOfRangeException();
 			if (NeedsEndianSwap)
-				Array.Reverse(this.Data, offset, size);
-			var value = BitConverter.ToUInt32(this.Data, offset);
+				Array.Reverse(Data, offset, size);
+			var value = BitConverter.ToUInt32(Data, offset);
 			offset += size;
 			return (int)(value - 0x40000000);
 		}

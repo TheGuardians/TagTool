@@ -2,12 +2,11 @@
 using System.IO;
 using TagTool.Cache;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Tags;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Serialization
 {
-	partial class HyperSerializer : ISerializationContext
+    partial class HyperSerializer : ISerializationContext
 	{
 		private Stream RootStream;
 		private GameCacheContext CacheContext;
@@ -15,9 +14,9 @@ namespace TagTool.HyperSerialization
 
 		public HyperSerializer(Stream rootStream, GameCacheContext cacheContext, bool doesBranching = false)
 		{
-			this.RootStream = rootStream;
-			this.CacheContext = cacheContext;
-			this.DoesBranching = doesBranching;
+			RootStream = rootStream;
+			CacheContext = cacheContext;
+			DoesBranching = doesBranching;
 		}
 
 		public void BeginSerialize(TagStructureInfo info)

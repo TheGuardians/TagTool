@@ -1,11 +1,12 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Collections;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Files
 {
@@ -160,7 +161,7 @@ namespace TagTool.Commands.Files
 
 		private T ConvertStructure<T>(Stream tagsStream, Stream sourceStream, Stream destStream, T data) where T : TagStructure
         {
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);

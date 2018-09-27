@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Common;
 using TagTool.Cache;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
@@ -37,7 +36,7 @@ namespace TagTool.Commands.Porting
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";
 
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(Structure))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(Structure))
 			{
 				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Padding == true)
 					continue;
@@ -70,8 +69,8 @@ namespace TagTool.Commands.Porting
 						"null";
 				else if (fieldValue is StringId stringId)
 					valueString = BlamCache.Version < CacheVersion.Halo3Retail ?
-						BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
-						BlamCache.Strings.GetString(stringId);
+                        BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
+                        BlamCache.Strings.GetString(stringId);
 				else if (fieldType == typeof(CachedTagInstance))
 				{
 					var instance = (CachedTagInstance)fieldValue;
@@ -103,7 +102,7 @@ namespace TagTool.Commands.Porting
                 }
 #endif
 
-				Console.WriteLine("{0}: {1} = {2}", nameString, typeString, valueString);
+                Console.WriteLine("{0}: {1} = {2}", nameString, typeString, valueString);
 			}
 
 			return true;

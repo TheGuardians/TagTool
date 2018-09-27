@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Shaders;
 using TagTool.Tags;
+using TagTool.Shaders;
 
-namespace TagTool.HyperSerialization
+namespace TagTool.Serialization
 {
     public static class HyperDeserializer
 	{
@@ -28,8 +27,8 @@ namespace TagTool.HyperSerialization
 			var definitionOffset = (int)tag.DefinitionOffset;
 			var endianBytes = new EndianBytes(data, isLittleEndian);
 			var definition = TagDefinition.Find(tag.Group.Tag);
-			var info = ReflectionCache.GetTagStructureInfo(definition, cacheContext.Version);
-			var enumerator = ReflectionCache.GetTagFieldEnumerable(info);
+			var info = TagDefinition.GetTagStructureInfo(definition, cacheContext.Version);
+			var enumerator = TagDefinition.GetTagFieldEnumerable(info);
 
 			var value = MainDeserialize(definitionOffset, endianBytes, definition, cacheContext, enumerator);
 			return value;
@@ -267,7 +266,7 @@ namespace TagTool.HyperSerialization
 						else if (genericTypeArgument.IsDefined(typeof(TagStructureAttribute)))
 						{
 							var value = Activator.CreateInstance(genericTypeArgument);
-							var structEnumerator = ReflectionCache.GetTagFieldEnumerable(genericTypeArgument, cacheContext.Version);
+							var structEnumerator = TagDefinition.GetTagFieldEnumerable(genericTypeArgument, cacheContext.Version);
 
 							// TODO: add logic to decide when it's worth starting a task branch
 							if (DateTime.Now.Millisecond < 0)
@@ -300,7 +299,7 @@ namespace TagTool.HyperSerialization
 					var pointer = endianBytes.ToPointer(ref structOffset);
 					if (pointer > 0)
 					{
-						var structEnumerator = ReflectionCache.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+						var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 						var value = MainDeserializeInternal(currentTask, ref pointer, endianBytes, fieldType, cacheContext, structEnumerator);
 						tagField.SetValue(parent, value);
 					}
@@ -309,7 +308,7 @@ namespace TagTool.HyperSerialization
 				// Deserialize a TagStructure
 				else if (fieldType.IsDefined(typeof(TagStructureAttribute)))
 				{
-					var structEnumerator = ReflectionCache.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+					var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 					var value = MainDeserializeInternal(currentTask, ref structOffset, endianBytes, fieldType, cacheContext, structEnumerator);
 					tagField.SetValue(parent, value);
 				}
@@ -357,7 +356,7 @@ namespace TagTool.HyperSerialization
 							var listType = typeof(List<>).MakeGenericType(genericTypeArgument);
 							var list = (IList)Activator.CreateInstance(listType, new object[] { elementCount });
 
-							var structEnumerator = ReflectionCache.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+							var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 							for (var i = 0; i < elementCount; i++)
 							{
 								var value = MainDeserializeInternal(currentTask, ref structOffset, endianBytes, elementType, cacheContext, structEnumerator);
@@ -396,7 +395,7 @@ namespace TagTool.HyperSerialization
 				if (tagFieldAttribute != null && tagFieldAttribute.Size > 0)
 					structOffset += (int)tagFieldAttribute.Size;
 
-				// TagFieldPrinter(this.Context.Context, field, parent);
+				// TagFieldPrinter(Context.Context, field, parent);
 			}
 
 			return parent;
@@ -405,7 +404,7 @@ namespace TagTool.HyperSerialization
 		/// <summary>
 		/// Branches a structure into a new <see cref="Task"/> for deserialization.
 		/// </summary>
-		private static TaskBag BranchDeserialize(TaskBag parent_task, int structOffset, EndianBytes endianBytes, Type structure_type, Serialization.TagStructureInfo structure_info, object root_parent, FieldInfo field_info, int? list_index, GameCacheContext cacheContext, TagFieldEnumerable tagFieldEnumerable)
+		private static TaskBag BranchDeserialize(TaskBag parent_task, int structOffset, EndianBytes endianBytes, Type structure_type, TagStructureInfo structure_info, object root_parent, FieldInfo field_info, int? list_index, GameCacheContext cacheContext, TagFieldEnumerable tagFieldEnumerable)
 		{
 			var size = structure_info.TotalSize;
 
@@ -757,7 +756,7 @@ namespace TagTool.HyperSerialization
 			//if (pointer < 1)
 			//	return null;
 
-			//var headerOffset = (int)this.Context.Tag.PointerToOffset(pointer);
+			//var headerOffset = (int)Context.Tag.PointerToOffset(pointer);
 			//reader.SeekTo(headerOffset);
 
 			//PixelShaderHeader header = null;
@@ -803,7 +802,7 @@ namespace TagTool.HyperSerialization
 			//	codeSize = reader.ReadUInt32();
 			//}
 
-			//var constant_block_offset = (int)this.Context.Tag.PointerToOffset(header.ShaderDataAddress);
+			//var constant_block_offset = (int)Context.Tag.PointerToOffset(header.ShaderDataAddress);
 			//reader.SeekTo(constant_block_offset);
 			//var constantData = reader.ReadBytes((int)constantSize);
 
@@ -853,7 +852,7 @@ namespace TagTool.HyperSerialization
 			//if (headerAddress < 1)
 			//	return null;
 
-			//var headerOffset = this.Context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
+			//var headerOffset = Context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			//reader.SeekTo(headerOffset + 0x4 * sizeof(uint));
 
 			//VertexShaderHeader header = null;
@@ -899,7 +898,7 @@ namespace TagTool.HyperSerialization
 			//	codeSize = reader.ReadUInt32();
 			//}
 
-			//var constant_block_offset = this.Context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
+			//var constant_block_offset = Context.AddressToOffset(headerOffset + 0x10, header.ShaderDataAddress);
 			//reader.SeekTo(constant_block_offset);
 			//var constantData = reader.ReadBytes((int)constantSize);
 

@@ -1,6 +1,5 @@
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
@@ -229,8 +228,8 @@ namespace TagTool.Tags.Definitions
             public ushort Unknown7_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown7); set => SetCount(DrawModeRegisterOffsetType.Unknown7, value); }
             public ushort Unknown8_Count { get => GetCount(DrawModeRegisterOffsetType.Unknown8); set => SetCount(DrawModeRegisterOffsetType.Unknown8, value); }
 
-            private ushort GetValue(DrawModeRegisterOffsetType offset) => (ushort)this.GetType().GetField($"RegisterMapping{(int)offset}").GetValue(this);
-            private void SetValue(DrawModeRegisterOffsetType offset, ushort value) => this.GetType().GetField($"RegisterMapping{(int)offset}").SetValue(this, value);
+            private ushort GetValue(DrawModeRegisterOffsetType offset) => (ushort)GetType().GetField($"RegisterMapping{(int)offset}").GetValue(this);
+            private void SetValue(DrawModeRegisterOffsetType offset, ushort value) => GetType().GetField($"RegisterMapping{(int)offset}").SetValue(this, value);
             public ushort GetCount(DrawModeRegisterOffsetType offset) => (ushort)(GetValue(offset) >> 10);
             public ushort GetOffset(DrawModeRegisterOffsetType offset) => (ushort)(GetValue(offset) & 0x3FFu);
             public void SetCount(DrawModeRegisterOffsetType offset, ushort count)

@@ -1,4 +1,4 @@
-using TagTool.Serialization;
+using TagTool.Tags;
 using System;
 
 namespace TagTool.Cache

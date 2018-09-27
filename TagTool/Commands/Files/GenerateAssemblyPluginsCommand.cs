@@ -1,13 +1,12 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Shaders;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Files
 {
@@ -74,11 +73,11 @@ namespace TagTool.Commands.Files
             /// <summary>
             /// The field type.
             /// </summary>
-            AssemblyPluginFieldTypes type;
+            readonly AssemblyPluginFieldTypes type = AssemblyPluginFieldTypes.undefined;
             /// <summary>
             /// The field attributes. Eg, color format, string length.
             /// </summary>
-            Dictionary<String, String> attributes = new Dictionary<string, string>() { { "name", "" }, { "visible", "true" } };
+            Dictionary<string, string> attributes = new Dictionary<string, string>() { { "name", "" }, { "visible", "true" } };
             /// <summary>
             /// The field children. Eg enum options, reflexive contents.
             /// </summary>
@@ -252,7 +251,7 @@ namespace TagTool.Commands.Files
             public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attributes) : this(type, name)
             {
                 //Merge attributes dictionary
-                this.attributes = this.attributes.Concat(attributes)
+                attributes = attributes.Concat(attributes)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
             }
@@ -282,7 +281,7 @@ namespace TagTool.Commands.Files
             {
                 attributes.Add("offset", "0x" + offset.ToString("X"));
 
-                this.attributes = this.attributes.Concat(attributes)
+                attributes = attributes.Concat(attributes)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
 
@@ -913,7 +912,7 @@ namespace TagTool.Commands.Files
         /// A list of assembly plugin game names for cache versions in BlamCore.
         /// If it's not here, it's not supported.
         /// </summary>
-        static Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
+        static readonly Dictionary<CacheVersion, string> assemblyCacheVersions = new Dictionary<CacheVersion, string>()
         {
             {CacheVersion.HaloOnline106708, "HaloOnline" },
             {CacheVersion.Halo3Retail, "Halo3" },

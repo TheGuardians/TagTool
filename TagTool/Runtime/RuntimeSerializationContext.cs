@@ -1,9 +1,9 @@
 using TagTool.Cache;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using System;
 using System.IO;
-using TagTool.Tags;
+using TagTool.Serialization;
 
 namespace TagTool.Runtime
 {

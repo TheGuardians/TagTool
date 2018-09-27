@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections;
 
-namespace TagTool.Serialization
+namespace TagTool.Tags
 {
 	/// <summary>
 	/// Allows easy enumeration over a tag structure's elements and filtering by version.
@@ -13,13 +13,13 @@ namespace TagTool.Serialization
 	public class TagFieldEnumerable : IEnumerable<TagFieldInfo>
 	{
 		/// <summary>
-		/// Collection of <see cref="Serialization.TagFieldInfo"/> for a <see cref="TagStructureInfo"/> in a given
+		/// Collection of <see cref="TagFieldInfo"/> for a <see cref="TagStructureInfo"/> in a given
 		/// <see cref="CacheVersion"/>.
 		/// </summary>
 		private readonly List<TagFieldInfo> TagFieldInfos = new List<TagFieldInfo> { };
 
 		/// <summary>
-		/// Constructs aa <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/> over a tag structure for a <see cref="TagStructureInfo"/> in a given
+		/// Constructs aa <see cref="TagFieldInfo"/> <see cref="List{T}"/> over a tag structure for a <see cref="TagStructureInfo"/> in a given
 		/// <see cref="CacheVersion"/>.
 		/// </summary>
 		/// <param name="info">The info for the structure. Only fields which match the version used to create the info will be enumerated over.</param>
@@ -45,22 +45,22 @@ namespace TagTool.Serialization
 		public int Count => TagFieldInfos.Count;
 
 		/// <summary>
-		/// Gets an <see cref="IEnumerator{T}"/> over the <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/>.
+		/// Gets an <see cref="IEnumerator{T}"/> over the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerator<TagFieldInfo> GetEnumerator() => TagFieldInfos.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => TagFieldInfos.GetEnumerator();
 
 		/// <summary>
-		/// An indexer into the <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/>.
+		/// An indexer into the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
-		/// <param name="index">The index into the <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/>.</param>
-		/// <returns>The <see cref="Serialization.TagFieldInfo"/> at the specified index in the 
-		/// <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/>.</returns>
+		/// <param name="index">The index into the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.</param>
+		/// <returns>The <see cref="TagFieldInfo"/> at the specified index in the 
+		/// <see cref="TagFieldInfo"/> <see cref="List{T}"/>.</returns>
 		public TagFieldInfo this[int index] => TagFieldInfos[index];
 
 		/// <summary>
-		/// Builds the <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/> to be enumerated.
+		/// Builds the <see cref="TagFieldInfo"/> <see cref="List{T}"/> to be enumerated.
 		/// </summary>
 		private void Build()
 		{
@@ -73,7 +73,7 @@ namespace TagTool.Serialization
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attribute = ReflectionCache.GetTagFieldAttribute(field);
+					var attribute = TagDefinition.GetTagFieldAttribute(field);
 
 					if (attribute.Gen3Only)
 					{
@@ -103,10 +103,10 @@ namespace TagTool.Serialization
 		}
 
 		/// <summary>
-		/// Creates and adds a <see cref="Serialization.TagFieldInfo"/> to the <see cref="Serialization.TagFieldInfo"/> <see cref="List{T}"/>.
+		/// Creates and adds a <see cref="TagFieldInfo"/> to the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
-		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Serialization.TagFieldInfo"/> from.</param>
-		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Serialization.TagFieldInfo"/>.</param>
+		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="TagFieldInfo"/> from.</param>
+		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="TagFieldInfo"/>.</param>
 		/// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
 		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, ref uint offset)
 		{
@@ -117,7 +117,7 @@ namespace TagTool.Serialization
 		}
 
 		/// <summary>
-		/// Finds a <see cref="Serialization.TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
+		/// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
 		/// </summary>
 		/// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
 		/// <returns></returns>

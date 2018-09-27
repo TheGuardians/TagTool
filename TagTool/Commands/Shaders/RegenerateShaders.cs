@@ -1,10 +1,9 @@
 ﻿using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Tags;
 using System.Linq;
 using HaloShaderGenerator.Enums;
 using System.Reflection;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Diagnostics;
-using TagTool.Shaders;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Shaders
 {

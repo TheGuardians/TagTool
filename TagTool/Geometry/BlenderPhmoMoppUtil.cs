@@ -2,9 +2,10 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using JsonMoppNet;
 using System.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Geometry
 {
@@ -48,7 +49,7 @@ namespace TagTool.Geometry
                 var resourceWriter = new EndianWriter(new MemoryStream(), EndianFormat.LittleEndian);
                 var dataContext = new DataSerializationContext(null, resourceWriter);
                 var block = dataContext.CreateBlock();
-                var info = ReflectionCache.GetTagStructureInfo(resource.GetType(), CacheVersion.HaloOnline235640);
+                var info = TagDefinition.GetTagStructureInfo(resource.GetType(), CacheVersion.HaloOnline235640);
 
                 new TagSerializer(CacheVersion.HaloOnline235640).Serialize(dataContext, resource);
 

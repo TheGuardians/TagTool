@@ -1,19 +1,128 @@
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Serialization;
 
 namespace TagTool.Tags
 {
 	public static class TagDefinition
-	{
-		/// <summary>
-		/// Finds the structure type corresponding to a group tag.
-		/// </summary>
-		/// <param name="groupTag">The group tag of the group to search for.</param>
-		/// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
-		public static Type Find(Tag groupTag)
+    {
+        private static readonly Dictionary<CacheVersion, VersionedCache> VersionedCaches =
+            new Dictionary<CacheVersion, VersionedCache> { };
+
+        public static TagFieldEnumerable GetTagFieldEnumerable(Type type, CacheVersion version = CacheVersion.Unknown)
+        {
+            var info = GetTagStructureInfo(type, version);
+            var enumerator = GetTagFieldEnumerable(info);
+            return enumerator;
+        }
+
+        public static TagFieldEnumerable GetTagFieldEnumerable(TagStructureInfo info)
+            => VersionedCaches[info.Version].GetTagFieldEnumerable(info);
+
+        public static TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
+            => VersionedCaches[version].GetTagStructureAttribute(type, version);
+
+        public static TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown)
+            => VersionedCaches[version].GetTagStructureInfo(type, version);
+
+        public static TagFieldAttribute GetTagFieldAttribute(FieldInfo field, CacheVersion version = CacheVersion.Unknown)
+            => VersionedCaches[version].GetTagFieldAttribute(field, version);
+
+        private class VersionedCache
+        {
+            private readonly CacheVersion Version;
+
+            private readonly Dictionary<Type, TagStructureAttribute> TagStructureAttributes =
+                new Dictionary<Type, TagStructureAttribute> { };
+
+            private readonly Dictionary<Type, TagStructureInfo> TagStructureInfos =
+                new Dictionary<Type, TagStructureInfo> { };
+
+            private readonly Dictionary<Type, TagFieldEnumerable> TagFieldEnumerables =
+                new Dictionary<Type, TagFieldEnumerable> { };
+
+            private readonly Dictionary<FieldInfo, TagFieldAttribute> TagFieldAttributes =
+                new Dictionary<FieldInfo, TagFieldAttribute> { };
+
+            public TagStructureInfo GetTagStructureInfo(Type type, CacheVersion version = CacheVersion.Unknown)
+            {
+                if (!TagStructureInfos.TryGetValue(type, out TagStructureInfo info))
+                    lock (TagStructureInfos)
+                    {
+                        if (!TagStructureInfos.TryGetValue(type, out info))
+                            TagStructureInfos[type] = info = new TagStructureInfo(type, version);
+                    }
+                return info;
+            }
+
+            public TagFieldEnumerable GetTagFieldEnumerable(TagStructureInfo info)
+            {
+                if (!TagFieldEnumerables.TryGetValue(info.Types[0], out TagFieldEnumerable enumerator))
+                    lock (TagFieldEnumerables)
+                    {
+                        if (!TagFieldEnumerables.TryGetValue(info.Types[0], out enumerator))
+                            TagFieldEnumerables[info.Types[0]] = enumerator = new TagFieldEnumerable(info);
+                    }
+                return enumerator;
+            }
+
+            public TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
+            {
+                if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
+                    lock (TagStructureInfos)
+                    {
+                        if (!TagStructureAttributes.TryGetValue(type, out attribute))
+                            TagStructureAttributes[type] = attribute = GetStructureAttribute();
+                    }
+                return attribute;
+
+                TagStructureAttribute GetStructureAttribute()
+                {
+                    // First match against any TagStructureAttributes that have version restrictions
+                    var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
+                        .Cast<TagStructureAttribute>()
+                        .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
+                        .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
+
+                    // If nothing was found, find the first attribute without any version restrictions
+                    return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
+                        .Cast<TagStructureAttribute>()
+                        .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown);
+                }
+            }
+
+            public TagFieldAttribute GetTagFieldAttribute(FieldInfo field, CacheVersion version = CacheVersion.Unknown)
+            {
+                if (!TagFieldAttributes.TryGetValue(field, out TagFieldAttribute attribute))
+                    lock (TagFieldEnumerables)
+                    {
+                        if (!TagFieldAttributes.TryGetValue(field, out attribute))
+                            TagFieldAttributes[field] = attribute =
+                                field.GetCustomAttributes<TagFieldAttribute>(false).DefaultIfEmpty(TagFieldAttribute.Default).First();
+                    }
+                return attribute;
+            }
+
+            public VersionedCache(CacheVersion version) => Version = version;
+        }
+
+        static TagDefinition()
+        {
+            lock (VersionedCaches)
+                foreach (var version in Enum.GetValues(typeof(CacheVersion)) as CacheVersion[])
+                    VersionedCaches[version] = new VersionedCache(version);
+        }
+
+        /// <summary>
+        /// Finds the structure type corresponding to a group tag.
+        /// </summary>
+        /// <param name="groupTag">The group tag of the group to search for.</param>
+        /// <returns>The structure type if found, or <c>null</c> otherwise.</returns>
+        public static Type Find(Tag groupTag)
 		{
 			Types.TryGetValue(groupTag, out var result);
 			return result;
@@ -42,7 +151,7 @@ namespace TagTool.Tags
 			foreach (var entry in Types)
 			{
 				var type = entry.Value;
-				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+				var attribute = TagDefinition.GetTagStructureAttribute(type);
 				if (attribute.Name == group)
 					return type;
 			}
@@ -55,7 +164,7 @@ namespace TagTool.Tags
 			foreach (var entry in Types)
 			{
 				var type = entry.Value;
-				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+				var attribute = TagDefinition.GetTagStructureAttribute(type);
 
 				if (attribute.Name == group)
 				{
@@ -84,7 +193,7 @@ namespace TagTool.Tags
 			foreach (var entry in Types)
 			{
 				var type = entry.Value;
-				var attribute = ReflectionCache.GetTagStructureAttribute(type);
+				var attribute = TagDefinition.GetTagStructureAttribute(type);
 
 				if (attribute.Name == group)
 					return true;
@@ -95,7 +204,7 @@ namespace TagTool.Tags
 
 		public static Tag GetGroupTag<T>()
 		{
-			var attribute = ReflectionCache.GetTagStructureAttribute(typeof(T));
+			var attribute = TagDefinition.GetTagStructureAttribute(typeof(T));
 			return new Tag(attribute.Tag);
 		}
 

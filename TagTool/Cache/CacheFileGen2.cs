@@ -11,6 +11,20 @@ namespace TagTool.Cache
         public static CacheFileGen2 SharedCache { get; private set; } = null;
         public static CacheFileGen2 SinglePlayerSharedCache { get; private set; } = null;
 
+        public override string LocalesKey => null;
+
+        public override string StringsKey => null;
+
+        public override string TagsKey => null;
+
+        public override string NetworkKey => null;
+
+        public override string StringMods => null;
+
+        public override int LocaleGlobalsOffset => -1;
+
+        public override int LocaleGlobalsSize => -1;
+
         public CacheFileGen2(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory) :
             base(cacheContext, file, version, memory)
         {

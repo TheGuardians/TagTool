@@ -1,7 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
@@ -9,11 +9,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
 using TagTool.Audio;
 using System.Threading;
 using System.Threading.Tasks;
 using TagTool.Audio.Converter;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {
@@ -234,11 +234,12 @@ namespace TagTool.Commands.Porting
 
             int permutationChunkSize = permBuffer.Length;
 
-            CacheSoundResult result = new CacheSoundResult();
-
-            result.PermutationIndex = permutationIndex;
-            result.PermutationBuffer = permBuffer;
-            result.PermutationChunkSize = permutationChunkSize;
+            CacheSoundResult result = new CacheSoundResult
+            {
+                PermutationIndex = permutationIndex,
+                PermutationBuffer = permBuffer,
+                PermutationChunkSize = permutationChunkSize
+            };
 
             return result;
         }

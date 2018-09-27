@@ -2,15 +2,15 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
 using System.Collections;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {
@@ -687,7 +687,7 @@ namespace TagTool.Commands.Porting
 
         private T ConvertStructure<T>(Stream cacheStream, T data, bool replace) where T : TagStructure
         {
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = ConvertData(cacheStream, oldValue, replace);

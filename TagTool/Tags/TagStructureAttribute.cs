@@ -1,8 +1,7 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
+using TagTool.Cache;
 
-namespace TagTool.Serialization
+namespace TagTool.Tags
 {
 	/// <summary>
 	/// Attribute for a serializable structure in a tag.

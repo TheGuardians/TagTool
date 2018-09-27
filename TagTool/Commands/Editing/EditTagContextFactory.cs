@@ -1,4 +1,4 @@
-﻿using TagTool.Serialization;
+﻿using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using System.Reflection;
@@ -17,7 +17,6 @@ using TagTool.Commands.Scenarios;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
-using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
 {
@@ -125,7 +124,7 @@ namespace TagTool.Commands.Editing
                     break;
             }
 
-            var structure = ReflectionCache.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag));
+            var structure = TagDefinition.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag));
 
             commandContext.AddCommand(new ListFieldsCommand(cacheContext, structure, definition));
             commandContext.AddCommand(new SetFieldCommand(contextStack, cacheContext, tag, structure, definition));

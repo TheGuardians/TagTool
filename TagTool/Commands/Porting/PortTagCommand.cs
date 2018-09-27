@@ -9,14 +9,14 @@ using TagTool.Common;
 using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
-using TagTool.Serialization;
-using TagTool.Shaders;
 using TagTool.Tags;
+using TagTool.Shaders;
 using TagTool.Tags.Definitions;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting
 {
-	public partial class PortTagCommand : Command
+    public partial class PortTagCommand : Command
 	{
 		private HaloOnlineCacheContext CacheContext { get; }
 		private CacheFile BlamCache;
@@ -52,7 +52,7 @@ namespace TagTool.Commands.Porting
 			GeometryConverter = new RenderGeometryConverter(cacheContext, blamCache);
 
 			foreach (var tagType in TagDefinition.Types.Keys)
-				DefaultTags[tagType] = CacheContext.TagCache.Index.FindFirstInGroup(tagType);
+                DefaultTags[tagType] = CacheContext.TagCache.Index.FindFirstInGroup(tagType);
 		}
 
 		public override object Execute(List<string> args)
@@ -61,7 +61,7 @@ namespace TagTool.Commands.Porting
 				return false;
 
 			var portingOptions = args.Take(args.Count - 1).ToList();
-			this.ParsePortingOptions(portingOptions);
+			ParsePortingOptions(portingOptions);
 
 			var initialStringIdCount = CacheContext.StringIdCache.Strings.Count;
 
@@ -761,7 +761,7 @@ namespace TagTool.Commands.Porting
 
 		private T ConvertStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
 		{
-			foreach (var tagFieldInfo in ReflectionCache.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
 			{
 				// skip the field if no conversion is needed
 				if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||

@@ -72,9 +72,9 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Include 'Scripting.Script' tag-blocks.")]
 			Scripts = 1 << 8,
 
-			/// <summary>
-			/// TBD.
-			/// </summary>
+			// <summary>
+			// TBD.
+			// </summary>
 			//[PortingFlagDescription("TBD.")]
 			//ShaderTest = 1 << 9,
 
@@ -117,7 +117,7 @@ namespace TagTool.Commands.Porting
 		/// (<see cref="PortTagCommand.Flags"/> &amp; flags) == flags
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to check.</param>
-		private bool FlagsAllSet(PortingFlags flags) => (this.Flags & flags) == flags;
+		private bool FlagsAllSet(PortingFlags flags) => (Flags & flags) == flags;
 		
 		/// <summary>
 		/// True if the flag is set (this is 100% the same as <see cref="FlagsAnySet(PortingFlags)"/>,
@@ -125,32 +125,32 @@ namespace TagTool.Commands.Porting
 		/// </summary>
 		/// <param name="flag"></param>
 		/// <returns></returns>
-		private bool FlagIsSet(PortingFlags flag) => (this.Flags & flag) != 0;
+		private bool FlagIsSet(PortingFlags flag) => (Flags & flag) != 0;
 
 		/// <summary>
 		/// True if ANY of the supplied <see cref="PortingFlags"/> are set, false if none are:
 		/// (<see cref="PortTagCommand.Flags"/> &amp; flags) != 0
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to check.</param>
-		private bool FlagsAnySet(PortingFlags flags) => (this.Flags & flags) != 0;
+		private bool FlagsAnySet(PortingFlags flags) => (Flags & flags) != 0;
 
 		/// <summary>
 		/// Sets flags explicitly (<see cref="PortTagCommand.Flags"/> |= <see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to set.</param>
-		private PortingFlags SetFlags(PortingFlags flags) => this.Flags |= flags;
+		private PortingFlags SetFlags(PortingFlags flags) => Flags |= flags;
 
 		/// <summary>
 		/// Removes flags explicitly (<see cref="PortTagCommand.Flags"/> &amp;= ~<see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to remove.</param>
-		private PortingFlags RemoveFlags(PortingFlags flags) => this.Flags &= ~flags;
+		private PortingFlags RemoveFlags(PortingFlags flags) => Flags &= ~flags;
 
 		/// <summary>
 		/// Toggles flags on or off (<see cref="PortTagCommand.Flags"/> ^= <see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to toggle.</param>
-		private PortingFlags ToggleFlags(PortingFlags flags) => this.Flags ^= flags;
+		private PortingFlags ToggleFlags(PortingFlags flags) => Flags ^= flags;
 
 		/// <summary>
 		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>.
@@ -158,7 +158,7 @@ namespace TagTool.Commands.Porting
 		/// <param name="args"></param>
 		private void ParsePortingOptions(List<string> args)
 		{
-			this.Flags = PortingFlags.Default;
+			Flags = PortingFlags.Default;
 
 			var flagNames = Enum.GetNames(typeof(PortingFlags)).Select(name => name.ToLower());
 			var flagValues = Enum.GetValues(typeof(PortingFlags)) as PortingFlags[];
@@ -189,9 +189,9 @@ namespace TagTool.Commands.Porting
 				for (var i = 0; i < flagNames.Count(); i++)
 					if (arg == flagNames.ElementAt(i))
 						if (toggleOn)
-							this.SetFlags(flagValues[i]);
+							SetFlags(flagValues[i]);
 						else
-							this.RemoveFlags(flagValues[i]);
+							RemoveFlags(flagValues[i]);
 			}
 		}
 
@@ -239,7 +239,7 @@ namespace TagTool.Commands.Porting
 
 			public PortingFlagDescriptionAttribute(string description)
 			{
-				this.Description = description;
+				Description = description;
 			}
 		}
 	}

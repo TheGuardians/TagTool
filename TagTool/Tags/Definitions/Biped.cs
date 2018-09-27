@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
-using TagTool.Serialization;
 
 namespace TagTool.Tags.Definitions
 {

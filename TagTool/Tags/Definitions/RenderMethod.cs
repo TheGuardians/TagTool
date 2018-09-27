@@ -1,6 +1,5 @@
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
@@ -189,8 +188,8 @@ namespace TagTool.Tags.Definitions
                 }
                 public RenderMethodExternalValue RenderMethodExternal
                 {
-                    get => (RenderMethodExternalValue)this.ArgumentIndex;
-                    set => this.ArgumentIndex = (byte)value;
+                    get => (RenderMethodExternalValue)ArgumentIndex;
+                    set => ArgumentIndex = (byte)value;
                 }
 
                 public short RegisterIndex;

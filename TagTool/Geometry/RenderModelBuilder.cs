@@ -1,14 +1,14 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TagTool.Tags;
+using TagTool.Serialization;
 
 namespace TagTool.Geometry
 {

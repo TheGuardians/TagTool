@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
-using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Commands
 {
-	public static class StartupTests
+    public static class StartupTests
 	{
 		private delegate void TestDelegate(ref bool result);
 
@@ -99,8 +99,8 @@ namespace TagTool.Commands
 			public bool Enabled;
 			public StartupTestAttribute(string text, bool enabled = true)
 			{
-				this.Text = text;
-				this.Enabled = enabled;
+				Text = text;
+				Enabled = enabled;
 			}
 		}
 	}
