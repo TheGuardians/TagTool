@@ -11,19 +11,19 @@ namespace TagTool.Cache
 {
     public class CacheFileGen3 : CacheFile
     {
-        public override string LocalesKey => throw new NotImplementedException();
+        public override string LocalesKey => "";
 
-        public override string StringsKey => throw new NotImplementedException();
+        public override string StringsKey => "";
 
-        public override string TagsKey => throw new NotImplementedException();
+        public override string TagsKey => "";
 
-        public override string NetworkKey => throw new NotImplementedException();
+        public override string NetworkKey => "";
 
-        public override string StringMods => throw new NotImplementedException();
+        public override string StringMods => "+262143,-259153;+64329,-64329;+1208,+1882";
 
-        public override int LocaleGlobalsOffset => throw new NotImplementedException();
+        public override int LocaleGlobalsOffset => 452;
 
-        public override int LocaleGlobalsSize => throw new NotImplementedException();
+        public override int LocaleGlobalsSize => 68;
 
         public CacheFileGen3(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory)
             : base(cacheContext, file, version, memory)
@@ -306,8 +306,14 @@ namespace TagTool.Cache
             else
                 er = Reader;
 
-            var offset = Header.Partitions[0].BaseAddress + Pool.BlockOffset;
-            er.SeekTo(offset);
+			// FIXME: broken?
+			// var offset = Header.Partitions[0].BaseAddress + Pool.BlockOffset;
+
+			// remove these two lines if above is fixed
+			er.SeekTo(1136);
+			int offset = er.ReadInt32() + Pool.BlockOffset;
+
+			er.SeekTo(offset);
             byte[] compressed = er.ReadBytes(Pool.CompressedBlockSize);
             byte[] decompressed = new byte[Pool.UncompressedBlockSize];
 
@@ -322,7 +328,7 @@ namespace TagTool.Cache
             if (length > decompressed.Length)
                 length = decompressed.Length;
 
-            Array.Copy(decompressed, locOffset, data, 0, Math.Min(length, decompressed.Length - locOffset));
+            Array.Copy(decompressed, locOffset, data, 0, length);
 
             if (er != Reader)
             {

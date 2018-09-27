@@ -213,6 +213,9 @@ namespace TagTool.Cache
 
                 foreach (var instance in TagCache.Index)
                 {
+					if (instance is null)
+						continue;
+
                     if (instance.IsInGroup(groupTag) && instance.Name == name)
                     {
                         result = instance;
@@ -293,6 +296,9 @@ namespace TagTool.Cache
 
             foreach (var instance in TagCache.Index)
             {
+				if (instance is null)
+					continue;
+
                 if (instance.IsInGroup(groupTag) && instance.Name == name)
                 {
                     result = instance;
