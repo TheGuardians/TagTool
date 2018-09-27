@@ -9,7 +9,6 @@ namespace TagTool.Commands
 	{
 		public static void Run()
 		{
-#if DEBUG
 			foreach (var method in typeof(StartupTests).GetRuntimeMethods())
 			{
 				if (!method.IsPrivate)
@@ -17,42 +16,61 @@ namespace TagTool.Commands
 
 				method.Invoke(null, null);
 			}
-
-			Console.WriteLine();
-#endif
 		}
 
-		private const string IgnoreStackMsg = "\n*** Ignore The Stacktrace Below ***\n";
-
+		#region Test Methods
 		private static void ConfirmTagStructureHasNoFields()
 		{
-			Console.WriteLine(
-				$"Verifying `{typeof(TagStructure).FullName}` contains no public instance fields...");
-
 			var fields = typeof(TagStructure).GetFields(BindingFlags.Instance | BindingFlags.Public);
 
-			Debug.Assert(fields.Length == 0,
-				$"`{typeof(TagStructure).FullName}` must not have public instance fields.", IgnoreStackMsg);
+			Test.Assert(fields.Length == 0,
+				$"`{typeof(TagStructure).FullName}` must not have public instance fields.");
 		}
 
 		private static void ValidateTagStructureTypes()
 		{
-			Console.WriteLine(
-				$"Verifying `{typeof(TagStructure).FullName}` inheritance and `[{typeof(TagStructureAttribute).FullName}]` usage...");
-
 			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
 			{
 				var inheritsTagStructure = type.IsSubclassOf(typeof(TagStructure));
 				var inheritsAttribute = type.IsDefined(typeof(TagStructureAttribute));
 
 				if (inheritsTagStructure)
-					Debug.Assert(inheritsAttribute,
-						$"{type.FullName} must define [{typeof(TagStructureAttribute).FullName}] because it inherits {typeof(TagStructure).FullName}.", IgnoreStackMsg);
+					Test.Assert(inheritsAttribute,
+						$"{type.FullName} must define [{typeof(TagStructureAttribute).FullName}] because it inherits {typeof(TagStructure).FullName}.");
 
 				if (inheritsAttribute)
-					Debug.Assert(inheritsTagStructure,
-						$"{type.FullName} must inherit {typeof(TagStructure).FullName} becuse it defnes [{typeof(TagStructureAttribute).FullName}].", IgnoreStackMsg);
+					Test.Assert(inheritsTagStructure,
+						$"{type.FullName} must inherit {typeof(TagStructure).FullName} becuse it defnes [{typeof(TagStructureAttribute).FullName}].");
 			}
+		}
+		#endregion
+
+		private static class Test
+		{
+#if DEBUG
+			public static void Assert(bool condition, string message)
+			{
+				// TODO: Can we make visual studio highlight a different line of code when this exception is thrown?
+				if (!condition)
+					throw new StartupTestException($"FAIL: {message}");
+			}
+#else
+			public static void Assert(bool condition, string message)
+			{
+				if (!condition)
+					Console.WriteLine($"FAIL: {message}");
+			}
+#endif
+		}
+
+		private class StartupTestException : Exception
+		{
+			public StartupTestException() { }
+			public StartupTestException(string message) : base(message) { }
+			public StartupTestException(string message, Exception inner) : base(message, inner) { }
+			protected StartupTestException(
+			  System.Runtime.Serialization.SerializationInfo info,
+			  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 		}
 	}
 }
