@@ -328,6 +328,7 @@ namespace TagTool.Cache
             if (length > decompressed.Length)
                 length = decompressed.Length;
 
+			length = Math.Min(length, decompressed.Length - locOffset);
             Array.Copy(decompressed, locOffset, data, 0, length);
 
             if (er != Reader)

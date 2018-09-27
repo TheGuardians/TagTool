@@ -53,7 +53,7 @@ namespace TagTool.Tags
 	}
 
 	[TagStructure(Size = 0x0)]
-	public class TagBlock<T> : TagBlock, IList<T> // where T : TagStructure
+	public class TagBlock<T> : TagBlock, IList<T> where T : TagStructure
 	{
 		/// <summary>
 		/// The list of elements within the tag block.
@@ -61,16 +61,15 @@ namespace TagTool.Tags
 		[TagField(Runtime = true)]
 		private new IList<T> Elements;
 
-		public TagBlock() : base(0, new CacheAddress())
+		public TagBlock() : this(0, new CacheAddress()) { }
+
+		public TagBlock(int count, CacheAddress address) : base(count, address)
 		{
-			Trace.Assert(typeof(T) != typeof(TagBlock),
-				$"Type parameter must not be `{nameof(TagBlock)}`: `{nameof(TagBlock<T>)}`.");
+			if (typeof(T) == typeof(TagBlock))
+				throw new NotSupportedException($"Type parameter must not be `{nameof(TagBlock)}`: `{nameof(TagBlock<T>)}`.");
 
 			Elements = base.Elements as IList<T>;
 		}
-
-		public TagBlock(int count, CacheAddress address) : base(count, address) 
-			=> Elements = base.Elements as IList<T>;
 
 		#region IList<T> Implementation
 		int ICollection<T>.Count => Elements.Count;

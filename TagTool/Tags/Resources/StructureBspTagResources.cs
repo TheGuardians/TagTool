@@ -193,10 +193,16 @@ namespace TagTool.Tags.Resources
             public sbyte DataBuildType;
             public sbyte Unused4;
             public short Unused5;
-            public TagBlock<byte> Data;
+            public TagBlock<Datum> Data;
             public sbyte MoppBuildType;
             public byte Unused6;
             public short Unused7;
+
+			[TagStructure(Size = 0x1)]
+			public class Datum : TagStructure
+			{
+				public byte Value;
+			}
         }
     }
 }
