@@ -346,7 +346,7 @@ namespace TagTool.Cache
                 }
 
 				var type = Tags.TagDefinition.Types[groupTag];
-				var structure = TagDefinition.GetTagStructureAttribute(type);
+				var structure = TagStructure.GetTagStructureAttribute(type);
 
                 return structure.Name;
             }

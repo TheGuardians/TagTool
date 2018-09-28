@@ -73,7 +73,7 @@ namespace TagTool.Tags
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attribute = TagDefinition.GetTagFieldAttribute(field);
+					var attribute = TagStructure.GetTagFieldAttribute(type, field);
 
 					if (attribute.Gen3Only)
 					{

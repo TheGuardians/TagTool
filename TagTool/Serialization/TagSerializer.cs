@@ -36,7 +36,7 @@ namespace TagTool.Serialization
         public void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
         {
             // Serialize the structure to a data block
-            var info = TagDefinition.GetTagStructureInfo(tagStructure.GetType(), Version);
+            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version);
             context.BeginSerialize(info);
             var tagStream = new MemoryStream();
             var structBlock = context.CreateBlock();
@@ -61,7 +61,7 @@ namespace TagTool.Serialization
         {
             var baseOffset = block.Stream.Position;
 
-			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(info))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info))
 				SerializeProperty(info.Version, context, tagStream, block, structure, tagFieldInfo, baseOffset);
 
             // Honor the struct size if it's defined
@@ -258,7 +258,7 @@ namespace TagTool.Serialization
                 if (value == null)
                     value = Activator.CreateInstance(valueType);
 
-                SerializeStruct(context, tagStream, block, TagDefinition.GetTagStructureInfo(valueType, version), value);
+                SerializeStruct(context, tagStream, block, TagStructure.GetTagStructureInfo(valueType, version), value);
             }
         }
 
@@ -411,7 +411,7 @@ namespace TagTool.Serialization
 
             try
             {
-                structure = TagDefinition.GetTagStructureInfo(elementType, Version).Structure;
+                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
             }
             catch
             {

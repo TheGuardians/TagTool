@@ -72,7 +72,7 @@ namespace TagTool.Tags
         private void Analyze(Type mainType, CacheVersion version)
         {
             // Get the attribute for the main structure type
-            Structure = TagDefinition.GetTagStructureAttribute(mainType, version);
+            Structure = TagStructure.GetTagStructureAttribute(mainType, version);
             if (Structure == null)
                 throw new InvalidOperationException($"No `{nameof(TagStructureAttribute)}` for `{version.ToString()}` found on `{mainType.Name}`.");
 
@@ -81,7 +81,7 @@ namespace TagTool.Tags
             Types = new List<Type>();
             while (currentType != null)
             {
-                var attrib = (currentType != mainType) ? TagDefinition.GetTagStructureAttribute(currentType, version) : Structure;
+                var attrib = (currentType != mainType) ? TagStructure.GetTagStructureAttribute(currentType, version) : Structure;
                 if (attrib != null)
                 {
                     Types.Add(currentType);

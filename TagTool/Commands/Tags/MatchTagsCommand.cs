@@ -187,8 +187,8 @@ namespace TagTool.Commands.Tags
 
             else if (dataA is TagStructure)
             {
-				var tagFieldInfosA = TagDefinition.GetTagFieldEnumerable(dataA.GetType(), versionA);
-				var tagFieldInfosB = TagDefinition.GetTagFieldEnumerable(dataB.GetType(), versionB);
+				var tagFieldInfosA = TagStructure.GetTagFieldEnumerable(dataA.GetType(), versionA);
+				var tagFieldInfosB = TagStructure.GetTagFieldEnumerable(dataB.GetType(), versionB);
 
 				// The objects are structures
 				for (int a = 0, b = 0; a < tagFieldInfosA.Count && b < tagFieldInfosB.Count; a++, b++)

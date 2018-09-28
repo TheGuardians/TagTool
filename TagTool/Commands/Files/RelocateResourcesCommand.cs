@@ -161,7 +161,7 @@ namespace TagTool.Commands.Files
 
 		private T ConvertStructure<T>(Stream tagsStream, Stream sourceStream, Stream destStream, T data) where T : TagStructure
         {
-			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = ConvertData(tagsStream, sourceStream, destStream, oldValue);

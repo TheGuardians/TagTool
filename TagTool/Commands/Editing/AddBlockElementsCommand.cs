@@ -92,7 +92,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			var field = TagDefinition.GetTagFieldEnumerable(Structure)
+			var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
             var fieldType = field.FieldType;
@@ -166,7 +166,7 @@ namespace TagTool.Commands.Editing
 
             if (isTagStructure)
             {
-				foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(elementType))
+				foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(elementType))
 				{
 					var fieldType = tagFieldInfo.FieldType;
 

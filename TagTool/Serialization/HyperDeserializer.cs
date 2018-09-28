@@ -27,8 +27,8 @@ namespace TagTool.Serialization
 			var definitionOffset = (int)tag.DefinitionOffset;
 			var endianBytes = new EndianBytes(data, isLittleEndian);
 			var definition = TagDefinition.Find(tag.Group.Tag);
-			var info = TagDefinition.GetTagStructureInfo(definition, cacheContext.Version);
-			var enumerator = TagDefinition.GetTagFieldEnumerable(info);
+			var info = TagStructure.GetTagStructureInfo(definition, cacheContext.Version);
+			var enumerator = TagStructure.GetTagFieldEnumerable(info);
 
 			var value = MainDeserialize(definitionOffset, endianBytes, definition, cacheContext, enumerator);
 			return value;
@@ -266,7 +266,7 @@ namespace TagTool.Serialization
 						else if (genericTypeArgument.IsDefined(typeof(TagStructureAttribute)))
 						{
 							var value = Activator.CreateInstance(genericTypeArgument);
-							var structEnumerator = TagDefinition.GetTagFieldEnumerable(genericTypeArgument, cacheContext.Version);
+							var structEnumerator = TagStructure.GetTagFieldEnumerable(genericTypeArgument, cacheContext.Version);
 
 							// TODO: add logic to decide when it's worth starting a task branch
 							if (DateTime.Now.Millisecond < 0)
@@ -299,7 +299,7 @@ namespace TagTool.Serialization
 					var pointer = endianBytes.ToPointer(ref structOffset);
 					if (pointer > 0)
 					{
-						var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+						var structEnumerator = TagStructure.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 						var value = MainDeserializeInternal(currentTask, ref pointer, endianBytes, fieldType, cacheContext, structEnumerator);
 						tagField.SetValue(parent, value);
 					}
@@ -308,7 +308,7 @@ namespace TagTool.Serialization
 				// Deserialize a TagStructure
 				else if (fieldType.IsDefined(typeof(TagStructureAttribute)))
 				{
-					var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+					var structEnumerator = TagStructure.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 					var value = MainDeserializeInternal(currentTask, ref structOffset, endianBytes, fieldType, cacheContext, structEnumerator);
 					tagField.SetValue(parent, value);
 				}
@@ -356,7 +356,7 @@ namespace TagTool.Serialization
 							var listType = typeof(List<>).MakeGenericType(genericTypeArgument);
 							var list = (IList)Activator.CreateInstance(listType, new object[] { elementCount });
 
-							var structEnumerator = TagDefinition.GetTagFieldEnumerable(fieldType, cacheContext.Version);
+							var structEnumerator = TagStructure.GetTagFieldEnumerable(fieldType, cacheContext.Version);
 							for (var i = 0; i < elementCount; i++)
 							{
 								var value = MainDeserializeInternal(currentTask, ref structOffset, endianBytes, elementType, cacheContext, structEnumerator);

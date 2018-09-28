@@ -144,7 +144,7 @@ namespace TagTool.Cache
             if (TryGetTag<T>(name, out var result))
                 return result;
 
-			var attribute = TagDefinition.GetTagStructureAttribute(typeof(T));
+			var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
             var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
@@ -156,7 +156,7 @@ namespace TagTool.Cache
 
             try
             {
-                var structure = TagDefinition.GetTagStructureInfo(type, Version).Structure;
+                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
 
                 if (structure == null)
                 {
@@ -337,7 +337,7 @@ namespace TagTool.Cache
         {
             if (Tags.TagDefinition.TryFind(name, out var type))
             {
-				var attribute = TagDefinition.GetTagStructureAttribute(type);
+				var attribute = TagStructure.GetTagStructureAttribute(type);
                 result = new Tag(attribute.Tag);
                 return true;
             }

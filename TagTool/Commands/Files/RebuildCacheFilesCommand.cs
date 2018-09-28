@@ -266,7 +266,7 @@ namespace TagTool.Commands.Files
 
         private T CopyStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
                 var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);

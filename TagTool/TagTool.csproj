@@ -388,6 +388,7 @@
     <Compile Include="Serialization\TaskBag.cs" />
     <Compile Include="Tags\TagFieldInfo.cs" />
     <Compile Include="StartupTests.cs" />
+    <Compile Include="Tags\TagStructure.cs" />
     <Compile Include="Tags\TagStructureReference.cs" />
     <Compile Include="Common\FunctionType.cs" />
     <Compile Include="Common\GameLanguage.cs" />

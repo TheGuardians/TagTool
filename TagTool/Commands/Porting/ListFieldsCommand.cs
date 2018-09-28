@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             var match = (args.Count == 1);
             var token = match ? args[0].ToLower() : "";
 
-			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(Structure))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
 				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Padding == true)
 					continue;

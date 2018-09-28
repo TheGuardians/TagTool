@@ -264,7 +264,7 @@ namespace TagTool.Commands.Tags
 		private T ConvertStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
         {
 			// Convert each field
-			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);

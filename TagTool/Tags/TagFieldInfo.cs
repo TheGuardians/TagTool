@@ -219,7 +219,7 @@ namespace TagTool.Tags
 
 				// Assume the field is a structure
 				default:
-					return TagDefinition.GetTagStructureInfo(type, attr.Version).TotalSize;
+					return TagStructure.GetTagStructureInfo(type, attr.Version).TotalSize;
 			}
 		}
 	}

@@ -81,7 +81,7 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			var field = TagDefinition.GetTagFieldEnumerable(Structure)
+			var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f =>
 					f.Name == fieldName ||
 					f.Name.ToLower() == fieldNameLow ||

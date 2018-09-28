@@ -761,7 +761,7 @@ namespace TagTool.Commands.Porting
 
 		private T ConvertStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
 		{
-			foreach (var tagFieldInfo in TagDefinition.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
 			{
 				// skip the field if no conversion is needed
 				if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
