@@ -56,8 +56,8 @@ namespace TagTool.Tags.Definitions
                     public CollisionGeometry Geometry;
                 }
 
-                [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3ODST)]
-                [TagStructure(Size = 0x80, MaxVersion = CacheVersion.HaloOnline106708)]
+                [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail)]
+                [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST)]
                 public class BspPhysicsBlock : TagStructure
 				{
                     public int Unknown;
