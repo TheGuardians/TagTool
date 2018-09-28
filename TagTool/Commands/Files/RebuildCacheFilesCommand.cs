@@ -1,12 +1,13 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting;
-using TagTool.Tags;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Collections;
+using TagTool.Tags;
+using System.Linq;
 
 namespace TagTool.Commands.Files
 {
@@ -106,7 +107,7 @@ namespace TagTool.Commands.Files
                 //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
                 var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
-                var defaultBitmapNames = new List<string>
+                var defaultBitmapNames = new[]
                 {
                     @"shaders\default_bitmaps\bitmaps\gray_50_percent",
                     @"shaders\default_bitmaps\bitmaps\alpha_grey50",
@@ -131,12 +132,19 @@ namespace TagTool.Commands.Files
                     @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
                 };
 
-                foreach (var tag in CacheContext.TagCache.Index)
+                foreach (var tagName in defaultBitmapNames)
                 {
-                    if (tag == null || !tag.IsInGroup("bitm") || tag.Name == null || !defaultBitmapNames.Contains(tag.Name))
-                        continue;
+                    foreach (var tag in CacheContext.TagCache.Index)
+                    {
+                        if (tag == null || !tag.IsInGroup("bitm"))
+                            continue;
 
-                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                        if (tagName == tag.Name)
+                        {
+                            CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+                            break;
+                        }
+                    }
                 }
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmdf"))
@@ -154,7 +162,7 @@ namespace TagTool.Commands.Files
 
                 CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
 
-                destCacheContext.Serialize(destStream, cfgtTag, new CacheFileGlobalTags
+                destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
                 {
                     GlobalTags = new List<TagReferenceBlock>
                     {
@@ -181,14 +189,15 @@ namespace TagTool.Commands.Files
             if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
                 return null;
 
-            if (srcTag?.Name?.StartsWith("hf2p") ?? false)
+            if (srcTag.Name?.StartsWith("hf2p") ?? false)
                 return null; // kill it with fucking fire
-							 // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-			if (ConvertedTags.ContainsKey(srcTag.Index))
+            if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
 
-            var tagData = srcCacheContext.Deserialize(srcStream, srcTag);
+            var structureType = TagDefinition.Find(srcTag.Group.Tag);
+            var srcContext = new TagSerializationContext(srcStream, srcCacheContext, srcTag);
+            var tagData = srcCacheContext.Deserializer.Deserialize(srcContext, structureType);
 
             CachedTagInstance destTag = null;
 
@@ -196,7 +205,7 @@ namespace TagTool.Commands.Files
             {
                 if (destCacheContext.TagCache.Index[i] == null)
                 {
-                    destCacheContext.TagCache.Index[i] = destTag = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag], srcTag?.Name);
+                    destCacheContext.TagCache.Index[i] = destTag = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag]);
                     break;
                 }
             }
@@ -206,73 +215,101 @@ namespace TagTool.Commands.Files
 
             ConvertedTags[srcTag.Index] = destTag;
 
+            if (srcTag.Name != null)
+                destTag.Name = srcTag.Name;
+
             if (NoVariants && tagData is MultiplayerGlobals mulg)
                 CleanMultiplayerGlobals(mulg);
 
-            if (tagData is Scenario scenario1)
+            if (structureType == typeof(Scenario))
             {
-                if (!MapScenarios.ContainsKey(scenario1.MapId))
-                    MapScenarios[scenario1.MapId] = destTag.Index;
+                var scenario = (Scenario)tagData;
+
+                if (!MapScenarios.ContainsKey(scenario.MapId))
+                    MapScenarios[scenario.MapId] = destTag.Index;
 
                 if (NoVariants)
-                    CleanScenario(srcStream, scenario1);
+                    CleanScenario(srcStream, scenario);
             }
 
             tagData = CopyData(tagData, srcCacheContext, srcStream, destCacheContext, destStream);
 
-            if (tagData is Scenario scenario2)
-                CopyScenario(scenario2);
+            if (structureType == typeof(Scenario))
+                CopyScenario((Scenario)tagData);
 
-            destCacheContext.Serialize(destStream, destTag, tagData);
+            var destContext = new TagSerializationContext(destStream, destCacheContext, destTag);
+            destCacheContext.Serializer.Serialize(destContext, tagData);
 
             return destTag;
         }
 
         private object CopyData(object data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-			switch (data)
-			{
-				case null:
-				case string _:
-				case ValueType _:
-					return data;
-				case CachedTagInstance tag:
-					return CopyTag(tag, srcCacheContext, srcStream, destCacheContext, destStream);
-				case PageableResource resource:
-					return CopyResource(resource, srcCacheContext, destCacheContext);
-				case TagStructure structure:
-					return CopyStructure(structure, srcCacheContext, srcStream, destCacheContext, destStream);
-				case IList collection:
-					return CopyCollection(collection, srcCacheContext, srcStream, destCacheContext, destStream);
-			}
+            if (data == null)
+                return null;
 
-			return data;
+            var type = data.GetType();
+
+            if (type.IsPrimitive)
+                return data;
+
+            if (type == typeof(CachedTagInstance))
+                return CopyTag((CachedTagInstance)data, srcCacheContext, srcStream, destCacheContext, destStream);
+
+            if (type == typeof(PageableResource))
+                return CopyResource((PageableResource)data, srcCacheContext, destCacheContext);
+
+            if (type.IsArray)
+                return CopyArray((Array)data, srcCacheContext, srcStream, destCacheContext, destStream);
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+                return CopyList(data, type, srcCacheContext, srcStream, destCacheContext, destStream);
+
+            if (type.IsSubclassOf(typeof(TagStructure)))
+                return CopyStructure((TagStructure)data, type, srcCacheContext, srcStream, destCacheContext, destStream);
+
+            return data;
         }
 
-		private IList CopyCollection(IList collection, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
-		{
-			if (collection.GetType().GetElementType().IsPrimitive)
-				return collection;
-
-			for (var i = 0; i < collection.Count; i++)
-			{
-				var oldValue = collection[i];
-				var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-				collection[i] = newValue;
-			}
-
-			return collection;
-		}
-
-        private T CopyStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
-            where T : TagStructure
+        private Array CopyArray(Array array, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            foreach (var tagFieldInfo in data.GetTagFieldEnumerable(destCacheContext.Version))
+            if (array.GetType().GetElementType().IsPrimitive)
+                return array;
+
+            for (var i = 0; i < array.Length; i++)
             {
-                var oldValue = tagFieldInfo.GetValue(data);
+                var oldValue = array.GetValue(i);
                 var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
-                tagFieldInfo.SetValue(data, newValue);
+                array.SetValue(newValue, i);
             }
+
+            return array;
+        }
+
+        private object CopyList(object list, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
+        {
+            if (type.GenericTypeArguments[0].IsPrimitive)
+                return list;
+
+            var count = (int)type.GetProperty("Count").GetValue(list);
+            var getItem = type.GetMethod("get_Item");
+            var setItem = type.GetMethod("set_Item");
+
+            for (var i = 0; i < count; i++)
+            {
+                var oldValue = getItem.Invoke(list, new object[] { i });
+                var newValue = CopyData(oldValue, srcCacheContext, srcStream, destCacheContext, destStream);
+
+                setItem.Invoke(list, new object[] { i, newValue });
+            }
+
+            return list;
+        }
+
+        private object CopyStructure(TagStructure data, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
+        {
+            foreach (var field in data.GetTagFieldEnumerable(srcCacheContext.Version))
+                field.SetValue(data, CopyData(field.GetValue(data), srcCacheContext, srcStream, destCacheContext, destStream));
 
             return data;
         }
@@ -1011,7 +1048,10 @@ namespace TagTool.Commands.Files
                 return;
 
             if (MulgDefinition == null)
-                MulgDefinition = CacheContext.Deserialize<MultiplayerGlobals>(srcStream, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
+            {
+                var context = new TagSerializationContext(srcStream, CacheContext, CacheContext.TagCache.Index.FindFirstInGroup("mulg"));
+                MulgDefinition = CacheContext.Deserializer.Deserialize<MultiplayerGlobals>(context);
+            }
 
             var weaponPalette = new List<Scenario.ScenarioPaletteEntry>();
 
