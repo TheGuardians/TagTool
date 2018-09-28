@@ -206,10 +206,10 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown4;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x4)]
         public class RegeneratorBlock : TagStructure
 		{
-            public CachedTagInstance RegeneratingEffect;
+            public float Unknown;
         }
 
         [TagStructure(Size = 0x8)]
