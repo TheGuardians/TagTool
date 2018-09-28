@@ -29,7 +29,7 @@ namespace TagTool.Commands.Porting
             if (args.Count < 1)
                 return false;
 
-            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : CacheContext.ParseGroupTag(args[0]);
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.NULL : CacheContext.ParseGroupTag(args[0]);
 
             if (!args[0].EndsWith(":"))
                 args.RemoveAt(0);
@@ -83,7 +83,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var tag in BlamCache.IndexItems)
             {
-                if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
+                if (tag == null || (groupTag != Tag.NULL && !tag.IsInGroup(groupTag)))
                     continue;
 
                 if (!tag.Name.StartsWith(startFilter) || !tag.Name.Contains(filter) || !tag.Name.EndsWith(endFilter))

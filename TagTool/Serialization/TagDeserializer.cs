@@ -256,7 +256,9 @@ namespace TagTool.Serialization
             if (valueType.IsArray)
                 return DeserializeInlineArray(reader, context, valueInfo, valueType);
 
-            // List = Tag block
+			// TagBlock. TODO: remove `List<>` from tag definitions in favor of `TagBlock<>`
+			if (valueType == typeof(TagBlock))
+				return DeserializeTagBlock(reader, context, valueType);
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
                 return DeserializeTagBlock(reader, context, valueType);
 

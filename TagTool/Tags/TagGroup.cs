@@ -14,7 +14,7 @@ namespace TagTool.Tags
         /// Constructs an empty tag group description.
         /// </summary>
         public TagGroup()
-            : this(Tag.Null, Tag.Null, Tag.Null, StringId.Invalid)
+            : this(Tag.NULL, Tag.NULL, Tag.NULL, StringId.Invalid)
         {
         }
 

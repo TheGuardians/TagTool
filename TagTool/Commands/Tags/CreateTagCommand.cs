@@ -37,7 +37,7 @@ namespace TagTool.Commands.Tags
                 return true;
             }
 
-            var groupTag = Tag.Null;
+            var groupTag = Tag.NULL;
 
             try
             {
@@ -74,8 +74,8 @@ namespace TagTool.Commands.Tags
 
                 switch (groupArgs.Count)
                 {
-                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.Null, Tag.Null, CacheContext.GetStringId(groupArgs[1])); break;
-                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.Null, CacheContext.GetStringId(groupArgs[2])); break;
+                    case 2: new TagGroup(new Tag(groupArgs[0]), Tag.NULL, Tag.NULL, CacheContext.GetStringId(groupArgs[1])); break;
+                    case 3: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), Tag.NULL, CacheContext.GetStringId(groupArgs[2])); break;
                     case 4: new TagGroup(new Tag(groupArgs[0]), new Tag(groupArgs[1]), new Tag(groupArgs[2]), CacheContext.GetStringId(groupArgs[3])); break;
                     default: return false;
                 }
