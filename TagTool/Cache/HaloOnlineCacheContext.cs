@@ -299,7 +299,7 @@ namespace TagTool.Cache
 				if (instance is null)
 					continue;
 
-                if (instance.IsInGroup(groupTag) && instance.Name == name)
+                if (instance.IsInGroup(groupTag) && instance.Name == tagName)
                 {
                     result = instance;
                     return true;
