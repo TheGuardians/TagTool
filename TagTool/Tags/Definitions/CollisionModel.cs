@@ -97,6 +97,14 @@ namespace TagTool.Tags.Definitions
                     public short Count2;
                     public int Offset2;
                     public int Unknown27;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    public uint Unknown28;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    public uint Unknown29;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    public uint Unknown30;
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    public uint Unknown31;
                 }
             }
         }
