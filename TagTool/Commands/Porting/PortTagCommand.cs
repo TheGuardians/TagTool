@@ -24,8 +24,8 @@ namespace TagTool.Commands.Porting
 
 		private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
-		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
-		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
+		private List<Tag> RenderMethodTagGroups = new List<Tag> { Tag.RMBK, Tag.RMCS, Tag.RMD_, Tag.RMFL, Tag.RMHG, Tag.RMSH, Tag.RMSS, Tag.RMTR, Tag.RMW_, Tag.RWRD, Tag.RMCT };
+		private List<Tag> EffectTagGroups = new List<Tag> { Tag.BEAM, Tag.CNTL, Tag.LTVL, Tag.DECS, Tag.PRT3 };
 
 		private static readonly string[] DoNotReplaceGroups = new[]
 		{

@@ -150,7 +150,7 @@ namespace TagTool.Commands.Porting
                 CachedTagInstance edTag = null;
                 TagGroup edGroup = null;
 
-                var groupTag = new Tag("Lbsp");
+                var groupTag = Tag.LBSP;
 
                 if (TagGroup.Instances.ContainsKey(groupTag))
                 {

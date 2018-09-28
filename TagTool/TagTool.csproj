@@ -363,6 +363,7 @@
     <Compile Include="Commands\Tags\MatchTagsCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
     <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
+    <Compile Include="Commands\Tags\StaticTagsCommand.cs" />
     <Compile Include="Commands\Tags\TagCacheContextFactory.cs" />
     <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceCommand.cs" />

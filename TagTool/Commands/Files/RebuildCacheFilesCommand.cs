@@ -104,7 +104,7 @@ namespace TagTool.Commands.Files
                 //CacheContext.TagNames.Remove(tag.Index);
 
                 //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
-                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
+                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[Tag.CFGT]);
 
                 var defaultBitmapNames = new List<string>
                 {

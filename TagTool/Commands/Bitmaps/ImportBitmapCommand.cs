@@ -85,7 +85,7 @@ namespace TagTool.Commands.Bitmaps
             if (Bitmap.Images.Count == 0)
             {
                 Bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
-                Bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
+                Bitmap.Images.Add(new Bitmap.Image { Signature = TagTool.Common.Tag.BITM });
                 Bitmap.Resources.Add(new Bitmap.BitmapResource());
             }
 

@@ -443,7 +443,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 if (edModeTag == null)
-                    edModeTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("mode")]);
+                    edModeTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[Tag.MODE]);
             }
 
             //
@@ -545,13 +545,13 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("hlmt")]);
+                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTagInstance(i, TagGroup.Instances[Tag.HLMT]);
                         break;
                     }
                 }
 
                 if (edHlmtTag == null)
-                    edHlmtTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("hlmt")]);
+                    edHlmtTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[Tag.HLMT]);
             }
 
             //
@@ -594,13 +594,13 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("scen")]);
+                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTagInstance(i, TagGroup.Instances[Tag.SCEN]);
                         break;
                     }
                 }
 
                 if (edScenTag == null)
-                    edScenTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("scen")]);
+                    edScenTag = CacheContext.TagCache.AllocateTag(TagGroup.Instances[Tag.SCEN]);
             }
 
             //
