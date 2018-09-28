@@ -11,19 +11,140 @@ namespace TagTool.Cache
 {
     public class CacheFileGen3 : CacheFile
     {
-        public override string LocalesKey => "";
+        public override string LocalesKey
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        return "";
 
-        public override string StringsKey => "";
+                    case CacheVersion.HaloReach:
+                        return "BungieHaloReach!";
 
-        public override string TagsKey => "";
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
 
-        public override string NetworkKey => "";
+        public override string StringsKey
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        return "";
 
-        public override string StringMods => "+262143,-259153;+64329,-64329;+1208,+1882";
+                    case CacheVersion.HaloReach:
+                        return "ILikeSafeStrings";
 
-        public override int LocaleGlobalsOffset => 452;
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
 
-        public override int LocaleGlobalsSize => 68;
+        public override string TagsKey
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        return "";
+
+                    case CacheVersion.HaloReach:
+                        return "LetsAllPlayNice!";
+
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
+
+        public override string NetworkKey
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        return "";
+
+                    case CacheVersion.HaloReach:
+                        return "SneakerNetReigns";
+
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
+
+        public override string StringMods
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                        return "+262143,-259153;+64329,-64329;+1208,+1882";
+
+                    case CacheVersion.Halo3ODST:
+                        return "+258846,-258846;+64231,-64231;+1304,+2098";
+
+                    case CacheVersion.HaloReach:
+                        return "+1174139,-1174139;+129874,-129874;+1123,+4604";
+
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
+
+        public override int LocaleGlobalsOffset
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                        return 452;
+
+                    case CacheVersion.Halo3ODST:
+                        return 508;
+
+                    case CacheVersion.HaloReach:
+                        return 656;
+
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
+
+        public override int LocaleGlobalsSize
+        {
+            get
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                    case CacheVersion.HaloReach:
+                        return 68;
+
+                    default:
+                        throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                }
+            }
+        }
 
         public CacheFileGen3(HaloOnlineCacheContext cacheContext, FileInfo file, CacheVersion version, bool memory)
             : base(cacheContext, file, version, memory)
@@ -45,6 +166,9 @@ namespace TagTool.Cache
                 var resourceSection = Header.Interop.Sections[(int)CacheFileSectionType.Resource];
                 Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (Header.Interop.DebugSectionSize + resourceSection.Size);
             }
+
+            if (Header.TagIndexAddress == 0)
+                return;
 
             Header.TagIndexAddress = BitConverter.ToUInt32(BitConverter.GetBytes(Header.TagIndexAddress - Magic), 0);
 
@@ -255,6 +379,47 @@ namespace TagTool.Cache
             }
         }
 
+        public Dictionary<string, CacheFileGen3> SharedCacheFiles { get; } = new Dictionary<string, CacheFileGen3>();
+
+        public byte[] ReadPageData(CacheFileResourceGestalt.TagResource resource, CacheFileResourceLayoutTable.RawPage page)
+        {
+            var cacheFilePath = "";
+            var cache = this;
+
+            if (page.SharedCacheIndex != -1)
+            {
+                cacheFilePath = ResourceLayoutTable.ExternalCacheReferences[page.SharedCacheIndex].MapPath;
+                cacheFilePath = cacheFilePath.Substring(cacheFilePath.LastIndexOf('\\'));
+                cacheFilePath = File.DirectoryName + cacheFilePath;
+
+                if (cacheFilePath != File.FullName)
+                {
+                    if (SharedCacheFiles.ContainsKey(cacheFilePath))
+                        cache = SharedCacheFiles[cacheFilePath];
+                    else
+                        cache = SharedCacheFiles[cacheFilePath] = new CacheFileGen3(CacheContext, new FileInfo(cacheFilePath), Version, false);
+                }
+            }
+
+            var offset = BitConverter.ToInt32(BitConverter.GetBytes(cache.Header.Interop.DebugSectionSize), 0) + page.BlockOffset;
+
+            cache.Reader.SeekTo(offset);
+            var compressed = cache.Reader.ReadBytes(page.CompressedBlockSize);
+
+            if (resource.ResourceTypeIndex != -1 && Strings.GetString(ResourceGestalt.ResourceTypes[resource.ResourceTypeIndex].Name) == "sound_resource_definition")
+                return compressed;
+
+            var decompressed = new byte[page.UncompressedBlockSize];
+
+            if (page.CompressionCodecIndex == -1)
+                cache.Reader.BaseStream.Read(decompressed, 0, page.UncompressedBlockSize);
+            else
+                using (var reader = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
+                    reader.Read(decompressed, 0, page.UncompressedBlockSize);
+
+            return decompressed;
+        }
+
         public override byte[] GetRawFromID(int ID, int DataLength)
         {
             if (ID == -1)
@@ -263,79 +428,43 @@ namespace TagTool.Cache
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            EndianReader er;
-            string fName = "";
+            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            var Entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            if (resource.SegmentIndex == -1) return null;
 
-            if (Entry.PlaySegmentIndex == -1) return null;
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
 
-            var Loc = ResourceLayoutTable.Segments[Entry.PlaySegmentIndex];
-
-            if (Loc.RequiredPageIndex == -1 || Loc.RequiredSegmentOffset == -1)
+            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
                 return null;
 
-            int index = (Loc.OptionalPageIndex != -1) ? Loc.OptionalPageIndex : Loc.RequiredPageIndex;
-            int locOffset = (Loc.OptionalSegmentOffset != -1) ? Loc.OptionalSegmentOffset : Loc.RequiredSegmentOffset;
+            int pageIndex = (segment.OptionalPageIndex != -1) ?
+                segment.OptionalPageIndex :
+                segment.RequiredPageIndex;
 
-            if (index == -1 || locOffset == -1)
+            int segmentOffset = (segment.OptionalSegmentOffset != -1) ?
+                segment.OptionalSegmentOffset :
+                segment.RequiredSegmentOffset;
+
+            if (pageIndex == -1 || segmentOffset == -1)
                 return null;
 
-            if (ResourceLayoutTable.RawPages[index].BlockOffset == -1)
+            if (ResourceLayoutTable.RawPages[pageIndex].BlockOffset == -1)
             {
-                index = Loc.RequiredPageIndex;
-                locOffset = Loc.RequiredSegmentOffset;
+                pageIndex = segment.RequiredPageIndex;
+                segmentOffset = segment.RequiredSegmentOffset;
             }
 
-            var Pool = ResourceLayoutTable.RawPages[index];
+            var page = ResourceLayoutTable.RawPages[pageIndex];
+            var decompressed = ReadPageData(resource, page);
 
-            if (Pool.SharedCacheIndex != -1)
-            {
-                fName = ResourceLayoutTable.ExternalCacheReferences[Pool.SharedCacheIndex].MapPath;
-                fName = fName.Substring(fName.LastIndexOf('\\'));
-                fName = File.DirectoryName + fName;
-
-                if (fName == File.FullName)
-                    er = Reader;
-                else
-                {
-                    var fs = new FileStream(fName, FileMode.Open, FileAccess.Read);
-                    er = new EndianReader(fs, EndianFormat.BigEndian);
-                }
-            }
-            else
-                er = Reader;
-
-			// FIXME: broken?
-			// var offset = Header.Partitions[0].BaseAddress + Pool.BlockOffset;
-
-			// remove these two lines if above is fixed
-			er.SeekTo(1136);
-			int offset = er.ReadInt32() + Pool.BlockOffset;
-
-			er.SeekTo(offset);
-            byte[] compressed = er.ReadBytes(Pool.CompressedBlockSize);
-            byte[] decompressed = new byte[Pool.UncompressedBlockSize];
-
-            BinaryReader BR = new BinaryReader(new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress));
-            decompressed = BR.ReadBytes(Pool.UncompressedBlockSize);
-            BR.Close();
-            BR.Dispose();
-
-            byte[] data = new byte[(DataLength != -1) ? DataLength : (Pool.UncompressedBlockSize - locOffset)];
-            int length = data.Length;
+            var length = DataLength == -1 ? (page.UncompressedBlockSize - segmentOffset) : DataLength;
+            var data = new byte[length];
 
             if (length > decompressed.Length)
                 length = decompressed.Length;
 
-			length = Math.Min(length, decompressed.Length - locOffset);
-            Array.Copy(decompressed, locOffset, data, 0, length);
-
-            if (er != Reader)
-            {
-                er.Close();
-                er.Dispose();
-            }
+			length = Math.Min(length, decompressed.Length - segmentOffset);
+            Array.Copy(decompressed, segmentOffset, data, 0, length);
 
             return data;
         }
@@ -345,100 +474,46 @@ namespace TagTool.Cache
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var entry = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            if (entry.PlaySegmentIndex == -1)
+            if (resource.SegmentIndex == -1)
                 return null;
 
-            var segment = ResourceLayoutTable.Segments[entry.PlaySegmentIndex];
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
 
             if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1 || segment.RequiredSizeIndex == -1 || segment.OptionalSizeIndex == -1)
                 return null;
 
-            var sRaw = ResourceLayoutTable.Sizes[segment.OptionalSizeIndex];
+            var sizes = ResourceLayoutTable.Sizes[segment.OptionalSizeIndex];
+
             var reqPage = ResourceLayoutTable.RawPages[segment.RequiredPageIndex];
             var optPage = ResourceLayoutTable.RawPages[segment.OptionalPageIndex];
 
-            if (size == 0) size = (reqPage.CompressedBlockSize != 0) ? reqPage.CompressedBlockSize : optPage.CompressedBlockSize;
+            if (size == 0)
+                size = (reqPage.CompressedBlockSize != 0) ?
+                    reqPage.CompressedBlockSize :
+                    optPage.CompressedBlockSize;
 
-            var reqSize = size - sRaw.OverallSize;
+            var reqSize = size - sizes.OverallSize;
             var optSize = size - reqSize;
 
-            byte[] buffer;
             byte[] data = new byte[size];
-            int offset;
-            EndianReader er;
-            string fName = "";
 
-            #region REQUIRED
             if (reqSize > 0)
             {
-                if (reqPage.SharedCacheIndex != -1)
-                {
-                    fName = ResourceLayoutTable.ExternalCacheReferences[reqPage.SharedCacheIndex].MapPath;
-                    fName = fName.Substring(fName.LastIndexOf('\\'));
-                    fName = File.DirectoryName + fName;
-
-                    if (fName == File.FullName)
-                        er = Reader;
-                    else
-                        er = new EndianReader(new FileStream(fName, FileMode.Open, FileAccess.Read), EndianFormat.BigEndian);
-                }
-                else
-                    er = Reader;
-
-                er.SeekTo(1136);
-                offset = reqPage.BlockOffset + er.ReadInt32();
-
-                er.SeekTo(offset);
-                buffer = er.ReadBytes(reqPage.CompressedBlockSize);
-
+                var buffer = ReadPageData(resource, reqPage);
                 Array.Copy(buffer, segment.RequiredSegmentOffset, data, 0, reqSize);
-
-                if (er != Reader)
-                {
-                    er.Close();
-                    er.Dispose();
-                }
             }
-            #endregion
 
-            #region OPTIONAL
             if (segment.OptionalPageIndex != -1 && optSize > 0)
             {
-                if (optPage.SharedCacheIndex != -1)
-                {
-                    fName = ResourceLayoutTable.ExternalCacheReferences[optPage.SharedCacheIndex].MapPath;
-                    fName = fName.Substring(fName.LastIndexOf('\\'));
-                    fName = File.DirectoryName + fName;
-
-                    if (fName == File.FullName)
-                        er = Reader;
-                    else
-                        er = new EndianReader(new FileStream(fName, FileMode.Open, FileAccess.Read), EndianFormat.BigEndian);
-                }
-                else
-                    er = Reader;
-
-                er.SeekTo(1136);
-                offset = optPage.BlockOffset + er.ReadInt32();
-
-                er.SeekTo(offset);
-                buffer = er.ReadBytes(optPage.CompressedBlockSize);
+                var buffer = ReadPageData(resource, optPage);
 
                 if (buffer.Length > data.Length)
                     data = buffer;
                 else
                     Array.Copy(buffer, segment.OptionalSegmentOffset, data, reqSize, optSize);
-
-
-                if (er != Reader)
-                {
-                    er.Close();
-                    er.Dispose();
-                }
             }
-            #endregion
 
             return data;
         }

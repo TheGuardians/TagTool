@@ -144,13 +144,13 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance ParentTag;
             public ushort Salt;
-            public byte ResourceTypeIndex;
+            public sbyte ResourceTypeIndex;
             public byte Flags;
             public int FixupInformationOffset;
             public int FixupInformationLength;
             public int SecondaryFixupInformationOffset;
             public short Unknown1;
-            public short PlaySegmentIndex;
+            public short SegmentIndex;
             public int DefinitionAddress;
             public List<ResourceFixup> ResourceFixups;
             public List<ResourceDefinitionFixup> ResourceDefinitionFixups;

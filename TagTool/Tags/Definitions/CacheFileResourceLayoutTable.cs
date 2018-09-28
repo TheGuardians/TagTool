@@ -61,7 +61,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short Salt;
             public byte Flags;
-            public byte CompressionCodecIndex;
+            public sbyte CompressionCodecIndex;
             public short SharedCacheIndex;
             public short Unknown;
 
@@ -159,7 +159,7 @@ namespace TagTool.Tags.Definitions
                     var offset = (uint)cf.Header.Interop.Sections[(int)CacheFileSectionType.Resource].CacheOffset + (uint)BlockOffset;
                     cf.Reader.SeekTo(offset);
 
-                    if (CompressionCodecIndex != byte.MaxValue)
+                    if (CompressionCodecIndex != -1)
                     {
                         using (var deflate = new DeflateStream(cf.Reader.BaseStream, CompressionMode.Decompress, true))
                         {
