@@ -41,14 +41,11 @@ namespace TagTool.Cache
             using (var stream = OpenStringIdCacheRead())
                 StringIdCache = new StringIdCache(stream, stringIdResolver);
 
-            TagGroup.Instances[Tag.OBJE] = new TagGroup(Tag.OBJE, Tag.NULL, Tag.NULL, GetStringId("object"));
-
-			// TODO: set these up properly?
-			TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), Tag.OBJE, Tag.NULL, GetStringId("item"));
-            TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), Tag.OBJE, Tag.NULL, GetStringId("device"));
-            TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), Tag.OBJE, Tag.NULL, GetStringId("unit"));
-
-			TagGroup.Instances[Tag.RM__] = new TagGroup(Tag.RM__, Tag.NULL, Tag.NULL, GetStringId("render_method"));
+            TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.NULL, Tag.NULL, GetStringId("object"));
+            TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.NULL, GetStringId("item"));
+            TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.NULL, GetStringId("device"));
+            TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.NULL, GetStringId("unit"));
+            TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.NULL, Tag.NULL, GetStringId("render_method"));
         }
 
         #region Tag Cache Functionality

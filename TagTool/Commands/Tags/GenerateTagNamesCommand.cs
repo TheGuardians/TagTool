@@ -44,19 +44,19 @@ namespace TagTool.Commands.Tags
 
             using (var cacheStream = CacheContext.OpenTagCacheRead())
             {
-                var scenarioTags = CacheContext.TagCache.Index.FindAllInGroup(Tag.SCNR);
+                var scenarioTags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("scnr"));
                 foreach (var scenarioTag in scenarioTags)
                     SetScenarioName(cacheStream, scenarioTag, ref tagNames);
 
-                var objectTags = CacheContext.TagCache.Index.FindAllInGroup(Tag.OBJE);
+                var objectTags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("obje"));
                 foreach (var objectTag in objectTags)
                     SetGameObjectName(cacheStream, objectTag, ref tagNames);
 
-                var renderModelTags = CacheContext.TagCache.Index.FindAllInGroup(Tag.MODE);
+                var renderModelTags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("mode"));
                 foreach (var renderModelTag in renderModelTags)
                     SetRenderModelName(cacheStream, renderModelTag, ref tagNames);
 
-                var modelTags = CacheContext.TagCache.Index.FindAllInGroup(Tag.HLMT);
+                var modelTags = CacheContext.TagCache.Index.FindAllInGroup(new Tag("hlmt"));
                 foreach (var modelTag in modelTags)
                     SetModelName(cacheStream, modelTag, ref tagNames);
 
@@ -165,7 +165,7 @@ namespace TagTool.Commands.Tags
 
             var objectName = CacheContext.GetString(renderModelDefinition.Name);
             
-            if (tag.Group.Tag == Tag.BIPD)
+            if (tag.Group.Tag == new Tag("bipd"))
             {
                 var biped = (Biped)definition;
 
@@ -253,7 +253,7 @@ namespace TagTool.Commands.Tags
                     tagNames[biped.AreaDamageEffect.Index] =
                         $"fx\\material_effects\\objects\\characters\\contact\\collision\\blood_aoe_{objectRootName}";
             }
-            else if (tag.Group.Tag == Tag.WEAP)
+            else if (tag.Group.Tag == new Tag("weap"))
             {
                 var weapon = (Weapon)definition;
 
@@ -339,7 +339,7 @@ namespace TagTool.Commands.Tags
                 if (objectName.EndsWith("energy_blade") && definition.WaterDensity == GameObject.WaterDensityValue.Default)
                     objectName += "_useless";
             }
-            else if (tag.Group.Tag == Tag.EQIP)
+            else if (tag.Group.Tag == new Tag("eqip"))
             {
                 var equipment = (Equipment)definition;
 
@@ -354,13 +354,13 @@ namespace TagTool.Commands.Tags
 
                 objectName = $"objects\\{equipmentClassName}\\{objectName}";
             }
-            else if (tag.Group.Tag == Tag.VEHI)
+            else if (tag.Group.Tag == new Tag("vehi"))
             {
                 objectName = $"objects\\vehicles\\{objectName}\\{objectName}";
 
                 tagNames[definition.Model.Index] = objectName;
             }
-            else if (tag.Group.Tag == Tag.ARMR)
+            else if (tag.Group.Tag == new Tag("armr"))
             {
                 // TODO: figure out spartan/elite armor name differences
 
