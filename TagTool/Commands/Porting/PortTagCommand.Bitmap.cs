@@ -526,6 +526,10 @@ namespace TagTool.Commands.Porting
                         for (int j = 0; j < raw.Length; j += 4)
                             Array.Reverse(raw, j, 4);
 
+                    if(blamBitmap.Format == BitmapFormat.A8Y8)
+                        for (int j = 0; j < raw.Length; j += 2)
+                            Array.Reverse(raw, j, 2);
+
                     blamBitmap.RawSize = raw.Length;
                     compress = false;
                     noMips = true;
