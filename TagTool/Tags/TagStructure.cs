@@ -62,7 +62,9 @@ namespace TagTool.Tags
 
         public void Convert(CacheVersion from, CacheVersion to)
         {
-            throw new NotImplementedException();
+            PreConvert(from, to);
+            MainConvert(from, to);
+            PostConvert(from, to);
         }
 
         private class VersionedCache

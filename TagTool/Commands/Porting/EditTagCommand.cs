@@ -75,14 +75,12 @@ namespace TagTool.Commands.Porting
             var tagName = $"(0x{tag.ID:X8}) {tag.Name.Substring(tag.Name.LastIndexOf('\\') + 1)}";
 
             var tagType = TagDefinition.Find(groupTag);
-            var structure = TagStructure.GetTagStructureInfo(tagType);
-
-            var definition = BlamCache.Deserializer.Deserialize(new CacheSerializationContext(ref BlamCache, tag), tagType);
+            var definition = (TagStructure)BlamCache.Deserializer.Deserialize(new CacheSerializationContext(ref BlamCache, tag), tagType);
 
             var oldContext = ContextStack.Context;
 
             var commandContext = new CommandContext(ContextStack.Context, string.Format("{0}.{1}", tagName, groupTagInput));
-            commandContext.AddCommand(new ListFieldsCommand(BlamCache, structure, definition));
+            commandContext.AddCommand(new ListFieldsCommand(BlamCache, definition.GetTagStructureInfo(BlamCache.Version), definition));
             commandContext.AddCommand(new EditBlockCommand(ContextStack, BlamCache, tag, definition));
             commandContext.AddCommand(new Editing.ExitToCommand(ContextStack));
             ContextStack.Push(commandContext);

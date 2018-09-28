@@ -63,9 +63,9 @@ namespace TagTool.Serialization
         public object DeserializeStruct(EndianReader reader, ISerializationContext context, TagStructureInfo info)
         {
             var baseOffset = reader.BaseStream.Position;
-            var instance = Activator.CreateInstance(info.Types[0]);
+            var instance = (TagStructure)Activator.CreateInstance(info.Types[0]);
 
-			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info))
+			foreach (var tagFieldInfo in instance.GetTagFieldEnumerable(info.Version))
 				DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
 
 			if (info.TotalSize > 0)
