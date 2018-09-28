@@ -108,7 +108,7 @@ namespace TagTool.Tags
             public TagStructureAttribute GetTagStructureAttribute(Type type, CacheVersion version = CacheVersion.Unknown)
             {
                 if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
-                    lock (TagStructureAttributes)
+                    lock (TagStructureInfos)
                     {
                         if (!TagStructureAttributes.TryGetValue(type, out attribute))
                             TagStructureAttributes[type] = attribute = GetStructureAttribute();
@@ -132,11 +132,11 @@ namespace TagTool.Tags
 
             public TagFieldAttribute GetTagFieldAttribute(Type type, FieldInfo field, CacheVersion version = CacheVersion.Unknown)
             {
-                if (field.DeclaringType != type && !type.IsSubclassOf(field.DeclaringType))
+                if (field.DeclaringType != type || !type.IsSubclassOf(field.DeclaringType))
                     throw new ArgumentException(nameof(field), new TypeAccessException(type.FullName));
 
                 if (!TagFieldAttributes.TryGetValue(field, out TagFieldAttribute attribute))
-                    lock (TagFieldAttributes)
+                    lock (TagFieldEnumerables)
                     {
                         if (!TagFieldAttributes.TryGetValue(field, out attribute))
                             TagFieldAttributes[field] = attribute =

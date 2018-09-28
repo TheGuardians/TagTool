@@ -33,7 +33,7 @@ namespace TagTool.Tags
 		/// <summary>
 		/// The name of the tag group that the structure applies to.
 		/// </summary>
-		public string Tag { get; set; } = Common.Tag.NULL.ToString();
+		public string Tag { get; set; } = Common.Tag.Null.ToString();
 
 		/// <summary>
 		/// The minimum engine version which the structure applies to.

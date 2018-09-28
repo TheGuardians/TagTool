@@ -28,7 +28,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.NULL : CacheContext.ParseGroupTag(args[0]);
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : CacheContext.ParseGroupTag(args[0]);
 
             if (args.Count > 0 && !args[0].EndsWith(":"))
                 args.RemoveAt(0);
@@ -93,7 +93,7 @@ namespace TagTool.Commands.Tags
 
             foreach (var tag in CacheContext.TagCache.Index)
             {
-                if (tag == null || (groupTag != Tag.NULL && !tag.IsInGroup(groupTag)))
+                if (tag == null || (groupTag != Tag.Null && !tag.IsInGroup(groupTag)))
                     continue;
 
                 var groupName = CacheContext.GetString(tag.Group.Name);

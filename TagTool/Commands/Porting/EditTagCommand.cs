@@ -35,7 +35,7 @@ namespace TagTool.Commands.Porting
 
             var groupTagInput = args[0];
             var blamTagName = args[1];
-            var groupTag = Tag.NULL;
+            var groupTag = Tag.Null;
 
             if (TagDefinition.Exists(groupTagInput))
             {

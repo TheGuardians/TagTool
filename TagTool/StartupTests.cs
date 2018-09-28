@@ -31,9 +31,6 @@ namespace TagTool.Commands
 		{
 			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
 			{
-				if (type.IsAbstract)
-					continue;
-
 				var inheritsTagStructure = type.IsSubclassOf(typeof(TagStructure));
 				var inheritsAttribute = type.IsDefined(typeof(TagStructureAttribute));
 

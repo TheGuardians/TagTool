@@ -295,7 +295,7 @@ namespace TagTool.Cache
 
             public Tag GroupTag =>
                 (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].ClassCode == null) ?
-                    Tag.NULL :
+                    Tag.Null :
                     new Tag(Cache.IndexItems.ClassList[ClassIndex].ClassCode.ToCharArray());
 
             public string GroupName =>
@@ -305,12 +305,12 @@ namespace TagTool.Cache
 
             public Tag ParentGroupTag =>
                 (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].Parent == null) ?
-                    Tag.NULL :
+                    Tag.Null :
                     new Tag(Cache.IndexItems.ClassList[ClassIndex].Parent.ToCharArray());
 
             public Tag GrandparentGroupTag =>
                 (ClassIndex == -1 || Cache.IndexItems.ClassList[ClassIndex].Parent2 == null) ?
-                    Tag.NULL :
+                    Tag.Null :
                     new Tag(Cache.IndexItems.ClassList[ClassIndex].Parent2.ToCharArray());
 
             /// <summary>

@@ -41,11 +41,11 @@ namespace TagTool.Cache
             using (var stream = OpenStringIdCacheRead())
                 StringIdCache = new StringIdCache(stream, stringIdResolver);
 
-            TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.NULL, Tag.NULL, GetStringId("object"));
-            TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.NULL, GetStringId("item"));
-            TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.NULL, GetStringId("device"));
-            TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.NULL, GetStringId("unit"));
-            TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.NULL, Tag.NULL, GetStringId("render_method"));
+            TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, GetStringId("object"));
+            TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, GetStringId("item"));
+            TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, GetStringId("device"));
+            TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, GetStringId("unit"));
+            TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, GetStringId("render_method"));
         }
 
         #region Tag Cache Functionality
@@ -351,7 +351,7 @@ namespace TagTool.Cache
                 }
             }
 
-            result = Tag.NULL;
+            result = Tag.Null;
             return false;
         }
 
@@ -363,7 +363,7 @@ namespace TagTool.Cache
         public Tag ParseGroupTag(string name)
         {
             if (name == "****" || name == "null")
-                return Tag.NULL;
+                return Tag.Null;
 
             if (TryParseGroupTag(name, out var result))
                 return result;

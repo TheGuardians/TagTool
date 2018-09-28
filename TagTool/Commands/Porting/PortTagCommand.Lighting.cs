@@ -158,7 +158,7 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    edGroup = new TagGroup(groupTag, Tag.NULL, Tag.NULL, CacheContext.GetStringId("scenario_lightmap_bsp_data"));
+                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.GetStringId("scenario_lightmap_bsp_data"));
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
