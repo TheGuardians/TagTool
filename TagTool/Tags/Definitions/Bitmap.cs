@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MaxVersion = CacheVersion.HaloOnline106708)]
+	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xA4, MaxVersion = CacheVersion.Halo3ODST)]
+	[TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xB8, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xAC, MinVersion = CacheVersion.HaloOnline235640)]
     [TagStructure(Name = "bitmap", Tag = "bitm", Size = 0xC0, MinVersion = CacheVersion.HaloReach)]
     public class Bitmap : TagStructure

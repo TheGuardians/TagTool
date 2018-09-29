@@ -177,13 +177,14 @@ namespace TagTool.Tags
 				case TypeCode.Double:
 				case TypeCode.Int64:
 				case TypeCode.UInt64:
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Version <= CacheVersion.Halo2Vista:
-				case TypeCode.Object when type == typeof(Byte[]) && attr.Version <= CacheVersion.Halo2Vista:
+				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Version != CacheVersion.Unknown && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
+				case TypeCode.Object when type == typeof(Byte[]) && attr.Version != CacheVersion.Unknown && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
 				case TypeCode.Object when type == typeof(RealEulerAngles2d):
 				case TypeCode.Object when type == typeof(RealPoint2d):
 				case TypeCode.Object when type == typeof(RealVector2d):
-				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && attr.Version <= CacheVersion.Halo2Vista:
+				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && attr.Version != CacheVersion.Unknown && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
+				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && attr.Version != CacheVersion.Unknown && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 					return 0x08;
 
 				case TypeCode.Object when type == typeof(RealRgbColor):
@@ -191,17 +192,18 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(RealPoint3d):
 				case TypeCode.Object when type == typeof(RealVector3d):
 				case TypeCode.Object when type == typeof(RealPlane2d):
-				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && attr.Version > CacheVersion.Halo2Vista:
+				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo3Retail, CacheVersion.Unknown):
+				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(TagBlock<>) && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 					return 0x0C;
 
 				case TypeCode.Decimal:
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Version > CacheVersion.Halo2Vista:
+				case TypeCode.Object when type == typeof(CachedTagInstance) && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 				case TypeCode.Object when type == typeof(RealArgbColor):
 				case TypeCode.Object when type == typeof(RealQuaternion):
 				case TypeCode.Object when type == typeof(RealPlane3d):
 					return 0x10;
 
-				case TypeCode.Object when type == typeof(Byte[]) && attr.Version > CacheVersion.Halo2Vista:
+				case TypeCode.Object when type == typeof(Byte[]) && CacheVersionDetection.IsBetween(attr.Version, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 					return 0x14;
 
 				case TypeCode.Object when type == typeof(RealMatrix4x3):

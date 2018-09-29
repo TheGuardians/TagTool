@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace TagTool.Geometry
 {
     [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x5C, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail)]
     public class CollisionGeometry : TagStructure
 	{
         public List<Bsp3dNode> Bsp3dNodes;
