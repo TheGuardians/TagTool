@@ -21,7 +21,6 @@ namespace TagTool.Commands
 		}
 
 		#region Test Methods
-
 		private static void CheckStructureSizes()
 		{
 			var cacheVersions = Enum.GetValues(typeof(CacheVersion)) as CacheVersion[];
@@ -129,7 +128,7 @@ namespace TagTool.Commands
 			}
 		}
 
-		private static void ConfirmTagStructureHasNoFields()
+        private static void ConfirmTagStructureHasNoFields()
 		{
 			var fields = typeof(TagStructure).GetFields(BindingFlags.Instance | BindingFlags.Public);
 
