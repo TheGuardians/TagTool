@@ -386,6 +386,10 @@
     <Compile Include="Serialization\HyperSerializer.cs" />
     <Compile Include="Serialization\HyperDeserializer.cs" />
     <Compile Include="Serialization\TaskBag.cs" />
+    <Compile Include="Shaders\ShaderMatching\ArgumentMapping.cs" />
+    <Compile Include="Shaders\ShaderMatching\FastRenderTags.cs" />
+    <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
+    <Compile Include="Shaders\ShaderMatching\Unknown3TagBlock.cs" />
     <Compile Include="Tags\TagFieldInfo.cs" />
     <Compile Include="StartupTests.cs" />
     <Compile Include="Tags\TagStructure.cs" />
