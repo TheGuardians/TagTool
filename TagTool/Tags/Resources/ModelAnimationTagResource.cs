@@ -224,7 +224,7 @@ namespace TagTool.Tags.Resources
                 public PrimaryNodeFlags ScaleFlags_Overlay;
             }
 
-            [TagStructure(Size = 0x48)]
+            [TagStructure(Size = 0x30)]
             public class Footer64_Overlay : TagStructure
 			{
                 public PrimaryNodeFlags RotationFlags1;

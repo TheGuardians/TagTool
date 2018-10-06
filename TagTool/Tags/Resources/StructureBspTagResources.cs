@@ -99,7 +99,7 @@ namespace TagTool.Tags.Resources
             }
         }
 
-        [TagStructure(Size = 0xB8, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnline106708)]
         public class InstancedGeometryBlock : TagStructure
 		{

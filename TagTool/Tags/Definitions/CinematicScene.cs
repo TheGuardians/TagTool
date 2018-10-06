@@ -235,7 +235,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xC)]
+        [TagStructure(Size = 0x14)]
         public class TextureCameraBlock : TagStructure
 		{
             [TagField(Label = true)]

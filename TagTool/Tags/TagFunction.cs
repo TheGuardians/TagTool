@@ -130,7 +130,7 @@ namespace TagTool.Tags
             public RealPoint2d Point2;
         }
 
-        [TagStructure(Size = 0x14)]
+        [TagStructure(Size = 0x10)]
 		public /*was_struct*/ class ExponentData : TagStructure
 		{
             public RealPoint2d Point1;

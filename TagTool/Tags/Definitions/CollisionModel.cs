@@ -92,11 +92,11 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown19;
                     public uint Unknown20;
 
-                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown21;
-                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown22;
-                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown23;
 
                     public short Size2;

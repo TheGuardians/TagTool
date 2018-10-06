@@ -166,8 +166,9 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(Tag):
 				case TypeCode.Object when type == typeof(CacheAddress):
 				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Short:
-				case TypeCode.Object when type == typeof(ArgbColor):
-				case TypeCode.Object when type == typeof(Point2d):
+                case TypeCode.Object when type == typeof(RgbColor):
+                case TypeCode.Object when type == typeof(ArgbColor):
+                case TypeCode.Object when type == typeof(Point2d):
 				case TypeCode.Object when type == typeof(StringId):
 				case TypeCode.Object when type == typeof(Angle):
 				case TypeCode.Object when type == typeof(VertexShaderReference):

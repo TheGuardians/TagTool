@@ -61,38 +61,22 @@ namespace TagTool.Tags.Definitions
         
         [TagStructure(Size = 0x30)]
         public class UnknownStandardBlock1 : TagStructure
-		{
-            public byte Flags;
-            public byte Unknown1;
-            public short Unknown2;
+        {
+            public float Unknown1;
+            public float Unknown2;
             public float Unknown3;
             public float Unknown4;
             public float Unknown5;
             public float Unknown6;
             public float Unknown7;
-
-            public List<TimedTagFunctionBlock> Unknown8;
-
+            public float Unknown8;
             public float Unknown9;
             public float Unknown10;
-
-            [TagStructure(Size = 0x20)]
-            public class TimedTagFunctionBlock : TagStructure
-			{
-                public List<UnknownBlock> Unknown1;
-                public TagFunction Unknown2 = new TagFunction { Data = new byte[0] };
-
-                [TagStructure(Size = 0xC)]
-                public class UnknownBlock : TagStructure
-				{
-                    public int Frame;
-                    public float Unknown1;
-                    public float Unknown2;
-                }
-            }
+            public float Unknown11;
+            public float Unknown12;
         }
 
-        [TagStructure(Size = 0x38)]
+        [TagStructure(Size = 0x34)]
         public class UnknownStandardBlock2 : TagStructure
 		{
             public byte Flags;
@@ -110,7 +94,6 @@ namespace TagTool.Tags.Definitions
             public float Unknown10;
             public float Unknown11;
             public float Unknown12;
-            public float Unknown13;
 
             [TagStructure(Size = 0x20)]
             public class TimedTagFunctionBlock : TagStructure

@@ -4,6 +4,7 @@ using TagTool.Scripting;
 using System;
 using System.Collections.Generic;
 using TagTool.Ai;
+using static TagTool.Tags.Definitions.GameObject;
 
 namespace TagTool.Tags.Definitions
 {
@@ -538,7 +539,7 @@ namespace TagTool.Tags.Definitions
                 public int EncodedData;
             }
 
-            [TagStructure(Size = 0x4)]
+            [TagStructure(Size = 0x1)]
             public class RoomDistance : TagStructure
 			{
                 public sbyte EncodedData;
@@ -2281,7 +2282,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public FlagsValue Flags;
                 public short GeometryIndex;
-                public CharacterJumpHeight ForceJumpHeight;
+                public AiDistanceValue ForceJumpHeight;
                 public ControlFlagsValue ControlFlags;
 
                 [Flags]

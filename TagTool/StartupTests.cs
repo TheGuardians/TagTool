@@ -70,21 +70,23 @@ namespace TagTool.Commands
 
 						if (tagField.Attribute.Length != 0)
 						{
-							if (tagField.FieldType == typeof(string))
-							{
-								size += (uint)tagField.Attribute.Length;
-								continue;
-							}
+                            if (tagField.FieldType == typeof(string))
+                            {
+                                size += (uint)tagField.Attribute.Length;
+                            }
+                            else
+                            {
+                                var elementType = tagField.FieldType.GetElementType() ?? tagField.FieldType;
 
-							var elementType = tagField.FieldType.GetElementType() ?? tagField.FieldType;
-							if (elementType is null)
-								elementType = tagField.FieldType;
-							var elementSize = TagFieldInfo.GetFieldSize(elementType, TagFieldAttribute.Default);
-							size += (uint)tagField.Attribute.Length * elementSize;
-							continue;
+                                if (elementType is null)
+                                    elementType = tagField.FieldType;
+
+                                var elementSize = TagFieldInfo.GetFieldSize(elementType, TagFieldAttribute.Default);
+
+                                size += (uint)tagField.Attribute.Length * elementSize;
+                            }
 						}
-
-						if (tagField.FieldType.IsGenericType && tagField.FieldType.GetGenericTypeDefinition() == typeof(TagBlock<>))
+                        else if (tagField.FieldType.IsGenericType && tagField.FieldType.GetGenericTypeDefinition() == typeof(TagBlock<>))
 						{
 							if (!CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista))
 								size += 0xC;
@@ -100,7 +102,9 @@ namespace TagTool.Commands
 						}
 						else if (tagField.FieldType == typeof(CachedTagInstance))
 						{
-							if (!CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista))
+                            if (tagField.Attribute.Short)
+                                size += 4;
+							else if (!CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista))
 								size += 0x10;
 							else
 								size += 0x8;
@@ -113,7 +117,7 @@ namespace TagTool.Commands
 								size += 0x8;
 						}
 						else
-							size += tagField.Size;
+							size += TagFieldInfo.GetFieldSize(tagField.FieldType, tagField.Attribute);
 					}
 
 					if (structureInfo.TotalSize != size)
