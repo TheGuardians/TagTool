@@ -77,33 +77,36 @@ namespace TagTool.Tags.Definitions
                     public float Unknown12;
                     public float Unknown13;
                     public uint Unknown14;
-                    [TagField(Short = true)] public CachedTagInstance Model;
+
+                    [TagField(Short = true)]
+                    public CachedTagInstance Model;
+
                     public uint Unknown15;
+
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown16;
+
                     public short Unknown17;
                     public short Unknown18;
+
                     public uint Unknown19;
                     public uint Unknown20;
+
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public uint Unknown21;
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public uint Unknown22;
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public uint Unknown23;
-                    public uint Unknown24;
-                    public uint Unknown25;
-                    public uint Unknown26;
+
                     public short Size2;
                     public short Count2;
                     public int Offset2;
                     public int Unknown27;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+
                     public uint Unknown28;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown29;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown30;
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public uint Unknown31;
                 }
             }

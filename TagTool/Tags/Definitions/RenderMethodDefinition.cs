@@ -16,9 +16,6 @@ namespace TagTool.Tags.Definitions
         public int Unknown2;
         public int Unknown3;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
-
         [TagStructure(Size = 0x18)]
         public class Method : TagStructure
 		{

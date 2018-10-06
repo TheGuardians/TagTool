@@ -3,7 +3,7 @@ using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "camo", Tag = "cmoe", Size = 0x40)]
+    [TagStructure(Name = "camo", Tag = "cmoe", Size = 0x3C)]
     public class Camo : TagStructure
 	{
         public CamoFlags Flags;

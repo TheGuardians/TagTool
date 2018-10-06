@@ -4,7 +4,7 @@ using TagTool.Common;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA0, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xB0, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA4, MinVersion = CacheVersion.Halo3ODST)]
     public class CameraGlobalsDefinition : TagStructure
 	{
         [TagField(Label = true, ValidTags = new[] { "trak" })]

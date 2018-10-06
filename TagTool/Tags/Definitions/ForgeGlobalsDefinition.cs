@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
     /// <summary>
     /// ElDewrito Forge globals.
     /// </summary>
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x80)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x90)]
 	public /*was_struct*/ class ForgeGlobalsDefinition : TagStructure
 	{
         /// <summary>

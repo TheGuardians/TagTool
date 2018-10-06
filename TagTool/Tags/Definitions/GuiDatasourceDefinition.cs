@@ -35,7 +35,9 @@ namespace TagTool.Tags.Definitions
             public class StringValue : TagStructure
 			{
                 public StringId DataType;
-                [TagField(Length = 20)] public string Value;
+
+                [TagField(Length = 32)]
+                public string Value;
             }
 
             [TagStructure(Size = 0x8)]

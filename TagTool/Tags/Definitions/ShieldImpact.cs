@@ -109,16 +109,23 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public class H3ValuesBlock : TagStructure
 		{
+            public CachedTagInstance Bitmap1;
+            public CachedTagInstance Bitmap2;
+
             public float Unknown1;
             public float Unknown2;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown3;
+
             public float Unknown4;
             public float Unknown5;
             public float Unknown6;
             public float Unknown7;
             public float Unknown8;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown9;
+            public float Unknown10;
+
             public RealRgbColor Color1;
             public float Magnitude1;
             public RealRgbColor Color2;
@@ -131,8 +138,6 @@ namespace TagTool.Tags.Definitions
             public float Magnitude5;
             public RealRgbColor Color6;
             public float Magnitude6;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown10;
         }
 
         /// <summary>

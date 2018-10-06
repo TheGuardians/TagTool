@@ -82,9 +82,6 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public StringId ExitAnimation;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused4;
-
         [TagStructure(Size = 0x3C)]
         public class EquipmentCameraBlock : TagStructure
 		{
@@ -206,10 +203,15 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown4;
         }
 
-        [TagStructure(Size = 0x4)]
+        [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
         public class RegeneratorBlock : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public CachedTagInstance RegeneratingEffect;
         }
 
         [TagStructure(Size = 0x8)]

@@ -25,7 +25,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTagInstance DefaultVisionMode;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail ,MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public int Unknown6;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int Unknown6HO; //6 
@@ -37,9 +37,6 @@ namespace TagTool.Tags.Definitions
 
         public float Unknown11;
         public float Unknown12;
-
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x14)]
         public class DefaultBitmap : TagStructure

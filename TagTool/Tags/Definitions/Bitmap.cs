@@ -107,7 +107,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<BitmapResource> InterleavedResourcesNew;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
         public int UnknownB4;
 
         [TagStructure(Size = 0x8)]

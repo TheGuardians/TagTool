@@ -28,9 +28,6 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 24)]
         public ushort[] OffsetCounts;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
-
         /// <summary>
         /// Gets the value of a string in a given language.
         /// </summary>
