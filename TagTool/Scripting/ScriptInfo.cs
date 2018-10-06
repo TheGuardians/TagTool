@@ -13304,6 +13304,22 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
+                [0x4B0] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "objectives_unavailable")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long)
+                },
+                [0x4B1] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "objectives_secondary_show")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long)
+                },
+                [0x4B2] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "objectives_secondary_finish")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long)
+                },
+                [0x4B3] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "objectives_secondary_unavailable")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long)
+                },
                 [0x4D1] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "net_delegate_?")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
