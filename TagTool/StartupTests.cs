@@ -81,7 +81,7 @@ namespace TagTool.Commands
                                 if (elementType is null)
                                     elementType = tagField.FieldType;
 
-                                var elementSize = TagFieldInfo.GetFieldSize(elementType, TagFieldAttribute.Default);
+                                var elementSize = TagFieldInfo.GetFieldSize(elementType, tagField.Attribute, cacheVersion);
 
                                 size += (uint)tagField.Attribute.Length * elementSize;
                             }
@@ -117,7 +117,7 @@ namespace TagTool.Commands
 								size += 0x8;
 						}
 						else
-							size += TagFieldInfo.GetFieldSize(tagField.FieldType, tagField.Attribute);
+							size += TagFieldInfo.GetFieldSize(tagField.FieldType, tagField.Attribute, cacheVersion);
 					}
 
 					if (structureInfo.TotalSize != size)

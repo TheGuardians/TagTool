@@ -13,13 +13,13 @@ namespace TagTool.Tags
 	public class TagFieldEnumerable : IEnumerable<TagFieldInfo>
 	{
 		/// <summary>
-		/// Collection of <see cref="TagFieldInfo"/> for a <see cref="TagStructureInfo"/> in a given
+		/// Collection of <see cref="Tags.TagFieldInfo"/> for a <see cref="TagStructureInfo"/> in a given
 		/// <see cref="CacheVersion"/>.
 		/// </summary>
 		private readonly List<TagFieldInfo> TagFieldInfos = new List<TagFieldInfo> { };
 
 		/// <summary>
-		/// Constructs aa <see cref="TagFieldInfo"/> <see cref="List{T}"/> over a tag structure for a <see cref="TagStructureInfo"/> in a given
+		/// Constructs a <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/> over a tag structure for a <see cref="TagStructureInfo"/> in a given
 		/// <see cref="CacheVersion"/>.
 		/// </summary>
 		/// <param name="info">The info for the structure. Only fields which match the version used to create the info will be enumerated over.</param>
@@ -45,22 +45,22 @@ namespace TagTool.Tags
 		public int Count => TagFieldInfos.Count;
 
 		/// <summary>
-		/// Gets an <see cref="IEnumerator{T}"/> over the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
+		/// Gets an <see cref="IEnumerator{T}"/> over the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerator<TagFieldInfo> GetEnumerator() => TagFieldInfos.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => TagFieldInfos.GetEnumerator();
 
 		/// <summary>
-		/// An indexer into the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
+		/// An indexer into the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
-		/// <param name="index">The index into the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.</param>
-		/// <returns>The <see cref="TagFieldInfo"/> at the specified index in the 
-		/// <see cref="TagFieldInfo"/> <see cref="List{T}"/>.</returns>
+		/// <param name="index">The index into the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.</param>
+		/// <returns>The <see cref="Tags.TagFieldInfo"/> at the specified index in the 
+		/// <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.</returns>
 		public TagFieldInfo this[int index] => TagFieldInfos[index];
 
 		/// <summary>
-		/// Builds the <see cref="TagFieldInfo"/> <see cref="List{T}"/> to be enumerated.
+		/// Builds the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/> to be enumerated.
 		/// </summary>
 		private void Build()
 		{
@@ -78,39 +78,40 @@ namespace TagTool.Tags
 					if (attribute.Gen3Only)
 					{
 						if (Info.Version == CacheVersion.Halo3Retail || Info.Version == CacheVersion.Halo3ODST || Info.Version == CacheVersion.HaloReach)
-							CreateTagFieldInfo(field, attribute, ref offset);
+							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
 						continue;
 					}
 
 					if (attribute.HaloOnlineOnly)
 					{
 						if (CacheVersionDetection.IsBetween(Info.Version, CacheVersion.HaloOnline106708, CacheVersion.HaloOnline700123))
-							CreateTagFieldInfo(field, attribute, ref offset);
+							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
 						continue;
 					}
 
 					if (attribute.Version != CacheVersion.Unknown)
 					{
 						if (Info.Version == attribute.Version)
-							CreateTagFieldInfo(field, attribute, ref offset);
+							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
 						continue;
 					}
 
 					if (CacheVersionDetection.IsBetween(Info.Version, attribute.MinVersion, attribute.MaxVersion))
-						CreateTagFieldInfo(field, attribute, ref offset);
+						CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
 				}
 			}
 		}
 
 		/// <summary>
-		/// Creates and adds a <see cref="TagFieldInfo"/> to the <see cref="TagFieldInfo"/> <see cref="List{T}"/>.
+		/// Creates and adds a <see cref="Tags.TagFieldInfo"/> to the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
 		/// </summary>
-		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="TagFieldInfo"/> from.</param>
-		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="TagFieldInfo"/>.</param>
+		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Tags.TagFieldInfo"/> from.</param>
+		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Tags.TagFieldInfo"/>.</param>
+		/// <param name="targetVersion">The target <see cref="CacheVersion"/> the <see cref="Tags.TagFieldInfo"/> belongs to.</param>
 		/// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
-		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, ref uint offset)
+		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, ref uint offset)
 		{
-			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute);
+			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion);
 			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
 			TagFieldInfos.Add(tagFieldInfo);
 			offset += fieldSize;
