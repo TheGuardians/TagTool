@@ -8,8 +8,20 @@
 	/// <typeparam name="TFlop"></typeparam>
 	public class FlipFlopDictionary<TFlip, TFlop> : IDictionary<TFlip, TFlop>
 	{
-		private readonly IDictionary<TFlip, TFlop> Flip = new Dictionary<TFlip, TFlop>();
-		private readonly IDictionary<TFlop, TFlip> Flop = new Dictionary<TFlop, TFlip>();
+		private readonly IDictionary<TFlip, TFlop> Flip;
+		private readonly IDictionary<TFlop, TFlip> Flop;
+
+		public FlipFlopDictionary()
+		{
+			Flip = new Dictionary<TFlip, TFlop>();
+			Flop = new Dictionary<TFlop, TFlip>();
+		}
+
+		public FlipFlopDictionary(int capacity)
+		{
+			Flip = new Dictionary<TFlip, TFlop>(capacity);
+			Flop = new Dictionary<TFlop, TFlip>(capacity);
+		}
 
 		public TFlop this[TFlip flip]
 		{

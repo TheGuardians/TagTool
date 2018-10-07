@@ -120,7 +120,6 @@ namespace TagTool.Tags.Resources
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public TagBlock<Unknown4Block> Unknown5;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown6;
 
             [TagStructure(Size = 0x4)]

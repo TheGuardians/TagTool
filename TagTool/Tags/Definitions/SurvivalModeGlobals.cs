@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
+	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
     public class SurvivalModeGlobals : TagStructure
 	{
         public uint Unknown;

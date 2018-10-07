@@ -342,8 +342,9 @@ namespace TagTool.Tags.Definitions
                 public CachedTagInstance Type;
             }
 
-            [TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x10C, MaxVersion = CacheVersion.HaloOnline449175)]
+			[TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
+			[TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
+			[TagStructure(Size = 0x10C, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x20C, MinVersion = CacheVersion.HaloOnline498295)]
             public class EventBlock : TagStructure
 			{

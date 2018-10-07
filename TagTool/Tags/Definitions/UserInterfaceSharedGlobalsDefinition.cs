@@ -90,13 +90,15 @@ namespace TagTool.Tags.Definitions
         public string UiOdst2BipedName;
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
         public string UiOdst2AiSquadName;
-        public StringId UiOdst2AiLocationName;
+		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		public StringId UiOdst2AiLocationName;
 
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
         public string UiOdst3BipedName;
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
         public string UiOdst3AiSquadName;
-        public StringId UiOdst3AiLocationName;
+		[TagField(MinVersion = CacheVersion.Halo3ODST)]
+		public StringId UiOdst3AiLocationName;
 
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
         public string UiOdst4BipedName;

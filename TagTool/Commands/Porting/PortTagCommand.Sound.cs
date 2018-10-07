@@ -399,7 +399,6 @@ namespace TagTool.Commands.Porting
                 int i = 0;
                 for (i = 0; i < permutationCount; i++)
                 {
-
                     var gestaltPermIndex = i + pitchRange.FirstPermutationIndex;
                     var permSize = BlamSoundGestalt.GetPermutationSize(gestaltPermIndex);
                     var permOffset = BlamSoundGestalt.GetPermutationOffset(gestaltPermIndex);

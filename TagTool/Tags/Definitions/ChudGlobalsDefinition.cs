@@ -652,7 +652,7 @@ namespace TagTool.Tags.Definitions
                     Bit31 = 1 << 31
                 }
 
-                [TagStructure(Size = 0x14)]
+                [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
                 public class BipedData : TagStructure
 				{
                     [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
