@@ -125,22 +125,21 @@ namespace TagTool.Cache
             if (set < 0 || set >= setOffsets.Length)
                 throw new IndexOutOfRangeException($"string_id set {set}");
 
-            var setStrings = new Dictionary<string, StringId>();
-
             for (var i = 1; i < Strings.Count; i++)
             {
                 var stringId = GetStringId(i, version);
+
+                if (set != stringId.Set)
+                    continue;
+
                 var stringValue = GetString(stringId);
 
                 if (stringValue == null)
                     continue;
 
-                if (set == stringId.Set)
-                    setStrings[stringValue] = stringId;
+                if (value == stringValue)
+                    return stringId;
             }
-
-            if (setStrings.ContainsKey(value))
-                return setStrings[value];
 
             return StringId.Invalid;
         }

@@ -25,6 +25,9 @@ namespace TagTool.Commands.Porting
 
 		private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
+        private Dictionary<int, CachedTagInstance> PortedTags = new Dictionary<int, CachedTagInstance>();
+        private Dictionary<uint, StringId> PortedStringIds = new Dictionary<uint, StringId>();
+
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
 		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
 
@@ -147,16 +150,22 @@ namespace TagTool.Commands.Porting
 			return result;
 		}
 
-		public CachedTagInstance ConvertTag(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
-		{
-			CachedTagInstance result = null;
+        public CachedTagInstance ConvertTag(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
+        {
+            if (blamTag == null)
+                return null;
+
+            CachedTagInstance result = null;
 #if !DEBUG
             try
             {
 #endif
-			var oldFlags = Flags;
-			result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
-			Flags = oldFlags;
+                if (PortedTags.ContainsKey(blamTag.ID))
+                    return PortedTags[blamTag.ID];
+
+                var oldFlags = Flags;
+                result = ConvertTagInternal(cacheStream, resourceStreams, blamTag);
+                Flags = oldFlags;
 #if !DEBUG
             }
             catch (Exception e)
@@ -168,8 +177,9 @@ namespace TagTool.Commands.Porting
                 throw e;
             }
 #endif
-			return result;
-		}
+            PortedTags[blamTag.ID] = result;
+            return result;
+        }
 
 		public CachedTagInstance ConvertTagInternal(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
 		{
@@ -875,6 +885,9 @@ namespace TagTool.Commands.Porting
 			if (stringId == StringId.Invalid)
 				return stringId;
 
+            if (PortedStringIds.ContainsKey(stringId.Value))
+                return PortedStringIds[stringId.Value];
+
 			var value = BlamCache.Version < CacheVersion.Halo3Retail ?
 				BlamCache.Strings.GetItemByID((int)(stringId.Value & 0xFFFF)) :
 				BlamCache.Strings.GetString(stringId);
@@ -884,10 +897,10 @@ namespace TagTool.Commands.Porting
 				CacheContext.StringIdCache.GetStringId(stringId.Set, value);
 
 			if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
-				return edStringId;
+				return PortedStringIds[stringId.Value] = edStringId;
 
 			if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
-				return CacheContext.StringIdCache.AddString(value);
+				return PortedStringIds[stringId.Value] = CacheContext.StringIdCache.AddString(value);
 
 			return StringId.Invalid;
 		}
