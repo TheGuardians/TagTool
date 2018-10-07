@@ -1,8 +1,9 @@
-﻿using TagTool.Tags;
+﻿using TagTool.Cache;
+using TagTool.Tags;
 
 namespace TagTool.Common
 {
-    [TagStructure(Size = 0x10)]
+    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
     public class ResourceGen2 : TagStructure
 	{
         public ResourceTypeGen2 Type;

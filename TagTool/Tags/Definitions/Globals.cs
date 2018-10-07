@@ -233,7 +233,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public float Unknown10;
 
-            [TagStructure(Size = 0x28)]
+            [TagStructure(Size = 0x24)]
             public class CrosshairLocationBlock : TagStructure
 			{
                 public float DefaultCrosshairLocationY;
@@ -699,9 +699,9 @@ namespace TagTool.Tags.Definitions
 
             public List<UnderwaterProxy> UnderwaterProxies;
 
-            public uint Unknown2;
-            public short Unknown3;
-            public short Unknown4;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)] public uint Unknown2;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)] public short Unknown3;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)] public short Unknown4;
 
             [TagStructure(Size = 0x28)]
             public class WaterDragProperty : TagStructure

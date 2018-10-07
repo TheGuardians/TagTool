@@ -108,14 +108,14 @@ namespace TagTool.Tags
             public RealPoint2d Point;
         }
 
-        [TagStructure(Size = 0x14)]
+        [TagStructure(Size = 0x10)]
 		public /*was_struct*/ class MultiLinearKeyData : TagStructure
 		{
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x14)]
 		public /*was_struct*/ class SplineData : TagStructure
 		{
             public float Unknown;
@@ -123,7 +123,7 @@ namespace TagTool.Tags
             public RealPoint2d Point2;
         }
 
-        [TagStructure(Size = 0x14)]
+        [TagStructure(Size = 0x10)]
 		public /*was_struct*/ class MultiSplineData : TagStructure
 		{
             public RealPoint2d Point1;

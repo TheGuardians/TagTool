@@ -199,7 +199,7 @@ namespace TagTool.Tags.Definitions
             GeometryPostprocessed = 1 << 0
         }
 
-        [TagStructure(Size = 0x5C)]
+        [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.Halo2Vista)]
         public class Section : TagStructure
 		{
             public RenderGeometryClassification GlobalGeometryClassification;
@@ -245,13 +245,15 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Runtime;
         }
 
-        [TagStructure(Size = 0xC)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         public class InvalidSectionPairBit : TagStructure
 		{
             public int Bits;
-        }
+			public int Unknown_0x04;
+			public int Unknown_0x08;
+		}
 
-        [TagStructure(Size = 0xC)]
+		[TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
         public class SectionGroup : TagStructure
 		{
             public DetailLevelFlags DetailLevels;
@@ -270,7 +272,7 @@ namespace TagTool.Tags.Definitions
                 Level6 = 1 << 5
             }
 
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
             public class CompoundNode : TagStructure
 			{
                 [TagField(Length = 4)]
@@ -303,7 +305,7 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
-        [TagStructure(Size = 0x3C)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail)]
         public class InstancePlacement : TagStructure
 		{
             public StringId Name;
@@ -367,7 +369,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x58)]
+        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo2Vista)]
         public class PrtInfoBlock : TagStructure
 		{
             public ushort ShOrder;
@@ -399,13 +401,13 @@ namespace TagTool.Tags.Definitions
             [TagField(Short = true)]
             public CachedTagInstance Runtime;
 
-            [TagStructure(Size = 0xC)]
+            [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
             public class LodInfoBlock : TagStructure
 			{
                 public uint ClusterOffset;
                 public List<SectionInfoBlock> SectionInfo;
 
-                [TagStructure(Size = 0x8)]
+                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
                 public class SectionInfoBlock : TagStructure
 				{
                     public int SectionIndex;
@@ -426,18 +428,18 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x8)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
         public class SectionRenderLeaf : TagStructure
 		{
             public List<NodeRenderLeaf> NodeRenderLeaves;
 
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
             public class NodeRenderLeaf : TagStructure
 			{
                 public List<CollisionLeaf> CollisionLeaves;
                 public List<SurfaceReference> SurfaceReferences;
 
-                [TagStructure(Size = 0x8)]
+                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
                 public class CollisionLeaf : TagStructure
 				{
                     public short Cluster;
@@ -445,7 +447,7 @@ namespace TagTool.Tags.Definitions
                     public int FirstSurfaceReferenceIndex;
                 }
 
-                [TagStructure(Size = 0x8)]
+                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
                 public class SurfaceReference : TagStructure
 				{
                     public short StripIndex;

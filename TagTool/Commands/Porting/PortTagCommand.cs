@@ -322,7 +322,7 @@ namespace TagTool.Commands.Porting
 					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
 					{
 						var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
-						var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
+						var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
 
 						if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
 							continue;
@@ -342,7 +342,7 @@ namespace TagTool.Commands.Porting
 					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
 					{
 						var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
-						var rmt2 = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, rm.ShaderProperties[0].Template);
+						var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
 
 						if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
 							continue;

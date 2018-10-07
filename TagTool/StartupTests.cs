@@ -1,6 +1,7 @@
-﻿using System;
+﻿//#define STARTUP_TESTS_ENABLED
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using TagTool.Cache;
 using TagTool.Tags;
@@ -11,6 +12,7 @@ namespace TagTool.Commands
 	{
 		public static void Run()
 		{
+			#if STARTUP_TESTS_ENABLED
 			foreach (var method in typeof(StartupTests).GetRuntimeMethods())
 			{
 				if (!method.IsPrivate)
@@ -18,6 +20,7 @@ namespace TagTool.Commands
 
 				method.Invoke(null, null);
 			}
+			#endif
 		}
 
 		#region Test Methods
@@ -163,20 +166,21 @@ namespace TagTool.Commands
 
 		private static class Test
 		{
-#if DEBUG
+			#if DEBUG
 			public static void Assert(bool condition, string message = null)
 			{
 				// TODO: Can we make visual studio highlight a different line of code when this exception is thrown?
 				if (!condition)
 					throw new StartupTestException($"FAIL: {message}");
 			}
-#else
+			
+			#else
 			public static void Assert(bool condition, string message = null)
 			{
 				if (!condition)
 					Console.WriteLine($"FAIL: {message}");
 			}
-#endif
+			#endif
 		}
 
 		private class StartupTestException : Exception

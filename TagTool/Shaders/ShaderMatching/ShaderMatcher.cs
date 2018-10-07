@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -117,7 +114,7 @@ namespace TagTool.Shaders.ShaderMatching
                 if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                     continue;
 
-                var template = CacheContext.Deserialize<RenderMethodTemplateFast>(CacheStream, instance);
+                var template = CacheContext.Deserialize<RenderMethodTemplate>(CacheStream, instance);
 
                 if (!UseMS30 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                     continue;
@@ -125,11 +122,11 @@ namespace TagTool.Shaders.ShaderMatching
                 var bitmaps = new List<string>();
                 var arguments = new List<string>();
 
-                foreach (var shaderMap in template.ShaderMaps)
-                    bitmaps.Add(CacheContext.StringIdCache.GetString(shaderMap.Name));
+                foreach (var samplerArgument in template.SamplerArguments)
+                    bitmaps.Add(CacheContext.StringIdCache.GetString(samplerArgument.Name));
 
-                foreach (var argument in template.Arguments)
-                    arguments.Add(CacheContext.StringIdCache.GetString(argument.Name));
+                foreach (var vectorArgument in template.VectorArguments)
+                    arguments.Add(CacheContext.StringIdCache.GetString(vectorArgument.Name));
 
                 Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { bitmaps, arguments });
             }
@@ -659,7 +656,7 @@ namespace TagTool.Shaders.ShaderMatching
 
                 if (instance.Name.StartsWith(blamRmt2Tag.Name))
                 {
-                    var template = CacheContext.Deserialize<RenderMethodTemplateFast>(cacheStream, instance);
+                    var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, instance);
 
                     if (!UseMS30 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
                         continue;

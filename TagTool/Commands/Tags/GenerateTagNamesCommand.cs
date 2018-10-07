@@ -606,11 +606,5 @@ namespace TagTool.Commands.Tags
             
             return true;
         }
-
-        [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x14)]
-        public class RenderMethod_BaseRenderMethod : TagStructure
-		{
-            public CachedTagInstance BaseRenderMethod = null;
-        }
     }
 }
