@@ -2222,8 +2222,8 @@ namespace TagTool.Tags.Definitions
             public List<LineSegment> LineSegments;
             public List<Parallelogram> Parallelograms;
             public List<JumpHint> JumpHints;
-            public List<UnknownBlock4> Unknown4;
-            public List<UnknownBlock5> Unknown5;
+            public List<ClimbHint> ClimbHints;
+            public List<WellHint> WellHints;
             public List<FlightHint> FlightHints;
             public List<CookieCutter> CookieCutters;
             public List<UnknownBlock8> Unknown8;
@@ -2301,28 +2301,46 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x8)]
-            public class UnknownBlock4 : TagStructure
+            public class ClimbHint : TagStructure
 			{
-                public int Unknown;
-                public uint Unknown2;
+                public UserHintFlags Flags;
+                public uint LineSegmentIndex;
             }
 
             [TagStructure(Size = 0x10, Align = 0x8)]
-            public class UnknownBlock5 : TagStructure
+            public class WellHint : TagStructure
 			{
-                public uint Unknown;
-                public List<UnknownBlock> Unknown2;
+                public FlagsValue Flags;
+                public List<WellPoint> Points;
+
+                [Flags]
+                public enum FlagsValue : int
+                {
+                    None = 0,
+                    Bidirectional = 1 << 0
+                }
+
+                public enum WellPointType : short
+                {
+                    Jump,
+                    Climb,
+                    Hoist
+                }
 
                 [TagStructure(Size = 0x1C)]
-                public class UnknownBlock : TagStructure
+                public class WellPoint : TagStructure
 				{
-                    public uint Unknown1;
-                    public uint Unknown2;
-                    public uint Unknown3;
-                    public uint Unknown4;
-                    public uint Unknown5;
-                    public uint Unknown6;
-                    public uint Unknown7;
+                    public WellPointType Type;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused1 = new byte[2];
+
+                    public RealPoint3d Position;
+
+                    public short ReferenceFrame;
+                    public short SectorIndex;
+
+                    public RealVector2d Normal;
                 }
             }
 

@@ -1,4 +1,4 @@
-﻿#define STARTUP_TESTS_ENABLED
+﻿//#define STARTUP_TESTS_ENABLED
 
 using System;
 using System.Collections.Generic;
