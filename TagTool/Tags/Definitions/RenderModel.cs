@@ -232,7 +232,7 @@ namespace TagTool.Tags.Definitions
             public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
-            public List<ResourceGen2> Resources;
+            public List<TagResourceGen2> Resources;
 
             [TagField(Short = true)]
             public CachedTagInstance Original;
@@ -389,7 +389,7 @@ namespace TagTool.Tags.Definitions
             public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
-            public List<ResourceGen2> Resources;
+            public List<TagResourceGen2> Resources;
 
             [TagField(Short = true)]
             public CachedTagInstance Original;

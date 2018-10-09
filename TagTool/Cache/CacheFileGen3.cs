@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -347,8 +348,6 @@ namespace TagTool.Cache
                         throw new InvalidOperationException();
 
                     ResourceLayoutTable = deserializer.Deserialize<CacheFileResourceLayoutTable>(blamContext);
-                    ResourceLayoutTable.BuildInteropData();
-
                     break;
                 }
             }
@@ -368,9 +367,9 @@ namespace TagTool.Cache
                     {
                         foreach (var fixup in tagresource.ResourceFixups)
                         {
-                            fixup.Offset = (fixup.Address & 0x0FFFFFFF);
-                            fixup.Type = (fixup.Address >> 28) & 0xF;
-                            fixup.RawAddress = fixup.Address;
+                            fixup.Offset = (int)(fixup.Address.Value & 0x0FFFFFFF);
+                            fixup.Type = (int)(fixup.Address.Value >> 28) & 0xF;
+                            fixup.RawAddress = (int)fixup.Address.Value;
                         }
                     }
 
@@ -381,7 +380,7 @@ namespace TagTool.Cache
 
         public Dictionary<string, CacheFileGen3> SharedCacheFiles { get; } = new Dictionary<string, CacheFileGen3>();
 
-        public byte[] ReadPageData(CacheFileResourceGestalt.TagResource resource, CacheFileResourceLayoutTable.RawPage page)
+        public byte[] ReadPageData(TagResourceGen3 resource, RawPage page)
         {
             var cacheFilePath = "";
             var cache = this;
@@ -404,7 +403,7 @@ namespace TagTool.Cache
             var offset = BitConverter.ToInt32(BitConverter.GetBytes(cache.Header.Interop.DebugSectionSize), 0) + page.BlockOffset;
 
             cache.Reader.SeekTo(offset);
-            var compressed = cache.Reader.ReadBytes(page.CompressedBlockSize);
+            var compressed = cache.Reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
 
             if (resource.ResourceTypeIndex != -1 && Strings.GetString(ResourceGestalt.ResourceTypes[resource.ResourceTypeIndex].Name) == "sound_resource_definition")
                 return compressed;
@@ -412,10 +411,10 @@ namespace TagTool.Cache
             var decompressed = new byte[page.UncompressedBlockSize];
 
             if (page.CompressionCodecIndex == -1)
-                cache.Reader.BaseStream.Read(decompressed, 0, page.UncompressedBlockSize);
+                cache.Reader.BaseStream.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
             else
                 using (var reader = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
-                    reader.Read(decompressed, 0, page.UncompressedBlockSize);
+                    reader.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
 
             return decompressed;
         }
@@ -489,10 +488,13 @@ namespace TagTool.Cache
             var reqPage = ResourceLayoutTable.RawPages[segment.RequiredPageIndex];
             var optPage = ResourceLayoutTable.RawPages[segment.OptionalPageIndex];
 
+            var reqBlockSize = BitConverter.ToInt32(BitConverter.GetBytes(reqPage.CompressedBlockSize), 0);
+            var optBlockSize = BitConverter.ToInt32(BitConverter.GetBytes(optPage.CompressedBlockSize), 0);
+
             if (size == 0)
-                size = (reqPage.CompressedBlockSize != 0) ?
-                    reqPage.CompressedBlockSize :
-                    optPage.CompressedBlockSize;
+                size = (reqBlockSize != 0) ?
+                    reqBlockSize :
+                    optBlockSize;
 
             var reqSize = size - sizes.OverallSize;
             var optSize = size - reqSize;

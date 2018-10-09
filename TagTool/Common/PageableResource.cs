@@ -1,6 +1,6 @@
+using System;
 using TagTool.Cache;
 using TagTool.Tags;
-using System;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Common
@@ -20,9 +20,9 @@ namespace TagTool.Common
         public RawPage Page;
 
         /// <summary>
-        /// The <see cref="TagResource"/> of the <see cref="PageableResource"/>.
+        /// The <see cref="TagResourceGen3"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public TagResource Resource;
+        public TagResourceGen3 Resource;
 
         /// <summary>
         /// Gets the definition type of the pageable_resource.
@@ -30,32 +30,32 @@ namespace TagTool.Common
         /// <returns>The definition type of the pageable_resource, if it is of a valid type.</returns>
         public Type GetDefinitionType()
         {
-            switch (Resource.Type)
+            switch (Resource.ResourceType)
             {
-                case TagResourceType.Animation:
+                case TagResourceTypeGen3.Animation:
                     return typeof(ModelAnimationTagResource);
 
-                case TagResourceType.Bink:
+                case TagResourceTypeGen3.Bink:
                     return typeof(BinkResource);
 
-                case TagResourceType.Bitmap:
-                case TagResourceType.BitmapInterleaved:
+                case TagResourceTypeGen3.Bitmap:
+                case TagResourceTypeGen3.BitmapInterleaved:
                     return typeof(BitmapTextureInteropResource);
 
-                case TagResourceType.Collision:
+                case TagResourceTypeGen3.Collision:
                     return typeof(StructureBspTagResources);
 
-                case TagResourceType.Pathfinding:
+                case TagResourceTypeGen3.Pathfinding:
                     return typeof(StructureBspCacheFileTagResources);
 
-                case TagResourceType.RenderGeometry:
+                case TagResourceTypeGen3.RenderGeometry:
                     return typeof(RenderGeometryApiResourceDefinition);
 
-                case TagResourceType.Sound:
+                case TagResourceTypeGen3.Sound:
                     return typeof(SoundResourceDefinition);
 
                 default:
-                    throw new TypeLoadException(Resource.Type.ToString());
+                    throw new TypeLoadException(Resource.ResourceType.ToString());
             }
         }
 

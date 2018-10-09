@@ -1,6 +1,6 @@
-﻿namespace TagTool.Cache
+﻿namespace TagTool.Tags
 {
-    public enum TagResourceType : sbyte
+    public enum TagResourceTypeGen3 : sbyte
     {
         None = -1,
         Collision,

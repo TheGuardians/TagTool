@@ -1,15 +1,20 @@
-using TagTool.Tags;
 using System.Collections.Generic;
+using TagTool.Cache;
 
-namespace TagTool.Cache
+namespace TagTool.Tags
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708)]
-    public class TagResource : TagStructure
+    public class TagResourceGen3 : TagStructure
 	{
         public CachedTagInstance ParentTag;
         public ushort Salt;
-        public TagResourceType Type;
+
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public sbyte ResourceTypeIndex;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagResourceTypeGen3 ResourceType;
+
         public byte Flags;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -25,7 +30,7 @@ namespace TagTool.Cache
         public short Unknown1;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public short PlaySegmentIndex;
+        public short SegmentIndex;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] DefinitionData;
@@ -43,6 +48,13 @@ namespace TagTool.Cache
 		{
             public uint BlockOffset;
             public CacheAddress Address;
+
+            [TagField(Runtime = true)]
+            public int Type;
+            [TagField(Runtime = true)]
+            public int Offset;
+            [TagField(Runtime = true)]
+            public int RawAddress;
         }
 
         [TagStructure(Size = 0x8)]

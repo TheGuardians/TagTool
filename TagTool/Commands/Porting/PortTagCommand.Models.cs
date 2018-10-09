@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -503,17 +504,17 @@ namespace TagTool.Commands.Porting
 
                         switch (resource.Type)
                         {
-                            case ResourceTypeGen2.TagBlock:
+                            case TagResourceTypeGen2.TagBlock:
                                 writer.Write(resource.ResoureDataSize / resource.SecondaryLocator);
                                 writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
-                            case ResourceTypeGen2.TagData:
+                            case TagResourceTypeGen2.TagData:
                                 writer.Write(resource.ResoureDataSize);
                                 writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
-                            case ResourceTypeGen2.VertexBuffer:
+                            case TagResourceTypeGen2.VertexBuffer:
                                 break;
                         }
                     }
@@ -547,7 +548,7 @@ namespace TagTool.Commands.Porting
 
                     foreach (var resource in section.Resources)
                     {
-                        if (resource.Type != ResourceTypeGen2.VertexBuffer)
+                        if (resource.Type != TagResourceTypeGen2.VertexBuffer)
                             continue;
                         
                         var vertexBuffer = mesh.VertexBuffers[currentVertexBuffer];
@@ -660,17 +661,17 @@ namespace TagTool.Commands.Porting
 
                         switch (resource.Type)
                         {
-                            case ResourceTypeGen2.TagBlock:
+                            case TagResourceTypeGen2.TagBlock:
                                 writer.Write(resource.ResoureDataSize / resource.SecondaryLocator);
                                 writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
-                            case ResourceTypeGen2.TagData:
+                            case TagResourceTypeGen2.TagData:
                                 writer.Write(resource.ResoureDataSize);
                                 writer.Write(8 + section.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
-                            case ResourceTypeGen2.VertexBuffer:
+                            case TagResourceTypeGen2.VertexBuffer:
                                 break;
                         }
                     }

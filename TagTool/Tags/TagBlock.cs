@@ -2,12 +2,10 @@ using TagTool.Cache;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.IO;
-using System.Diagnostics;
 
 namespace TagTool.Tags
 {
-	[TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
 	[TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
 	public abstract class TagBlock : TagStructure, IList<TagStructure>
 	{

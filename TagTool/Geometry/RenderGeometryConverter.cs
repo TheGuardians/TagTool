@@ -146,13 +146,13 @@ namespace TagTool.Geometry
                 {
                     Index = -1
                 },
-                Resource = new TagResource
+                Resource = new TagResourceGen3
                 {
-                    Type = TagResourceType.RenderGeometry,
+                    ResourceType = TagResourceTypeGen3.RenderGeometry,
                     DefinitionData = new byte[0x30],
                     DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
-                    ResourceFixups = new List<TagResource.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
+                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
                     Unknown2 = 1
                 }
             };
@@ -163,7 +163,7 @@ namespace TagTool.Geometry
 
             var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
 
-            geometry.Resource.Resource.DefinitionAddress = new CacheAddress((uint)resourceEntry.DefinitionAddress);
+            geometry.Resource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
             geometry.Resource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             RenderGeometryApiResourceDefinition resourceDefinition = null;
@@ -184,23 +184,17 @@ namespace TagTool.Geometry
                 {
                     foreach (var fixup in resourceEntry.ResourceFixups)
                     {
-                        var newFixup = new TagResource.ResourceFixup
-                        {
-                            BlockOffset = (uint)fixup.BlockOffset,
-                            Address = new CacheAddress((uint)fixup.Address)
-                        };
+                        definitionStream.Position = fixup.BlockOffset;
+                        definitionWriter.Write(fixup.Address.Value);
 
-                        definitionStream.Position = newFixup.BlockOffset;
-                        definitionWriter.Write(newFixup.Address.Value);
-
-                        geometry.Resource.Resource.ResourceFixups.Add(newFixup);
+                        geometry.Resource.Resource.ResourceFixups.Add(fixup);
                     }
 
                     foreach (var definitionFixup in resourceEntry.ResourceDefinitionFixups)
                     {
-                        var newDefinitionFixup = new TagResource.ResourceDefinitionFixup
+                        var newDefinitionFixup = new TagResourceGen3.ResourceDefinitionFixup
                         {
-                            Address = new CacheAddress((uint)definitionFixup.Address),
+                            Address = definitionFixup.Address,
                             ResourceStructureTypeIndex = definitionFixup.ResourceStructureTypeIndex
                         };
 
@@ -230,7 +224,7 @@ namespace TagTool.Geometry
                 }
                 else
                 {
-                    geometry.Resource.Resource.Type = TagResourceType.None;
+                    geometry.Resource.Resource.ResourceType = TagResourceTypeGen3.None;
                     return geometry;
                 }
             }

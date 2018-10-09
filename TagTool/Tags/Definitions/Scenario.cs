@@ -3,7 +3,6 @@ using TagTool.Common;
 using TagTool.Scripting;
 using System;
 using System.Collections.Generic;
-using TagTool.Ai;
 using static TagTool.Tags.Definitions.GameObject;
 
 namespace TagTool.Tags.Definitions

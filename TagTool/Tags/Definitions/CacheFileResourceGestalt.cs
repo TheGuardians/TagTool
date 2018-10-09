@@ -24,7 +24,7 @@ namespace TagTool.Tags.Definitions
         public List<ResourceType> ResourceTypes;
         public List<ResourceStructureType> ResourceStructureTypes;
         public CacheFileResourceLayoutTable ResourceLayoutTable = new CacheFileResourceLayoutTable();
-        public List<TagResource> TagResources;
+        public List<TagResourceGen3> TagResources;
         public List<Zoneset> DesignerZonesets;
         public List<Zoneset> GlobalZoneset;
         public uint Unknown;
@@ -137,44 +137,6 @@ namespace TagTool.Tags.Definitions
             public byte[] Guid;
             [TagField(Label = true)]
             public StringId Name;
-        }
-
-        [TagStructure(Size = 0x40)]
-        public class TagResource : TagStructure
-		{
-            public CachedTagInstance ParentTag;
-            public ushort Salt;
-            public sbyte ResourceTypeIndex;
-            public byte Flags;
-            public int FixupInformationOffset;
-            public int FixupInformationLength;
-            public int SecondaryFixupInformationOffset;
-            public short Unknown1;
-            public short SegmentIndex;
-            public int DefinitionAddress;
-            public List<ResourceFixup> ResourceFixups;
-            public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
-
-            [TagStructure(Size = 0x8)]
-            public class ResourceFixup : TagStructure
-			{
-                public int BlockOffset;
-                public int Address;
-
-                [TagField(Runtime = true)]
-                public int Type;
-                [TagField(Runtime = true)]
-                public int Offset;
-                [TagField(Runtime = true)]
-                public int RawAddress;
-            }
-
-            [TagStructure(Size = 0x8)]
-            public class ResourceDefinitionFixup : TagStructure
-			{
-                public uint Address;
-                public int ResourceStructureTypeIndex;
-            }
         }
 
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]

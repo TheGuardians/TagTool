@@ -410,11 +410,11 @@ namespace TagTool.Commands.Porting
                 edModeDefinition.Geometry.Resource = new PageableResource
                 {
                     Page = new RawPage(),
-                    Resource = new TagResource
+                    Resource = new TagResourceGen3
                     {
-                        Type = TagResourceType.RenderGeometry,
-                        ResourceFixups = new List<TagResource.ResourceFixup>(),
-                        ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                        ResourceType = TagResourceTypeGen3.RenderGeometry,
+                        ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
+                        ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
                         Unknown2 = 1
                     }
                 };

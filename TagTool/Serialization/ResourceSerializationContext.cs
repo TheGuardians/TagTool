@@ -1,12 +1,12 @@
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.IO;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.IO;
 using TagTool.Tags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Serialization
 {
@@ -18,8 +18,8 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 0x0;
 
         private PageableResource Resource { get; }
-        private List<TagResource.ResourceFixup> ResourceFixups { get; } = new List<TagResource.ResourceFixup>();
-        private List<TagResource.ResourceDefinitionFixup> ResourceDefinitionFixups { get; } = new List<TagResource.ResourceDefinitionFixup>();
+        private List<TagResourceGen3.ResourceFixup> ResourceFixups { get; } = new List<TagResourceGen3.ResourceFixup>();
+        private List<TagResourceGen3.ResourceDefinitionFixup> ResourceDefinitionFixups { get; } = new List<TagResourceGen3.ResourceDefinitionFixup>();
 
         public ResourceSerializationContext(PageableResource resource)
         {
@@ -99,8 +99,8 @@ namespace TagTool.Serialization
         private class ResourceDataBlock : IDataBlock
         {
             private readonly ResourceSerializationContext _context;
-            private readonly List<TagResource.ResourceFixup> _fixups = new List<TagResource.ResourceFixup>();
-            private readonly List<TagResource.ResourceDefinitionFixup> _tagStructureFixups = new List<TagResource.ResourceDefinitionFixup>();
+            private readonly List<TagResourceGen3.ResourceFixup> _fixups = new List<TagResourceGen3.ResourceFixup>();
+            private readonly List<TagResourceGen3.ResourceDefinitionFixup> _tagStructureFixups = new List<TagResourceGen3.ResourceDefinitionFixup>();
             private uint _align = DefaultBlockAlign;
 
             public ResourceDataBlock(ResourceSerializationContext context)
@@ -181,36 +181,36 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            private TagResource.ResourceFixup MakeDefinitionFixup(CacheAddress address)
+            private TagResourceGen3.ResourceFixup MakeDefinitionFixup(CacheAddress address)
             {
-                return new TagResource.ResourceFixup
+                return new TagResourceGen3.ResourceFixup
                 {
                     BlockOffset = (uint)Stream.Position,
                     Address = address
                 };
             }
 
-            private TagResource.ResourceDefinitionFixup MakeTagStructureFixup(uint offset, int typeIndex)
+            private TagResourceGen3.ResourceDefinitionFixup MakeTagStructureFixup(uint offset, int typeIndex)
             {
-                return new TagResource.ResourceDefinitionFixup
+                return new TagResourceGen3.ResourceDefinitionFixup
                 {
                     Address = new CacheAddress(CacheAddressType.Definition, (int)offset),
                     ResourceStructureTypeIndex = typeIndex
                 };
             }
             
-            private static TagResource.ResourceFixup FinalizeDefinitionFixup(TagResource.ResourceFixup fixup, uint dataOffset)
+            private static TagResourceGen3.ResourceFixup FinalizeDefinitionFixup(TagResourceGen3.ResourceFixup fixup, uint dataOffset)
             {
-                return new TagResource.ResourceFixup
+                return new TagResourceGen3.ResourceFixup
                 {
                     BlockOffset = dataOffset + fixup.BlockOffset,
                     Address = fixup.Address
                 };
             }
 
-            private static TagResource.ResourceDefinitionFixup FinalizeD3DFixup(TagResource.ResourceDefinitionFixup fixup, uint dataOffset)
+            private static TagResourceGen3.ResourceDefinitionFixup FinalizeD3DFixup(TagResourceGen3.ResourceDefinitionFixup fixup, uint dataOffset)
             {
-                return new TagResource.ResourceDefinitionFixup
+                return new TagResourceGen3.ResourceDefinitionFixup
                 {
                     Address = new CacheAddress(fixup.Address.Type, fixup.Address.Offset + (int)dataOffset),
                     ResourceStructureTypeIndex = fixup.ResourceStructureTypeIndex

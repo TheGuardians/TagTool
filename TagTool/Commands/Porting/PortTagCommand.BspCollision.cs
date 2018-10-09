@@ -7,8 +7,8 @@ using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
 using TagTool.IO;
-using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 
@@ -255,13 +255,13 @@ namespace TagTool.Commands.Porting
                 {
                     Index = -1
                 },
-                Resource = new TagResource
+                Resource = new TagResourceGen3
                 {
-                    Type = TagResourceType.Collision,
+                    ResourceType = TagResourceTypeGen3.Collision,
                     DefinitionData = new byte[0x30],
                     DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
-                    ResourceFixups = new List<TagResource.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
+                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
                     Unknown2 = 1
                 }
             };
@@ -272,7 +272,7 @@ namespace TagTool.Commands.Porting
             
             var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3 & ushort.MaxValue];
 
-            bsp.CollisionBspResource.Resource.DefinitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress);
+            bsp.CollisionBspResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
             bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             StructureBspTagResources resourceDefinition = null;
@@ -283,7 +283,7 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var fixup in resourceEntry.ResourceFixups)
                 {
-                    var newFixup = new TagResource.ResourceFixup
+                    var newFixup = new TagResourceGen3.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
                         Address = new CacheAddress(

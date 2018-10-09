@@ -70,20 +70,20 @@ namespace TagTool.Commands.Sounds
                     {
                         Index = -1
                     },
-                    Resource = new TagResource
+                    Resource = new TagResourceGen3
                     {
-                        Type = TagResourceType.Sound,
+                        ResourceType = TagResourceTypeGen3.Sound,
                         DefinitionData = new byte[20],
                         DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 536870912),
-                        ResourceFixups = new List<TagResource.ResourceFixup>
+                        ResourceFixups = new List<TagResourceGen3.ResourceFixup>
                         {
-                            new TagResource.ResourceFixup
+                            new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = 12,
                                 Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
                             }
                         },
-                        ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                        ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
                         Unknown2 = 1
                     }
                 };

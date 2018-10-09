@@ -5,6 +5,7 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
@@ -32,13 +33,13 @@ namespace TagTool.Commands.Porting
                     {
                         Index = -1,
                     },
-                    Resource = new TagResource
+                    Resource = new TagResourceGen3
                     {
-                        Type = TagResourceType.Animation,
+                        ResourceType = TagResourceTypeGen3.Animation,
                         DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray(),
-                        DefinitionAddress = new CacheAddress(CacheAddressType.Definition, resourceEntry.DefinitionAddress),
-                        ResourceFixups = new List<TagResource.ResourceFixup>(),
-                        ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
+                        DefinitionAddress = resourceEntry.DefinitionAddress,
+                        ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
+                        ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
                         Unknown2 = 1
                     }
                 };
@@ -54,7 +55,7 @@ namespace TagTool.Commands.Porting
                     {
                         foreach (var fixup in resourceEntry.ResourceFixups)
                         {
-                            var newFixup = new TagResource.ResourceFixup
+                            var newFixup = new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = (uint)fixup.BlockOffset,
                                 Address = new CacheAddress(CacheAddressType.Resource, fixup.Offset)

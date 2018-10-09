@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
-using System.Linq;
 
 namespace TagTool.Commands.Files
 {
@@ -321,21 +320,21 @@ namespace TagTool.Commands.Files
 
             ResourceLocation newLocation;
 
-            switch (pageable.Resource.Type)
+            switch (pageable.Resource.ResourceType)
             {
-                case TagResourceType.Bitmap:
+                case TagResourceTypeGen3.Bitmap:
                     newLocation = ResourceLocation.Textures;
                     break;
 
-                case TagResourceType.BitmapInterleaved:
+                case TagResourceTypeGen3.BitmapInterleaved:
                     newLocation = ResourceLocation.TexturesB;
                     break;
 
-                case TagResourceType.RenderGeometry:
+                case TagResourceTypeGen3.RenderGeometry:
                     newLocation = ResourceLocation.Resources;
                     break;
 
-                case TagResourceType.Sound:
+                case TagResourceTypeGen3.Sound:
                     newLocation = ResourceLocation.Audio;
                     break;
 

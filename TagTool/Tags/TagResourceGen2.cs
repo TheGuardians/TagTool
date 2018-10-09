@@ -1,12 +1,11 @@
 ﻿using TagTool.Cache;
-using TagTool.Tags;
 
-namespace TagTool.Common
+namespace TagTool.Tags
 {
     [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
-    public class ResourceGen2 : TagStructure
+    public class TagResourceGen2 : TagStructure
 	{
-        public ResourceTypeGen2 Type;
+        public TagResourceTypeGen2 Type;
         public sbyte AlignmentBit;
         public short FieldOffset;
         public short PrimaryLocator;

@@ -4,8 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TagTool.Common;
-using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Serialization;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
@@ -764,32 +764,32 @@ namespace TagTool.Cache
 
         public object Deserialize(PageableResource pageable)
         {
-            switch (pageable.Resource.Type)
+            switch (pageable.Resource.ResourceType)
             {
-                case TagResourceType.Animation:
+                case TagResourceTypeGen3.Animation:
                     return Deserialize<ModelAnimationTagResource>(pageable);
 
-                case TagResourceType.Bink:
+                case TagResourceTypeGen3.Bink:
                     return Deserialize<BinkResource>(pageable);
 
-                case TagResourceType.Bitmap:
-                case TagResourceType.BitmapInterleaved:
+                case TagResourceTypeGen3.Bitmap:
+                case TagResourceTypeGen3.BitmapInterleaved:
                     return Deserialize<BitmapTextureInteropResource>(pageable);
 
-                case TagResourceType.Collision:
+                case TagResourceTypeGen3.Collision:
                     return Deserialize<StructureBspTagResources>(pageable);
 
-                case TagResourceType.Pathfinding:
+                case TagResourceTypeGen3.Pathfinding:
                     return Deserialize<StructureBspCacheFileTagResources>(pageable);
 
-                case TagResourceType.RenderGeometry:
+                case TagResourceTypeGen3.RenderGeometry:
                     return Deserialize<RenderGeometryApiResourceDefinition>(pageable);
 
-                case TagResourceType.Sound:
+                case TagResourceTypeGen3.Sound:
                     return Deserialize<SoundResourceDefinition>(pageable);
 
                 default:
-                    throw new NotSupportedException(pageable.Resource.Type.ToString());
+                    throw new NotSupportedException(pageable.Resource.ResourceType.ToString());
             }
         }
 

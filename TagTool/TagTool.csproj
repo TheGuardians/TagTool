@@ -218,8 +218,8 @@
     <Compile Include="Cache\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
-    <Compile Include="Cache\TagResource.cs" />
-    <Compile Include="Cache\TagResourceType.cs" />
+    <Compile Include="Tags\TagResourceGen3.cs" />
+    <Compile Include="Tags\TagResourceTypeGen3.cs" />
     <Compile Include="Commands\ArgumentParser.cs" />
     <Compile Include="Commands\Bitmaps\BitmapContextFactory.cs" />
     <Compile Include="Commands\Bitmaps\ExtractBitmapCommand.cs" />
@@ -416,8 +416,8 @@
     <Compile Include="Common\RealVector2d.cs" />
     <Compile Include="Common\RealVector3d.cs" />
     <Compile Include="Common\Rectangle2d.cs" />
-    <Compile Include="Common\ResourceGen2.cs" />
-    <Compile Include="Common\ResourceTypeGen2.cs" />
+    <Compile Include="Tags\TagResourceGen2.cs" />
+    <Compile Include="Tags\TagResourceTypeGen2.cs" />
     <Compile Include="Common\RgbColor.cs" />
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
@@ -726,11 +726,6 @@
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Builds.xml" />
-    <None Include="Resources\Classes_H1.xml" />
-    <None Include="Resources\Classes_H2.xml" />
-    <None Include="Resources\Versions.xml" />
-    <None Include="Resources\VertexBuffer.xml" />
     <Content Include="TagTool.ico" />
     <None Include="App.config" />
     <None Include="packages.config" />
@@ -771,7 +766,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

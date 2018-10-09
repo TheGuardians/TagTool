@@ -6,8 +6,8 @@ using System.Linq;
 using TagTool.Bitmaps;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Tools;
@@ -214,11 +214,11 @@ namespace TagTool.Commands.Porting
             var resource = new PageableResource
             {
                 Page = new RawPage(),
-                Resource = new TagResource
+                Resource = new TagResourceGen3
                 {
-                    ResourceFixups = new List<TagResource.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResource.ResourceDefinitionFixup>(),
-                    Type = TagResourceType.Bitmap,
+                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
+                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
+                    ResourceType = TagResourceTypeGen3.Bitmap,
                     Unknown2 = 1
                 }
             };

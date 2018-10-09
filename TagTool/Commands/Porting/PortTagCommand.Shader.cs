@@ -1,11 +1,8 @@
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags;
 using TagTool.Tags.Definitions;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using TagTool.Serialization;
 using TagTool.Shaders.ShaderMatching;
 

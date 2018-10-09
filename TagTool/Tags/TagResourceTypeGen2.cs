@@ -1,6 +1,6 @@
-﻿namespace TagTool.Common
+﻿namespace TagTool.Tags
 {
-    public enum ResourceTypeGen2 : sbyte
+    public enum TagResourceTypeGen2 : sbyte
     {
         TagBlock,
         TagData,

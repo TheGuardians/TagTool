@@ -1,14 +1,17 @@
-using TagTool.Tags;
 using System;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x58, Align = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640)]
     public class RawPage : TagStructure
 	{
         public short Salt;
+
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public byte XboxFlags;
 
         /// <summary>
         /// Gets or sets flags containing information about where the resource is located.
@@ -24,9 +27,16 @@ namespace TagTool.Cache
 
         public sbyte CompressionCodecIndex;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public short SharedCacheIndex;
+
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public short Unknown0;
+
         [TagField(MinVersion = CacheVersion.HaloOnline235640)]
         public int Unknown1;
 
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int Index;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]

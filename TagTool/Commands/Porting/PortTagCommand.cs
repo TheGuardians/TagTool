@@ -13,7 +13,6 @@ using TagTool.Tags;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
-using TagTool.Shaders.ShaderMatching;
 
 namespace TagTool.Commands.Porting
 {
