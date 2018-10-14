@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting
             // The offsets are computed as follows : you want to trim about 0.013 seconds at the start and 0.004 seconds at the end. 1152 bytes is the number of bytes required to cut this amount
             // on a 16 bit PCM single channel audio file at 44100Hz. Obtaining the offset for other type of sounds is just changing those parameters.
 
-            int startOffset = (int)(1392 * channelCount * ((float)sampleRate / 44100));                                        // Offset from index 0 
+            int startOffset = (int)(1152 * channelCount * ((float)sampleRate / 44100));                                        // Offset from index 0 
             int endOffset = (int)(384 * channelCount * ((float)sampleRate / 44100));                                           // Offset from index data.Length -1
             int size = data.Length - startOffset - endOffset;
             byte[] result = new byte[size];

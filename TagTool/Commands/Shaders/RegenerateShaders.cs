@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
 using TagTool.Serialization;
+using System.Diagnostics;
 
 namespace TagTool.Commands.Shaders
 {
