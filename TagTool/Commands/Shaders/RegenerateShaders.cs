@@ -329,10 +329,7 @@ namespace TagTool.Commands.Shaders
             int before = serialization_pairs_bag.Count;
             var serialization_pairs = serialization_pairs_bag.Where(sp => sp != null).GroupBy(sp => sp.tag.Index).Select(g => g.First());
 
-            Console.WriteLine($"Generation completed in {(DateTime.Now - then).TotalSeconds} seconds {Math.Round(100.0f * (float)serialization_pairs_bag.Count / (float)before, 2)}% efficiency");
-#if DEBUG
             Debug.WriteLine($"Generation completed in {(DateTime.Now - then).TotalSeconds} seconds {Math.Round(100.0f * (float)serialization_pairs_bag.Count / (float)before, 2)}% efficiency");
-#endif
 
             // serialize modified tags
             foreach (var sp in serialization_pairs_bag)
@@ -352,16 +349,13 @@ namespace TagTool.Commands.Shaders
             base_stream.Close();
             memory_stream.Close();
 
-            Console.WriteLine($"Finished in {(DateTime.Now - then).TotalSeconds} seconds");
-#if DEBUG
             Debug.WriteLine($"Finished in {(DateTime.Now - then).TotalSeconds} seconds");
-#endif
         }
 
         bool RegenerateShader(
             RenderMethodTemplate rmt2,
             PixelShader pixl,
-            Int32[] shader_args,
+            int[] shader_args,
             ShaderType type,
             ShaderStage shaderstage,
             RenderMethodTemplate.ShaderModeBitmask bit,
@@ -419,7 +413,7 @@ namespace TagTool.Commands.Shaders
             return false;
         }
 
-        void _RegenerateShaders(RenderMethodTemplate rmt2, PixelShader pixl, Int32[] shader_args, string shader_type)
+        void _RegenerateShaders(RenderMethodTemplate rmt2, PixelShader pixl, int[] shader_args, string shader_type)
         {
             switch (shader_type)
             {
@@ -497,7 +491,7 @@ namespace TagTool.Commands.Shaders
             }
         }
 
-        public object[] CreateArguments(MethodInfo method, ShaderStage stage, Int32[] template)
+        public object[] CreateArguments(MethodInfo method, ShaderStage stage, int[] template)
         {
             var _params = method.GetParameters();
             object[] input_params = new object[_params.Length];
