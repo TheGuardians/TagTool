@@ -151,10 +151,10 @@ namespace TagTool.Commands.Porting
                 foreach (var zone in scnr.Zones)
                 {
                     if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
-                        zone.FlagsNew = (Scenario.BspFlags)(1 << zone.ManualBspIndex);
+                        zone.FlagsNew = (ushort)(1 << zone.ManualBspIndex);
                     else
                         for (var i = 0; i < scnr.StructureBsps.Count; i++)
-                            zone.FlagsNew |= (Scenario.BspFlags)(1 << i);
+                            zone.FlagsNew |= (ushort)(1 << i);
 
                     foreach (var area in zone.Areas)
                     {

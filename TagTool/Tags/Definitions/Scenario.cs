@@ -1950,13 +1950,15 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ZoneFlags FlagsOld;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public BspFlags FlagsNew;
-
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short ManualBspIndex;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public short Unused;
+            public short Unknown1;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public short Unknown2;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public ushort FlagsNew;
 
             public List<FiringPosition> FiringPositions;
             public List<Area> Areas;
@@ -2020,7 +2022,8 @@ namespace TagTool.Tags.Definitions
                 public string Name;
                 public AreaFlags Flags;
                 public RealPoint3d RuntimeRelativeMeanPoint;
-                public int Unknown;
+                public short Unknown1;
+                public short Unknown2;
                 public float RuntimeStandardDeviation;
                 public short FiringPositionStartIndex;
                 public short FiringPositionCount;
@@ -2032,18 +2035,18 @@ namespace TagTool.Tags.Definitions
 
                 public short Unknown3;
                 public short Unknown4;
-                public int Unknown5;
+                public uint Unknown5;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public uint Unknown6;
-
                 public uint Unknown7;
+
                 public uint Unknown8;
                 public uint Unknown9;
                 public uint Unknown10;
                 public uint Unknown11;
+                public uint Unknown12;
                 public short ManualReferenceFrame;
-                public short Unknown12;
+                public short Unknown13;
                 public List<FlightHint> FlightHints;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -2075,7 +2078,9 @@ namespace TagTool.Tags.Definitions
                     None = 0,
                     VehicleArea = 1 << 0,
                     Perch = 1 << 1,
-                    ManualReferenceFrame = 1 << 2
+                    ManualReferenceFrame = 1 << 2,
+                    TurretDeploymentArea = 1 << 3,
+                    InvalidSectorDef = 1 << 4
                 }
 
                 [Flags]
