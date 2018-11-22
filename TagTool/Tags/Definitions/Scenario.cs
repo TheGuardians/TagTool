@@ -2527,8 +2527,9 @@ namespace TagTool.Tags.Definitions
                     public string Name;
                     public RealPoint3d Position;
                     public short ReferenceFrame;
-                    public short Unknown;
-                    public int SurfaceIndex;
+                    public short Unknown1;
+                    public short Unknown2;
+                    public short SurfaceIndex;
                     public RealEulerAngles2d FacingDirection;
                 }
             }

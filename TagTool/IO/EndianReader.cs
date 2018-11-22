@@ -24,6 +24,19 @@ namespace TagTool.IO
             StreamOrigin = 0;
         }
 
+        /// <summary>
+        /// Creates a new instance of the EndianReader class.
+        /// </summary>
+        /// <param name="Stream">The Stream to read from.</param>
+        /// <param name="leaveOpen">Whether to leave the underlying stream open.</param>
+        /// <param name="Type">The default EndianFormat the EndianReader will use.</param>
+        public EndianReader(Stream Stream, bool leaveOpen, EndianFormat Type = EndianFormat.LittleEndian)
+            : base(Stream, Encoding.ASCII, leaveOpen)
+        {
+            Format = Type;
+            StreamOrigin = 0;
+        }
+
         #region Param-less Overrides
         /// <summary>
         /// Reads a Double value in the EndianReader's default EndianFormat.

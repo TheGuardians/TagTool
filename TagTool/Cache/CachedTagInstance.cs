@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using System;
 
 namespace TagTool.Cache
 {
@@ -119,6 +120,13 @@ namespace TagTool.Cache
         {
             return Group.BelongsTo(groups);
         }
+
+        /// <summary>
+        /// Determines whether the tag belongs to a tag group.
+        /// </summary>
+        /// <typeparam name="T">The type of the tag group's definition class.</typeparam>
+        /// <returns><c>true</c> if the tag belongs to the group.</returns>
+        public bool IsInGroup<T>() => Group.BelongsTo(typeof(T).GetGroupTag());
 
         /// <summary>
         /// Converts a pointer to an offset relative to the tag's header.

@@ -337,6 +337,8 @@ namespace TagTool.Cache
             /// <returns><c>true</c> if the tag belongs to the group.</returns>
             public bool IsInGroup(TagGroup group) => IsInGroup(group.Tag);
 
+            public bool IsInGroup<T>() => IsInGroup(typeof(T).GetGroupTag());
+
             private string GetGen2GroupName(Tag groupTag)
             {
                 if (!Tags.TagDefinition.Types.ContainsKey(groupTag))
@@ -421,6 +423,11 @@ namespace TagTool.Cache
         }
 
         public abstract void LoadResourceTags();
+
+        public IndexItem GetIndexItemFromID(int id)
+        {
+            return IndexItems.GetItemByID(id);
+        }
 
         public byte[] GetRawFromID(int ID)
         {

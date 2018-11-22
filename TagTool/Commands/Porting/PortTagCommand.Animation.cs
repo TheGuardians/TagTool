@@ -14,13 +14,14 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
+        public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
         {
             if (BlamCache.ResourceGestalt == null)
                 BlamCache.LoadResourceTags();
 
             var resourceDefinition = new List<ModelAnimationTagResource>();
-            foreach (var group in definition.ResourceGroups)
+
+            foreach (var group in resourceGroups)
             {
                 var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetDatumIndex & ushort.MaxValue];
 
@@ -79,11 +80,12 @@ namespace TagTool.Commands.Porting
 
             var diffLines = new List<string>();
             var resDefIndex = -1;
-            foreach (var group in definition.ResourceGroups)
+
+            foreach (var group in resourceGroups)
             {
                 resDefIndex++;
 
-                if (resourceDefinition.Count < resDefIndex + 1) 
+                if (resourceDefinition.Count < resDefIndex + 1)
                     continue; // rare cases, might break the game
 
                 // Get the resource group real size, which is probably not in the resource definition
@@ -415,7 +417,7 @@ namespace TagTool.Commands.Porting
 
                         // Align the next animation member to 0x10. 
                         memberOffset += member.AnimationData.Size;
-                        while (memberOffset % 0x10 != 0) 
+                        while (memberOffset % 0x10 != 0)
                             memberOffset += 4;
                     }
 
@@ -456,6 +458,15 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            return resourceGroups;
+        }
+
+        public ModelAnimationGraph ConvertModelAnimationGraph(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ModelAnimationGraph definition)
+        {
+            if (BlamCache.ResourceGestalt == null)
+                BlamCache.LoadResourceTags();
+
+            definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, resourceStreams, definition.ResourceGroups);
             definition.Modes = definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
 
             foreach (var mode in definition.Modes)

@@ -313,7 +313,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class UnknownBlock : TagStructure
 		{
-            public uint Unknown;
+            public StringId Unknown;
         }
 
         [TagStructure(Size = 0x18)]

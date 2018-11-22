@@ -597,6 +597,8 @@ namespace TagTool.Commands.Porting
             {
                 case ScriptExpressionType.Expression:
                 case ScriptExpressionType.Group:
+                case ScriptExpressionType.GlobalsReference:
+                case ScriptExpressionType.ParameterReference:
                     if (ScriptExpressionIsValue(expr))
                         ConvertScriptValueOpcode(expr);
                     else
@@ -607,8 +609,6 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
-                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
-                case ScriptExpressionType.ParameterReference: // Probably as above
                     break;
 
                 default:
@@ -623,6 +623,7 @@ namespace TagTool.Commands.Porting
             switch (expr.ExpressionType)
             {
                 case ScriptExpressionType.ParameterReference:
+                case ScriptExpressionType.GlobalsReference:
                     return true;
 
                 case ScriptExpressionType.Expression:
@@ -632,7 +633,6 @@ namespace TagTool.Commands.Porting
                         return false;
 
                 case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
-                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses, so ignore
                 case ScriptExpressionType.Group:
                     return false;
 
@@ -668,11 +668,11 @@ namespace TagTool.Commands.Porting
             {
                 case ScriptExpressionType.Expression:
                 case ScriptExpressionType.Group:
+                case ScriptExpressionType.GlobalsReference:
+                case ScriptExpressionType.ParameterReference:
                     break;
 
                 case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
-                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
-                case ScriptExpressionType.ParameterReference: // Probably as above
                     return;
 
                 default:

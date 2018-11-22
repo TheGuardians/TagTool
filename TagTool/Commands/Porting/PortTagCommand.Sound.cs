@@ -75,21 +75,47 @@ namespace TagTool.Commands.Porting
         /// </summary>
         /// <param name="WAVFileName"></param>
         /// <param name="MP3FileName"></param>
+        /// <param name="loop"></param>
         /// <returns></returns>
-        private static bool ConvertWAVToMP3(string WAVFileName, string MP3FileName)
+        private static bool ConvertWAVToMP3(string WAVFileName, string MP3FileName, bool loop)
         {
-            ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+            if (!loop)
             {
-                Arguments = "-i " + WAVFileName + " -q:a 0 " + MP3FileName,         //No imposed bitrate for now
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                RedirectStandardInput = false
-            };
-            Process ffmpeg = Process.Start(info);
-            ffmpeg.WaitForExit();
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+                {
+                    Arguments = "-i " + WAVFileName + " -q:a 0 " + MP3FileName,         //No imposed bitrate for now
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process ffmpeg = Process.Start(info);
+                ffmpeg.WaitForExit();
+            }
+            else
+            {
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
+                {
+                    Arguments = WAVFileName,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process mp3loop = Process.Start(info);
+                mp3loop.WaitForExit();
+
+                // mp3loop outputs wavfilename.mp3. gotta rename it to MP3FileName
+                string LoopFileName = WAVFileName.Substring(0, WAVFileName.Length - 4) + ".mp3";
+                if (File.Exists(LoopFileName))
+                    File.Move(LoopFileName, MP3FileName);
+                else
+                    return false;
+            }
 
             if (File.Exists(MP3FileName))
                 return true;
@@ -152,46 +178,31 @@ namespace TagTool.Commands.Porting
                 byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
                 byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
 
-                // Don't convert loops to mp3 for now. Use the WAV file.
-                if (loop)
+                using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                 {
-                    using (EndianWriter writer = new EndianWriter(new FileStream(resultWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                    {
-                        writer.WriteBlock(truncatedWAVdata);
-                    }
+                    WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
+                    WAVfile.Write(writer);
                 }
-                // Create WAV file and convert to MP3, then remove header.
-                else
-                {
-                    using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                    {
-                        WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
-                        WAVfile.Write(writer);
-                    }
 
-                    // Convert to MP3 and remove header
-                    if (ConvertWAVToMP3(fixedWAV, tempMP3))
+                // Convert to MP3 and remove header
+                if (ConvertWAVToMP3(fixedWAV, tempMP3, loop))
+                {
+                    int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
+                    byte[] MP3stream = File.ReadAllBytes(tempMP3);
+                    using (Stream output = new FileStream(resultMP3, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
-                        byte[] MP3stream = File.ReadAllBytes(tempMP3);
-                        using (Stream output = new FileStream(resultMP3, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            output.Write(MP3stream, 0x2D, size);
-                        }
+                        output.Write(MP3stream, 0x2D, size);
                     }
-                    else
-                        return null;
                 }
+                else
+                    return null;
 
                 Tools.AsyncJobManager.CleanupFile(tempXMA, 30000);
                 Tools.AsyncJobManager.CleanupFile(tempWAV, 30000);
                 Tools.AsyncJobManager.CleanupFile(fixedWAV, 30000);
                 Tools.AsyncJobManager.CleanupFile(tempMP3, 30000);
 
-                if (loop)
-                    return resultWAV;
-                else
-                    return resultMP3;
+                return resultMP3;
 
             }
             else
@@ -210,10 +221,7 @@ namespace TagTool.Commands.Porting
             string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
             string cacheFileName = "";
 
-            if (loop)
-                cacheFileName = $"{permutationName}.wav";
-            else
-                cacheFileName = $"{permutationName}.mp3";
+            cacheFileName = $"{permutationName}.mp3";
 
             bool exists = File.Exists(cacheFileName);
 
@@ -352,10 +360,7 @@ namespace TagTool.Commands.Porting
                 // Set compression format
                 //
 
-                if (loop)
-                    sound.PlatformCodec.Compression = Compression.PCM;
-                else
-                    sound.PlatformCodec.Compression = Compression.MP3;
+                sound.PlatformCodec.Compression = Compression.MP3;
 
                 //
                 // Convert Blam permutations to ElDorado format

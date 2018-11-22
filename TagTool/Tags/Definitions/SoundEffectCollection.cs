@@ -87,7 +87,7 @@ namespace TagTool.Tags.Definitions
                 public class Component : TagStructure
 				{
                     public CachedTagInstance Sound;
-                    public uint Gain;
+                    public float Gain;
                     public int Flags;
                 }
 
@@ -101,8 +101,8 @@ namespace TagTool.Tags.Definitions
                     public class Parameter : TagStructure
 					{
                         public StringId Name;
-                        public float Unknown;
-                        public float Unknown2;
+                        public StringId Unknown;
+                        public StringId Unknown2;
                         public float HardwareOffset;
                         public float Unknown3;
                         public float DefaultScalarValue;

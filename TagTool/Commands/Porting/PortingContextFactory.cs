@@ -43,12 +43,15 @@ namespace TagTool.Commands.Porting
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
         {
+            var portTagCommand = new PortTagCommand(cacheContext, blamCache);
+
+            context.AddCommand(portTagCommand);
             context.AddCommand(new EditTagCommand(contextStack, blamCache));
             context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
-            context.AddCommand(new PortTagCommand(cacheContext, blamCache));
             context.AddCommand(new NameBlamTagCommand(cacheContext, blamCache));
+            context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
 		}
 	}
 }

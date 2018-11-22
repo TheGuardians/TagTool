@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance On;
         public CachedTagInstance Off;
         public CachedTagInstance Deny;
-        public uint Unknown8;
+        public StringId Unknown8;
         public uint Unknown9;
 
         public enum TypeValue : short

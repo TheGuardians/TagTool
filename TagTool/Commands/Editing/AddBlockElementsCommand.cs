@@ -185,7 +185,13 @@ namespace TagTool.Commands.Editing
                     }
                     catch
                     {
-                        tagFieldInfo.SetValue(element, null);
+                        try
+                        {
+                            tagFieldInfo.SetValue(element, null);
+                        }
+                        catch
+                        {
+                        }
                     }
                 }
             }

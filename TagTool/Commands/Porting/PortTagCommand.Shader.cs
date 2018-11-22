@@ -32,7 +32,7 @@ namespace TagTool.Commands.Porting
                 Matcher.Init(cacheStream, CacheContext, BlamCache);
 
             // Set flags
-            Matcher.SetMS30Flag(FlagIsSet(PortingFlags.Ms30));
+            Matcher.SetMS30Flag(cacheStream, FlagIsSet(PortingFlags.Ms30));
 
             // finalRm.ShaderProperties[0].ShaderMaps are all ported bitmaps
             // finalRm.BaseRenderMethod is a H3 tag

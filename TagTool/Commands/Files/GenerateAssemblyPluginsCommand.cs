@@ -40,9 +40,6 @@ namespace TagTool.Commands.Files
             {
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
-                    if (tagType.Key == "coll")
-                        continue;
-
                     if (path != null)
                     {
                         try
@@ -248,10 +245,10 @@ namespace TagTool.Commands.Files
             /// <param name="type">The type of plugin field.</param>
             /// <param name="name">The name attrubute of the field.</param>
             /// <param name="attributes">Plugin field attributes such as string length or color format to add to the field.</param>
-            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attributes) : this(type, name)
+            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attrs) : this(type, name)
             {
                 //Merge attributes dictionary
-                attributes = attributes.Concat(attributes)
+                attributes = attributes.Concat(attrs)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
             }
@@ -277,11 +274,11 @@ namespace TagTool.Commands.Files
             /// <param name="name">The name attrubute of the field.</param>
             /// <param name="offset">The offset of the field. The size of the field is added, moving on to the next field.</param>
             /// <param name="attributes">Plugin field attributes such as string length or color format to add to the field.</param>
-            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, ref int offset, Dictionary<string, string> attributes) : this(type, name)
+            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, ref int offset, Dictionary<string, string> attrs) : this(type, name)
             {
                 attributes.Add("offset", "0x" + offset.ToString("X"));
 
-                attributes = attributes.Concat(attributes)
+                attributes = attributes.Concat(attrs)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
 
@@ -611,7 +608,12 @@ namespace TagTool.Commands.Files
                 {
                     //This covers quite a few cases.
                     //Types like vectors that can't easily be converted to assembly types belong here.
-                    if (fieldType == typeof(string))
+                    if (fieldType == typeof(ulong))
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 0", ref offset));
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 1", ref offset));
+                    }
+                    else if (fieldType == typeof(string))
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.ascii, fieldName, ref offset, new Dictionary<string, string>() { { "length", "0x" + tagFieldAttribute.Length.ToString("X") } }));
                     }
@@ -855,7 +857,7 @@ namespace TagTool.Commands.Files
                 List<Type> inheritedTypes = new List<Type>(); //Parent, Grandparent, Great-Grandparent...
                 Type parentType = structureType.BaseType;
 
-                while (parentType != typeof(object))
+                while (parentType != typeof(TagStructure) && parentType != typeof(object) && parentType != null)
                 {
                     inheritedTypes.Add(parentType);
                     parentType = parentType.BaseType;

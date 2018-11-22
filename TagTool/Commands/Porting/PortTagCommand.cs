@@ -632,7 +632,7 @@ namespace TagTool.Commands.Porting
 			return edTag;
 		}
 
-		private object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
+		public object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
 		{
 			switch (data)
 			{

@@ -619,7 +619,7 @@ namespace TagTool.Tags.Definitions
         }
         
         [TagStructure(Size = 0x170, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x178, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x178, MinVersion = CacheVersion.Halo3ODST)]
         public class Material : TagStructure
 		{
             [TagField(Label = true)]

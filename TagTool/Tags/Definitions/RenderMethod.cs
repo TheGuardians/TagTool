@@ -30,7 +30,7 @@ namespace TagTool.Tags.Definitions
             public int Unknown;
             [TagField(Label = true)]
             public StringId Name;
-            public uint Unknown2;
+            public StringId Unknown2;
             public uint Unknown3;
             public TagFunction Function = new TagFunction { Data = new byte[0] };
         }

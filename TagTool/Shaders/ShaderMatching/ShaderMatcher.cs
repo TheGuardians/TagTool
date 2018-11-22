@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -76,7 +77,7 @@ namespace TagTool.Shaders.ShaderMatching
             BlamCache = blamCache;
 
             if (Rmt2TagsInfo.Count == 0)
-                GetRmt2Info();
+                GetRmt2Info(cacheStream);
 
             IsValid = true;
         }
@@ -93,42 +94,77 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Set the flag to use MS30 to true or false. Reloads the Rmt2TagsInfo Dictionnary
         /// </summary>
+        /// <param name="cacheStream"></param>
         /// <param name="useMS30PortTag"></param>
-        public void SetMS30Flag(bool useMS30PortTag)
+        public void SetMS30Flag(Stream cacheStream, bool useMS30PortTag)
         {
-            if(useMS30PortTag != UseMS30)
+            if (useMS30PortTag != UseMS30)
             {
                 UseMS30 = useMS30PortTag;
                 Rmt2TagsInfo = new Dictionary<int, List<List<string>>>();
-                GetRmt2Info();
+                GetRmt2Info(cacheStream);
             }
         }
 
-        public void GetRmt2Info()
+        public void GetRmt2Info(Stream cacheStream)
         {
             if (Rmt2TagsInfo.Count != 0)
                 return;
 
-            foreach (var instance in CacheContext.TagCache.Index)
+            if (!cacheStream.CanRead)
             {
-                if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
-                    continue;
+                Console.Write("Waiting for cache stream to become available...");
+                while (!cacheStream.CanRead) ;
+                Console.Write("done.");
+            }
 
-                var template = CacheContext.Deserialize<RenderMethodTemplate>(CacheStream, instance);
+            using (var reader = new EndianReader(cacheStream, true))
+            {
+                foreach (var instance in CacheContext.TagCache.Index)
+                {
+                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
+                        continue;
 
-                if (!UseMS30 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
-                    continue;
+                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
+                    var vertexShaderIndex = reader.ReadInt32();
 
-                var bitmaps = new List<string>();
-                var arguments = new List<string>();
+                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
+                    var pixelShaderIndex = reader.ReadInt32();
 
-                foreach (var samplerArgument in template.SamplerArguments)
-                    bitmaps.Add(CacheContext.StringIdCache.GetString(samplerArgument.Name));
+                    if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+                        continue;
 
-                foreach (var vectorArgument in template.VectorArguments)
-                    arguments.Add(CacheContext.StringIdCache.GetString(vectorArgument.Name));
+                    var bitmaps = new List<string>();
+                    var arguments = new List<string>();
 
-                Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { bitmaps, arguments });
+                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x48);
+                    var vectorArgsCount = reader.ReadInt32();
+                    var vectorArgsAddress = reader.ReadUInt32();
+
+                    if (vectorArgsCount != 0 && vectorArgsAddress != 0)
+                    {
+                        for (var i = 0; i < vectorArgsCount; i++)
+                        {
+                            reader.SeekTo(instance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
+                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                        }
+                    }
+
+                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 0x6C);
+                    var samplerArgsCount = reader.ReadInt32();
+                    var samplerArgsAddress = reader.ReadUInt32();
+
+                    if (samplerArgsCount != 0 && samplerArgsAddress != 0)
+                    {
+                        for (var i = 0; i < samplerArgsCount; i++)
+                        {
+                            reader.SeekTo(instance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
+                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                        }
+                    }
+
+                    Rmt2TagsInfo.Add(instance.Index, new List<List<string>> { bitmaps, arguments });
+                }
             }
         }
 
@@ -153,11 +189,23 @@ namespace TagTool.Shaders.ShaderMatching
                 if (edRmt2Tag == null || !(edRmt2Tag.Name?.Contains(rmt2Type) ?? false))
                     continue;
 
-                var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Tag);
-                var edPixl = CacheContext.Deserialize<PixelShader>(cacheStream, edRmt2.PixelShader);
+                using (var reader = new EndianReader(cacheStream, true))
+                {
+                    reader.SeekTo(edRmt2Tag.HeaderOffset + edRmt2Tag.DefinitionOffset + 28);
+                    var edPixl = CacheContext.GetTag(reader.ReadInt32());
 
-                if (bmPixl.DrawModes.Count > edPixl.DrawModes.Count || bmPixl.Shaders.Count > edPixl.Shaders.Count)
-                    continue;
+                    if (edPixl == null)
+                        continue;
+
+                    reader.SeekTo(edPixl.HeaderOffset + edPixl.DefinitionOffset + 0x4);
+                    var drawModeCount = reader.ReadInt32();
+
+                    reader.SeekTo(edPixl.HeaderOffset + edPixl.DefinitionOffset + 0x14);
+                    var shaderCount = reader.ReadInt32();
+
+                    if (bmPixl.DrawModes.Count > drawModeCount || bmPixl.Shaders.Count > shaderCount)
+                        continue;
+                }
 
                 int mapsCommon = 0;
                 int argsCommon = 0;
@@ -649,19 +697,26 @@ namespace TagTool.Shaders.ShaderMatching
 
             // Find existing rmt2 tags
             // If tagnames are not fixed, ms30 tags have an additional _0 or _0_0. This shouldn't happen if the tags have proper names, so it's mostly to preserve compatibility with older tagnames
-            foreach (var instance in CacheContext.TagCache.Index)
+            using (var reader = new EndianReader(cacheStream, true))
             {
-                if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
-                    continue;
-
-                if (instance.Name.StartsWith(blamRmt2Tag.Name))
+                foreach (var instance in CacheContext.TagCache.Index)
                 {
-                    var template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, instance);
-
-                    if (!UseMS30 && (template.VertexShader.Index >= 0x4455 || template.PixelShader.Index >= 0x4455))
+                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                         continue;
 
-                    return instance;
+                    if (instance.Name.StartsWith(blamRmt2Tag.Name))
+                    {
+                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
+                        var vertexShaderIndex = reader.ReadInt32();
+
+                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
+                        var pixelShaderIndex = reader.ReadInt32();
+
+                        if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+                            continue;
+
+                        return instance;
+                    }
                 }
             }
 
