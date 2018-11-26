@@ -62,11 +62,6 @@ namespace TagTool.Commands.Editing
 #endif
 				if (fieldValue == null)
 					valueString = "null";
-				else if (fieldType.GetInterface(typeof(IList).Name) != null)
-					valueString =
-						((IList)fieldValue).Count != 0 ?
-							$"{{...}}[{((IList)fieldValue).Count}]" :
-						"null";
 				else if (fieldType == typeof(StringId))
 					valueString = CacheContext.GetString((StringId)fieldValue);
 				else if (fieldType == typeof(CachedTagInstance))
@@ -90,7 +85,25 @@ namespace TagTool.Commands.Editing
 					pageable.GetLocation(out var location);
 					valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
 				}
-				else
+                else if (tagFieldInfo.FieldType.IsArray && tagFieldInfo.Attribute.Length != 0)
+                {
+                    valueString = fieldValue == null ? "null" : $"[{tagFieldInfo.Attribute.Length}] {{ ";
+                    var valueArray = (Array)fieldValue;
+
+                    if (fieldValue != null)
+                    {
+                        for (var i = 0; i < tagFieldInfo.Attribute.Length; i++)
+                            valueString += $"{valueArray.GetValue(i)}{((i + 1) < tagFieldInfo.Attribute.Length ? "," : "")} ";
+
+                        valueString += "}";
+                    }
+                }
+                else if (fieldType.GetInterface(typeof(IList).Name) != null)
+                    valueString =
+                        ((IList)fieldValue).Count != 0 ?
+                            $"{{...}}[{((IList)fieldValue).Count}]" :
+                        "null";
+                else
 					valueString = fieldValue.ToString();
 #if !DEBUG
                 }

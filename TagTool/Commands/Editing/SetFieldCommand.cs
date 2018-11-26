@@ -6,7 +6,6 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
-using ResourceLocation = TagTool.Common.ResourceLocation;
 
 namespace TagTool.Commands.Editing
 {
@@ -97,9 +96,12 @@ namespace TagTool.Commands.Editing
             }
 
             var fieldType = field.FieldType;
-            var newValue = ParseArgs(field.FieldType, args.Skip(1).ToList());
+            var fieldAttrs = field.GetCustomAttributes(typeof(TagFieldAttribute), false);
+            var fieldAttr = fieldAttrs?.Length < 1 ? new TagFieldAttribute() : (TagFieldAttribute)fieldAttrs[0];
+            var fieldInfo = new TagFieldInfo(field, fieldAttr, uint.MaxValue, uint.MaxValue);
+            var fieldValue = ParseArgs(field.FieldType, fieldInfo, args.Skip(1).ToList());
 
-            if (newValue != null && newValue.Equals(false))
+            if (fieldValue != null && fieldValue.Equals(false))
             {
                 while (ContextStack.Context != previousContext) ContextStack.Pop();
                 Owner = previousOwner;
@@ -109,19 +111,19 @@ namespace TagTool.Commands.Editing
 
             if (field.FieldType == typeof(PageableResource))
             {
-                var fieldValue = field.GetValue(Owner);
+                var ownerValue = field.GetValue(Owner);
 
-                if (newValue == null)
+                if (fieldValue == null)
                 {
                     field.SetValue(Owner, null);
                 }
-                else if (fieldValue is PageableResource pageable)
+                else if (ownerValue is PageableResource pageable)
                 {
                     var newLocation = ResourceLocation.None;
 
                     FileInfo resourceFile = null;
                     
-                    switch (newValue)
+                    switch (fieldValue)
                     {
                         case FileInfo file:
                             if (!pageable.GetLocation(out newLocation))
@@ -135,7 +137,7 @@ namespace TagTool.Commands.Editing
                             break;
                             
                         default:
-                            throw new FormatException(newValue.ToString());
+                            throw new FormatException(fieldValue.ToString());
                     }
 
                     if (pageable.GetLocation(out var oldLocation))
@@ -166,14 +168,14 @@ namespace TagTool.Commands.Editing
 
                         pageable.DisableChecksum();
 
-                        field.SetValue(Owner, newValue = pageable);
+                        field.SetValue(Owner, fieldValue = pageable);
                     }
                     else throw new InvalidDataException(pageable.ToString());
                 }
             }
             else
             {
-                field.SetValue(Owner, newValue);
+                field.SetValue(Owner, fieldValue);
             }
             
             var typeString =
@@ -187,18 +189,13 @@ namespace TagTool.Commands.Editing
             try
             {
 #endif
-                if (newValue == null)
+                if (fieldValue == null)
                     valueString = "null";
-                else if (fieldType.GetInterface(typeof(IList).Name) != null)
-                    valueString =
-                        ((IList)newValue).Count != 0 ?
-                            $"{{...}}[{((IList)newValue).Count}]" :
-                        "null";
                 else if (fieldType == typeof(StringId))
-                    valueString = CacheContext.GetString((StringId)newValue);
+                    valueString = CacheContext.GetString((StringId)fieldValue);
                 else if (fieldType == typeof(CachedTagInstance))
                 {
-                    var instance = (CachedTagInstance)newValue;
+                    var instance = (CachedTagInstance)fieldValue;
 
                     var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
@@ -206,19 +203,37 @@ namespace TagTool.Commands.Editing
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
-                    var function = (TagFunction)newValue;
+                    var function = (TagFunction)fieldValue;
                     valueString = "";
                     foreach (var datum in function.Data)
                         valueString += datum.ToString("X2");
                 }
                 else if (fieldType == typeof(PageableResource))
                 {
-                    var pageable = (PageableResource)newValue;
+                    var pageable = (PageableResource)fieldValue;
                     pageable.GetLocation(out var location);
                     valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
                 }
+                else if (fieldInfo.FieldType.IsArray && fieldInfo.Attribute.Length != 0)
+                {
+                    valueString = fieldValue == null ? "null" : $"[{fieldInfo.Attribute.Length}] {{ ";
+                    var valueArray = (Array)fieldValue;
+
+                    if (fieldValue != null)
+                    {
+                        for (var i = 0; i < fieldInfo.Attribute.Length; i++)
+                            valueString += $"{valueArray.GetValue(i)}{((i + 1) < fieldInfo.Attribute.Length ? "," : "")} ";
+
+                        valueString += "}";
+                    }
+                }
+                else if (fieldType.GetInterface(typeof(IList).Name) != null)
+                    valueString =
+                        ((IList)fieldValue).Count != 0 ?
+                            $"{{...}}[{((IList)fieldValue).Count}]" :
+                        "null";
                 else
-                    valueString = newValue.ToString();
+                    valueString = fieldValue.ToString();
 #if !DEBUG
             }
             catch (Exception e)
@@ -242,7 +257,7 @@ namespace TagTool.Commands.Editing
             return true;
         }
 
-        public object ParseArgs(Type type, List<string> args)
+        public object ParseArgs(Type type, TagFieldInfo info, List<string> args)
         {
             var input = args[0];
             object output = null;
@@ -510,12 +525,12 @@ namespace TagTool.Commands.Editing
                 var rangeType = type.GenericTypeArguments[0];
                 var argCount = RangeArgCount(rangeType);
 
-                var min = ParseArgs(rangeType, args.Take(argCount).ToList());
+                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
 
                 if (min.Equals(false))
                     return false;
 
-                var max = ParseArgs(rangeType, args.Skip(argCount).Take(argCount).ToList());
+                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
 
                 if (max.Equals(false))
                     return false;
@@ -527,12 +542,12 @@ namespace TagTool.Commands.Editing
                 var rangeType = type.GenericTypeArguments[0];
                 var argCount = RangeArgCount(rangeType);
 
-                var min = ParseArgs(rangeType, args.Take(argCount).ToList());
+                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
 
                 if (min.Equals(false))
                     return false;
 
-                var max = ParseArgs(rangeType, args.Skip(argCount).Take(argCount).ToList());
+                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
 
                 if (max.Equals(false))
                     return false;
@@ -544,12 +559,12 @@ namespace TagTool.Commands.Editing
                 var rangeType = type.GenericTypeArguments[0];
                 var argCount = RangeArgCount(rangeType);
 
-                var min = ParseArgs(rangeType, args.Take(argCount).ToList());
+                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
 
                 if (min.Equals(false))
                     return false;
 
-                var max = ParseArgs(rangeType, args.Skip(argCount).Take(argCount).ToList());
+                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
 
                 if (max.Equals(false))
                     return false;
@@ -558,17 +573,33 @@ namespace TagTool.Commands.Editing
             }
             else if (type.IsArray)
             {
-                if (args.Count != 1)
-                    return false;
-                if (input.Length % 2 != 0)
-                    return false;
+                if (info?.FieldType == typeof(byte[]) && info?.Attribute.Length != 0)
+                {   // tag_data field
+                    if (args.Count != 1)
+                        return false;
+                    if (input.Length % 2 != 0)
+                        return false;
 
-                List<byte> bytes = new List<byte>();
+                    List<byte> bytes = new List<byte>();
 
-                for (int i = 0; i < input.Length; i = i + 2)
-                    bytes.Add(Convert.ToByte(input.Substring(i, 2), 16));
+                    for (int i = 0; i < input.Length; i = i + 2)
+                        bytes.Add(Convert.ToByte(input.Substring(i, 2), 16));
 
-                output = bytes.ToArray();
+                    output = bytes.ToArray();
+                }
+                else
+                {
+                    if (info == null || args.Count != info.Attribute.Length)
+                        return false;
+
+                    var elementType = info.FieldType.GetElementType();
+                    var values = Array.CreateInstance(elementType, info.Attribute.Length);
+
+                    for (var i = 0; i < info.Attribute.Length; i++)
+                        values.SetValue(Convert.ChangeType(ParseArgs(elementType, null, new List<string> { args[i] }), elementType), i);
+
+                    return values;
+                }
             }
 			else if (type == typeof(RealRgbColor))
 			{

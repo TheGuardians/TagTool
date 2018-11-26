@@ -187,7 +187,7 @@ namespace TagTool.Commands.Editing
                     {
                         try
                         {
-                            tagFieldInfo.SetValue(element, null);
+                            tagFieldInfo.SetValue(element, Activator.CreateInstance(tagFieldInfo.FieldType));
                         }
                         catch
                         {

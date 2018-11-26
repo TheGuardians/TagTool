@@ -72,7 +72,7 @@ namespace TagTool.Tags.Tests
 							var elementType = tagField.FieldType.GetElementType() ?? tagField.FieldType;
 							if (elementType is null)
 								elementType = tagField.FieldType;
-							var elementSize = TagFieldInfo.GetFieldSize(elementType, TagFieldAttribute.Default);
+							var elementSize = TagFieldInfo.GetFieldSize(elementType, TagFieldAttribute.Default, cacheVersion);
 							size += (uint)tagField.Attribute.Length * elementSize;
 							continue;
 						}
