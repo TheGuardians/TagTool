@@ -493,13 +493,6 @@ namespace TagTool.Commands.Porting
             return definition;
         }
 
-        private class Codec7_FrametimingCounts
-        {
-            public List<uint> RotationNodes;
-            public List<uint> PositionNodes;
-            public List<uint> ScaleNodes;
-        }
-
         private List<string> CompareData(MemoryStream bmData_, MemoryStream edData_, long start, long length, List<string> diffLines)
         {
             if (start > edData_.Length || start > bmData_.Length)

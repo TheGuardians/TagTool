@@ -245,10 +245,10 @@ namespace TagTool.Commands.Files
             /// <param name="type">The type of plugin field.</param>
             /// <param name="name">The name attrubute of the field.</param>
             /// <param name="attributes">Plugin field attributes such as string length or color format to add to the field.</param>
-            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attrs) : this(type, name)
+            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attributes) : this(type, name)
             {
                 //Merge attributes dictionary
-                attributes = attributes.Concat(attrs)
+                attributes = attributes.Concat(attributes)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
             }
@@ -274,11 +274,11 @@ namespace TagTool.Commands.Files
             /// <param name="name">The name attrubute of the field.</param>
             /// <param name="offset">The offset of the field. The size of the field is added, moving on to the next field.</param>
             /// <param name="attributes">Plugin field attributes such as string length or color format to add to the field.</param>
-            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, ref int offset, Dictionary<string, string> attrs) : this(type, name)
+            public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, ref int offset, Dictionary<string, string> attributes) : this(type, name)
             {
-                attributes.Add("offset", "0x" + offset.ToString("X"));
+                this.attributes.Add("offset", "0x" + offset.ToString("X"));
 
-                attributes = attributes.Concat(attrs)
+                attributes = attributes.Concat(attributes)
                     .GroupBy(keyPair => keyPair.Key)
                     .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
 
