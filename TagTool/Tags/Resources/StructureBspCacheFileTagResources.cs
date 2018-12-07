@@ -23,47 +23,65 @@ namespace TagTool.Tags.Resources
             public TagBlock<ScenarioStructureBsp.PathfindingDatum.PathfindingHint> PathfindingHints;
             public TagBlock<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference> InstancedGeometryReferences;
             public int StructureChecksum;
-            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown1Block> Unknown1s;
-            public List<Unknown2Block> Unknown2s;
-            public List<Unknown3Block> Unknown3s;
-            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown4Block> Unknown4s;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock> GiantPathfinding;
+            public List<Seam> Seams;
+            public List<JumpSeam> JumpSeams;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Door> Doors;
 
             [TagStructure(Size = 0x18)]
             public class ObjectReference : TagStructure
-			{
-                public int Unknown;
-                public List<Unknown1Block> Unknown2;
-                public int Unknown3;
-                public short Unknown4;
-                public short Unknown5;
+            {
+                public ushort Flags;
+
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused = new byte[2];
+
+                public List<BspReference> Bsps;
+
+                public uint ObjectHandle;
+                public short OriginBspIndex;
+                public ScenarioObjectType ObjectType;
+                public Scenario.ScenarioInstance.SourceValue Source;
 
                 [TagStructure(Size = 0x18)]
-                public class Unknown1Block : TagStructure
-				{
-                    public sbyte Unknown1;
-                    public sbyte Unknown2;
-                    public sbyte Unknown3;
-                    public sbyte Unknown4;
-                    public short Unknown5;
-                    public short Unknown6;
-                    public TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2> Unknown7;
-                    public int Unknown8;
+                public class BspReference : TagStructure
+                {
+                    public uint BspHandle;
+                    public short NodeIndex;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused = new byte[2];
+
+                    public TagBlock<Bsp2dRef> Bsp2dRefs;
+
+                    public int VertexOffset;
+
+                    [TagStructure(Size = 0x4)]
+                    public class Bsp2dRef : TagStructure
+                    {
+                        public int Index;
+                    }
                 }
             }
 
             [TagStructure(Size = 0xC)]
-            public class Unknown2Block : TagStructure
+            public class Seam : TagStructure
 			{
-                public TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock> Unknown;
+                public TagBlock<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock> LinkIndices;
             }
 
             [TagStructure(Size = 0x14)]
-            public class Unknown3Block : TagStructure
+            public class JumpSeam : TagStructure
 			{
-                public short Unknown1;
-                public short Unknown2;
-                public float Unknown3;
-                public TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock> Unknown4;
+                public short UserJumpIndex;
+                public byte DestOnly;
+
+                [TagField(Padding = true, Length = 1)]
+                public byte[] Unused = new byte[1];
+
+                public float Length;
+
+                public TagBlock<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock> JumpIndices;
             }
         }
     }

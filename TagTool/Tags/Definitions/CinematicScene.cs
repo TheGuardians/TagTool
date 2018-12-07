@@ -35,12 +35,9 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance PuppetAnimation;
             public CachedTagInstance PuppetObject;
 
-            public uint Unknown1;
-            public byte Unknown2;
-            public byte Unknown3;
-            public byte Unknown4;
-            public byte Unknown5;
-            public int Unknown6;
+            public int Unknown1;
+            public int Unknown2;
+            public int Unknown3;
 
             public byte[] ImportScript;
 

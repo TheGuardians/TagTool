@@ -5,122 +5,324 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Scripting;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private Cinematic ConvertCinematic(Cinematic cine)
-        {
-            return cine;
-        }
-
-        private CinematicScene ConvertCinematicScene(CinematicScene cisc)
-        {
-            /*foreach (var shot in cisc.Shots)
-            {
-                var frames = new List<CinematicScene.ShotBlock.FrameBlock>();
-
-                for (int frameIndex = 0; frameIndex < shot.LoadedFrameCount; frameIndex++)
-                {
-                    frames.Add(shot.Frames[frameIndex]);
-
-                    if (frameIndex + 1 == shot.LoadedFrameCount)
-                        break;
-
-                    frames.Add(new CinematicScene.ShotBlock.FrameBlock
-                    {
-                        Position = (shot.Frames[frameIndex].Position + shot.Frames[frameIndex + 1].Position) / 2f,
-                        Unknown1 = (shot.Frames[frameIndex].Unknown1 + shot.Frames[frameIndex + 1].Unknown1) / 2f,
-                        Unknown2 = (shot.Frames[frameIndex].Unknown2 + shot.Frames[frameIndex + 1].Unknown2) / 2f,
-                        Unknown3 = (shot.Frames[frameIndex].Unknown3 + shot.Frames[frameIndex + 1].Unknown3) / 2f,
-                        Unknown4 = (shot.Frames[frameIndex].Unknown4 + shot.Frames[frameIndex + 1].Unknown4) / 2f,
-                        Unknown5 = (shot.Frames[frameIndex].Unknown5 + shot.Frames[frameIndex + 1].Unknown5) / 2f,
-                        Unknown6 = (shot.Frames[frameIndex].Unknown6 + shot.Frames[frameIndex + 1].Unknown6) / 2f,
-                        Unknown7 = (shot.Frames[frameIndex].Unknown7 + shot.Frames[frameIndex + 1].Unknown7) / 2f,
-                        Unknown8 = (shot.Frames[frameIndex].Unknown8 + shot.Frames[frameIndex + 1].Unknown8) / 2f,
-                        FOV = (shot.Frames[frameIndex].FOV + shot.Frames[frameIndex + 1].FOV) / 2f,
-                        NearPlane = (shot.Frames[frameIndex].NearPlane + shot.Frames[frameIndex + 1].NearPlane) / 2f,
-                        FarPlane = (shot.Frames[frameIndex].FarPlane + shot.Frames[frameIndex + 1].FarPlane) / 2f,
-                        FocalDepth = (shot.Frames[frameIndex].FocalDepth + shot.Frames[frameIndex + 1].FocalDepth) / 2f,
-                        BlurAmount = (shot.Frames[frameIndex].BlurAmount + shot.Frames[frameIndex + 1].BlurAmount) / 2f
-                    });
-                }
-
-                shot.Frames = frames;
-                shot.LoadedFrameCount *= 2;
-                shot.LoadedFrameCount -= 1;
-
-                foreach (var sound in shot.Sounds)
-                    sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
-
-                foreach (var sound in shot.BackgroundSounds)
-                    sound.Frame = Math.Min(sound.Frame == 1 ? 1 : sound.Frame * 2, shot.LoadedFrameCount - 1);
-
-                foreach (var effect in shot.Effects)
-                    effect.Frame = Math.Min(effect.Frame == 1 ? 1 : effect.Frame * 2, shot.LoadedFrameCount - 1);
-
-                if (shot.ScreenEffects != null)
-                    foreach (var effect in shot.ScreenEffects)
-                    {
-                        effect.StartFrame = Math.Min(effect.StartFrame == 1 ? 1 : effect.StartFrame * 2, shot.LoadedFrameCount - 1);
-                        effect.EndFrame = Math.Min(effect.EndFrame == 1 ? 1 : effect.EndFrame * 2, shot.LoadedFrameCount - 1);
-                    }
-
-                foreach (var script in shot.ImportScripts)
-                    script.Frame = Math.Min(script.Frame == 1 ? 1 : script.Frame * 2, shot.LoadedFrameCount - 1);
-            }*/
-
-            return cisc;
-        }
+        private Scenario CurrentScenario = null;
 
         private Scenario ConvertScenario(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
+            CurrentScenario = scnr;
+
             //
             // Halo 3 scenario ai data
             //
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
+                var pathfindingBsps = new List<StructureBspCacheFileTagResources>();
+
+                Console.Write("Loading pathfinding bsps: ");
+
+                for (var bspIndex = 0; bspIndex < scnr.StructureBsps.Count; bspIndex++)
+                {
+                    Console.Write($"{bspIndex}, ");
+
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(
+                        new TagSerializationContext(cacheStream, CacheContext, scnr.StructureBsps[bspIndex].StructureBsp));
+
+                    StructureBspCacheFileTagResources pathfindingBsp = null;
+
+                    if (sbsp.PathfindingResource != null)
+                    {
+                        pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
+                            new ResourceSerializationContext(sbsp.PathfindingResource));
+
+                        using (var resourceStream = new MemoryStream())
+                        using (var resourceReader = new EndianReader(resourceStream))
+                        {
+                            if (!sbsp.PathfindingResource.GetLocation(out var location))
+                                throw new NullReferenceException();
+
+                            var resourceCache = CacheContext.GetResourceCache(location);
+
+                            if (!resourceStreams.ContainsKey(location))
+                            {
+                                resourceStreams[location] = FlagIsSet(PortingFlags.Memory) ?
+                                    new MemoryStream() :
+                                    (Stream)CacheContext.OpenResourceCacheReadWrite(location);
+
+                                if (FlagIsSet(PortingFlags.Memory))
+                                    using (var stream = CacheContext.OpenResourceCacheRead(location))
+                                        stream.CopyTo(resourceStreams[location]);
+                            }
+
+                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource, resourceStream);
+
+                            var resourceDataContext = new DataSerializationContext(resourceReader);
+
+                            resourceStream.Position = pathfindingBsp.UnknownRaw6ths.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.UnknownRaw6ths.Count; i++)
+                            {
+                                var UnknownRaw6th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(resourceDataContext);
+                                pathfindingBsp.UnknownRaw6ths.Add(UnknownRaw6th);
+                            }
+
+                            resourceStream.Position = pathfindingBsp.Planes.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.Planes.Count; i++)
+                            {
+                                var Plane = CacheContext.Deserialize<ScenarioStructureBsp.Plane>(resourceDataContext);
+                                pathfindingBsp.Planes.Add(Plane);
+                            }
+
+                            resourceStream.Position = pathfindingBsp.UnknownRaw7ths.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.UnknownRaw7ths.Count; i++)
+                            {
+                                var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(resourceDataContext);
+                                pathfindingBsp.UnknownRaw7ths.Add(UnknownRaw7th);
+                            }
+
+                            foreach (var pathfinding in pathfindingBsp.PathfindingData)
+                            {
+                                resourceStream.Position = pathfinding.Sectors.Address.Offset;
+                                for (var i = 0; i < pathfinding.Sectors.Count; i++)
+                                {
+                                    var Sector = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(resourceDataContext);
+                                    pathfinding.Sectors.Add(Sector);
+                                }
+
+                                resourceStream.Position = pathfinding.Links.Address.Offset;
+                                for (var i = 0; i < pathfinding.Links.Count; i++)
+                                {
+                                    var Link = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(resourceDataContext);
+                                    pathfinding.Links.Add(Link);
+                                }
+
+                                resourceStream.Position = pathfinding.References.Address.Offset;
+                                for (var i = 0; i < pathfinding.References.Count; i++)
+                                {
+                                    var Reference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(resourceDataContext);
+                                    pathfinding.References.Add(Reference);
+                                }
+
+                                resourceStream.Position = pathfinding.Bsp2dNodes.Address.Offset;
+                                for (var i = 0; i < pathfinding.Bsp2dNodes.Count; i++)
+                                {
+                                    var Bsp2dNode = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(resourceDataContext);
+                                    pathfinding.Bsp2dNodes.Add(Bsp2dNode);
+                                }
+
+                                resourceStream.Position = pathfinding.Vertices.Address.Offset;
+                                for (var i = 0; i < pathfinding.Vertices.Count; i++)
+                                {
+                                    var Vertex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(resourceDataContext);
+                                    pathfinding.Vertices.Add(Vertex);
+                                }
+
+                                foreach (var objectReference in pathfinding.ObjectReferences)
+                                {
+                                    foreach (var bsp in objectReference.Bsps)
+                                    {
+                                        resourceStream.Position = bsp.Bsp2dRefs.Address.Offset;
+                                        for (var i = 0; i < bsp.Bsp2dRefs.Count; i++)
+                                        {
+                                            var Bsp2dRef = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(resourceDataContext);
+                                            bsp.Bsp2dRefs.Add(Bsp2dRef);
+                                        }
+                                    }
+                                }
+
+                                resourceStream.Position = pathfinding.PathfindingHints.Address.Offset;
+                                for (var i = 0; i < pathfinding.PathfindingHints.Count; i++)
+                                {
+                                    var PathfindingHint = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(resourceDataContext);
+                                    pathfinding.PathfindingHints.Add(PathfindingHint);
+                                }
+
+                                resourceStream.Position = pathfinding.InstancedGeometryReferences.Address.Offset;
+                                for (var i = 0; i < pathfinding.InstancedGeometryReferences.Count; i++)
+                                {
+                                    var InstancedGeometryReference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(resourceDataContext);
+                                    pathfinding.InstancedGeometryReferences.Add(InstancedGeometryReference);
+                                }
+
+                                resourceStream.Position = pathfinding.GiantPathfinding.Address.Offset;
+                                for (var i = 0; i < pathfinding.GiantPathfinding.Count; i++)
+                                {
+                                    var GiantPathfinding = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(resourceDataContext);
+                                    pathfinding.GiantPathfinding.Add(GiantPathfinding);
+                                }
+
+                                foreach (var seam in pathfinding.Seams)
+                                {
+                                    resourceStream.Position = seam.LinkIndices.Address.Offset;
+                                    for (var i = 0; i < seam.LinkIndices.Count; i++)
+                                    {
+                                        var LinkIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(resourceDataContext);
+                                        seam.LinkIndices.Add(LinkIndex);
+                                    }
+                                }
+
+                                foreach (var jumpSeam in pathfinding.JumpSeams)
+                                {
+                                    resourceStream.Position = jumpSeam.JumpIndices.Address.Offset;
+                                    for (var i = 0; i < jumpSeam.JumpIndices.Count; i++)
+                                    {
+                                        var JumpIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(resourceDataContext);
+                                        jumpSeam.JumpIndices.Add(JumpIndex);
+                                    }
+                                }
+
+                                resourceStream.Position = pathfinding.Doors.Address.Offset;
+                                for (var i = 0; i < pathfinding.Doors.Count; i++)
+                                {
+                                    var Door = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(resourceDataContext);
+                                    pathfinding.Doors.Add(Door);
+                                }
+                            }
+                        }
+                    }
+
+                    pathfindingBsps.Add(pathfindingBsp);
+                }
+
+                Console.WriteLine("done.");
+
+                foreach (var squad in scnr.Squads)
+                {
+                    squad.EditorFolderIndexNew = squad.EditorFolderIndexOld;
+                    squad.SpawnFormations = new List<Scenario.Squad.SpawnFormation>();
+                    squad.SpawnPoints = new List<Scenario.Squad.SpawnPoint>();
+                    squad.SquadTemplate = null;
+                    squad.TemplatedFireteams = new List<Scenario.Squad.Fireteam>();
+                    squad.DesignerFireteams = new List<Scenario.Squad.Fireteam>();
+
+                    for (var i = 0; i < squad.Fireteams.Count; i++)
+                    {
+                        var fireteam = squad.Fireteams[i];
+
+                        fireteam.Name = StringId.Invalid;
+
+                        if (fireteam.CharacterTypeIndex != -1)
+                        {
+                            fireteam.CharacterType = new List<Scenario.Squad.Fireteam.CharacterTypeBlock>
+                            {
+                                new Scenario.Squad.Fireteam.CharacterTypeBlock
+                                {
+                                    CharacterTypeIndex = fireteam.CharacterTypeIndex,
+                                    Chance = 1
+                                }
+                            };
+                        }
+
+                        if (fireteam.InitialPrimaryWeaponIndex != -1)
+                        {
+                            fireteam.InitialPrimaryWeapon = new List<Scenario.Squad.Fireteam.ItemTypeBlock>
+                            {
+                                new Scenario.Squad.Fireteam.ItemTypeBlock
+                                {
+                                    ItemTypeIndex = fireteam.InitialPrimaryWeaponIndex,
+                                    Probability = 1
+                                }
+                            };
+                        }
+
+                        if (fireteam.InitialSecondaryWeaponIndex != -1)
+                        {
+                            fireteam.InitialSecondaryWeapon = new List<Scenario.Squad.Fireteam.ItemTypeBlock>
+                            {
+                                new Scenario.Squad.Fireteam.ItemTypeBlock
+                                {
+                                    ItemTypeIndex = fireteam.InitialSecondaryWeaponIndex,
+                                    Probability = 1
+                                }
+                            };
+                        }
+
+                        if (fireteam.InitialEquipmentIndex != -1)
+                        {
+                            fireteam.InitialEquipment = new List<Scenario.Squad.Fireteam.ItemTypeBlock>
+                            {
+                                new Scenario.Squad.Fireteam.ItemTypeBlock
+                                {
+                                    ItemTypeIndex = fireteam.InitialEquipmentIndex,
+                                    Probability = 1
+                                }
+                            };
+                        }
+
+                        fireteam.VehicleVariant = ConvertStringId(fireteam.VehicleVariant);
+                        fireteam.ActivityName = ConvertStringId(fireteam.ActivityName);
+
+                        foreach (var point in fireteam.PatrolPoints)
+                            point.ActivityName = ConvertStringId(point.ActivityName);
+
+                        foreach (var spawnPoint in fireteam.StartingLocations)
+                        {
+                            spawnPoint.Name = ConvertStringId(spawnPoint.Name);
+                            spawnPoint.FireteamIndex = (short)i;
+                            spawnPoint.InitialEquipmentIndexNew = spawnPoint.InitialEquipmentIndexOld;
+                            spawnPoint.ActorVariant = ConvertStringId(spawnPoint.ActorVariant);
+                            spawnPoint.VehicleVariant = ConvertStringId(spawnPoint.VehicleVariant);
+
+                            spawnPoint.InitialMovementModeNew = spawnPoint.InitialMovementModeOld;
+
+                            spawnPoint.ActivityName = ConvertStringId(spawnPoint.ActivityName);
+
+                            foreach (var point in spawnPoint.PatrolPoints)
+                                point.ActivityName = ConvertStringId(point.ActivityName);
+
+                            squad.SpawnPoints.Add(spawnPoint);
+                        }
+
+                        squad.DesignerFireteams.Add(fireteam);
+                    }
+                }
+
                 foreach (var pathfindingdata in scnr.AiPathfindingData)
                 {
                     foreach (var cookieCutter in pathfindingdata.CookieCutters)
                     {
-                        cookieCutter.Points = new List<Scenario.AiPathfindingDatum.CookieCutter.Point>
+                        cookieCutter.SectorPoints = new List<Scenario.TriggerVolume.SectorPoint>
                         {
-                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            new Scenario.TriggerVolume.SectorPoint
                             {
-                                Unknown1 = cookieCutter.Unknown12 - 0.5f,
-                                Unknown2 = cookieCutter.Unknown13 - 0.5f,
-                                Unknown3 = cookieCutter.Unknown14,
-                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
-                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                                Position = new RealPoint3d(
+                                    cookieCutter.Position.X - 0.5f,
+                                    cookieCutter.Position.Y - 0.5f,
+                                    cookieCutter.Position.Z),
+                                Normal = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
-                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            new Scenario.TriggerVolume.SectorPoint
                             {
-                                Unknown1 = cookieCutter.Unknown12 + 0.5f,
-                                Unknown2 = cookieCutter.Unknown13 - 0.5f,
-                                Unknown3 = cookieCutter.Unknown14,
-                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
-                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                                Position = new RealPoint3d(
+                                    cookieCutter.Position.X + 0.5f,
+                                    cookieCutter.Position.Y - 0.5f,
+                                    cookieCutter.Position.Z),
+                                Normal = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
-                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            new Scenario.TriggerVolume.SectorPoint
                             {
-                                Unknown1 = cookieCutter.Unknown12 + 0.5f,
-                                Unknown2 = cookieCutter.Unknown13 + 0.5f,
-                                Unknown3 = cookieCutter.Unknown14,
-                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
-                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                                Position = new RealPoint3d(
+                                    cookieCutter.Position.X + 0.5f,
+                                    cookieCutter.Position.Y + 0.5f,
+                                    cookieCutter.Position.Z),
+                                Normal = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             },
-                            new Scenario.AiPathfindingDatum.CookieCutter.Point
+                            new Scenario.TriggerVolume.SectorPoint
                             {
-                                Unknown1 = cookieCutter.Unknown12 - 0.5f,
-                                Unknown2 = cookieCutter.Unknown13 + 0.5f,
-                                Unknown3 = cookieCutter.Unknown14,
-                                Unknown4 = 0.0f, // not always 0 in odst, but works for now
-                                Unknown5 = 0.0f, // not always 0 in odst, but works for now
+                                Position = new RealPoint3d(
+                                    cookieCutter.Position.X - 0.5f,
+                                    cookieCutter.Position.Y + 0.5f,
+                                    cookieCutter.Position.Z),
+                                Normal = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
                             }
                         };
                     }
@@ -129,203 +331,122 @@ namespace TagTool.Commands.Porting
                         block.Unknown1 = block.UnknownH3;
                 }
 
-                foreach (var aiObjective in scnr.AiObjectives)
-                {
-                    aiObjective.EditorFolderIndex = -1;
-
-                    foreach (var task in aiObjective.Tasks)
-                    {
-                        //task.RuntimeFlags = Scenario.AiObjective.Task.RuntimeFlagBits.AreaConnectivityValid;
-
-                        foreach (var area in task.Areas)
-                        {
-                            area.Flags = Scenario.AiObjective.Task.AreaFlags.DirectionValid;
-                            // TODO: set up task area connectivity flags
-                        }
-
-                        foreach (var direction in task.Direction)
-                            direction.Points = direction.Points_H3.ToList();
-                    }
-                }
+                var zoneAreaSectors = new List<List<List<(short, short)>>>();
 
                 foreach (var zone in scnr.Zones)
                 {
                     if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
-                        zone.FlagsNew = (ushort)(1 << zone.ManualBspIndex);
+                        zone.BlockFlags = (ushort)(1 << zone.ManualBspIndex);
                     else
                         for (var i = 0; i < scnr.StructureBsps.Count; i++)
-                            zone.FlagsNew |= (ushort)(1 << i);
+                            zone.BlockFlags |= (ushort)(1 << i);
 
-                    foreach (var area in zone.Areas)
+                    var areaSectors = new List<List<(short, short)>>();
+
+                    for (var areaIndex = 0; areaIndex < zone.Areas.Count; areaIndex++)
                     {
-                        /* Add at least one "point" for now (there's usually a few more)
-                        area.Points = new List<Scenario.Zone.Area.Point>
+                        var area = zone.Areas[areaIndex];
+
+                        area.ManualReferenceFrameNew = area.ManualReferenceFrameOld;
+                        area.AreaTypeNew = area.AreaTypeOld;
+                        area.Points = new List<Scenario.Zone.Area.Point>();
+
+                        var sectors = new List<(short, short)>();
+
+                        foreach (var firingPosition in zone.FiringPositions)
                         {
-                            new Scenario.Zone.Area.Point
-                            {
-                                Position = new RealPoint3d(
-                                    area.RuntimeRelativeMeanPoint.X - 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Y - 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Z)
-                            },
-                            new Scenario.Zone.Area.Point
-                            {
-                                Position = new RealPoint3d(
-                                    area.RuntimeRelativeMeanPoint.X + 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Y - 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Z)
-                            },
-                            new Scenario.Zone.Area.Point
-                            {
-                                Position = new RealPoint3d(
-                                    area.RuntimeRelativeMeanPoint.X + 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Y + 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Z)
-                            },
-                            new Scenario.Zone.Area.Point
-                            {
-                                Position = new RealPoint3d(
-                                    area.RuntimeRelativeMeanPoint.X - 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Y + 2.5f,
-                                    area.RuntimeRelativeMeanPoint.Z)
-                            }
-                        };*/
+                            if ((firingPosition.AreaIndex != areaIndex) || (firingPosition.SectorBspIndex == -1) || (firingPosition.SectorIndex == -1))
+                                continue;
+
+                            if (sectors.Contains((firingPosition.SectorBspIndex, firingPosition.SectorIndex)))
+                                continue;
+
+                            sectors.Add((firingPosition.SectorBspIndex, firingPosition.SectorIndex));
+                        }
+
+                        areaSectors.Add(sectors);
                     }
+
+                    zoneAreaSectors.Add(areaSectors);
                 }
-            }
 
-            //
-            // Temporary fixes
-            //
-
-            // Cheap color fix for now
-
-            foreach(var title in scnr.CutsceneTitles)
-            {
-                title.TextColor = new ArgbColor(title.TextColor.Blue, title.TextColor.Green, title.TextColor.Red, title.TextColor.Alpha);
-                title.ShadowColor = new ArgbColor(title.ShadowColor.Blue, title.ShadowColor.Green, title.ShadowColor.Red, title.ShadowColor.Alpha);
-            }
-
-            // Null cubemaps until shaders and bitmaps are fixed
-            // foreach (var sbspblock in scnr.StructureBsps)
-                // sbspblock.Cubemap = null;
-
-            //
-            // Convert Squads
-            //
-
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-            {
-                foreach (var squad in scnr.Squads)
+                foreach (var aiObjective in scnr.AiObjectives)
                 {
-                    squad.SpawnFormations = new List<Scenario.Squad.SpawnFormation>();
-                    squad.SpawnPoints = new List<Scenario.Squad.SpawnPoint>();
-                    squad.SquadTemplate = null;
-                    squad.TemplatedCells = new List<Scenario.Squad.Cell>();
-                    squad.DesignerCells = new List<Scenario.Squad.Cell>();
-
-                    for (var i = 0; i < squad.BaseSquad.Count; i++)
+                    foreach (var task in aiObjective.Tasks)
                     {
-                        var baseSquad = squad.BaseSquad[i];
+                        task.RuntimeFlags |= Scenario.AiObjective.Task.RuntimeFlagsValue.AreaConnectivityValid;
 
-                        baseSquad.VehicleVariant = ConvertStringId(baseSquad.VehicleVariant);
-                        baseSquad.InitialState = ConvertStringId(baseSquad.InitialState);
-
-                        foreach (var multiState in baseSquad.MultiState)
+                        foreach (var taskArea in task.Areas)
                         {
-                            multiState.ActivityName = ConvertStringId(multiState.ActivityName);
-                        }
+                            taskArea.Flags |= Scenario.AiObjective.Task.AreaFlags.DirectionValid;
 
-                        foreach (var spawnPoint in baseSquad.StartingLocations)
-                        {
-                            var newSpawnPoint = spawnPoint.DeepClone();
+                            if (taskArea.ZoneIndex == -1 || taskArea.AreaIndex == -1)
+                                continue;
 
-                            newSpawnPoint.Name = ConvertStringId(newSpawnPoint.Name);
-
-                            newSpawnPoint.InitialEquipmentIndex = -1;
-                            newSpawnPoint.CellIndex = (short)i;
-
-                            newSpawnPoint.ActorVariant = ConvertStringId(newSpawnPoint.ActorVariant);
-                            newSpawnPoint.VehicleVariant = ConvertStringId(newSpawnPoint.VehicleVariant);
-
-                            newSpawnPoint.InitialMovementMode = newSpawnPoint.InitialMovementMode_H3;
-
-                            newSpawnPoint.InitialState = ConvertStringId(newSpawnPoint.InitialState);
-
-                            foreach (var point in newSpawnPoint.Points)
+                            foreach (var entry1 in zoneAreaSectors[taskArea.ZoneIndex][taskArea.AreaIndex])
                             {
-                                point.ActivityName = ConvertStringId(point.ActivityName);
+                                var pathfinding = pathfindingBsps[entry1.Item1].PathfindingData[0];
+                                var sector = pathfinding.Sectors[entry1.Item2];
+                                var link = pathfinding.Links[sector.FirstLink];
+
+                                while (true)
+                                {
+                                    if (link.LeftSector == entry1.Item2)
+                                    {
+                                        if (link.RightSector != -1)
+                                        {
+                                            for (var areaIndex = 0; areaIndex < task.Areas.Count; areaIndex++)
+                                            {
+                                                if (areaIndex == task.Areas.IndexOf(taskArea) || task.Areas[areaIndex].ZoneIndex != taskArea.ZoneIndex)
+                                                    continue;
+
+                                                foreach (var entry2 in zoneAreaSectors[task.Areas[areaIndex].ZoneIndex][task.Areas[areaIndex].AreaIndex])
+                                                {
+                                                    if (entry1.Item1 != entry2.Item1)
+                                                        continue;
+
+                                                    if (entry2.Item2 == link.LeftSector || entry2.Item2 == link.RightSector)
+                                                        taskArea.ConnectivityBitVector |= 1 << areaIndex;
+                                                }
+                                            }
+                                        }
+
+                                        if (link.ForwardLink == sector.FirstLink)
+                                            break;
+                                        else
+                                            link = pathfinding.Links[link.ForwardLink];
+                                    }
+                                    else if (link.RightSector == entry1.Item2)
+                                    {
+                                        if (link.LeftSector != -1)
+                                        {
+                                            for (var areaIndex = 0; areaIndex < task.Areas.Count; areaIndex++)
+                                            {
+                                                if (areaIndex == task.Areas.IndexOf(taskArea) || task.Areas[areaIndex].ZoneIndex != taskArea.ZoneIndex)
+                                                    continue;
+
+                                                foreach (var entry2 in zoneAreaSectors[task.Areas[areaIndex].ZoneIndex][task.Areas[areaIndex].AreaIndex])
+                                                {
+                                                    if (entry1.Item1 != entry2.Item1)
+                                                        continue;
+
+                                                    if (entry2.Item2 == link.LeftSector || entry2.Item2 == link.RightSector)
+                                                        taskArea.ConnectivityBitVector |= 1 << areaIndex;
+                                                }
+                                            }
+                                        }
+
+                                        if (link.ReverseLink == sector.FirstLink)
+                                            break;
+                                        else
+                                            link = pathfinding.Links[link.ReverseLink];
+                                    }
+                                }
                             }
-
-                            squad.SpawnPoints.Add(newSpawnPoint);
                         }
 
-                        var designer = new Scenario.Squad.Cell
-                        {
-                            Name = StringId.Invalid,
-                            DifficultyFlags = baseSquad.DifficultyFlags,
-                            Count = baseSquad.Count,
-
-                            InitialWeapon = new List<Scenario.Squad.Cell.ItemBlock>(),
-                            InitialSecondaryWeapon = new List<Scenario.Squad.Cell.ItemBlock>(),
-                            InitialEquipment = new List<Scenario.Squad.Cell.ItemBlock>(),
-                            CharacterType = new List<Scenario.Squad.Cell.CharacterTypeBlock>()
-                        };
-
-                        //Add character type
-                        if (baseSquad.CharacterType != -1)
-                        {
-                            designer.CharacterType.Add(new Scenario.Squad.Cell.CharacterTypeBlock
-                            {
-                                CharacterTypeIndex = baseSquad.CharacterType,
-                                Chance = 1
-                            });
-                        }
-
-                        //Add initial weapon
-                        if (baseSquad.InitialPrimaryWeapon != -1)
-                        {
-                            designer.InitialWeapon.Add(new Scenario.Squad.Cell.ItemBlock
-                            {
-                                Weapon2 = baseSquad.InitialPrimaryWeapon,
-                                Probability = 1
-                            });
-                        }
-
-                        //Add secondary initial weapon
-                        if (baseSquad.InitialSecondaryWeapon != -1)
-                        {
-                            designer.InitialSecondaryWeapon.Add(new Scenario.Squad.Cell.ItemBlock
-                            {
-                                Weapon2 = baseSquad.InitialSecondaryWeapon,
-                                Probability = 1
-                            });
-                        }
-
-                        //Add equipment
-                        if (baseSquad.Equipment != -1)
-                        {
-                            designer.InitialEquipment.Add(new Scenario.Squad.Cell.ItemBlock
-                            {
-                                Weapon2 = baseSquad.Equipment,
-                                Probability = 1
-                            });
-                        }
-
-                        designer.GrenadeType = baseSquad.GrenadeType;
-                        designer.VehicleTypeIndex = baseSquad.Vehicle;
-                        designer.VehicleVariant = baseSquad.VehicleVariant;
-                        designer.CommandScriptName = baseSquad.CommandScriptName;
-                        designer.CommandScriptIndex = baseSquad.CommandScriptIndex;
-                        designer.CommandScriptUnknown = 0;
-                        designer.InitialState = baseSquad.InitialState;
-                        designer.PointSetIndex = baseSquad.PointSetIndex;
-                        designer.PatrolMode = baseSquad.PatrolMode;
-
-                        designer.Points = baseSquad.MultiState;
-
-                        //Add new cell to the list
-                        squad.DesignerCells.Add(designer);
+                        foreach (var direction in task.Direction)
+                            direction.Points = direction.Points_H3.ToList();
                     }
                 }
             }
@@ -896,6 +1017,52 @@ namespace TagTool.Commands.Porting
                     expr.Data[1] = bytes[1];
                 }
             }
+            else if (expr.ExpressionType == ScriptExpressionType.Expression && expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Ai)
+            {
+                var value = BitConverter.ToUInt32(expr.Data, 0);
+
+                if (value != uint.MaxValue && BlamCache.Version == CacheVersion.Halo3Retail)
+                {
+                    var aiValueType = (value >> 29) & 0x7;
+                    var squadIndex = (value >> 16) & 0x1FFF;
+                    var taskIndex = (value >> 16) & 0x1FFF;
+                    var fireTeamIndex = (value >> 8) & 0xFF;
+                    var spawnPointIndex = value & 0xFF;
+
+                    switch (aiValueType)
+                    {
+                        case 1: // squad index
+                        case 2: // squad group index
+                        case 3: // actor datum_index
+                            value = (uint)(((aiValueType & 0x7) << 29) | (value & 0xFFFF));
+                            break;
+
+                        case 4: // starting location
+                            value = (uint)(((aiValueType & 0x7) << 29) | ((squadIndex & 0x1FFF) << 16) | (GetSpawnPointIndex(squadIndex, fireTeamIndex, spawnPointIndex) & 0xFF));
+                            break;
+
+                        case 5: // objective task
+                            aiValueType++; // odst added spawn_formation
+                            value = (uint)(((aiValueType & 0x7) << 29) | ((taskIndex & 0x1FFF) << 16) | (value & 0xFFFF));
+                            break;
+
+                        default:
+                            throw new NotSupportedException($"0x{value:X8}");
+                    }
+
+                    expr.Data = BitConverter.GetBytes(value);
+                }
+            }
+        }
+
+        public uint GetSpawnPointIndex(uint squadIndex, uint fireTeamIndex, uint spawnPointIndex)
+        {
+            var prevSpawnPoints = 0;
+
+            for (var i = 0; i < fireTeamIndex; i++)
+                prevSpawnPoints += CurrentScenario.Squads[(int)squadIndex].Fireteams[i].StartingLocations.Count;
+
+            return (uint)(prevSpawnPoints + spawnPointIndex);
         }
 
         public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)

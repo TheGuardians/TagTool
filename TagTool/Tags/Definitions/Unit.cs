@@ -21,6 +21,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance IntegratedLightToggle;
         public Angle CameraFieldOfView;
         public float CameraStiffness;
+
         public short Flags2;
         public short Unknown6;
         public StringId CameraMarkerName;
@@ -58,6 +59,7 @@ namespace TagTool.Tags.Definitions
         public Angle Unknown14;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<UnknownBlock2> Unknown15;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance AssassinationResponse;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -72,6 +74,7 @@ namespace TagTool.Tags.Definitions
         public RealVector3d AccelerationRange;
         public float AccelerationActionScale;
         public float AccelerationAttachScale;
+
         public float SoftPingThreshold;
         public float SoftPingInterruptTime;
         public float HardPingThreshold;
@@ -113,14 +116,21 @@ namespace TagTool.Tags.Definitions
         public List<HudInterface> HudInterfaces;
         public List<DialogueVariant> DialogueVariants;
 
+        /// <summary>
+        /// If the player is in a seat in this unit then modify the motion tracker range by this amount.
+        /// See base value in player globals for how this modifier is applied.
+        /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown16;
+        public float MotionTrackerRangeModifier;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown17;
+        public Angle GrenadeAngle;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown18;
+        public Angle GrenadeAngleMaxElevation;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown19;
+        public Angle GrenadeAngleMinElevation;
 
         public float GrenadeVelocity;
         public GrenadeTypeValue GrenadeType; // short

@@ -131,7 +131,7 @@ namespace TagTool.Commands.Porting
 
             foreach(var data in decoratorData)
             {
-                ScenarioStructureBsp.Cluster.DecoratorGrid newGrid = grid.Copy();
+                var newGrid = grid.DeepClone();
 
                 newGrid.Amount = data.Amount;
                 newGrid.DecoratorGeometryOffset = grid.DecoratorGeometryOffset+data.GeometryOffset;

@@ -15,6 +15,7 @@ namespace TagTool.Tags.Definitions
         public float OverlapThreshold;
         public float ContinueIfWithin;
         public float DeathDelay;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown1;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -23,6 +24,7 @@ namespace TagTool.Tags.Definitions
         public sbyte Unknown3;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte Unknown4;
+
         public short LoopStartEvent;
         public EffectPriority Priority;
         public uint Unknown5;

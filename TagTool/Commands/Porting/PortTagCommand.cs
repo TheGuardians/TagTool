@@ -489,22 +489,8 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertChudGlobalsDefinition(chudGlobals);
 					break;
 
-				case Cinematic cine:
-					blamDefinition = ConvertCinematic(cine);
-					break;
-
-				case CinematicScene cisc:
-					blamDefinition = ConvertCinematicScene(cisc);
-					break;
-
 				case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
-					break;
-
-				case Effect effect when BlamCache.Version == CacheVersion.Halo3Retail:
-					//foreach (var even in effect.Events)
-					//foreach (var particleSystem in even.ParticleSystems)
-					//particleSystem.Unknown7 = 1.0f / particleSystem.Unknown7;
 					break;
 
 				case Globals matg:
@@ -574,12 +560,6 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
 					break;
 
-				case SkyAtmParameters skya:
-					// Decrease secondary fog intensity (it's quite sickening in ms23)
-					// foreach (var atmosphere in skya.AtmosphereProperties)
-					// atmosphere.FogIntensity2 /= 36.0f;
-					break;
-
 				case Sound sound:
 					blamDefinition = ConvertSound(cacheStream, resourceStreams, sound, blamTag.Name);
 					break;
@@ -604,6 +584,8 @@ namespace TagTool.Commands.Porting
 				case Weapon weapon when blamTag.Name == "objects\\weapons\\rifle\\shotgun\\shotgun":
 					weapon.Unknown24 = 1 << 16;
 					break;
+                
+                // Fix warthog horn
 				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
 					foreach (var attach in weapon.Attachments)
 						attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");

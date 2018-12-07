@@ -41,7 +41,7 @@ namespace TagTool.Tags.Definitions
         public List<CharacterBoardingProperties> BoardingProperties;
 
         [TagField(Padding = true, Length = 12, MaxVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused1;
+        public byte[] Unused1; // guardian properties
         
         public List<CharacterCombatformProperties> CombatformProperties;
        
@@ -54,7 +54,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<CharacterInspectProperties> InspectProperties;
 
-        public List<CharacterUnknownProperties> UnknownProperties;
+        public List<CharacterScarabProperties> ScarabProperties;
         public List<CharacterWeaponsProperties> WeaponsProperties;
         public List<CharacterFiringPatternProperties> FiringPatternProperties;
         public List<CharacterGrenadesProperties> GrenadesProperties;

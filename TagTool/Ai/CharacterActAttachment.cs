@@ -8,9 +8,9 @@ namespace TagTool.Ai
     public class CharacterActAttachment : TagStructure
 	{
         [TagField(Label = true)]
-        public StringId Name;
-        public CachedTagInstance ChildObject;
-        public StringId ChildMarker;
-        public StringId ParentMarker;
+        public StringId ActivityName;
+        public CachedTagInstance Crate;
+        public StringId CrateMarkerName;
+        public StringId UnitMarkerName;
     }
 }

@@ -20,10 +20,10 @@ namespace TagTool.Tags.Definitions
 
             public CachedTagInstance TeamNameStrings;
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public List<TeamColor> TeamColors;
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public List<Halo3ArmorCustomizationBlock> ArmorCustomization;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline449175)]

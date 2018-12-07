@@ -56,7 +56,7 @@ namespace TagTool.Commands.Porting
             //
             // Port Blam resource definition
             //
-            
+
             StructureBspCacheFileTagResources resourceDefinition = null;
 
             if (BlamCache.Version >= CacheVersion.Halo3ODST)
@@ -194,57 +194,54 @@ namespace TagTool.Commands.Porting
                     {
                         StructureChecksum = bsp.PathfindingData[0].StructureChecksum,
                         ObjectReferences = new List<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference>(),
-                        Unknown2s = new List<StructureBspCacheFileTagResources.PathfindingDatum.Unknown2Block>(),
-                        Unknown3s = new List<StructureBspCacheFileTagResources.PathfindingDatum.Unknown3Block>()
+                        Seams = new List<StructureBspCacheFileTagResources.PathfindingDatum.Seam>(),
+                        JumpSeams = new List<StructureBspCacheFileTagResources.PathfindingDatum.JumpSeam>()
                     };
 
                     foreach (var oldObjectReference in bsp.PathfindingData[0].ObjectReferences)
                     {
                         var objectReference = new StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference
                         {
-                            Unknown = oldObjectReference.Unknown,
-                            Unknown2 = new List<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.Unknown1Block>(),
-                            Unknown3 = oldObjectReference.Unknown3,
-                            Unknown4 = oldObjectReference.Unknown4,
-                            Unknown5 = oldObjectReference.Unknown5
+                            Flags = oldObjectReference.Flags,
+                            Bsps = new List<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference>(),
+                            ObjectHandle = oldObjectReference.ObjectHandle,
+                            OriginBspIndex = oldObjectReference.OriginBspIndex,
+                            ObjectType = oldObjectReference.ObjectType.DeepClone(),
+                            Source = oldObjectReference.Source
                         };
 
-                        foreach (var oldUnknown in oldObjectReference.Unknown2)
+                        foreach (var bspRef in oldObjectReference.Bsps)
                         {
-                            objectReference.Unknown2.Add(new StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.Unknown1Block
+                            objectReference.Bsps.Add(new StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference
                             {
-                                Unknown1 = oldUnknown.Unknown1,
-                                Unknown2 = oldUnknown.Unknown2,
-                                Unknown3 = oldUnknown.Unknown3,
-                                Unknown4 = oldUnknown.Unknown4,
-                                Unknown5 = oldUnknown.Unknown5,
-                                Unknown6 = oldUnknown.Unknown6,
-                                Unknown7 = new TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(oldUnknown.Unknown7.Count, new CacheAddress()),
-                                Unknown8 = oldUnknown.Unknown8
+                                BspHandle = bspRef.BspHandle,
+                                NodeIndex = bspRef.NodeIndex,
+                                Bsp2dRefs = new TagBlock<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(bspRef.Bsp2dRefs.Count, new CacheAddress()),
+                                VertexOffset = bspRef.VertexOffset
                             });
                         }
 
                         pathfinding.ObjectReferences.Add(objectReference);
                     }
 
-                    foreach (var oldUnknown2 in bsp.PathfindingData[0].Unknown2s)
+                    foreach (var oldSeam in bsp.PathfindingData[0].Seams)
                     {
-                        pathfinding.Unknown2s.Add(new StructureBspCacheFileTagResources.PathfindingDatum.Unknown2Block
+                        pathfinding.Seams.Add(new StructureBspCacheFileTagResources.PathfindingDatum.Seam
                         {
-                            Unknown = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock>(
-                                oldUnknown2.Unknown.Count, new CacheAddress())
+                            LinkIndices = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(
+                                oldSeam.LinkIndices.Count, new CacheAddress())
                         });
                     }
 
-                    foreach (var oldUnknown3 in bsp.PathfindingData[0].Unknown3s)
+                    foreach (var oldJumpSeam in bsp.PathfindingData[0].JumpSeams)
                     {
-                        pathfinding.Unknown3s.Add(new StructureBspCacheFileTagResources.PathfindingDatum.Unknown3Block
+                        pathfinding.JumpSeams.Add(new StructureBspCacheFileTagResources.PathfindingDatum.JumpSeam
                         {
-                            Unknown1 = oldUnknown3.Unknown1,
-                            Unknown2 = oldUnknown3.Unknown2,
-                            Unknown3 = oldUnknown3.Unknown3,
-                            Unknown4 = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock>(
-                                oldUnknown3.Unknown4.Count, new CacheAddress())
+                            UserJumpIndex = oldJumpSeam.UserJumpIndex,
+                            DestOnly = oldJumpSeam.DestOnly,
+                            Length = oldJumpSeam.Length,
+                            JumpIndices = new TagBlock<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(
+                                oldJumpSeam.JumpIndices.Count, new CacheAddress())
                         });
                     }
 
@@ -315,20 +312,20 @@ namespace TagTool.Commands.Porting
 
                     for (var objRefIdx = 0; objRefIdx < pathfindingDatum.ObjectReferences.Count; objRefIdx++)
                     {
-                        for (var unk2Idx = 0; unk2Idx < pathfindingDatum.ObjectReferences[objRefIdx].Unknown2.Count; unk2Idx++)
+                        for (var bspRefIdx = 0; bspRefIdx < pathfindingDatum.ObjectReferences[objRefIdx].Bsps.Count; bspRefIdx++)
                         {
-                            var unknown2 = pathfindingDatum.ObjectReferences[objRefIdx].Unknown2[unk2Idx];
+                            var bspRef = pathfindingDatum.ObjectReferences[objRefIdx].Bsps[bspRefIdx];
 
                             StreamUtil.Align(dataStream, 0x4);
                             if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                                blamResourceStream.Position = unknown2.Unknown7.Address.Offset;
-                            unknown2.Unknown7.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
+                                blamResourceStream.Position = bspRef.Bsp2dRefs.Address.Offset;
+                            bspRef.Bsp2dRefs.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
 
-                            for (var unk3Idx = 0; unk3Idx < unknown2.Unknown7.Count; unk3Idx++)
+                            for (var bsp2dRefIdx = 0; bsp2dRefIdx < bspRef.Bsp2dRefs.Count; bsp2dRefIdx++)
                                 CacheContext.Serializer.Serialize(dataContext,
                                     BlamCache.Version < CacheVersion.Halo3ODST ?
-                                    bsp.PathfindingData[0].ObjectReferences[objRefIdx].Unknown2[unk2Idx].Unknown7[unk3Idx] :
-                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.UnknownBlock.UnknownBlock2>(dataContext));
+                                        bsp.PathfindingData[0].ObjectReferences[objRefIdx].Bsps[bspRefIdx].Bsp2dRefs[bsp2dRefIdx] :
+                                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
                         }
                     }
 
@@ -358,67 +355,67 @@ namespace TagTool.Commands.Porting
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                        blamResourceStream.Position = pathfindingDatum.Unknown1s.Address.Offset;
-                    pathfindingDatum.Unknown1s = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown1Block>(
-                        (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Unknown1s.Count : pathfindingDatum.Unknown1s.Count),
+                        blamResourceStream.Position = pathfindingDatum.GiantPathfinding.Address.Offset;
+                    pathfindingDatum.GiantPathfinding = new TagBlock<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(
+                        (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].GiantPathfinding.Count : pathfindingDatum.GiantPathfinding.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
-                    for (var i = 0; i < pathfindingDatum.Unknown1s.Count; i++)
+                    for (var i = 0; i < pathfindingDatum.GiantPathfinding.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.PathfindingData[0].Unknown1s[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown1Block>(dataContext));
+                            bsp.PathfindingData[0].GiantPathfinding[i] :
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(dataContext));
 
-                    for (var unk2Idx = 0; unk2Idx < pathfindingDatum.Unknown2s.Count; unk2Idx++)
+                    for (var unk2Idx = 0; unk2Idx < pathfindingDatum.Seams.Count; unk2Idx++)
                     {
-                        var unknown2 = pathfindingDatum.Unknown2s[unk2Idx];
+                        var unknown2 = pathfindingDatum.Seams[unk2Idx];
 
                         StreamUtil.Align(dataStream, 0x4);
 
                         if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                            blamResourceStream.Position = unknown2.Unknown.Address.Offset;
+                            blamResourceStream.Position = unknown2.LinkIndices.Address.Offset;
 
-                        unknown2.Unknown = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock>(
-                            (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Unknown2s[unk2Idx].Unknown.Count : unknown2.Unknown.Count),
+                        unknown2.LinkIndices = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(
+                            (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Seams[unk2Idx].LinkIndices.Count : unknown2.LinkIndices.Count),
                             new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
-                        for (var unkIdx = 0; unkIdx < unknown2.Unknown.Count; unkIdx++)
+                        for (var unkIdx = 0; unkIdx < unknown2.LinkIndices.Count; unkIdx++)
                             CacheContext.Serializer.Serialize(dataContext,
                                 BlamCache.Version < CacheVersion.Halo3ODST ?
-                                    bsp.PathfindingData[0].Unknown2s[unk2Idx].Unknown[unkIdx] :
-                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown2Block.UnknownBlock>(dataContext));
+                                    bsp.PathfindingData[0].Seams[unk2Idx].LinkIndices[unkIdx] :
+                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(dataContext));
                     }
 
-                    for (var unk3Idx = 0; unk3Idx < pathfindingDatum.Unknown3s.Count; unk3Idx++)
+                    for (var unk3Idx = 0; unk3Idx < pathfindingDatum.JumpSeams.Count; unk3Idx++)
                     {
-                        var unknown3 = pathfindingDatum.Unknown3s[unk3Idx];
+                        var unknown3 = pathfindingDatum.JumpSeams[unk3Idx];
 
                         StreamUtil.Align(dataStream, 0x4);
 
                         if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                            blamResourceStream.Position = unknown3.Unknown4.Address.Offset;
+                            blamResourceStream.Position = unknown3.JumpIndices.Address.Offset;
 
-                        unknown3.Unknown4 = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock>(
-                            (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Unknown3s[unk3Idx].Unknown4.Count : unknown3.Unknown4.Count),
+                        unknown3.JumpIndices = new TagBlock<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(
+                            (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].JumpSeams[unk3Idx].JumpIndices.Count : unknown3.JumpIndices.Count),
                             new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
-                        for (var unk4Idx = 0; unk4Idx < unknown3.Unknown4.Count; unk4Idx++)
+                        for (var unk4Idx = 0; unk4Idx < unknown3.JumpIndices.Count; unk4Idx++)
                             CacheContext.Serializer.Serialize(dataContext,
                                 BlamCache.Version < CacheVersion.Halo3ODST ?
-                                    bsp.PathfindingData[0].Unknown3s[unk3Idx].Unknown4[unk4Idx] :
-                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown3Block.UnknownBlock>(dataContext));
+                                    bsp.PathfindingData[0].JumpSeams[unk3Idx].JumpIndices[unk4Idx] :
+                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(dataContext));
                     }
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                        blamResourceStream.Position = pathfindingDatum.Unknown4s.Address.Offset;
-                    pathfindingDatum.Unknown4s = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Unknown4Block>(
-                        (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Unknown4s.Count : pathfindingDatum.Unknown4s.Count),
+                        blamResourceStream.Position = pathfindingDatum.Doors.Address.Offset;
+                    pathfindingDatum.Doors = new TagBlock<ScenarioStructureBsp.PathfindingDatum.Door>(
+                        (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].Doors.Count : pathfindingDatum.Doors.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
-                    for (var i = 0; i < pathfindingDatum.Unknown4s.Count; i++)
+                    for (var i = 0; i < pathfindingDatum.Doors.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext,
                             BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.PathfindingData[0].Unknown4s[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Unknown4Block>(dataContext));
+                            bsp.PathfindingData[0].Doors[i] :
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
                 }
 
                 CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.PathfindingResource), resourceDefinition);

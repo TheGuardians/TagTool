@@ -10,27 +10,29 @@ namespace TagTool.Tags.Definitions
         public sbyte Unknown2;
         public sbyte Unknown3;
         public sbyte Unknown4;
+
         public float Unknown5;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown6;
         public float Unknown7;
         public float Unknown8;
         public float Unknown9;
         public float Unknown10;
+
         public float Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown12;
         public float Unknown13;
         public float Unknown14;
         public float Unknown15;
         public float Unknown16;
+
         public float Unknown17;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown18;
         public float Unknown19;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown20;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown21;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown22;
 
         public CachedTagInstance Unknown23;

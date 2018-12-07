@@ -42,34 +42,43 @@ namespace TagTool.Tags.Definitions
         public TagFunction CrouchingCameraFunction = new TagFunction { Data = new byte[0] };
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<WeaponCameraHeightBlock> WeaponCameraHeight;
+        public List<CameraHeightBlock> CameraHeights;
 
         public Angle CameraInterpolationStart;
         public Angle CameraInterpolationEnd;
-        public uint Unknown22;
-        public uint Unknown23;
-        public uint Unknown24;
-        public uint Unknown25;
+
+        public RealVector3d CameraOffset;
+        public float RootOffsetCameraScale;
+
         public float AutoaimWidth;
+
         public LockOnFlagBits LockonFlags; //bitfield32
-        public uint LockonDistance;
+        public float LockonDistance;
+
         public short PhysicsControlNodeIndex;
         public short Unknown29;
+
         public uint Unknown30;
         public uint Unknown31;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown32;
+
         public short PelvisNodeIndex;
         public short HeadNodeIndex;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown33;
+
         public float HeadshotAccelerationScale;
         public CachedTagInstance AreaDamageEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownFunctionBlock> Unknown34;
+        public List<MovementGateBlock> MovementGates;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownFunctionBlock> Unknown35;
+        public List<MovementGateBlock> MovementGatesCrouching;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown36;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -191,7 +200,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x18)]
-        public class WeaponCameraHeightBlock : TagStructure
+        public class CameraHeightBlock : TagStructure
 		{
             [TagField(Label = true)]
             public StringId Class;
@@ -212,13 +221,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class UnknownFunctionBlock : TagStructure
+        public class MovementGateBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public TagFunction Function = new TagFunction { Data = new byte[0] };
+            public float Period;
+            public float ZOffset;
+            public float ConstantZOffset;
+            public float YOffset;
+            public TagFunction DefaultFunction = new TagFunction { Data = new byte[0] };
         }
 
         [TagStructure(Size = 0x4)]

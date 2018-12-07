@@ -36,7 +36,7 @@ namespace TagTool.Tags.Resources
                 public byte PositionNodeCount; // number of nodes with position frames (XYZ float per frame)
                 public byte ScaleNodeCount; // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
                 public uint Unknown0;       // always 0x0
-                public uint PlaybackRate;   // always 0x3F800000
+                public float PlaybackRate = 1.0f;
             }
 
             [TagStructure(Size = 0x14)]

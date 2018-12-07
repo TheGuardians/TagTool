@@ -56,32 +56,25 @@ namespace TagTool.Tags
 	[TagStructure(Size = 0x0)]
 	public class TagBlock<T> : TagBlock, IList<T> where T : TagStructure
 	{
-		/// <summary>
-		/// The list of elements within the tag block.
-		/// </summary>
-		[TagField(Runtime = true)]
-		private new IList<T> Elements;
-
 		public TagBlock() : this(0, new CacheAddress()) { }
 
 		public TagBlock(int count, CacheAddress address) : base(count, address)
 		{
 			if (typeof(T) == typeof(TagBlock))
 				throw new NotSupportedException($"Type parameter must not be `{nameof(TagBlock)}`: `{nameof(TagBlock<T>)}`.");
-
-			Elements = base.Elements as IList<T>;
 		}
 
 		#region IList<T> Implementation
 		int ICollection<T>.Count => Elements.Count;
-		T IList<T>.this[int index] { get => Elements[index]; set => Elements[index] = value; }
+		T IList<T>.this[int index] { get => (T)Elements[index]; set => Elements[index] = value; }
+        public new T this[int index] { get => (T)Elements[index]; set => Elements[index] = value; }
 		public void Add(T value) => Elements.Add(value);
 		public bool Contains(T value) => Elements.Contains(value);
 		public void CopyTo(T[] array, int arrayIndex) => Elements.CopyTo(array, arrayIndex);
 		public int IndexOf(T value) => Elements.IndexOf(value);
 		public void Insert(int index, T value) => Elements.Insert(index, value);
 		bool ICollection<T>.Remove(T item) => Elements.Remove(item);
-		IEnumerator<T> IEnumerable<T>.GetEnumerator() => Elements.GetEnumerator();
+		IEnumerator<T> IEnumerable<T>.GetEnumerator() => (IEnumerator<T>)Elements.GetEnumerator();
 		#endregion
 	}
 }

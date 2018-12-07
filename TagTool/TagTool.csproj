@@ -111,6 +111,7 @@
     <Compile Include="Ai\CharacterCombatformProperties.cs" />
     <Compile Include="Ai\CharacterCoverFlags.cs" />
     <Compile Include="Ai\CharacterCoverProperties.cs" />
+    <Compile Include="Ai\CharacterDefaultGrenadeType.cs" />
     <Compile Include="Ai\CharacterDialogueVariation.cs" />
     <Compile Include="Ai\CharacterEngageFlags.cs" />
     <Compile Include="Ai\CharacterEngageProperties.cs" />
@@ -462,7 +463,6 @@
     <Compile Include="Tags\TagMapping.cs" />
     <Compile Include="Tags\TagReferenceBlock.cs" />
     <Compile Include="Common\TagVersionMap.cs" />
-    <Compile Include="Ai\CharacterDefaultGrenadeType.cs" />
     <Compile Include="Extensions\BinaryReaderExtensions.cs" />
     <Compile Include="Extensions\BinaryWriterExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
@@ -767,9 +767,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -7,6 +7,20 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84)]
     public class RenderMethodTemplate : TagStructure
 	{
+        public CachedTagInstance VertexShader;
+        public CachedTagInstance PixelShader;
+        public ShaderModeBitmask DrawModeBitmask;
+        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
+        public List<DrawModeRegisterOffsetBlock> RegisterOffsets;
+        public List<ArgumentMapping> ArgumentMappings;
+        public List<ShaderArgument> VectorArguments;
+        public List<ShaderArgument> IntegerArguments;
+        public List<ShaderArgument> BooleanArguments;
+        public List<ShaderArgument> SamplerArguments;
+
+        [TagField(Padding = true, Length = 12)]
+        public byte[] Unused;
+
         public enum RenderMethodExtern : byte
         {
             none,
@@ -109,20 +123,6 @@ namespace TagTool.Tags.Definitions
             Z_Only = 1 << 18,
             Sfx_Distort = 1 << 19,
         }
-
-        public CachedTagInstance VertexShader;
-        public CachedTagInstance PixelShader;
-        public ShaderModeBitmask DrawModeBitmask;
-        public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
-        public List<DrawModeRegisterOffsetBlock> RegisterOffsets;
-        public List<ArgumentMapping> ArgumentMappings;
-        public List<ShaderArgument> VectorArguments;
-        public List<ShaderArgument> IntegerArguments;
-        public List<ShaderArgument> BooleanArguments;
-        public List<ShaderArgument> SamplerArguments;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x2)]
         public class PackedInteger_10_6 : TagStructure

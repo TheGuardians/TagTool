@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -28,33 +29,30 @@ namespace TagTool.Tags.Definitions
 
         public VehicleFlagsValue VehicleFlags;
 
-        public List<TankEngineMotionProperty> TankEngineMotionProperties;
-        public List<EngineMotionProperty> EngineMotionProperties;
-        public List<DropshipMotionProperty> DropshipMotionProperties;
-        public List<AntigravityMotionProperty> AntigravityMotionProperties;
-        public List<JetEngineMotionProperty> JetEngineMotionProperties;
-        public List<TurretProperty> TurretProperties;
-
-        public float Unknown20;
-        public float Unknown21;
-        public float Unknown22;
-
-        public List<HelicopterMotionProperty> HelicopterMotionProperties;
-        public List<AntigravityEngineMotionProperty> AntigravityEngineMotionProperties;
-        public List<AutoturretEquipmentBlock> AutoturretEquipment;
+        public List<HumanTankPhysics> TankEngineMotionProperties;
+        public List<HumanJeepPhysics> EngineMotionProperties;
+        public List<HumanPlanePhysics> DropshipMotionProperties;
+        public List<AlienScoutPhysics> AntigravityMotionProperties;
+        public List<AlienFighterPhysics> JetEngineMotionProperties;
+        public List<TurretPhysics> TurretProperties;
+        public List<HumanBoatPhysics> HumanBoat;
+        public List<VtolPhysics> HelicopterMotionProperties;
+        public List<ChopperPhysics> AntigravityEngineMotionProperties;
+        public List<GuardianPhysics> AutoturretEquipment;
 
         public uint Flags6;
         public float GroundFriction;
         public float GroundDepth;
         public float GroundDampFactor;
         public float GroundMovingFriction;
-        public float GroundMaximumSlope0;
-        public float GroundMaximumSlope1LessThanSlope0;
-        public float Unknown23;
+        public float GroundSlopeToStopAllTraction;
+        public float GroundSlopeToStartTractionLoss;
+        public float MaximumNormalForceContribution;
         public float AntiGravityBankLift;
         public float SteeringBankReactionScale;
         public float GravityScale;
         public float Radius;
+
         public float Unknown24;
         public float Unknown25;
         public float Unknown26;
@@ -65,12 +63,15 @@ namespace TagTool.Tags.Definitions
 
         public PlayerTrainingVehicleTypeValue PlayerTrainingVehicleType;
         public VehicleSizeValue VehicleSize;
-        public sbyte Unknown27;
-        public sbyte Unknown28;
+        public sbyte ComplexSuspensionSampleCount;
+
+        [TagField(Padding = true, Length = 1)]
+        public byte[] Unused28 = new byte[1];
+
         public float MinimumFlippingAngularVelocity;
         public float MaximumFlippingAngularVelocity;
-        public float Unknown29;
-        public float Unknown30;
+        public float CrouchTransitionTime;
+        public float Hoojytsu;
         public float SeatEntranceAccelerationScale;
         public float SeatExitAccelerationScale;
         public float FlipTime;
@@ -78,39 +79,45 @@ namespace TagTool.Tags.Definitions
         public StringId FlipOverMessage;
 
         public CachedTagInstance SuspensionSound;
-        public CachedTagInstance RunningEffect;
-        public CachedTagInstance UnknownResponse;
-        public CachedTagInstance UnknownResponse2;
+        public CachedTagInstance SpecialEffect;
+        public CachedTagInstance DriverBoostDamageEffectOrResponse;
+        public CachedTagInstance RiderBoostDamageEffectOrResponse;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown31;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown32;
 
-        [TagStructure(Size = 0x58)]
-        public class TankEngineMotionProperty : TagStructure
-		{
-            public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdamenExponent;
-            public float Unknown;
-            public float SpeedLeft;
-            public float SpeedRight;
-            public float TurningSpeedLeft;
-            public float TurningSpeedRight;
-            public float SpeedLeft2;
-            public float SpeedRight2;
-            public float TurningSpeedLeft2;
-            public float TurningSpeedRight2;
+        [TagStructure(Size = 0x24)]
+        public class EnginePhysics : TagStructure
+        {
             public float EngineMomentum;
             public float EngineMaximumAngularVelocity;
             public List<Gear> Gears;
-            public CachedTagInstance ChangeGearSound;
-            public float Unknown2;
-            public float Unknown3;
+            public CachedTagInstance GearShiftSound;
+        }
+
+        [TagStructure(Size = 0x58)]
+        public class HumanTankPhysics : TagStructure
+		{
+            public Angle ForwardArc;
+            public float FlipWindow;
+            public float PeggedFraction;
+            public float MaximumLeftDifferential;
+            public float MaximumRightDifferential;
+            public float DifferentialAcceleration;
+            public float DifferentialDeceleration;
+            public float MaximumLeftReverseDifferential;
+            public float MaximumRightReverseDifferential;
+            public float DifferentialReverseAcceleration;
+            public float DifferentialReverseDeceleration;
+            public EnginePhysics Engine;
+            public float WheelCircumference;
+            public float GravityAdjust;
         }
 
         [TagStructure(Size = 0x40)]
-        public class EngineMotionProperty : TagStructure
+        public class HumanJeepPhysics : TagStructure
 		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
@@ -121,36 +128,52 @@ namespace TagTool.Tags.Definitions
             public float EngineMaximumAngularVelocity;
             public List<Gear> Gears;
             public CachedTagInstance ChangeGearSound;
-            public float Unknown;
-            public float Unknown2;
+            public float WheelCircumference;
+            public float GravityAdjust;
         }
 
         [TagStructure(Size = 0x4C)]
-        public class DropshipMotionProperty : TagStructure
+        public class HumanPlanePhysics : TagStructure
 		{
-            public float ForwardAcceleration;
-            public float BackwardAcceleration;
-            public float Unknown;
-            public float Unknown2;
-            public float LeftStrafeAcceleration;
-            public float RightStrafeAcceleration;
-            public float Unknown3;
-            public float Unknown4;
-            public float LiftAcceleration;
-            public float DropAcceleration;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public Angle Unknown11;
-            public float Unknown12;
-            public Angle Unknown13;
+            public float MaximumForwardSpeed;
+            public float MaximumReverseSpeed;
+            public float SpeedAcceleration;
+            public float SpeedDeceleration;
+            public float MaximumLeftSlide;
+            public float MaximumRightSlide;
+            public float SlideAcceleration;
+            public float SlideDeceleration;
+            public float MaximumUpRise;
+            public float MaximumDownRise;
+            public float RiseAcceleration;
+            public float RiseDeceleration;
+            public float FlyingTorqueScale;
+            public float AirFrictionDeceleration;
+            public float ThrustScale;
+            public float TurnRateScaleWhenBoosting;
+            public Angle MaximumRoll;
+            public float InterpolationScale;
+            public Angle MaximumAngle;
+        }
+
+        [Flags]
+        public enum AlientScoutFlags : byte
+        {
+            None,
+            LockedCamera = 1 << 0
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class AlienScoutGravityFunction : TagStructure
+        {
+            public StringId ObjectFunctionDamageRegion;
+            public Bounds<float> AntiGravityEngineSpeedRange;
+            public float EngineSpeedAcceleration;
+            public float MaximumVehicleSpeed;
         }
 
         [TagStructure(Size = 0x70)]
-        public class AntigravityMotionProperty : TagStructure
+        public class AlienScoutPhysics : TagStructure
 		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
@@ -162,80 +185,88 @@ namespace TagTool.Tags.Definitions
             public float MaximumRightSlide;
             public float SlideAcceleration;
             public float SlideDeceleration;
-            public sbyte Unknown;
-            public sbyte Unknown2;
-            public sbyte Unknown3;
-            public sbyte Unknown4;
-            public float Traction;
-            public float Unknown5;
-            public float TurningRate;
-            public StringId Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public StringId Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
-            public float Unknown18;
-            public Angle Unknown19;
+
+            public AlientScoutFlags Flags;
+
+            [TagField(Padding = true, Length = 3)]
+            public byte[] Unused = new byte[3];
+
+            public float DragCoeficient;
+            public float ConstantDeceleration;
+            public float TorqueScale;
+
+            public AlienScoutGravityFunction EngineGravityFunction;
+            public AlienScoutGravityFunction ContrailObjectFunction;
+
+            public Bounds<float> GearRotationSpeed;
+
+            // steering
+            public float InterpolationScale;
+            public Angle MaximumAngle;
         }
 
         [TagStructure(Size = 0x64, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloOnline106708)]
-        public class JetEngineMotionProperty : TagStructure
+        public class AlienFighterPhysics : TagStructure
 		{
             public Angle SteeringOverdampenCuspAngle;
             public float SteeringOverdamenExponent;
+
             public Angle MaximumLeftTurn;
             public Angle MaximumRightTurnNegative;
-            public Angle TurnRate;
-            public float FlyingSpeed;
-            public float Acceleration;
+            public float TurnRate;
+
+            public float MaximumForwardSpeed;
+            public float MaximumReverseSpeed;
             public float SpeedAcceleration;
             public float SpeedDeceleration;
-            public float PitchLeftSpeed;
-            public float PitchRightSpeed;
-            public float PitchRate;
-            public float UnpitchRate;
-            public float FlightStability;
-            public float Unknown;
-            public float NoseAngle;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float FallingSpeed;
-            public float FallingSpeed2;
-            public float Unknown5;
-            public float Unknown6;
-            public float IdleRise;
-            public float IdleForward;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public float Unknown7;
+            public float MaximumLeftSlide;
+            public float MaximumRightSlide;
+            public float SlideAcceleration;
+            public float SlideDeceleration;
+            public float SlideAccelAgainstDirection;
+            public float FlyingTorqueScale;
+            public RealEulerAngles2d FixedGunOffset;
+            public float LoopTrickDuration;
+            public float RollTrickDuration;
+            public float ZeroGravitySpeed;
+            public float FullGravitySpeed;
+            public float StrafeBoostScale;
+            public float OffStickDecelScale;
+            public float CruisingThrottle;
+            public float DiveSpeedScale;
+
+            [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+            public byte[] Unused = new byte[4];
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708)]
-        public class TurretProperty : TagStructure
+        public class TurretPhysics : TagStructure
 		{
-            public float Unknown;
+            public float Unknown1;
+
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown2;
         }
 
+        [TagStructure(Size = 0x0)]
+        public class HumanBoatPhysics
+        {
+            // TODO: Map this out
+        }
+
         [TagStructure(Size = 0x74)]
-        public class HelicopterMotionProperty : TagStructure
+        public class VtolPhysics : TagStructure
 		{
-            public Angle MaximumLeftTurn;
-            public Angle MaximumRightTurnNegative;
-            public Angle Unknown;
-            public StringId ThrustFrontLeft;
-            public StringId ThrustFrontRight;
-            public StringId Thrust;
+            public float MaximumLeftTurn;
+            public float MaximumRightTurnNegative;
+            public float TurnRate;
+
+            public StringId LeftLiftMarker;
+            public StringId RightLiftMarker;
+            public StringId ThrustMarker;
+
             public Angle Unknown2;
             public Angle Unknown3;
             public Angle Unknown4;
@@ -262,66 +293,77 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x70)]
-        public class AntigravityEngineMotionProperty : TagStructure
+        public class ChopperPhysics : TagStructure
 		{
             public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdamenExponent;
+            public float SteeringOverdampenExponent;
+
             public Angle MaximumLeftTurn;
             public Angle MaximumRightTurnNegative;
             public Angle TurnRate;
-            public float EngineMomentum;
-            public float EngineMaximumAngularVelocity;
-            public List<Gear> Gears;
-            public CachedTagInstance ChangeGearSound;
-            public float Unknown;
-            public StringId Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public Angle Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
+
+            public EnginePhysics Engine;
+
+            public float WheelCircumference;
+            public StringId RotationMarker;
+            public float MagicTurningScale;
+            public float MagicTurningAcceleration;
+            public float MagicTurningMaximumVelocity;
+            public float MagicTurningExponent;
+            public float BankToSlideRatio;
+            public float BankSlideExponent;
+            public float BankToTurnRatio;
+            public float BankTurnExponent;
+            public float BankFraction;
+            public float BankRate;
+            public float WheelAcceleration;
+            public float GyroscopicDamping;
         }
 
         [TagStructure(Size = 0x030)]
-        public class AutoturretEquipmentBlock : TagStructure
+        public class GuardianPhysics : TagStructure
 		{
-            public Angle Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
+            public Angle OverdampenCuspAngle;
+            public float OverdampenExponent;
+            public float MaximumForwardSpeed;
+            public float MaximumReverseSpeed;
+            public float SpeedAcceleration;
+            public float SpeedDeceleration;
+            public float MaximumLeftSlide;
+            public float MaximumRightSlide;
+            public float SlideAcceleration;
+            public float SlideDeceleration;
+            public float TorqueScale;
+            public float AntiGravityForceZOffset;
+        }
+
+        [Flags]
+        public enum AntiGravityPointFlags : int
+        {
+            None,
+            GetsDamageFromRegion = 1 << 0,
+            OnlyActiveOnWater = 1 << 1
         }
 
         [TagStructure(Size = 0x4C)]
         public class AntiGravityPoint : TagStructure
 		{
             public StringId MarkerName;
-            public uint Flags;
+            public AntiGravityPointFlags Flags;
             public float AntigravStrength;
-            public float AntigravOffset;
             public float AntigravHeight;
-            public float AntigravDumpFactor;
+            public float AntigravDampFactor;
+            public float AntigravExtensionDamping;
             public float AntigravNormalK1;
             public float AntigravNormalK0;
             public float Radius;
-            public float Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public short Unknown4;
+
+            [TagField(Padding = true, Length = 12)]
+            public byte[] Unused1 = new byte[12];
+
+            [TagField(Padding = true, Length = 2)]
+            public byte[] Unused2 = new byte[2];
+
             public short DamageSourceRegionIndex;
             public StringId DamageSourceRegionName;
             public float DefaultStateError;
@@ -589,18 +631,20 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x44)]
         public class Gear : TagStructure
 		{
-            public float MinTorque;
-            public float MaxTorque;
-            public float PeakTorqueScale;
-            public float PastPeakTorqueExponent;
-            public float TorqueAtMaxAngularVelovity;
-            public float TorqueAt2xMaxAngularVelocity;
-            public float MinTorque2;
-            public float MaxTorque2;
-            public float PeakTorqueScale2;
-            public float PastPeakTorqueExponent2;
-            public float TorqueAtMaxAngularVelovity2;
-            public float TorqueAt2xMaxAngularVelocity2;
+            public float MinLoadedTorque;
+            public float MaxLoadedTorque;
+            public float PeakLoadedTorqueScale;
+            public float PastPeakLoadedTorqueExponent;
+            public float LoadedTorqueAtMaxAngularVelocity;
+            public float LoadedTorqueAt2xMaxAngularVelocity;
+
+            public float MinCruisingTorque;
+            public float MaxCruisingTorque;
+            public float PeakCruisingTorqueScale;
+            public float PastPeakCruisingTorqueExponent;
+            public float CruisingTorqueAtMaxAngularVelocity;
+            public float CruisingTorqueAt2xMaxAngularVelocity;
+
             public float MinTimeToUpshift;
             public float EngineUpshiftScale;
             public float GearRatio;

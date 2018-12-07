@@ -12,17 +12,23 @@ namespace TagTool.Ai
         public float InfantryOnAiWeaponDamageScale;
         public float VehicleOnAiWeaponDamageScale;
         public float PlayerOnAiWeaponDamageScale;
-
         public float DangerBroadlyFacing;
+
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public float Unknown1;
+
         public float DangerShootingNear;
+
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public float Unknown2;
+
         public float DangerShootingAt;
+
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public float Unknown3;
+
         public float DangerExtremelyClose;
+
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public float Unknown4;
 
@@ -64,10 +70,13 @@ namespace TagTool.Ai
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeInfantry; // 30
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeFlying; // 40
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeVehicle; // 40
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeGiant; // 200
 

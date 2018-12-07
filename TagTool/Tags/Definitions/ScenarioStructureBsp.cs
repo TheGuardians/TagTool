@@ -439,23 +439,6 @@ namespace TagTool.Tags.Definitions
                 public float Radius;
                 public RealPoint3d GridSize;
                 public RealPoint3d BoundingSphereOffset;
-
-
-                public DecoratorGrid Copy()
-                {
-                    DecoratorGrid result = new DecoratorGrid
-                    {
-                        DecoratorIndex_HO = DecoratorIndex_HO,
-                        DecoratorGeometryIndex_HO = DecoratorGeometryIndex_HO,
-                        DecoratorGeometryOffset = DecoratorGeometryOffset,
-                        Position = Position,
-                        Radius = Radius,
-                        GridSize = GridSize,
-                        BoundingSphereOffset = BoundingSphereOffset
-                    };
-
-                    return result;
-                }
             }
 
             [TagStructure(Size = 0x4)]
@@ -517,10 +500,10 @@ namespace TagTool.Tags.Definitions
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
-            public List<Unknown1Block> Unknown1s;
-            public List<Unknown2Block> Unknown2s;
-            public List<Unknown3Block> Unknown3s;
-            public List<Unknown4Block> Unknown4s;
+            public List<GiantPathfindingBlock> GiantPathfinding;
+            public List<Seam> Seams;
+            public List<JumpSeam> JumpSeams;
+            public List<Door> Doors;
 
             [TagStructure(Size = 0x8)]
             public class Sector : TagStructure
@@ -559,8 +542,8 @@ namespace TagTool.Tags.Definitions
                 public short Vertex2;
                 public FlagsValue LinkFlags;
                 public short HintIndex;
-                public short ForwardLink;
-                public short ReverseLink;
+                public ushort ForwardLink;
+                public ushort ReverseLink;
                 public short LeftSector;
                 public short RightSector;
 
@@ -610,28 +593,35 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18)]
             public class ObjectReference : TagStructure
 			{
-                public int Unknown;
-                public List<UnknownBlock> Unknown2;
-                public int Unknown3;
-                public short Unknown4;
-                public short Unknown5;
+                public ushort Flags;
+
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused = new byte[2];
+
+                public List<BspReference> Bsps;
+
+                public uint ObjectHandle;
+                public short OriginBspIndex;
+                public ScenarioObjectType ObjectType;
+                public Scenario.ScenarioInstance.SourceValue Source;
 
                 [TagStructure(Size = 0x18)]
-                public class UnknownBlock : TagStructure
+                public class BspReference : TagStructure
 				{
-                    public sbyte Unknown1;
-                    public sbyte Unknown2;
-                    public sbyte Unknown3;
-                    public sbyte Unknown4;
-                    public short Unknown5;
-                    public short Unknown6;
-                    public List<UnknownBlock2> Unknown7;
-                    public int Unknown8;
+                    public uint BspHandle;
+                    public short NodeIndex;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused = new byte[2];
+
+                    public List<Bsp2dRef> Bsp2dRefs;
+
+                    public int VertexOffset;
 
                     [TagStructure(Size = 0x4)]
-                    public class UnknownBlock2 : TagStructure
+                    public class Bsp2dRef : TagStructure
 					{
-                        public int Unknown;
+                        public int Index;
                     }
                 }
             }
@@ -691,44 +681,53 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class Unknown1Block : TagStructure
+            public class GiantPathfindingBlock : TagStructure
 			{
-                public uint Unknown;
+                public int Bsp2dIndex;
             }
 
             [TagStructure(Size = 0xC)]
-            public class Unknown2Block : TagStructure
+            public class Seam : TagStructure
 			{
-                public List<UnknownBlock> Unknown;
+                public List<LinkIndexBlock> LinkIndices;
 
                 [TagStructure(Size = 0x4)]
-                public class UnknownBlock : TagStructure
+                public class LinkIndexBlock : TagStructure
 				{
-                    public int Unknown;
+                    public int LinkIndex;
                 }
             }
 
             [TagStructure(Size = 0x14)]
-            public class Unknown3Block : TagStructure
+            public class JumpSeam : TagStructure
 			{
-                public short Unknown1;
-                public short Unknown2;
-                public float Unknown3;
-                public List<UnknownBlock> Unknown4;
+                public short UserJumpIndex;
+                public byte DestOnly;
+
+                [TagField(Padding = true, Length = 1)]
+                public byte[] Unused = new byte[1];
+
+                public float Length;
+
+                public List<JumpIndexBlock> JumpIndices;
 
                 [TagStructure(Size = 0x4)]
-                public class UnknownBlock : TagStructure
+                public class JumpIndexBlock : TagStructure
 				{
-                    public short Unknown;
-                    public short Unknown2;
+                    public short JumpIndex;
+
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused = new byte[2];
                 }
             }
 
             [TagStructure(Size = 0x4)]
-            public class Unknown4Block : TagStructure
+            public class Door : TagStructure
 			{
-                public short Unknown;
-                public short Unknown2;
+                public short ScenarioObjectIndex;
+
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused = new byte[2];
             }
         }
 

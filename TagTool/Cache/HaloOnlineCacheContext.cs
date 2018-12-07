@@ -144,7 +144,7 @@ namespace TagTool.Cache
             if (TryGetTag<T>(name, out var result))
                 return result;
 
-			var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
+            var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
             var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
@@ -196,7 +196,7 @@ namespace TagTool.Cache
         }
 
         public CachedTagInstance AllocateTag<T>(string name = null) where T : TagStructure
-			=> AllocateTag(typeof(T), name);
+            => AllocateTag(typeof(T), name);
 
         /// <summary>
         /// Attempts to get a tag of a specific type from the current cache.
@@ -213,8 +213,8 @@ namespace TagTool.Cache
 
                 foreach (var instance in TagCache.Index)
                 {
-					if (instance is null)
-						continue;
+                    if (instance is null)
+                        continue;
 
                     if (instance.IsInGroup(groupTag) && instance.Name == name)
                     {
@@ -296,8 +296,8 @@ namespace TagTool.Cache
 
             foreach (var instance in TagCache.Index)
             {
-				if (instance is null)
-					continue;
+                if (instance is null)
+                    continue;
 
                 if (instance.IsInGroup(groupTag) && instance.Name == tagName)
                 {
@@ -314,7 +314,7 @@ namespace TagTool.Cache
         {
             if (TryGetTag(name, out var result))
                 return result;
-            
+
             throw new KeyNotFoundException(name);
         }
 
@@ -337,7 +337,7 @@ namespace TagTool.Cache
         {
             if (Tags.TagDefinition.TryFind(name, out var type))
             {
-				var attribute = TagStructure.GetTagStructureAttribute(type);
+                var attribute = TagStructure.GetTagStructureAttribute(type);
                 result = new Tag(attribute.Tag);
                 return true;
             }
@@ -398,7 +398,7 @@ namespace TagTool.Cache
                             tagIndex = -1;
 
                         //if (tagIndex < 0 || tagIndex >= TagCache.Index.Count || TagCache.Index[tagIndex] == null)
-                            //continue;
+                        //continue;
 
                         var nameString = line.Substring(separatorIndex + 1);
 
@@ -678,6 +678,25 @@ namespace TagTool.Cache
             var cache = GetResourceCache(pageable);
             using (var stream = cache.File.OpenRead())
                 cache.Cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
+        }
+
+        /// <summary>
+        /// Extracts and decompresses the data for a resource from the current cache.
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="pageable">The resource.</param>
+        /// <param name="outStream">The stream to write the extracted data to.</param>
+        /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
+        /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
+        public void ExtractResource(Stream inStream, PageableResource pageable, Stream outStream)
+        {
+            if (pageable == null)
+                throw new ArgumentNullException("resource");
+            if (!outStream.CanWrite)
+                throw new ArgumentException("The output stream is not open for writing", "outStream");
+
+            var cache = GetResourceCache(pageable);
+            cache.Cache.Decompress(inStream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
         }
 
         /// <summary>
