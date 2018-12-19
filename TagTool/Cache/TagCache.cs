@@ -349,14 +349,17 @@ namespace TagTool.Cache
         {
             if (index < 0)
                 throw new ArgumentException("Index cannot be negative");
+
             if (index >= _tags.Count - 1)
                 return GetTagDataEndOffset();
+
             for (var i = index - 1; i >= 0; i--)
             {
                 var tag = _tags[i];
                 if (tag != null && tag.HeaderOffset >= 0)
                     return tag.HeaderOffset + tag.TotalSize;
             }
+
             return CacheHeaderSize;
         }
 

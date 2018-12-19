@@ -212,8 +212,8 @@ namespace TagTool.Commands.Tags
                     tagNames[biped.MeleeImpact.Index] =
                         "sounds\\materials\\soft\\organic_flesh\\melee_impact";
 
-                if (biped.CameraTracks.Count != 0 && biped.CameraTracks[0].CameraTrack != null && !tagNames.ContainsKey(biped.CameraTracks[0].CameraTrack.Index))
-                    tagNames[biped.CameraTracks[0].CameraTrack.Index] = isMonitor ?
+                if (biped.Camera.CameraTracks.Count != 0 && biped.Camera.CameraTracks[0].CameraTrack != null && !tagNames.ContainsKey(biped.Camera.CameraTracks[0].CameraTrack.Index))
+                    tagNames[biped.Camera.CameraTracks[0].CameraTrack.Index] = isMonitor ?
                         "camera\\biped_follow_camera" :
                         "camera\\biped_support_camera";
 

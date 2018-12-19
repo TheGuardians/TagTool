@@ -5,75 +5,35 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)] 
+    [TagStructure(Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)] 
     [TagStructure(Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnline106708)] 
     public abstract class Unit : GameObject
     {
-        public uint FlagsWarningHalo4Values;
+        public UnitFlagBits UnitFlags; // int
         public DefaultTeamValue DefaultTeam; // short
         public ConstantSoundVolumeValue ConstantSoundVolume; // short
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance HologramUnit;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<MetagameProperty> MetagameProperties;
+
         public CachedTagInstance IntegratedLightToggle;
         public Angle CameraFieldOfView;
         public float CameraStiffness;
 
-        public short Flags2;
-        public short Unknown6;
-        public StringId CameraMarkerName;
-        public StringId CameraSubmergedMarkerName;
-        public Angle PitchAutoLevel;
-        public Angle PitchRangeMin;
-        public Angle PitchRangeMax;
-        public List<CameraTrackBlock> CameraTracks;
-        public Angle Unknown7;
-        public Angle Unknown8;
-        public Angle Unknown9;
-        public List<UnknownBlock> Unknown10;
+        public UnitCamera Camera;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Flags3;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Unknown11;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public StringId CameraMarkerName2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public StringId CameraSubmergedMarkerName2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle PitchAutoLevel2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle PitchRangeMin2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle PitchRangeMax2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<CameraTrackBlock> CameraTracks2;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle Unknown12;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle Unknown13;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Angle Unknown14;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<UnknownBlock2> Unknown15;
+        public UnitCamera SyncActionCamera;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance AssassinationResponse;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance AssassinationWeapon;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public StringId AssasinationToolStowAnchor;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public StringId AssasinationToolHandMarker;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public StringId AssasinationToolMarker;
+        public UnitAssassination Assassination;
 
-        public RealVector3d AccelerationRange;
-        public float AccelerationActionScale;
-        public float AccelerationAttachScale;
+        public UnitSeatAcceleration SeatAcceleration;
 
         public float SoftPingThreshold;
         public float SoftPingInterruptTime;
@@ -106,10 +66,13 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance LandingMeleeDamage;
         public CachedTagInstance FlurryMeleeDamage;
         public CachedTagInstance ObstacleSmashMeleeDamage;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance ShieldPopDamage;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance AssassinationDamage;
+
         public MotionSensorBlipSizeValue MotionSensorBlipSize; // short
         public ItemScaleValue ItemScale; // short
         public List<Posture> Postures;
@@ -153,6 +116,39 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance DetachDamage;
         public CachedTagInstance DetachedWeapon;
 
+        public enum UnitFlagBits : int
+        {
+            CircularAiming = 1 << 0,
+            DestroyedAfterDying = 1 << 1,
+            HalfSpeedInterpolation = 1 << 2,
+            FiresFromCamera = 1 << 3,
+            EntranceInsideBoundingSphere = 1 << 4,
+            DoesntShowReadiedWeapon = 1 << 5,
+            CausesPassengerDialogue = 1 << 6,
+            ResistsPings = 1 << 7,
+            MeleeAttackIsFatal = 1 << 8,
+            DontRefaceDuringPings = 1 << 9,
+            HasNoAiming = 1 << 10,
+            SimpleCreature = 1 << 11,
+            ImpactMeleeAttachesToUnit = 1 << 12,
+            ImpactMeleeDiesOnShield = 1 << 13,
+            CannotOpenDoorsAutomatically = 1 << 14,
+            MeleeAttackersCannotAttach = 1 << 15,
+            NotInstantlyKilledByMelee = 1 << 16,
+            ShieldSapping = 1 << 17,
+            RunsAroundFlaming = 1 << 18,
+            Inconsequential = 1 << 19,
+            SpecialCinematicUnit = 1 << 20,
+            IgnoredByAutoaiming = 1 << 21,
+            ShieldsFryInfectionForms = 1 << 22,
+            CanDualWield = 1 << 23,
+            ActsAsGunnerForParent = 1 << 24,
+            ControlledByParentGunner = 1 << 25,
+            ParentsPrimaryWeapon = 1 << 26,
+            ParentsSecondaryWeapon = 1 << 27,
+            UnitHasBoost = 1 << 28
+        }
+
         public enum DefaultTeamValue : short
         {
             Default,
@@ -170,7 +166,7 @@ namespace TagTool.Tags.Definitions
             Unused12,
             Unused13,
             Unused14,
-            Unused15,
+            Unused15
         }
 
         public enum ConstantSoundVolumeValue : short
@@ -179,7 +175,7 @@ namespace TagTool.Tags.Definitions
             Medium,
             Loud,
             Shout,
-            Quiet,
+            Quiet
         }
 
         [TagStructure(Size = 0x8)]
@@ -239,65 +235,85 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x10)]
-        public class CameraTrackBlock : TagStructure
-		{
-            public CachedTagInstance CameraTrack;
+        public enum UnitCameraFlagBits : ushort
+        {
+            PitchBoundsAbsoluteSpace = 1 << 0,
+            OnlyCollidesWithEnvironment = 1 << 1,
+            HidesPlayerUnitFromCamera = 1 << 2,
+            UseAimingVectorInsteadOfMarkerForward = 1 << 3
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class UnitCameraAxisAcceleration : TagStructure
+        {
+            public float Unknown1;
+            public float Unknown2;
+            public float Unknown3;
+            public float Unknown4;
+            public float Unknown5;
+            public float Unknown6;
         }
 
         [TagStructure(Size = 0x4C)]
-        public class UnknownBlock : TagStructure
-		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
+        public class UnitCameraAcceleration : TagStructure
+        {
+            public float MaximumCameraVelocity;
+
+            [TagField(Length = 3)]
+            public UnitCameraAxisAcceleration[] AxesAcceleration = new UnitCameraAxisAcceleration[3];
         }
-        
-        [TagStructure(Size = 0x4C)]
-        public class UnknownBlock2 : TagStructure
-		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
+
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+        public class UnitCameraTrack : TagStructure
+        {
+            public CachedTagInstance CameraTrack;
+        }
+
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail)]
+        public class UnitCamera : TagStructure
+        {
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public UnitCameraFlagBits CameraFlags;
+
+            [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            public byte[] Unused = new byte[2];
+
+            public StringId CameraMarkerName;
+            public StringId CameraSubmergedMarkerName;
+            public Angle PitchAutoLevel;
+            public Bounds<Angle> PitchRange;
+            public List<UnitCameraTrack> CameraTracks;
+            public Bounds<float> PitchSpringBounds;
+            public Angle SpringVelocity;
+            public List<UnitCameraAcceleration> CameraAcceleration;
+        }
+
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
+        public class UnitAssassination : TagStructure
+        {
+            public CachedTagInstance Response;
+            public CachedTagInstance Weapon;
+            public StringId ToolStowAnchor;
+            public StringId ToolHandMarker;
+            public StringId ToolMarker;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class UnitSeatAcceleration : TagStructure
+        {
+            public RealVector3d Range;
+            public float ActionScale;
+            public float AttachScale;
         }
 
         public enum MotionSensorBlipSizeValue : short
         {
             Medium,
             Small,
-            Large,
+            Large
         }
 
         public enum ItemScaleValue : short
@@ -305,7 +321,7 @@ namespace TagTool.Tags.Definitions
             Small,
             Medium,
             Large,
-            Huge,
+            Huge
         }
 
         [TagStructure(Size = 0x10)]
@@ -406,7 +422,7 @@ namespace TagTool.Tags.Definitions
             public StringId CameraSubmergedMarkerName;
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
-            public List<CameraTrackBlock> CameraTracks;
+            public List<UnitCameraTrack> CameraTracks;
             public Bounds<Angle> PitchSpringBounds;
             public Angle SpringVelocity;
             public List<CameraAccelerationBlock> Unknown7;

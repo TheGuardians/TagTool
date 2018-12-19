@@ -179,7 +179,15 @@ namespace TagTool.Commands
             try
             {
 #endif
-                ExecuteCommand(command, commandAndArgs);
+                if (!command.Execute(commandAndArgs).Equals(true))
+                {
+                    Console.WriteLine("{0}: {1}", command.Name, command.Description);
+                    Console.WriteLine();
+                    Console.WriteLine("Usage:");
+                    Console.WriteLine("{0}", command.Usage);
+                    Console.WriteLine();
+                    Console.WriteLine("Use \"help {0}\" for more information.", command.Name);
+                }
 #if !DEBUG
             }
             catch (Exception e)
@@ -192,17 +200,5 @@ namespace TagTool.Commands
             return true;
         }
 
-        private static void ExecuteCommand(Command command, List<string> args)
-        {
-            if (command.Execute(args).Equals(true))
-                return;
-
-            Console.WriteLine("{0}: {1}", command.Name, command.Description);
-            Console.WriteLine();
-            Console.WriteLine("Usage:");
-            Console.WriteLine("{0}", command.Usage);
-            Console.WriteLine();
-            Console.WriteLine("Use \"help {0}\" for more information.", command.Name);
-        }
     }
 }

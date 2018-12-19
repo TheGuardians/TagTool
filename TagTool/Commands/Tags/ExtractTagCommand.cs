@@ -35,6 +35,7 @@ namespace TagTool.Commands.Tags
             if (!file.Directory.Exists)
                 file.Directory.Create();
 
+
             byte[] data;
 
             using (var stream = CacheContext.OpenTagCacheRead())

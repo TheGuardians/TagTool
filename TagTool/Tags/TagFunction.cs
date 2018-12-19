@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x14)]
+    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
     public class TagFunction : TagStructure
 	{
         public byte[] Data;

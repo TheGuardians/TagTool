@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
+    [TagStructure(Name = "object", Tag = "obje", Size = 0xBC, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x104, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnline106708)]
@@ -27,17 +28,42 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
         public CachedTagInstance CrateObject;
 
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance ModifierShader;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance CollisionDamage;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<EarlyMoverProperty> EarlyMoverProperties;
+
         public CachedTagInstance CreationEffect;
         public CachedTagInstance MaterialEffects;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance ArmorSounds;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance MeleeImpact;
+
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float ApplyCollisionDamageScale;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public Bounds<float> GameAccelerationRange;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public Bounds<float> GameScaleRange;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public Bounds<float> AbsoluteAccelerationRange;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public Bounds<float> AbsoluteScaleRange;
+
         public short HudTextMessageIndex;
 
         [TagField(Padding = true, Length = 2)]
@@ -45,6 +71,10 @@ namespace TagTool.Tags.Definitions
 
         public List<Attachment> Attachments;
         public List<TagReferenceBlock> Widgets;
+
+        [TagField(Padding = true, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] OldFunctionsBlock = new byte[12];
+
         public List<ChangeColor> ChangeColors;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -53,6 +83,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<NodeMap> NodeMaps;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<MultiplayerObjectProperty> MultiplayerObjectProperties;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
@@ -151,7 +182,8 @@ namespace TagTool.Tags.Definitions
             Infinite
         }
 
-        [TagStructure(Size = 0x2C)]
+        [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Retail)]
         public class Function : TagStructure
 		{
             public FlagsValue Flags;
@@ -173,18 +205,21 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo3ODST)]
         public class Attachment : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public AtlasFlagsValue AtlasFlags;
+
             [TagField(Label = true)]
-            public CachedTagInstance Attachment2;
+            public CachedTagInstance Type;
+
             public StringId Marker;
             public ChangeColorValue ChangeColor;
             public FlagsValue Flags;
-            public short Unknown;
+
             public StringId PrimaryScale;
             public StringId SecondaryScale;
 
@@ -196,7 +231,7 @@ namespace TagTool.Tags.Definitions
                 TheaterVisionMode = 1 << 1
             }
 
-            public enum ChangeColorValue : sbyte
+            public enum ChangeColorValue : short
             {
                 None,
                 Primary,
@@ -206,7 +241,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum FlagsValue : byte
+            public enum FlagsValue : short
             {
                 None,
                 ForceAlwaysOn = 1 << 0,
@@ -214,7 +249,8 @@ namespace TagTool.Tags.Definitions
             }
         }
         
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
         public class ChangeColor : TagStructure
 		{
             public List<InitialPermutation> InitialPermutations;
@@ -230,10 +266,11 @@ namespace TagTool.Tags.Definitions
                 public StringId VariantName;
             }
 
-            [TagStructure(Size = 0x28)]
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Function : TagStructure
 			{
-                [TagField(Padding = true, Length = 4)]
+                [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused = new byte[4];
 
                 public ScaleFlagsValue ScaleFlags;

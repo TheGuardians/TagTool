@@ -377,7 +377,7 @@ namespace TagTool.Tags.Definitions
         public class FrictionPoint : TagStructure
 		{
             public StringId MarkerName;
-            public uint Flags;
+            public FlagsValue Flags;
             public float FractionOfTotalMass;
             public float Radius;
             public float DamagedRadius;
@@ -397,6 +397,18 @@ namespace TagTool.Tags.Definitions
             public ModelStateDestroyedValue ModelStateDestroyed;
             public StringId RegionName;
             public int RegionIndex;
+
+            [Flags]
+            public enum FlagsValue : int
+            {
+                None,
+                GetsDamageFromRegion = 1 << 0,
+                Powered = 1 << 1,
+                FrontTurning = 1 << 2,
+                RearTurning = 1 << 3,
+                AttachedToEBrake = 1 << 4,
+                CanBeDestroyed = 1 << 5
+            }
 
             public enum FrictionTypeValue : short
             {
@@ -438,6 +450,7 @@ namespace TagTool.Tags.Definitions
             public float Unknown15;
             public float Unknown16;
             public float Unknown17;
+
             public int MultisphereCount;
             public uint Flags;
             public float X0;
@@ -446,6 +459,7 @@ namespace TagTool.Tags.Definitions
             public float Y1;
             public float Z0;
             public float Z1;
+
             public int Unknown18;
             public short Size2;
             public short Count2;
@@ -487,6 +501,7 @@ namespace TagTool.Tags.Definitions
             public float Sphere7Y;
             public float Sphere7Z;
             public float Sphere7Radius;
+
             public int Unknown22;
             public short Size3;
             public short Count3;
@@ -528,6 +543,7 @@ namespace TagTool.Tags.Definitions
             public float Sphere7Y2;
             public float Sphere7Z2;
             public float Sphere7Radius2;
+
             public int Unknown26;
             public short Size4;
             public short Count4;
@@ -569,6 +585,7 @@ namespace TagTool.Tags.Definitions
             public float Sphere7Y3;
             public float Sphere7Z3;
             public float Sphere7Radius3;
+
             public int Unknown30;
             public short Size5;
             public short Count5;
@@ -610,6 +627,7 @@ namespace TagTool.Tags.Definitions
             public float Sphere7Y4;
             public float Sphere7Z4;
             public float Sphere7Radius4;
+
             public float Unknown34;
             public float Unknown35;
             public float Unknown36;

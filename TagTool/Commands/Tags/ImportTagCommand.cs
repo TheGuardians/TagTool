@@ -26,7 +26,7 @@ namespace TagTool.Commands.Tags
         {
             if (args.Count != 2)
                 return false;
-    
+
             if (!CacheContext.TryGetTag(args[0], out var instance))
                 return false;
 
