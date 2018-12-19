@@ -97,15 +97,24 @@ namespace TagTool.Tags.Definitions
 
         public float GrenadeVelocity;
         public GrenadeTypeValue GrenadeType; // short
-        public short GrenadeCount;
+        public ushort GrenadeCount;
         public List<PoweredSeat> PoweredSeats;
         public List<Weapon> Weapons;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<TargetTrackingBlock> TargetTracking;
-        public List<Seat> Seats;
+
+        public List<UnitSeat> Seats;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float EmpRadius;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance EmpEffect;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance BoostCollisionDamage;
+
         public float BoostPeakPower;
         public float BoostRisePower;
         public float BoostPeakTime;
@@ -113,9 +122,14 @@ namespace TagTool.Tags.Definitions
         public float BoostDeadTime;
         public float LipsyncAttackWeight;
         public float LipsyncDecayWeight;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance DetachDamage;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance DetachedWeapon;
 
+        [Flags]
         public enum UnitFlagBits : int
         {
             CircularAiming = 1 << 0,
@@ -235,6 +249,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [Flags]
         public enum UnitCameraFlagBits : ushort
         {
             PitchBoundsAbsoluteSpace = 1 << 0,
@@ -270,7 +285,7 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance CameraTrack;
         }
 
-        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitCamera : TagStructure
         {
@@ -285,8 +300,14 @@ namespace TagTool.Tags.Definitions
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
             public List<UnitCameraTrack> CameraTracks;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public Bounds<float> PitchSpringBounds;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public Angle SpringVelocity;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public List<UnitCameraAcceleration> CameraAcceleration;
         }
 
@@ -331,13 +352,15 @@ namespace TagTool.Tags.Definitions
             public RealVector3d PillOffset;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class HudInterface : TagStructure
 		{
             public CachedTagInstance UnitHudInterface;
         }
 
-        [TagStructure(Size = 0x14)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
         public class DialogueVariant : TagStructure
 		{
             public short VariantNumber;
@@ -360,13 +383,14 @@ namespace TagTool.Tags.Definitions
             public float DriverPowerdownTime;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Weapon : TagStructure
 		{
             public CachedTagInstance Weapon2;
         }
 
-        [TagStructure(Size = 0x38)]
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo3Retail)]
         public class TargetTrackingBlock : TagStructure
 		{
             public List<TrackingType> TrackingTypes;
@@ -376,56 +400,72 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance TrackingSound;
             public CachedTagInstance LockedSound;
 
-            [TagStructure(Size = 0x4)]
+            [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
             public class TrackingType : TagStructure
 			{
                 public StringId TrackingType2;
             }
         }
 
-        [TagStructure(Size = 0xE4)]
-        public class Seat : TagStructure
+        [Flags]
+        public enum UnitSeatFlagBits : int
+        {
+            Invisible = 1 << 0,
+            Locked = 1 << 1,
+            Driver = 1 << 2,
+            Gunner = 1 << 3,
+            ThirdPersonCamera = 1 << 4,
+            AllowsWeapons = 1 << 5,
+            ThirdPersonOnEnter = 1 << 6,
+            FirstPersonCameraSlavedToGun = 1 << 7,
+            AllowVehicleCommunicationAnimations = 1 << 8,
+            NotValidWithoutDriver = 1 << 9,
+            AllowAiNonCombatants = 1 << 10,
+            BoardingSeat = 1 << 11,
+            AiFiringDisabledByMaxAcceleration = 1 << 12,
+            BoardingEntersSeat = 1 << 13,
+            BoardingNeedAnyPassenger = 1 << 14,
+            ControlsOpenAndClose = 1 << 15,
+            InvalidForPlayer = 1 << 16,
+            InvalidForNonPlayer = 1 << 17,
+            GunnerPlayerOnly = 1 << 18,
+            InvisibleUnderMajorDamage = 1 << 19,
+            MeleeInstantKillable = 1 << 20,
+            LeaderPreference = 1 << 21,
+            AllowsExitAndDetach = 1 << 22
+        }
+
+        [TagStructure(Size = 0xB0, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0xE4, MinVersion = CacheVersion.Halo3Retail)]
+        public class UnitSeat : TagStructure
 		{
-            public uint Flags;
+            public UnitSeatFlagBits Flags; // int
             public StringId SeatAnimation;
             public StringId SeatMarkerName;
-            public StringId EntryMarkerSName;
+            public StringId EntryMarkerName;
             public StringId BoardingGrenadeMarker;
             public StringId BoardingGrenadeString;
             public StringId BoardingMeleeString;
             public StringId DetachWeaponString;
             public float PingScale;
             public float TurnoverTime;
-            public RealVector3d AccelerationRange;
-            public float AccelerationActionScale;
-            public float AccelerationAttachScale;
+            public UnitSeatAcceleration SeatAcceleration;
             public float AiScariness;
-            public AiSeatTypeValue AiSeatType;
+            public AiSeatTypeValue AiSeatType; // short
             public short BoardingSeat;
             public float ListenerInterpolationFactor;
 
             public Bounds<float> YawRateBounds;
-
             public Bounds<float> PitchRateBounds;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public float PitchInterpolationTime;
 
-            public float MinSpeedReference;
-            public float MaxSpeedReference;
+            public Bounds<float> SpeedReferenceBounds;
             public float SpeedExponent;
 
-            public CameraFlagsValue CameraFlags;
+            public UnitCamera Camera;
 
-            [TagField(Padding = true, Length = 2)]
-            public byte[] Unused;
-
-            public StringId CameraMarkerName;
-            public StringId CameraSubmergedMarkerName;
-            public Angle PitchAutoLevel;
-            public Bounds<Angle> PitchRange;
-            public List<UnitCameraTrack> CameraTracks;
-            public Bounds<Angle> PitchSpringBounds;
-            public Angle SpringVelocity;
-            public List<CameraAccelerationBlock> Unknown7;
             public List<UnitHudInterfaceBlock> UnitHudInterface;
             public StringId EnterSeatString;
             public Bounds<Angle> YawRange;
@@ -444,44 +484,11 @@ namespace TagTool.Tags.Definitions
                 Gunner,
                 SmallCargo,
                 LargeCargo,
-                Driver,
+                Driver
             }
 
-            [Flags]
-            public enum CameraFlagsValue : ushort
-            {
-                None = 0,
-                PitchBoundsAbsoluteSpace = 1 << 0,
-                OnlyCollidesWithEnvironment = 1 << 1,
-                HidesPlayerUnitFromCamera = 1 << 2,
-                UseAimingVectorInsteadOfMarkerForward = 1 << 3
-            }
-            
-            [TagStructure(Size = 0x4C)]
-            public class CameraAccelerationBlock : TagStructure
-			{
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
-                public uint Unknown12;
-                public uint Unknown13;
-                public uint Unknown14;
-                public uint Unknown15;
-                public uint Unknown16;
-                public uint Unknown17;
-                public uint Unknown18;
-                public uint Unknown19;
-            }
-
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
             public class UnitHudInterfaceBlock : TagStructure
 			{
                 public CachedTagInstance UnitHudInterface;

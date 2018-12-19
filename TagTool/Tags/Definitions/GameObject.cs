@@ -72,8 +72,8 @@ namespace TagTool.Tags.Definitions
         public List<Attachment> Attachments;
         public List<TagReferenceBlock> Widgets;
 
-        [TagField(Padding = true, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
-        public byte[] OldFunctionsBlock = new byte[12];
+        [TagField(Padding = true, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] OldFunctionsBlock = new byte[8];
 
         public List<ChangeColor> ChangeColors;
 
@@ -304,7 +304,7 @@ namespace TagTool.Tags.Definitions
             public sbyte TargetNode;
         }
 
-        [TagStructure(Size = 0xC4)]
+        [TagStructure(Size = 0xC4, MinVersion = CacheVersion.Halo3Retail)]
         public class MultiplayerObjectProperty : TagStructure
 		{
             public EngineFlagsValue EngineFlags;
