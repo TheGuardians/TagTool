@@ -273,6 +273,8 @@ namespace TagTool.Commands.Tags
 
             // Perform fixups
             FixShaders(data);
+
+
             if (data is Scenario scenario)
                 FixScenario(scenario);
 

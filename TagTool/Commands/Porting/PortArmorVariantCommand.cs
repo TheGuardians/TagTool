@@ -567,6 +567,7 @@ namespace TagTool.Commands.Porting
                 {
                     ObjectType = new GameObjectType
                     {
+                        Halo2 = GameObjectTypeHalo2.Scenery,
                         Halo3Retail = GameObjectTypeHalo3Retail.Scenery,
                         Halo3ODST = GameObjectTypeHalo3ODST.Scenery,
                         HaloOnline = GameObjectTypeHaloOnline.Scenery

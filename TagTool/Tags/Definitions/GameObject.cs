@@ -424,6 +424,23 @@ namespace TagTool.Tags.Definitions
         }
     }
 
+    public enum GameObjectTypeHalo2 : sbyte
+    {
+        Biped,
+		Vehicle,
+		Weapon,
+		Equipment,
+		Garbage,
+		Projectile,
+		Scenery,
+		Machine,
+		Control,
+		LightFixture,
+		SoundScenery,
+		Crate,
+		Creature
+    }
+
     public enum GameObjectTypeHalo3Retail : sbyte
     {
         None = -1,
@@ -487,6 +504,9 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x2)]
     public class GameObjectType : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public GameObjectTypeHalo2 Halo2;
+
         [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] Unused1;
 
@@ -582,6 +602,9 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x1)]
     public class ScenarioObjectType : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public GameObjectTypeHalo2 Halo2;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public GameObjectTypeHalo3Retail Halo3Retail;
 

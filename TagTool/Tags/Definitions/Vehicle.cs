@@ -117,7 +117,7 @@ namespace TagTool.Tags.Definitions
         public float EngineMomentum;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float EngineMaxAngularVelocity;
+        public float EngineMaximumAngularVelocity;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<Gear> Gears;
@@ -248,19 +248,19 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x78, MinVersion = CacheVersion.Halo3Retail)]
         public class VehiclePhysicsTypes : TagStructure
         {
-            public List<HumanTankPhysics> TankEngineMotionProperties;
-            public List<HumanJeepPhysics> EngineMotionProperties;
-            public List<HumanPlanePhysics> DropshipMotionProperties;
-            public List<AlienScoutPhysics> AntigravityMotionProperties;
-            public List<AlienFighterPhysics> JetEngineMotionProperties;
-            public List<TurretPhysics> TurretProperties;
+            public List<HumanTankPhysics> HumanTank;
+            public List<HumanJeepPhysics> HumanJeep;
+            public List<HumanPlanePhysics> HumanPlane;
+            public List<AlienScoutPhysics> AlienScout;
+            public List<AlienFighterPhysics> AlienFighter;
+            public List<TurretPhysics> Turret;
 
             [TagField(Padding = true, Length = 12)]
             public byte[] Unused = new byte[12]; // tag_block
 
-            public List<VtolPhysics> HelicopterMotionProperties;
-            public List<ChopperPhysics> AntigravityEngineMotionProperties;
-            public List<GuardianPhysics> AutoturretEquipment;
+            public List<VtolPhysics> Vtol;
+            public List<ChopperPhysics> Chopper;
+            public List<GuardianPhysics> Guardian;
         }
 
         [TagStructure(Size = 0x4)]
@@ -361,15 +361,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40)]
         public class HumanJeepPhysics : TagStructure
         {
-            public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdamenExponent;
-            public Angle MaximumLeftTurn;
-            public Angle MaximumRightTurn;
-            public Angle TurnRate;
-            public float EngineMomentum;
-            public float EngineMaximumAngularVelocity;
-            public List<Gear> Gears;
-            public CachedTagInstance ChangeGearSound;
+            public VehicleSteeringControl Steering;
+            public VehicleTurningControl Turning;
+            public EnginePhysics Engine;
             public float WheelCircumference;
             public float GravityAdjust;
         }
@@ -394,8 +388,7 @@ namespace TagTool.Tags.Definitions
             public float ThrustScale;
             public float TurnRateScaleWhenBoosting;
             public Angle MaximumRoll;
-            public float InterpolationScale;
-            public Angle MaximumAngle;
+            public VehicleSteeringAnimation SteeringAnimation;
         }
 
         [Flags]
@@ -417,8 +410,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x70)]
         public class AlienScoutPhysics : TagStructure
         {
-            public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdampenExponent;
+            public VehicleSteeringControl Steering;
+
             public float MaximumForwardSpeed;
             public float MaximumReverseSpeed;
             public float SpeedAcceleration;
@@ -442,20 +435,17 @@ namespace TagTool.Tags.Definitions
 
             public Bounds<float> GearRotationSpeed;
 
-            // steering
-            public float InterpolationScale;
-            public Angle MaximumAngle;
+            public VehicleSteeringAnimation SteeringAnimation;
         }
 
         [TagStructure(Size = 0x64, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloOnline106708)]
         public class AlienFighterPhysics : TagStructure
         {
-            public Angle SteeringOverdampenCuspAngle;
-            public float SteeringOverdamenExponent;
+            public VehicleSteeringControl Steering;
 
             public Angle MaximumLeftTurn;
-            public Angle MaximumRightTurnNegative;
+            public Angle MaximumRightTurn;
             public float TurnRate;
 
             public float MaximumForwardSpeed;
@@ -928,6 +918,21 @@ namespace TagTool.Tags.Definitions
         {
             public float OverdampenCuspAngle;
             public float OverdampenExponent;
+        }
+
+        [TagStructure(Size = 0x8)]
+        public class VehicleSteeringAnimation : TagStructure
+        {
+            public float InterpolationScale;
+            public Angle MaximumAngle;
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class VehicleTurningControl : TagStructure
+        {
+            public float MaximumLeftTurn;
+            public float MaximumRightTurn;
+            public float TurnRate;
         }
     }
 }

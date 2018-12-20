@@ -426,6 +426,7 @@ namespace TagTool.Commands.Porting
 				case Scenario scenario when !FlagIsSet(PortingFlags.Squads):
 					scenario.Squads = new List<Scenario.Squad>();
 					break;
+
 				case Scenario scenario when !FlagIsSet(PortingFlags.ForgePalette):
 					scenario.SandboxEquipment.Clear();
 					scenario.SandboxGoalObjects.Clear();
@@ -673,7 +674,13 @@ namespace TagTool.Commands.Porting
 				case WeaponFlags weaponFlags:
 					return ConvertWeaponFlags(weaponFlags);
 
-				case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
+                case Vehicle.VehicleFlagBits vehicleFlags:
+                    return ConvertVehicleFlags(vehicleFlags);
+
+                case Vehicle.HavokVehiclePhysicsFlags havokVehicleFlags:
+                    return ConvertHavokVehicleFlags(havokVehicleFlags);
+
+                case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
 					if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
 						throw new NotSupportedException(propertyType.Halo2.ToString());
 					return propertyType;
@@ -693,27 +700,6 @@ namespace TagTool.Commands.Porting
 					data = ConvertCollection(cacheStream, resourceStreams, data as IList, definition, blamTagName);
 					return data;
 
-				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
-					renderGeometry = ConvertStructure(cacheStream, resourceStreams, renderGeometry, definition, blamTagName);
-					renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
-					return renderGeometry;
-
-				case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:
-					part = ConvertStructure(cacheStream, resourceStreams, part, definition, blamTagName);
-					if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
-						throw new NotSupportedException(part.TypeOld.ToString());
-					return part;
-
-				case RenderMaterial.Property property when BlamCache.Version < CacheVersion.Halo3Retail:
-					property = ConvertStructure(cacheStream, resourceStreams, property, definition, blamTagName);
-					property.IntValue = property.ShortValue;
-					return property;
-
-				case Model.GlobalDamageInfoBlock newDamageInfo:
-					newDamageInfo = ConvertStructure(cacheStream, resourceStreams, newDamageInfo, definition, blamTagName);
-					newDamageInfo = ConvertNewDamageInfo(newDamageInfo);
-					return newDamageInfo;
-
 				case TagStructure tagStructure: // much faster to pattern match a type than to check for custom attributes.
 					tagStructure = ConvertStructure(cacheStream, resourceStreams, tagStructure, definition, blamTagName);
 					return data;
@@ -730,7 +716,7 @@ namespace TagTool.Commands.Porting
 			return data;
 		}
 
-		private IList ConvertCollection(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, string blamTagName)
+        private IList ConvertCollection(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, string blamTagName)
 		{
 			// return early where possible
 			if (data is null || data.Count == 0) 
@@ -751,24 +737,188 @@ namespace TagTool.Commands.Porting
 			return data;
 		}
 
-		private T ConvertStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
+        private T UpgradeStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
+        {
+            if (BlamCache.Version >= CacheVersion.Halo3Retail)
+                return data;
+
+            switch (data)
+            {
+                case Mesh.Part part:
+                    if (!Enum.TryParse(part.TypeOld.ToString(), out part.TypeNew))
+                        throw new NotSupportedException(part.TypeOld.ToString());
+                    break;
+
+                case RenderMaterial.Property property:
+                    property.IntValue = property.ShortValue;
+                    break;
+
+                case Vehicle vehi:
+                    vehi.FlipOverMessageNew = ConvertStringId(vehi.FlipOverMessageOld);
+                    vehi.FlipTimeNew = vehi.FlipTimeOld;
+                    vehi.FlippingAngularVelocityRangeNew = vehi.FlippingAngularVelocityRangeOld;
+                    vehi.HavokPhysicsNew = vehi.HavokPhysicsOld;
+
+                    vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
+
+                    switch (vehi.PhysicsType)
+                    {
+                        case Vehicle.VehiclePhysicsType.HumanTank:
+                            vehi.PhysicsTypes.HumanTank = new List<Vehicle.HumanTankPhysics>
+                            {
+                                new Vehicle.HumanTankPhysics
+                                {
+                                    ForwardArc = Angle.FromDegrees(100.0f),
+                                    FlipWindow = 0.4f,
+                                    PeggedFraction = 1.0f,
+                                    MaximumLeftDifferential = vehi.MaximumLeftSlide,
+                                    MaximumRightDifferential = vehi.MaximumRightSlide,
+                                    DifferentialAcceleration = vehi.SlideAcceleration,
+                                    DifferentialDeceleration = vehi.SlideDeceleration,
+                                    MaximumLeftReverseDifferential = vehi.MaximumLeftSlide,
+                                    MaximumRightReverseDifferential = vehi.MaximumRightSlide,
+                                    DifferentialReverseAcceleration = vehi.SlideAcceleration,
+                                    DifferentialReverseDeceleration = vehi.SlideDeceleration,
+                                    Engine = new Vehicle.EnginePhysics
+                                    {
+                                        EngineMomentum = vehi.EngineMomentum,
+                                        EngineMaximumAngularVelocity = vehi.EngineMaximumAngularVelocity,
+                                        Gears = vehi.Gears,
+                                        GearShiftSound = null
+                                    },
+                                    WheelCircumference = vehi.WheelCircumference,
+                                    GravityAdjust = 0.45f
+                                }
+                            };
+                            break;
+
+                        case Vehicle.VehiclePhysicsType.HumanJeep:
+                            vehi.PhysicsTypes.HumanJeep = new List<Vehicle.HumanJeepPhysics>
+                            {
+                                new Vehicle.HumanJeepPhysics
+                                {
+                                    Steering = vehi.Steering,
+                                    Turning = new Vehicle.VehicleTurningControl
+                                    {
+                                        MaximumLeftTurn = vehi.MaximumLeftTurn,
+                                        MaximumRightTurn = vehi.MaximumRightTurn,
+                                        TurnRate = vehi.TurnRate
+                                    },
+                                    Engine = new Vehicle.EnginePhysics
+                                    {
+                                        EngineMomentum = vehi.EngineMomentum,
+                                        EngineMaximumAngularVelocity = vehi.EngineMaximumAngularVelocity,
+                                        Gears = vehi.Gears,
+                                        GearShiftSound = CacheContext.GetTag<Vehicle>(@"sound\vehicles\warthog\warthog_shift")
+                                    },
+                                    WheelCircumference = vehi.WheelCircumference,
+                                    GravityAdjust = 0.8f
+                                }
+                            };
+                            break;
+
+                        case Vehicle.VehiclePhysicsType.HumanBoat:
+                            throw new NotSupportedException(vehi.PhysicsType.ToString());
+
+                        case Vehicle.VehiclePhysicsType.HumanPlane:
+                            vehi.PhysicsTypes.HumanPlane = new List<Vehicle.HumanPlanePhysics>
+                            {
+                                new Vehicle.HumanPlanePhysics
+                                {
+                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                    SpeedAcceleration = vehi.SpeedAcceleration,
+                                    SpeedDeceleration = vehi.SpeedDeceleration,
+                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                    MaximumRightSlide = vehi.MaximumRightSlide,
+                                    SlideAcceleration = vehi.SlideAcceleration,
+                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    MaximumUpRise = vehi.MaximumForwardSpeed,
+                                    MaximumDownRise = vehi.MaximumForwardSpeed,
+                                    RiseAcceleration = vehi.SpeedAcceleration,
+                                    RiseDeceleration = vehi.SpeedDeceleration,
+                                    FlyingTorqueScale = vehi.FlyingTorqueScale,
+                                    AirFrictionDeceleration = vehi.AirFrictionDeceleration,
+                                    ThrustScale = vehi.ThrustScale,
+                                    TurnRateScaleWhenBoosting = 1.0f,
+                                    MaximumRoll = Angle.FromDegrees(90.0f),
+                                    SteeringAnimation = new Vehicle.VehicleSteeringAnimation
+                                    {
+                                        InterpolationScale = 0.9f,
+                                        MaximumAngle = Angle.FromDegrees(15.0f)
+                                    }
+                                }
+                            };
+                            break;
+
+                        case Vehicle.VehiclePhysicsType.AlienScout:
+                            vehi.PhysicsTypes.AlienScout = new List<Vehicle.AlienScoutPhysics>
+                            {
+                                new Vehicle.AlienScoutPhysics
+                                {
+                                    // TODO
+                                }
+                            };
+                            break;
+
+                        case Vehicle.VehiclePhysicsType.AlienFighter:
+                            vehi.PhysicsTypes.AlienFighter = new List<Vehicle.AlienFighterPhysics>
+                            {
+                                new Vehicle.AlienFighterPhysics
+                                {
+                                    // TODO
+                                }
+                            };
+                            break;
+
+                        case Vehicle.VehiclePhysicsType.Turret:
+                            vehi.PhysicsTypes.Turret = new List<Vehicle.TurretPhysics>
+                            {
+                                new Vehicle.TurretPhysics
+                                {
+                                    // TODO
+                                }
+                            };
+                            break;
+                    }
+                    break;
+            }
+
+            return data;
+        }
+
+        private T ConvertStructure<T>(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
 		{
-			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
-			{
-				// skip the field if no conversion is needed
-				if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
-					tagFieldInfo.FieldType == typeof(string))
-					continue;
-				var oldValue = tagFieldInfo.GetValue(data);
-				if (oldValue is null)
-					continue;
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+            {
+                // skip the field if no conversion is needed
+                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
+                    tagFieldInfo.FieldType == typeof(string))
+                    continue;
 
-				// convert the field
-				var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-				tagFieldInfo.SetValue(data, newValue);
-			}
+                var oldValue = tagFieldInfo.GetValue(data);
+                if (oldValue is null)
+                    continue;
 
-			return data;
+                // convert the field
+                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                tagFieldInfo.SetValue(data, newValue);
+            }
+
+            data = UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
+
+            switch (data)
+            {
+                case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
+                    renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+                    break;
+
+                case Model.GlobalDamageInfoBlock newDamageInfo:
+                    newDamageInfo = ConvertNewDamageInfo(newDamageInfo);
+                    break;
+            }
+
+            return data;
 		}
 
 		private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)
@@ -843,9 +993,31 @@ namespace TagTool.Commands.Porting
 			return TagFunction.ConvertTagFunction(function);
 		}
 
-		private GameObjectType ConvertGameObjectType(GameObjectType objectType)
+        private Vehicle.VehicleFlagBits ConvertVehicleFlags(Vehicle.VehicleFlagBits flags)
+        {
+            if (BlamCache.Version <= CacheVersion.Halo2Vista)
+                if (!Enum.TryParse(flags.Gen2.ToString(), out flags.Gen3))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            return flags;
+        }
+
+        private Vehicle.HavokVehiclePhysicsFlags ConvertHavokVehicleFlags(Vehicle.HavokVehiclePhysicsFlags flags)
+        {
+            if (BlamCache.Version <= CacheVersion.Halo2Vista)
+                if (!Enum.TryParse(flags.Gen2.ToString(), out flags.Gen3))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            return flags;
+        }
+
+        private GameObjectType ConvertGameObjectType(GameObjectType objectType)
 		{
-			if (BlamCache.Version == CacheVersion.Halo3Retail)
+            if (BlamCache.Version <= CacheVersion.Halo2Vista)
+                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
@@ -853,8 +1025,12 @@ namespace TagTool.Commands.Porting
 		}
 
 		private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType)
-		{
-			if (BlamCache.Version == CacheVersion.Halo3Retail)
+        {
+            if (BlamCache.Version <= CacheVersion.Halo2Vista)
+                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
