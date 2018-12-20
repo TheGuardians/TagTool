@@ -37,8 +37,13 @@ namespace TagTool.Tags.Definitions
 
         public float SoftPingThreshold;
         public float SoftPingInterruptTime;
+
         public float HardPingThreshold;
         public float HardPingInterruptTime;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public float HardPingDeathThreshold;
+
         public float FeignDeathThreshold;
         public float FeignDeathTime;
         public float DistanceOfEvadeAnimation;
@@ -58,11 +63,17 @@ namespace TagTool.Tags.Definitions
         public StringId RightHandNode;
         public StringId LeftHandNode;
         public StringId PreferredGunNode;
+
         public CachedTagInstance MeleeDamage;
         public CachedTagInstance BoardingMeleeDamage;
         public CachedTagInstance BoardingMeleeResponse;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance EjectionMeleeDamage;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance EjectionMeleeResponse;
+
         public CachedTagInstance LandingMeleeDamage;
         public CachedTagInstance FlurryMeleeDamage;
         public CachedTagInstance ObstacleSmashMeleeDamage;
@@ -446,7 +457,10 @@ namespace TagTool.Tags.Definitions
             public StringId BoardingGrenadeMarker;
             public StringId BoardingGrenadeString;
             public StringId BoardingMeleeString;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public StringId DetachWeaponString;
+
             public float PingScale;
             public float TurnoverTime;
             public UnitSeatAcceleration SeatAcceleration;

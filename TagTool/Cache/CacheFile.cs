@@ -147,7 +147,7 @@ namespace TagTool.Cache
             public string GetItemByID(int ID)
             {
                 //go through the modifiers, if the ID matches a modifer return the correct string
-                string[] mods = Cache.StringMods.Split(';');
+                string[] mods = Cache.StringMods?.Split(';') ?? new string[] { "0,0" };
                 try
                 {
                     foreach (string mod in mods)

@@ -56,6 +56,9 @@ namespace TagTool.Tags.Definitions
 
         public PlayerTrainingVehicleTypeValue PlayerTrainingVehicleType;
 
+        [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused2 = new byte[1];
+
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public StringId FlipOverMessageOld;
 
@@ -85,10 +88,13 @@ namespace TagTool.Tags.Definitions
 
         public VehicleSizeValue VehicleSize;
 
+        [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused3 = new byte[1];
+
         public sbyte ComplexSuspensionSampleCount;
 
         [TagField(Padding = true, Length = 1)]
-        public byte[] Unused2 = new byte[1];
+        public byte[] Unused4 = new byte[1];
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public Bounds<float> FlippingAngularVelocityRangeNew;
