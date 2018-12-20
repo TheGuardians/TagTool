@@ -312,7 +312,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitAssassination : TagStructure
         {
             public CachedTagInstance Response;
