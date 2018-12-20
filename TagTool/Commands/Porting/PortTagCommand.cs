@@ -753,6 +753,10 @@ namespace TagTool.Commands.Porting
                     property.IntValue = property.ShortValue;
                     break;
 
+                case Vehicle.VehicleSteeringControl steering:
+                    steering.OverdampenCuspAngleNew = Angle.FromDegrees(steering.OverdampenCuspAngleOld);
+                    break;
+
                 case Vehicle vehi:
                     vehi.FlipOverMessageNew = ConvertStringId(vehi.FlipOverMessageOld);
                     vehi.FlipTimeNew = vehi.FlipTimeOld;
@@ -856,7 +860,39 @@ namespace TagTool.Commands.Porting
                             {
                                 new Vehicle.AlienScoutPhysics
                                 {
-                                    // TODO
+                                    Steering = vehi.Steering,
+                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                    SpeedAcceleration = vehi.SpeedAcceleration,
+                                    SpeedDeceleration = vehi.SpeedDeceleration,
+                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                    MaximumRightSlide = vehi.MaximumRightSlide,
+                                    SlideAcceleration = vehi.SlideAcceleration,
+                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    Flags = Vehicle.VehicleScoutPhysicsFlags.None, // TODO
+                                    DragCoefficient = 0.0f,
+                                    ConstantDeceleration = 0.0f,
+                                    TorqueScale = 1.0f,
+                                    EngineGravityFunction = new Vehicle.AlienScoutGravityFunction
+                                    {// TODO
+                                        ObjectFunctionDamageRegion = StringId.Invalid,
+                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
+                                        EngineSpeedAcceleration = 0.0f,
+                                        MaximumVehicleSpeed = 0.0f
+                                    },
+                                    ContrailObjectFunction = new Vehicle.AlienScoutGravityFunction
+                                    {// TODO
+                                        ObjectFunctionDamageRegion = StringId.Invalid,
+                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
+                                        EngineSpeedAcceleration = 0.0f,
+                                        MaximumVehicleSpeed = 0.0f
+                                    },
+                                    GearRotationSpeed = new Bounds<float>(0.0f, 0.0f), // TODO
+                                    SteeringAnimation = new Vehicle.VehicleSteeringAnimation
+                                    {// TODO
+                                        InterpolationScale = 0.0f,
+                                        MaximumAngle = Angle.FromDegrees(0.0f)
+                                    }
                                 }
                             };
                             break;
@@ -866,18 +902,40 @@ namespace TagTool.Commands.Porting
                             {
                                 new Vehicle.AlienFighterPhysics
                                 {
-                                    // TODO
+                                    Steering = vehi.Steering,
+                                    Turning = new Vehicle.VehicleTurningControl
+                                    {
+                                        MaximumLeftTurn = vehi.MaximumLeftTurn,
+                                        MaximumRightTurn = vehi.MaximumRightTurn,
+                                        TurnRate = vehi.TurnRate
+                                    },
+                                    MaximumForwardSpeed = vehi.MaximumForwardSpeed,
+                                    MaximumReverseSpeed = vehi.MaximumReverseSpeed,
+                                    SpeedAcceleration = vehi.SpeedAcceleration,
+                                    SpeedDeceleration = vehi.SpeedDeceleration,
+                                    MaximumLeftSlide = vehi.MaximumLeftSlide,
+                                    MaximumRightSlide = vehi.MaximumRightSlide,
+                                    SlideAcceleration = vehi.SlideAcceleration,
+                                    SlideDeceleration = vehi.SlideDeceleration,
+                                    SlideAccelAgainstDirection = 1.0f,
+                                    FlyingTorqueScale = vehi.FlyingTorqueScale,
+                                    FixedGunOffset = vehi.FixedGunOffset,
+                                    LoopTrickDuration = 1.8f,
+                                    RollTrickDuration = 1.8f,
+                                    ZeroGravitySpeed = 4.0f,
+                                    FullGravitySpeed = 3.7f,
+                                    StrafeBoostScale = 7.5f,
+                                    OffStickDecelScale = 0.1f,
+                                    CruisingThrottle = 0.75f,
+                                    DiveSpeedScale = 0.0f
                                 }
                             };
                             break;
 
                         case Vehicle.VehiclePhysicsType.Turret:
                             vehi.PhysicsTypes.Turret = new List<Vehicle.TurretPhysics>
-                            {
-                                new Vehicle.TurretPhysics
-                                {
-                                    // TODO
-                                }
+                            {// TODO: Determine if these fields are used
+                                new Vehicle.TurretPhysics()
                             };
                             break;
                     }

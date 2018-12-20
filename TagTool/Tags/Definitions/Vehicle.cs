@@ -100,10 +100,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> FlippingAngularVelocityRangeNew;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public Angle FixedGunYaw;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public Angle FixedGunPitch;
+        public RealEulerAngles2d FixedGunOffset;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public VehicleSteeringControl Steering;
@@ -190,7 +187,7 @@ namespace TagTool.Tags.Definitions
                 AiDriverCanSidestep = 1 << 13,
                 AiDriverHovering = 1 << 14,
                 VehicleSteersDirectly = 1 << 15,
-                Bit_16 = 1 << 16,
+                Bit16 = 1 << 16,
                 HasEBrake = 1 << 17,
                 NoncombatVehicle = 1 << 18,
                 NoFrictionWithDriver = 1 << 19,
@@ -212,9 +209,20 @@ namespace TagTool.Tags.Definitions
                 AiDriverCanSidestep = 1 << 7,
                 AiDriverHovering = 1 << 8,
                 NoncombatVehicle = 1 << 9,
-                VehicleIsChild = 1 << 10,
-                BouncesAtDeathBarriers = 1 << 11,
-                Hydraulics = 1 << 12
+                DoesNotCauseCollisionDamage = 1 << 10,
+                AiAutoTurret = 1 << 11,
+                AiSentryTurret = 1 << 12,
+                IgnoreKillVolumes = 1 << 13,
+                TargetableWhenOpen = 1 << 14,
+                ReduceWeaponAccelWhenOnGround = 1 << 15,
+                ReduceWeaponAccelWhenAirborne = 1 << 16,
+                DoNotForceUnitsToExitWhenUpsideDown = 1 << 17,
+                CreatesEnemySpawnInfluencers = 1 << 18,
+                DriverCannotTakeDamage = 1 << 19,
+                PlayerCannotFlipVehicle = 1 << 20,
+                DoNotKillRidersAtTerminalVelocity = 1 << 21,
+                RidersUseRadioOnly = 1 << 22,
+                TreatDualWieldedWeaponAsSecondaryWeapon = 1 << 23
             }
         }
 
@@ -392,10 +400,11 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum AlientScoutFlags : byte
+        public enum VehicleScoutPhysicsFlags : byte
         {
             None,
-            LockedCamera = 1 << 0
+            Hovercraft = 1 << 0,
+            SlopeScalesSpeed = 1 << 1
         }
 
         [TagStructure(Size = 0x14)]
@@ -421,12 +430,12 @@ namespace TagTool.Tags.Definitions
             public float SlideAcceleration;
             public float SlideDeceleration;
 
-            public AlientScoutFlags Flags;
+            public VehicleScoutPhysicsFlags Flags;
 
             [TagField(Padding = true, Length = 3)]
             public byte[] Unused = new byte[3];
 
-            public float DragCoeficient;
+            public float DragCoefficient;
             public float ConstantDeceleration;
             public float TorqueScale;
 
@@ -443,10 +452,7 @@ namespace TagTool.Tags.Definitions
         public class AlienFighterPhysics : TagStructure
         {
             public VehicleSteeringControl Steering;
-
-            public Angle MaximumLeftTurn;
-            public Angle MaximumRightTurn;
-            public float TurnRate;
+            public VehicleTurningControl Turning;
 
             public float MaximumForwardSpeed;
             public float MaximumReverseSpeed;
@@ -485,9 +491,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x74)]
         public class VtolPhysics : TagStructure
         {
-            public float MaximumLeftTurn;
-            public float MaximumRightTurnNegative;
-            public float TurnRate;
+            public VehicleTurningControl Turning;
 
             public StringId LeftLiftMarker;
             public StringId RightLiftMarker;
@@ -916,7 +920,12 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class VehicleSteeringControl : TagStructure
         {
-            public float OverdampenCuspAngle;
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public float OverdampenCuspAngleOld;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public Angle OverdampenCuspAngleNew;
+
             public float OverdampenExponent;
         }
 
