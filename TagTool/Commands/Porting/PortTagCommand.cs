@@ -1048,14 +1048,48 @@ namespace TagTool.Commands.Porting
 
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{
+            if (BlamCache.Version < CacheVersion.Halo3Retail)
+            {
+                Console.WriteLine("WARNING: TagFunction from Gen2 not converted!");
+                return null;
+            }
+
 			return TagFunction.ConvertTagFunction(function);
 		}
 
         private Vehicle.VehicleFlagBits ConvertVehicleFlags(Vehicle.VehicleFlagBits flags)
         {
             if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(flags.Gen2.ToString(), out flags.Gen3))
-                    throw new FormatException(BlamCache.Version.ToString());
+            {
+                var gen2Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen2Bits));
+                var gen3Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen3Bits));
+
+                flags.Gen3 = Vehicle.VehicleFlagBits.Gen3Bits.None;
+
+                foreach (var gen2 in gen2Values)
+                {
+                    if (!flags.Gen2.HasFlag((Enum)gen2))
+                        continue;
+
+                    var wasSet = false;
+
+                    foreach (var gen3 in gen3Values)
+                    {
+                        if (gen2.ToString() == gen3.ToString())
+                        {
+                            flags.Gen3 |= (dynamic)gen3;
+                            wasSet = true;
+                            break;
+                        }
+                    }
+
+                    if (!wasSet)
+                        Console.WriteLine($"WARNING: Vehicle flag not found in gen3: {gen2}");
+                }
+
+                if (!flags.Gen2.HasFlag(Vehicle.VehicleFlagBits.Gen2Bits.KillsRidersAtTerminalVelocity))
+                    flags.Gen3 |= Vehicle.VehicleFlagBits.Gen3Bits.DoNotKillRidersAtTerminalVelocity;
+            }
 
             return flags;
         }
