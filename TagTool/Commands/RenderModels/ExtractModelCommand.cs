@@ -76,50 +76,62 @@ namespace TagTool.Commands.RenderModels
                 switch (fileType)
                 {
                     case "obj":
-                        ExtractObj(variantName, modelFile, Definition, resourceDefinition, resourceStream);
-                        break;
+                        return ExtractObj(variantName, modelFile, Definition, resourceDefinition, resourceStream);
                         
                     default:
                         throw new NotImplementedException(fileType);
                 }
             }
-
-            Console.WriteLine("Done!");
-
-            return true;
         }
 
-        private void ExtractObj(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
+        private bool ExtractObj(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
         {
+            var meshes = new Dictionary<string, Mesh>();
+            var vertexCompressor = new VertexCompressor(renderModel.Geometry.Compression[0]);
+
+            foreach (var region in renderModel.Regions)
+            {
+                var regionName = CacheContext.GetString(region.Name);
+
+                foreach (var permutation in region.Permutations)
+                {
+                    var permutationName = CacheContext.GetString(permutation.Name);
+
+                    if (variantName != "*" && variantName != permutationName)
+                        continue;
+
+                    for (var i = 0; i < permutation.MeshCount; i++)
+                    {
+                        var name = $"{regionName}_{permutationName}_{i}";
+                        meshes[name] = renderModel.Geometry.Meshes[permutation.MeshIndex + i];
+                    }
+                }
+            }
+
+            if (meshes.Count == 0)
+            {
+                Console.WriteLine($"ERROR: No meshes found under variant '{variantName}'!");
+                return false;
+            }
+
+            Console.Write("Extracting {0} mesh(es)...", meshes.Count);
+
             using (var objFile = new StreamWriter(modelFile.Create()))
             {
                 var objExtractor = new ObjExtractor(objFile);
 
-                // Create a (de)compressor from the first compression block
-                var vertexCompressor = new VertexCompressor(renderModel.Geometry.Compression[0]);
-
-                Console.WriteLine("Extracting {0} mesh(es)...", renderModel.Geometry.Meshes.Count);
-
-                foreach (var region in renderModel.Regions)
+                foreach (var entry in meshes)
                 {
-                    foreach (var permutation in region.Permutations)
-                    {
-                        if (variantName != CacheContext.GetString(permutation.Name))
-                            continue;
-
-                        for (var i = 0; i < permutation.MeshCount; i++)
-                        {
-                            var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex + i];
-
-                            // Create a MeshReader for the mesh and pass it to the obj extractor
-                            var meshReader = new MeshReader(CacheContext.Version, mesh, resourceDefinition);
-                            objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
-                        }
-                    }
+                    var meshReader = new MeshReader(CacheContext.Version, entry.Value, resourceDefinition);
+                    objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream, entry.Key);
                 }
 
                 objExtractor.Finish();
             }
+
+            Console.WriteLine("done!");
+
+            return true;
         }
     }
 }

@@ -2,6 +2,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace TagTool.Geometry
 {
@@ -30,25 +31,51 @@ namespace TagTool.Geometry
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="compressor">The vertex compressor to use.</param>
         /// <param name="resourceStream">A stream open on the resource data.</param>
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, Stream resourceStream)
+        /// <param name="name">The name of the mesh.</param>
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, Stream resourceStream, string name = null)
         {
-            // Read the vertex buffer and decompress each vertex
             var vertices = ReadVertices(reader, resourceStream);
             DecompressVertices(vertices, compressor);
 
-            // Write out the vertices
-            WriteVertices(vertices);
+            var indicesList = new List<ushort[]>();
+            var indexCount = 0;
 
-            // Read and write out the triangles for each part
-            foreach (var part in reader.Mesh.Parts)
+            for (var i = 0; i < (reader?.Mesh?.Parts?.Count ?? -1); i++)
             {
-                try
-                {
-                    var indices = ReadIndices(reader, part, resourceStream);
-                    WriteTriangles(indices);
-                }
-                catch { }
+                var part = reader.Mesh.Parts[i];
+                var indices = ReadIndices(reader, part, resourceStream);
+
+                indicesList.Add(indices);
+
+                if (part.IndexCount > 0)
+                    indexCount += indices.Length;
             }
+
+            if (indexCount == 0)
+                return;
+
+            foreach (var vertex in vertices)
+                _writer.WriteLine("v {0} {1} {2}", vertex.Position.I, vertex.Position.J, vertex.Position.K);
+
+            foreach (var vertex in vertices)
+                _writer.WriteLine("vn {0} {1} {2}", vertex.Normal.I, vertex.Normal.J, vertex.Normal.K);
+
+            foreach (var vertex in vertices)
+                _writer.WriteLine("vt {0} {1}", vertex.TexCoords.I, 1 - vertex.TexCoords.J);
+
+            var partIndex = 0;
+
+            foreach (var indices in indicesList)
+            {
+                var triangles = GenerateTriangles(indices);
+
+                if (triangles.Count() != 0)
+                    _writer.WriteLine($"g {name}_part_{partIndex++}");
+
+                foreach (var triangle in triangles)
+                    _writer.WriteLine(triangle);
+            }
+
             _baseIndex += (uint)vertices.Count;
         }
 
@@ -257,7 +284,7 @@ namespace TagTool.Geometry
         /// Queues triangle list data to be written out to the file.
         /// </summary>
         /// <param name="indices">The indices for the triangle list. Each set of 3 indices forms one triangle.</param>
-        private void WriteTriangles(IReadOnlyList<ushort> indices)
+        private IEnumerable<string> GenerateTriangles(IReadOnlyList<ushort> indices)
         {
             for (var i = 0; i < indices.Count; i += 3)
             {
@@ -269,8 +296,7 @@ namespace TagTool.Geometry
                 if (a == b || a == c || b == c)
                     continue;
 
-                // Write a face command for a triangle
-                _faceWriter.WriteLine("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}", a, b, c);
+                yield return $"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}";
             }
         }
 

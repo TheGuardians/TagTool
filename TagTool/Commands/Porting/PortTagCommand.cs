@@ -1048,13 +1048,7 @@ namespace TagTool.Commands.Porting
 
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{
-            if (BlamCache.Version < CacheVersion.Halo3Retail)
-            {
-                Console.WriteLine("WARNING: TagFunction from Gen2 not converted!");
-                return null;
-            }
-
-			return TagFunction.ConvertTagFunction(function);
+			return TagFunction.ConvertTagFunction(BlamCache.Reader.Format, function);
 		}
 
         private Vehicle.VehicleFlagBits ConvertVehicleFlags(Vehicle.VehicleFlagBits flags)

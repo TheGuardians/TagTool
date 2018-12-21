@@ -106,12 +106,12 @@ namespace TagTool.Cache
 
                 if (Cache.StringsKey == "" || Cache.StringsKey == null)
                 {
-                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(cacheHeader.StringIDsBufferSize)), EndianFormat.BigEndian);
+                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(cacheHeader.StringIDsBufferSize)), reader.Format);
                 }
                 else
                 {
                     reader.BaseStream.Position = cacheHeader.StringIDsBufferOffset;
-                    newReader = new EndianReader(reader.DecryptAesSegment(cacheHeader.StringIDsBufferSize, Cache.StringsKey));
+                    newReader = new EndianReader(reader.DecryptAesSegment(cacheHeader.StringIDsBufferSize, Cache.StringsKey), reader.Format);
                 }
 
                 for (var i = 0; i < indices.Length; i++)

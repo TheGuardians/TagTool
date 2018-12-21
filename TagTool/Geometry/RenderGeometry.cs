@@ -102,19 +102,19 @@ namespace TagTool.Geometry
             public List<UnknownBlock> Unknown2;
 
             [TagStructure(Size = 0x2)]
-			public /*was_struct*/ class UnknownBlock : TagStructure
+			public class UnknownBlock : TagStructure
 			{
                 public short Unknown;
             }
         }
 
         [TagStructure(Size = 0xC)]
-		public /*was_struct*/ class PerMeshNodeMap : TagStructure
+		public class PerMeshNodeMap : TagStructure
 		{
             public List<NodeIndex> NodeIndices;
 
             [TagStructure(Size = 0x1)]
-			public /*was_struct*/ class NodeIndex : TagStructure
+			public class NodeIndex : TagStructure
 			{
                 public byte Node;
             }
@@ -137,7 +137,7 @@ namespace TagTool.Geometry
             public byte[] Unused;
 
             [TagStructure(Size = 0x4)]
-			public /*was_struct*/ class Index : TagStructure
+			public class Index : TagStructure
 			{
                 public int Value;
             }

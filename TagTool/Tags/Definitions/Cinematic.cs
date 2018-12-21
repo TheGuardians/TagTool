@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
         public byte[] ImportScript3;
 
         [TagStructure(Size = 0x4)]
-		public /*was_struct*/ class SceneIndex : TagStructure
+		public class SceneIndex : TagStructure
 		{
             public uint Value;
         }

@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
     /// ElDewrito Forge globals.
     /// </summary>
     [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x90)]
-	public /*was_struct*/ class ForgeGlobalsDefinition : TagStructure
+	public class ForgeGlobalsDefinition : TagStructure
 	{
         /// <summary>
         /// The "invisible" render method.
@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
         /// A material reference for ReForge objects.
         /// </summary>
         [TagStructure(Size = 0x30)]
-		public /*was_struct*/ class ReForgeMaterial : TagStructure
+		public class ReForgeMaterial : TagStructure
 		{
             [TagField(Length = 32)]
             public string Name;
@@ -109,7 +109,7 @@ namespace TagTool.Tags.Definitions
         /// A single item of the Forge object palette.
         /// </summary>
         [TagStructure(Size = 0x40)]
-		public /*was_struct*/ class PaletteItem : TagStructure
+		public class PaletteItem : TagStructure
 		{
             /// <summary>
             /// The name of the palette item.
@@ -162,7 +162,7 @@ namespace TagTool.Tags.Definitions
             /// A property setter descriptor.
             /// </summary>
             [TagStructure(Size = 0x2C)]
-			public /*was_struct*/ class Setter : TagStructure
+			public class Setter : TagStructure
 			{
                 /// <summary>
                 /// The target of the property setter.
@@ -201,7 +201,7 @@ namespace TagTool.Tags.Definitions
         /// A weather effect reference descriptor.
         /// </summary>
         [TagStructure(Size = 0x30)]
-		public /*was_struct*/ class WeatherEffect : TagStructure
+		public class WeatherEffect : TagStructure
 		{
             /// <summary>
             /// The name of the weather effect.
@@ -229,7 +229,7 @@ namespace TagTool.Tags.Definitions
         /// A Forge sky descriptor.
         /// </summary>
         [TagStructure(Size = 0xAC)]
-		public /*was_struct*/ class Sky : TagStructure
+		public class Sky : TagStructure
 		{
             /// <summary>
             /// The name of the sky.

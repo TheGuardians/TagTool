@@ -60,7 +60,7 @@ namespace TagTool.Tags.Definitions
             public List<ModelWidget> ModelWidgets;
 
             [TagStructure(Size = 0x2C)]
-			public /*was_struct*/ class WidgetData : TagStructure
+			public class WidgetData : TagStructure
 			{
                 public uint Flags;
                 public StringId Name;
@@ -158,7 +158,7 @@ namespace TagTool.Tags.Definitions
                 public ModelWidgetData ModelData;
 
                 [TagStructure(Size = 0x4C)]
-				public /*was_struct*/ class ModelWidgetData : TagStructure
+				public class ModelWidgetData : TagStructure
 				{
                     public uint Unknown4;
                     public uint Unknown5;

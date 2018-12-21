@@ -251,7 +251,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-			public /*was_struct*/ class Vertex : TagStructure
+			public class Vertex : TagStructure
 			{
                 public RealPoint3d Position;
             }
@@ -460,7 +460,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-		public /*was_struct*/ class SkyOwnerClusterBlock : TagStructure
+		public class SkyOwnerClusterBlock : TagStructure
 		{
             public short Value;
         }

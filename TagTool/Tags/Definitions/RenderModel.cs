@@ -344,7 +344,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x1)]
-		public /*was_struct*/ class NodeIndex : TagStructure
+		public class NodeIndex : TagStructure
 		{
             public byte Node;
         }

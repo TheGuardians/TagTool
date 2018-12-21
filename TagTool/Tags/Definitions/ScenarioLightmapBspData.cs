@@ -173,7 +173,7 @@ namespace TagTool.Tags.Definitions
             public List<Datum> Vertex;
 
             [TagStructure(Size = 0x1)]
-			public /*was_struct*/ class Datum : TagStructure
+			public class Datum : TagStructure
 			{
                 public byte Value;
             }

@@ -343,14 +343,14 @@ namespace TagTool.Geometry
             public List<ContentsBlock> Contents;
 
             [TagStructure(Size = 0x2)]
-			public /*was_struct*/ class ContentsBlock : TagStructure
+			public class ContentsBlock : TagStructure
 			{
                 public short Value;
             }
         }
 
         [TagStructure(Size = 0x2)]
-		public /*was_struct*/ class WaterBlock : TagStructure
+		public class WaterBlock : TagStructure
 		{
             public short Value;
         }

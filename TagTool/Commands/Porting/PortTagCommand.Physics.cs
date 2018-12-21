@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting
 
             byte[] result = new byte[phmo.MoppCodes.Length];
 
-            using (var inputReader = new EndianReader(new MemoryStream(phmo.MoppCodes), EndianFormat.BigEndian))
+            using (var inputReader = new EndianReader(new MemoryStream(phmo.MoppCodes), BlamCache.Reader.Format))
             using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
             {
                 var dataContext = new DataSerializationContext(inputReader, outputWriter);

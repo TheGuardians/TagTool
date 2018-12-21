@@ -5,7 +5,7 @@ using TagTool.Tags;
 namespace TagTool.Havok
 {
     [TagStructure(Size = 0x4)]
-	public /*was_struct*/ class BipedPhysicsFlags : TagStructure
+	public class BipedPhysicsFlags : TagStructure
 	{
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public Halo3RetailBits Halo3Retail;

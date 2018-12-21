@@ -3470,7 +3470,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-		public /*was_struct*/ class ObjectReference : TagStructure
+		public class ObjectReference : TagStructure
 		{
             public short Index;
         }

@@ -16,7 +16,7 @@ namespace TagTool.Havok
 
         [TagStructure(Size = 0x1, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloOnline106708)]
-		public /*was_struct*/ class Datum : TagStructure
+		public class Datum : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public byte ValueOld;
