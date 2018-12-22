@@ -6,7 +6,7 @@ using TagTool.Damage;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "model", Tag = "hlmt", Size = 0x15C, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Name = "model", Tag = "hlmt", Size = 0xFC, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x188, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x1B4, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -65,9 +65,13 @@ namespace TagTool.Tags.Definitions
 
         public List<Target> Targets;
 
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public List<ModelVariation> ModelVariations;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public List<UnknownTarget> UnknownTargets;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<CollisionRegion> CollisionRegions;
 
         public List<Node> Nodes;
@@ -79,6 +83,10 @@ namespace TagTool.Tags.Definitions
 
         public CachedTagInstance PrimaryDialogue;
 
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance ActiveCamoShader;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTagInstance SecondaryDialogue;
 
         public FlagsValue Flags;
@@ -94,7 +102,7 @@ namespace TagTool.Tags.Definitions
         public RuntimeFlagsValue RuntimeFlags;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public uint Unknown3; // TODO: Version number
+        public uint Unknown3;
 
         public List<ScenarioLoadParametersBlock> ScenarioLoadParameters;
 
@@ -144,7 +152,7 @@ namespace TagTool.Tags.Definitions
             FadeNever
         }
 
-        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x50, MinVersion = CacheVersion.Halo3ODST)]
         public class Variant : TagStructure
@@ -177,14 +185,17 @@ namespace TagTool.Tags.Definitions
 
             public List<Region> Regions;
             public List<Object> Objects;
+
             public int InstanceGroupIndex;
-            public uint Unknown6;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public StringId DialogueSoundEffect;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public CachedTagInstance Dialogue;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public uint Unknown6;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline571627)]
             public uint Unknown7;
@@ -195,14 +206,13 @@ namespace TagTool.Tags.Definitions
 			{
                 public StringId Name;
 
-                public sbyte RenderModelRegionIndex;
-
-                public sbyte Unknown;
-
                 [TagField(MaxVersion = CacheVersion.Halo2Vista)]
                 public short ParentVariant;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                public sbyte RenderModelRegionIndex;
+
+                public sbyte Unknown1;
                 public sbyte Unknown2;
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -210,30 +220,32 @@ namespace TagTool.Tags.Definitions
 
                 public List<Permutation> Permutations;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public SortOrderValue SortOrder;
 
-                [TagStructure(Size = 0x24)]
+                [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
+                [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo3Retail)]
                 public class Permutation : TagStructure
 				{
                     public StringId Name;
+
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte RenderModelPermutationIndex;
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                    public sbyte Unknown;
+                    public sbyte Unknown1;
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte Unknown2;
 
                     public FlagsValue Flags;
 
-                    [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+                    [TagField(Padding = true, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
                     public byte[] Unused;
 
                     public float Probability;
                     public List<State> States;
 
-                    [TagField(Length = 12)]
+                    [TagField(Length = 12, MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte[] RuntimeStatePermutationIndices = new sbyte[12];
 
                     [Flags]
@@ -243,11 +255,11 @@ namespace TagTool.Tags.Definitions
                         CopyStatesToAllPermutations = 1 << 0
                     }
 
-                    [TagStructure(Size = 0x20)]
+                    [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo2Vista)]
+                    [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail)]
                     public class State : TagStructure
 					{
                         public StringId Name;
-                        public sbyte Unknown;
                         public PropertyFlagsValue PropertyFlags;
                         public StateValue State2;
                         public CachedTagInstance LoopingEffect;
@@ -255,7 +267,7 @@ namespace TagTool.Tags.Definitions
                         public float InitialProbability;
 
                         [Flags]
-                        public enum PropertyFlagsValue : byte
+                        public enum PropertyFlagsValue : ushort
                         {
                             None = 0,
                             Blurred = 1 << 0,
@@ -296,7 +308,7 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3Retail)]
             public class Object : TagStructure
 			{
@@ -401,7 +413,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x140, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0xF8, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x100, MinVersion = CacheVersion.Halo3Retail)]
         public class GlobalDamageInfoBlock : TagStructure
 		{
@@ -415,51 +427,35 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// Absorbes AOE or child damage
             /// </summary>
-            public short IndirectDamageSection;
-
-            [TagField(Padding = true, Length = 2)]
-            public byte[] Unused1 = new byte[2];
+            public int IndirectDamageSection;
 
             [TagField(Padding = true, Length = 4)]
-            public byte[] Unused2 = new byte[4];
+            public byte[] Unused1 = new byte[4];
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public DamageReportingType CollisionDamageReportingTypeOld;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public DamageReportingTypeNew CollisionDamageReportingTypeNew;
+            public DamageReportingType CollisionDamageReportingType;
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public DamageReportingType ResponseDamageReportingTypeOld;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public DamageReportingTypeNew ResponseDamageReportingTypeNew;
+            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            public byte[] Unused2 = new byte[1];
 
-            [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo3ODST)]
-            public byte[] Unused3 = new byte[2];
+            public DamageReportingType ResponseDamageReportingType;
+
+            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            public byte[] Unused3 = new byte[1];
+
+            [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            public byte[] Unused4 = new byte[2];
 
             [TagField(Padding = true, Length = 20)]
-            public byte[] Unused4 = new byte[20];
+            public byte[] Unused5 = new byte[20];
 
             public float MaxVitality;
             public float MinStunDamage;
             public float StunTime;
             public float RechargeTime;
             public float RechargeFraction;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
-            public uint Unknown20;
-            public uint Unknown21;
-            public uint Unknown22;
-            public uint Unknown23;
-            public uint Unknown24;
+
+            [TagField(Padding = true, Length = 64)]
+            public byte[] Unused6 = new byte[64];
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public CachedTagInstance ShieldDamagedFirstPersonShader;
@@ -480,8 +476,8 @@ namespace TagTool.Tags.Definitions
             public List<Node> Nodes;
             public short GlobalShieldMaterialIndex;
             public short GlobalIndirectMaterialIndex;
-            public uint Unknown25;
-            public uint Unknown26;
+            public uint Unknown1;
+            public uint Unknown2;
             public List<DamageSeat> DamageSeats;
             public List<DamageConstraint> DamageConstraints;
 
@@ -514,93 +510,32 @@ namespace TagTool.Tags.Definitions
                 OnlyDamagedByBoardingDamage = 1 << 16
             }
 
-            public enum DamageReportingTypeNew : short
-            {
-                GuardiansUnknown,
-                Guardians,
-                FallingDamage,
-                GenericCollision,
-                ArmorLockCrush,
-                GenericMelee,
-                GenericExplosion,
-                Magnum,
-                PlasmaPistol,
-                Needler,
-                Mauler,
-                SMG,
-                PlasmaRifle,
-                BattleRifle,
-                Carbine,
-                Shotgun,
-                SniperRifle,
-                BeamRifle,
-                AssaultRifle,
-                Spiker,
-                FuelRodCannon,
-                MissilePod,
-                RocketLauncher,
-                SpartanLaser,
-                BruteShot,
-                Flamethrower,
-                SentinelGun,
-                EnergySword,
-                GravityHammer,
-                FragGrenade,
-                PlasmaGrenade,
-                SpikeGrenade,
-                FirebombGrenade,
-                Flag,
-                Bomb,
-                BombExplosion,
-                Ball,
-                MachinegunTurret,
-                PlasmaCannon,
-                PlasmaMortar,
-                PlasmaTurret,
-                ShadeTurret,
-                Banshee,
-                Ghost,
-                Mongoose,
-                Scorpion,
-                ScorpionGunner,
-                Spectre,
-                SpectreGunner,
-                Warthog,
-                WarthogGunner,
-                WarthogGaussTurret,
-                Wraith,
-                WraithGunner,
-                Tank,
-                Chopper,
-                Hornet,
-                Mantis,
-                Prowler,
-                SentinelBeam,
-                SentinelRPG,
-                Teleporter,
-                Tripmine,
-                DMR
-            }
-
-            [TagStructure(Size = 0x44)]
+            [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x44, MinVersion = CacheVersion.Halo3Retail)]
             public class DamageSection : TagStructure
 			{
                 public StringId Name;
                 public FlagsValue Flags;
                 public float VitalityPercentage;
                 public List<InstantResponse> InstantResponses;
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
+
+                [TagField(Padding = true, Length = 20)]
+                public byte[] Unused1 = new byte[20];
+
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                public uint Unknown1;
+
                 public float StunTime;
                 public float RechargeTime;
-                public uint Unknown7;
+
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                public uint Unknown2;
+
                 public StringId ResurrectionRegionName;
                 public short RessurectionRegionRuntimeIndex;
-                public short Unknown8;
+
+                [TagField(Padding = true, Length = 2)]
+                public byte[] Unused2 = new byte[2];
 
                 [Flags]
                 public enum FlagsValue : int
@@ -620,7 +555,7 @@ namespace TagTool.Tags.Definitions
                     AllowDamageResponseOverflow = 1 << 11
                 }
 
-                [TagStructure(Size = 0x68, MaxVersion = CacheVersion.Halo2Vista)]
+                [TagStructure(Size = 0x50, MaxVersion = CacheVersion.Halo2Vista)]
                 [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
                 public class InstantResponse : TagStructure
 				{
@@ -641,6 +576,8 @@ namespace TagTool.Tags.Definitions
                     public StringId Region;
                     public NewStateValue NewState;
                     public short RuntimeRegionIndex;
+
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public StringId SecondaryRegion;
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -649,8 +586,8 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public short SecondaryRuntimeRegionIndex;
 
-                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                    public short Unknown;
+                    [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+                    public byte[] Unused = new byte[2];
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public UnknownSpecialDamageValue UnknownSpecialDamage;
@@ -847,6 +784,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
         public class Target : TagStructure
@@ -860,8 +798,10 @@ namespace TagTool.Tags.Definitions
             public short DamageSection;
             public short Variant;
             public float TargetingRelevance;
+
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public uint Unknown2;
+
             public FlagsValue Flags;
             public float LockOnDistance;
 
@@ -904,6 +844,20 @@ namespace TagTool.Tags.Definitions
                 Bit29 = 1 << 29,
                 Bit30 = 1 << 30,
                 Bit31 = 1 << 31
+            }
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class ModelVariation : TagStructure
+        {
+            public StringId Type;
+            public uint Unknown;
+            public List<Permutation> Permutations;
+
+            [TagStructure(Size = 0x4)]
+            public class Permutation : TagStructure
+            {
+                public StringId Variation;
             }
         }
 

@@ -970,24 +970,9 @@ namespace TagTool.Commands.Porting
                 case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
                     renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
                     break;
-
-                case Model.GlobalDamageInfoBlock newDamageInfo:
-                    newDamageInfo = ConvertNewDamageInfo(newDamageInfo);
-                    break;
             }
 
             return data;
-		}
-
-		private Model.GlobalDamageInfoBlock ConvertNewDamageInfo(Model.GlobalDamageInfoBlock newDamageInfo)
-		{
-			if (!Enum.TryParse(newDamageInfo.CollisionDamageReportingTypeOld.HaloOnline.ToString(), out newDamageInfo.CollisionDamageReportingTypeNew))
-				newDamageInfo.CollisionDamageReportingTypeNew = Model.GlobalDamageInfoBlock.DamageReportingTypeNew.Guardians;
-
-			if (!Enum.TryParse(newDamageInfo.ResponseDamageReportingTypeOld.HaloOnline.ToString(), out newDamageInfo.ResponseDamageReportingTypeNew))
-				newDamageInfo.ResponseDamageReportingTypeNew = Model.GlobalDamageInfoBlock.DamageReportingTypeNew.Guardians;
-
-			return newDamageInfo;
 		}
 
 		private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags objectTypeFlags)
