@@ -206,17 +206,16 @@ namespace TagTool.Tags.Definitions
 			{
                 public StringId Name;
 
-                [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-                public short ParentVariant;
-
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public sbyte RenderModelRegionIndex;
 
-                public sbyte Unknown1;
-                public sbyte Unknown2;
-
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                public sbyte Unknown3;
+                public sbyte Unknown;
+
+                public short ParentVariant;
+
+                [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+                public byte[] Unused = new byte[2];
 
                 public List<Permutation> Permutations;
 
