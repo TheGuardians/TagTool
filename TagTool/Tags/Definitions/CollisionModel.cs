@@ -7,13 +7,21 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44)]
+    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x34, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44, MinVersion = CacheVersion.Halo3Retail)]
     public class CollisionModel : TagStructure
 	{
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int CollisionModelChecksum;
 
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedErrorsBlock = new byte[12];
+        [TagField(Padding = true, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] UnusedImportInfoBlock = new byte[8];
+
+        [TagField(Padding = true, Length = 8)]
+        public byte[] UnusedErrorsBlock = new byte[8];
+
+        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+        public byte[] UnusedErrorsBlock2 = new byte[4];
 
         public CollisionModelFlags Flags;
 
@@ -29,23 +37,30 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Region : TagStructure
 		{
             [TagField(Label = true)]
             public StringId Name;
+
             public List<Permutation> Permutations;
 
-            [TagStructure(Size = 0x28)]
+            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Permutation : TagStructure
 			{
                 [TagField(Label = true)]
                 public StringId Name;
+
                 public List<Bsp> Bsps;
                 public List<BspPhysicsBlock> BspPhysics;
+
+                [TagField(MinVersion = CacheVersion.Halo3Retail)]
                 public List<CollisionMoppCode> BspMoppCodes;
 
-                [TagStructure(Size = 0x64)]
+                [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
+                [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail)]
                 public class Bsp : TagStructure
 				{
                     public short NodeIndex;
@@ -104,9 +119,11 @@ namespace TagTool.Tags.Definitions
                     public int Offset2;
                     public int Unknown27;
 
+                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
                     public uint Unknown28;
-                    public uint Unknown29;
-                    public uint Unknown30;
+
+                    public List<byte> MoppCodeData;
+
                     public uint Unknown31;
                 }
             }

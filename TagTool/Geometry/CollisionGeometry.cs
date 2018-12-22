@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Geometry
 {
-    [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail)]
     public class CollisionGeometry : TagStructure
 	{
@@ -18,9 +18,6 @@ namespace TagTool.Geometry
         public List<Surface> Surfaces;
         public List<Edge> Edges;
         public List<Vertex> Vertices;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float Unknown;
 
         public Dictionary<int, List<int>> GenerateIndices()
         {
