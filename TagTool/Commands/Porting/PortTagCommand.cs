@@ -671,6 +671,9 @@ namespace TagTool.Commands.Porting
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
                     return ConvertPhantomTypeFlags(phantomTypeFlags);
 
+                case PhysicsModel.MaterialFlags materialFlags:
+                    return ConvertMaterialFlags(materialFlags);
+
 				case BipedPhysicsFlags bipedPhysicsFlags:
 					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
@@ -1010,6 +1013,19 @@ namespace TagTool.Commands.Porting
                 case CacheVersion.Halo3Retail:
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
+
+            return flags;
+        }
+
+        private PhysicsModel.MaterialFlags ConvertMaterialFlags(PhysicsModel.MaterialFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    flags.Gen3 = PhysicsModel.MaterialFlags.Gen3Bits.None;
                     break;
             }
 

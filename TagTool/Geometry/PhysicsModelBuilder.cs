@@ -63,7 +63,7 @@ namespace TagTool.Geometry
                 Mass = 100f, //probably not important
                 CenterOfMass = new RealVector3d(0.0f, 0.0f, 0.25f), //probably not important
                 ShapeIndex = 0, //important
-                MotionType = PhysicsModel.RigidBody.MotionTypeValue.Keyframed // keyframed movement for now.
+                MotionType = PhysicsModel.RigidBodyMotionType.Keyframed // keyframed movement for now.
             };
 
             var shapedefs = fileStruct.AsArray;
@@ -78,7 +78,7 @@ namespace TagTool.Geometry
                 // as a level of indirection for multiple shapes.
                 //Also for ease of shape encoding, AddShape returns the 
                 //shape-type added. 'Unused0' is used to represent failure.
-                if (AddShape(_phmo, shapedefs[0]) == HavokShapeType.Unused0)
+                if (AddShape(_phmo, shapedefs[0]) == HavokShapeType.TriangleMesh)
                 {
                     return false;
                 }
@@ -121,7 +121,7 @@ namespace TagTool.Geometry
                 foreach (JSONNode listelem in fileStruct.AsArray)
                 {
                     HavokShapeType typeAdded = AddShape(_phmo, listelem);
-                    if (typeAdded == HavokShapeType.Unused0)
+                    if (typeAdded == HavokShapeType.TriangleMesh)
                     {
                         Console.WriteLine("Failed loading shape.");
                         return false;
@@ -160,7 +160,7 @@ namespace TagTool.Geometry
         {
             if (n == null)
             {
-                return HavokShapeType.Unused0;
+                return HavokShapeType.TriangleMesh;
             }
 
             //an element of the top-level JSON array is a map
@@ -168,9 +168,9 @@ namespace TagTool.Geometry
             switch (n["Type"])
             {
                 case "Polyhedron":
-                    return AddPolyhedron(phmo, n["Data"]) ? HavokShapeType.Polyhedron : HavokShapeType.Unused0;
+                    return AddPolyhedron(phmo, n["Data"]) ? HavokShapeType.Polyhedron : HavokShapeType.TriangleMesh;
                 default:
-                    return HavokShapeType.Unused0;
+                    return HavokShapeType.TriangleMesh;
             }
         }
 
@@ -277,8 +277,8 @@ namespace TagTool.Geometry
             poly.Friction = friction;
             poly.Mass = mass;
             poly.RelativeMassScale = 1.0f;
-            poly.PhantomIndex = 0;
-            poly.PhantomIndex--;
+            poly.PhantomIndexNew = 0;
+            poly.PhantomIndexNew--;
             poly.InteractionUnknown = 0;
             poly.InteractionUnknown--;
             poly.FourVectorsSize = nFVS;
@@ -316,10 +316,11 @@ namespace TagTool.Geometry
                 var p_vals = p.AsArray;
                 var plane = new PhysicsModel.PolyhedronPlaneEquation
                 {
-                    Unknown = p_vals[0].AsFloat, //i
-                    Unknown2 = p_vals[1].AsFloat, //j
-                    Unknown3 = p_vals[2].AsFloat, //k
-                    Unknown4 = p_vals[3].AsFloat // dist
+                    Plane = new RealPlane3d(
+                        p_vals[0].AsFloat,
+                        p_vals[1].AsFloat,
+                        p_vals[2].AsFloat,
+                        p_vals[3].AsFloat)
                 };
 
                 phmo.PolyhedronPlaneEquations.Add(plane);

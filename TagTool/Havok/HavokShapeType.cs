@@ -8,14 +8,14 @@ namespace TagTool.Havok
         Triangle,
         Polyhedron,
         MultiSphere,
+        TriangleMesh,
+        CompoundShape,
         Unused0,
         Unused1,
         Unused2,
         Unused3,
         Unused4,
         Unused5,
-        Unused6,
-        Unused7,
         List,
         Mopp
     }
