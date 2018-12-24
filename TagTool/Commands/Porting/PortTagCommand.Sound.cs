@@ -185,7 +185,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 // Convert to MP3 and remove header
-                if (ConvertWAVToMP3(fixedWAV, tempMP3, loop))
+                if (ConvertWAVToMP3(fixedWAV, tempMP3, false /* TODO: FIX THIS: loop */))
                 {
                     int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
                     byte[] MP3stream = File.ReadAllBytes(tempMP3);
