@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnline106708)]
     public class PhysicsModel : TagStructure
@@ -14,35 +15,45 @@ namespace TagTool.Tags.Definitions
         public float Mass;
         public float LowFrequencyDeactivationScale;
         public float HighFrequencyDeactivationScale;
+
+        [TagField(Padding = true, Length = 24, MaxVersion = CacheVersion.Halo2Vista)]
+        public byte[] Unused1 = new byte[24];
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float CustomShapeRadius;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float MaximumPenetrationDepthScale;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public sbyte ImportVersion;
 
-        [TagField(Padding = true, Length = 3)]
-        public byte[] Unused;
+        [TagField(Padding = true, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
+        public byte[] Unused2;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<DampedSprintMotor> DampedSpringMotors;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<PositionMotor> PositionMotors;
+
         public List<PhantomType> PhantomTypes;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<PoweredChain> PoweredChains;
+
         public List<NodeEdge> NodeEdges;
         public List<RigidBody> RigidBodies;
         public List<Material> Materials;
         public List<Sphere> Spheres;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedMultiSpheres;
-
+        public List<MultiSphere> MultiSpheres;
         public List<Pill> Pills;
         public List<Box> Boxes;
         public List<Triangle> Triangles;
         public List<Polyhedron> Polyhedra;
         public List<PolyhedronFourVector> PolyhedronFourVectors;
         public List<PolyhedronPlaneEquation> PolyhedronPlaneEquations;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedMassDistributions;
-
+        public List<MassDistribution> MassDistributions;
         public List<List> Lists;
         public List<ListShape> ListShapes;
         public List<Mopp> Mopps;
@@ -51,29 +62,22 @@ namespace TagTool.Tags.Definitions
         public List<RagdollConstraint> RagdollConstraints;
         public List<Region> Regions;
         public List<Node> Nodes;
-        public uint Unknown11;
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
-        public uint Unknown15;
-        public uint Unknown16;
+        public List<ImportInfoBlock> ImportInfo;
+        public List<Error> Errors;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public List<PointToPathCurve> PointToPathCurves;
+
         public List<LimitedHingeConstraint> LimitedHingeConstraints;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedBallAndSocketConstraints;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedStiffSprintConstraints;
-
-        [TagField(Padding = true, Length = 12)]
-        public byte[] UnusedPrismaticConstraints;
-
+        public List<BallAndSocketConstraint> BallAndSocketConstraints;
+        public List<StiffSpringConstraint> StiffSpringConstraints;
+        public List<PrismaticConstraint> PrismaticConstraints;
         public List<Phantom> Phantoms;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown17;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown18;
 
         [Flags]
@@ -110,29 +114,138 @@ namespace TagTool.Tags.Definitions
             public float InitialPosition;
         }
 
-        public enum PhantomTypeFlags : int
+        [TagStructure(Size = 0x4)]
+        public class PhantomTypeFlags : TagStructure
         {
-            None = 0,
-            GeneratesEffects = 1 << 0,
-            UseAccelerationAsForce = 1 << 1,
-            NegatesGravity = 1 << 2,
-            IgnoresPlayers = 1 << 3,
-            IgnoresNonPlayers = 1 << 4,
-            IgnoresBipeds = 1 << 5,
-            IgnoresVehicles = 1 << 6,
-            IgnoresWeapons = 1 << 7,
-            IgnoresEquipement = 1 << 8,
-            IgnoresARGDevices = 1 << 9,
-            IgnoresTerminals = 1 << 10,
-            IgnoresProjectiles = 1 << 11,
-            IgnoresScenery = 1 << 12,
-            IgnoresMachines = 1 << 13,
-            IgnoresControls = 1 << 14,
-            IgnoresSoundScenery = 1 << 15,
-            IgnoresCrates = 1 << 16,
-            IgnoresCreatures = 1 << 17,
-            IgnoresGiants = 1 << 18,
-            IgnoresEffectScenery = 1 << 19
+            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            public Halo2Bits Halo2;
+
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+            public Halo3RetailBits Halo3Retail;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
+            public Halo3ODSTBits Halo3ODST;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+            public HaloOnlineBits HaloOnline;
+
+            [Flags]
+            public enum Halo2Bits : int
+            {
+                None = 0,
+                GeneratesEffects = 1 << 0,
+                UseAccelerationAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonPlayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresEquipement = 1 << 8,
+                IgnoresGarbage = 1 << 9,
+                IgnoresProjectiles = 1 << 10,
+                IgnoresScenery = 1 << 11,
+                IgnoresMachines = 1 << 12,
+                IgnoresControls = 1 << 13,
+                IgnoresLightFixtures = 1 << 14,
+                IgnoresSoundScenery = 1 << 15,
+                IgnoresCrates = 1 << 16,
+                IgnoresCreatures = 1 << 17,
+                LocalizesPhysics = 1 << 19,
+                DisableLinearDamping = 1 << 20,
+                DisableAngularDamping = 1 << 21,
+                IgnoresDeadBipeds = 1 << 22
+            }
+
+            [Flags]
+            public enum Halo3RetailBits : int
+            {
+                None = 0,
+                GeneratesEffects = 1 << 0,
+                UseAccelerationAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonPlayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresEquipement = 1 << 8,
+                IgnoresTerminals = 1 << 9,
+                IgnoresProjectiles = 1 << 10,
+                IgnoresScenery = 1 << 11,
+                IgnoresMachines = 1 << 12,
+                IgnoresControls = 1 << 13,
+                IgnoresSoundScenery = 1 << 14,
+                IgnoresCrates = 1 << 15,
+                IgnoresCreatures = 1 << 16,
+                IgnoresGiants = 1 << 17,
+                IgnoresEffectScenery = 1 << 18,
+                LocalizesPhysics = 1 << 19,
+                DisableLinearDamping = 1 << 20,
+                DisableAngularDamping = 1 << 21,
+                IgnoresDeadBipeds = 1 << 22
+            }
+
+            [Flags]
+            public enum Halo3ODSTBits : int
+            {
+                None = 0,
+                GeneratesEffects = 1 << 0,
+                UseAccelerationAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonPlayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresEquipement = 1 << 8,
+                IgnoresARGDevices = 1 << 9,
+                IgnoresTerminals = 1 << 10,
+                IgnoresProjectiles = 1 << 11,
+                IgnoresScenery = 1 << 12,
+                IgnoresMachines = 1 << 13,
+                IgnoresControls = 1 << 14,
+                IgnoresSoundScenery = 1 << 15,
+                IgnoresCrates = 1 << 16,
+                IgnoresCreatures = 1 << 17,
+                IgnoresGiants = 1 << 18,
+                IgnoresEffectScenery = 1 << 19,
+                LocalizesPhysics = 1 << 20,
+                DisableLinearDamping = 1 << 21,
+                DisableAngularDamping = 1 << 22,
+                IgnoresDeadBipeds = 1 << 23
+            }
+
+            [Flags]
+            public enum HaloOnlineBits : int
+            {
+                None = 0,
+                GeneratesEffects = 1 << 0,
+                UseAccelerationAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonPlayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresArmor = 1 << 8,
+                IgnoresEquipement = 1 << 9,
+                IgnoresARGDevices = 1 << 10,
+                IgnoresTerminals = 1 << 11,
+                IgnoresProjectiles = 1 << 12,
+                IgnoresScenery = 1 << 13,
+                IgnoresMachines = 1 << 14,
+                IgnoresControls = 1 << 15,
+                IgnoresSoundScenery = 1 << 16,
+                IgnoresCrates = 1 << 17,
+                IgnoresCreatures = 1 << 18,
+                IgnoresGiants = 1 << 19,
+                IgnoresEffectScenery = 1 << 20,
+                LocalizesPhysics = 1 << 21,
+                DisableLinearDamping = 1 << 22,
+                DisableAngularDamping = 1 << 23,
+                IgnoresDeadBipeds = 1 << 24
+            }
         }
 
         public enum PhantomTypeSize : sbyte
@@ -149,7 +262,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x68)]
         public class PhantomType : TagStructure
 		{
-            public PhantomTypeFlags Flags; // NOTE: This has to be adjusted when converting because of the new armor object type. The "Ignores Armor" bit was inserted at position 8.
+            public PhantomTypeFlags Flags;
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
@@ -401,6 +514,11 @@ namespace TagTool.Tags.Definitions
             public float TranslationRadius;
         }
 
+        [TagStructure(Size = 0x0)]
+        public class MultiSphere : Shape
+        {
+        }
+
         [TagStructure(Size = 0x20, Align = 0x10)]
         public class Pill : Shape
         {
@@ -499,6 +617,11 @@ namespace TagTool.Tags.Definitions
             public float Unknown2;
             public float Unknown3;
             public float Unknown4;
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class MassDistribution : TagStructure
+        {
         }
 
         [TagStructure(Size = 0x50, Align = 0x10)]
@@ -628,6 +751,21 @@ namespace TagTool.Tags.Definitions
             public short Child;
         }
 
+        [TagStructure(Size = 0x0)]
+        public class ImportInfoBlock : TagStructure
+        {
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class Error : TagStructure
+        {
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class PointToPathCurve : TagStructure
+        {
+        }
+
         [TagStructure(Size = 0x84)]
         public class LimitedHingeConstraint : TagStructure
 		{
@@ -649,6 +787,21 @@ namespace TagTool.Tags.Definitions
             public uint Unknown2;
             public float LimitFriction;
             public Bounds<Angle> LimitAngleBounds;
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class BallAndSocketConstraint : TagStructure
+        {
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class StiffSpringConstraint : TagStructure
+        {
+        }
+
+        [TagStructure(Size = 0x0)]
+        public class PrismaticConstraint : TagStructure
+        {
         }
 
         [TagStructure(Size = 0x2C, Align = 0x10)]

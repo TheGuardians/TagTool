@@ -524,6 +524,25 @@ namespace TagTool.Tags.Definitions
     }
 
     [Flags]
+    public enum ObjectTypeFlagsHalo2 : ushort
+    {
+        None,
+        Biped = 1 << 0,
+        Vehicle = 1 << 1,
+        Weapon = 1 << 2,
+        Equipment = 1 << 3,
+        Garbage = 1 << 4,
+        Projectile = 1 << 5,
+        Scenery = 1 << 6,
+        Machine = 1 << 7,
+        Control = 1 << 8,
+        LightFixture = 1 << 9,
+        SoundScenery = 1 << 10,
+        Crate = 1 << 11,
+        Creature = 1 << 12
+    }
+
+    [Flags]
     public enum ObjectTypeFlagsHalo3Retail : ushort
     {
         None,
@@ -588,7 +607,10 @@ namespace TagTool.Tags.Definitions
 
     [TagStructure(Size = 0x2)]
     public class ObjectTypeFlags : TagStructure
-	{
+    {
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public ObjectTypeFlagsHalo2 Halo2;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public ObjectTypeFlagsHalo3Retail Halo3Retail;
 

@@ -73,57 +73,31 @@ namespace TagTool.Commands.Porting
         /// <summary>
         /// Converts a WAV file to MP3 using ffmpeg. True if MP3FileName exists else false.
         /// </summary>
-        /// <param name="WAVFileName"></param>
-        /// <param name="MP3FileName"></param>
-        /// <param name="loop"></param>
+        /// <param name="wavFileName"></param>
+        /// <param name="mp3FileName"></param>
         /// <returns></returns>
-        private static bool ConvertWAVToMP3(string WAVFileName, string MP3FileName, bool loop)
+        private static bool ConvertWAVToMP3(string wavFileName, string mp3FileName)
         {
-            if (!loop)
+            ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
             {
-                ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
-                {
-                    Arguments = "-i " + WAVFileName + " -q:a 0 " + MP3FileName,         //No imposed bitrate for now
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false,
-                    RedirectStandardError = false,
-                    RedirectStandardOutput = false,
-                    RedirectStandardInput = false
-                };
-                Process ffmpeg = Process.Start(info);
-                ffmpeg.WaitForExit();
-            }
-            else
-            {
-                ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
-                {
-                    Arguments = WAVFileName,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false,
-                    RedirectStandardError = false,
-                    RedirectStandardOutput = false,
-                    RedirectStandardInput = false
-                };
-                Process mp3loop = Process.Start(info);
-                mp3loop.WaitForExit();
+                Arguments = "-i " + wavFileName + " -q:a 0 " + mp3FileName,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+                RedirectStandardInput = false
+            };
+            Process ffmpeg = Process.Start(info);
+            ffmpeg.WaitForExit();
 
-                // mp3loop outputs wavfilename.mp3. gotta rename it to MP3FileName
-                string LoopFileName = WAVFileName.Substring(0, WAVFileName.Length - 4) + ".mp3";
-                if (File.Exists(LoopFileName))
-                    File.Move(LoopFileName, MP3FileName);
-                else
-                    return false;
-            }
-
-            if (File.Exists(MP3FileName))
+            if (File.Exists(mp3FileName))
                 return true;
             else
                 return false;
         }
 
-        public static string ConvertSoundPermutation(byte[] buffer, int channelCount, int sampleRate, bool loop, bool useCache, string permutationCache)
+        public static string ConvertSoundPermutation(byte[] buffer, int channelCount, int sampleRate, bool useCache, string permutationCache)
         {
             Directory.CreateDirectory(@"Temp");
 
@@ -185,7 +159,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 // Convert to MP3 and remove header
-                if (ConvertWAVToMP3(fixedWAV, tempMP3, false /* TODO: FIX THIS: loop */))
+                if (ConvertWAVToMP3(fixedWAV, tempMP3))
                 {
                     int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
                     byte[] MP3stream = File.ReadAllBytes(tempMP3);
@@ -216,7 +190,7 @@ namespace TagTool.Commands.Porting
             return filename;
         }
 
-        private CacheSoundResult ConvertSoundTask(int pitchRangeIndex, int permutationIndex, byte[] data, bool loop, int channelCount, int sampleRate, string basePermutationCacheName, bool useCache)
+        private CacheSoundResult ConvertSoundTask(int pitchRangeIndex, int permutationIndex, byte[] data, int channelCount, int sampleRate, string basePermutationCacheName, bool useCache)
         {
             string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
             string cacheFileName = "";
@@ -227,7 +201,7 @@ namespace TagTool.Commands.Porting
 
             if ((permutationName != null && !exists) || !useCache)
             {
-                cacheFileName = ConvertSoundPermutation(data, channelCount, sampleRate, loop, useCache, permutationName);
+                cacheFileName = ConvertSoundPermutation(data, channelCount, sampleRate, useCache, permutationName);
             }
 
             // Read data from the file
@@ -261,12 +235,6 @@ namespace TagTool.Commands.Porting
             {
                 Console.WriteLine("Failed to locate sound conversion tools, please install ffmpeg, towav and mp3loop in the Tools folder");
                 return null;
-            }
-
-            var loop = false;
-            if (((ushort)sound.Flags & (ushort)Sound.FlagsValue.FitToAdpcmBlockSize) != 0)
-            {
-                loop = true;
             }
 
             //
@@ -412,7 +380,7 @@ namespace TagTool.Commands.Porting
 
                     Task<CacheSoundResult> task = new Task<CacheSoundResult>((_i) =>
                     {
-                        return ConvertSoundTask(newPitchRangeIndex, (int)_i, permutationData, loop, channelCount, sound.SampleRate.GetSampleRateHz(), basePermutationCacheName, useCache);
+                        return ConvertSoundTask(newPitchRangeIndex, (int)_i, permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), basePermutationCacheName, useCache);
                     }, i);
                     task.Start();
                     tasks[i] = task;

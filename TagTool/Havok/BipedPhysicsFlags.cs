@@ -7,11 +7,27 @@ namespace TagTool.Havok
     [TagStructure(Size = 0x4)]
 	public class BipedPhysicsFlags : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public Halo2Bits Halo2;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public Halo3RetailBits Halo3Retail;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public Halo3OdstBits Halo3Odst;
+        public Halo3OdstBits Halo3ODST;
+
+        [Flags]
+        public enum Halo2Bits : int
+        {
+            None,
+            CenteredAtOrigin = 1 << 0,
+            ShapeSpherical = 1 << 1,
+            UsePlayerPhysics = 1 << 2,
+            ClimbAnySurface = 1 << 3,
+            Flying = 1 << 4,
+            NotPhysical = 1 << 5,
+            DeadCharacterCollisionGroup = 1 << 6
+        }
 
         [Flags]
         public enum Halo3RetailBits : int

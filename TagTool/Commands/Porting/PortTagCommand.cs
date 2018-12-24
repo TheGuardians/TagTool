@@ -668,6 +668,9 @@ namespace TagTool.Commands.Porting
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
+                case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
+                    return ConvertPhantomTypeFlags(phantomTypeFlags);
+
 				case BipedPhysicsFlags bipedPhysicsFlags:
 					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
@@ -975,27 +978,67 @@ namespace TagTool.Commands.Porting
             return data;
 		}
 
-		private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags objectTypeFlags)
+		private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags flags)
 		{
-			if (BlamCache.Version == CacheVersion.Halo3Retail)
-			{
-				if (!Enum.TryParse(objectTypeFlags.Halo3Retail.ToString(), out objectTypeFlags.Halo3ODST))
-					throw new FormatException(BlamCache.Version.ToString());
-			}
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
 
-			return objectTypeFlags;
+                case CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
+
+			return flags;
 		}
 
-		private BipedPhysicsFlags ConvertBipedPhysicsFlags(BipedPhysicsFlags bipedPhysicsFlags)
-		{
-			if (!Enum.TryParse(bipedPhysicsFlags.Halo3Retail.ToString(), out bipedPhysicsFlags.Halo3Odst))
-				throw new FormatException(BlamCache.Version.ToString());
+        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
 
-			return bipedPhysicsFlags;
-		}
+                case CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
 
-		private object ConvertWeaponFlags(WeaponFlags weaponFlags)
+            return flags;
+        }
+
+        private BipedPhysicsFlags ConvertBipedPhysicsFlags(BipedPhysicsFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+
+                case CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
+
+            return flags;
+        }
+
+        private object ConvertWeaponFlags(WeaponFlags weaponFlags)
 		{
+            // TODO: refactor for Halo 2
+
 			if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
 				weaponFlags.OldFlags &= ~WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode;
 

@@ -765,6 +765,9 @@ namespace TagTool.Cache
             {
                 var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
 
+                if (!file.Exists && file.Name == "resources_b.dat")
+                    file = new FileInfo(Path.Combine(Directory.FullName, "video.dat"));
+
                 using (var stream = file.OpenRead())
                 {
                     cache = new LoadedResourceCache
