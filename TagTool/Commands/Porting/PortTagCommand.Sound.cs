@@ -173,8 +173,6 @@ namespace TagTool.Commands.Porting
                     File.Delete(fixedWAV);
                 if (File.Exists(resultWAV))
                     File.Delete(resultWAV);
-                if (File.Exists(resultMP3))
-                    File.Delete(resultMP3);
                 if (File.Exists(tempMP3))
                     File.Delete(tempMP3);
             }
