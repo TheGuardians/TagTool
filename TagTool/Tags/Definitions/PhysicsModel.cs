@@ -768,7 +768,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown22;
         }
 
-        [TagStructure(Size = 0xD0, Align = 0x10, MinVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0xD0, Align = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x40, Align = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Polyhedron : ShapeInstance
         {
