@@ -409,7 +409,9 @@ namespace TagTool.Commands.Porting
                 result = raw;
             }
 
-			AsyncJobManager.CleanupFile(tempBitmap, 30_000);
+            if (File.Exists(tempBitmap))
+                File.Delete(tempBitmap);
+
 			return result;
         }
 

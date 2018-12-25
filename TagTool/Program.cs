@@ -155,9 +155,6 @@ namespace TagTool.Commands
                 }
             }
 
-            // wait for all async jobs to complete
-            Tools.AsyncJobManager.WaitForAll();
-
             end: return;
         }
 
