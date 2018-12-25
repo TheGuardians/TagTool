@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using System.Linq;
 
 namespace TagTool.Commands.Files
 {
@@ -19,6 +20,11 @@ namespace TagTool.Commands.Files
         private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
         private bool NoVariants { get; set; } = false;
         private bool NullReferences { get; set; } = false;
+
+        private static readonly string[] SkipGroups = new[]
+        {
+            "armr", "forg", "gfxt", "mode", "obje", "pdm!", "scnr", "sus!", "trdf", "vfsl",
+        };
 
         public RebuildCacheFilesCommand(HaloOnlineCacheContext cacheContext)
             : base(false,
@@ -185,7 +191,7 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null || srcTag.IsInGroup("scnr") || srcTag.IsInGroup("forg") || srcTag.IsInGroup("obje") || srcTag.IsInGroup("mode"))
+            if (srcTag == null || SkipGroups.Where(tag => srcTag.IsInGroup(tag)).Count() != 0)
                 return null;
 
             if (srcTag.Name?.StartsWith("hf2p") ?? false)

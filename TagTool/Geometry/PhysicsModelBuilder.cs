@@ -63,7 +63,7 @@ namespace TagTool.Geometry
                 Mass = 100f, //probably not important
                 CenterOfMass = new RealVector3d(0.0f, 0.0f, 0.25f), //probably not important
                 ShapeIndex = 0, //important
-                MotionType = PhysicsModel.RigidBodyMotionType.Keyframed // keyframed movement for now.
+                MotionType = PhysicsModel.RigidBody.MotionTypeValue.Keyframed // keyframed movement for now.
             };
 
             var shapedefs = fileStruct.AsArray;
@@ -277,8 +277,8 @@ namespace TagTool.Geometry
             poly.Friction = friction;
             poly.Mass = mass;
             poly.RelativeMassScale = 1.0f;
-            poly.PhantomIndexNew = 0;
-            poly.PhantomIndexNew--;
+            poly.PhantomIndex = 0;
+            poly.PhantomIndex--;
             poly.InteractionUnknown = 0;
             poly.InteractionUnknown--;
             poly.FourVectorsSize = nFVS;
@@ -316,11 +316,10 @@ namespace TagTool.Geometry
                 var p_vals = p.AsArray;
                 var plane = new PhysicsModel.PolyhedronPlaneEquation
                 {
-                    Plane = new RealPlane3d(
-                        p_vals[0].AsFloat,
-                        p_vals[1].AsFloat,
-                        p_vals[2].AsFloat,
-                        p_vals[3].AsFloat)
+                    Unknown = p_vals[0].AsFloat,
+                    Unknown2 = p_vals[1].AsFloat,
+                    Unknown3 = p_vals[2].AsFloat,
+                    Unknown4 = p_vals[3].AsFloat
                 };
 
                 phmo.PolyhedronPlaneEquations.Add(plane);

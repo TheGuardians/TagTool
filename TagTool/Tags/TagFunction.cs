@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x14)]
     public class TagFunction : TagStructure
-	{
+    {
         public byte[] Data;
 
         public enum TagFunctionType : sbyte
@@ -31,7 +29,6 @@ namespace TagTool.Tags
         [Flags]
         public enum TagFunctionFlags : byte
         {
-            None = 0,
             HasRange = 1 << 0,
             Bit1 = 1 << 1,
             IsBounded = 1 << 2,
@@ -52,7 +49,7 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-		public class ScalarFunctionHeader : TagStructure
+        public /*was_struct*/ class ScalarFunctionHeader : TagStructure
         {
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
@@ -66,8 +63,8 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x20)]
-		public class ColorFunctionHeader : TagStructure
-		{
+        public /*was_struct*/ class ColorFunctionHeader : TagStructure
+        {
             public TagFunctionType Type;
             public TagFunctionFlags Flags;
             public TagFunctionOutputType OutputType;
@@ -81,68 +78,68 @@ namespace TagTool.Tags
         }
 
         [TagStructure(Size = 0x8)]
-		public class IdentityData : TagStructure
-		{
+        public /*was_struct*/ class IdentityData : TagStructure
+        {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public class ConstantData : TagStructure
-		{
+        public /*was_struct*/ class ConstantData : TagStructure
+        {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public class TransitionData : TagStructure
-		{
+        public /*was_struct*/ class TransitionData : TagStructure
+        {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x8)]
-		public class PeriodicData : TagStructure
-		{
+        public /*was_struct*/ class PeriodicData : TagStructure
+        {
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0xC)]
-		public class LinearData : TagStructure
-		{
+        public /*was_struct*/ class LinearData : TagStructure
+        {
             public float Unknown;
             public RealPoint2d Point;
         }
 
         [TagStructure(Size = 0x10)]
-		public class MultiLinearKeyData : TagStructure
-		{
+        public /*was_struct*/ class MultiLinearKeyData : TagStructure
+        {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x14)]
-		public class SplineData : TagStructure
-		{
+        public /*was_struct*/ class SplineData : TagStructure
+        {
             public float Unknown;
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x10)]
-		public class MultiSplineData : TagStructure
-		{
+        public /*was_struct*/ class MultiSplineData : TagStructure
+        {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x10)]
-		public class ExponentData : TagStructure
-		{
+        public /*was_struct*/ class ExponentData : TagStructure
+        {
             public RealPoint2d Point1;
             public RealPoint2d Point2;
         }
 
         [TagStructure(Size = 0x20)]
-		public class Spline2Data : TagStructure
-		{
+        public /*was_struct*/ class Spline2Data : TagStructure
+        {
             public float Unknown1;
             public RealPoint2d Point1;
             public RealPoint2d Point2;
@@ -360,10 +357,10 @@ namespace TagTool.Tags
 
         public class TagFunctionHeader
         {
-            public TagFunctionType Type;
-            public TagFunctionFlags Flags;
-            public TagFunctionOutputType OutputType;
-            public byte Unused;
+            public byte Opcode;
+            public byte Flags;
+            public byte Unused1;
+            public byte Unused2;
 
             public uint Unknown1;
             public uint Unknown2;
@@ -373,48 +370,42 @@ namespace TagTool.Tags
             public uint Unknown6;
 
             public uint RemainingDataSize;
-            
+
             public void Read(EndianReader reader)
             {
-                Type = (TagFunctionType)reader.ReadSByte();
-                Flags = (TagFunctionFlags)reader.ReadByte();
-                OutputType = (TagFunctionOutputType)reader.ReadSByte();
-                Unused = reader.ReadByte();
+                Opcode = reader.ReadByte();
+                Flags = reader.ReadByte();
+                Unused1 = reader.ReadByte();
+                Unused2 = reader.ReadByte();
 
-                if (Type != TagFunctionType.Identity)
-                {
-                    Unknown1 = reader.ReadUInt32();
-                    Unknown2 = reader.ReadUInt32();
-                    Unknown3 = reader.ReadUInt32();
-                    Unknown4 = reader.ReadUInt32();
-                    Unknown5 = reader.ReadUInt32();
-                    Unknown6 = reader.ReadUInt32();
-                    RemainingDataSize = reader.ReadUInt32();
-                }
+                Unknown1 = reader.ReadUInt32();
+                Unknown2 = reader.ReadUInt32();
+                Unknown3 = reader.ReadUInt32();
+                Unknown4 = reader.ReadUInt32();
+                Unknown5 = reader.ReadUInt32();
+                Unknown6 = reader.ReadUInt32();
+
+                RemainingDataSize = reader.ReadUInt32();
             }
 
             public void Write(EndianWriter writer)
             {
-                writer.Write((sbyte)Type);
-                writer.Write((byte)Flags);
-                writer.Write((sbyte)OutputType);
-                writer.Write(Unused);
-
-                if (Type != TagFunctionType.Identity)
-                {
-                    writer.Write(Unknown1);
-                    writer.Write(Unknown2);
-                    writer.Write(Unknown3);
-                    writer.Write(Unknown4);
-                    writer.Write(Unknown5);
-                    writer.Write(Unknown6);
-                    writer.Write(RemainingDataSize);
-                }
+                writer.Write(Opcode);
+                writer.Write(Flags);
+                writer.Write(Unused1);
+                writer.Write(Unused2);
+                writer.Write(Unknown1);
+                writer.Write(Unknown2);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+                writer.Write(Unknown5);
+                writer.Write(Unknown6);
+                writer.Write(RemainingDataSize);
             }
 
-            public bool HasRange()
+            public bool Interpolated()
             {
-                return (Flags & TagFunctionFlags.HasRange) != TagFunctionFlags.None;
+                return (Flags & 0x1) == 1;
             }
         }
 
@@ -442,7 +433,7 @@ namespace TagTool.Tags
                 Unused3 = reader.ReadByte();
                 Unknown1 = reader.ReadSingle();
                 Unknown2 = reader.ReadSingle();
-                
+
             }
 
             public override void Write(EndianWriter writer)
@@ -496,14 +487,14 @@ namespace TagTool.Tags
 
         public class TagFunctionType4Data : TagFunctionTypeData
         {
-            
+
             public float Unknown1;
             public float Unknown2;
-            
+
             public override void Read(EndianReader reader)
             {
                 Unknown1 = reader.ReadSingle();
-                Unknown2 = reader.ReadSingle(); 
+                Unknown2 = reader.ReadSingle();
             }
 
             public override void Write(EndianWriter writer)
@@ -653,7 +644,7 @@ namespace TagTool.Tags
                 Unknown4 = reader.ReadSingle();
                 Unknown5 = reader.ReadSingle();
                 Unknown6 = reader.ReadSingle();
-                Unknown7 = reader.ReadSingle();  
+                Unknown7 = reader.ReadSingle();
             }
 
             public override void Write(EndianWriter writer)
@@ -691,7 +682,7 @@ namespace TagTool.Tags
 
                 public void Read(EndianReader reader)
                 {
-                    Unknown = reader.ReadByte(); 
+                    Unknown = reader.ReadByte();
                     Unused1 = reader.ReadByte();
                     Unused2 = reader.ReadByte();
                     Unused3 = reader.ReadByte();
@@ -700,13 +691,13 @@ namespace TagTool.Tags
                     Unknown2 = reader.ReadSingle();
                     Unknown3 = reader.ReadSingle();
 
-                    if(Unknown != 4)
+                    if (Unknown != 4)
                     {
                         Unknown4 = reader.ReadSingle();
                         Unknown5 = reader.ReadSingle();
                     }
-                    
-                    if(Unknown != 7 && Unknown != 4)
+
+                    if (Unknown != 7 && Unknown != 4)
                     {
                         Unknown6 = reader.ReadSingle();
                         Unknown7 = reader.ReadSingle();
@@ -736,7 +727,7 @@ namespace TagTool.Tags
                         writer.Write(Unknown6);
                         writer.Write(Unknown7);
                         writer.Write(Unknown8);
-                    }    
+                    }
                 }
             }
 
@@ -744,7 +735,7 @@ namespace TagTool.Tags
             {
                 Count = reader.ReadUInt32();
                 Sections = new List<Type8Section>();
-                for(int i =0; i< Count; i++)
+                for (int i = 0; i < Count; i++)
                 {
                     Type8Section section = new Type8Section();
                     section.Read(reader);
@@ -756,7 +747,7 @@ namespace TagTool.Tags
             public override void Write(EndianWriter writer)
             {
                 writer.Write(Count);
-                for(int i =0; i< Count; i++)
+                for (int i = 0; i < Count; i++)
                 {
                     Sections[i].Write(writer);
                 }
@@ -780,10 +771,12 @@ namespace TagTool.Tags
                 header.Read(inputReader);
                 header.Write(outputWriter);
 
-                ParseTagFunctionData(header.Type, inputReader, outputWriter);
+                var opcode = header.Opcode;
 
-                if (header.HasRange())
-                    ParseTagFunctionData(header.Type, inputReader, outputWriter);
+                ParseTagFunctionData(header.Opcode, inputReader, outputWriter);
+
+                if (header.Interpolated())
+                    ParseTagFunctionData(header.Opcode, inputReader, outputWriter);
 
                 // If any tag function has remaining data, just endian swap it. It is a very rare occurence, not handled by the HO parser. That piece of the function is most likely ignored at runtime.
                 while (!inputReader.EOF)
@@ -798,64 +791,67 @@ namespace TagTool.Tags
             return function;
         }
 
-        private static void ParseTagFunctionData(TagFunctionType type, EndianReader inputReader, EndianWriter outputWriter)
+        private static void ParseTagFunctionData(byte opcode, EndianReader inputReader, EndianWriter outputWriter)
         {
-            switch (type)
+            switch (opcode)
             {
-                case TagFunctionType.Identity:
-                case TagFunctionType.Constant:
+                case 0x00:
+                case 0x01:
                     break;
 
-                case TagFunctionType.Transition:
+                case 0x02:
                     TagFunctionType2Data data2 = new TagFunctionType2Data();
                     data2.Read(inputReader);
                     data2.Write(outputWriter);
                     break;
 
-                case TagFunctionType.Periodic:
+                case 0x03:
                     TagFunctionType3Data data3 = new TagFunctionType3Data();
                     data3.Read(inputReader);
                     data3.Write(outputWriter);
                     break;
 
-                case TagFunctionType.Linear:
+                case 0x04:
                     TagFunctionType4Data data4 = new TagFunctionType4Data();
                     data4.Read(inputReader);
                     data4.Write(outputWriter);
                     break;
 
-                case TagFunctionType.LinearKey:
+                case 0x05:
                     TagFunctionType5Data data5 = new TagFunctionType5Data();
                     data5.Read(inputReader);
                     data5.Write(outputWriter);
                     break;
 
-                case TagFunctionType.Spline:
+                case 0x07:
                     TagFunctionType7Data data7 = new TagFunctionType7Data();
                     data7.Read(inputReader);
                     data7.Write(outputWriter);
                     break;
 
-                case TagFunctionType.MultiSpline:
-                    TagFunctionType8Data data8 = new TagFunctionType8Data();
-                    data8.Read(inputReader);
-                    data8.Write(outputWriter);
-                    break;
-
-                case TagFunctionType.Exponent:
+                case 0x09:
                     TagFunctionType9Data data9 = new TagFunctionType9Data();
                     data9.Read(inputReader);
                     data9.Write(outputWriter);
                     break;
 
-                case TagFunctionType.Spline2:
+                case 0x0A:
                     TagFunctionTypeAData dataA = new TagFunctionTypeAData();
                     dataA.Read(inputReader);
                     dataA.Write(outputWriter);
                     break;
 
+
+                case 0x08:
+                    TagFunctionType8Data data8 = new TagFunctionType8Data();
+                    data8.Read(inputReader);
+                    data8.Write(outputWriter);
+                    break;
+
+
+                case 0x06:
                 default:
-                    throw new Exception($"TagFunction opcode {type} not present in Halo Online parser! REPORT IT.");
+                    throw new Exception($"TagFunction opcode {opcode} not present in Halo Online parser! REPORT IT.");
             }
         }
 

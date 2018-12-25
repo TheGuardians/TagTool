@@ -125,6 +125,32 @@ namespace TagTool.Commands.Porting
 			return true;
 		}
 
+		private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
+		{
+			if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
+				throw new Exception($"Invalid tag name: {tagSpecifier}");
+
+			var tagIdentifiers = tagSpecifier.Split('.');
+
+			if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
+				throw new Exception($"Invalid tag name: {tagSpecifier}");
+
+			var tagName = tagIdentifiers[0];
+
+			List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
+
+			// find the CacheFile.IndexItem(s)
+			if (tagName == "*") result = BlamCache.IndexItems.FindAll(
+				item => item != null && groupTag == item.GroupTag);
+			else result.Add(BlamCache.IndexItems.Find(
+				item => item != null && groupTag == item.GroupTag && tagName == item.Name));
+
+			if (result.Count == 0)
+				throw new Exception($"Invalid tag name: {tagSpecifier}");
+
+			return result;
+		}
+
         public CachedTagInstance ConvertTag(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile.IndexItem blamTag)
         {
             if (blamTag == null)
@@ -402,7 +428,6 @@ namespace TagTool.Commands.Porting
 				case Scenario scenario when !FlagIsSet(PortingFlags.Squads):
 					scenario.Squads = new List<Scenario.Squad>();
 					break;
-
 				case Scenario scenario when !FlagIsSet(PortingFlags.ForgePalette):
 					scenario.SandboxEquipment.Clear();
 					scenario.SandboxGoalObjects.Clear();
@@ -644,6 +669,12 @@ namespace TagTool.Commands.Porting
 				case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
+                case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
+                    return ConvertPhantomTypeFlags(phantomTypeFlags);
+
+                case PhysicsModel.MaterialFlags materialFlags:
+                    return ConvertMaterialFlags(materialFlags);
+
 				case BipedPhysicsFlags bipedPhysicsFlags:
 					return ConvertBipedPhysicsFlags(bipedPhysicsFlags);
 
@@ -691,6 +722,11 @@ namespace TagTool.Commands.Porting
 					property = ConvertStructure(cacheStream, resourceStreams, property, definition, blamTagName);
 					property.IntValue = property.ShortValue;
 					return property;
+
+				case Model.GlobalDamageInfoBlock newDamageInfo:
+					newDamageInfo = ConvertStructure(cacheStream, resourceStreams, newDamageInfo, definition, blamTagName);
+					newDamageInfo = ConvertNewDamageInfo(newDamageInfo);
+					return newDamageInfo;
 
 				case TagStructure tagStructure: // much faster to pattern match a type than to check for custom attributes.
 					tagStructure = ConvertStructure(cacheStream, resourceStreams, tagStructure, definition, blamTagName);
@@ -977,6 +1013,38 @@ namespace TagTool.Commands.Porting
 			return flags;
 		}
 
+        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+
+                case CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
+
+            return flags;
+        }
+
+        private PhysicsModel.MaterialFlags ConvertMaterialFlags(PhysicsModel.MaterialFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    flags.Gen3 = PhysicsModel.MaterialFlags.Gen3Bits.None;
+                    break;
+            }
+
+            return flags;
+        }
+
         private BipedPhysicsFlags ConvertBipedPhysicsFlags(BipedPhysicsFlags flags)
         {
             switch (BlamCache.Version)
@@ -1157,31 +1225,5 @@ namespace TagTool.Commands.Porting
 
 			return null;
 		}
-
-        private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
-        {
-            if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
-
-            var tagIdentifiers = tagSpecifier.Split('.');
-
-            if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
-
-            var tagName = tagIdentifiers[0];
-
-            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
-
-            // find the CacheFile.IndexItem(s)
-            if (tagName == "*") result = BlamCache.IndexItems.FindAll(
-                item => item != null && groupTag == item.GroupTag);
-            else result.Add(BlamCache.IndexItems.Find(
-                item => item != null && groupTag == item.GroupTag && tagName == item.Name));
-
-            if (result.Count == 0)
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
-
-            return result;
-        }
-    }
+	}
 }
