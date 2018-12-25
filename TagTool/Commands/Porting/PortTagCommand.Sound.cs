@@ -10,8 +10,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Audio;
-using System.Threading;
-using System.Threading.Tasks;
 using TagTool.Audio.Converter;
 using TagTool.Serialization;
 
@@ -137,7 +135,6 @@ namespace TagTool.Commands.Porting
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                Thread.Sleep(100);
                 goto CLEAN_FILES;
             }
 
@@ -190,7 +187,7 @@ namespace TagTool.Commands.Porting
             return filename;
         }
 
-        private CacheSoundResult ConvertSoundTask(int pitchRangeIndex, int permutationIndex, byte[] data, int channelCount, int sampleRate, string basePermutationCacheName, bool useCache)
+        private CacheSoundResult ConvertSoundPermutation(int pitchRangeIndex, int permutationIndex, byte[] data, int channelCount, int sampleRate, string basePermutationCacheName, bool useCache)
         {
             string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
             string cacheFileName = "";
@@ -351,8 +348,8 @@ namespace TagTool.Commands.Porting
 
                 
                 // Create base permutations before converting audio
-                Permutation[] permutations = new Permutation[permutationCount];
-                Task<CacheSoundResult>[] tasks = new Task<CacheSoundResult>[permutationCount];
+                var permutations = new Permutation[permutationCount];
+                var results = new CacheSoundResult[permutationCount];
 
                 for (int permutationIndex = 0; permutationIndex < permutationCount; permutationIndex++)
                 {
@@ -378,20 +375,12 @@ namespace TagTool.Commands.Porting
                     byte[] permutationData = new byte[permSize];
                     Array.Copy(XMAdata, permOffset, permutationData, 0, permSize);
 
-                    Task<CacheSoundResult> task = new Task<CacheSoundResult>((_i) =>
-                    {
-                        return ConvertSoundTask(newPitchRangeIndex, (int)_i, permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), basePermutationCacheName, useCache);
-                    }, i);
-                    task.Start();
-                    tasks[i] = task;
+                    results[i] = ConvertSoundPermutation(newPitchRangeIndex, i, permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), basePermutationCacheName, useCache);
                 }
-                Task.WaitAll(tasks);
 
-                i = 0;
                 for (i = 0; i < permutationCount; i++)
                 {
-                    var task = tasks[i];
-                    var result = task.Result;
+                    var result = results[i];
 
                     var permutation = permutations[result.PermutationIndex];
                     permutation.PermutationChunks.Add(new PermutationChunk(currentSoundDataOffset, result.PermutationChunkSize));
@@ -400,8 +389,6 @@ namespace TagTool.Commands.Porting
 
                     soundDataAggregate = soundDataAggregate.Concat(result.PermutationBuffer);
                 }
-
-
             }
 
             sound.Promotion.LongestPermutationDuration = (uint)(1000 * ((float)largestSampleCount) / sound.SampleRate.GetSampleRateHz());
