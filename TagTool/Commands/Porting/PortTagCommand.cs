@@ -30,6 +30,8 @@ namespace TagTool.Commands.Porting
 		private List<Tag> RenderMethodTagGroups = new List<Tag> { new Tag("rmbk"), new Tag("rmcs"), new Tag("rmd "), new Tag("rmfl"), new Tag("rmhg"), new Tag("rmsh"), new Tag("rmss"), new Tag("rmtr"), new Tag("rmw "), new Tag("rmrd"), new Tag("rmct") };
 		private List<Tag> EffectTagGroups = new List<Tag> { new Tag("beam"), new Tag("cntl"), new Tag("ltvl"), new Tag("decs"), new Tag("prt3") };
 
+        private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
+
 		private static readonly string[] DoNotReplaceGroups = new[]
 		{
 			"glps",

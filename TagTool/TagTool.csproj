@@ -172,7 +172,6 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
-    <Compile Include="Audio\Converter\CacheSoundResult.cs" />
     <Compile Include="Audio\Converter\HeaderChunk.cs" />
     <Compile Include="Audio\Converter\SoundFile.cs" />
     <Compile Include="Audio\Converter\WAV.cs" />
@@ -723,7 +722,6 @@
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResources.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResources.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
-    <Compile Include="Tools\AsyncJobManager.cs" />
     <Compile Include="Tools\Tool.cs" />
   </ItemGroup>
   <ItemGroup>

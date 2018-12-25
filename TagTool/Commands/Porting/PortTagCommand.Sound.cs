@@ -95,28 +95,24 @@ namespace TagTool.Commands.Porting
                 return false;
         }
 
-        public static string ConvertSoundPermutation(byte[] buffer, int channelCount, int sampleRate, bool useCache, string permutationCache)
+        public static string ConvertXmaPermutation(byte[] buffer, int channelCount, int sampleRate, bool useCache, string permutationName)
         {
-            Directory.CreateDirectory(@"Temp");
-
             if (!File.Exists(@"Tools\ffmpeg.exe"))
             {
                 Console.WriteLine("Missing tools, please install all the required tools before porting sounds.");
                 return null;
             }
+
             var gui = Guid.NewGuid();
-            string audioFile = permutationCache;
-            string tempXMA = $"{audioFile}.xma";
-            string tempWAV = $"{audioFile}_temp.wav";
-            string fixedWAV = $"{audioFile}_truncated.wav";
-            string tempMP3 = $"{audioFile}_temp.mp3";
-            string resultWAV = $"{audioFile}.wav";
-            string resultMP3 = $"{audioFile}.mp3";
+            var audioFile = permutationName;
+            var tempXMA = $"{audioFile}.xma";
+            var tempWAV = $"{audioFile}_temp.wav";
+            var fixedWAV = $"{audioFile}_truncated.wav";
+            var tempMP3 = $"{audioFile}_temp.mp3";
+            var resultWAV = $"{audioFile}.wav";
+            var resultMP3 = $"{audioFile}.mp3";
 
-
-            //If the files are still present, somehow, before the conversion happens, it will stall because ffmpeg doesn't override existing sounds.
-
-            CLEAN_FILES:
+        CLEAN_FILES:
             try
             {
                 if (File.Exists(tempXMA))
@@ -144,40 +140,51 @@ namespace TagTool.Commands.Porting
                 XMAfile.Write(output);
             }
 
-            if (ConvertXMAToWAV(tempXMA, tempWAV))
-            {
-                byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
-                byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
-
-                using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                {
-                    WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
-                    WAVfile.Write(writer);
-                }
-
-                // Convert to MP3 and remove header
-                if (ConvertWAVToMP3(fixedWAV, tempMP3))
-                {
-                    int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
-                    byte[] MP3stream = File.ReadAllBytes(tempMP3);
-                    using (Stream output = new FileStream(resultMP3, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        output.Write(MP3stream, 0x2D, size);
-                    }
-                }
-                else
-                    return null;
-
-                Tools.AsyncJobManager.CleanupFile(tempXMA, 30000);
-                Tools.AsyncJobManager.CleanupFile(tempWAV, 30000);
-                Tools.AsyncJobManager.CleanupFile(fixedWAV, 30000);
-                Tools.AsyncJobManager.CleanupFile(tempMP3, 30000);
-
-                return resultMP3;
-
-            }
-            else
+            if (!ConvertXMAToWAV(tempXMA, tempWAV))
                 return null;
+
+            byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
+            byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
+
+            using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+            {
+                WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
+                WAVfile.Write(writer);
+            }
+
+            // Convert to MP3 and remove header
+            if (!ConvertWAVToMP3(fixedWAV, tempMP3))
+                return null;
+
+            int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
+            byte[] MP3stream = File.ReadAllBytes(tempMP3);
+
+            using (var output = new FileStream(resultMP3, FileMode.Create, FileAccess.Write, FileShare.None))
+                output.Write(MP3stream, 0x2D, size);
+
+        CLEAN_FILES2:
+            try
+            {
+                if (File.Exists(tempXMA))
+                    File.Delete(tempXMA);
+                if (File.Exists(tempWAV))
+                    File.Delete(tempWAV);
+                if (File.Exists(fixedWAV))
+                    File.Delete(fixedWAV);
+                if (File.Exists(resultWAV))
+                    File.Delete(resultWAV);
+                if (File.Exists(resultMP3))
+                    File.Delete(resultMP3);
+                if (File.Exists(tempMP3))
+                    File.Delete(tempMP3);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                goto CLEAN_FILES2;
+            }
+
+            return resultMP3;
         }
 
         static string GetTagFileFriendlyName(string tagname)
@@ -185,42 +192,6 @@ namespace TagTool.Commands.Porting
             var pieces = tagname.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries);
             var filename = string.Join("_", pieces);
             return filename;
-        }
-
-        private CacheSoundResult ConvertSoundPermutation(int pitchRangeIndex, int permutationIndex, byte[] data, int channelCount, int sampleRate, string basePermutationCacheName, bool useCache)
-        {
-            string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
-            string cacheFileName = "";
-
-            cacheFileName = $"{permutationName}.mp3";
-
-            bool exists = File.Exists(cacheFileName);
-
-            if ((permutationName != null && !exists) || !useCache)
-            {
-                cacheFileName = ConvertSoundPermutation(data, channelCount, sampleRate, useCache, permutationName);
-            }
-
-            // Read data from the file
-            byte[] permBuffer = File.ReadAllBytes(cacheFileName);
-            if (!useCache)
-            {
-                if (File.Exists(cacheFileName))
-                    File.Delete(cacheFileName);
-            }
-
-            // Create new Permutation Chunk with matching size. Offset temporarly set to 0.
-
-            int permutationChunkSize = permBuffer.Length;
-
-            CacheSoundResult result = new CacheSoundResult
-            {
-                PermutationIndex = permutationIndex,
-                PermutationBuffer = permBuffer,
-                PermutationChunkSize = permutationChunkSize
-            };
-
-            return result;
         }
 
         private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
@@ -244,7 +215,6 @@ namespace TagTool.Commands.Porting
             var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
             var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
 
-
             sound.PlaybackParameters = playbackParameters;
             sound.Scale = scale;
             sound.PlatformCodec = platformCodec;
@@ -265,19 +235,19 @@ namespace TagTool.Commands.Porting
 
             sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
 
-            IEnumerable<byte> soundDataAggregate = new byte[0];
-            int currentSoundDataOffset = 0;
-            uint largestSampleCount = 0;
-            uint totalSampleCount = 0;
+            var soundDataAggregate = new byte[0].AsEnumerable();
+            var currentSoundDataOffset = 0;
+            var largestSampleCount = (uint)0;
+            var totalSampleCount = (uint)0;
 
-            int XMAFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
+            var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
 
-            if (XMAFileSize < 0)
+            if (xmaFileSize < 0)
                 return null;
 
-            byte[] XMAdata = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, XMAFileSize);
+            var xmaData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
 
-            if (XMAdata == null)
+            if (xmaData == null)
                 return null;
 
             for (int pitchRangeIndex = sound.SoundReference.PitchRangeIndex; pitchRangeIndex < sound.SoundReference.PitchRangeIndex+sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
@@ -331,63 +301,54 @@ namespace TagTool.Commands.Porting
                 // Convert Blam permutations to ElDorado format
                 //
 
+                var useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
+
+                var basePermutationCacheName = Path.Combine(
+                    useCache ? Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName : TempDirectory.FullName,
+                    GetTagFileFriendlyName(blamTag_Name));
+
                 var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
 
-                bool useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
-
-                string basePermutationCacheName;
-
-                if (Sounds.UseAudioCacheCommand.AudioCacheDirectory != null)
+                for (int i = 0; i < permutationCount; i++)
                 {
-                    basePermutationCacheName = Path.Combine(Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName, GetTagFileFriendlyName(blamTag_Name));
-                }
-                else
-                {
-                    basePermutationCacheName = Path.Combine("Temp", GetTagFileFriendlyName(blamTag_Name));
-                }
+                    var permutationIndex = pitchRange.FirstPermutationIndex + i;
+                    var permutationSize = BlamSoundGestalt.GetPermutationSize(permutationIndex);
+                    var permutationOffset = BlamSoundGestalt.GetPermutationOffset(permutationIndex);
 
-                
-                // Create base permutations before converting audio
-                var permutations = new Permutation[permutationCount];
-                var results = new CacheSoundResult[permutationCount];
-
-                for (int permutationIndex = 0; permutationIndex < permutationCount; permutationIndex++)
-                {
-                    var gestaltPermIndex = permutationIndex + pitchRange.FirstPermutationIndex;
-                    var permutation = BlamSoundGestalt.GetPermutation(gestaltPermIndex);
+                    var permutation = BlamSoundGestalt.GetPermutation(permutationIndex);
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
                     permutation.PermutationChunks = new List<PermutationChunk>();
-                    permutation.PermutationNumber = (uint)permutationOrder[permutationIndex];
+                    permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
-                    permutations[permutationIndex] = permutation;   
-                }
 
-                // Create tasks and wait for completion
+                    var permutationData = new byte[permutationSize];
+                    Array.Copy(xmaData, permutationOffset, permutationData, 0, permutationSize);
 
-                int i = 0;
-                for (i = 0; i < permutationCount; i++)
-                {
-                    var gestaltPermIndex = i + pitchRange.FirstPermutationIndex;
-                    var permSize = BlamSoundGestalt.GetPermutationSize(gestaltPermIndex);
-                    var permOffset = BlamSoundGestalt.GetPermutationOffset(gestaltPermIndex);
-                    byte[] permutationData = new byte[permSize];
-                    Array.Copy(XMAdata, permOffset, permutationData, 0, permSize);
+                    string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
+                    string cacheFileName = "";
 
-                    results[i] = ConvertSoundPermutation(newPitchRangeIndex, i, permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), basePermutationCacheName, useCache);
-                }
+                    cacheFileName = $"{permutationName}.mp3";
 
-                for (i = 0; i < permutationCount; i++)
-                {
-                    var result = results[i];
+                    bool exists = File.Exists(cacheFileName);
 
-                    var permutation = permutations[result.PermutationIndex];
-                    permutation.PermutationChunks.Add(new PermutationChunk(currentSoundDataOffset, result.PermutationChunkSize));
-                    currentSoundDataOffset += result.PermutationChunkSize;
+                    if ((permutationName != null && !exists) || !useCache)
+                        cacheFileName = ConvertXmaPermutation(permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), useCache, permutationName);
+
+                    var result = File.ReadAllBytes(cacheFileName);
+
+                    if (!useCache)
+                    {
+                        if (File.Exists(cacheFileName))
+                            File.Delete(cacheFileName);
+                    }
+
+                    permutation.PermutationChunks.Add(new PermutationChunk(currentSoundDataOffset, result.Length));
+                    currentSoundDataOffset += result.Length;
                     pitchRange.Permutations.Add(permutation);
 
-                    soundDataAggregate = soundDataAggregate.Concat(result.PermutationBuffer);
+                    soundDataAggregate = soundDataAggregate.Concat(result);
                 }
             }
 
@@ -524,7 +485,6 @@ namespace TagTool.Commands.Porting
                 }
             };
 
-
             var data = soundDataAggregate.ToArray();
 
             var resourceContext = new ResourceSerializationContext(sound.Resource);
@@ -539,6 +499,7 @@ namespace TagTool.Commands.Porting
                 BlockOffset = 12,
                 Address = new CacheAddress(CacheAddressType.Resource, 1073741824)
             };
+
             sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
 
             sound.Resource.ChangeLocation(ResourceLocation.Audio);
