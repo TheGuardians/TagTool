@@ -635,7 +635,10 @@ namespace TagTool.Commands.Porting
 					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
 					return collisionMopp;
 
-				case DamageReportingType damageReportingType:
+                case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
+                    return ConvertPhantomTypeFlags(phantomTypeFlags);
+
+                case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
 
 				case GameObjectType gameObjectType:
@@ -1009,7 +1012,26 @@ namespace TagTool.Commands.Porting
 			return weaponFlags;
 		}
 
-		private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
+        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+
+                case CacheVersion.Halo3Retail:
+                    if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
+            }
+
+            return flags;
+        }
+
+        private DamageReportingType ConvertDamageReportingType(DamageReportingType damageReportingType)
 		{
 			string value = null;
 
