@@ -339,6 +339,10 @@ namespace TagTool.Commands.Porting
                                 case "jmad":
                                     MergeAnimationGraphs(cacheStream, resourceStreams, instance, blamTag);
                                     break;
+
+                                case "mulg":
+                                    MergeMultiplayerGlobals(cacheStream, resourceStreams, instance, blamTag);
+                                    break;
                             }
                         }
 
