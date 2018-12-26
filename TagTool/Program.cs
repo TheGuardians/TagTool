@@ -77,6 +77,7 @@ namespace TagTool.Commands
             catch (Exception e)
             {
                 Console.WriteLine("ERROR: " + e.Message);
+                Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
                 ConsoleHistory.Dump("hott_*_init.log");
                 return;
             }
@@ -190,6 +191,7 @@ namespace TagTool.Commands
             catch (Exception e)
             {
                 Console.WriteLine("ERROR: " + e.Message);
+                Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
                 ConsoleHistory.Dump("hott_*_crash.log");
             }
 #endif

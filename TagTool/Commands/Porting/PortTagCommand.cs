@@ -147,7 +147,6 @@ namespace TagTool.Commands.Porting
             {
                 Console.WriteLine();
                 Console.WriteLine($"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.GroupName}':");
-                Console.WriteLine($"\t{e.Message}");
                 Console.WriteLine();
                 throw e;
             }
