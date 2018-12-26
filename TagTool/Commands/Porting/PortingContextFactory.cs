@@ -51,7 +51,6 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
             context.AddCommand(new NameBlamTagCommand(cacheContext, blamCache));
-            context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
 		}
 	}
 }

@@ -218,7 +218,6 @@
     <Compile Include="Cache\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
-    <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />
     <Compile Include="Tags\TagResourceTypeGen3.cs" />

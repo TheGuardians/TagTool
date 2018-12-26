@@ -108,6 +108,12 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Allow writing output to the console.")]
 			Print = 1 << 14,
 
+            /// <summary>
+            /// Merges new data if tags exist.
+            /// </summary>
+            [PortingFlagDescription("Merges new data if tags exist.")]
+            Merge = 1 << 15,
+
 			// No [PortingFlagDescription] here means we'll flag names as the description.
 			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print
 		}

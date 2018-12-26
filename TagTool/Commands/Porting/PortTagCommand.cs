@@ -169,6 +169,20 @@ namespace TagTool.Commands.Porting
 
 			switch (groupTag.ToString())
 			{
+                case "snd!":
+                    if (!FlagIsSet(PortingFlags.Audio))
+                    {
+                        PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultSoundName);
+                        CacheContext.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTagInstance result);
+                        return result;
+                    }
+                    break;
+
+                case "bipd":
+                    if (!FlagIsSet(PortingFlags.Elites) && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
+                        return null;
+                    break;
+
 				case "shit": // use the global shit tag until shit tags are port-able
 					return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
 
@@ -283,56 +297,31 @@ namespace TagTool.Commands.Porting
 					CacheContext.GetStringId(blamTag.GroupName));
 			}
 
-			if ((groupTag == "snd!") && !FlagIsSet(PortingFlags.Audio))
-			{
-				PortingConstants.DefaultTagNames.TryGetValue(groupTag, out string defaultSoundName);
-				CacheContext.TryGetTag($"{defaultSoundName}.{groupTag}", out CachedTagInstance result);
-				return result;
-			}
-
-			var wasReplacing = FlagIsSet(PortingFlags.Replace);
+            var wasReplacing = FlagIsSet(PortingFlags.Replace);
 			var wasNew = FlagIsSet(PortingFlags.New);
 			var wasSingle = FlagIsSet(PortingFlags.Recursive);
 
-			if (!FlagIsSet(PortingFlags.Elites) && groupTag == "bipd" && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
-				return null;
+            foreach (var instance in CacheContext.TagCache.Index)
+            {
+                if (instance == null || !instance.IsInGroup(groupTag) || instance.Name == null || instance.Name != blamTag.Name)
+                    continue;
 
-			if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
-			{
-				foreach (var instance in CacheContext.TagCache.Index)
-				{
-                    if (instance == null || !instance.IsInGroup(blamTag.GroupTag) || instance.Name == null || instance.Name != blamTag.Name)
+                if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
+                {
+                    var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
+                    var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
+
+                    if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
                         continue;
+                }
 
-					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
-					{
-						var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
-						var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
-
-						if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
-							continue;
-					}
-
-					if (instance.Group.Tag == groupTag)
-						return edTag = instance;
-				}
-			}
-			else if (!FlagIsSet(PortingFlags.New))
-			{
-				foreach (var instance in CacheContext.TagCache.Index)
-				{
-					if (instance == null || !instance.IsInGroup(groupTag) || instance.Name == null || instance.Name != blamTag.Name)
-						continue;
-
-					if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
-					{
-						var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
-						var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
-
-						if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
-							continue;
-                    }
-
+                if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
+                {
+                    if (instance.Group.Tag == groupTag)
+                        return instance;
+                }
+                else if (!FlagIsSet(PortingFlags.New))
+                {
                     if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                     {
                         if (!FlagIsSet(PortingFlags.Recursive) && wasSingle)
@@ -341,12 +330,28 @@ namespace TagTool.Commands.Porting
                         edTag = instance;
                         break;
                     }
+                    else
+                    {
+                        if (FlagIsSet(PortingFlags.Merge))
+                        {
+                            switch (groupTag.ToString())
+                            {
+                                case "jmad":
+                                    MergeAnimationGraphs(cacheStream, resourceStreams, instance, blamTag);
+                                    break;
+                            }
+                        }
 
-                    return edTag = instance;
+                        if (!ReplacedTags.ContainsKey(groupTag))
+                            ReplacedTags[groupTag] = new List<string>();
+
+                        ReplacedTags[groupTag].Add(blamTag.Name);
+                        return instance;
+                    }
                 }
-			}
+            }
 
-			if (FlagIsSet(PortingFlags.New) && !FlagIsSet(PortingFlags.Recursive) && wasSingle)
+            if (FlagIsSet(PortingFlags.New) && !FlagIsSet(PortingFlags.Recursive) && wasSingle)
 				ToggleFlags(PortingFlags.New | PortingFlags.Recursive);
 
 			//
