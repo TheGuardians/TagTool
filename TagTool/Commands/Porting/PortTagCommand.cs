@@ -542,7 +542,7 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
 					break;
 
-				case Sound sound:
+                case Sound sound:
 					blamDefinition = ConvertSound(cacheStream, resourceStreams, sound, blamTag.Name);
 					break;
 
@@ -573,7 +573,12 @@ namespace TagTool.Commands.Porting
 						attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
 					break;
 
-				case ShaderCortana shader_cortana:
+                // Fix avalanche trees
+                case Shader rmsh when blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
+                    rmsh.ShaderProperties[0].BlendMode = 1;
+                    break;
+
+                case ShaderCortana shader_cortana:
 					ConvertShaderCortana(shader_cortana, cacheStream, resourceStreams);
 					break;
 			}

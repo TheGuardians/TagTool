@@ -67,8 +67,8 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock3> Unknown3;
             public List<ArgumentMapping> ArgumentMappings;
             public List<FunctionBlock> Functions;
-            public int BitmapTransparency;
             public int Unknown7;
+            public int BlendMode;
             public uint Unknown8;
             public short Unknown9;
             public short Unknown10;
