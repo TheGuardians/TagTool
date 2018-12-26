@@ -1043,11 +1043,17 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case CacheVersion.Halo3ODST:
-					value = damageReportingType.Halo3ODST.ToString();
+                    if (damageReportingType.Halo3ODST == DamageReportingType.Halo3ODSTValue.ElephantTurret)
+                        value = DamageReportingType.HaloOnlineValue.GuardiansUnknown.ToString();
+                    else
+					    value = damageReportingType.Halo3ODST.ToString();
 					break;
 
 				case CacheVersion.Halo3Retail:
-					value = damageReportingType.Halo3Retail.ToString();
+                    if (damageReportingType.Halo3Retail == DamageReportingType.Halo3RetailValue.ElephantTurret)
+                        value = DamageReportingType.HaloOnlineValue.GuardiansUnknown.ToString();
+                    else
+                        value = damageReportingType.Halo3Retail.ToString();
 					break;
 			}
 

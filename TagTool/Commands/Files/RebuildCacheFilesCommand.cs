@@ -18,12 +18,41 @@ namespace TagTool.Commands.Files
         private Dictionary<ResourceLocation, Dictionary<int, PageableResource>> CopiedResources { get; } = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>();
         private MultiplayerGlobals MulgDefinition { get; set; } = null;
         private Dictionary<int, int> MapScenarios { get; } = new Dictionary<int, int>();
-        private bool NoVariants { get; set; } = false;
+
+        private bool Clean { get; set; } = false;
         private bool NullReferences { get; set; } = false;
 
-        private static readonly string[] SkipGroups = new[]
+        /// <summary>
+        /// When <see cref="Clean"/> is false, tags in this group are not copied to the new cache.
+        /// </summary>
+        private static readonly string[] UncleanSkipGroups = new[]
         {
             "armr", "forg", "gfxt", "mode", "obje", "pdm!", "scnr", "sus!", "trdf", "vfsl",
+        };
+
+        private static readonly string[] DefaultBitmapNames = new[]
+        {
+            @"shaders\default_bitmaps\bitmaps\gray_50_percent",
+            @"shaders\default_bitmaps\bitmaps\alpha_grey50",
+            @"shaders\default_bitmaps\bitmaps\color_white",
+            @"shaders\default_bitmaps\bitmaps\default_detail",
+            @"shaders\default_bitmaps\bitmaps\reference_grids",
+            @"shaders\default_bitmaps\bitmaps\default_vector",
+            @"shaders\default_bitmaps\bitmaps\default_alpha_test",
+            @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map",
+            @"shaders\default_bitmaps\bitmaps\color_red",
+            @"shaders\default_bitmaps\bitmaps\alpha_white",
+            @"shaders\default_bitmaps\bitmaps\monochrome_alpha_grid",
+            @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear",
+            @"shaders\default_bitmaps\bitmaps\color_black_alpha_black",
+            @"shaders\default_bitmaps\bitmaps\dither_pattern",
+            @"shaders\default_bitmaps\bitmaps\bump_detail",
+            @"shaders\default_bitmaps\bitmaps\color_black",
+            @"shaders\default_bitmaps\bitmaps\auto_exposure_weight",
+            @"shaders\default_bitmaps\bitmaps\dither_pattern2",
+            @"shaders\default_bitmaps\bitmaps\random4_warp",
+            @"levels\shared\bitmaps\nature\water\water_ripples",
+            @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
         };
 
         public RebuildCacheFilesCommand(HaloOnlineCacheContext cacheContext)
@@ -32,7 +61,7 @@ namespace TagTool.Commands.Files
                   "RebuildCacheFiles",
                   "Rebuilds the cache files into the specified output directory.",
 
-                  "RebuildCacheFiles [NoVariants] <Output Directory>",
+                  "RebuildCacheFiles [Clean] [NoVariants] <Output Directory>",
 
                   "Rebuilds the cache files into the specified directory.")
         {
@@ -48,8 +77,8 @@ namespace TagTool.Commands.Files
             {
                 switch (args[0].ToLower())
                 {
-                    case "novariants":
-                        NoVariants = true;
+                    case "clean":
+                        Clean = true;
                         break;
 
                     default:
@@ -67,10 +96,16 @@ namespace TagTool.Commands.Files
             if (!destDirectory.Exists)
                 destDirectory.Create();
 
-            var srcResourceCaches = new Dictionary<ResourceLocation, ResourceCache>();
-
             var destTagCache = CacheContext.CreateTagCache(destDirectory);
-            CacheContext.StringIdCacheFile.CopyTo(Path.Combine(destDirectory.FullName, CacheContext.StringIdCacheFile.Name));
+
+            var destStringIdPath = Path.Combine(destDirectory.FullName, CacheContext.StringIdCacheFile.Name);
+
+            if (File.Exists(destStringIdPath))
+                File.Delete(destStringIdPath);
+
+            CacheContext.StringIdCacheFile.CopyTo(destStringIdPath);
+
+            var srcResourceCaches = new Dictionary<ResourceLocation, ResourceCache>();
             var destResourceCaches = new Dictionary<ResourceLocation, ResourceCache>();
 
             foreach (var value in Enum.GetValues(typeof(ResourceLocation)))
@@ -101,43 +136,11 @@ namespace TagTool.Commands.Files
             using (var srcStream = CacheContext.OpenTagCacheRead())
             using (var destStream = destCacheContext.OpenTagCacheReadWrite())
             {
-                //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("vtsh"))
-                //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                //CacheContext.TagNames.Remove(tag.Index);
+                var cfgtTag = Clean ?
+                    CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream) :
+                    destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
 
-                //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("pixl"))
-                //if (tag != null && CacheContext.TagNames.ContainsKey(tag.Index))
-                //CacheContext.TagNames.Remove(tag.Index);
-
-                //CopyTag(CacheContext.TagCache.Index.FindFirstInGroup("cfgt"), CacheContext, srcStream, destCacheContext, destStream);
-                var cfgtTag = destCacheContext.TagCache.AllocateTag(TagGroup.Instances[new Tag("cfgt")]);
-
-                var defaultBitmapNames = new[]
-                {
-                    @"shaders\default_bitmaps\bitmaps\gray_50_percent",
-                    @"shaders\default_bitmaps\bitmaps\alpha_grey50",
-                    @"shaders\default_bitmaps\bitmaps\color_white",
-                    @"shaders\default_bitmaps\bitmaps\default_detail",
-                    @"shaders\default_bitmaps\bitmaps\reference_grids",
-                    @"shaders\default_bitmaps\bitmaps\default_vector",
-                    @"shaders\default_bitmaps\bitmaps\default_alpha_test",
-                    @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map",
-                    @"shaders\default_bitmaps\bitmaps\color_red",
-                    @"shaders\default_bitmaps\bitmaps\alpha_white",
-                    @"shaders\default_bitmaps\bitmaps\monochrome_alpha_grid",
-                    @"shaders\default_bitmaps\bitmaps\gray_50_percent_linear",
-                    @"shaders\default_bitmaps\bitmaps\color_black_alpha_black",
-                    @"shaders\default_bitmaps\bitmaps\dither_pattern",
-                    @"shaders\default_bitmaps\bitmaps\bump_detail",
-                    @"shaders\default_bitmaps\bitmaps\color_black",
-                    @"shaders\default_bitmaps\bitmaps\auto_exposure_weight",
-                    @"shaders\default_bitmaps\bitmaps\dither_pattern2",
-                    @"shaders\default_bitmaps\bitmaps\random4_warp",
-                    @"levels\shared\bitmaps\nature\water\water_ripples",
-                    @"shaders\default_bitmaps\bitmaps\vision_mode_mask"
-                };
-
-                foreach (var tagName in defaultBitmapNames)
+                foreach (var tagName in DefaultBitmapNames)
                 {
                     foreach (var tag in CacheContext.TagCache.Index)
                     {
@@ -158,30 +161,33 @@ namespace TagTool.Commands.Files
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmt2"))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
-                //foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmhg").Where(tag => CacheContext.TagNames.ContainsKey(tag.Index)))
-                //CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
-
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
 
-                CopyTag(CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough"), CacheContext, srcStream, destCacheContext, destStream);
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmw").Where(tag => tag.Name != null))
+                    CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
-                CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
-
-                destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
+                if (!Clean)
                 {
-                    GlobalTags = new List<TagReferenceBlock>
+                    CopyTag(CacheContext.GetTag<Globals>(@"globals\globals"), CacheContext, srcStream, destCacheContext, destStream);
+
+                    destCacheContext.Serialize(new TagSerializationContext(destStream, destCacheContext, cfgtTag), new CacheFileGlobalTags
+                    {
+                        GlobalTags = new List<TagReferenceBlock>
                     {
                         new TagReferenceBlock { Instance = destCacheContext.GetTag<Globals>(@"globals\globals") }
                     }
-                });
-
-                /*foreach (var instance in CacheContext.TagCache.Index)
+                    });
+                }
+                else
                 {
-                    if (instance == null || !instance.IsInGroup("scnr"))
-                        continue;
+                    foreach (var instance in CacheContext.TagCache.Index)
+                    {
+                        if (instance == null || !instance.IsInGroup("scnr"))
+                            continue;
 
-                    CopyTag(instance, CacheContext, srcStream, destCacheContext, destStream);
-                }*/
+                        CopyTag(instance, CacheContext, srcStream, destCacheContext, destStream);
+                    }
+                }
             }
 
             destCacheContext.SaveTagNames();
@@ -191,11 +197,17 @@ namespace TagTool.Commands.Files
 
         private CachedTagInstance CopyTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream)
         {
-            if (srcTag == null || SkipGroups.Where(tag => srcTag.IsInGroup(tag)).Count() != 0)
+            if (srcTag == null)
                 return null;
 
-            if (srcTag.Name?.StartsWith("hf2p") ?? false)
-                return null; // kill it with fucking fire
+            if (!Clean)
+            {
+                if (UncleanSkipGroups.Where(tag => srcTag.IsInGroup(tag)).Count() != 0)
+                    return null;
+
+                if (srcTag.Name?.StartsWith("hf2p") ?? false)
+                    return null; // kill it with fucking fire
+            }
 
             if (ConvertedTags.ContainsKey(srcTag.Index))
                 return ConvertedTags[srcTag.Index];
@@ -223,7 +235,7 @@ namespace TagTool.Commands.Files
             if (srcTag.Name != null)
                 destTag.Name = srcTag.Name;
 
-            if (NoVariants && tagData is MultiplayerGlobals mulg)
+            if (Clean && tagData is MultiplayerGlobals mulg)
                 CleanMultiplayerGlobals(mulg);
 
             if (structureType == typeof(Scenario))
@@ -233,7 +245,7 @@ namespace TagTool.Commands.Files
                 if (!MapScenarios.ContainsKey(scenario.MapId))
                     MapScenarios[scenario.MapId] = destTag.Index;
 
-                if (NoVariants)
+                if (Clean)
                     CleanScenario(srcStream, scenario);
             }
 
@@ -727,7 +739,7 @@ namespace TagTool.Commands.Files
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
                     Name = CacheContext.GetStringId("mauler"),
-                    Vehicle = null, //CacheContext.GetTagInstance<Vehicle>(@"objects\vehicles\mauler\mauler")
+                    Vehicle = CacheContext.GetTag<Vehicle>(@"objects\vehicles\mauler\mauler")
                 },
                 new MultiplayerGlobals.UniversalBlock.GameVariantVehicle
                 {
