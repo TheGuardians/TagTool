@@ -544,7 +544,7 @@ namespace TagTool.Commands.Porting
         }
 
         private HashSet<string> MergedAnimationGraphs { get; } = new HashSet<string>();
-        private Dictionary<string, (Dictionary<string, (short, short)>, Dictionary<short, short>)> MergedAnimationData { get; }
+        private Dictionary<string, (Dictionary<string, (short, short)>, Dictionary<short, short>)> MergedAnimationData { get; } = new Dictionary<string, (Dictionary<string, (short, short)>, Dictionary<short, short>)>();
 
         private void MergeAnimationTagReferences(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.AnimationTagReference> edReferences, List<ModelAnimationGraph.AnimationTagReference> h3References)
         {
