@@ -72,7 +72,7 @@ namespace TagTool.Tags.Definitions
         public enum FlagsValue : ushort
         {
             None = 0,
-            FitToAdpcmBlockSize = 1 << 0,
+            LoopingSound = 1 << 0,
             SplitLongSoundIntoPermutations  = 1 << 1
         }
 

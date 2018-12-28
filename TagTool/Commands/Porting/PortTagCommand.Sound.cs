@@ -95,7 +95,29 @@ namespace TagTool.Commands.Porting
                 return false;
         }
 
-        public static string ConvertXmaPermutation(byte[] buffer, int channelCount, int sampleRate, bool useCache, string permutationName)
+        private static bool ConvertWAVToMP3Looping(string wavFileName, string mp3FileName)
+        {
+            // Assumes that wavFileName and mp3FileName have the same name but different extensions.
+            ProcessStartInfo info = new ProcessStartInfo(@"Tools\mp3loop.exe")
+            {
+                Arguments = wavFileName,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+                RedirectStandardInput = false
+            };
+            Process mp3loop = Process.Start(info);
+            mp3loop.WaitForExit();
+
+            if (File.Exists(mp3FileName))
+                return true;
+            else
+                return false;
+        }
+        
+        public static string ConvertXMAPermutation(byte[] buffer, int channelCount, int sampleRate, bool loopingSound, bool useCache, string permutationName)
         {
             if (!File.Exists(@"Tools\ffmpeg.exe"))
             {
@@ -143,18 +165,30 @@ namespace TagTool.Commands.Porting
             if (!ConvertXMAToWAV(tempXMA, tempWAV))
                 return null;
 
-            byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
-            byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
-
-            using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-            {
-                WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
-                WAVfile.Write(writer);
-            }
-
             // Convert to MP3 and remove header
-            if (!ConvertWAVToMP3(fixedWAV, tempMP3))
-                return null;
+            if (loopingSound && channelCount <= 2)
+            {
+                if (!ConvertWAVToMP3Looping(tempWAV, tempMP3))
+                    return null;
+            }
+            else
+            {
+                // truncate file
+                byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
+                byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
+
+                using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                {
+                    WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
+                    WAVfile.Write(writer);
+                }
+
+                // add code to handle looping sounds with more than 2 channels here. Mp3Loop does not handle that kind of file.
+
+                if (!ConvertWAVToMP3(fixedWAV, tempMP3))
+                    return null;
+            }
+            
 
             int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
             byte[] MP3stream = File.ReadAllBytes(tempMP3);
@@ -212,6 +246,7 @@ namespace TagTool.Commands.Porting
             var scale = BlamSoundGestalt.Scales[sound.SoundReference.ScaleIndex];
             var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
             var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
+            var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
 
             sound.PlaybackParameters = playbackParameters;
             sound.Scale = scale;
@@ -332,7 +367,7 @@ namespace TagTool.Commands.Porting
                     bool exists = File.Exists(cacheFileName);
 
                     if ((permutationName != null && !exists) || !useCache)
-                        cacheFileName = ConvertXmaPermutation(permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), useCache, permutationName);
+                        cacheFileName = ConvertXMAPermutation(permutationData, channelCount, sound.SampleRate.GetSampleRateHz(), loop,  useCache, permutationName);
 
                     var result = File.ReadAllBytes(cacheFileName);
 
