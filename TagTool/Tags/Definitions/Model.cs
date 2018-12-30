@@ -230,16 +230,13 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte RenderModelPermutationIndex;
 
-                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                    public sbyte Unknown1;
-
-                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
-                    public sbyte Unknown2;
-
                     public FlagsValue Flags;
 
-                    [TagField(Padding = true, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
-                    public byte[] Unused;
+                    [TagField(Padding = true, Length = 2)]
+                    public byte[] Unused1 = new byte[2];
+
+                    [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+                    public byte[] Unused2 = new byte[1];
 
                     public float Probability;
                     public List<State> States;
