@@ -163,7 +163,7 @@ namespace TagTool.Commands.Files
 
                 CopyTag(CacheContext.GetTag<Shader>(@"shaders\invalid"), CacheContext, srcStream, destCacheContext, destStream);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmw").Where(tag => tag.Name != null))
+                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmw ").Where(tag => tag.Name != null))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 if (!Clean)
