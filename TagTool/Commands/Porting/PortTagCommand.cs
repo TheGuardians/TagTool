@@ -1202,12 +1202,18 @@ namespace TagTool.Commands.Porting
         private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
         {
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
+            {
+                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                return new List<CacheFile.IndexItem>();
+            }
 
             var tagIdentifiers = tagSpecifier.Split('.');
 
             if (!CacheContext.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
+            {
+                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                return new List<CacheFile.IndexItem>();
+            }
 
             var tagName = tagIdentifiers[0];
 
@@ -1220,7 +1226,10 @@ namespace TagTool.Commands.Porting
                 item => item != null && groupTag == item.GroupTag && tagName == item.Name));
 
             if (result.Count == 0)
-                throw new Exception($"Invalid tag name: {tagSpecifier}");
+            {
+                Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
+                return new List<CacheFile.IndexItem>();
+            }
 
             return result;
         }

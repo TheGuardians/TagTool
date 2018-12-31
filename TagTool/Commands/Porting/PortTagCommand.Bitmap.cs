@@ -266,7 +266,11 @@ namespace TagTool.Commands.Porting
                 // Serialize the new resource definition
                 //
 
-                resource.ChangeLocation(ResourceLocation.Textures);
+                var location = bitmap.Usage == 2 ?
+                    ResourceLocation.TexturesB : // bump maps
+                    ResourceLocation.Textures; // everything else
+
+                resource.ChangeLocation(location);
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");
@@ -274,24 +278,24 @@ namespace TagTool.Commands.Porting
                 if (!dataStream.CanRead)
                     throw new ArgumentException("The input stream is not open for reading", "dataStream");
 
-                var cache = CacheContext.GetResourceCache(ResourceLocation.Textures);
+                var cache = CacheContext.GetResourceCache(location);
 
-                if (!resourceStreams.ContainsKey(ResourceLocation.Textures))
+                if (!resourceStreams.ContainsKey(location))
                 {
-                    resourceStreams[ResourceLocation.Textures] = FlagIsSet(PortingFlags.Memory) ?
+                    resourceStreams[location] = FlagIsSet(PortingFlags.Memory) ?
                         new MemoryStream() :
-                        (Stream)CacheContext.OpenResourceCacheReadWrite(ResourceLocation.Textures);
+                        (Stream)CacheContext.OpenResourceCacheReadWrite(location);
 
                     if (FlagIsSet(PortingFlags.Memory))
-                        using (var resourceStream = CacheContext.OpenResourceCacheRead(ResourceLocation.Textures))
-                            resourceStream.CopyTo(resourceStreams[ResourceLocation.Textures]);
+                        using (var resourceStream = CacheContext.OpenResourceCacheRead(location))
+                            resourceStream.CopyTo(resourceStreams[location]);
                 }
 
                 dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
 
-                resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Textures], data, out uint compressedSize);
+                resource.Page.Index = cache.Add(resourceStreams[location], data, out uint compressedSize);
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();

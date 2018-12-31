@@ -551,153 +551,6 @@ namespace TagTool.Commands.Files
                 }
             };
 
-            mulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons = new List<MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon>
-            {
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // battle_rifle
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // carbine
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // sniper_rifle
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // beam_rifle
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // spartan_laster
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // rocket_launcher
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // chaingun_turret
-                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\chaingun\weapon\chaingun_turret"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // machinegun_turret
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // machinegun_turret_integrated
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret_integrated"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // plasma_cannon
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // plasma_cannon_integrated
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon_integrated"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // needler
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // flak_cannon
-                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\flak_cannon\flak_cannon"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // gauss_turret
-                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\gauss\weapon\gauss_turret"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // anti_infantry
-                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\mauler\anti_infantry\weapon\anti_infantry"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
-                {
-                    // behemoth_chaingun_turret
-                    Type = CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
-                    Unknown1 = 5.0f,
-                    Unknown2 = 15.0f,
-                    Unknown3 = 5.0f,
-                    Unknown4 = -10.0f
-                }
-            };
             #region Universal GameVariantVehicles
             mulgDefinition.Universal[0].GameVariantVehicles = new List<MultiplayerGlobals.UniversalBlock.GameVariantVehicle>
             {
@@ -1057,6 +910,161 @@ namespace TagTool.Commands.Files
             };
             #endregion
 
+            mulgDefinition.Runtime[0].SandboxEditorUnit = CacheContext.GetTag<Biped>(@"objects\characters\monitor\monitor_editor");
+            mulgDefinition.Runtime[0].SandboxEditorObject = CacheContext.GetTag<Scenery>(@"objects\ui\editor_gizmo\editor_gizmo");
+            mulgDefinition.Runtime[0].Flag = CacheContext.GetTag<Weapon>(@"objects\weapons\multiplayer\flag\flag");
+            mulgDefinition.Runtime[0].Bomb = CacheContext.GetTag<Weapon>(@"objects\weapons\multiplayer\assault_bomb\assault_bomb");
+            mulgDefinition.Runtime[0].Ball = CacheContext.GetTag<Weapon>(@"objects\weapons\multiplayer\ball\ball");
+            mulgDefinition.Runtime[0].VipZone = CacheContext.GetTag<Crate>(@"objects\multi\vip\vip_boundary");
+            mulgDefinition.Runtime[0].Unknown = CacheContext.GetTag<Projectile>(@"objects\weapons\grenade\plasma_grenade\plasma_grenade");
+
+            mulgDefinition.Runtime[0].MultiplayerConstants[0].Weapons = new List<MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon>
+            {
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // battle_rifle
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\battle_rifle\battle_rifle"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // carbine
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\covenant_carbine\covenant_carbine"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // sniper_rifle
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\sniper_rifle\sniper_rifle"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // beam_rifle
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\beam_rifle\beam_rifle"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // spartan_laster
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\spartan_laser\spartan_laser"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // rocket_launcher
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\rocket_launcher\rocket_launcher"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // chaingun_turret
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\chaingun\weapon\chaingun_turret"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // machinegun_turret
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // machinegun_turret_integrated
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\machinegun_turret\machinegun_turret_integrated"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // plasma_cannon
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // plasma_cannon_integrated
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\turret\plasma_cannon\plasma_cannon_integrated"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // needler
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\pistol\needler\needler"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // flak_cannon
+                    Type = CacheContext.GetTag<Weapon>(@"objects\weapons\support_high\flak_cannon\flak_cannon"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // gauss_turret
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\warthog\turrets\gauss\weapon\gauss_turret"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // anti_infantry
+                    Type = CacheContext.GetTag<Weapon>(@"objects\vehicles\mauler\anti_infantry\weapon\anti_infantry"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                },
+                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Weapon
+                {
+                    // behemoth_chaingun_turret
+                    Type = CacheContext.GetTag<Weapon>(@"objects\levels\multi\shrine\behemoth\weapon\behemoth_chaingun_turret"),
+                    Unknown1 = 5.0f,
+                    Unknown2 = 15.0f,
+                    Unknown3 = 5.0f,
+                    Unknown4 = -10.0f
+                }
+            };
         }
 
         private void CleanScenario(Stream srcStream, Scenario scnrDefinition)

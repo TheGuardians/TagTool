@@ -661,6 +661,9 @@ namespace TagTool.Commands.Porting
 
                             if (edActionCreated || edWeaponTypeCreated || edWeaponClassCreated || edModeCreated)
                             {
+                                if (edAction.Animation == -1 && edAction.GraphIndex == -1)
+                                    continue;
+                                
                                 if (edAction.GraphIndex == -1)
                                 {
                                     edAction.Animation = indices[BlamCache.Strings.GetString(h3Def.Animations[edAction.Animation].Name)].Item2;
@@ -689,6 +692,9 @@ namespace TagTool.Commands.Porting
 
                             if (edOverlayCreated || edWeaponTypeCreated || edWeaponClassCreated || edModeCreated)
                             {
+                                if (edOverlay.Animation == -1 && edOverlay.GraphIndex == -1)
+                                    continue;
+
                                 if (edOverlay.GraphIndex == -1)
                                 {
                                     edOverlay.Animation = indices[BlamCache.Strings.GetString(h3Def.Animations[edOverlay.Animation].Name)].Item2;
@@ -721,9 +727,13 @@ namespace TagTool.Commands.Porting
                                 {
                                     foreach (var region in direction.Regions)
                                     {
+                                        if (region.Animation == -1 && region.GraphIndex == -1)
+                                            continue;
+
                                         if (region.GraphIndex == -1)
                                         {
-                                            region.Animation = indices[BlamCache.Strings.GetString(h3Def.Animations[region.Animation].Name)].Item2;
+                                            var animationName = BlamCache.Strings.GetString(h3Def.Animations[region.Animation].Name);
+                                            region.Animation = indices[animationName].Item2;
                                         }
                                         else
                                         {
@@ -775,6 +785,9 @@ namespace TagTool.Commands.Porting
 
                                 if (edDestinationCreated || edTransitionCreated || edWeaponTypeCreated || edWeaponClassCreated || edModeCreated)
                                 {
+                                    if (edDestination.Animation == -1 && edDestination.GraphIndex == -1)
+                                        continue;
+
                                     if (edDestination.GraphIndex == -1)
                                     {
                                         edDestination.Animation = indices[BlamCache.Strings.GetString(h3Def.Animations[edDestination.Animation].Name)].Item2;

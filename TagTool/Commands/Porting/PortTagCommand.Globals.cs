@@ -127,6 +127,9 @@ namespace TagTool.Commands.Porting
             var h3Def = BlamCache.Deserializer.Deserialize<MultiplayerGlobals>(
                 new CacheSerializationContext(ref BlamCache, h3Tag));
 
+            if (h3Def.Runtime == null || h3Def.Runtime.Count == 0)
+                return;
+
             for (var i = 0; i < h3Def.Runtime[0].GeneralEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].GeneralEvents[i];
