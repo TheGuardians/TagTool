@@ -331,8 +331,10 @@ namespace TagTool.Bitmaps
                         color.A = 0xFF;
                         temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
                         buffer[temp] = (byte)color.B;
-                        buffer[temp + 1] = (byte)color.G;
-                        buffer[temp + 2] = (byte)color.R;
+                        // inverting red and green
+                        buffer[temp + 1] = (byte)color.R;
+                        buffer[temp + 2] = (byte)color.G;
+
                         buffer[temp + 3] = (byte)color.A;
                     }
                 }
