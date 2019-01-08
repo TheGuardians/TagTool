@@ -73,14 +73,8 @@ namespace TagTool.Commands.Porting
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
-                character.InspectProperties = new List<CharacterInspectProperties>
-                {
-                    new CharacterInspectProperties()
-                };
-                character.EngineerProperties = new List<CharacterEngineerProperties>
-                {
-                    new CharacterEngineerProperties()
-                };
+                character.InspectProperties = new List<CharacterInspectProperties>();
+                character.EngineerProperties = new List<CharacterEngineerProperties>();
             }
 
             return character;
