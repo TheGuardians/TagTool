@@ -155,7 +155,11 @@ namespace TagTool.Tags.Definitions
                 None = 0,
                 DestroyableCover = 1 << 0,
                 PathfindingIgnoreWhenDead = 1 << 1,
-                DynamicCover = 1 << 2
+                DynamicCover = 1 << 2,
+                NonFlightBlocking = 1 << 3,
+                DynamicCoverFromCentre = 1 << 4,
+                HasCornerMarkers = 1 << 5,
+                IdleWhenFlying = 1 << 6
             }
         }
 
