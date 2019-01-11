@@ -53,10 +53,6 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
-            renderData.LocalColorA = ConvertColor(renderData.LocalColorA);
-            renderData.LocalColorB = ConvertColor(renderData.LocalColorB);
-            renderData.LocalColorC = ConvertColor(renderData.LocalColorC);
-            renderData.LocalColorD = ConvertColor(renderData.LocalColorD);          
             renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
             renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
             renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
@@ -166,31 +162,6 @@ namespace TagTool.Commands.Porting
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
                 
-                //Color Conversion
-                H3globs.HUDDisabled = ConvertColor(H3globs.HUDDisabled);
-                H3globs.HUDPrimary = ConvertColor(H3globs.HUDPrimary);
-                H3globs.HUDForeground = ConvertColor(H3globs.HUDForeground);
-                H3globs.HUDWarning = ConvertColor(H3globs.HUDWarning);
-                H3globs.NeutralReticule = ConvertColor(H3globs.NeutralReticule);
-                H3globs.HostileReticule = ConvertColor(H3globs.HostileReticule);
-                H3globs.FriendlyReticule = ConvertColor(H3globs.FriendlyReticule);
-                H3globs.GlobalDynamic7_UnknownBlip = ConvertColor(H3globs.GlobalDynamic7_UnknownBlip);
-                H3globs.NeutralBlip = ConvertColor(H3globs.NeutralBlip);
-                H3globs.HostileBlip = ConvertColor(H3globs.HostileBlip);
-                H3globs.FriendlyPlayerBlip = ConvertColor(H3globs.FriendlyPlayerBlip);
-                H3globs.FriendlyAIBlip = ConvertColor(H3globs.FriendlyAIBlip);
-                H3globs.GlobalDynamic12 = ConvertColor(H3globs.GlobalDynamic12);
-                H3globs.WaypointBlip = ConvertColor(H3globs.WaypointBlip);
-                H3globs.DistantWaypointBlip = ConvertColor(H3globs.DistantWaypointBlip);
-                H3globs.FriendlyWaypoint = ConvertColor(H3globs.FriendlyWaypoint);
-
-                H3globs.TextFadeIn_HO = ConvertColor(H3globs.TextFadeIn);
-                H3globs.GlobalDynamic21_HO = ConvertColor(H3globs.GlobalDynamic21);
-                H3globs.GlobalDynamic23_HO = ConvertColor(H3globs.GlobalDynamic23);
-                H3globs.GlobalDynamic24_HO = ConvertColor(H3globs.GlobalDynamic24);
-                H3globs.GlobalDynamic25_UnknownWaypoint_HO = ConvertColor(H3globs.GlobalDynamic25);
-
-                //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
@@ -204,7 +175,6 @@ namespace TagTool.Commands.Porting
                         H3att.WarpAmount = 0.1f;
                     }
                     
-                    //more fixups
                     H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
                     H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
                     H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
@@ -258,7 +228,6 @@ namespace TagTool.Commands.Porting
                             else
                             {
                                 H3snd.Bipeds.RemoveAt(bipedIndex);
-                                //indexes are shifted left by one because of this removal
                                 bipedIndex -= 1;
                             }
 						}
@@ -286,18 +255,6 @@ namespace TagTool.Commands.Porting
             H3Definition.Unknown72 = 3.0f;
 
             return H3Definition;
-        }
-
-        private ArgbColor ConvertColor(ArgbColor oldcolor)
-        {
-            var newcolor = new ArgbColor()
-            {
-                Alpha = ((ArgbColor)oldcolor).Blue,
-                Red = ((ArgbColor)oldcolor).Green,
-                Green = ((ArgbColor)oldcolor).Red,
-                Blue = ((ArgbColor)oldcolor).Alpha
-            };
-            return newcolor;
         }
 
         /// <summary>
