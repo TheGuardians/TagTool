@@ -1221,9 +1221,9 @@ namespace TagTool.Commands.Porting
 
             // find the CacheFile.IndexItem(s)
             if (tagName == "*") result = BlamCache.IndexItems.FindAll(
-                item => item != null && groupTag == item.GroupTag);
+                item => item != null && item.IsInGroup(groupTag));
             else result.Add(BlamCache.IndexItems.Find(
-                item => item != null && groupTag == item.GroupTag && tagName == item.Name));
+                item => item != null && item.IsInGroup(groupTag) && tagName == item.Name));
 
             if (result.Count == 0)
             {
