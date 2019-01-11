@@ -355,7 +355,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4)]
-            public class ArgbColorFixed
+            public class ArgbColorFixed : TagStructure
             {
                 public byte Alpha;
                 public byte Red;
