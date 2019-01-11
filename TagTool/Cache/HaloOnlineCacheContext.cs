@@ -147,8 +147,7 @@ namespace TagTool.Cache
             var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
             var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
 
-            //throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
-            return null;
+            throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
         }
 
         public bool TryAllocateTag(out CachedTagInstance result, Type type, string name = null)
