@@ -199,89 +199,89 @@ namespace TagTool.Tags.Definitions
             [TagField(Label = true)]
             public BipedValue Biped;
 
-            public ArgbColorFixed HUDDisabled;
-            public ArgbColorFixed HUDPrimary;
-            public ArgbColorFixed HUDForeground;
-            public ArgbColorFixed HUDWarning;
-            public ArgbColorFixed NeutralReticule;
-            public ArgbColorFixed HostileReticule;
-            public ArgbColorFixed FriendlyReticule;
-            public ArgbColorFixed GlobalDynamic7_UnknownBlip;
-            public ArgbColorFixed NeutralBlip;
-            public ArgbColorFixed HostileBlip;
-            public ArgbColorFixed FriendlyPlayerBlip;
-            public ArgbColorFixed FriendlyAIBlip;
-            public ArgbColorFixed GlobalDynamic12;
-            public ArgbColorFixed WaypointBlip;
-            public ArgbColorFixed DistantWaypointBlip;
-            public ArgbColorFixed FriendlyWaypoint;
+            public ArgbColor HUDDisabled;
+            public ArgbColor HUDPrimary;
+            public ArgbColor HUDForeground;
+            public ArgbColor HUDWarning;
+            public ArgbColor NeutralReticule;
+            public ArgbColor HostileReticule;
+            public ArgbColor FriendlyReticule;
+            public ArgbColor GlobalDynamic7_UnknownBlip;
+            public ArgbColor NeutralBlip;
+            public ArgbColor HostileBlip;
+            public ArgbColor FriendlyPlayerBlip;
+            public ArgbColor FriendlyAIBlip;
+            public ArgbColor GlobalDynamic12;
+            public ArgbColor WaypointBlip;
+            public ArgbColor DistantWaypointBlip;
+            public ArgbColor FriendlyWaypoint;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic16;
+            public ArgbColor GlobalDynamic16;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic17;
+            public ArgbColor GlobalDynamic17;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic18;
+            public ArgbColor GlobalDynamic18;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic19;
+            public ArgbColor GlobalDynamic19;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic20;
+            public ArgbColor GlobalDynamic20;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic21;
+            public ArgbColor GlobalDynamic21;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed TextFadeIn;
+            public ArgbColor TextFadeIn;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic23;
+            public ArgbColor GlobalDynamic23;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic24;
+            public ArgbColor GlobalDynamic24;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic25;
+            public ArgbColor GlobalDynamic25;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic26;
+            public ArgbColor GlobalDynamic26;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColorFixed GlobalDynamic27;
+            public ArgbColor GlobalDynamic27;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed NeutralWaypoint_HO;
+            public ArgbColor NeutralWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed HostileWaypoint_HO;
+            public ArgbColor HostileWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed DeadWaypoint_HO;
+            public ArgbColor DeadWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed BlueWaypoint_HO;
+            public ArgbColor BlueWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed TextFadeIn_HO;
+            public ArgbColor TextFadeIn_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed GlobalDynamic21_HO;
+            public ArgbColor GlobalDynamic21_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed GlobalDynamic22_HO;
+            public ArgbColor GlobalDynamic22_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed GlobalDynamic23_HO;
+            public ArgbColor GlobalDynamic23_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed GlobalDynamic24_HO;
+            public ArgbColor GlobalDynamic24_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed GlobalDynamic25_UnknownWaypoint_HO;
+            public ArgbColor GlobalDynamic25_UnknownWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed ShootingWaypoint_HO;
+            public ArgbColor ShootingWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed TakingDamageWaypoint_HO;
+            public ArgbColor TakingDamageWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColorFixed SpeakingWaypoint_HO;
+            public ArgbColor SpeakingWaypoint_HO;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed GlobalDynamic29_HO; //White
+			public ArgbColor GlobalDynamic29_HO; //White
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed DefaultItemOutline;
+			public ArgbColor DefaultItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed MAGItemOutline;
+			public ArgbColor MAGItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed DMGItemOutline;
+			public ArgbColor DMGItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed ACCItemOutline;
+			public ArgbColor ACCItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed ROFItemOutline;
+			public ArgbColor ROFItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed RNGItemOutline;
+			public ArgbColor RNGItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
-			public ArgbColorFixed PWRItemOutline;
+			public ArgbColor PWRItemOutline;
 			public List<HudAttribute> HudAttributes;
 			public List<HudSound> HudSounds;
 			public CachedTagInstance Unknown;
@@ -352,15 +352,6 @@ namespace TagTool.Tags.Definitions
 				Spartan,
 				Elite,
 				Monitor
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class ArgbColorFixed : TagStructure
-            {
-                public byte Alpha;
-                public byte Red;
-                public byte Green;
-                public byte Blue;
             }
 
             [TagStructure(Size = 0x60, MaxVersion = CacheVersion.Halo3Retail)]

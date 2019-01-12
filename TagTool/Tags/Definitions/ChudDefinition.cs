@@ -892,10 +892,10 @@ namespace TagTool.Tags.Definitions
                 public InputValue_ODST Input_ODST;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public InputValue_ODST RangeInput_ODST;
-                public ArgbColorFixed LocalColorA;
-                public ArgbColorFixed LocalColorB;
-                public ArgbColorFixed LocalColorC;
-                public ArgbColorFixed LocalColorD;
+                public ArgbColor LocalColorA;
+                public ArgbColor LocalColorB;
+                public ArgbColor LocalColorC;
+                public ArgbColor LocalColorD;
                 public float LocalScalarA;
                 public float LocalScalarB;
                 public float LocalScalarC;
@@ -1341,15 +1341,6 @@ namespace TagTool.Tags.Definitions
                     LocalD,
                     Unknown6,
                     Unknown7
-                }
-
-                [TagStructure(Size = 0x4)]
-                public class ArgbColorFixed : TagStructure
-                {
-                    public byte Alpha;
-                    public byte Red;
-                    public byte Green;
-                    public byte Blue;
                 }
             }
 
