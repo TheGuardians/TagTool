@@ -205,7 +205,9 @@ namespace TagTool.Tags.Definitions
                 Invert = 1 << 0,
                 MappingDoesNotControlsActive = 1 << 1,
                 AlwaysActive = 1 << 2,
-                RandomTimeOffset = 1 << 3
+                RandomTimeOffset = 1 << 3,
+                AlwaysExportsValue = 1 << 4,
+                TurnOffWithUsesMagnitude = 1 << 5
             }
         }
 
