@@ -335,10 +335,6 @@ namespace TagTool.Commands.Porting
                         {
                             switch (groupTag.ToString())
                             {
-                                case "jmad":
-                                    MergeAnimationGraphs(cacheStream, resourceStreams, instance, blamTag);
-                                    break;
-
                                 case "mulg":
                                     MergeMultiplayerGlobals(cacheStream, resourceStreams, instance, blamTag);
                                     break;
