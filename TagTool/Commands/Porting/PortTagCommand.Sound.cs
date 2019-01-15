@@ -359,10 +359,8 @@ namespace TagTool.Commands.Porting
                     var permutationData = new byte[permutationSize];
                     Array.Copy(xmaData, permutationOffset, permutationData, 0, permutationSize);
 
-                    string permutationName = $"{basePermutationCacheName}_{pitchRangeIndex}_{permutationIndex}";
-                    string cacheFileName = "";
-
-                    cacheFileName = $"{permutationName}.mp3";
+                    var permutationName = $"{basePermutationCacheName}_{i}";
+                    var cacheFileName = $"{permutationName}.mp3";
 
                     bool exists = File.Exists(cacheFileName);
 
