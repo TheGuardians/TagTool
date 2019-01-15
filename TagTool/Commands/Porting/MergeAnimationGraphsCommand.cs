@@ -94,7 +94,7 @@ namespace TagTool.Commands.Porting
                 var h3TagName = $"{h3Tag.Name}.{h3Tag.GroupName}";
 
                 PortTag.Execute(new List<string> { h3TagName });
-                edReference.Reference = CacheContext.GetTag(h3TagName);
+                edReference.Reference = PortTag.ConvertTag(CacheStream, ResourceStreams, h3Tag);
             }
         }
 
