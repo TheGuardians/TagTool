@@ -33,9 +33,6 @@ namespace System.IO
         public static Rectangle2d ReadRectangle2d(this BinaryReader reader) =>
             new Rectangle2d(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16());
 
-        public static RgbColor ReadRgbColor(this BinaryReader reader) =>
-            new RgbColor(reader.ReadBytes(2)[1], reader.ReadByte(), reader.ReadByte());
-
         public static ArgbColor ReadRgbaColor(this BinaryReader reader) =>
             new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 

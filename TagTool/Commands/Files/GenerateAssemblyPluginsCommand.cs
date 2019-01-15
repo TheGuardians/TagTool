@@ -174,7 +174,7 @@ namespace TagTool.Commands.Files
                 //{typeof(RealVector2d), AssemblyPluginFieldTypes.range},
                 {typeof(RealArgbColor), AssemblyPluginFieldTypes.colorf },
                 {typeof(RealRgbColor), AssemblyPluginFieldTypes.color24 },
-                {typeof(RgbColor), AssemblyPluginFieldTypes.color24},
+                //{typeof(RgbColor), AssemblyPluginFieldTypes.color24},
                 {typeof(ArgbColor), AssemblyPluginFieldTypes.color},
                 {typeof(CachedTagData), AssemblyPluginFieldTypes.dataRef},
                 {typeof(TagFunction), AssemblyPluginFieldTypes.dataRef },

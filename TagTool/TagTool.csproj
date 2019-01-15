@@ -419,7 +419,6 @@
     <Compile Include="Common\Rectangle2d.cs" />
     <Compile Include="Tags\TagResourceGen2.cs" />
     <Compile Include="Tags\TagResourceTypeGen2.cs" />
-    <Compile Include="Common\RgbColor.cs" />
     <Compile Include="Common\SimpleJson.cs" />
     <Compile Include="Common\StringId.cs" />
     <Compile Include="Common\Tag.cs" />
