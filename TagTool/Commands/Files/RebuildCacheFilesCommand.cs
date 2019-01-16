@@ -1284,13 +1284,6 @@ namespace TagTool.Commands.Files
                     Unknown = 2f,
                     Unknown2 = 3f,
                     Unknown3 = -1000f
-                },
-                new MultiplayerGlobals.RuntimeBlock.MultiplayerConstant.Projectile
-                {
-                    Type = CacheContext.GetTag<Projectile>(@"objects\equipment\bombrun\projectiles\bombrun_grenade"),
-                    Unknown = 1f,
-                    Unknown2 = 3f,
-                    Unknown3 = -1000f
                 }
             };
 
