@@ -452,6 +452,16 @@ namespace TagTool.Commands.Porting
             }
 
             //
+            // Fix cutscene title colors
+            //
+
+            foreach (var cutsceneTitle in scnr.CutsceneTitles)
+            {
+                cutsceneTitle.TextColor = ConvertColor(cutsceneTitle.TextColor);
+                cutsceneTitle.ShadowColor = ConvertColor(cutsceneTitle.ShadowColor);
+            }
+
+            //
             // Add prematch camera position
             //
 
