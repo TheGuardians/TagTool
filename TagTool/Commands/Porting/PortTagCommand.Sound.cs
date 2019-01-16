@@ -285,6 +285,7 @@ namespace TagTool.Commands.Porting
 
             for (int pitchRangeIndex = sound.SoundReference.PitchRangeIndex; pitchRangeIndex < sound.SoundReference.PitchRangeIndex+sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
+                var relativePitchRangeIndex = pitchRangeIndex - sound.SoundReference.PitchRangeIndex;
                 var firstPermutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRangeIndex);
                 var pitchRangeSampleCount = BlamSoundGestalt.GetSamplesPerPitchRange(pitchRangeIndex);
 
@@ -359,7 +360,7 @@ namespace TagTool.Commands.Porting
                     var permutationData = new byte[permutationSize];
                     Array.Copy(xmaData, permutationOffset, permutationData, 0, permutationSize);
 
-                    var permutationName = $"{basePermutationCacheName}_{i}";
+                    string permutationName = $"{basePermutationCacheName}_{relativePitchRangeIndex}_{i}";
                     var cacheFileName = $"{permutationName}.mp3";
 
                     bool exists = File.Exists(cacheFileName);
