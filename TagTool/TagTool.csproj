@@ -385,10 +385,6 @@
     <Compile Include="Extensions\FlipFlopDictionary.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Common\BlamType.cs" />
-    <Compile Include="Serialization\EndianByteArray.cs" />
-    <Compile Include="Serialization\HyperSerializer.cs" />
-    <Compile Include="Serialization\HyperDeserializer.cs" />
-    <Compile Include="Serialization\TaskBag.cs" />
     <Compile Include="Shaders\ShaderMatching\ArgumentMapping.cs" />
     <Compile Include="Shaders\ShaderMatching\FastRenderTags.cs" />
     <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />

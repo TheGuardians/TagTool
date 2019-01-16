@@ -4,13 +4,35 @@ namespace TagTool.Common
 {
     public struct ArgbColor : IEquatable<ArgbColor>, IBlamType
     {
-        public byte Alpha { get; set; }
-        public byte Red { get; set; }
-        public byte Green { get; set; }
-        public byte Blue { get; set; }
+        private int Value;
+
+        public byte Alpha
+        {
+            get => (byte)((Value >> 24) & byte.MaxValue);
+            set => Value = (Value & ~(byte.MaxValue << 24)) | (value << 24);
+        }
+
+        public byte Red
+        {
+            get => (byte)((Value >> 16) & byte.MaxValue);
+            set => Value = (Value & ~(byte.MaxValue << 16)) | (value << 16);
+        }
+
+        public byte Green
+        {
+            get => (byte)((Value >> 8) & byte.MaxValue);
+            set => Value = (Value & ~(byte.MaxValue << 8)) | (value << 8);
+        }
+
+        public byte Blue
+        {
+            get => (byte)(Value & byte.MaxValue);
+            set => Value = (Value & ~byte.MaxValue) | value;
+        }
 
         public ArgbColor(byte alpha, byte red, byte green, byte blue)
         {
+            Value = 0;
             Alpha = alpha;
             Red = red;
             Green = green;
@@ -35,10 +57,7 @@ namespace TagTool.Common
             !a.Equals(b);
 
         public override int GetHashCode() =>
-            13 * 17 + Alpha.GetHashCode()
-               * 17 + Red.GetHashCode()
-               * 17 + Green.GetHashCode()
-               * 17 + Blue.GetHashCode();
+            Value.GetHashCode();
 
         public override string ToString() =>
             $"{{ Alpha: {Alpha}, Red: {Red}, Green: {Green}, Blue: {Blue} }}";
