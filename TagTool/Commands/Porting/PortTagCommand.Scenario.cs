@@ -648,7 +648,7 @@ namespace TagTool.Commands.Porting
 
             if (createPrematchCamera)
                 scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
-            
+
             //
             // Convert scripts
             //
@@ -809,7 +809,7 @@ namespace TagTool.Commands.Porting
                 default:
                     return;
             }
-            
+
             // Some script expressions use opcode as a script reference. Only continue if it is a reference
             if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
             {
@@ -828,7 +828,7 @@ namespace TagTool.Commands.Porting
                 }
             }
         }
-        
+
         public void ConvertScriptExpressionUnsupportedOpcode(ScriptExpression expr)
         {
             if (expr.Opcode == 0xBABA || expr.Opcode == 0xCDCD)
@@ -844,7 +844,7 @@ namespace TagTool.Commands.Porting
                 case ScriptExpressionType.Expression:
                     if (expr.ExpressionType == ScriptExpressionType.ScriptReference)
                         return;
-                    
+
                     // If the previous scriptExpr is a scriptRef, don't convert. The opcode is the script reference. They always come in pairs.
                     if (scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) - 1].ExpressionType == ScriptExpressionType.ScriptReference)
                         return;
@@ -1142,8 +1142,8 @@ namespace TagTool.Commands.Porting
                         return true;
 
                     case 0x1B7: // campaign_metagame_award_primary_skull
-                         expr.Opcode = 0x1E5; // ^
-                         return true;
+                        expr.Opcode = 0x1E5; // ^
+                        return true;
 
                     case 0x1B8: //campaign_metagame_award_secondary_skull
                         expr.Opcode = 0x1E6; // ^
@@ -1178,7 +1178,7 @@ namespace TagTool.Commands.Porting
             else
                 return false;
         }
-        
+
         public void AdjustScripts(Scenario scnr, string tagName)
         {
             var mapName = tagName.Split("\\".ToCharArray()).Last();
@@ -1194,7 +1194,7 @@ namespace TagTool.Commands.Porting
                 var items = line.Split(",".ToCharArray());
 
                 int scriptIndex = Convert.ToInt32(items[0]);
-                
+
                 uint.TryParse(items[2], NumberStyles.HexNumber, null, out uint NextExpressionHandle);
                 ushort.TryParse(items[3], NumberStyles.HexNumber, null, out ushort Opcode);
                 byte.TryParse(items[4].Substring(0, 2), NumberStyles.HexNumber, null, out byte data0);
@@ -1371,7 +1371,7 @@ namespace TagTool.Commands.Porting
                 "00001328,E8A30530,E8B80545,0112,3105A4E8,Group,Void,unit_enable_vision_mode, //default:E8A80535",
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin, //default:E9790606",
             },
-            
+
             ["c100"] = new List<string>
             {
                 "00000293,E4980125,E48E011B,0000,00000000,Expression,FunctionName,begin,// E4860113",
@@ -1650,7 +1650,7 @@ namespace TagTool.Commands.Porting
                 "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, prevents cinematic looping
                 "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,", // disable g_player_training as it freezes scripts
             },
-            
+
             ["010_jungle"] = new List<string>
             {
                 // default:

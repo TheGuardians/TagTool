@@ -16,6 +16,7 @@ namespace TagTool.Commands.Porting
 
         private HashSet<string> MergedAnimationGraphs { get; }
         private Dictionary<string, (Dictionary<string, (short, short)>, Dictionary<short, short>)> MergedAnimationData { get; }
+        private int MergedAnimationGraphCount { get; set; } = 0;
 
         private PortTagCommand PortTag { get; }
 
@@ -70,7 +71,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            var count = MergedAnimationGraphs.Count;
+            var count = MergedAnimationGraphCount;
 
             if (count == 0)
                 Console.WriteLine("No animation graphs were merged.");
@@ -377,6 +378,7 @@ namespace TagTool.Commands.Porting
             ResourceStreams = new Dictionary<ResourceLocation, Stream>();
 
             var animationIndices = MergeAnimations(h3Tag, h3Def, edDef.Animations);
+
             edDef.Modes = MergeModes(h3Tag, h3Def, edDef.Modes, animationIndices);
 
             //
@@ -428,6 +430,9 @@ namespace TagTool.Commands.Porting
 
             MergedAnimationGraphs.Add(h3Tag.Name);
             MergedAnimationData[h3Tag.Name] = (animationIndices, resourceGroupData);
+
+            if (resourceGroups.Count > 0)
+                MergedAnimationGraphCount++;
         }
     }
 }
