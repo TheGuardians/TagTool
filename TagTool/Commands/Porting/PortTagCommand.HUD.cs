@@ -53,6 +53,10 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            renderData.LocalColorA = ConvertColor(renderData.LocalColorA);
+            renderData.LocalColorB = ConvertColor(renderData.LocalColorB);
+            renderData.LocalColorC = ConvertColor(renderData.LocalColorC);
+            renderData.LocalColorD = ConvertColor(renderData.LocalColorD);
             renderData.OutputColorA_HO = GetEquivalentValue(renderData.OutputColorA_HO, renderData.OutputColorA);
             renderData.OutputColorB_HO = GetEquivalentValue(renderData.OutputColorB_HO, renderData.OutputColorB);
             renderData.OutputColorC_HO = GetEquivalentValue(renderData.OutputColorC_HO, renderData.OutputColorC);
@@ -65,7 +69,7 @@ namespace TagTool.Commands.Porting
 
         private ChudDefinition.HudWidget.TextWidget ConvertTextWidget(ChudDefinition.HudWidget.TextWidget textWidget)
         {
-            switch(BlamCache.Version)
+            switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
                     textWidget.Flags = GetEquivalentFlags(textWidget.Flags, textWidget.Flags_H3);
@@ -143,25 +147,50 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
                     }
                 }
-                
+
                 //scale all widget groups by 1.5 to match 720p > 1080p conversion
                 for (int placementDatumIndex = 0; placementDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count; placementDatumIndex++)
-                    {
+                {
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.X *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Scale.Y *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.X *= 1.5f;
                     chudDefinition.HudWidgets[hudWidgetIndex].PlacementData[placementDatumIndex].Offset.Y *= 1.5f;
-                }               
+                }
             }
             return chudDefinition;
         }
 
-		private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition H3Definition)
-		{
+        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition H3Definition)
+        {
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
                 var H3globs = H3Definition.HudGlobals[hudGlobalsIndex];
-                
+
+                //Color Conversion
+                H3globs.HUDDisabled = ConvertColor(H3globs.HUDDisabled);
+                H3globs.HUDPrimary = ConvertColor(H3globs.HUDPrimary);
+                H3globs.HUDForeground = ConvertColor(H3globs.HUDForeground);
+                H3globs.HUDWarning = ConvertColor(H3globs.HUDWarning);
+                H3globs.NeutralReticule = ConvertColor(H3globs.NeutralReticule);
+                H3globs.HostileReticule = ConvertColor(H3globs.HostileReticule);
+                H3globs.FriendlyReticule = ConvertColor(H3globs.FriendlyReticule);
+                H3globs.GlobalDynamic7_UnknownBlip = ConvertColor(H3globs.GlobalDynamic7_UnknownBlip);
+                H3globs.NeutralBlip = ConvertColor(H3globs.NeutralBlip);
+                H3globs.HostileBlip = ConvertColor(H3globs.HostileBlip);
+                H3globs.FriendlyPlayerBlip = ConvertColor(H3globs.FriendlyPlayerBlip);
+                H3globs.FriendlyAIBlip = ConvertColor(H3globs.FriendlyAIBlip);
+                H3globs.GlobalDynamic12 = ConvertColor(H3globs.GlobalDynamic12);
+                H3globs.WaypointBlip = ConvertColor(H3globs.WaypointBlip);
+                H3globs.DistantWaypointBlip = ConvertColor(H3globs.DistantWaypointBlip);
+                H3globs.FriendlyWaypoint = ConvertColor(H3globs.FriendlyWaypoint);
+
+                H3globs.TextFadeIn_HO = ConvertColor(H3globs.TextFadeIn);
+                H3globs.GlobalDynamic21_HO = ConvertColor(H3globs.GlobalDynamic21);
+                H3globs.GlobalDynamic23_HO = ConvertColor(H3globs.GlobalDynamic23);
+                H3globs.GlobalDynamic24_HO = ConvertColor(H3globs.GlobalDynamic24);
+                H3globs.GlobalDynamic25_UnknownWaypoint_HO = ConvertColor(H3globs.GlobalDynamic25);
+
+                //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;
 
                 for (int hudAttributesIndex = 0; hudAttributesIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudAttributes.Count; hudAttributesIndex++)
@@ -174,7 +203,8 @@ namespace TagTool.Commands.Porting
                         H3att.WarpAngle = Angle.FromDegrees(4.5f);
                         H3att.WarpAmount = 0.1f;
                     }
-                    
+
+                    //more fixups
                     H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
                     H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
                     H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
@@ -189,7 +219,7 @@ namespace TagTool.Commands.Porting
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
                 }
 
-                
+
                 for (int hudSoundsIndex = 0; hudSoundsIndex < H3Definition.HudGlobals[hudGlobalsIndex].HudSounds.Count; hudSoundsIndex++)
                 {
                     var H3snd = H3Definition.HudGlobals[hudGlobalsIndex].HudSounds[hudSoundsIndex];
@@ -216,10 +246,10 @@ namespace TagTool.Commands.Porting
                         }
                     }
 
-					else if(BlamCache.Version == CacheVersion.Halo3ODST)
-					{
-						for (int bipedIndex = 0; bipedIndex < H3snd.Bipeds.Count; bipedIndex++)
-						{
+                    else if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        for (int bipedIndex = 0; bipedIndex < H3snd.Bipeds.Count; bipedIndex++)
+                        {
                             if (H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Rookie
                                 || H3snd.Bipeds[bipedIndex].BipedType_ODST == ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_ODST.Any)
                             {
@@ -228,13 +258,14 @@ namespace TagTool.Commands.Porting
                             else
                             {
                                 H3snd.Bipeds.RemoveAt(bipedIndex);
+                                //indexes are shifted left by one because of this removal
                                 bipedIndex -= 1;
                             }
-						}
+                        }
                     }
-                    
+
                 }
-            
+
             }
 
             //additional values
@@ -257,12 +288,24 @@ namespace TagTool.Commands.Porting
             return H3Definition;
         }
 
+        private ArgbColor ConvertColor(ArgbColor oldcolor)
+        {
+            var newcolor = new ArgbColor()
+            {
+                Alpha = ((ArgbColor)oldcolor).Blue,
+                Red = ((ArgbColor)oldcolor).Green,
+                Green = ((ArgbColor)oldcolor).Red,
+                Blue = ((ArgbColor)oldcolor).Alpha
+            };
+            return newcolor;
+        }
+
         /// <summary>
         /// Adds shared values from flags2 to flags1.
         /// </summary>
         private E1 GetEquivalentFlags<E1, E2>(E1 flags1, E2 flags2) where E1 : unmanaged, Enum where E2 : unmanaged, Enum
         {
-             //Get enum values
+            //Get enum values
             E1[] flagsType1Values = (E1[])Enum.GetValues(typeof(E1));
             E2[] flagsType2Values = (E2[])Enum.GetValues(typeof(E2));
 
