@@ -346,6 +346,17 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = tag;
             }
+            else if (type == typeof(Tag))
+            {
+                if (args.Count != 1)
+                    return false;
+                if (!CacheContext.TryParseGroupTag(args[0], out var result))
+                {
+                    Console.WriteLine($"Invalid tag group specifier: {args[0]}");
+                    return false;
+                }
+                output = result;
+            }
             else if (type == typeof(StringId))
             {
                 if (args.Count != 1)
@@ -521,40 +532,6 @@ namespace TagTool.Commands.Editing
                 output = found;
             }
             else if (type == typeof(Bounds<>))
-            {
-                var rangeType = type.GenericTypeArguments[0];
-                var argCount = RangeArgCount(rangeType);
-
-                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
-
-                if (min.Equals(false))
-                    return false;
-
-                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
-
-                if (max.Equals(false))
-                    return false;
-
-                output = Activator.CreateInstance(type, new object[] { min, max });
-            }
-            else if (type == typeof(Bounds<float>))
-            {
-                var rangeType = type.GenericTypeArguments[0];
-                var argCount = RangeArgCount(rangeType);
-
-                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
-
-                if (min.Equals(false))
-                    return false;
-
-                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
-
-                if (max.Equals(false))
-                    return false;
-
-                output = Activator.CreateInstance(type, new object[] { min, max });
-            }
-            else if (type == typeof(Bounds<Single>))
             {
                 var rangeType = type.GenericTypeArguments[0];
                 var argCount = RangeArgCount(rangeType);
