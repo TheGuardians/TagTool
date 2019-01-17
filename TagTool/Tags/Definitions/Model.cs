@@ -259,6 +259,7 @@ namespace TagTool.Tags.Definitions
                     public class State : TagStructure
 					{
                         public StringId Name;
+                        public byte ModelPermutationIndex;
                         public PropertyFlagsValue PropertyFlags;
                         public StateValue State2;
                         public CachedTagInstance LoopingEffect;
@@ -266,7 +267,7 @@ namespace TagTool.Tags.Definitions
                         public float InitialProbability;
 
                         [Flags]
-                        public enum PropertyFlagsValue : ushort
+                        public enum PropertyFlagsValue : byte
                         {
                             None = 0,
                             Blurred = 1 << 0,
@@ -745,7 +746,7 @@ namespace TagTool.Tags.Definitions
                     public short RuntimeDamageRegionIndex;
 
                     [TagField(Padding = true, Length = 2)]
-                    public byte Unused;
+                    public short Unused;
 
                     public float DirectDamageScaleMinor;
                     public float MaxTransferScaleMinor;
