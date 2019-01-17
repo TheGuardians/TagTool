@@ -46,6 +46,7 @@ namespace TagTool.Commands.Porting
             var portTagCommand = new PortTagCommand(cacheContext, blamCache);
 
             context.AddCommand(portTagCommand);
+            context.AddCommand(new ExtractXMACommand(cacheContext, blamCache));
             context.AddCommand(new EditTagCommand(contextStack, blamCache));
             context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
