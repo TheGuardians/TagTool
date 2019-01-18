@@ -41,6 +41,7 @@ namespace TagTool.Commands.Porting
             // For each bitmaps, apply conversion process and create a new list of resources that will replace the one from H3.
             //
 
+            var tagName = blamTag.Name;
             var resourceList = new List<Bitmap.BitmapResource>();
             for (int i = 0; i < bitmap.Images.Count(); i++)
             {
@@ -48,7 +49,7 @@ namespace TagTool.Commands.Porting
                 try
                 {
 #endif
-                    var resource = ConvertBlamBitmap(bitmap, resourceStreams, i);
+                    var resource = ConvertBlamBitmap(bitmap, resourceStreams, i, tagName);
                     if (resource == null)
                         return null;
                     Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
@@ -129,7 +130,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private PageableResource ConvertBlamBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex)
+        private PageableResource ConvertBlamBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
             BlamBitmap blamBitmap = new BlamBitmap(bitmap.Images[imageIndex], 0, 0);
 
@@ -192,7 +193,7 @@ namespace TagTool.Commands.Porting
 
             if (blamBitmap.Type == BitmapType.Texture2D)
             {
-                raw = ConvertBlamBitmapData(raw, blamBitmap);
+                raw = ConvertBlamBitmapData(raw, blamBitmap, tagName);
             }
             else if (blamBitmap.Type == BitmapType.CubeMap)
             {
@@ -419,7 +420,7 @@ namespace TagTool.Commands.Porting
 			return result;
         }
 
-        private byte[] ConvertBlamBitmapData(byte[] raw, BlamBitmap blamBitmap)
+        private byte[] ConvertBlamBitmapData(byte[] raw, BlamBitmap blamBitmap, string tagName)
         {
             byte[] result = new byte[0];
 
@@ -599,6 +600,14 @@ namespace TagTool.Commands.Porting
             //Remove flags for conversion
             blamBitmap.Image.XboxFlags &= ~BitmapFlagsXbox.Xbox360ByteOrder;
             blamBitmap.Image.XboxFlags &= ~BitmapFlagsXbox.TiledTexture;
+
+            //Fixes to improve compatibility
+            if (tagName.Contains("chud"))
+            {
+                noMips = true;
+                genMips = false;
+                blamBitmap.MipMapCount = 0;
+            }
 
             //Flip byte ordering for regular-sized bitmaps
             if (!blamBitmap.Reformat && !blamBitmap.Convert)
