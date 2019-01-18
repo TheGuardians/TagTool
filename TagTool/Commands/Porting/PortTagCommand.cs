@@ -323,7 +323,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (FlagIsSet(PortingFlags.Replace) && !DoNotReplaceGroups.Contains(instance.Group.Tag.ToString()))
                     {
-                        if (!FlagIsSet(PortingFlags.Recursive) && wasSingle)
+                        if (!FlagIsSet(PortingFlags.Recursive))
                             ToggleFlags(PortingFlags.Replace | PortingFlags.Recursive);
 
                         edTag = instance;
