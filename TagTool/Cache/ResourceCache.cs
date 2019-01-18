@@ -185,7 +185,7 @@ namespace TagTool.Cache
             while (startOffset < data.Length)
             {
                 var chunkSize = Math.Min(data.Length - startOffset, MaxDecompressedBlockSize);
-                var chunk = LZ4Codec.EncodeHC(data, startOffset, chunkSize);
+                var chunk = LZ4Codec.Encode(data, startOffset, chunkSize);
                 chunks.Add(chunk);
                 startOffset += chunkSize;
                 newSize += (uint)(ChunkHeaderSize + chunk.Length);
