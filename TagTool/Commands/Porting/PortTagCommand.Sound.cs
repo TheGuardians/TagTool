@@ -29,12 +29,13 @@ namespace TagTool.Commands.Porting
         /// <returns></returns>
         private static byte[] TruncateWAVFile(byte[] data, int sampleRate, int channelCount, int additionalOffset = 0)
         {
-            // The offsets are computed as follows : you want to trim about 0.013 seconds at the start and 0.004 seconds at the end. 1152 bytes is the number of bytes required to cut this amount
-            // on a 16 bit PCM single channel audio file at 44100Hz. Obtaining the offset for other type of sounds is just changing those parameters.
 
-            int startOffset = (int)(1152 * channelCount * ((float)sampleRate / 44100));                                        // Offset from index 0 
-            int endOffset = (int)(384 * channelCount * ((float)sampleRate / 44100));                                           // Offset from index data.Length -1
-            int size = data.Length - startOffset - endOffset;
+            int startOffset = (0x380 * channelCount);                                        // Offset from index 0 
+            int endOffset = (0x80 * channelCount);                                           // Offset from index data.Length -1
+            if (channelCount == 1)
+                endOffset = 0;
+
+            int size = data.Length - startOffset - endOffset - additionalOffset;
             byte[] result = new byte[size];
             Array.Copy(data, startOffset + additionalOffset, result, 0, size);
             return result;
@@ -130,10 +131,10 @@ namespace TagTool.Commands.Porting
             var tempXMA = $"{audioFile}.xma";
             var tempWAV = $"{audioFile}_temp.wav";
             var fixedWAV = $"{audioFile}_truncated.wav";
-            var tempMP3 = $"{audioFile}_temp.mp3";
+            var fixedMP3 = $"{audioFile}_truncated.mp3";
             var resultWAV = $"{audioFile}.wav";
             var resultMP3 = $"{audioFile}.mp3";
-
+            
         CLEAN_FILES:
             try
             {
@@ -147,15 +148,15 @@ namespace TagTool.Commands.Porting
                     File.Delete(resultWAV);
                 if (File.Exists(resultMP3))
                     File.Delete(resultMP3);
-                if (File.Exists(tempMP3))
-                    File.Delete(tempMP3);
+                if (File.Exists(fixedMP3))
+                    File.Delete(fixedMP3);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 goto CLEAN_FILES;
             }
-
+            
             using (EndianWriter output = new EndianWriter(new FileStream(tempXMA, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
             {
                 XMAFile XMAfile = new XMAFile(buffer, channelCount, sampleRate);
@@ -165,37 +166,37 @@ namespace TagTool.Commands.Porting
             if (!ConvertXMAToWAV(tempXMA, tempWAV))
                 return null;
 
+            // remove garbage data created by ffmpeg
+
+            byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
+            byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x4E);
+
+            using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+            {
+                WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
+                WAVfile.Write(writer);
+            }
+
             // Convert to MP3 and remove header
             if (loopingSound && channelCount <= 2)
             {
-                if (!ConvertWAVToMP3Looping(tempWAV, tempMP3))
+                if (!ConvertWAVToMP3Looping(fixedWAV, fixedMP3))
                     return null;
             }
             else
             {
-                // truncate file
-                byte[] originalWAVdata = File.ReadAllBytes(tempWAV);
-                byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x2C);
-
-                using (EndianWriter writer = new EndianWriter(new FileStream(fixedWAV, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
-                {
-                    WAVFile WAVfile = new WAVFile(truncatedWAVdata, channelCount, sampleRate);
-                    WAVfile.Write(writer);
-                }
-
                 // add code to handle looping sounds with more than 2 channels here. Mp3Loop does not handle that kind of file.
 
-                if (!ConvertWAVToMP3(fixedWAV, tempMP3))
+                if (!ConvertWAVToMP3(fixedWAV, fixedMP3))
                     return null;
             }
-            
 
-            int size = (int)(new FileInfo(tempMP3).Length - 0x2D);
-            byte[] MP3stream = File.ReadAllBytes(tempMP3);
+                int size = (int)(new FileInfo(fixedMP3).Length - 0x2D);
+            byte[] MP3stream = File.ReadAllBytes(fixedMP3);
 
             using (var output = new FileStream(resultMP3, FileMode.Create, FileAccess.Write, FileShare.None))
                 output.Write(MP3stream, 0x2D, size);
-
+            
         CLEAN_FILES2:
             try
             {
@@ -207,15 +208,16 @@ namespace TagTool.Commands.Porting
                     File.Delete(fixedWAV);
                 if (File.Exists(resultWAV))
                     File.Delete(resultWAV);
-                if (File.Exists(tempMP3))
-                    File.Delete(tempMP3);
+                if (File.Exists(fixedMP3))
+                    File.Delete(fixedMP3);
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 goto CLEAN_FILES2;
             }
-
+            
             return resultMP3;
         }
 
