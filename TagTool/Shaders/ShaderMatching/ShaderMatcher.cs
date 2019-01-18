@@ -679,20 +679,37 @@ namespace TagTool.Shaders.ShaderMatching
 
         public CachedTagInstance FixRmt2Reference(Stream cacheStream, string blamTagName, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
-            if (blamTagName == @"levels\multi\snowbound\sky\shaders\skydome")
+            switch (blamTagName)
             {
-                try
-                {
-                    return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
-                }
-                catch
-                {
+                case @"levels\multi\snowbound\sky\shaders\skydome":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
                     }
-                    catch { }
-                }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
+                        }
+                        catch { }
+                    }
+                    break;
+
+                case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0_0");
+                        }
+                        catch { }
+                    }
+                    break;
             }
 
             // Find existing rmt2 tags

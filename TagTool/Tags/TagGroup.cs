@@ -8,8 +8,39 @@ namespace TagTool.Tags
     /// <summary>
     /// Describes the type of data in a tag.
     /// </summary>
-    public class TagGroup : IEquatable<TagGroup>
+    [TagStructure(Size = 0x10)]
+    public class TagGroup : TagStructure, IEquatable<TagGroup>
     {
+        /// <summary>
+        /// Gets the group's tag. Can be -1.
+        /// </summary>
+        public Tag Tag;
+
+        /// <summary>
+        /// Gets the parent group's tag. Can be -1.
+        /// </summary>
+        public Tag ParentTag;
+
+        /// <summary>
+        /// Gets the grandparent group's tag. Can be -1.
+        /// </summary>
+        public Tag GrandparentTag;
+
+        /// <summary>
+        /// Gets the group's name stringID.
+        /// </summary>
+        public StringId Name;
+
+        /// <summary>
+        /// Represents a "null" tag group.
+        /// </summary>
+        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
+
+        /// <summary>
+        /// A dictionary of available tag groups.
+        /// </summary>
+        public static Dictionary<Tag, TagGroup> Instances { get; set; }
+
         /// <summary>
         /// Constructs an empty tag group description.
         /// </summary>
@@ -37,36 +68,6 @@ namespace TagTool.Tags
 
             Instances[Tag] = this;
         }
-
-        /// <summary>
-        /// Represents a "null" tag group.
-        /// </summary>
-        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
-
-        /// <summary>
-        /// A dictionary of available tag groups.
-        /// </summary>
-        public static Dictionary<Tag, TagGroup> Instances { get; set; }
-        
-        /// <summary>
-        /// Gets the group's tag. Can be -1.
-        /// </summary>
-        public readonly Tag Tag;
-
-        /// <summary>
-        /// Gets the parent group's tag. Can be -1.
-        /// </summary>
-        public readonly Tag ParentTag;
-
-        /// <summary>
-        /// Gets the grandparent group's tag. Can be -1.
-        /// </summary>
-        public readonly Tag GrandparentTag;
-
-        /// <summary>
-        /// Gets the group's name stringID.
-        /// </summary>
-        public readonly StringId Name;
 
         /// <summary>
         /// Determines whether this group is a subgroup of another group.

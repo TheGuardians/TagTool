@@ -252,7 +252,7 @@ namespace TagTool.Cache
         };
     }
 
-    public enum CacheVersion
+    public enum CacheVersion : int
     {
         Unknown = -1,
         Halo2Xbox,
