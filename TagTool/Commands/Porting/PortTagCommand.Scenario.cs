@@ -1372,6 +1372,26 @@ namespace TagTool.Commands.Porting
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin, //default:E9790606",
             },
 
+            ["sc110"] = new List<string>
+            {
+                "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E disable pda_breadcrumbs",
+                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinemtics from looping",
+                "00018320,AB044790,AA6446F0,0000,00000000,Expression,FunctionName,begin,// AA4046CC disable waypoints temp",
+
+                // autoremove:
+                "00000892,E6EF037C,E6F50382,0016,00000000,Expression,FunctionName,// E6F0037D was pointing at E6F0037D",
+                "00001468,E92F05BC,E93805C5,03F4,BD0530E9,Group,Void,// E93405C1 was pointing at E93405C1",
+                "00001500,E94F05DC,FFFFFFFF,03F4,DD0550E9,Group,Void,// E95405E1 was pointing at E95405E1",
+                "00001659,E9EE067B,EA030690,0112,7C06EFE9,Group,Void,// E9FF068C was pointing at E9FF068C",
+                "00001680,EA030690,EA1506A2,0012,910604EA,ScriptReference,Void,// EA11069E was pointing at EA11069E",
+                "00001944,EB0B0798,EB2007AD,0112,99070CEB,Group,Void,// EB1C07A9 was pointing at EB1C07A9",
+                "00002164,EBE70874,EBFC0889,0000,00000000,Expression,FunctionName,// EBF70884 was pointing at EBF70884",
+                "00005201,F7C41451,F7A81435,0000,00000000,Expression,FunctionName,// F7A2142F was pointing at F7A2142F",
+                "00005173,F7A81435,FFFFFFFF,0014,3614A9F7,Group,Void,// F7BD144A was pointing at F7BD144A",
+                "00018193,AA854711,AAA0472C,0627,124786AA,Group,Void,// AA9B4727 was pointing at AA9B4727",
+                "00023201,BE155AA1,BE1B5AA7,0014,A25A16BE,Group,Void,// BE185AA4 was pointing at BE185AA4",
+            },
+
             ["c100"] = new List<string>
             {
                 "00000293,E4980125,E48E011B,0000,00000000,Expression,FunctionName,begin,// E4860113",
