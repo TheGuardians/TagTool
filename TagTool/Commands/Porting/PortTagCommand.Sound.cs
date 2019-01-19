@@ -29,9 +29,9 @@ namespace TagTool.Commands.Porting
         /// <returns></returns>
         private static byte[] TruncateWAVFile(byte[] data, int sampleRate, int channelCount, int additionalOffset = 0)
         {
-
-            int startOffset = (0x380 * channelCount);                                        // Offset from index 0 
-            int endOffset = (0x80 * channelCount);                                           // Offset from index data.Length -1
+            var bytesPerSample = 2;         //16 bit PCM
+            int startOffset = (0x240 * channelCount * bytesPerSample);                       // Offset from index 0 
+            int endOffset = (0xBE * channelCount * bytesPerSample);                                           // Offset from index data.Length -1
             if (channelCount == 1)
                 endOffset = 0;
 
