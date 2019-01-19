@@ -24,14 +24,18 @@ namespace TagTool.Tags.Definitions
             CollideWithMedia = 1 << 2,
             CollideWithScenery = 1 << 3,
             CollideWithVehicles = 1 << 4,
-            CollideWithBipeds = 1 << 5
+            CollideWithBipeds = 1 << 5,
+            Swarm = 1 << 6,
+            Wind = 1 << 7
         }
 
         [TagStructure(Size = 0x18)]
         public class Movement : TagStructure
 		{
             public TypeValue Type;
-            public short Unknown1;
+            public byte Flags;
+            [TagField(Padding = true, Length = 1)]
+            public byte Unused;
             public List<Parameter> Parameters;
             public int Unknown2;
             public int Unknown3;
@@ -48,16 +52,7 @@ namespace TagTool.Tags.Definitions
             public class Parameter : TagStructure
 			{
                 public int ParameterId;
-                public byte Unknown1;
-                public byte Unknown2;
-                public byte Unknown3;
-                public byte Unknown4;
-                public TagFunction Function = new TagFunction { Data = new byte[0] };
-                public float Unknown5;
-                public byte Unknown6;
-                public sbyte Unknown7;
-                public sbyte Unknown8;
-                public sbyte Unknown9;
+                public TagMapping Property;
             }
         }
     }
