@@ -1,4 +1,4 @@
-﻿using TagTool.Cache;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Shaders;
@@ -248,9 +248,10 @@ namespace TagTool.Commands.Files
             public AssemblyPluginField(AssemblyPluginFieldTypes type, string name, Dictionary<string, string> attributes) : this(type, name)
             {
                 //Merge attributes dictionary
-                attributes = attributes.Concat(attributes)
-                    .GroupBy(keyPair => keyPair.Key)
-                    .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
+                this.attributes = new Dictionary<string, string>[] { this.attributes, attributes }
+                         .SelectMany(dict => dict)
+                         .ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
             }
 
             /// <summary>
@@ -278,9 +279,10 @@ namespace TagTool.Commands.Files
             {
                 this.attributes.Add("offset", "0x" + offset.ToString("X"));
 
-                attributes = attributes.Concat(attributes)
-                    .GroupBy(keyPair => keyPair.Key)
-                    .ToDictionary(keyPair => keyPair.Key, kp => kp.First().Value);
+                this.attributes = new Dictionary<string, string>[] { this.attributes, attributes }
+                         .SelectMany(dict => dict)
+                         .ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
 
                 offset += Size;
             }
