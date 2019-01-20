@@ -93,7 +93,8 @@ namespace TagTool.Commands.Porting
 
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
-                    if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name.Value == 17796)
+                    //Fix the scoreboard 'who am i?' arrow in forge.
+                    if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name == CacheContext.GetStringId("who_am_i"))
                     {
                         for (int stateDataIndex = 0; stateDataIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDataIndex++)
                         {
