@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
@@ -160,7 +161,7 @@ namespace TagTool.Commands.Porting
             return chudDefinition;
         }
 
-        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(ChudGlobalsDefinition H3Definition)
+        private ChudGlobalsDefinition ConvertChudGlobalsDefinition(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ChudGlobalsDefinition H3Definition)
         {
             for (int hudGlobalsIndex = 0; hudGlobalsIndex < H3Definition.HudGlobals.Count; hudGlobalsIndex++)
             {
@@ -234,14 +235,14 @@ namespace TagTool.Commands.Porting
                         {
                             var spartanBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             spartanBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Spartan;
-                            spartanBiped.Sound = PortTagReference(H3snd.SpartanSound.Index);
+                            spartanBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.SpartanSound, null, H3snd.SpartanSound.Name);
                             H3snd.Bipeds.Add(spartanBiped);
                         }
                         if (H3snd.EliteSound != null)
                         {
                             var eliteBiped = new ChudGlobalsDefinition.HudGlobal.HudSound.BipedData();
                             eliteBiped.BipedType_HO = ChudGlobalsDefinition.HudGlobal.HudSound.BipedData.BipedTypeValue_HO.Elite;
-                            eliteBiped.Sound = PortTagReference(H3snd.SpartanSound.Index);
+                            eliteBiped.Sound = (CachedTagInstance)ConvertData(cacheStream, resourceStreams, H3snd.EliteSound, null, H3snd.EliteSound.Name);
                             H3snd.Bipeds.Add(eliteBiped);
                         }
                     }

@@ -467,7 +467,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case ChudGlobalsDefinition chudGlobals:
-					blamDefinition = ConvertChudGlobalsDefinition(chudGlobals);
+					blamDefinition = ConvertChudGlobalsDefinition(cacheStream, resourceStreams, chudGlobals);
 					break;
 
 				case Dialogue udlg:
