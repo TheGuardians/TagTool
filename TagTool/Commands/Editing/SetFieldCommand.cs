@@ -550,7 +550,7 @@ namespace TagTool.Commands.Editing
             }
             else if (type.IsArray)
             {
-                if (info?.FieldType == typeof(byte[]) && info?.Attribute.Length != 0)
+                if (info?.FieldType == typeof(byte[]) && info?.Attribute.Length == 0)
                 {   // tag_data field
                     if (args.Count != 1)
                         return false;
