@@ -239,7 +239,7 @@ namespace TagTool.Commands.Porting
                                     }
                                 }
 
-                                if (CacheContext.GetTag(unitIndex)?.IsInGroup<Giant>() ?? false)
+                                if (unitIndex != -1 && (CacheContext.GetTag(unitIndex)?.IsInGroup<Giant>() ?? false))
                                     scnr.Zones[squad.InitialZoneIndex].FlagsNew |= Scenario.Zone.ZoneFlagsNew.GiantsZone;
                             }
                         }
