@@ -2479,6 +2479,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short EditorFolderIndex;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short Unknown;
 
@@ -2489,8 +2490,8 @@ namespace TagTool.Tags.Definitions
                     public string Name;
                     public RealPoint3d Position;
                     public short ReferenceFrame;
-                    public short Unknown1;
-                    public short Unknown2;
+                    public short BspIndex;
+                    public short ZoneIndex;
                     public short SurfaceIndex;
                     public RealEulerAngles2d FacingDirection;
                 }

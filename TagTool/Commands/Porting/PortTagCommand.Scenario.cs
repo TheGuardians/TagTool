@@ -407,8 +407,6 @@ namespace TagTool.Commands.Porting
 
                         foreach (var taskArea in task.Areas)
                         {
-                            taskArea.Flags |= Scenario.AiObjective.Task.AreaFlags.DirectionValid;
-
                             if (taskArea.ZoneIndex == -1 || taskArea.AreaIndex == -1)
                                 continue;
 
