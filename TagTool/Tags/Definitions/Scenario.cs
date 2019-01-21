@@ -39,7 +39,7 @@ namespace TagTool.Tags.Definitions
 
         public CachedTagInstance Unknown;
         public List<SkyReference> SkyReferences;
-        public List<ZoneSetPotentiallyVisibleSet> ZoneSetPotentiallyVisibleSets;
+        public List<ZoneSetPvsBlock> ZoneSetPvs;
         public List<ZoneSetAudibilityBlock> ZoneSetAudibility;
         public List<ZoneSet> ZoneSets;
         public List<BspAtlasBlock> BspAtlas;
@@ -364,7 +364,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2C)]
-        public class ZoneSetPotentiallyVisibleSet : TagStructure
+        public class ZoneSetPvsBlock : TagStructure
 		{
             public uint StructureBspMask;
             public short Version;
@@ -1963,23 +1963,30 @@ namespace TagTool.Tags.Definitions
             public string Name;
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public ZoneFlags FlagsOld;
+            public ZoneFlagsOld FlagsOld;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public ZoneFlagsNew FlagsNew;
+
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short ManualBspIndex;
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public ushort UnknownFlags;
-
-            public ushort BlockFlags;
+            public ushort BspFlags;
 
             public List<FiringPosition> FiringPositions;
             public List<Area> Areas;
 
             [Flags]
-            public enum ZoneFlags : int
+            public enum ZoneFlagsOld : int
             {
                 None,
                 UsesManualBspIndex = 1 << 0
+            }
+
+            [Flags]
+            public enum ZoneFlagsNew : ushort
+            {
+                None,
+                GiantsZone = 1 << 0
             }
 
             [TagStructure(Size = 0x28)]
@@ -3525,6 +3532,7 @@ namespace TagTool.Tags.Definitions
 		{
             public List<TimeMultiplier> TimeMultipliers;
             public float ParScore;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public List<SurvivalBlock> Survival;
 
@@ -3580,9 +3588,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class UnknownBlock7 : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
+            public RealPoint3d Position;
             public short Unknown4;
             public short Unknown5;
         }
@@ -3590,9 +3596,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class LightmapAirprobe : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
+            public RealPoint3d Position;
             public StringId Unknown4;
             public short Unknown5;
             public short Unknown6;

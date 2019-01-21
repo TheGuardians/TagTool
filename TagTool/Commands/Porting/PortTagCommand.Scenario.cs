@@ -220,6 +220,28 @@ namespace TagTool.Commands.Porting
                                     Chance = 1
                                 }
                             };
+
+                            //
+                            // Determine if the character is a giant to enable zone flags
+                            //
+
+                            if (squad.InitialZoneIndex != -1)
+                            {
+                                var unitIndex = -1;
+                                var entry = scnr.CharacterPalette[fireteam.CharacterTypeIndex];
+
+                                if (entry.Instance != null)
+                                {
+                                    using (var reader = new EndianReader(cacheStream, true))
+                                    {
+                                        cacheStream.Position = entry.Instance.HeaderOffset + entry.Instance.DefinitionOffset + 32;
+                                        unitIndex = reader.ReadInt32();
+                                    }
+                                }
+
+                                if (CacheContext.GetTag(unitIndex)?.IsInGroup<Giant>() ?? false)
+                                    scnr.Zones[squad.InitialZoneIndex].FlagsNew |= Scenario.Zone.ZoneFlagsNew.GiantsZone;
+                            }
                         }
 
                         if (fireteam.InitialPrimaryWeaponIndex != -1)
@@ -335,11 +357,14 @@ namespace TagTool.Commands.Porting
 
                 foreach (var zone in scnr.Zones)
                 {
-                    if (zone.FlagsOld.HasFlag(Scenario.Zone.ZoneFlags.UsesManualBspIndex))
-                        zone.BlockFlags = (ushort)(1 << zone.ManualBspIndex);
-                    else
-                        for (var i = 0; i < scnr.StructureBsps.Count; i++)
-                            zone.BlockFlags |= (ushort)(1 << i);
+                    foreach (var firingPosition in zone.FiringPositions)
+                    {
+                        if (firingPosition.BspIndex != -1)
+                            zone.BspFlags |= (ushort)(1 << firingPosition.BspIndex);
+
+                        if (firingPosition.SectorBspIndex != -1)
+                            zone.BspFlags |= (ushort)(1 << firingPosition.SectorBspIndex);
+                    }
 
                     var areaSectors = new List<List<(short, short)>>();
 
@@ -369,6 +394,10 @@ namespace TagTool.Commands.Porting
 
                     zoneAreaSectors.Add(areaSectors);
                 }
+
+                //
+                // TODO: thoroughly check and possibly refactor the ai objective code below
+                //
 
                 foreach (var aiObjective in scnr.AiObjectives)
                 {
