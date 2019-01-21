@@ -37,6 +37,12 @@ namespace TagTool.Commands.RenderModels
 			if (args.Count != 1)
 				return false;
 
+            if (!CacheContext.TryGetTag<Shader>(@"shaders\invalid", out var defaultShaderTag))
+            {
+                Console.WriteLine("WARNING: 'shaders\\invalid.shader' not found!");
+                Console.WriteLine("You will have to assign material shaders manually.");
+            }
+
 			var stringIdCount = CacheContext.StringIdCache.Strings.Count;
 
 			var sceneFile = new FileInfo(args[0]);
@@ -208,7 +214,7 @@ namespace TagTool.Commands.RenderModels
 						else
 							materialIndex = materialIndices[meshMaterial.Name] = builder.AddMaterial(new RenderMaterial
 							{
-								RenderMethod = CacheContext.TagCache.Index[0x3AB0],
+								RenderMethod = defaultShaderTag,
 							});
 
 						builder.BeginPart(materialIndex, partStartIndex, (ushort)meshIndices.Length, (ushort)mesh.VertexCount);
