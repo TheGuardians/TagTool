@@ -90,7 +90,7 @@ namespace TagTool.Commands.RenderModels
 						continue;
 
 					var permName = CacheContext.GetString(permutation.Name);
-					var meshName = $"{regionName.Replace('_', '-')}_{permName.Replace('_', '-')}Mesh";
+					var meshName = $"{regionName}FBXASC058{permName}Mesh";
 
 					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
 

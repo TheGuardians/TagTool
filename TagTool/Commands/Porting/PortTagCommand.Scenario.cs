@@ -374,7 +374,49 @@ namespace TagTool.Commands.Porting
 
                         area.ManualReferenceFrameNew = area.ManualReferenceFrameOld;
                         area.AreaTypeNew = area.AreaTypeOld;
-                        area.Points = new List<Scenario.Zone.Area.Point>();
+                        area.Points = new List<Scenario.Zone.Area.Point>
+                        {
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X - area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Y - area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Z),
+                                ReferenceFrame = -1,
+                                BspIndex = 0, // TODO: find the proper bsp index
+                                Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X + area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Y - area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Z),
+                                ReferenceFrame = -1,
+                                BspIndex = 0, // TODO: find the proper bsp index
+                                Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X + area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Y + area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Z),
+                                ReferenceFrame = -1,
+                                BspIndex = 0, // TODO: find the proper bsp index
+                                Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
+                            },
+                            new Scenario.Zone.Area.Point
+                            {
+                                Position = new RealPoint3d(
+                                    area.RuntimeRelativeMeanPoint.X - area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Y + area.RuntimeStandardDeviation,
+                                    area.RuntimeRelativeMeanPoint.Z),
+                                ReferenceFrame = -1,
+                                BspIndex = 0, // TODO: find the proper bsp index
+                                Facing = new RealEulerAngles2d(Angle.FromDegrees(0.0f), Angle.FromDegrees(90.0f))
+                            }
+                        };
 
                         var sectors = new List<(short, short)>();
 

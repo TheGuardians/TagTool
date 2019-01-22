@@ -73,7 +73,6 @@ namespace TagTool.Audio.Converter
         public byte EncoderVersion = 3;
         List<XMAStream> Streams;
 
-
         public XMAFMTChunk(int channels, int sampleRate)
         {
             Name = 0x666D7420;
@@ -88,25 +87,28 @@ namespace TagTool.Audio.Converter
                     ChunkSize += 0x14;
                     NumberOfStreams = 1;
                     break;
+
                 case 2:
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
                     ChunkSize += 0x14;
                     NumberOfStreams = 1;
                     break;
+
                 case 4:
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
                     ChunkSize += 0x28;
                     NumberOfStreams = 2;
                     break;
+
                 case 6:
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_CENTER | ChannelMask.XMA_SPEAKER_LFE));
-                    
-                    NumberOfStreams = 3;
                     ChunkSize += 0x3C;
+                    NumberOfStreams = 3;
                     break;
+
                 default:
                     break;
             }
@@ -280,6 +282,4 @@ namespace TagTool.Audio.Converter
 
 
     }
-
-    
 }
