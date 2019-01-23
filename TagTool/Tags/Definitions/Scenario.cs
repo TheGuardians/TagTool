@@ -2041,7 +2041,8 @@ namespace TagTool.Tags.Definitions
                 public string Name;
                 public AreaFlags Flags;
                 public RealPoint3d RuntimeRelativeMeanPoint;
-                public int Unknown;
+                public short RuntimeRelativeReferenceFrame;
+                public short RuntimeRelativeBspIndex;
                 public float RuntimeStandardDeviation;
                 public short FiringPositionStartIndex;
                 public short FiringPositionCount;
@@ -2170,8 +2171,9 @@ namespace TagTool.Tags.Definitions
                 public class Waypoint : TagStructure
 				{
                     public RealPoint3d Position;
-                    public int PackedKeyOfFaceRefIndex;
-                    public int NavMeshUidOfFaceRefIndex;
+                    public short ManualReferenceFrame;
+                    public short BspIndex;
+                    public int SurfaceIndex;
                 }
             }
         }
@@ -3470,8 +3472,8 @@ namespace TagTool.Tags.Definitions
                     public class Point : TagStructure
 					{
                         public RealPoint3d Position;
-                        public short PackedKeyOfFaceRef;
-                        public short NavMeshUidOfFaceRef;
+                        public short ManualReferenceFrame;
+                        public short BspIndex;
                     }
                 }
             }
