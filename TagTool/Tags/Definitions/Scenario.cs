@@ -2249,7 +2249,15 @@ namespace TagTool.Tags.Definitions
             public List<UnknownBlock9> Unknown9;
 
             [Flags]
-            public enum UserHintFlags : int
+            public enum UserHintShortFlags : short
+            {
+                None,
+                Bidirectional = 1 << 0,
+                Closed = 1 << 1
+            }
+
+            [Flags]
+            public enum UserHintLongFlags : int
             {
                 None,
                 Bidirectional = 1 << 0,
@@ -2259,7 +2267,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x24)]
             public class LineSegment : TagStructure
 			{
-                public UserHintFlags Flags;
+                public UserHintLongFlags Flags;
 
                 public RealPoint3d Point0;
                 public short ReferenceUnknown0;
@@ -2273,7 +2281,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48)]
             public class Parallelogram : TagStructure
 			{
-                public UserHintFlags Flags;
+                public UserHintLongFlags Flags;
 
                 public RealPoint3d Point0;
                 public short ReferenceUnknown0;
@@ -2298,18 +2306,10 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x8)]
             public class JumpHint : TagStructure
 			{
-                public FlagsValue Flags;
-                public short GeometryIndex;
+                public UserHintShortFlags Flags;
+                public short ParallelogramIndex;
                 public AiDistanceValue ForceJumpHeight;
                 public ControlFlagsValue ControlFlags;
-
-                [Flags]
-                public enum FlagsValue : short
-                {
-                    None,
-                    Bidirectional = 1 << 0,
-                    Closed = 1 << 1
-                }
 
                 [Flags]
                 public enum ControlFlagsValue : ushort
@@ -2321,8 +2321,9 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x8)]
             public class ClimbHint : TagStructure
-			{
-                public UserHintFlags Flags;
+            {
+                public UserHintShortFlags Flags;
+                public short LineSegmentIndex;
                 public short Unknown1;
                 public short Unknown2;
             }
