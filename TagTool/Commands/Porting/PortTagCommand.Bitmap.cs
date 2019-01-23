@@ -595,6 +595,13 @@ namespace TagTool.Commands.Porting
                     blamBitmap.MipMapCount = 0;
                     compress = true;
                     break;
+
+                case BitmapFormat.V8U8:
+                    // Convert to rgb normal then compress to ati2n
+                    throw new Exception($"Unsupported bitmap format {blamBitmap.Format}");
+
+                default:
+                    throw new Exception($"Unsupported bitmap format {blamBitmap.Format}");
             }
 
             //Remove flags for conversion
