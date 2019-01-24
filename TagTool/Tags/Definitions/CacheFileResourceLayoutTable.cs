@@ -35,13 +35,11 @@ namespace TagTool.Tags.Definitions
             public int OverallSize;
             public List<Part> Parts;
 
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x8)]
             public class Part : TagStructure
             {
-                public int Unknown1;
-                public int Size1;
-                public int Unknown2;
-                public int Size2;
+                public int Unknown;
+                public int Size;
             }
         }
 
