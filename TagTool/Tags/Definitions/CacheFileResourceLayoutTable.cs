@@ -22,14 +22,10 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x108)]
         public class ExternalCacheReference : TagStructure
 		{
-            [TagField(Length = 0x12)]
+            [TagField(Length = 0x100)]
             public string MapPath;
-
-            [TagField(Length = 0xEE)]
-            public byte[] UnusedData;
-
             public short Unknown;
-            public short Unknown2;
+            public ushort Flags;
             public uint Unknown3;
         }
 
@@ -39,11 +35,13 @@ namespace TagTool.Tags.Definitions
             public int OverallSize;
             public List<Part> Parts;
 
-            [TagStructure(Size = 0x8)]
+            [TagStructure(Size = 0x10)]
             public class Part : TagStructure
-			{
-                public int Unknown;
-                public int Size;
+            {
+                public int Unknown1;
+                public int Size1;
+                public int Unknown2;
+                public int Size2;
             }
         }
 

@@ -400,9 +400,7 @@ namespace TagTool.Cache
                 }
             }
 
-            var offset = BitConverter.ToInt32(BitConverter.GetBytes(cache.Header.Interop.DebugSectionSize), 0) + page.BlockOffset;
-
-            cache.Reader.SeekTo(offset);
+            cache.Reader.SeekTo(cache.Header.Interop.DebugSectionSize + page.BlockOffset);
             var compressed = cache.Reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
 
             if (resource.ResourceTypeIndex != -1 && Strings.GetString(ResourceGestalt.ResourceTypes[resource.ResourceTypeIndex].Name) == "sound_resource_definition")
