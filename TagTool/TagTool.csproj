@@ -180,6 +180,7 @@
     <Compile Include="Bitmaps\BitmapDdsExtractor.cs" />
     <Compile Include="Bitmaps\BitmapDdsFormatDetection.cs" />
     <Compile Include="Bitmaps\BitmapDdsInjector.cs" />
+    <Compile Include="Bitmaps\BitmapExtractor.cs" />
     <Compile Include="Bitmaps\BitmapFlags.cs" />
     <Compile Include="Bitmaps\BitmapFlagsXbox.cs" />
     <Compile Include="Bitmaps\BitmapFormat.cs" />
@@ -188,6 +189,11 @@
     <Compile Include="Bitmaps\BitmapType.cs" />
     <Compile Include="Bitmaps\BlamBitmap.cs" />
     <Compile Include="Bitmaps\DdsHeader.cs" />
+    <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
+    <Compile Include="Bitmaps\DDS\DDSFlags.cs" />
+    <Compile Include="Bitmaps\DDS\DDSPixelFormatFlags.cs" />
+    <Compile Include="Bitmaps\DDS\DDSSurfaceInfoFlags.cs" />
+    <Compile Include="Bitmaps\DDS\Header.cs" />
     <Compile Include="Bitmaps\DxtDecoder.cs" />
     <Compile Include="Bitmaps\MipMapGenerator.cs" />
     <Compile Include="Cache\CacheAddress.cs" />
