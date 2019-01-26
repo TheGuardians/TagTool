@@ -445,7 +445,7 @@ namespace TagTool.Commands.Porting
                 {
                     foreach (var task in aiObjective.Tasks)
                     {
-                        task.RuntimeFlags |= Scenario.AiObjective.Task.RuntimeFlagsValue.AreaConnectivityValid;
+                        //task.RuntimeFlags |= Scenario.AiObjective.Task.RuntimeFlagsValue.AreaConnectivityValid;
 
                         foreach (var taskArea in task.Areas)
                         {
