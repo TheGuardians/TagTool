@@ -227,6 +227,7 @@
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\ExtractXMACommand.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />
     <Compile Include="Tags\TagResourceTypeGen3.cs" />

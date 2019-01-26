@@ -16,7 +16,8 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// Describes a bitmap.
         /// </summary>
-        [TagStructure(Size = 0x40)]
+        [TagStructure(Size = 0x34, MaxVersion = Cache.CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x40, MinVersion = Cache.CacheVersion.HaloOnline106708)]
         public class BitmapDefinition : TagStructure
 		{
             /// <summary>
@@ -67,17 +68,22 @@ namespace TagTool.Tags.Resources
             /// <summary>
             /// The format of the bitmap data.
             /// </summary>
+            [TagField(MinVersion = Cache.CacheVersion.HaloOnline106708)]
             public BitmapFormat Format;
 
             // Some sort of enum? No idea what this does but it IS used for something.
+            [TagField(MinVersion = Cache.CacheVersion.HaloOnline106708)]
             public BitmapImageCurve Curve;
 
             /// <summary>
             /// Gets or sets flags describing the bitmap.
             /// </summary>
+            [TagField(MinVersion = Cache.CacheVersion.HaloOnline106708)]
             public BitmapFlags Flags;
 
+            [TagField(MinVersion = Cache.CacheVersion.HaloOnline106708)]
             public int Unused38;
+            [TagField(MinVersion = Cache.CacheVersion.HaloOnline106708)]
             public int Unused3C;
         }
     }
