@@ -427,10 +427,10 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// Absorbes AOE or child damage
             /// </summary>
-            public int IndirectDamageSection;
+            public short IndirectDamageSection;
 
-            [TagField(Padding = true, Length = 4)]
-            public byte[] Unused1 = new byte[4];
+            [TagField(Padding = true, Length = 6)]
+            public byte[] Unused1 = new byte[6];
 
             public DamageReportingType CollisionDamageReportingType;
 
