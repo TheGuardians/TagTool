@@ -572,21 +572,40 @@ namespace TagTool.Commands.Porting
 						attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
 					break;
 
-                // Fix avalanche trees
-                case Shader rmsh when blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
-                    rmsh.ShaderProperties[0].BlendMode = 1;
+                case Shader rmsh:
+                    rmsh.Material = ConvertStringId(rmsh.Material);
+                    if (blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
+                        rmsh.ShaderProperties[0].BlendMode = 1; // Fix avalanche trees
                     break;
 
-                case ShaderCortana shader_cortana:
-					ConvertShaderCortana(shader_cortana, cacheStream, resourceStreams);
-					break;
-			}
+                case ShaderFoliage rmfl:
+                    rmfl.Material = ConvertStringId(rmfl.Material);
+                    break;
 
-			//
-			// Finalize and serialize the new ElDorado tag definition
-			//
+                case ShaderBlack rmbk:
+                    rmbk.Material = ConvertStringId(rmbk.Material);
+                    break;
 
-			if (blamDefinition == null) //If blamDefinition is null, return null tag.
+                case ShaderTerrain rmtr:
+                    for (var i = 0; i < rmtr.MaterialNames.Length; i++)
+                        rmtr.MaterialNames[i] = ConvertStringId(rmtr.MaterialNames[i]);
+                    break;
+
+                case ShaderCustom rmcs:
+                    rmcs.Material = ConvertStringId(rmcs.Material);
+                    break;
+
+                case ShaderCortana rmct:
+                    rmct.Material = ConvertStringId(rmct.Material);
+                    ConvertShaderCortana(rmct, cacheStream, resourceStreams);
+                    break;
+            }
+
+            //
+            // Finalize and serialize the new ElDorado tag definition
+            //
+
+            if (blamDefinition == null) //If blamDefinition is null, return null tag.
 			{
 				CacheContext.TagCache.Index[edTag.Index] = null;
 				return null;
