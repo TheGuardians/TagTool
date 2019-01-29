@@ -443,5 +443,15 @@ namespace TagTool.Cache
         {
             throw new NotImplementedException();
         }
+
+        public virtual byte[] GetPrimaryResource(int ID, int dataLength, int offset=0, bool padding = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual byte[] GetSecondaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

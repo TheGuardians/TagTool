@@ -132,7 +132,7 @@ namespace TagTool.Commands.Porting
 
         private PageableResource ConvertBlamBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
-            BlamBitmap blamBitmap = new BlamBitmap(bitmap.Images[imageIndex], 0, 0);
+            BlamBitmap blamBitmap = new BlamBitmap(bitmap.Images[imageIndex]);
 
             byte[] raw = new byte[0];
             var rawSize = blamBitmap.Type == BitmapType.CubeMap ? blamBitmap.RawSize * 6 : blamBitmap.RawSize;
@@ -258,7 +258,7 @@ namespace TagTool.Commands.Porting
                 texture.Depth = (sbyte)imageData.Depth;
                 texture.MipmapCount = (sbyte)(imageData.MipMapCount + 1);
                 texture.Type = imageData.Image.Type;
-                texture.D3DFormatUnused = GetUnusedFormat(blamBitmap.Format);
+                texture.D3DFormat = (D3DFormatXbox)GetUnusedFormat(blamBitmap.Format);
                 texture.Format = imageData.Format;
                 texture.Curve = bitmap.Images[imageIndex].Curve;
                 texture.Flags = bitmap.Images[imageIndex].Flags;
@@ -435,10 +435,12 @@ namespace TagTool.Commands.Porting
                 //Converted to Y8
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.Dxt3aMono:
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, BlamCache.Version);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Format = BitmapFormat.Y8;
                     blamBitmap.Image.Format = BitmapFormat.Y8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = raw.Length;
                     blamBitmap.CompressionFactor = 1;
@@ -450,10 +452,12 @@ namespace TagTool.Commands.Porting
                 //Converted to A8
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt5aAlpha:
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, BlamCache.Version);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Format = BitmapFormat.A8;
                     blamBitmap.Image.Format = BitmapFormat.A8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
 
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = raw.Length;
@@ -467,10 +471,12 @@ namespace TagTool.Commands.Porting
                 //Converted to A8Y8
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.Dxt5a:
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, BlamCache.Version);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Format = BitmapFormat.A8Y8;
                     blamBitmap.Image.Format = BitmapFormat.A8Y8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
 
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = raw.Length;
@@ -483,10 +489,12 @@ namespace TagTool.Commands.Porting
                 //Convert to A8R8G8B8 for ease
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, CacheVersion.Halo3Retail);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Image.Format = BitmapFormat.A8R8G8B8;
                     blamBitmap.Format = BitmapFormat.A8R8G8B8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
 
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = raw.Length;
@@ -498,8 +506,9 @@ namespace TagTool.Commands.Porting
 
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
+
                     if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        raw = DxtDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
                     blamBitmap.RawSize = raw.Length;
                     blamBitmap.MipMapCount = 0;
 
@@ -527,7 +536,7 @@ namespace TagTool.Commands.Porting
                 case BitmapFormat.A8:
                 case BitmapFormat.A8R8G8B8:
                     if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        raw = DxtDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
 
                     if(blamBitmap.Format == BitmapFormat.A8R8G8B8)
                         for (int j = 0; j < raw.Length; j += 4)
@@ -545,9 +554,9 @@ namespace TagTool.Commands.Porting
 
                 case BitmapFormat.AY8:
                     if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        raw = DxtDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Image.Format);
                     // Convert to A8Y8
-                    raw = DxtDecoder.ConvertAY8ToA8Y8(raw, blamBitmap.Width, blamBitmap.Height);
+                    raw = BitmapDecoder.ConvertAY8ToA8Y8(raw, blamBitmap.Width, blamBitmap.Height);
 
                     blamBitmap.Image.Format = BitmapFormat.A8Y8;
                     blamBitmap.Format = BitmapFormat.A8Y8;
@@ -565,10 +574,12 @@ namespace TagTool.Commands.Porting
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
                     targetFormat = blamBitmap.Format;
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, CacheVersion.Halo3Retail);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Image.Format = BitmapFormat.A8R8G8B8;
                     blamBitmap.Format = BitmapFormat.A8R8G8B8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = raw.Length;
                     blamBitmap.CompressionFactor = 0.25;
@@ -581,10 +592,12 @@ namespace TagTool.Commands.Porting
 
                 case BitmapFormat.Ctx1:
                     targetFormat = BitmapFormat.Dxn;
-                    raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, CacheVersion.Halo3Retail);
+                    if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        raw = BitmapDecoder.ConvertToLinearTexture(raw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.Image.Format = BitmapFormat.A8R8G8B8;
                     blamBitmap.Format = BitmapFormat.A8R8G8B8;
-                    raw = DxtDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
+                    raw = BitmapDecoder.EncodeBitmap(raw, blamBitmap.Image.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                     blamBitmap.BlockSize = 1;
                     blamBitmap.RawSize = Math.Max(blamBitmap.PixelCount * 4, 4);
                     blamBitmap.CompressionFactor = 0.25;
@@ -595,13 +608,6 @@ namespace TagTool.Commands.Porting
                     blamBitmap.MipMapCount = 0;
                     compress = true;
                     break;
-
-                case BitmapFormat.V8U8:
-                    // Convert to rgb normal then compress to ati2n
-                    throw new Exception($"Unsupported bitmap format {blamBitmap.Format}");
-
-                default:
-                    throw new Exception($"Unsupported bitmap format {blamBitmap.Format}");
             }
 
             //Remove flags for conversion
@@ -634,7 +640,7 @@ namespace TagTool.Commands.Porting
 
                 var prevFormat = blamBitmap.Format;
 
-                raw = DxtDecoder.DecodeBitmap(raw, blamBitmap.Image, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, BlamCache.Version);
+                raw = BitmapDecoder.DecodeBitmap(raw, blamBitmap.Format, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight);
                 blamBitmap.Format = BitmapFormat.A8R8G8B8;
                 blamBitmap.Image.Format = BitmapFormat.A8R8G8B8;
                 blamBitmap.BlockSize = 1;
@@ -669,7 +675,7 @@ namespace TagTool.Commands.Porting
                         for (int j = 0; j < raw.Length; j += 4)
                             Array.Reverse(raw, j, 4);
 
-                        raw = DxtDecoder.EncodeBitmap(raw, prevFormat, blamBitmap.Width, blamBitmap.Height);
+                        raw = BitmapDecoder.EncodeBitmap(raw, prevFormat, blamBitmap.Width, blamBitmap.Height);
                         blamBitmap.RawSize = raw.Length;
                         blamBitmap.Format = prevFormat;
                         blamBitmap.Image.Format = prevFormat;
@@ -715,7 +721,7 @@ namespace TagTool.Commands.Porting
 
                 //Apply linear fix to each layer of the array
                 if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                    layerRaw = DxtDecoder.ConvertToLinearTexture(layerRaw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                    layerRaw = BitmapDecoder.ConvertToLinearTexture(layerRaw, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
 
                 //Reverse each block of 2 bytes
                 for (int j = 0; j < layerRaw.Length; j += 2)
@@ -770,7 +776,7 @@ namespace TagTool.Commands.Porting
                     Array.Copy(raw, i * blamBitmap.RawSize, buffer, 0, blamBitmap.RawSize);
 
                     if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        buffer = DxtDecoder.ConvertToLinearTexture(buffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                        buffer = BitmapDecoder.ConvertToLinearTexture(buffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
 
                     if (blamBitmap.Format != BitmapFormat.A8R8G8B8)
                     {
@@ -800,14 +806,14 @@ namespace TagTool.Commands.Porting
                         Array.Copy(raw, i * blamBitmap.RawSize, tempBuffer, 0, blamBitmap.RawSize);
 
                         if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            buffer = DxtDecoder.ConvertToLinearTexture(tempBuffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                            buffer = BitmapDecoder.ConvertToLinearTexture(tempBuffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
                     }
                     else
                     {
                         Array.Copy(raw, i / 2 * blamBitmap.RawSize, tempBuffer, 0, blamBitmap.RawSize);
 
                         if ((blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && blamBitmap.Image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            tempBuffer = DxtDecoder.ConvertToLinearTexture(tempBuffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
+                            tempBuffer = BitmapDecoder.ConvertToLinearTexture(tempBuffer, blamBitmap.VirtualWidth, blamBitmap.VirtualHeight, blamBitmap.Format);
 
                         Array.Copy(tempBuffer, (i % 2) * (gap), buffer, 0, blamBitmap.RawSize - (i % 2) * (gap));
                     }

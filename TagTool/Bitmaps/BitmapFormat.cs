@@ -56,6 +56,11 @@ namespace TagTool.Bitmaps
 
     public static class BitmapFormatUtils
     {
+        /// <summary>
+        /// Get the number of bits per pixel of a bitmap format.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
         public static int GetBitsPerPixel(BitmapFormat format)
         {
             int bitsPerPixel = 0;
@@ -110,6 +115,11 @@ namespace TagTool.Bitmaps
             return bitsPerPixel;
         }
 
+        /// <summary>
+        /// Get the size in bytes of a block compressed format.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
         public static int GetBlockSize(BitmapFormat format)
         {
             int blockSize = 0;
@@ -134,9 +144,147 @@ namespace TagTool.Bitmaps
                     blockSize = 16;
                     break;
                 default:
-                    throw new Exception($"Unsupported Compressed Format {format}");
+                    blockSize = -1;
+                    break;
             }
             return blockSize;
+        }
+
+        /// <summary>
+        /// Get the dimension of a block in block compressed formats.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static int GetBlockDimension(BitmapFormat format)
+        {
+            int blockDimension = 0;
+            switch (format)
+            {
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt3aMono:
+                    blockDimension = 4;
+                    break;
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                    blockDimension = 4;
+                    break;
+                case BitmapFormat.AY8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.A8:
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A32B32G32R32F:
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.A1R5G5B5:
+                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.V8U8:
+                case BitmapFormat.R5G6B5:
+                    blockDimension = 1;
+                    break;
+                default:
+                    throw new Exception($"Unsupported Compressed Format {format}");
+            }
+            return blockDimension;
+        }
+
+        /// <summary>
+        /// Get the compression factor of a bitmap format.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static double GetCompressionFactor(BitmapFormat format)
+        {
+            double compressionFactor = 0.0;
+            switch (format)
+            {
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                    compressionFactor = 2;
+                    break;
+                case BitmapFormat.A8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.AY8:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.A4R4G4B4Font:
+                    compressionFactor = 1;
+                    break;
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.A1R5G5B5:
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.V8U8:
+                case BitmapFormat.R5G6B5:
+                    compressionFactor = 0.5;
+                    break;
+                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
+                    compressionFactor = 0.25;
+                    break;
+                case BitmapFormat.A16B16G16R16F:
+                    compressionFactor = 0.125;
+                    break;
+                case BitmapFormat.A32B32G32R32F:
+                    compressionFactor = 0.0625;
+                    break;
+                default:
+                    throw new Exception($"Unsupported Compressed Format {format}");
+            }
+            return compressionFactor;
+        }
+
+        /// <summary>
+        /// Get the minimal virtual size of an Xbox 360 Bitmap
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static int GetMinimalVirtualSize(BitmapFormat format)
+        {
+            int minimalSize = 1;
+            switch (format)
+            {
+                case BitmapFormat.A8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.AY8:
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.R5G6B5:
+                case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A32B32G32R32F:
+                    minimalSize = 32;
+                    break;
+
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt3aMono: 
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                    minimalSize = 128;
+                    break;
+                default:
+                    throw new Exception($"Unsupported Compressed Format {format}");
+            }
+            return minimalSize;
         }
     }
 }

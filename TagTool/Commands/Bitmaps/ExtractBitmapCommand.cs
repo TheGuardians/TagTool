@@ -49,6 +49,7 @@ namespace TagTool.Commands.Bitmaps
                     return false;
             }
 
+            //var extractor = new BitmapExtractor(CacheContext);
             var extractor = new BitmapDdsExtractor(CacheContext);
 
             using (var tagsStream = CacheContext.OpenTagCacheRead())
@@ -71,7 +72,10 @@ namespace TagTool.Commands.Bitmaps
                         var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : Tag.Index.ToString("X8")) + ".dds");
 
                         using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
+                        {
+                            //extractor.ExtractBitmap(bitmap, i, outStream);
                             extractor.ExtractDds(bitmap, i, outStream);
+                        }
                     }
             #if !DEBUG
                 }

@@ -517,5 +517,99 @@ namespace TagTool.Cache
 
             return data;
         }
+
+        public override byte[] GetPrimaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        {
+            if (ID == -1)
+                return null;
+
+            if (ResourceLayoutTable == null || ResourceGestalt == null)
+                LoadResourceTags();
+
+            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+
+            if (resource.SegmentIndex == -1) return null;
+
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
+
+            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
+                return null;
+
+            int pageIndex = segment.RequiredPageIndex;
+
+            int segmentOffset = segment.RequiredSegmentOffset + offset;
+
+            if (pageIndex == -1 || segmentOffset == -1)
+                return null;
+
+            if (ResourceLayoutTable.RawPages[pageIndex].BlockOffset == -1)
+                return null;
+
+            var page = ResourceLayoutTable.RawPages[pageIndex];
+            var decompressed = ReadPageData(resource, page);
+
+            var length = dataLength;
+            var data = new byte[length];
+
+            if (length > decompressed.Length || (length + segmentOffset) > decompressed.Length)
+            {
+                if (padding == true)
+                {
+                    length = decompressed.Length;
+                    if (length + segmentOffset > decompressed.Length)
+                        length = decompressed.Length - segmentOffset;
+                }
+                else
+                    return null;
+            }
+               
+            Array.Copy(decompressed, segmentOffset, data, 0, length);
+
+            return data;
+        }
+
+        public override byte[] GetSecondaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        {
+            if (ID == -1)
+                return null;
+
+            if (ResourceLayoutTable == null || ResourceGestalt == null)
+                LoadResourceTags();
+
+            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+
+            if (resource.SegmentIndex == -1) return null;
+
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
+
+            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
+                return null;
+
+            int pageIndex = segment.OptionalPageIndex;
+
+            int segmentOffset = segment.OptionalSegmentOffset + offset;
+
+            if (pageIndex == -1 || segmentOffset == -1)
+                return null;
+
+            if (ResourceLayoutTable.RawPages[pageIndex].BlockOffset == -1)
+                return null;
+
+            var page = ResourceLayoutTable.RawPages[pageIndex];
+            var decompressed = ReadPageData(resource, page);
+
+            var length = dataLength;
+            var data = new byte[length];
+
+            if (length > decompressed.Length)
+                if (padding == true)
+                    length = decompressed.Length;
+                else
+                    return null;
+
+            Array.Copy(decompressed, segmentOffset, data, 0, length);
+
+            return data;
+        }
     }
 }

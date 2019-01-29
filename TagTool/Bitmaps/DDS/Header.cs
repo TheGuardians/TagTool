@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.IO;
+using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Bitmaps.DDS
@@ -35,6 +36,17 @@ namespace TagTool.Bitmaps.DDS
         public DDSHeader(BitmapTextureInteropResource.BitmapDefinition definition)
         {
             CreateHeaderFromType(definition.Height, definition.Width, definition.Depth, definition.MipmapCount, definition.Format, definition.Type, definition.Flags);
+        }
+
+        public DDSHeader(Bitmap.Image image)
+        {
+            var mipMapCount = image.MipmapCount != 0 ? (1 + image.MipmapCount) : 0;
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type, image.Flags);
+        }
+
+        public DDSHeader(BaseBitmap image)
+        {
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipMapCount, image.Format, image.Type, image.Flags);
         }
 
 
@@ -170,7 +182,10 @@ namespace TagTool.Bitmaps.DDS
             {
                 Flags |= DDSFlags.LinearSize;
                 int blockSize = BitmapFormatUtils.GetBlockSize(format);
-                PitchOrLinearSize = (Width * Height / 16) * blockSize;
+                int blockDimension = BitmapFormatUtils.GetBlockDimension(format);
+                var nearestWidth = blockDimension * ((Height + (blockDimension - 1)) / blockDimension);
+                var nearestHeight = blockDimension * ((Width + (blockDimension - 1)) / blockDimension); ;
+                PitchOrLinearSize = (nearestWidth * nearestHeight / 16) * blockSize;
             }
             else
             {
@@ -187,12 +202,12 @@ namespace TagTool.Bitmaps.DDS
     {
         public readonly int Size = 0x20;
         public DDSPixelFormatFlags Flags;
-        public uint FourCC;
-        public int RGBBitCount;
-        public uint RBitMask;
-        public uint GBitMask;
-        public uint BBitMask;
-        public uint ABitMask;
+        public uint FourCC = 0;
+        public int RGBBitCount = 0;
+        public uint RBitMask = 0;
+        public uint GBitMask = 0;
+        public uint BBitMask = 0;
+        public uint ABitMask = 0;
 
         public PixelFormat(BitmapFormat format, BitmapFlags flags)
         {
@@ -210,6 +225,24 @@ namespace TagTool.Bitmaps.DDS
                         Flags |= DDSPixelFormatFlags.FourCC;
                         FourCC = 0x35545844;
                         break;
+
+                    case BitmapFormat.Dxt3:
+                        Flags |= DDSPixelFormatFlags.FourCC;
+                        FourCC = 0x33545844;
+                        break;
+
+                    case BitmapFormat.Dxt1:
+                        Flags |= DDSPixelFormatFlags.FourCC;
+                        FourCC = 0x31545844;
+                        break;
+
+                    case BitmapFormat.Dxn:
+                        Flags |= DDSPixelFormatFlags.FourCC;
+                        FourCC = 0x32495441;
+                        break;
+
+                    default:
+                        throw new Exception($"Unsupported bitmap format {format}");
                 }
             }
             else
@@ -226,33 +259,62 @@ namespace TagTool.Bitmaps.DDS
                         break;
 
                     case BitmapFormat.Y8:
-                        RBitMask = 0xFF; GBitMask = 0xFF; BBitMask = 0xFF;
+                        RBitMask = 0xFF;
                         Flags |= DDSPixelFormatFlags.Luminance;
                         break;
+
+                    case BitmapFormat.A8Y8:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0x00FF; ABitMask = 0xFF00;
+                        break;
+
+                    case BitmapFormat.R5G6B5:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0xF800; GBitMask = 0x07E0; BBitMask = 0x001F;
+                        break;
+
+                    case BitmapFormat.A1R5G5B5:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0x7C00; GBitMask = 0x03E0; BBitMask = 0x001F; ABitMask = 0x8000;
+                        break;
+
+                    case BitmapFormat.A4R4G4B4:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
+                        break;
+
+                    case BitmapFormat.A4R4G4B4Font:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
+                        break;
+
+                    case BitmapFormat.A8R8G8B8:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0x00FF0000; GBitMask = 0x0000FF00; BBitMask = 0x000000FF; ABitMask = 0xFF000000;
+                        break;
+
+                    case BitmapFormat.X8R8G8B8:
+                        Flags |= DDSPixelFormatFlags.RGB;
+                        RBitMask = 0x00FF0000; GBitMask = 0x0000FF00; BBitMask = 0x000000FF;
+                        break;
+
+                    case BitmapFormat.V8U8:
+                        RBitMask = 0xFF00; GBitMask = 0x00FF;
+                        Flags |= DDSPixelFormatFlags.BumpDUDV;
+                        break;
+
+                    case BitmapFormat.A32B32G32R32F:
+                        Flags |= DDSPixelFormatFlags.FourCC;
+                        FourCC = 0x74;
+                        break;
+                    case BitmapFormat.A16B16G16R16F:
+                        Flags |= DDSPixelFormatFlags.FourCC;
+                        FourCC = 0x71;
+                        break;
+                    default:
+                        throw new Exception($"Unsupported bitmap format {format}");
                 }
             }
-
-        
-
-
-            /*
-            
-            { BitmapFormat.Y8,            new BitmapFormatDefinition { FormatType = DdsFormatType.Luminance, BitsPerPixel = 8, RBitMask = 0xFF } },
-            { BitmapFormat.A8Y8,          new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 16, ABitMask = 0xFF00, RBitMask = 0x00FF } },
-            { BitmapFormat.R5G6B5,        new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 16, RBitMask = 0xF800, GBitMask = 0x07E0, BBitMask = 0x001F } },
-            { BitmapFormat.A1R5G5B5,      new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 16, ABitMask = 0x8000, RBitMask = 0x7C00, GBitMask = 0x03E0, BBitMask = 0x001F } },
-            { BitmapFormat.A4R4G4B4,      new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 16, ABitMask = 0xF000, RBitMask = 0x0F00, GBitMask = 0x00F0, BBitMask = 0x000F } },
-            { BitmapFormat.X8R8G8B8,      new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 32, RBitMask = 0x00FF0000, GBitMask = 0x0000FF00, BBitMask = 0x000000FF } },
-            { BitmapFormat.A8R8G8B8,      new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 32, ABitMask = 0xFF000000, RBitMask = 0x00FF0000, GBitMask = 0x0000FF00, BBitMask = 0x000000FF } },
-            { BitmapFormat.Dxt1,          new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = DdsFourCc.FromString("DXT1") } },
-            { BitmapFormat.Dxt3,          new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = DdsFourCc.FromString("DXT3") } },
-            { BitmapFormat.Dxt5,          new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = DdsFourCc.FromString("DXT5") } },
-            { BitmapFormat.A4R4G4B4Font,  new BitmapFormatDefinition { FormatType = DdsFormatType.Rgb, BitsPerPixel = 16, ABitMask = 0xF000, RBitMask = 0x0F00, GBitMask = 0x00F0, BBitMask = 0x000F } },
-            { BitmapFormat.Dxn,           new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = DdsFourCc.FromString("ATI2") } },
-            { BitmapFormat.A16B16G16R16F, new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = 0x00000071} },
-            { BitmapFormat.A32B32G32R32F, new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = 0x00000074} },
-            { BitmapFormat.V8U8,          new BitmapFormatDefinition { FormatType = DdsFormatType.Luminance, BitsPerPixel=16 } },
-             */
         }
 
         /// <summary>
