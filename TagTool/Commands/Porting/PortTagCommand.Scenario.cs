@@ -1190,7 +1190,7 @@ namespace TagTool.Commands.Porting
                         return true;
 
                     case 0x2D2: // player_action_test_cinematic_skip
-                        expr.Opcode = 0x2FC; // player_action_test_action
+                        expr.Opcode = 0x2F5; // player_action_test_jump
                         return true;
 
                     case 0x3CD: // chud_show_weapon_stats
