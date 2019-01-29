@@ -287,11 +287,6 @@ namespace TagTool.Commands.Porting
             H3Definition.HealthMajorThreshold = 0.75f;
             H3Definition.HealthCriticalThreshold = 0.5f;
 
-            //upscale blip bitmap sizes
-            H3Definition.LargeSensorBlipScale = H3Definition.LargeSensorBlipScale * 2.0f;
-            H3Definition.MediumSensorBlipScale = H3Definition.MediumSensorBlipScale * 2.0f;
-            H3Definition.SmallSensorBlipScale = H3Definition.SmallSensorBlipScale * 2.0f;
-
             //prevent crash?
             H3Definition.Unknown72 = 3.0f;
 
