@@ -184,9 +184,6 @@ namespace TagTool.Commands.Porting
 
             foreach (var properties in finalRm.ShaderProperties[0].AnimationProperties)
             {
-                if (BlamCache.Version < CacheVersion.Halo3ODST && !Enum.TryParse(properties.Type.Halo3Retail.ToString(), out properties.Type.Halo3Odst))
-                    throw new NotSupportedException(properties.Type.Halo3Retail.ToString());
-
                 properties.InputName = ConvertStringId(properties.InputName);
                 properties.RangeName = ConvertStringId(properties.RangeName);
 

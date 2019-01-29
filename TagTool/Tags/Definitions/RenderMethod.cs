@@ -6,7 +6,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
     public class RenderMethod : TagStructure
-	{
+    {
         public CachedTagInstance BaseRenderMethod;
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
@@ -20,74 +20,29 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x2)]
         public class RenderMethodDefinitionOptionIndex : TagStructure
-		{
+        {
             public short OptionIndex;
         }
 
         [TagStructure(Size = 0x24)]
         public class AnimationPropertiesBlock : TagStructure
-		{
-            public TypeValue Type;
+        {
+            // TODO: determine if this is an enum or an index
+            public int Type;
+
             [TagField(Label = true)]
             public StringId InputName;
+
             public StringId RangeName;
+
             public float TimePeriod;
+
             public TagFunction Function = new TagFunction { Data = new byte[0] };
-
-            // TODO: map this out better, this is actually from H2V
-            [TagStructure(Size = 0x4)]
-            public class TypeValue : TagStructure
-            {
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public Halo3RetailValue Halo3Retail;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public Halo3OdstValue Halo3Odst;
-
-                // TODO: map these out better, this is actually from H2V
-                public enum Halo3RetailValue : int
-                {
-                    BitmapScaleUniform,
-                    BitmapScaleX,
-                    BitmapScaleY,
-                    BitmapScaleZ,
-                    BitmapTranslationX,
-                    BitmapTranslationY,
-                    BitmapTranslationZ,
-                    BitmapRotationAngle,
-                    BitmapRotationAxisX,
-                    BitmapRotationAxisY,
-                    BitmapRotationAxisZ,
-                    Value,
-                    Color,
-                    BitmapIndex
-                }
-
-                // TODO: map these out better, this is actually from H2V
-                public enum Halo3OdstValue : int
-                {
-                    Unknown,
-                    BitmapScaleUniform,
-                    BitmapScaleX,
-                    BitmapScaleY,
-                    BitmapScaleZ,
-                    BitmapTranslationX,
-                    BitmapTranslationY,
-                    BitmapTranslationZ,
-                    BitmapRotationAngle,
-                    BitmapRotationAxisX,
-                    BitmapRotationAxisY,
-                    BitmapRotationAxisZ,
-                    Value,
-                    Color,
-                    BitmapIndex
-                }
-            }
         }
 
         [TagStructure(Size = 0x3C)]
         public class ImportDatum : TagStructure
-		{
+        {
             [TagField(Label = true)]
             public StringId Name;
 
@@ -107,7 +62,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x84)]
         public class ShaderProperty : TagStructure
-		{
+        {
             public CachedTagInstance Template;
             public List<ShaderMap> ShaderMaps;
             public List<Argument> Arguments;
@@ -131,7 +86,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x18)]
             public class ShaderMap : TagStructure
-			{
+            {
                 [TagField(Label = true)]
                 public CachedTagInstance Bitmap;
                 public sbyte Unknown;
@@ -146,7 +101,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x10)]
             public class Argument : TagStructure
-			{
+            {
                 [TagField(Length = 4)]
                 public float[] Values;
 
@@ -154,7 +109,7 @@ namespace TagTool.Tags.Definitions
                 {
                     get
                     {
-                        if(Values == null)
+                        if (Values == null)
                             Values = new float[4];
                         return Values;
                     }
@@ -167,13 +122,13 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class UnknownBlock1 : TagStructure
-			{
+            {
                 public uint Unknown;
             }
 
             [TagStructure(Size = 0x6)]
             public class UnknownBlock3 : TagStructure
-			{
+            {
                 public short DataHandleSampler;
                 public short DataHandleUnknown;
                 public short DataHandleVector;
@@ -181,7 +136,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class ArgumentMapping : TagStructure
-			{
+            {
                 public enum RenderMethodExternalValue : byte
                 {
                     None = 0x00,
