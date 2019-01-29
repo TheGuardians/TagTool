@@ -38,7 +38,7 @@ namespace TagTool.Bitmaps.Converter
             var image = bitmapTag.Images[index];
             int handle = GetBitmapResourceHandle(bitmapTag, index, version);
 
-            if (!ResourceEntryValid(cache, handle))
+            if (!ResourceEntryValid(cache, handle) || (!HasPrimaryResource(cache, handle) && !HasSecondaryResource(cache, handle)))
             {
                 Console.WriteLine($"Invalid resource entry at {handle}. No data to convert.");
                 return null;
@@ -52,45 +52,78 @@ namespace TagTool.Bitmaps.Converter
                 xboxBitmap = new XboxBitmap(resourceDef, image.InterleavedTextureIndex2, image);
                 bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
 
-                //temp
+                //temporary until full bitmap size is computed
                 mipMapSize = bitmapSize;
 
-                xboxBitmap.Offset = image.InterleavedTextureIndex2 * (int)(0.25 * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor + 0.5 * xboxBitmap.TilePitch);
-                mipMapOffset = bitmapSize;
+                xboxBitmap.Offset = 0;
+                //xboxBitmap.Offset = image.InterleavedTextureIndex2 * (int)(0.25 * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor + 0.5 * xboxBitmap.TilePitch);
 
                 if (!xboxBitmap.InTile)
                 {
-                    xboxBitmap.Offset = 0;
-                    imageData = cache.GetSecondaryResource(handle, bitmapSize, 0);
-                    mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0);
+                    var offset = image.InterleavedTextureIndex2 * (int)( xboxBitmap.VirtualHeight * xboxBitmap.VirtualWidth / xboxBitmap.CompressionFactor);
+                    imageData = cache.GetSecondaryResource(handle, bitmapSize, offset, true);
+                    if(xboxBitmap.MipMapCount > 1)
+                    {
+                        mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0);
+                    }
+                    else
+                    {
+                        mipMapData = null;
+                    }
                 }
                 else
                 {
                     imageData = cache.GetPrimaryResource(handle, bitmapSize, 0);
-                    mipMapData = cache.GetPrimaryResource(handle, mipMapSize, mipMapOffset);
-                }
-
-                
-                // Fix data, may be able to extend to all interleaved
-                if (image.InterleavedTextureIndex2 == 1 && xboxBitmap.BlockSize == 16 && xboxBitmap.Width == 64 && xboxBitmap.Type == BitmapType.CubeMap)
-                {
-                    byte[] totalData = new byte[2 * bitmapSize];
-                    Array.Copy(imageData, 0, totalData, 0, bitmapSize);
-                    Array.Copy(mipMapData, 0, totalData, bitmapSize, bitmapSize);
-
-                    var tileSize = (int)(128 * 128 / xboxBitmap.CompressionFactor);
-
-                    for (int i = 0; i < 6; i++)
+                    if(xboxBitmap.MipMapCount > 1)
                     {
-                        Array.Copy(totalData, (tileSize * i) + tileSize / 2 , imageData, (tileSize * i), tileSize);
+                        mipMapData = cache.GetPrimaryResource(handle, mipMapSize, bitmapSize);
                     }
-                    xboxBitmap.Offset = 0;
+                    else
+                    {
+                        mipMapData = null;
+                    }
                 }
-                    
-                
 
-                //imageData = mipMapData;
-               
+                if (image.InterleavedTextureIndex2 == 1 && xboxBitmap.InTile)
+                {
+                    byte[] totalData = null;
+                    var tileSize = (int)(xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                    var subCount = 0;
+                    switch (xboxBitmap.Type)
+                    {
+                        case BitmapType.Texture2D:
+                            subCount = 1;
+                            break;
+                        case BitmapType.Texture3D:
+                        case BitmapType.Array:
+                            subCount = xboxBitmap.Depth;
+                            break;
+                        case BitmapType.CubeMap:
+                            subCount = 6;
+                            break;
+                    }
+                    if (mipMapData != null)
+                    {
+                        totalData = new byte[bitmapSize + mipMapSize];
+                        Array.Copy(imageData, 0, totalData, 0, bitmapSize);
+                        Array.Copy(mipMapData, 0, totalData, bitmapSize, mipMapSize);
+
+                    }
+                    else
+                    {
+                         totalData = imageData;
+                    }
+
+                    for (int i = 0; i < subCount; i++)
+                    {
+                        // make sure to copy the right amount of data
+                        var copySize = tileSize;
+                        if (copySize > totalData.Length - ((tileSize * i) + tileSize / 2))
+                            copySize = totalData.Length - ((tileSize * i) + tileSize / 2);
+                        Array.Copy(totalData, (tileSize * i) + tileSize / 2, imageData, (tileSize * i), copySize);
+                    }
+
+                }
             }
             else
             {
@@ -147,6 +180,8 @@ namespace TagTool.Bitmaps.Converter
                 }
             }
 
+            
+
             List<XboxBitmap> xboxBitmaps = new List<XboxBitmap>();
             List<XboxBitmap> xboxMipMaps = new List<XboxBitmap>();
 
@@ -190,19 +225,24 @@ namespace TagTool.Bitmaps.Converter
                         newXboxBitmap.Data = data;
                         xboxBitmaps.Add(newXboxBitmap);
                     }
+                    // process mipmaps
+                    /*
                     for (int i = 0; i < count; i++)
                     {
                         byte[] data = new byte[size];
-                        Array.Copy(mipMapData, i * size, data, 0, size);
-                        XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-                        
-                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-                        
-                        newXboxBitmap.Data = data;
-                        xboxMipMaps.Add(newXboxBitmap);
+                        if(xboxBitmap.MipMapCount > 1)
+                        {
+                            Array.Copy(mipMapData, i * size, data, 0, size);
+                            XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
+
+                            if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                                data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
+
+                            newXboxBitmap.Data = data;
+                            xboxMipMaps.Add(newXboxBitmap);
+                        }
                     }
-                    
+                    */
                     break;
             }
 
@@ -419,6 +459,7 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.A16B16G16R16F:
                     break;
 
                 case BitmapFormat.A8R8G8B8:

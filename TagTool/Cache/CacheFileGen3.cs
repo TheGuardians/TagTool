@@ -601,11 +601,17 @@ namespace TagTool.Cache
             var length = dataLength;
             var data = new byte[length];
 
-            if (length > decompressed.Length)
+            if (length > decompressed.Length || (length + segmentOffset) > decompressed.Length)
+            {
                 if (padding == true)
+                {
                     length = decompressed.Length;
+                    if (length + segmentOffset > decompressed.Length)
+                        length = decompressed.Length - segmentOffset;
+                }
                 else
                     return null;
+            }
 
             Array.Copy(decompressed, segmentOffset, data, 0, length);
 
