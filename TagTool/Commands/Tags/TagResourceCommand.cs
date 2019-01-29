@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Tags
 {
@@ -17,7 +19,8 @@ namespace TagTool.Commands.Tags
                 "Manage raw resource data",
 
                 "TagResource Extract <Location> <Index> <Compressed Size> <Data File>\n" +
-                "TagResource Import <Location> <Index> <Data File>",
+                "TagResource Import <Location> <Index> <Data File>\n" +
+                "TagResource Dependencies <Location> <Index>",
 
                 "Extracts and imports raw resource data.\n" +
                 "When extracting, the compressed size must include chunk headers.\n\n" +
@@ -81,9 +84,92 @@ namespace TagTool.Commands.Tags
                 case "import":
                     return ImportResource(location, index, args);
 
+                case "listtags":
+                    return ListTags(location, index);
+
                 default:
                     return false;
             }
+        }
+
+        private bool ListTags(ResourceLocation location, uint index)
+        {
+            var indices = new List<int>();
+
+            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var reader = new EndianReader(cacheStream))
+            {
+                foreach (var instance in CacheContext.TagCache.Index)
+                {
+                    if (instance == null || instance.ResourcePointerOffsets.Count == 0)
+                        continue;
+
+                    foreach (var offset in instance.ResourcePointerOffsets)
+                    {
+                        reader.BaseStream.Position = instance.HeaderOffset + offset;
+                        var resourcePointer = instance.PointerToOffset(reader.ReadUInt32());
+
+                        if (resourcePointer == 0)
+                            continue;
+
+                        reader.BaseStream.Position = instance.HeaderOffset + resourcePointer + 2;
+                        var flags = (OldRawPageFlags)reader.ReadByte();
+
+                        if (flags == 0)
+                            continue;
+
+                        if (flags.HasFlag(OldRawPageFlags.InResources))
+                        {
+                            if (location != ResourceLocation.Resources)
+                                continue;
+                        }
+                        else if (flags.HasFlag(OldRawPageFlags.InTextures))
+                        {
+                            if (location != ResourceLocation.Textures)
+                                continue;
+                        }
+                        else if (flags.HasFlag(OldRawPageFlags.InTexturesB))
+                        {
+                            if (location != ResourceLocation.TexturesB)
+                                continue;
+                        }
+                        else if (flags.HasFlag(OldRawPageFlags.InAudio))
+                        {
+                            if (location != ResourceLocation.Audio)
+                                continue;
+                        }
+                        else if (flags.HasFlag(OldRawPageFlags.InResourcesB))
+                        {
+                            if (location != ResourceLocation.ResourcesB)
+                                continue;
+                        }
+                        else continue;
+
+                        reader.BaseStream.Position = instance.HeaderOffset + resourcePointer + 4;
+
+                        if (reader.ReadInt32() == index)
+                        {
+                            indices.Add(instance.Index);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            foreach (var tagIndex in indices)
+            {
+                var tag = CacheContext.GetTag(tagIndex);
+
+                if (tag == null)
+                    continue;
+
+                var tagName = (tag.Name == null || tag.Name.Length == 0) ? $"0x{tag.Index:X4}" : tag.Name;
+                var groupName = CacheContext.GetString(tag.Group.Name);
+
+                Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tagName}.{groupName}");
+            }
+
+            return true;
         }
 
         private bool ExtractResource(ResourceLocation location, uint index, IReadOnlyList<string> args)

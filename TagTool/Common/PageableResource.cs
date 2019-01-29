@@ -39,8 +39,10 @@ namespace TagTool.Common
                     return typeof(BinkResource);
 
                 case TagResourceTypeGen3.Bitmap:
-                case TagResourceTypeGen3.BitmapInterleaved:
                     return typeof(BitmapTextureInteropResource);
+
+                case TagResourceTypeGen3.BitmapInterleaved:
+                    return typeof(BitmapTextureInterleavedInteropResource);
 
                 case TagResourceTypeGen3.Collision:
                     return typeof(StructureBspTagResources);
