@@ -20,7 +20,7 @@ namespace TagTool.Commands.Tags
 
                 "TagResource Extract <Location> <Index> <Compressed Size> <Data File>\n" +
                 "TagResource Import <Location> <Index> <Data File>\n" +
-                "TagResource Dependencies <Location> <Index>",
+                "TagResource ListTags <Location> <Index>",
 
                 "Extracts and imports raw resource data.\n" +
                 "When extracting, the compressed size must include chunk headers.\n\n" +

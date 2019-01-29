@@ -25,14 +25,64 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class FunctionBlock : TagStructure
+        public class AnimationPropertiesBlock : TagStructure
 		{
-            public int Unknown;
+            public TypeValue Type;
             [TagField(Label = true)]
-            public StringId Name;
-            public uint Unknown2;
-            public uint Unknown3;
+            public StringId InputName;
+            public StringId RangeName;
+            public float TimePeriod;
             public TagFunction Function = new TagFunction { Data = new byte[0] };
+
+            // TODO: map this out better, this is actually from H2V
+            [TagStructure(Size = 0x4)]
+            public class TypeValue : TagStructure
+            {
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public Halo3RetailValue Halo3Retail;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public Halo3OdstValue Halo3Odst;
+
+                // TODO: map these out better, this is actually from H2V
+                public enum Halo3RetailValue : int
+                {
+                    BitmapScaleUniform,
+                    BitmapScaleX,
+                    BitmapScaleY,
+                    BitmapScaleZ,
+                    BitmapTranslationX,
+                    BitmapTranslationY,
+                    BitmapTranslationZ,
+                    BitmapRotationAngle,
+                    BitmapRotationAxisX,
+                    BitmapRotationAxisY,
+                    BitmapRotationAxisZ,
+                    Value,
+                    Color,
+                    BitmapIndex
+                }
+
+                // TODO: map these out better, this is actually from H2V
+                public enum Halo3OdstValue : int
+                {
+                    Unknown,
+                    BitmapScaleUniform,
+                    BitmapScaleX,
+                    BitmapScaleY,
+                    BitmapScaleZ,
+                    BitmapTranslationX,
+                    BitmapTranslationY,
+                    BitmapTranslationZ,
+                    BitmapRotationAngle,
+                    BitmapRotationAxisX,
+                    BitmapRotationAxisY,
+                    BitmapRotationAxisZ,
+                    Value,
+                    Color,
+                    BitmapIndex
+                }
+            }
         }
 
         [TagStructure(Size = 0x3C)]
@@ -52,7 +102,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown8;
             public short Unknown9;
             public uint Unknown10;
-            public List<FunctionBlock> Functions;
+            public List<AnimationPropertiesBlock> AnimationProperties;
         }
 
         [TagStructure(Size = 0x84)]
@@ -66,7 +116,7 @@ namespace TagTool.Tags.Definitions
             public List<RenderMethodTemplate.DrawMode> DrawModes;
             public List<UnknownBlock3> Unknown3;
             public List<ArgumentMapping> ArgumentMappings;
-            public List<FunctionBlock> Functions;
+            public List<AnimationPropertiesBlock> AnimationProperties;
             public int Unknown7;
             public int BlendMode;
             public uint Unknown8;

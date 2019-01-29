@@ -265,7 +265,6 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
-                case BitmapFormat.V8U8:
                     minimalSize = 32;
                     break;
 

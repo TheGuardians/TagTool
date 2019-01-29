@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Serialization;
 using TagTool.Shaders.ShaderMatching;
+using System;
 
 namespace TagTool.Commands.Porting
 {
@@ -142,7 +143,7 @@ namespace TagTool.Commands.Porting
 
             Matcher.FixRmdfTagRef(finalRm);
 
-            FixFunctions(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2);
+            FixAnimationProperties(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2);
 
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
@@ -175,16 +176,21 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private RenderMethod FixFunctions(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
+        private RenderMethod FixAnimationProperties(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
-            if (finalRm.ShaderProperties[0].Functions.Count == 0)
+            if (finalRm.ShaderProperties[0].AnimationProperties.Count == 0)
                 return finalRm;
 
-            foreach (var function in finalRm.ShaderProperties[0].Functions)
+            foreach (var properties in finalRm.ShaderProperties[0].AnimationProperties)
             {
-                function.Name = ConvertStringId(function.Name);
-                ConvertTagFunction(function.Function);
+                if (BlamCache.Version < CacheVersion.Halo3ODST && !Enum.TryParse(properties.Type.Halo3Retail.ToString(), out properties.Type.Halo3Odst))
+                    throw new NotSupportedException(properties.Type.Halo3Retail.ToString());
+
+                properties.InputName = ConvertStringId(properties.InputName);
+                properties.RangeName = ConvertStringId(properties.RangeName);
+
+                ConvertTagFunction(properties.Function);
             }
 
             var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
@@ -382,7 +388,7 @@ namespace TagTool.Commands.Porting
                 {
                     // Abort, disable functions
                     finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>(); // no idea what it does, but it crashes sometimes if it's null. on Shrine, it's the shader loop effect
-                    finalRm.ShaderProperties[0].Functions = new List<RenderMethod.FunctionBlock>();
+                    finalRm.ShaderProperties[0].AnimationProperties = new List<RenderMethod.AnimationPropertiesBlock>();
                     finalRm.ShaderProperties[0].ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
                     finalRm.ShaderProperties[0].Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
                     foreach (var b in edRmt2.RegisterOffsets) // stops crashing for some shaders if the drawmodes count is still the same

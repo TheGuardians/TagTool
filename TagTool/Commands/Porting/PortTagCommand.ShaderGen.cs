@@ -38,7 +38,7 @@ namespace TagTool.Commands.Porting
             shader_properties.DrawModes = new List<RenderMethodTemplate.DrawMode>();
             shader_properties.Unknown3 = new List<RenderMethod.ShaderProperty.UnknownBlock3>();
             shader_properties.ArgumentMappings = new List<RenderMethod.ShaderProperty.ArgumentMapping>();
-            shader_properties.Functions = new List<RenderMethod.FunctionBlock>();
+            shader_properties.AnimationProperties = new List<RenderMethod.AnimationPropertiesBlock>();
 
             List<RenderMethodOption.OptionBlock> templateOptions = new List<RenderMethodOption.OptionBlock>();
 
@@ -76,7 +76,7 @@ namespace TagTool.Commands.Porting
             }
             //shader_properties.DrawModes = rmt2.DrawModes;
 
-            var shaderFunctions = new List<RenderMethod.FunctionBlock>();
+            var shaderFunctions = new List<RenderMethod.AnimationPropertiesBlock>();
             var shaderVectorArguments = new RenderMethod.ShaderProperty.Argument[rmt2.VectorArguments.Count];
 
             var shaderSamplerArguments = new RenderMethod.ShaderProperty.ShaderMap[rmt2.SamplerArguments.Count];
@@ -146,7 +146,7 @@ namespace TagTool.Commands.Porting
                 shaderVectorArguments[rmt2ArgumentIndex] = shaderArgument;
             }
             shader_properties.Arguments = shaderVectorArguments.ToList();
-            shader_properties.Functions = shaderFunctions;
+            shader_properties.AnimationProperties = shaderFunctions;
 
             if (shaderCortana.Material.Index == 0)
             {
@@ -182,7 +182,7 @@ namespace TagTool.Commands.Porting
 
         private RenderMethod.ShaderProperty.Argument ProcessArgument(
             RenderMethodTemplate.ShaderArgument vectorArgument,
-            List<RenderMethod.FunctionBlock> shaderFunctions,
+            List<RenderMethod.AnimationPropertiesBlock> shaderFunctions,
             List<RenderMethodOption.OptionBlock> templateOptions,
             ShaderCortana shaderCortana)
         {
@@ -195,7 +195,7 @@ namespace TagTool.Commands.Porting
             {
                 if (importData.Name.Index != name.Index) continue;
 
-                var argument_data = importData.Functions.Count > 0 ? importData.Functions[0].Function.Data : null;
+                var argument_data = importData.AnimationProperties.Count > 0 ? importData.AnimationProperties[0].Function.Data : null;
                 if (argument_data != null)
                 {
                     var unknown0A = BitConverter.ToUInt16(argument_data, 0);
@@ -264,9 +264,9 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                for (int functionIndex = 1; functionIndex < importData.Functions.Count; functionIndex++)
+                for (int functionIndex = 1; functionIndex < importData.AnimationProperties.Count; functionIndex++)
                 {
-                    shaderFunctions.Add(importData.Functions[functionIndex]);
+                    shaderFunctions.Add(importData.AnimationProperties[functionIndex]);
                 }
 
                 goto datafound;
