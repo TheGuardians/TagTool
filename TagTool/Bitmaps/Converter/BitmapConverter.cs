@@ -71,6 +71,23 @@ namespace TagTool.Bitmaps.Converter
                 }
 
                 
+                // Fix data, may be able to extend to all interleaved
+                if (image.InterleavedTextureIndex2 == 1 && xboxBitmap.BlockSize == 16 && xboxBitmap.Width == 64 && xboxBitmap.Type == BitmapType.CubeMap)
+                {
+                    byte[] totalData = new byte[2 * bitmapSize];
+                    Array.Copy(imageData, 0, totalData, 0, bitmapSize);
+                    Array.Copy(mipMapData, 0, totalData, bitmapSize, bitmapSize);
+
+                    var tileSize = (int)(128 * 128 / xboxBitmap.CompressionFactor);
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        Array.Copy(totalData, (tileSize * i) + tileSize / 2 , imageData, (tileSize * i), tileSize);
+                    }
+                    xboxBitmap.Offset = 0;
+                }
+                    
+                
 
                 //imageData = mipMapData;
                
@@ -166,10 +183,10 @@ namespace TagTool.Bitmaps.Converter
                         byte[] data = new byte[size];
                         Array.Copy(imageData, i * size, data, 0, size);
                         XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-
+                        
                         if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
                             data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-
+                            
                         newXboxBitmap.Data = data;
                         xboxBitmaps.Add(newXboxBitmap);
                     }
@@ -178,40 +195,35 @@ namespace TagTool.Bitmaps.Converter
                         byte[] data = new byte[size];
                         Array.Copy(mipMapData, i * size, data, 0, size);
                         XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-
+                        
                         if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
                             data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-
+                        
                         newXboxBitmap.Data = data;
                         xboxMipMaps.Add(newXboxBitmap);
                     }
-
-                    // Fix data
-                    if (image.InterleavedTextureIndex2 == 1 && xboxBitmap.BlockSize == 16 && xboxBitmap.Width == 64 && xboxBitmap.Type == BitmapType.CubeMap)
-                    {
-                        // Very special case where the 2 bitmap in the interleaved texture is split in half, the lower half is in the mipmap data.
-                        // The following code copies the lower half of the bitmap where it should be in the original image.
-                        // copies 128x64 upper half into original 128x128 image in lower half
-                        int tileSize = (int)(128 * 128 / xboxBitmap.CompressionFactor);
-                        int halfOffset = tileSize / 2;
-                        for (int i = 0; i < 6; i++)
-                        {
-                            Array.Copy(xboxMipMaps[i].Data, 0, xboxBitmaps[i].Data, halfOffset, halfOffset);
-                        }
-                        Console.WriteLine("Big oof");
-                    }
-
+                    
                     break;
             }
 
             List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
             foreach (var bitmap in xboxBitmaps)
             {
+                
                 BaseBitmap finalBitmap = ExtractImage(bitmap);
                 ConvertImage(finalBitmap);
                 FlipImage(finalBitmap, image);
                 finalBitmaps.Add(finalBitmap);
                 finalBitmap.MipMapCount = 0;
+                
+                /*   
+                //   temp code to test cubemaps
+                finalBitmaps.Add((BaseBitmap)bitmap);
+                FlipImage(bitmap, image);
+                bitmap.MipMapCount = 0;
+                bitmap.Height = 128;
+                bitmap.Width = 128;
+                */
             }
 
             return RebuildBitmap(finalBitmaps);
