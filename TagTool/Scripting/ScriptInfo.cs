@@ -10527,7 +10527,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 },
-                [0x15A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_infection_supress")
+                [0x15A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_infection_suppress")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
