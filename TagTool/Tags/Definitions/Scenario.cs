@@ -3017,11 +3017,11 @@ namespace TagTool.Tags.Definitions
             public List<Sink> Sinks;
             public Bounds<float> ProductionFrequencyBounds;
             public Bounds<float> ScaleBounds;
-            public uint Unknown;
-            public uint Unknown2;
+            public float SourceScaleto0;
+            public float SinkScaleto0;
             public short CreaturePaletteIndex;
             public Bounds<short> BoidCountBounds;
-            public short Unknown3;
+            public short EnemyFlockIndex;
 
             [TagStructure(Size = 0x24)]
             public class Source : TagStructure
