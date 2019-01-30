@@ -3185,7 +3185,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Short),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.String),
                 },
-                [0x2F4] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "UnknownString")
+                [0x2F4] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "screenshot_simple")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.String),
                 },
@@ -4310,7 +4310,6 @@ namespace TagTool.Scripting
                 },
                 [0x5B3] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "stop_bink_movie"),
                 [0x5B4] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "play_credits_unskippable"),
-
                 [0x5B5] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown9")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.SoundBudgetReference),
@@ -4321,8 +4320,8 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Short),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean)
                 },
-                [0x5B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown11"),
-                [0x5B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown12")
+                [0x5B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "data_mine_upload"),
+                [0x5B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "data_mine_enable")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 }
@@ -4719,7 +4718,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                 },
-                [0x06C] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown1")// survival_bonus_round
+                [0x06C] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown1")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
@@ -5002,7 +5001,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real)
                 },
                 [0x0B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_on"),
-                [0x0B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown2"),
+                [0x0B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_bink"),
                 [0x0B9] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_off"),
                 [0x0BA] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_aspect_ratio")
                 {
@@ -5408,7 +5407,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Unit),
                 },
-                [0x130] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown4"),
+                [0x130] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "animation_stats_dump"),
                 [0x131] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "unit_animation_forced_seat")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
@@ -5549,7 +5548,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 },
                 [0x150] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "cheats_load"),
-                [0x151] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown5")
+                [0x151] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "drop_safe")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.AnyTag),
                 },
@@ -10356,7 +10355,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Unit),
                 },
-                [0x131] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown4"), //  animation_stats_dump
+                [0x131] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "animation_stats_dump"),
                 [0x132] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "unit_animation_forced_seat")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
@@ -10502,7 +10501,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 },
                 [0x151] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "cheats_load"),
-                [0x152] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown5")
+                [0x152] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "drop_safe")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.AnyTag),
                 },
@@ -12499,7 +12498,7 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Short),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.String),
                 },
-                [0x343] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "UnknownString")
+                [0x343] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "screenshot_simple")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.String),
                 },
