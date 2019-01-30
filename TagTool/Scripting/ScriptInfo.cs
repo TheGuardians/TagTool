@@ -746,6 +746,11 @@ namespace TagTool.Scripting
                 [0x09B] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_dump_world_close_movie"),
                 [0x09C] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_start"),
                 [0x09D] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_end"),
+                [0x09E] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_range")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
                 [0x09F] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_reset_allocated_state"),
                 [0x0A0] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "breakable_surfaces_enable")
                 {
@@ -805,15 +810,78 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                 },
+                [0x0AD] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_attach_to_object")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
+                },
+                [0x0AE] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_target_object")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
+                },
+                [0x0AF] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_position_world_offset")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                },
                 [0x0B0] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_on"),
+                [0x0B1] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_bink"),
                 [0x0B2] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_off"),
                 [0x0B3] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_aspect_ratio")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                },
+                [0x0B4] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_resolution")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0B5] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_render_mode")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0B6] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_fov")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                },
+                [0x0B7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_set_fov_frame_target")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
                 },
                 [0x0B8] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "texture_camera_enable_dynamic_lights")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
+                },
+                [0x0B9] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_texture_camera")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
+                },
+                [0x0BA] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "debug_structure_cluster")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0BB] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_cluster_visibility")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0BC] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_cluster_fog")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0BD] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_fog_plane")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0BE] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_fog_plane_infinite_extent")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
+                [0x0BF] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_fog_zone")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
                 [0x0C0] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "render_debug_structure_all_fog_planes")
                 {
@@ -4948,6 +5016,11 @@ namespace TagTool.Scripting
                 [0x0A2] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_dump_world_close_movie"),
                 [0x0A3] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_start"),
                 [0x0A4] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_end"),
+                [0x0A5] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_profile_range")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
+                },
                 [0x0A6] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "havok_reset_allocated_state"),
                 [0x0A7] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "breakable_surfaces_enable")
                 {
