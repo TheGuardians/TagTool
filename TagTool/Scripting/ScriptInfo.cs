@@ -557,10 +557,10 @@ namespace TagTool.Scripting
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
                 },
-                [0x06D] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Short, "Unknown1")
+                [0x06D] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Short, "object_model_targets_destroyed")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Object),
-                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Real),
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.StringId),
                 },
                 [0x06E] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "object_damage_damage_section")
                 {
