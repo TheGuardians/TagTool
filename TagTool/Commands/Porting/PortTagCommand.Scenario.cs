@@ -940,7 +940,7 @@ namespace TagTool.Commands.Porting
 
             var blamScript = ScriptInfo.Scripts[BlamCache.Version][expr.Opcode];
 
-            var match = true;
+            bool match;
 
             foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
             {
@@ -952,6 +952,8 @@ namespace TagTool.Commands.Porting
 
                 if (newScript.Arguments.Count != blamScript.Arguments.Count)
                     continue;
+
+                match = true;
 
                 for (var k = 0; k < newScript.Arguments.Count; k++)
                 {

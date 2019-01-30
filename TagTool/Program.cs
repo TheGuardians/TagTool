@@ -7,7 +7,6 @@ using System.Reflection;
 using TagTool.Cache;
 using TagTool.Commands.Tags;
 using TagTool.IO;
-using TagTool.Scripting;
 
 namespace TagTool.Commands
 {
