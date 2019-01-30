@@ -1342,7 +1342,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 },
-                [0x13A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown7")
+                [0x13A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_infection_suppress")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
@@ -5573,6 +5573,10 @@ namespace TagTool.Scripting
                 [0x158] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_player_dialogue_enable")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
+                },
+                [0x159] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_infection_suppress")
+                {
+                    new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
                 [0x15A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_fast_and_dumb")
                 {
@@ -10523,7 +10527,7 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Boolean),
                 },
-                [0x15A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "Unknown7")
+                [0x15A] = new ScriptInfo(ScriptValueType.Halo3ODSTValue.Void, "ai_infection_supress")
                 {
                     new ScriptInfo.ArgumentInfo(ScriptValueType.Halo3ODSTValue.Long),
                 },
