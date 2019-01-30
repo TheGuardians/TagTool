@@ -33,7 +33,6 @@ namespace TagTool.Bitmaps.Converter
             XboxBitmap xboxBitmap = null;
             int bitmapSize = 0;
             int mipMapSize = 0;
-            int mipMapOffset = 0;
 
             var image = bitmapTag.Images[index];
             int handle = GetBitmapResourceHandle(bitmapTag, index, version);
@@ -51,6 +50,7 @@ namespace TagTool.Bitmaps.Converter
                 var resourceDef = GetInterleavedResourceDefinition(cache, handle);
                 xboxBitmap = new XboxBitmap(resourceDef, image.InterleavedTextureIndex2, image);
                 bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
+                mipMapSize = BitmapUtils.GetXboxMipMapSize(xboxBitmap);
 
                 //temporary until full bitmap size is computed
                 mipMapSize = bitmapSize;
@@ -130,8 +130,9 @@ namespace TagTool.Bitmaps.Converter
                 var resourceDef = GetResourceDefinition(cache, handle);
                 xboxBitmap = new XboxBitmap(resourceDef, image);
                 bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
+                mipMapSize = BitmapUtils.GetXboxMipMapSize(xboxBitmap);
 
-                if(HasSecondaryResource(cache, handle))
+                if (HasSecondaryResource(cache, handle))
                 {
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, 0, true);
                     if (xboxBitmap.MipMapCount > 1)
@@ -139,7 +140,7 @@ namespace TagTool.Bitmaps.Converter
                         if(HasPrimaryResource(cache, handle))
                         {
                             // dedicated resource for mipmaps
-                            mipMapData = cache.GetPrimaryResource(handle, mipMapSize, mipMapOffset);
+                            mipMapData = cache.GetPrimaryResource(handle, mipMapSize);
                         }
                         else
                         {
@@ -158,8 +159,7 @@ namespace TagTool.Bitmaps.Converter
                         // compute offset in the bitmap, most likely will be one that is not exact.
 
                         imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
-                        mipMapData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
-                        mipMapOffset = 0;
+                        mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0, true);
 
                         // Formula seems quite complex, small hack to make it work
                         if(xboxBitmap.BlockDimension == 4)
@@ -180,11 +180,49 @@ namespace TagTool.Bitmaps.Converter
                 }
             }
 
+            //
+            // Convert main bitmap
+            //
+
+            List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
+            List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
+            foreach (var bitmap in xboxBitmaps)
+            {
+                
+                BaseBitmap finalBitmap = ExtractImage(bitmap);
+                ConvertImage(finalBitmap);
+                FlipImage(finalBitmap, image);
+                finalBitmaps.Add(finalBitmap);
+                finalBitmap.MipMapCount = 0;
+                
+                /*   
+                //   temp code to test cubemaps
+                finalBitmaps.Add((BaseBitmap)bitmap);
+                FlipImage(bitmap, image);
+                bitmap.MipMapCount = 0;
+                bitmap.Height = 128;
+                bitmap.Width = 128;
+                */
+            }
+
+            //
+            // Convert mipmaps
+            //
+
+            List<XboxMipMap> xboxMipMaps = new List<XboxMipMap>();
             
+            if(xboxBitmap.MipMapCount > 1)
+            {
+                xboxMipMaps = ParseMipMaps(xboxBitmap, image, mipMapData, mipMapSize);
 
+            }
+
+            return RebuildBitmap(finalBitmaps);
+        }
+
+        private static List<XboxBitmap> ParseImages(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] imageData, int bitmapSize)
+        {
             List<XboxBitmap> xboxBitmaps = new List<XboxBitmap>();
-            List<XboxBitmap> xboxMipMaps = new List<XboxBitmap>();
-
             switch (image.Type)
             {
                 case BitmapType.Texture2D:
@@ -218,103 +256,104 @@ namespace TagTool.Bitmaps.Converter
                         byte[] data = new byte[size];
                         Array.Copy(imageData, i * size, data, 0, size);
                         XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
-                        
+
                         if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
                             data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-                            
+
                         newXboxBitmap.Data = data;
                         xboxBitmaps.Add(newXboxBitmap);
                     }
-                    // process mipmaps
-                    /*
-                    for (int i = 0; i < count; i++)
-                    {
-                        byte[] data = new byte[size];
-                        if(xboxBitmap.MipMapCount > 1)
-                        {
-                            Array.Copy(mipMapData, i * size, data, 0, size);
-                            XboxBitmap newXboxBitmap = xboxBitmap.ShallowCopy();
+                    break;
+            }
+            return xboxBitmaps;
+        }
 
-                            if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                                data = BitmapDecoder.ConvertToLinearTexture(data, xboxBitmap.VirtualWidth, xboxBitmap.VirtualHeight, xboxBitmap.Format);
-
-                            newXboxBitmap.Data = data;
-                            xboxMipMaps.Add(newXboxBitmap);
-                        }
-                    }
-                    */
+        private static List<XboxMipMap> ParseMipMaps(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] mipMapData, int mipMapSize)
+        {
+            List<XboxMipMap> mipMaps = new List<XboxMipMap>();
+            var imageCount = 0;
+            switch (image.Type)
+            {
+                case BitmapType.Texture2D:
+                    imageCount = 1;
+                    break;
+                case BitmapType.Texture3D:
+                case BitmapType.Array:
+                    imageCount = xboxBitmap.Depth;
+                    break;
+                case BitmapType.CubeMap:
+                    imageCount = 6;
                     break;
             }
 
-            List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
-            foreach (var bitmap in xboxBitmaps)
+            var singleSize = mipMapSize / imageCount;
+
+            for(int i = 0; i < imageCount; i++)
             {
+                byte[] data = new byte[singleSize];
+                Array.Copy(mipMapData, (i * singleSize), data, 0, singleSize);
                 
-                BaseBitmap finalBitmap = ExtractImage(bitmap);
-                ConvertImage(finalBitmap);
-                FlipImage(finalBitmap, image);
-                finalBitmaps.Add(finalBitmap);
-                finalBitmap.MipMapCount = 0;
+
                 
-                /*   
-                //   temp code to test cubemaps
-                finalBitmaps.Add((BaseBitmap)bitmap);
-                FlipImage(bitmap, image);
-                bitmap.MipMapCount = 0;
-                bitmap.Height = 128;
-                bitmap.Width = 128;
-                */
-            }
 
-            return RebuildBitmap(finalBitmaps);
-        }
+                // split mip maps into sub images for conversion
 
-        public static int GetBitmapResourceHandle(Bitmap bitmap, int index, CacheVersion version)
-        {
-            var image = bitmap.Images[index];
-            int handle = 0;
-            int resourceIndex = 0;
+                var curWidth = xboxBitmap.Width;
+                var curHeight = xboxBitmap.Height;
+                var mipMapCount = xboxBitmap.MipMapCount - 1;
+                var mipMapDataOffset = 0;
 
-            List<Bitmap.BitmapResource> resources = null;
-
-            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
-            {
-                resourceIndex = image.InterleavedTextureIndex1;
-                switch (version)
+                while (mipMapCount != 0)
                 {
-                    case CacheVersion.Halo3Retail:
-                    case CacheVersion.Halo3ODST:
-                        resources = bitmap.InterleavedResourcesOld;
+                    var nextMipWidth = BitmapUtils.NextNearestSize(curWidth, xboxBitmap.BlockDimension);
+                    var nextMipHeight = BitmapUtils.NextNearestSize(curHeight, xboxBitmap.BlockDimension);
+                    var minVirtualSize = xboxBitmap.MinimalBitmapSize;
+
+                    // mips are contained in a single image
+                    if (nextMipWidth <= minVirtualSize / 2 && nextMipHeight <= minVirtualSize / 2)
+                    {
+                        int size = (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
+                        byte[] sharedData = new byte[size];
+                        Array.Copy(mipMapData, mipMapDataOffset, sharedData, 0, size);
+
+                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                            sharedData = BitmapDecoder.ConvertToLinearTexture(sharedData, minVirtualSize, minVirtualSize, xboxBitmap.Format);
+
+                        int sharedMipMapCount = (xboxBitmap.MipMapCount - 1) - mipMapCount;
+
+                        // create xboxMipMaps for each mipmap in the shared data
+                        for(int j = 0; j < sharedMipMapCount; j++)
+                        {
+                            // compute the offsets for each level
+                            int offset = 0; // TODO
+
+                            mipMaps.Add(new XboxMipMap(xboxBitmap, curWidth, curHeight, offset, sharedData));
+                            curWidth = BitmapUtils.NextNearestSize(curWidth, xboxBitmap.BlockDimension);
+                            curHeight = BitmapUtils.NextNearestSize(curHeight, xboxBitmap.BlockDimension);
+                        }
                         break;
-                    case CacheVersion.HaloReach:
-                        resources = bitmap.InterleavedResourcesNew;
-                        break;
+                    }
+                    else
+                    {
+                        int size = (int)(curWidth * curHeight / xboxBitmap.CompressionFactor);
+                        byte[] singleData = new byte[size];
+                        Array.Copy(mipMapData, mipMapDataOffset, singleData, 0, size);
+
+                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                            singleData = BitmapDecoder.ConvertToLinearTexture(singleData, curWidth, curHeight, xboxBitmap.Format);
+
+                        mipMaps.Add(new XboxMipMap(xboxBitmap, curWidth, curHeight, 0, singleData));
+                        mipMapDataOffset += size;
+                        curWidth = nextMipWidth;
+                        curHeight = nextMipHeight;
+                        mipMapCount--;
+                    }
                 }
             }
-            else
-            {
-                resourceIndex = index;
-                resources = bitmap.Resources;
-            }
-
-            switch (version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    handle = resources[resourceIndex].ZoneAssetHandleOld;
-                    break;
-                case CacheVersion.HaloReach:
-                    handle = resources[resourceIndex].ZoneAssetHandleNew;
-                    break;
-
-                default:
-                    throw new Exception($"Unsupported cache version {version}");
-            }
-
-            return handle;
+            return mipMaps;
         }
 
-        public static BaseBitmap ExtractImage(XboxBitmap bitmap)
+        private static BaseBitmap ExtractImage(XboxBitmap bitmap)
         {
             if (bitmap.NotExact)
             {
@@ -342,8 +381,8 @@ namespace TagTool.Bitmaps.Converter
             }
             return bitmap;
         }
-
-        public static void ConvertImage(BaseBitmap bitmap)
+     
+        private static void ConvertImage(BaseBitmap bitmap)
         {
             BitmapFormat targetFormat = bitmap.Format;
             var data = bitmap.Data;
@@ -428,7 +467,7 @@ namespace TagTool.Bitmaps.Converter
             bitmap.Data = data;
         }
 
-        public static void FlipImage(BaseBitmap bitmap, Bitmap.Image image)
+        private static void FlipImage(BaseBitmap bitmap, Bitmap.Image image)
         {
             switch (image.Format)
             {
@@ -472,7 +511,7 @@ namespace TagTool.Bitmaps.Converter
             }
         }
 
-        public static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
+        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
         {
             int totalSize = 0;
             foreach (var b in bitmaps)
@@ -490,6 +529,51 @@ namespace TagTool.Bitmaps.Converter
 
             bitmaps[0].Data = totalData;
             return bitmaps[0];
+        }
+
+        private static int GetBitmapResourceHandle(Bitmap bitmap, int index, CacheVersion version)
+        {
+            var image = bitmap.Images[index];
+            int handle = 0;
+            int resourceIndex = 0;
+
+            List<Bitmap.BitmapResource> resources = null;
+
+            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+            {
+                resourceIndex = image.InterleavedTextureIndex1;
+                switch (version)
+                {
+                    case CacheVersion.Halo3Retail:
+                    case CacheVersion.Halo3ODST:
+                        resources = bitmap.InterleavedResourcesOld;
+                        break;
+                    case CacheVersion.HaloReach:
+                        resources = bitmap.InterleavedResourcesNew;
+                        break;
+                }
+            }
+            else
+            {
+                resourceIndex = index;
+                resources = bitmap.Resources;
+            }
+
+            switch (version)
+            {
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                    handle = resources[resourceIndex].ZoneAssetHandleOld;
+                    break;
+                case CacheVersion.HaloReach:
+                    handle = resources[resourceIndex].ZoneAssetHandleNew;
+                    break;
+
+                default:
+                    throw new Exception($"Unsupported cache version {version}");
+            }
+
+            return handle;
         }
 
         private static BitmapTextureInteropResource GetResourceDefinition(CacheFile cache, int handle)

@@ -73,6 +73,7 @@ public class BlamBitmap
     }
  
 }
+
 public class BaseBitmap
 {
     public int Height;
@@ -138,6 +139,17 @@ public class BaseBitmap
         }
     }
 
+    public BaseBitmap(BaseBitmap bitmap)
+    {
+        Height = bitmap.Height;
+        Width = bitmap.Width;
+        Depth = bitmap.Depth;
+        MipMapCount = bitmap.MipMapCount;
+        Type = bitmap.Type;
+        Flags = bitmap.Flags;
+        UpdateFormat(bitmap.Format);
+    }
+
     public void UpdateFormat(BitmapFormat format)
     {
         Format = format;
@@ -189,6 +201,15 @@ public class XboxBitmap : BaseBitmap
         Offset = 0;
     }
 
+    public XboxBitmap(XboxBitmap bitmap) : base(bitmap)
+    {
+        UpdateFormat(bitmap.Format);
+        MultipleOfBlockDimension = Width % BlockDimension == 0 && Height % BlockDimension == 0;
+        NotExact = Width != VirtualWidth || Height != VirtualHeight;
+        InTile = Width <= MinimalBitmapSize / 2 && Height <= MinimalBitmapSize / 2;
+        Offset = 0;
+    }
+
     public new void UpdateFormat(BitmapFormat format)
     {
         Format = format;
@@ -200,6 +221,8 @@ public class XboxBitmap : BaseBitmap
         VirtualHeight = BitmapUtils.GetVirtualSize(Height, MinimalBitmapSize);
         TilePitch = (int)(VirtualWidth * BlockDimension / CompressionFactor);
         Pitch = (int)(NearestWidth * BlockDimension / CompressionFactor);
+        NearestHeight = BlockDimension * ((Height + (BlockDimension - 1)) / BlockDimension);
+        NearestWidth = BlockDimension * ((Width + (BlockDimension - 1)) / BlockDimension);
     }
 
     public XboxBitmap ShallowCopy()
@@ -207,4 +230,31 @@ public class XboxBitmap : BaseBitmap
         return (XboxBitmap)this.MemberwiseClone();
     }
     
+}
+
+public class XboxMipMap : XboxBitmap
+{
+    public XboxMipMap (XboxBitmap bitmap, int width, int height, int offset, byte[] data) : base(bitmap)
+    {
+        Height = height;
+        Width = width;
+        Offset = offset;
+        Data = data;
+        UpdateFormat(bitmap.Format);
+    }
+
+    public new void UpdateFormat(BitmapFormat format)
+    {
+        Format = format;
+        BlockSize = BitmapFormatUtils.GetBlockSize(Format);
+        BlockDimension = BitmapFormatUtils.GetBlockDimension(Format);
+        CompressionFactor = BitmapFormatUtils.GetCompressionFactor(Format);
+        MinimalBitmapSize = BitmapFormatUtils.GetMinimalVirtualSize(Format);
+        VirtualWidth = BitmapUtils.GetVirtualSize(Width, MinimalBitmapSize);
+        VirtualHeight = BitmapUtils.GetVirtualSize(Height, MinimalBitmapSize);
+        TilePitch = (int)(VirtualWidth * BlockDimension / CompressionFactor);
+        Pitch = (int)(NearestWidth * BlockDimension / CompressionFactor);
+        NearestHeight = BlockDimension * ((Height + (BlockDimension - 1)) / BlockDimension);
+        NearestWidth = BlockDimension * ((Width + (BlockDimension - 1)) / BlockDimension);
+    }
 }

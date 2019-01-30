@@ -70,14 +70,53 @@ namespace TagTool.Bitmaps
 
         public static int GetXboxMipMapSize(XboxBitmap xboxBitmap)
         {
-            var minDim = xboxBitmap.MinimalBitmapSize;
-            var largestSide = Math.Max(xboxBitmap.Width, xboxBitmap.Height);
-            if(largestSide / 2 <= minDim / 2)
+            if (xboxBitmap.MipMapCount <= 1)
+                return 0;
+            else
             {
-                return (int)(minDim * minDim / xboxBitmap.CompressionFactor);
-            }
+                var minDim = xboxBitmap.BlockDimension;
+                var minVirtualSize = xboxBitmap.MinimalBitmapSize;
+                var totalSize = 0;
 
-            return -1;
+                var mipMapCount = xboxBitmap.MipMapCount - 1;
+
+                var curWidth = xboxBitmap.Width;
+                var curHeight = xboxBitmap.Height;
+
+                while (mipMapCount != 0)
+                {
+                    var nextMipWidth = NextNearestSize(curWidth, minDim);
+                    var nextMipHeight = NextNearestSize(curHeight, minDim);
+
+                    // mips are contained in a single image
+                    if (nextMipWidth <= minVirtualSize / 2 && nextMipHeight <= minVirtualSize / 2)
+                    {
+                        totalSize += (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
+                        break;
+                    }
+                    else
+                    {
+                        totalSize += (int)(nextMipHeight * nextMipWidth / xboxBitmap.CompressionFactor);
+                        curWidth = nextMipWidth;
+                        curHeight = nextMipHeight;
+                        mipMapCount--;
+                    }
+
+                }
+
+                switch (xboxBitmap.Type)
+                {
+                    case BitmapType.CubeMap:
+                        totalSize *= 6;
+                        break;
+                    case BitmapType.Texture3D:
+                    case BitmapType.Array:
+                        totalSize *= xboxBitmap.Depth;
+                        break;
+                }
+
+                return totalSize;
+            }  
         }
 
         public static int GetXboxMipMapSize(Bitmap.Image image)
@@ -110,16 +149,10 @@ namespace TagTool.Bitmaps
 
         }
 
-        public static int GetInterleavedOffset(int interleavedIndex, XboxBitmap bitmap)
+        public static int NextNearestSize(int curSize, int minSize)
         {
-            if(interleavedIndex == 0)
-                return 0;
-            else{
-                int offset = 0;
-
-                return offset;
-            }
+            return minSize * ((curSize/2 + (minSize - 1)) / minSize);
         }
-
+        
     }
 }
