@@ -46,7 +46,8 @@ namespace TagTool.Bitmaps.DDS
 
         public DDSHeader(BaseBitmap image)
         {
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipMapCount, image.Format, image.Type, image.Flags);
+            var mipMapCount = image.MipMapCount != 0 ? (1 + image.MipMapCount) : 0;
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type, image.Flags);
         }
 
 

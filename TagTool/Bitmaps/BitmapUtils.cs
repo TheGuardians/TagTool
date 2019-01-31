@@ -89,14 +89,17 @@ namespace TagTool.Bitmaps
                     var nextMipHeight = NextNearestSize(curHeight, minDim);
 
                     // mips are contained in a single image
-                    if (nextMipWidth <= minVirtualSize / 2 && nextMipHeight <= minVirtualSize / 2)
+                    if (nextMipWidth < minVirtualSize / 2 && nextMipHeight < minVirtualSize / 2)
                     {
                         totalSize += (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
                         break;
                     }
                     else
                     {
-                        totalSize += (int)(nextMipHeight * nextMipWidth / xboxBitmap.CompressionFactor);
+                        var virtualHeight = GetVirtualSize(nextMipHeight, xboxBitmap.MinimalBitmapSize);
+                        var virtualWidth = GetVirtualSize(nextMipWidth, xboxBitmap.MinimalBitmapSize);
+
+                        totalSize += (int)(virtualHeight * virtualWidth / xboxBitmap.CompressionFactor);
                         curWidth = nextMipWidth;
                         curHeight = nextMipHeight;
                         mipMapCount--;

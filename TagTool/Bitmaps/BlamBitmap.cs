@@ -252,9 +252,12 @@ public class XboxMipMap : XboxBitmap
         MinimalBitmapSize = BitmapFormatUtils.GetMinimalVirtualSize(Format);
         VirtualWidth = BitmapUtils.GetVirtualSize(Width, MinimalBitmapSize);
         VirtualHeight = BitmapUtils.GetVirtualSize(Height, MinimalBitmapSize);
-        TilePitch = (int)(VirtualWidth * BlockDimension / CompressionFactor);
-        Pitch = (int)(NearestWidth * BlockDimension / CompressionFactor);
         NearestHeight = BlockDimension * ((Height + (BlockDimension - 1)) / BlockDimension);
         NearestWidth = BlockDimension * ((Width + (BlockDimension - 1)) / BlockDimension);
+        TilePitch = (int)(VirtualWidth * BlockDimension / CompressionFactor);
+        Pitch = (int)(NearestWidth * BlockDimension / CompressionFactor);
+        MultipleOfBlockDimension = Width % BlockDimension == 0 && Height % BlockDimension == 0;
+        NotExact = Width != VirtualWidth || Height != VirtualHeight;
+        InTile = Width <= MinimalBitmapSize / 2 && Height <= MinimalBitmapSize / 2;
     }
 }

@@ -188,21 +188,10 @@ namespace TagTool.Bitmaps.Converter
             List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
             foreach (var bitmap in xboxBitmaps)
             {
-                
                 BaseBitmap finalBitmap = ExtractImage(bitmap);
                 ConvertImage(finalBitmap);
                 FlipImage(finalBitmap, image);
                 finalBitmaps.Add(finalBitmap);
-                finalBitmap.MipMapCount = 0;
-                
-                /*   
-                //   temp code to test cubemaps
-                finalBitmaps.Add((BaseBitmap)bitmap);
-                FlipImage(bitmap, image);
-                bitmap.MipMapCount = 0;
-                bitmap.Height = 128;
-                bitmap.Width = 128;
-                */
             }
 
             //
@@ -210,14 +199,23 @@ namespace TagTool.Bitmaps.Converter
             //
 
             List<XboxMipMap> xboxMipMaps = new List<XboxMipMap>();
-            
+            List<BaseBitmap> finalMipMaps = new List<BaseBitmap>();
             if(xboxBitmap.MipMapCount > 1)
             {
                 xboxMipMaps = ParseMipMaps(xboxBitmap, image, mipMapData, mipMapSize);
-
+                foreach(var mipmap in xboxMipMaps)
+                {
+                    BaseBitmap finalMipMap = ExtractImage(mipmap);
+                    ConvertImage(finalMipMap);
+                    FlipImage(finalMipMap, image);
+                    finalMipMaps.Add(finalMipMap); 
+                }
             }
-
-            return RebuildBitmap(finalBitmaps);
+            else
+            {
+                finalMipMaps = null;
+            }
+            return RebuildBitmap(finalBitmaps, finalMipMaps);
         }
 
         private static List<XboxBitmap> ParseImages(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] imageData, int bitmapSize)
@@ -298,19 +296,19 @@ namespace TagTool.Bitmaps.Converter
 
                 // split mip maps into sub images for conversion
 
-                var curWidth = xboxBitmap.Width;
-                var curHeight = xboxBitmap.Height;
+                var prevWidth = xboxBitmap.Width;
+                var prevHeight = xboxBitmap.Height;
                 var mipMapCount = xboxBitmap.MipMapCount - 1;
                 var mipMapDataOffset = 0;
 
                 while (mipMapCount != 0)
                 {
-                    var nextMipWidth = BitmapUtils.NextNearestSize(curWidth, xboxBitmap.BlockDimension);
-                    var nextMipHeight = BitmapUtils.NextNearestSize(curHeight, xboxBitmap.BlockDimension);
+                    var currentMipWidth = BitmapUtils.NextNearestSize(prevWidth, xboxBitmap.BlockDimension);
+                    var currentMipHeight = BitmapUtils.NextNearestSize(prevHeight, xboxBitmap.BlockDimension);
                     var minVirtualSize = xboxBitmap.MinimalBitmapSize;
 
                     // mips are contained in a single image
-                    if (nextMipWidth <= minVirtualSize / 2 && nextMipHeight <= minVirtualSize / 2)
+                    if (currentMipWidth < minVirtualSize / 2 && currentMipHeight < minVirtualSize / 2)
                     {
                         int size = (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
                         byte[] sharedData = new byte[size];
@@ -319,33 +317,44 @@ namespace TagTool.Bitmaps.Converter
                         if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
                             sharedData = BitmapDecoder.ConvertToLinearTexture(sharedData, minVirtualSize, minVirtualSize, xboxBitmap.Format);
 
-                        int sharedMipMapCount = (xboxBitmap.MipMapCount - 1) - mipMapCount;
+                        int sharedMipMapCount = mipMapCount;
 
                         // create xboxMipMaps for each mipmap in the shared data
                         for(int j = 0; j < sharedMipMapCount; j++)
                         {
-                            // compute the offsets for each level
-                            int offset = 0; // TODO
+                            int offset = 0;
 
-                            mipMaps.Add(new XboxMipMap(xboxBitmap, curWidth, curHeight, offset, sharedData));
-                            curWidth = BitmapUtils.NextNearestSize(curWidth, xboxBitmap.BlockDimension);
-                            curHeight = BitmapUtils.NextNearestSize(curHeight, xboxBitmap.BlockDimension);
+                            if (sharedMipMapCount == 1)
+                                offset = 0;
+                            else
+                            {
+                                // largest mipmap is 
+                                offset = 0;
+                            }
+
+
+                            mipMaps.Add(new XboxMipMap(xboxBitmap, currentMipWidth, currentMipHeight, offset, sharedData));
+                            prevWidth = BitmapUtils.NextNearestSize(currentMipWidth, xboxBitmap.BlockDimension);
+                            prevHeight = BitmapUtils.NextNearestSize(currentMipHeight, xboxBitmap.BlockDimension);
                         }
                         break;
                     }
                     else
                     {
-                        int size = (int)(curWidth * curHeight / xboxBitmap.CompressionFactor);
+                        var curVirtualWidth = BitmapUtils.GetVirtualSize(currentMipWidth, xboxBitmap.MinimalBitmapSize);
+                        var curVirtualHeight = BitmapUtils.GetVirtualSize(currentMipHeight, xboxBitmap.MinimalBitmapSize);
+
+                        int size = (int)(curVirtualWidth * curVirtualHeight / xboxBitmap.CompressionFactor);
                         byte[] singleData = new byte[size];
                         Array.Copy(mipMapData, mipMapDataOffset, singleData, 0, size);
 
                         if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            singleData = BitmapDecoder.ConvertToLinearTexture(singleData, curWidth, curHeight, xboxBitmap.Format);
+                            singleData = BitmapDecoder.ConvertToLinearTexture(singleData, curVirtualWidth, curVirtualHeight, xboxBitmap.Format);
 
-                        mipMaps.Add(new XboxMipMap(xboxBitmap, curWidth, curHeight, 0, singleData));
+                        mipMaps.Add(new XboxMipMap(xboxBitmap, currentMipWidth, currentMipHeight, 0, singleData));
                         mipMapDataOffset += size;
-                        curWidth = nextMipWidth;
-                        curHeight = nextMipHeight;
+                        prevWidth = currentMipWidth;
+                        prevHeight = currentMipHeight;
                         mipMapCount--;
                     }
                 }
@@ -511,9 +520,41 @@ namespace TagTool.Bitmaps.Converter
             }
         }
 
-        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
+        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps, List<BaseBitmap> mipMaps)
         {
+            int mipCount = mipMaps.Count / bitmaps.Count;   // Each image always has the same number of mipmaps (applies to cubemaps and arrays/texture3D)
+
             int totalSize = 0;
+
+            for(int i = 0; i < bitmaps.Count; i++)
+            {
+                totalSize += bitmaps[i].Data.Length;
+                for(int j =0; j< mipCount; j++)
+                {
+                    totalSize += mipMaps[i * mipCount + j].Data.Length;
+                }
+            }
+
+            byte[] totalData = new byte[totalSize];
+            int currentPos = 0;
+
+            for (int i = 0; i < bitmaps.Count; i++)
+            {
+                var bitmap = bitmaps[i];
+
+                Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
+                currentPos += bitmap.Data.Length;
+
+                for (int j = 0; j < mipCount; j++)
+                {
+                    var mipMap = mipMaps[i * mipCount + j];
+                    Array.Copy(mipMap.Data, 0, totalData, currentPos, mipMap.Data.Length);
+                    currentPos += mipMap.Data.Length;
+                }
+            }
+
+
+            /*
             foreach (var b in bitmaps)
                 totalSize += b.Data.Length;
 
@@ -526,8 +567,10 @@ namespace TagTool.Bitmaps.Converter
                 Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
                 currentPos += bitmap.Data.Length;
             }
+            */
 
             bitmaps[0].Data = totalData;
+            bitmaps[0].MipMapCount = mipCount;
             return bitmaps[0];
         }
 
