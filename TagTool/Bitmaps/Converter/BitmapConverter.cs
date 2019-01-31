@@ -136,7 +136,7 @@ namespace TagTool.Bitmaps.Converter
                 {
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, 0, true);
                     /*
-                    imageData = cache.GetPrimaryResource(handle, mipMapSize, 114688);
+                    imageData = cache.GetPrimaryResource(handle, mipMapSize, 114688, true);
                     xboxBitmap.MipMapCount = 0;
                     xboxBitmap.Width = 128;
                     xboxBitmap.Height = 128;
@@ -319,26 +319,24 @@ namespace TagTool.Bitmaps.Converter
                             sharedData = BitmapDecoder.ConvertToLinearTexture(sharedData, minVirtualSize, minVirtualSize, xboxBitmap.Format);
 
                         int sharedMipMapCount = mipMapCount;
-                        int curOffset = 0;
-                        // create xboxMipMaps for each mipmap in the shared data
-                        for(int j = 0; j < sharedMipMapCount; j++)
-                        {
-                            int offset = 0;
+                        int curOffset = (int)(minVirtualSize / 8 * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
+                        
 
-                            if (sharedMipMapCount == 1)
-                                offset = 0;
+                        // create xboxMipMaps for each mipmap in the shared data
+                        for (int j = 0; j < sharedMipMapCount; j++)
+                        {
+                            int offset = curOffset;
+
+                            if (curOffset < xboxBitmap.BlockSize)
+                            {
+                                curOffset = (int)(minVirtualSize / 2 * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
+                                offset = curOffset;
+                                curOffset = 2 * offset;
+                            }
                             else
                             {
-                                var curPitch = (int)(currentMipWidth * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
-
-                                if (j != 0)
-                                {
-                                    offset = curOffset;
-                                    curOffset += curPitch;
-                                }
-                                curOffset += curPitch;
+                                curOffset -= offset / 2;
                             }
-
 
                             mipMaps.Add(new XboxMipMap(xboxBitmap, currentMipWidth, currentMipHeight, offset, sharedData));
                             prevWidth = BitmapUtils.NextNearestSize(currentMipWidth, xboxBitmap.BlockDimension);
