@@ -135,6 +135,13 @@ namespace TagTool.Bitmaps.Converter
                 if (HasSecondaryResource(cache, handle))
                 {
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, 0, true);
+                    /*
+                    imageData = cache.GetPrimaryResource(handle, mipMapSize, 114688);
+                    xboxBitmap.MipMapCount = 0;
+                    xboxBitmap.Width = 128;
+                    xboxBitmap.Height = 128;
+                    xboxBitmap.UpdateFormat(xboxBitmap.Format);
+                    */
                     if (xboxBitmap.MipMapCount > 1)
                     {
                         if(HasPrimaryResource(cache, handle))
@@ -155,9 +162,6 @@ namespace TagTool.Bitmaps.Converter
                     // Bitmap doesn't have a secondary resource means either no mipmaps or everything is packed in the primary resource.
                     if(xboxBitmap.MipMapCount > 1)
                     {
-                        // mipmaps are the first in that kind of bitmap, then the full texture.
-                        // compute offset in the bitmap, most likely will be one that is not exact.
-
                         imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0, true);
 
@@ -290,9 +294,6 @@ namespace TagTool.Bitmaps.Converter
             {
                 byte[] data = new byte[singleSize];
                 Array.Copy(mipMapData, (i * singleSize), data, 0, singleSize);
-                
-
-                
 
                 // split mip maps into sub images for conversion
 
@@ -307,8 +308,8 @@ namespace TagTool.Bitmaps.Converter
                     var currentMipHeight = BitmapUtils.NextNearestSize(prevHeight, xboxBitmap.BlockDimension);
                     var minVirtualSize = xboxBitmap.MinimalBitmapSize;
 
-                    // mips are contained in a single image
-                    if (currentMipWidth < minVirtualSize / 2 && currentMipHeight < minVirtualSize / 2)
+                    // mips are contained in a single image, stored in reverse order. 
+                    if (currentMipWidth < minVirtualSize / 4 && currentMipHeight < minVirtualSize / 4)
                     {
                         int size = (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
                         byte[] sharedData = new byte[size];
@@ -318,7 +319,7 @@ namespace TagTool.Bitmaps.Converter
                             sharedData = BitmapDecoder.ConvertToLinearTexture(sharedData, minVirtualSize, minVirtualSize, xboxBitmap.Format);
 
                         int sharedMipMapCount = mipMapCount;
-
+                        int curOffset = 0;
                         // create xboxMipMaps for each mipmap in the shared data
                         for(int j = 0; j < sharedMipMapCount; j++)
                         {
@@ -328,8 +329,14 @@ namespace TagTool.Bitmaps.Converter
                                 offset = 0;
                             else
                             {
-                                // largest mipmap is 
-                                offset = 0;
+                                var curPitch = (int)(currentMipWidth * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
+
+                                if (j != 0)
+                                {
+                                    offset = curOffset;
+                                    curOffset += curPitch;
+                                }
+                                curOffset += curPitch;
                             }
 
 
@@ -522,55 +529,58 @@ namespace TagTool.Bitmaps.Converter
 
         private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps, List<BaseBitmap> mipMaps)
         {
-            int mipCount = mipMaps.Count / bitmaps.Count;   // Each image always has the same number of mipmaps (applies to cubemaps and arrays/texture3D)
-
             int totalSize = 0;
+            if ( mipMaps != null && mipMaps.Count > 0){
+                int mipCount = mipMaps.Count / bitmaps.Count;   // Each image always has the same number of mipmaps (applies to cubemaps and arrays/texture3D)
 
-            for(int i = 0; i < bitmaps.Count; i++)
-            {
-                totalSize += bitmaps[i].Data.Length;
-                for(int j =0; j< mipCount; j++)
+                
+
+                for (int i = 0; i < bitmaps.Count; i++)
                 {
-                    totalSize += mipMaps[i * mipCount + j].Data.Length;
+                    totalSize += bitmaps[i].Data.Length;
+                    for (int j = 0; j < mipCount; j++)
+                    {
+                        totalSize += mipMaps[i * mipCount + j].Data.Length;
+                    }
                 }
-            }
 
-            byte[] totalData = new byte[totalSize];
-            int currentPos = 0;
+                byte[] totalData = new byte[totalSize];
+                int currentPos = 0;
 
-            for (int i = 0; i < bitmaps.Count; i++)
-            {
-                var bitmap = bitmaps[i];
-
-                Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
-                currentPos += bitmap.Data.Length;
-
-                for (int j = 0; j < mipCount; j++)
+                for (int i = 0; i < bitmaps.Count; i++)
                 {
-                    var mipMap = mipMaps[i * mipCount + j];
-                    Array.Copy(mipMap.Data, 0, totalData, currentPos, mipMap.Data.Length);
-                    currentPos += mipMap.Data.Length;
+                    var bitmap = bitmaps[i];
+
+                    Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
+                    currentPos += bitmap.Data.Length;
+
+                    for (int j = 0; j < mipCount; j++)
+                    {
+                        var mipMap = mipMaps[i * mipCount + j];
+                        Array.Copy(mipMap.Data, 0, totalData, currentPos, mipMap.Data.Length);
+                        currentPos += mipMap.Data.Length;
+                    }
                 }
+                bitmaps[0].Data = totalData;
+                bitmaps[0].MipMapCount = mipCount;
             }
-
-
-            /*
-            foreach (var b in bitmaps)
-                totalSize += b.Data.Length;
-
-            byte[] totalData = new byte[totalSize];
-            int currentPos = 0;
-
-            for (int i = 0; i < bitmaps.Count; i++)
+            else
             {
-                var bitmap = bitmaps[i];
-                Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
-                currentPos += bitmap.Data.Length;
-            }
-            */
+                foreach (var b in bitmaps)
+                    totalSize += b.Data.Length;
 
-            bitmaps[0].Data = totalData;
-            bitmaps[0].MipMapCount = mipCount;
+                byte[] totalData = new byte[totalSize];
+                int currentPos = 0;
+
+                for (int i = 0; i < bitmaps.Count; i++)
+                {
+                    var bitmap = bitmaps[i];
+                    Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
+                    currentPos += bitmap.Data.Length;
+                }
+                bitmaps[0].Data = totalData;
+            }
+
             return bitmaps[0];
         }
 
