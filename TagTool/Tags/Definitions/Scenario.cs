@@ -106,42 +106,55 @@ namespace TagTool.Tags.Definitions
         public List<UnknownBlock> Unknown34;
         public List<UnknownBlock> Unknown35;
         public List<UnknownBlock> Unknown36;
+
         public uint Unknown45;
         public uint Unknown46;
         public uint Unknown47;
+
         public uint Unknown48;
         public uint Unknown49;
         public uint Unknown50;
+
         public uint Unknown51;
         public uint Unknown52;
         public uint Unknown53;
+
         public uint Unknown54;
         public uint Unknown55;
         public uint Unknown56;
+
         public uint Unknown57;
         public uint Unknown58;
         public uint Unknown59;
+
         public uint Unknown60;
         public uint Unknown61;
         public uint Unknown62;
+
         public uint Unknown63;
         public uint Unknown64;
         public uint Unknown65;
+
         public uint Unknown66;
         public uint Unknown67;
         public uint Unknown68;
+
         public uint Unknown69;
         public uint Unknown70;
         public uint Unknown71;
+
         public uint Unknown72;
         public uint Unknown73;
         public uint Unknown74;
+
         public uint Unknown75;
         public uint Unknown76;
         public uint Unknown77;
+
         public uint Unknown78;
         public uint Unknown79;
         public uint Unknown80;
+
         public List<Decal> Decals;
         public List<TagReferenceBlock> DecalPalette;
         public List<TagReferenceBlock> DetailObjectCollectionPalette;
@@ -153,13 +166,17 @@ namespace TagTool.Tags.Definitions
         public List<SquadPatrol> SquadPatrols;
         public List<MissionScene> MissionScenes;
         public List<TagReferenceBlock> CharacterPalette;
+
         public uint Unknown88;
         public uint Unknown89;
         public uint Unknown90;
+
         public List<AiPathfindingDatum> AiPathfindingData;
+
         public uint Unknown91;
         public uint Unknown92;
         public uint Unknown93;
+
         public byte[] ScriptStrings;
         public List<Script> Scripts;
         public List<ScriptGlobal> Globals;
@@ -1436,20 +1453,26 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown2;
                 public uint Unknown3;
                 public uint Unknown4;
+
                 public uint Unknown5;
                 public uint Unknown6;
                 public uint Unknown7;
                 public uint Unknown8;
+
                 public uint Unknown9;
                 public uint Unknown10;
                 public uint Unknown11;
                 public uint Unknown12;
+
                 public uint Unknown13;
                 public uint Unknown14;
+
                 public uint Unknown15;
                 public uint Unknown16;
+
                 public uint Unknown17;
                 public uint Unknown18;
+
                 public uint Unknown19;
                 public uint Unknown20;
             }
@@ -1481,6 +1504,7 @@ namespace TagTool.Tags.Definitions
             public short BeginZoneSet;
             public short TriggerVolume;
             public short CommitZoneSet;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short Unknown2;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -3224,9 +3248,11 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
 
                 public short HierarchyLevelFrom100;
+
                 public short PreviousRole;
                 public short NextRole;
                 public short ParentRole;
+
                 public List<ActivationScriptBlock> ActivationScript;
                 public short ScriptIndex;
 
@@ -3236,7 +3262,7 @@ namespace TagTool.Tags.Definitions
                 public short LifetimeCount;
 
                 public FilterFlagsValue FilterFlags;
-                public FilterValue Filter;
+                public TaskFilter Filter;
 
                 public Bounds<short> Capacity;
                 
@@ -3385,29 +3411,121 @@ namespace TagTool.Tags.Definitions
                     Exclusive = 1 << 0
                 }
 
-                public enum FilterValue : short
+                [TagStructure(Size = 0x2)]
+                public class TaskFilter : TagStructure
                 {
-                    None,
-                    Leader,
-                    NoLeader,
-                    Arbiter,
-                    Player,
-                    Infantry = 7,
-                    Flood = 16,
-                    Sentinel,
-                    Jackal = 21,
-                    Grunt,
-                    Hunter,
-                    Marine,
-                    FloodCombat,
-                    FloodCarrier,
-                    Brute = 28,
-                    Drone = 30,
-                    FloodPureform,
-                    Warthog = 34,
-                    Wraith = 39,
-                    Phantom,
-                    BruteChopper = 44,
+                    [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                    public Halo3RetailValue Halo3Retail;
+
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    public Halo3OdstValue Halo3Odst;
+
+                    public enum Halo3RetailValue : short
+                    {
+                        None,
+                        Leader,
+                        NoLeader,
+                        Arbiter,
+                        Player,
+                        SightedPlayer,
+                        SightedEnemy,
+                        Infantry,
+                        StrengthGreaterThanOneQuarter,
+                        StrengthGreaterThanOneHalf,
+                        StrengthGreaterThanThreeQuarters,
+                        StrengthLessThanOneQuarter,
+                        StrengthLessThanOneHalf,
+                        StrengthLessThanThreeQuarters,
+                        HumanTeam,
+                        CovenantTeam,
+                        FloodTeam,
+                        SentinelTeam,
+                        ProphetTeam,
+                        GuiltyTeam,
+                        Elite,
+                        Jackal,
+                        Grunt,
+                        Hunter,
+                        Marine,
+                        FloodCombat,
+                        FloodCarrier,
+                        Sentinel,
+                        Brute,
+                        Prophet,
+                        Bugger,
+                        FloodPureform,
+                        Guardian,
+                        Sniper,
+                        Vehicle,
+                        Scorpion,
+                        Ghost,
+                        Warthog,
+                        Spectre,
+                        Wraith,
+                        Phantom,
+                        Pelican,
+                        Banshee,
+                        Hornet,
+                        BruteChopper,
+                        Mauler,
+                        Mongoose
+                    }
+
+                    public enum Halo3OdstValue : short
+                    {
+                        None,
+                        Leader,
+                        NoLeader,
+                        Arbiter,
+                        Player,
+                        InCombat,
+                        SightedPlayer,
+                        SightedEnemy,
+                        Disengaged,
+                        Infantry,
+                        HasAnEngineer,
+                        StrengthGreaterThanOneQuarter,
+                        StrengthGreaterThanOneHalf,
+                        StrengthGreaterThanThreeQuarters,
+                        StrengthLessThanOneQuarter,
+                        StrengthLessThanOneHalf,
+                        StrengthLessThanThreeQuarters,
+                        HumanTeam,
+                        CovenantTeam,
+                        FloodTeam,
+                        SentinelTeam,
+                        ProphetTeam,
+                        GuiltyTeam,
+                        Elite,
+                        Jackal,
+                        Grunt,
+                        Hunter,
+                        Marine,
+                        FloodCombat,
+                        FloodCarrier,
+                        Sentinel,
+                        Brute,
+                        Prophet,
+                        Bugger,
+                        FloodPureform,
+                        Guardian,
+                        Engineer,
+                        Sniper,
+                        Rifle,
+                        Vehicle,
+                        Scorpion,
+                        Ghost,
+                        Warthog,
+                        Spectre,
+                        Wraith,
+                        Phantom,
+                        Pelican,
+                        Banshee,
+                        Hornet,
+                        BruteChopper,
+                        Mauler,
+                        Mongoose
+                    }
                 }
 
                 public enum AttitudeValue : short

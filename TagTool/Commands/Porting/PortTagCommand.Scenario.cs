@@ -445,7 +445,10 @@ namespace TagTool.Commands.Porting
                 {
                     foreach (var task in aiObjective.Tasks)
                     {
-                        //task.RuntimeFlags |= Scenario.AiObjective.Task.RuntimeFlagsValue.AreaConnectivityValid;
+                        task.RuntimeFlags = Scenario.AiObjective.Task.RuntimeFlagsValue.AreaConnectivityValid;
+
+                        if (!Enum.TryParse(task.Filter.Halo3Retail.ToString(), out task.Filter.Halo3Odst))
+                            throw new NotSupportedException(task.Filter.Halo3Retail.ToString());
 
                         foreach (var taskArea in task.Areas)
                         {
