@@ -160,10 +160,12 @@ namespace TagTool.Commands.Editing
 
         private object CreateElement(Type elementType)
         {
-            var element = (TagStructure)Activator.CreateInstance(elementType);
+            var instance = Activator.CreateInstance(elementType);
 
-            if (!Attribute.IsDefined(elementType, typeof(TagStructureAttribute)))
-                throw new ArgumentException(nameof(elementType), new TypeAccessException(elementType.FullName));
+            if (!Attribute.IsDefined(elementType, typeof(TagStructureAttribute)) || !elementType.IsSubclassOf(typeof(TagStructure)))
+                return instance;
+
+            var element = (TagStructure)instance;
 
             foreach (var tagFieldInfo in element.GetTagFieldEnumerable(CacheContext.Version))
             {

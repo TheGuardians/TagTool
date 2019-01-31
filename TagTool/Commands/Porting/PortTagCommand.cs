@@ -521,7 +521,11 @@ namespace TagTool.Commands.Porting
 					mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
 					break;
 
-				case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
+                case RenderModel mode when blamTag.Name == @"levels\multi\isolation\sky\sky":
+                    mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
+                    break;
+
+                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
 					blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);
 					break;
 
