@@ -84,7 +84,9 @@ namespace TagTool.Bitmaps.DDS
         {
             reader.Format = EndianFormat.LittleEndian;
 
-            if (reader.ReadInt32() != 0x20534444 && reader.ReadInt32() != Size)
+            var tag = reader.ReadInt32();
+            var size = reader.ReadInt32();
+            if (tag != 0x20534444 && size != Size)
                 return false;
             else
             {
@@ -343,7 +345,8 @@ namespace TagTool.Bitmaps.DDS
         public override bool Read(EndianReader reader)
         {
             reader.Format = EndianFormat.LittleEndian;
-            if(reader.ReadInt32() != Size)
+            var size = reader.ReadInt32();
+            if (size != Size)
                 return false;
             else
             {

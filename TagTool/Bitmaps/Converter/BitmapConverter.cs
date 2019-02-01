@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Bitmaps.DDS;
@@ -73,7 +74,7 @@ namespace TagTool.Bitmaps.Converter
                 }
                 else
                 {
-                    imageData = cache.GetPrimaryResource(handle, bitmapSize, 0);
+                    imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
                     if(xboxBitmap.MipMapCount > 1)
                     {
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, bitmapSize);
@@ -130,14 +131,13 @@ namespace TagTool.Bitmaps.Converter
                 var resourceDef = GetResourceDefinition(cache, handle);
                 xboxBitmap = new XboxBitmap(resourceDef, image);
                 bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
-                mipMapSize = BitmapUtils.GetXboxMipMapSize(xboxBitmap);
 
                 if (HasSecondaryResource(cache, handle))
                 {
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, 0, true);
                     /*
                     imageData = cache.GetPrimaryResource(handle, mipMapSize, 114688, true);
-                    xboxBitmap.MipMapCount = 0;
+                    
                     xboxBitmap.Width = 128;
                     xboxBitmap.Height = 128;
                     xboxBitmap.UpdateFormat(xboxBitmap.Format);
@@ -162,17 +162,26 @@ namespace TagTool.Bitmaps.Converter
                     // Bitmap doesn't have a secondary resource means either no mipmaps or everything is packed in the primary resource.
                     if(xboxBitmap.MipMapCount > 1)
                     {
-                        imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
+                        imageData = cache.GetPrimaryResource(handle, 2*bitmapSize, 0, true);
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0, true);
 
                         // Formula seems quite complex, small hack to make it work
                         if(xboxBitmap.BlockDimension == 4)
                         {
-                            xboxBitmap.Offset = xboxBitmap.TilePitch * xboxBitmap.BlockDimension;
+                            if(xboxBitmap.Width >= xboxBitmap.Height)
+                            {
+                                xboxBitmap.Offset = 4 * (int)(BitmapUtils.RoundSize(xboxBitmap.Height, 4) * xboxBitmap.VirtualWidth / xboxBitmap.CompressionFactor);
+                            }
+                            else
+                            {
+                                xboxBitmap.Offset = 4 * (int)(BitmapUtils.RoundSize(xboxBitmap.Width / 2, 4) * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
+                            }
+                            
                         }
                         else
                         {
                             xboxBitmap.Offset = (int)(xboxBitmap.Width * 4 / xboxBitmap.CompressionFactor);
+                            Console.WriteLine("WEIRD BITMAP");
                         }
                     }
                     else
@@ -187,39 +196,26 @@ namespace TagTool.Bitmaps.Converter
             //
             // Convert main bitmap
             //
+            xboxBitmap.MipMapCount = 0;
 
             List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
             List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
             foreach (var bitmap in xboxBitmaps)
             {
+                // extract bitmap from padded image
                 BaseBitmap finalBitmap = ExtractImage(bitmap);
+                // convert to PC format
                 ConvertImage(finalBitmap);
+                // flip data if required
                 FlipImage(finalBitmap, image);
+                // generate mipmaps
+                if(finalBitmap.MipMapCount > 0)
+                    GenerateMipMaps(finalBitmap);
+                
                 finalBitmaps.Add(finalBitmap);
             }
-
-            //
-            // Convert mipmaps
-            //
-
-            List<XboxMipMap> xboxMipMaps = new List<XboxMipMap>();
-            List<BaseBitmap> finalMipMaps = new List<BaseBitmap>();
-            if(xboxBitmap.MipMapCount > 1)
-            {
-                xboxMipMaps = ParseMipMaps(xboxBitmap, image, mipMapData, mipMapSize);
-                foreach(var mipmap in xboxMipMaps)
-                {
-                    BaseBitmap finalMipMap = ExtractImage(mipmap);
-                    ConvertImage(finalMipMap);
-                    FlipImage(finalMipMap, image);
-                    finalMipMaps.Add(finalMipMap); 
-                }
-            }
-            else
-            {
-                finalMipMaps = null;
-            }
-            return RebuildBitmap(finalBitmaps, finalMipMaps);
+            // build and return the final bitmap
+            return RebuildBitmap(finalBitmaps);
         }
 
         private static List<XboxBitmap> ParseImages(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] imageData, int bitmapSize)
@@ -269,113 +265,7 @@ namespace TagTool.Bitmaps.Converter
             }
             return xboxBitmaps;
         }
-
-        private static List<XboxMipMap> ParseMipMaps(XboxBitmap xboxBitmap, Bitmap.Image image, byte[] mipMapData, int mipMapSize)
-        {
-            List<XboxMipMap> mipMaps = new List<XboxMipMap>();
-            var imageCount = 0;
-            switch (image.Type)
-            {
-                case BitmapType.Texture2D:
-                    imageCount = 1;
-                    break;
-                case BitmapType.Texture3D:
-                case BitmapType.Array:
-                    imageCount = xboxBitmap.Depth;
-                    break;
-                case BitmapType.CubeMap:
-                    imageCount = 6;
-                    break;
-            }
-
-            var singleSize = mipMapSize / imageCount;
-
-            for(int i = 0; i < imageCount; i++)
-            {
-                byte[] data = new byte[singleSize];
-                Array.Copy(mipMapData, (i * singleSize), data, 0, singleSize);
-
-                // split mip maps into sub images for conversion
-
-                int currentMipMapCount = xboxBitmap.MipMapCount - 1;
-
-                int offset = 0;
-                int bitmapOffset = 0;
-
-                int currentWidth = xboxBitmap.Width;
-                int currentHeight = xboxBitmap.Height;
-
-                while (currentMipMapCount != 0)
-                {
-
-                    currentWidth /= 2;
-                    currentHeight /= 2;
-
-                    // compute the actual size of the data required for this mipmap by determining the xbox virtual size
-
-
-                    int xboxWidth = BitmapUtils.GetVirtualSize(currentWidth, xboxBitmap.MinimalBitmapSize);
-                    int xboxHeight = BitmapUtils.GetVirtualSize(currentHeight, xboxBitmap.MinimalBitmapSize);
-
-                    
-                    int xboxDataSize = (int)(xboxWidth * xboxHeight / xboxBitmap.CompressionFactor);
-                    byte[] currentMipMapData = new byte[xboxDataSize];
-
-                    Array.Copy(data, offset, currentMipMapData, 0, xboxDataSize);
-
-                    if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                        currentMipMapData = BitmapDecoder.ConvertToLinearTexture(currentMipMapData, xboxWidth, xboxHeight, xboxBitmap.Format);
-
-                    switch (xboxBitmap.BlockDimension)
-                    {
-                        case 4:
-                            if(currentWidth <16 && currentHeight < 16)
-                            {
-                                while(currentMipMapCount != 0)
-                                {
-                                    if(currentWidth == 1 || currentWidth == 2)
-                                    {
-                                        bitmapOffset = 2 * (int)(128 * 4 / xboxBitmap.CompressionFactor);
-                                    }
-                                    else
-                                    {
-                                        bitmapOffset /= 2;
-                                    }
-                                    Console.WriteLine(bitmapOffset);
-                                    XboxMipMap mipMap = new XboxMipMap(xboxBitmap, currentWidth, currentHeight, bitmapOffset, currentMipMapData);
-                                    mipMaps.Add(mipMap);
-                                    currentMipMapCount--;
-                                    currentWidth /= 2;
-                                    currentHeight /= 2;
-                                }
-                                break;
-                            }
-                            else
-                            {
-                                if(currentWidth == 16)
-                                {
-                                    bitmapOffset = (int)(16 * 4 / xboxBitmap.CompressionFactor);
-                                }
-
-                                XboxMipMap mipMap = new XboxMipMap(xboxBitmap, currentWidth, currentHeight, bitmapOffset, currentMipMapData);
-                                mipMaps.Add(mipMap);
-
-                                // prepare next mipmap level
-                                if(currentWidth != 16)
-                                {
-                                    offset += BitmapUtils.GetSingleMipMapSize(currentWidth, currentHeight, xboxBitmap.MinimalBitmapSize, xboxBitmap.CompressionFactor);
-                                }
-                                currentMipMapCount--;
-                            }
-                            break;
-                        case 1:
-                            throw new Exception("Unsupported block size");
-                    }
-                }
-            }
-            return mipMaps;
-        }
-
+        
         private static BaseBitmap ExtractImage(XboxBitmap bitmap)
         {
             if (bitmap.NotExact)
@@ -534,59 +424,22 @@ namespace TagTool.Bitmaps.Converter
             }
         }
 
-        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps, List<BaseBitmap> mipMaps)
+        private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
         {
             int totalSize = 0;
-            if ( mipMaps != null && mipMaps.Count > 0){
-                int mipCount = mipMaps.Count / bitmaps.Count;   // Each image always has the same number of mipmaps (applies to cubemaps and arrays/texture3D)
+            foreach (var b in bitmaps)
+                totalSize += b.Data.Length;
 
-                
+            byte[] totalData = new byte[totalSize];
+            int currentPos = 0;
 
-                for (int i = 0; i < bitmaps.Count; i++)
-                {
-                    totalSize += bitmaps[i].Data.Length;
-                    for (int j = 0; j < mipCount; j++)
-                    {
-                        totalSize += mipMaps[i * mipCount + j].Data.Length;
-                    }
-                }
-
-                byte[] totalData = new byte[totalSize];
-                int currentPos = 0;
-
-                for (int i = 0; i < bitmaps.Count; i++)
-                {
-                    var bitmap = bitmaps[i];
-
-                    Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
-                    currentPos += bitmap.Data.Length;
-
-                    for (int j = 0; j < mipCount; j++)
-                    {
-                        var mipMap = mipMaps[i * mipCount + j];
-                        Array.Copy(mipMap.Data, 0, totalData, currentPos, mipMap.Data.Length);
-                        currentPos += mipMap.Data.Length;
-                    }
-                }
-                bitmaps[0].Data = totalData;
-                bitmaps[0].MipMapCount = mipCount;
-            }
-            else
+            for (int i = 0; i < bitmaps.Count; i++)
             {
-                foreach (var b in bitmaps)
-                    totalSize += b.Data.Length;
-
-                byte[] totalData = new byte[totalSize];
-                int currentPos = 0;
-
-                for (int i = 0; i < bitmaps.Count; i++)
-                {
-                    var bitmap = bitmaps[i];
-                    Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
-                    currentPos += bitmap.Data.Length;
-                }
-                bitmaps[0].Data = totalData;
+                var bitmap = bitmaps[i];
+                Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
+                currentPos += bitmap.Data.Length;
             }
+            bitmaps[0].Data = totalData;
 
             return bitmaps[0];
         }
@@ -715,6 +568,138 @@ namespace TagTool.Bitmaps.Converter
             var segmentIndex = resourceEntry.SegmentIndex;
             var segment = cache.ResourceLayoutTable.Segments[segmentIndex];
             return segment.OptionalPageIndex != -1;
+        }
+
+        public static void GenerateMipMaps(BaseBitmap bitmap)
+        {
+            switch (bitmap.Format)
+            {
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                    GenerateCompressedMipMaps(bitmap);
+                    break;
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.A8:
+                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.V8U8:
+                    GenerateUncompressedMipMaps(bitmap);
+                    break;
+
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.R5G6B5:
+                case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A32B32G32R32F:
+                    bitmap.MipMapCount = 0;
+                    break;
+                default:
+                    throw new Exception($"Unsupported format for mipmap generation {bitmap.Format}");
+
+            }
+        }
+
+        public static void GenerateCompressedMipMaps(BaseBitmap bitmap)
+        {
+            string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
+
+            if (!Directory.Exists(@"Temp"))
+                Directory.CreateDirectory(@"Temp");
+
+            //Write input dds
+            var header = new DDSHeader(bitmap);
+
+            using (var outStream = File.Open(tempBitmap, FileMode.Create, FileAccess.Write))
+            {
+                header.Write(new EndianWriter(outStream));
+                var dataStream = new MemoryStream(bitmap.Data);
+                StreamUtil.Copy(dataStream, outStream, bitmap.Data.Length);
+            }
+
+            string args = " ";
+
+            switch (bitmap.Format)
+            {
+                case BitmapFormat.Dxn:
+                    args += "-bc5 ";
+                    break;
+
+                case BitmapFormat.Dxt1:
+                    args += "-bc1 ";
+                    break;
+                case BitmapFormat.Dxt3:
+                    args += "-bc2 ";
+                    break;
+                case BitmapFormat.Dxt5:
+                    args += "-bc3 ";
+                    break;
+
+                default:
+                    throw new Exception($"Unexpected bitmap format for compressed mipmap generation {bitmap.Format}");
+            }
+
+            args += $"{tempBitmap} {tempBitmap}";
+
+            ProcessStartInfo info = new ProcessStartInfo(@"Tools\nvcompress.exe")
+            {
+                Arguments = args,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+                RedirectStandardInput = false
+            };
+            Process nvcompress = Process.Start(info);
+            nvcompress.WaitForExit();
+
+            byte[] result;
+            using (var ddsStream = File.OpenRead(tempBitmap))
+            {
+                header.Read(new EndianReader(ddsStream));
+                var dataSize = (int)(ddsStream.Length - ddsStream.Position);
+
+                int mipMapCount = header.MipMapCount - 1;
+
+                // Remove lowest DXN mipmaps to prevent issues with D3D memory allocation.
+                if (bitmap.Format == BitmapFormat.Dxn)
+                {
+                    dataSize = BitmapUtils.RoundSize(bitmap.Width, 4) * BitmapUtils.RoundSize(bitmap.Height, 4);
+                    if (mipMapCount > 0)
+                    {
+                        if (bitmap.Format == BitmapFormat.Dxn)
+                        {
+                            var width = bitmap.Width;
+                            var height = bitmap.Height;
+
+                            dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+
+                            mipMapCount = 0;
+                            while ((width >= 8) && (height >= 8))
+                            {
+                                width /= 2;
+                                height /= 2;
+                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+                                mipMapCount++;
+                            }
+                        }
+                    }
+                }
+                bitmap.MipMapCount = mipMapCount;
+                byte[] raw = new byte[dataSize];
+                ddsStream.Read(raw, 0, dataSize);
+                result = raw;
+                bitmap.Data = result;
+            }
+
+            if (File.Exists(tempBitmap))
+                File.Delete(tempBitmap);
+        }
+
+        public static void GenerateUncompressedMipMaps(BaseBitmap bitmap)
+        {
+            bitmap.MipMapCount = 0;
         }
     }
 }
