@@ -689,8 +689,25 @@ namespace TagTool.Commands.Porting
             {
                 if (blamBitmap.MipMapCount != 0)
                 {
+                    int channelCount = 0;
+                    switch (blamBitmap.Format)
+                    {
+
+                        case BitmapFormat.A8Y8:
+                        case BitmapFormat.V8U8:
+                            channelCount = 2;
+                            break;
+                        case BitmapFormat.Y8:
+                        case BitmapFormat.A8:
+                            channelCount = 1;
+                            break;
+                        case BitmapFormat.A8R8G8B8:
+                            channelCount = 4;
+                            break;
+
+                    }
                     MipMapGenerator gen = new MipMapGenerator();
-                    gen.GenerateMipMap(blamBitmap.Height, blamBitmap.Width, raw, blamBitmap.MipMapCount, blamBitmap.Format);
+                    gen.GenerateMipMap(blamBitmap.Height, blamBitmap.Width, raw, blamBitmap.MipMapCount, channelCount);
                     raw = gen.CombineImage(raw);
                     blamBitmap.RawSize = raw.Length;
                 }

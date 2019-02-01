@@ -63,7 +63,7 @@ namespace TagTool.Bitmaps.Converter
                 {
                     var offset = image.InterleavedTextureIndex2 * (int)( xboxBitmap.VirtualHeight * xboxBitmap.VirtualWidth / xboxBitmap.CompressionFactor);
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, offset, true);
-                    if(xboxBitmap.MipMapCount > 1)
+                    if(xboxBitmap.MipMapCount > 0)
                     {
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0);
                     }
@@ -75,7 +75,7 @@ namespace TagTool.Bitmaps.Converter
                 else
                 {
                     imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
-                    if(xboxBitmap.MipMapCount > 1)
+                    if(xboxBitmap.MipMapCount > 0)
                     {
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, bitmapSize);
                     }
@@ -142,7 +142,7 @@ namespace TagTool.Bitmaps.Converter
                     xboxBitmap.Height = 128;
                     xboxBitmap.UpdateFormat(xboxBitmap.Format);
                     */
-                    if (xboxBitmap.MipMapCount > 1)
+                    if (xboxBitmap.MipMapCount > 0)
                     {
                         if(HasPrimaryResource(cache, handle))
                         {
@@ -160,7 +160,7 @@ namespace TagTool.Bitmaps.Converter
                 else
                 {
                     // Bitmap doesn't have a secondary resource means either no mipmaps or everything is packed in the primary resource.
-                    if(xboxBitmap.MipMapCount > 1)
+                    if(xboxBitmap.MipMapCount > 0)
                     {
                         imageData = cache.GetPrimaryResource(handle, 2*bitmapSize, 0, true);
                         mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0, true);
@@ -196,7 +196,6 @@ namespace TagTool.Bitmaps.Converter
             //
             // Convert main bitmap
             //
-            xboxBitmap.MipMapCount = 0;
 
             List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
             List<BaseBitmap> finalBitmaps = new List<BaseBitmap>();
@@ -208,9 +207,9 @@ namespace TagTool.Bitmaps.Converter
                 ConvertImage(finalBitmap);
                 // flip data if required
                 FlipImage(finalBitmap, image);
-                // generate mipmaps
-                if(finalBitmap.MipMapCount > 0)
-                    GenerateMipMaps(finalBitmap);
+                // generate mipmaps for uncompressed textures
+                if (!finalBitmap.Flags.HasFlag(BitmapFlags.Compressed) && finalBitmap.MipMapCount > 0 )
+                    GenerateUncompressedMipMaps(finalBitmap);
                 
                 finalBitmaps.Add(finalBitmap);
             }
@@ -439,9 +438,12 @@ namespace TagTool.Bitmaps.Converter
                 Array.Copy(bitmap.Data, 0, totalData, currentPos, bitmap.Data.Length);
                 currentPos += bitmap.Data.Length;
             }
-            bitmaps[0].Data = totalData;
+            var finalBitmap = bitmaps[0];
+            finalBitmap.Data = totalData;
 
-            return bitmaps[0];
+            if (finalBitmap.Flags.HasFlag(BitmapFlags.Compressed) && finalBitmap.MipMapCount > 0)
+                GenerateCompressedMipMaps(finalBitmap);
+            return finalBitmap;
         }
 
         private static int GetBitmapResourceHandle(Bitmap bitmap, int index, CacheVersion version)
@@ -608,7 +610,9 @@ namespace TagTool.Bitmaps.Converter
                 Directory.CreateDirectory(@"Temp");
 
             //Write input dds
+            bitmap.MipMapCount = 0;
             var header = new DDSHeader(bitmap);
+            
 
             using (var outStream = File.Open(tempBitmap, FileMode.Create, FileAccess.Write))
             {
@@ -636,7 +640,10 @@ namespace TagTool.Bitmaps.Converter
                     break;
 
                 default:
-                    throw new Exception($"Unexpected bitmap format for compressed mipmap generation {bitmap.Format}");
+                    bitmap.MipMapCount = 0;
+                    if (File.Exists(tempBitmap))
+                        File.Delete(tempBitmap);
+                    return;
             }
 
             args += $"{tempBitmap} {tempBitmap}";
@@ -699,7 +706,31 @@ namespace TagTool.Bitmaps.Converter
 
         public static void GenerateUncompressedMipMaps(BaseBitmap bitmap)
         {
-            bitmap.MipMapCount = 0;
+            int channelCount = 0;
+            switch (bitmap.Format)
+            {
+                
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.V8U8:
+                    channelCount = 2;
+                    break;
+                case BitmapFormat.Y8:
+                case BitmapFormat.A8:
+                    channelCount = 1;
+                    break;
+                case BitmapFormat.A8R8G8B8:
+                    channelCount = 4;
+                    break;
+                default:
+                    bitmap.MipMapCount = 0;
+                    return;
+
+            }
+            MipMapGenerator generator = new MipMapGenerator();
+            generator.GenerateMipMap(bitmap.Height, bitmap.Width, bitmap.Data, channelCount);
+            bitmap.MipMapCount = generator.MipMaps.Count;
+            bitmap.Data = generator.CombineImage(bitmap.Data);
+            return;
         }
     }
 }

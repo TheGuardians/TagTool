@@ -108,7 +108,7 @@ public class BaseBitmap
         Height = def.Height;
         Width = def.Width;
         Depth = def.Depth;
-        MipMapCount = def.MipmapCount;
+        MipMapCount = def.MipmapCount - 1;
         Type = def.Type;
         Flags = image.Flags;
         UpdateFormat(image.Format);
@@ -122,7 +122,7 @@ public class BaseBitmap
             Height = def.Height1;
             Width = def.Width1;
             Depth = def.Depth1;
-            MipMapCount = def.MipmapCount1;
+            MipMapCount = def.MipmapCount1 - 1;
             Type = def.Type1;
             Flags = image.Flags;
             UpdateFormat(image.Format);
@@ -132,7 +132,7 @@ public class BaseBitmap
             Height = def.Height2;
             Width = def.Width2;
             Depth = def.Depth2;
-            MipMapCount = def.MipmapCount2;
+            MipMapCount = def.MipmapCount2 - 1;
             Type = def.Type2;
             Flags = image.Flags;
             UpdateFormat(image.Format);
