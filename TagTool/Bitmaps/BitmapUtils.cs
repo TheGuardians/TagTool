@@ -85,26 +85,10 @@ namespace TagTool.Bitmaps
 
                 while (mipMapCount != 0)
                 {
-                    var nextMipWidth = NextNearestSize(curWidth, minDim);
-                    var nextMipHeight = NextNearestSize(curHeight, minDim);
-
-                    // mips are contained in a single image
-                    if (nextMipWidth < minVirtualSize / 4 && nextMipHeight < minVirtualSize / 4)
-                    {
-                        totalSize += (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
-                        break;
-                    }
-                    else
-                    {
-                        var virtualHeight = GetVirtualSize(nextMipHeight, xboxBitmap.MinimalBitmapSize);
-                        var virtualWidth = GetVirtualSize(nextMipWidth, xboxBitmap.MinimalBitmapSize);
-
-                        totalSize += (int)(virtualHeight * virtualWidth / xboxBitmap.CompressionFactor);
-                        curWidth = nextMipWidth;
-                        curHeight = nextMipHeight;
-                        mipMapCount--;
-                    }
-
+                    var nextMipWidth = curWidth / 2;
+                    var nextMipHeight = curHeight / 2;
+                    totalSize += GetSingleMipMapSize(nextMipWidth, nextMipHeight, xboxBitmap.MinimalBitmapSize, xboxBitmap.CompressionFactor);
+                    mipMapCount--;
                 }
 
                 switch (xboxBitmap.Type)
@@ -157,5 +141,17 @@ namespace TagTool.Bitmaps
             return minSize * ((curSize/2 + (minSize - 1)) / minSize);
         }
         
+        public static int RoundSize(int size, int blockDimension)
+        {
+            return blockDimension * ((size + (blockDimension - 1)) / blockDimension);
+        }
+
+        public static int GetSingleMipMapSize(int width, int height, int minimalSize, double compressionFactor)
+        {
+            int virtualWidth = GetVirtualSize(width, minimalSize);
+            int virtualHeight = GetVirtualSize(height, minimalSize);
+            int size = (int)(virtualHeight * virtualWidth / compressionFactor); ;
+            return size;
+        }
     }
 }

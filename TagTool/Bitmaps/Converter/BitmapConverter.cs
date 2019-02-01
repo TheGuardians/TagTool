@@ -147,7 +147,7 @@ namespace TagTool.Bitmaps.Converter
                         if(HasPrimaryResource(cache, handle))
                         {
                             // dedicated resource for mipmaps
-                            mipMapData = cache.GetPrimaryResource(handle, mipMapSize);
+                            mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0, true);
                         }
                         else
                         {
@@ -297,70 +297,79 @@ namespace TagTool.Bitmaps.Converter
 
                 // split mip maps into sub images for conversion
 
-                var prevWidth = xboxBitmap.Width;
-                var prevHeight = xboxBitmap.Height;
-                var mipMapCount = xboxBitmap.MipMapCount - 1;
-                var mipMapDataOffset = 0;
+                int currentMipMapCount = xboxBitmap.MipMapCount - 1;
 
-                while (mipMapCount != 0)
+                int offset = 0;
+                int bitmapOffset = 0;
+
+                int currentWidth = xboxBitmap.Width;
+                int currentHeight = xboxBitmap.Height;
+
+                while (currentMipMapCount != 0)
                 {
-                    var currentMipWidth = BitmapUtils.NextNearestSize(prevWidth, xboxBitmap.BlockDimension);
-                    var currentMipHeight = BitmapUtils.NextNearestSize(prevHeight, xboxBitmap.BlockDimension);
-                    var minVirtualSize = xboxBitmap.MinimalBitmapSize;
 
-                    // mips are contained in a single image, stored in reverse order. 
-                    if (currentMipWidth < minVirtualSize / 4 && currentMipHeight < minVirtualSize / 4)
+                    currentWidth /= 2;
+                    currentHeight /= 2;
+
+                    // compute the actual size of the data required for this mipmap by determining the xbox virtual size
+
+
+                    int xboxWidth = BitmapUtils.GetVirtualSize(currentWidth, xboxBitmap.MinimalBitmapSize);
+                    int xboxHeight = BitmapUtils.GetVirtualSize(currentHeight, xboxBitmap.MinimalBitmapSize);
+
+                    
+                    int xboxDataSize = (int)(xboxWidth * xboxHeight / xboxBitmap.CompressionFactor);
+                    byte[] currentMipMapData = new byte[xboxDataSize];
+
+                    Array.Copy(data, offset, currentMipMapData, 0, xboxDataSize);
+
+                    if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
+                        currentMipMapData = BitmapDecoder.ConvertToLinearTexture(currentMipMapData, xboxWidth, xboxHeight, xboxBitmap.Format);
+
+                    switch (xboxBitmap.BlockDimension)
                     {
-                        int size = (int)(minVirtualSize * minVirtualSize / xboxBitmap.CompressionFactor);
-                        byte[] sharedData = new byte[size];
-                        Array.Copy(mipMapData, mipMapDataOffset, sharedData, 0, size);
-
-                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            sharedData = BitmapDecoder.ConvertToLinearTexture(sharedData, minVirtualSize, minVirtualSize, xboxBitmap.Format);
-
-                        int sharedMipMapCount = mipMapCount;
-                        int curOffset = (int)(minVirtualSize / 8 * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
-                        
-
-                        // create xboxMipMaps for each mipmap in the shared data
-                        for (int j = 0; j < sharedMipMapCount; j++)
-                        {
-                            int offset = curOffset;
-
-                            if (curOffset < xboxBitmap.BlockSize)
+                        case 4:
+                            if(currentWidth <16 && currentHeight < 16)
                             {
-                                curOffset = (int)(minVirtualSize / 2 * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
-                                offset = curOffset;
-                                curOffset = 2 * offset;
+                                while(currentMipMapCount != 0)
+                                {
+                                    if(currentWidth == 1 || currentWidth == 2)
+                                    {
+                                        bitmapOffset = 2 * (int)(128 * 4 / xboxBitmap.CompressionFactor);
+                                    }
+                                    else
+                                    {
+                                        bitmapOffset /= 2;
+                                    }
+                                    Console.WriteLine(bitmapOffset);
+                                    XboxMipMap mipMap = new XboxMipMap(xboxBitmap, currentWidth, currentHeight, bitmapOffset, currentMipMapData);
+                                    mipMaps.Add(mipMap);
+                                    currentMipMapCount--;
+                                    currentWidth /= 2;
+                                    currentHeight /= 2;
+                                }
+                                break;
                             }
                             else
                             {
-                                curOffset -= offset / 2;
+                                if(currentWidth == 16)
+                                {
+                                    bitmapOffset = (int)(16 * 4 / xboxBitmap.CompressionFactor);
+                                }
+
+                                XboxMipMap mipMap = new XboxMipMap(xboxBitmap, currentWidth, currentHeight, bitmapOffset, currentMipMapData);
+                                mipMaps.Add(mipMap);
+
+                                // prepare next mipmap level
+                                if(currentWidth != 16)
+                                {
+                                    offset += BitmapUtils.GetSingleMipMapSize(currentWidth, currentHeight, xboxBitmap.MinimalBitmapSize, xboxBitmap.CompressionFactor);
+                                }
+                                currentMipMapCount--;
                             }
-
-                            mipMaps.Add(new XboxMipMap(xboxBitmap, currentMipWidth, currentMipHeight, offset, sharedData));
-                            prevWidth = BitmapUtils.NextNearestSize(currentMipWidth, xboxBitmap.BlockDimension);
-                            prevHeight = BitmapUtils.NextNearestSize(currentMipHeight, xboxBitmap.BlockDimension);
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        var curVirtualWidth = BitmapUtils.GetVirtualSize(currentMipWidth, xboxBitmap.MinimalBitmapSize);
-                        var curVirtualHeight = BitmapUtils.GetVirtualSize(currentMipHeight, xboxBitmap.MinimalBitmapSize);
-
-                        int size = (int)(curVirtualWidth * curVirtualHeight / xboxBitmap.CompressionFactor);
-                        byte[] singleData = new byte[size];
-                        Array.Copy(mipMapData, mipMapDataOffset, singleData, 0, size);
-
-                        if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                            singleData = BitmapDecoder.ConvertToLinearTexture(singleData, curVirtualWidth, curVirtualHeight, xboxBitmap.Format);
-
-                        mipMaps.Add(new XboxMipMap(xboxBitmap, currentMipWidth, currentMipHeight, 0, singleData));
-                        mipMapDataOffset += size;
-                        prevWidth = currentMipWidth;
-                        prevHeight = currentMipHeight;
-                        mipMapCount--;
+                            break;
+                        case 1:
+                            throw new Exception("Unsupported block size");
                     }
                 }
             }
