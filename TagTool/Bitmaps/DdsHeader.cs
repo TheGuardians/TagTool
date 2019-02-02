@@ -277,20 +277,20 @@ namespace TagTool.Bitmaps
             var flags = (DdsFormatFlags)reader.ReadUInt32();
             if ((flags & DdsFormatFlags.Alpha) != 0)
                 FormatType = DdsFormatType.Alpha;
-            else if ((flags & DdsFormatFlags.Rgb) != 0)
+            else if ((flags & DdsFormatFlags.RGB) != 0)
                 FormatType = DdsFormatType.Rgb;
-            else if ((flags & DdsFormatFlags.Yuv) != 0)
+            else if ((flags & DdsFormatFlags.YUV) != 0)
                 FormatType = DdsFormatType.Yuv;
             else if ((flags & DdsFormatFlags.Luminance) != 0)
                 FormatType = DdsFormatType.Luminance;
-            else if ((flags & DdsFormatFlags.FourCc) != 0)
+            else if ((flags & DdsFormatFlags.FourCC) != 0)
                 FormatType = DdsFormatType.Other;
             else
                 throw new InvalidOperationException("Invalid DDS file: invalid DDS_PIXELFORMAT flags");
 
             // Read FourCC code (optional)
             var fourCc = reader.ReadUInt32();
-            if ((flags & DdsFormatFlags.FourCc) != 0)
+            if ((flags & DdsFormatFlags.FourCC) != 0)
             {
                 FourCc = fourCc;
                 reader.BaseStream.Position += 20; // Skip masks
@@ -331,22 +331,22 @@ namespace TagTool.Bitmaps
                     flags = DdsFormatFlags.Alpha;
                     break;
                 case DdsFormatType.Rgb:
-                    flags = DdsFormatFlags.Rgb;
+                    flags = DdsFormatFlags.RGB;
                     break;
                 case DdsFormatType.Yuv:
-                    flags = DdsFormatFlags.Yuv;
+                    flags = DdsFormatFlags.YUV;
                     break;
                 case DdsFormatType.Luminance:
                     flags = DdsFormatFlags.Luminance;
                     break;
                 case DdsFormatType.Other:
-                    flags = DdsFormatFlags.FourCc;
+                    flags = DdsFormatFlags.FourCC;
                     break;
                 default:
                     throw new InvalidOperationException("Unrecognized FormatType: " + FormatType);
             }
             if (FourCc != 0)
-                flags |= DdsFormatFlags.FourCc;
+                flags |= DdsFormatFlags.FourCC;
             if (ABitMask != 0)
                 flags |= DdsFormatFlags.AlphaPixels;
             return flags;
@@ -389,17 +389,32 @@ namespace TagTool.Bitmaps
         }
 
         /// <summary>
-        /// Flags containing information about a DDS file's format.
+        /// Flags containing information about a DDS file's format. Taken from ddraw.h
         /// </summary>
         [Flags]
         private enum DdsFormatFlags
         {
-            AlphaPixels = 0x1,    // Texture has an alpha channel
-            Alpha       = 0x2,    // Alpha-only texture
-            FourCc      = 0x4,    // FourCC is valid
-            Rgb         = 0x40,   // RGB texture
-            Yuv         = 0x200,  // YUV texture
-            Luminance   = 0x20000 // Luminance texture
+            AlphaPixels             = 0x1,      // The surface has alpha channel information in the pixel format.
+            Alpha                   = 0x2,      // The pixel format contains alpha only information
+            FourCC                  = 0x4,      // The FourCC code is valid.
+            PaletteIndexed4         = 0x8,      // The surface is 4-bit color indexed.
+            PaletteIndexedT08       = 0x10,     // The surface is indexed into a palette which stores indices into the destination surface's 8-bit palette.
+            PaletteIndexed8         = 0x20,     // The surface is 8-bit color indexed.
+            RGB                     = 0x40,     // The RGB data in the pixel format structure is valid.
+            Compressed              = 0x80,     // The surface will accept pixel data in the format specified and compress it during the write.
+            RGBToYUV                = 0x100,    // The surface will accept RGB data and translate it during the write to YUV data.  The format of the data to be written
+                                                // will be contained in the pixel format structure.  The DDPF_RGB flag will be set.
+            YUV                     = 0x200,    // Pixel format is YUV - YUV data in pixel format struct is valid.
+            ZBuffer                 = 0x400,    // Pixel format is a z buffer only surface.
+            PaletteIndexed1         = 0x800,    // The surface is 1-bit color indexed.
+            PaletteIndexed2         = 0x1000,   // The surface is 2-bit color indexed.
+            ZPixels                 = 0x2000,   // The surface contains Z information in the pixels.
+            StencilBuffer           = 0x4000,   // The surface contains stencil information along with Z.
+            PremultipliedAlpha      = 0x8000,   // Premultiplied alpha format -- the color components have been premultiplied by the alpha component.
+            Luminance               = 0x20000,  // Luminance data in the pixel format is valid. Use this flag for luminance-only or luminance+alpha surfaces, the bit depth is then ddpf.dwLuminanceBitCount.
+            BumpLuminance           = 0x40000,  // Luminance data in the pixel format is valid. Use this flag when hanging luminance off bumpmap surfaces, the bit mask for the luminance portion of the pixel is then ddpf.dwBumpLuminanceBitMask.
+            BumpDUDV                = 0x80000   // Bump map dUdV data in the pixel format is valid.
+
         }
     }
 

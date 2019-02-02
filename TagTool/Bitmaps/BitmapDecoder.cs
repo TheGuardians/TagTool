@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using System;
+using TagTool.Tags.Definitions;
 
 /***************************************************************
 * The following code is derived from the HaloDeveloper project
@@ -17,7 +18,7 @@ using System;
 ***************************************************************/
 namespace TagTool.Bitmaps
 {
-    public static class DxtDecoder
+    public static class BitmapDecoder
     {
         public static byte[] ConvertFromLinearTexture(byte[] data, int width, int height, BitmapFormat texture)
         {
@@ -331,15 +332,126 @@ namespace TagTool.Bitmaps
                         color.A = 0xFF;
                         temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
                         buffer[temp] = (byte)color.B;
-                        // inverting red and green
-                        buffer[temp + 1] = (byte)color.R;
-                        buffer[temp + 2] = (byte)color.G;
-
+                        buffer[temp + 1] = (byte)color.G;
+                        buffer[temp + 2] = (byte)color.R;
                         buffer[temp + 3] = (byte)color.A;
                     }
                 }
             }
             return buffer;
+        }
+
+        public static byte[] SwapXYDxn(byte[] data, int width, int height)
+        {
+            for (int i = 0; i < (width * height); i += 16)
+            {
+                // store x values and swap
+                byte xMin = data[i];
+                byte xMax = data[i + 1];
+
+                byte x1 = data[i + 2];
+                byte x2 = data[i + 3];
+                byte x3 = data[i + 4];
+                byte x4 = data[i + 5];
+                byte x5 = data[i + 6];
+                byte x6 = data[i + 7];
+
+                data[i] = data[i + 8];
+                data[i + 1] = data[i + 9];
+
+                data[i + 2] = data[i + 10];
+                data[i + 3] = data[i + 11];
+                data[i + 4] = data[i + 12];
+                data[i + 5] = data[i + 13];
+                data[i + 6] = data[i + 14];
+                data[i + 7] = data[i + 15];
+
+                data[i + 8] = xMin;
+                data[i + 9] = xMax;
+
+                data[i + 10] = x1;
+                data[i + 11] = x2;
+                data[i + 12] = x3;
+                data[i + 13] = x4;
+                data[i + 14] = x5;
+                data[i + 15] = x6;
+            }
+            return data;
+        }
+
+        public static byte[] Ctx1ToDxn(byte[] data, int width, int height)
+        {
+            byte[] buffer = new byte[width * height];
+            int b = 0;  // buffer block index (dxn)
+            for(int i =0; i< width * height / 2; i += 8, b += 16)
+            {
+                // convert X,Y min and max components (swap X and Y)
+                byte minX = data[i];
+                byte maxX = data[i + 2];
+                byte minY = data[i + 1];
+                byte maxY = data[i + 3];
+
+                buffer[b] = minX;
+                buffer[b + 1] = maxX;
+                buffer[b + 8] = minY;
+                buffer[b + 9] = maxY;
+                
+                byte[] Ctx1indices = new byte[16];
+                // convert indices
+                int[] rowOrder = { 1,0,3,2};
+                for(int k = 0; k<4; k++)
+                {
+                    int j = rowOrder[k];
+                    Ctx1indices[(k * 4 + 0)] = (byte)((data[i + 4 + j] & 0xC0) >> 6);
+                    Ctx1indices[(k * 4 + 1)] = (byte)((data[i + 4 + j] & 0x30) >> 4);
+                    Ctx1indices[(k * 4 + 2)] = (byte)((data[i + 4 + j] & 0x0C) >> 2);
+                    Ctx1indices[(k * 4 + 3)] = (byte)((data[i + 4 + j] & 0x03) >> 0);
+                }
+
+
+                Ctx1indices = FixCTX1Indices(Ctx1indices);
+
+                // DXN indices
+                buffer[b + 2] = (byte)(((Ctx1indices[3]) << 0) | ((Ctx1indices[2]) << 3) | ((Ctx1indices[1] & 0x3) << 6));
+                buffer[b + 3] = (byte)(((Ctx1indices[1] & 0x4) >> 2) | ((Ctx1indices[0]) << 1) | ((Ctx1indices[7]) << 4) | ((Ctx1indices[6] & 0x1) << 7));
+                buffer[b + 4] = (byte)(((Ctx1indices[6] & 0x6) >> 1) | ((Ctx1indices[5]) << 2) | ((Ctx1indices[4]) << 5));
+                buffer[b + 5] = (byte)(((Ctx1indices[11]) << 0) | ((Ctx1indices[10]) << 3) | ((Ctx1indices[9] & 0x3) << 6));
+                buffer[b + 6] = (byte)(((Ctx1indices[9] & 0x4) >> 2) | ((Ctx1indices[8]) << 1) | ((Ctx1indices[15]) << 4) | ((Ctx1indices[14] & 0x1) << 7));
+                buffer[b + 7] = (byte)(((Ctx1indices[14] & 0x6) >> 1) | ((Ctx1indices[13]) << 2) | ((Ctx1indices[12]) << 5));
+
+                // copy indices for X component
+                buffer[b + 10] = buffer[b + 2];
+                buffer[b + 11] = buffer[b + 3];
+                buffer[b + 12] = buffer[b + 4];
+                buffer[b + 13] = buffer[b + 5];
+                buffer[b + 14] = buffer[b + 6];
+                buffer[b + 15] = buffer[b + 7];
+
+            }
+
+
+            return buffer;
+        }
+
+        private static byte[] FixCTX1Indices(byte[] indices)
+        {
+            for(int i = 0; i< 16; i++)
+            {
+                
+                byte index = indices[i];
+                
+                if(index != 0 || index != 1)
+                {
+                    if (index == 2)
+                        index = 3;
+                    if (index == 3)
+                        index = 4;
+                }
+
+                indices[i] = index;
+                
+            }
+            return indices;
         }
 
         private static byte[] DecodeDxnMA(byte[] data, int width, int height)
@@ -940,12 +1052,9 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        public static byte[] DecodeBitmap(byte[] bitmRaw, Tags.Definitions.Bitmap.Image image, int virtualWidth, int virtualHeight, CacheVersion Version)
+        public static byte[] DecodeBitmap(byte[] bitmRaw, BitmapFormat format, int virtualWidth, int virtualHeight)
         {
-            if ((image.XboxFlags.HasFlag(BitmapFlagsXbox.TiledTexture) && image.XboxFlags.HasFlag(BitmapFlagsXbox.Xbox360ByteOrder)))
-                bitmRaw = ConvertToLinearTexture(bitmRaw, virtualWidth, virtualHeight, image.Format);
-
-            switch (image.Format)
+            switch (format)
             {
                 case BitmapFormat.A8:
                     bitmRaw = DecodeA8(bitmRaw, virtualWidth, virtualHeight);
@@ -1050,7 +1159,7 @@ namespace TagTool.Bitmaps
 
 
                 default:
-                    throw new NotSupportedException("Unsupported bitmap format for encoding.");
+                    throw new NotSupportedException($"Unsupported bitmap format for encoding {format}.");
             }
             return data;
         }

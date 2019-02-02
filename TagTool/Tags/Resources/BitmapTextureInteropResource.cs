@@ -63,7 +63,7 @@ namespace TagTool.Tags.Resources
             /// Note that this is actually unused and the game reads the format from <see cref="Format"/>.
             /// Setting this value is still suggested however.
             /// </summary>
-            public int D3DFormatUnused;
+            public int D3DFormat;
 
             /// <summary>
             /// The format of the bitmap data.
