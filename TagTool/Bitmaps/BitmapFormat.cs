@@ -184,6 +184,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.V8U8:
                 case BitmapFormat.R5G6B5:
                     blockDimension = 1;
@@ -261,6 +262,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.AY8:
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A16B16G16R16F:

@@ -333,6 +333,7 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
                 case BitmapFormat.Dxt1:
@@ -416,6 +417,7 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.V8U8:
                 case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.X8R8G8B8:
                     break;
 
                 case BitmapFormat.A8R8G8B8:
@@ -592,6 +594,7 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.A8:
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.X8R8G8B8:
                     GenerateUncompressedMipMaps(bitmap);
                     break;
 
@@ -765,6 +768,7 @@ namespace TagTool.Bitmaps.Converter
                     channelCount = 1;
                     break;
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                     channelCount = 4;
                     break;
                 default:
