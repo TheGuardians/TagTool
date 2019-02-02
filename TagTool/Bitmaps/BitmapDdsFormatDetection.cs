@@ -118,7 +118,7 @@ namespace TagTool.Bitmaps
             { BitmapFormat.A32B32G32R32F, new BitmapFormatDefinition { FormatType = DdsFormatType.Other, FourCc = 0x00000074} },
 
             // TODO: Double-check these
-            { BitmapFormat.V8U8,          new BitmapFormatDefinition { FormatType = DdsFormatType.Luminance, BitsPerPixel=16 } },
+            { BitmapFormat.V8U8,          new BitmapFormatDefinition { FormatType = DdsFormatType.Other, D3D10Format = DxgiFormat.R8G8UNorm } },
             //{ BitmapFormat.A32B32G32R32F, new BitmapFormatDefinition { FormatType = DdsFormatType.Other, D3D10Format = DxgiFormat.R32G32B32A32Float } },
             //{ BitmapFormat.A16B16G16R16F, new BitmapFormatDefinition { FormatType = DdsFormatType.Other, D3D10Format = DxgiFormat.R16G16B16A16Float } },
             { BitmapFormat.Q8W8V8U8,      new BitmapFormatDefinition { FormatType = DdsFormatType.Other, D3D10Format = DxgiFormat.R8G8B8A8UNorm } },

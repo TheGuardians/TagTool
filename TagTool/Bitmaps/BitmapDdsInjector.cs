@@ -74,7 +74,7 @@ namespace TagTool.Bitmaps
             texture.Depth = (sbyte)Math.Max(1, dds.Depth);
             texture.MipmapCount = (sbyte)Math.Max(1, dds.MipMapCount);
             texture.Type = BitmapDdsFormatDetection.DetectType(dds);
-            texture.D3DFormat = (D3DFormatXbox)((dds.D3D10Format != DxgiFormat.Bc5UNorm) ? dds.FourCc : DdsFourCc.FromString("ATI2"));
+            texture.D3DFormatUnused = (int)((dds.D3D10Format != DxgiFormat.Bc5UNorm) ? dds.FourCc : DdsFourCc.FromString("ATI2"));
             texture.Format = BitmapDdsFormatDetection.DetectFormat(dds);
 
             // Set flags based on the format
