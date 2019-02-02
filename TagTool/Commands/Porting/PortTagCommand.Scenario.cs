@@ -457,6 +457,12 @@ namespace TagTool.Commands.Porting
 
                             foreach (var entry1 in zoneAreaSectors[taskArea.ZoneIndex][taskArea.AreaIndex])
                             {
+                                if (entry1.Item1 >= pathfindingBsps.Count || entry1.Item2 >= pathfindingBsps[entry1.Item1].PathfindingData[0].Sectors.Count)
+                                {
+                                    Console.WriteLine("WARNING: Invalid zone area sector data!");
+                                    continue;
+                                }
+
                                 var pathfinding = pathfindingBsps[entry1.Item1].PathfindingData[0];
                                 var sector = pathfinding.Sectors[entry1.Item2];
                                 var link = pathfinding.Links[sector.FirstLink];
