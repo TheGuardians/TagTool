@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
             // Halo 3 scenario ai data
             //
 
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            if (BlamCache.Version == CacheVersion.Halo3Retail && Flags.HasFlag(PortingFlags.Recursive))
             {
                 var pathfindingBsps = new List<StructureBspCacheFileTagResources>();
 
@@ -426,6 +426,9 @@ namespace TagTool.Commands.Porting
                                 continue;
 
                             if (sectors.Contains((firingPosition.SectorBspIndex, firingPosition.SectorIndex)))
+                                continue;
+
+                            if (firingPosition.SectorBspIndex == 10 && firingPosition.SectorIndex == 1157)
                                 continue;
 
                             sectors.Add((firingPosition.SectorBspIndex, firingPosition.SectorIndex));

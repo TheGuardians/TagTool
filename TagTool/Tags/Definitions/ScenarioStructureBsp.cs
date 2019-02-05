@@ -178,8 +178,9 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4)]
         public class UnknownRaw7th : TagStructure
-		{
-            public int SeamIndex;
+        {
+            public short Unknown0;
+            public short Unknown2;
         }
 
         [TagStructure(Size = 0x18)]

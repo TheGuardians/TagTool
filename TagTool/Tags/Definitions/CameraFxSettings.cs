@@ -8,8 +8,12 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnline106708)]
     public class CameraFxSettings : TagStructure
 	{
+        #region exposure
         public FlagsValue Flags;
-        public short Unknown;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused1 = new byte[2];
+
         public float OverexposureAmount;
         public float OverexposureUnknown;
         public float OverexposureUnknown2;
@@ -17,63 +21,95 @@ namespace TagTool.Tags.Definitions
         public float BrightnessUnknown;
         public float BrightnessUnknown2;
         public float BrightnessUnknown3;
+        #endregion
+
+        #region auto-exposure sensitivity
         public FlagsValue Flags2;
-        public short Unknown2;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused2 = new byte[2];
+
         public float Unknown3;
+        #endregion
+
+        #region exposure compensation
         public FlagsValue Flags3;
-        public short Unknown4;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused3 = new byte[2];
+
         public float Unknown5;
+        #endregion
+
+        #region bloom point
         public FlagsValue Flags4;
-        public short Unknown6;
+
+        [TagField(Padding = true, Length = 2)]
+        public byte[] Unused4 = new byte[2];
+
         public float Base;
         public float Min;
         public float Max;
+        #endregion
+
+        #region inherent bloom
         public FlagsValue Flags5;
         public short Unknown7;
         public float Base2;
         public float Min2;
         public float Max2;
+        #endregion
+
         public FlagsValue Flags6;
         public short Unknown8;
         public float Base3;
         public float Min3;
         public float Max3;
+
         public FlagsValue Flags7;
         public short Unknown9;
         public float Red;
         public float Green;
         public float Blue;
+
         public FlagsValue Flags8;
         public short Unknown10;
         public float Red2;
         public float Green2;
         public float Blue2;
+
         public FlagsValue Flags9;
         public short Unknown11;
         public float Red3;
         public float Green3;
         public float Blue3;
+
         public FlagsValue Flags10;
         public short Unknown12;
         public float Unknown13;
         public float Unknown14;
         public float Unknown15;
+
         public FlagsValue Flags11;
         public short Unknown16;
         public float Unknown17;
         public float Unknown18;
         public float Unknown19;
+
         public FlagsValue Flags12;
         public short Unknown20;
         public float Unknown21;
         public float Unknown22;
         public float Unknown23;
-        public int Unknown24;
+        public short Unknown24_1;
+        public short Unknown24_2;
+
         public FlagsValue Flags13;
         public short Unknown25;
         public float Base4;
         public float Min4;
         public float Max4;
+
         public FlagsValue Flags14;
         public short Unknown26;
         public float Base5;

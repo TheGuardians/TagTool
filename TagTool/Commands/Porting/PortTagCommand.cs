@@ -470,6 +470,17 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertChudGlobalsDefinition(cacheStream, resourceStreams, chudGlobals);
 					break;
 
+                case CinematicScene cisc:
+                    foreach (var shot in cisc.Shots)
+                    {
+                        foreach (var frame in shot.Frames)
+                        {
+                            frame.NearPlane *= -1.0f;
+                            frame.FarPlane *= -1.0f;
+                        }
+                    }
+                    break;
+
 				case Dialogue udlg:
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;

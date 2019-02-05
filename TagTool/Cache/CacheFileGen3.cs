@@ -486,13 +486,10 @@ namespace TagTool.Cache
             var reqPage = ResourceLayoutTable.RawPages[segment.RequiredPageIndex];
             var optPage = ResourceLayoutTable.RawPages[segment.OptionalPageIndex];
 
-            var reqBlockSize = BitConverter.ToInt32(BitConverter.GetBytes(reqPage.CompressedBlockSize), 0);
-            var optBlockSize = BitConverter.ToInt32(BitConverter.GetBytes(optPage.CompressedBlockSize), 0);
-
             if (size == 0)
-                size = (reqBlockSize != 0) ?
-                    reqBlockSize :
-                    optBlockSize;
+                size = (reqPage.CompressedBlockSize != 0) ?
+                    (int)reqPage.CompressedBlockSize :
+                    (int)optPage.CompressedBlockSize;
 
             var reqSize = size - sizes.OverallSize;
             var optSize = size - reqSize;
@@ -528,7 +525,8 @@ namespace TagTool.Cache
 
             var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
 
-            if (resource.SegmentIndex == -1) return null;
+            if (resource.SegmentIndex == -1)
+                return null;
 
             var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
 
