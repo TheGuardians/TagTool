@@ -345,7 +345,7 @@ namespace TagTool.Bitmaps.Converter
 
                 case BitmapFormat.Ctx1:
                     bitmap.UpdateFormat(BitmapFormat.Dxn);
-                    data = BitmapDecoder.Ctx1ToDxn(data, bitmap.Width, bitmap.Height);
+                    data = BitmapDecoder.Ctx1ToDxn(data, bitmap.NearestWidth, bitmap.NearestHeight);
                     targetFormat = BitmapFormat.Dxn;
                     break;
 
