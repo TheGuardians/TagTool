@@ -428,9 +428,6 @@ namespace TagTool.Commands.Porting
                             if (sectors.Contains((firingPosition.SectorBspIndex, firingPosition.SectorIndex)))
                                 continue;
 
-                            if (firingPosition.SectorBspIndex == 10 && firingPosition.SectorIndex == 1157)
-                                continue;
-
                             sectors.Add((firingPosition.SectorBspIndex, firingPosition.SectorIndex));
                         }
 
