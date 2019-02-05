@@ -410,12 +410,10 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt5aAlpha:
                 case BitmapFormat.Ctx1:
-                case BitmapFormat.A8Y8:
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A4R4G4B4:
-                case BitmapFormat.V8U8:
                     break;
 
                 case BitmapFormat.A8R8G8B8:
@@ -425,6 +423,8 @@ namespace TagTool.Bitmaps.Converter
                     break;
 
                 case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.V8U8:
                     for (int j = 0; j < bitmap.Data.Length; j += 2)
                         Array.Reverse(bitmap.Data, j, 2);
                     break;
