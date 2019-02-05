@@ -416,13 +416,17 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.V8U8:
-                case BitmapFormat.A16B16G16R16F:
-                case BitmapFormat.X8R8G8B8:
                     break;
 
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                     for (int j = 0; j < bitmap.Data.Length; j += 4)
                         Array.Reverse(bitmap.Data, j, 4);
+                    break;
+
+                case BitmapFormat.A16B16G16R16F:
+                    for (int j = 0; j < bitmap.Data.Length; j += 2)
+                        Array.Reverse(bitmap.Data, j, 2);
                     break;
 
                 default:
@@ -634,12 +638,6 @@ namespace TagTool.Bitmaps.Converter
             switch (bitmap.Format)
             {
                 case BitmapFormat.Dxn:
-                    /*
-                    if (bitmap.Flags.HasFlag(BitmapFlags.PowerOfTwoDimensions))
-                        args += "-bc5 ";
-                    else
-                        args += "-bc3n ";
-                    */
                     args += "-bc5 -resize -normal";
                     break;
 
@@ -689,37 +687,6 @@ namespace TagTool.Bitmaps.Converter
                 // Remove lowest DXN mipmaps to prevent issues with D3D memory allocation.
                 if (bitmap.Format == BitmapFormat.Dxn)
                 {
-                    /*
-                    // if it's still in DXN format
-                    if (bitmap.Flags.HasFlag(BitmapFlags.PowerOfTwoDimensions))
-                    {
-                        dataSize = BitmapUtils.RoundSize(bitmap.Width, 4) * BitmapUtils.RoundSize(bitmap.Height, 4);
-                        if (mipMapCount > 0)
-                        {
-                            if (bitmap.Format == BitmapFormat.Dxn)
-                            {
-                                var width = bitmap.Width;
-                                var height = bitmap.Height;
-
-                                dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-
-                                mipMapCount = 0;
-                                while ((width >= 8) && (height >= 8))
-                                {
-                                    width /= 2;
-                                    height /= 2;
-                                    dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                                    mipMapCount++;
-                                }
-                            }
-                        }
-                        
-                    }
-                    else
-                    {
-                        bitmap.UpdateFormat(BitmapFormat.Dxt5);
-                    }
-                    */
                     dataSize = BitmapUtils.RoundSize(bitmap.Width, 4) * BitmapUtils.RoundSize(bitmap.Height, 4);
                     if (mipMapCount > 0)
                     {
