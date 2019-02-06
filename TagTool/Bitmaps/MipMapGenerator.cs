@@ -101,11 +101,16 @@ namespace TagTool.Bitmaps
             bool padHeight = false, padWidth = false;
             int HorizontalSize = width;
 
-            for (int j = 0; j < height/2; j ++)
+            for (int j = 0; j < newHeight; j ++)
             {
-                for (int i = 0; i < width/2; i ++)
+                if (j == newHeight - 1 && newHeight % 2 == 1)
+                    padHeight = true;
+
+                for (int i = 0; i < newWidth; i ++)
                 {
-                    
+                    if (i == newWidth - 1 && newWidth % 2 == 1)
+                        padWidth = true;
+
                     x1 = color[2*j * HorizontalSize + 2*i];
 
                     if (!padHeight)

@@ -293,6 +293,7 @@ namespace TagTool.Bitmaps.Converter
         {
             BitmapFormat targetFormat = bitmap.Format;
             var data = bitmap.Data;
+            bool DXTFlip = false;
             switch (bitmap.Format)
             {
                 case BitmapFormat.Dxt5aMono:
@@ -326,11 +327,19 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
+                case BitmapFormat.V8U8:
+                    break;
+
                 case BitmapFormat.Dxt1:
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
-                case BitmapFormat.V8U8:
+                    if(bitmap.Height != bitmap.NearestHeight || bitmap.Width != bitmap.NearestWidth)
+                    {
+                        targetFormat = BitmapFormat.A8R8G8B8;
+                        bitmap.Flags &= ~BitmapFlags.Compressed;
+                        DXTFlip = true;
+                    }
                     break;
 
                 case BitmapFormat.Ctx1:
@@ -368,6 +377,12 @@ namespace TagTool.Bitmaps.Converter
                     }
                     data = fixedData;
                 }
+                if (DXTFlip)
+                {
+                    for (int j = 0; j < bitmap.Data.Length; j += 2)
+                        Array.Reverse(bitmap.Data, j, 2);
+                }
+
                 bitmap.UpdateFormat(targetFormat);
                 bitmap.Data = data;
             }
@@ -382,14 +397,10 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.Dxt1:
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
-                    for (int j = 0; j < bitmap.Data.Length; j += 2)
-                        Array.Reverse(bitmap.Data, j, 2);
-                    break;
-
                 case BitmapFormat.Dxn:
-                    for (int j = 0; j < bitmap.Data.Length; j += 2)
-                        Array.Reverse(bitmap.Data, j, 2);
-                    //BitmapDecoder.SwapXYDxn(bitmap.Data, bitmap.NearestWidth, bitmap.NearestHeight);
+                    if(!(bitmap.Height != bitmap.NearestHeight || bitmap.Width != bitmap.NearestWidth)) // this means it has been flipped
+                        for (int j = 0; j < bitmap.Data.Length; j += 2)
+                            Array.Reverse(bitmap.Data, j, 2);
                     break;
 
                 case BitmapFormat.AY8:
