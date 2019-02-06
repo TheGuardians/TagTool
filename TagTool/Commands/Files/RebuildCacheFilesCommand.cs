@@ -92,8 +92,6 @@ namespace TagTool.Commands.Files
                     default:
                         throw new NotImplementedException(args[0]);
                 }
-
-                args.RemoveAt(0);
             }
 
             ConvertedTags.Clear();
