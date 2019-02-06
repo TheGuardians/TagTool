@@ -189,7 +189,7 @@
     <Compile Include="Bitmaps\BitmapType.cs" />
     <Compile Include="Bitmaps\BitmapUtils.cs" />
     <Compile Include="Bitmaps\BlamBitmap.cs" />
-    <Compile Include="Bitmaps\Converter\BitmapConverter.cs" />
+    <Compile Include="Bitmaps\BitmapConverter.cs" />
     <Compile Include="Bitmaps\D3DFormatXbox.cs" />
     <Compile Include="Bitmaps\DdsHeader.cs" />
     <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
