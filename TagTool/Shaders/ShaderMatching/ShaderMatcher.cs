@@ -696,6 +696,7 @@ namespace TagTool.Shaders.ShaderMatching
                     }
                     break;
 
+                //Weapons
                 case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
                     try
                     {
@@ -709,6 +710,62 @@ namespace TagTool.Shaders.ShaderMatching
                         }
                         catch { }
                     }
+                    break;
+
+                case @"objects\weapons\rifle\plasma_rifle_red\shaders\plasma_rifle_red":
+                case @"objects\weapons\rifle\plasma_rifle\shaders\plasma_rifle":
+                case @"objects\weapons\rifle\covenant_carbine\shaders\carbine":
+                case @"objects\weapons\rifle\covenant_carbine\shaders\carbine_dull":
+                case @"objects\weapons\pistol\plasma_pistol\shaders\plasma_pistol_metal":
+                case @"objects\weapons\pistol\needler\shaders\needler_blue":
+                case @"objects\weapons\pistol\needler\shaders\needler_pink":
+                case @"objects\weapons\support_high\flak_cannon\shaders\flak_cannon":
+                case @"objects\weapons\rifle\beam_rifle\shaders\beam_rifle":
+                case @"objects\weapons\rifle\beam_rifle\shaders\beam_rifle2":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0_0");
+                        }
+                        catch { }
+                    }
+                    break;
+
+                case @"objects\weapons\pistol\needler\shaders\needler_glass":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0_0");
+                        }
+                        catch { }
+                    }
+                    break;
+
+                case @"objects\weapons\rifle\sniper_rifle\shaders\scope_alpha":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_11_0_1_0_2_0");
+                    }
+                    catch { }
+                    break;
+
+                //Vehicles
+                case @"objects\vehicles\scorpion\turrets\cannon\shaders\turret_cannon":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_3_2_0_1_1_0_0_0_0_0_0");
+                    }
+                    catch { }
                     break;
             }
 
