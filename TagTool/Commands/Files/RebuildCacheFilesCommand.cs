@@ -21,6 +21,7 @@ namespace TagTool.Commands.Files
 
         private bool Clean { get; set; } = false;
         private bool NullReferences { get; set; } = false;
+        private List<Tag> KeepGroups { get; set; } = new List<Tag>();
 
         /// <summary>
         /// When <see cref="Clean"/> is false, tags in this group are not copied to the new cache.
@@ -61,7 +62,7 @@ namespace TagTool.Commands.Files
                   "RebuildCacheFiles",
                   "Rebuilds the cache files into the specified output directory.",
 
-                  "RebuildCacheFiles [Clean] [NoVariants] <Output Directory>",
+                  "RebuildCacheFiles [Clean] [KeepGroups: {GroupTags}] <Output Directory>",
 
                   "Rebuilds the cache files into the specified directory.")
         {
@@ -70,7 +71,7 @@ namespace TagTool.Commands.Files
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count > 2)
+            if (args.Count < 1)
                 return false;
 
             while (args.Count > 1)
@@ -79,6 +80,13 @@ namespace TagTool.Commands.Files
                 {
                     case "clean":
                         Clean = true;
+                        args.RemoveAt(0);
+                        break;
+
+                    case "keepgroups:":
+                        args.RemoveAt(0);
+                        KeepGroups = args.Take(args.Count - 1).Select(arg => CacheContext.ParseGroupTag(arg)).ToList();
+                        args.RemoveRange(0, args.Count - 1);
                         break;
 
                     default:
@@ -165,6 +173,10 @@ namespace TagTool.Commands.Files
 
                 foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("rmw ").Where(tag => tag.Name != null))
                     CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
+
+                foreach (var groupTag in KeepGroups)
+                    foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup(groupTag))
+                        CopyTag(tag, CacheContext, srcStream, destCacheContext, destStream);
 
                 if (!Clean)
                 {
