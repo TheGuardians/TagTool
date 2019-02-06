@@ -131,22 +131,17 @@ namespace TagTool.Tags.Definitions
         public StringId WeaponClass;
         public StringId WeaponName;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown24;
-
         public MultiplayerWeaponTypeValue MultiplayerWeaponType;
         public WeaponTypeValue WeaponType;
+		public TrackingType Tracking;
+		public short UnknownEnum;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public SpecialHudVersionValue SpecialHudVersion;
-
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public TrackingType Tracking;
-
-        public short UnknownEnum;
+		[TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int SpecialHudIcon;
         
-        [TagField(Padding = true, Length = 12, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Padding = true, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] UnknownBlock;
         
         public List<FirstPersonBlock> FirstPerson;
