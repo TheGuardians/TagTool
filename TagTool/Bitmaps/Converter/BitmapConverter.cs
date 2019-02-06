@@ -59,26 +59,16 @@ namespace TagTool.Bitmaps.Converter
                 {
                     var offset = image.InterleavedTextureIndex2 * (int)( xboxBitmap.VirtualHeight * xboxBitmap.VirtualWidth / xboxBitmap.CompressionFactor);
                     imageData = cache.GetSecondaryResource(handle, bitmapSize, offset, true);
-                    if(xboxBitmap.MipMapCount > 0)
-                    {
-                        mipMapData = cache.GetPrimaryResource(handle, mipMapSize, 0);
-                    }
-                    else
-                    {
-                        mipMapData = null;
-                    }
+                    mipMapData = null;
                 }
                 else
                 {
+                    if(xboxBitmap.Type == BitmapType.CubeMap && image.Flags.HasFlag(BitmapFlags.Compressed) && xboxBitmap.Width <= 16)
+                    {
+                        xboxBitmap.Offset = (int)(16 * 4 / xboxBitmap.CompressionFactor);   // account for the mipmaps
+                    }
                     imageData = cache.GetPrimaryResource(handle, bitmapSize, 0, true);
-                    if(xboxBitmap.MipMapCount > 0)
-                    {
-                        mipMapData = cache.GetPrimaryResource(handle, mipMapSize, bitmapSize);
-                    }
-                    else
-                    {
-                        mipMapData = null;
-                    }
+                    mipMapData = null;
                 }
 
                 if (image.InterleavedTextureIndex2 == 1 && xboxBitmap.InTile)
