@@ -589,8 +589,16 @@ namespace TagTool.Commands.Porting
 
                 case Shader rmsh:
                     rmsh.Material = ConvertStringId(rmsh.Material);
-                    if (blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
-                        rmsh.ShaderProperties[0].BlendMode = 1; // Fix avalanche trees
+                    switch (blamTag.Name)
+                    {
+                        case @"levels\dlc\fortress\shaders\floor_glass":
+                            rmsh.ShaderProperties[0].Transparency = 1; // Fix citadel glass
+                            break;
+
+                        case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
+                            rmsh.ShaderProperties[0].BlendMode = 1; // Fix avalanche trees
+                            break;
+                    }
                     break;
 
                 case ShaderFoliage rmfl:
