@@ -178,7 +178,7 @@ namespace TagTool.Bitmaps.Converter
             //
             
             List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
-
+            bool flipImage = true;
             // rearrange cubemaps order
             if(xboxBitmap.Type == BitmapType.CubeMap)
             {
@@ -194,9 +194,10 @@ namespace TagTool.Bitmaps.Converter
                 // extract bitmap from padded image
                 BaseBitmap finalBitmap = ExtractImage(bitmap);
                 // convert to PC format
-                ConvertImage(finalBitmap);
+                flipImage = ConvertImage(finalBitmap);
                 // flip data if required
-                FlipImage(finalBitmap, image);
+                if(flipImage)
+                    FlipImage(finalBitmap, image);
                 // until I write code to move mipmaps at the end of the file, remove cubemap mipmaps
                 if (xboxBitmap.Type == BitmapType.CubeMap)
                 {
@@ -289,7 +290,7 @@ namespace TagTool.Bitmaps.Converter
             return bitmap;
         }
      
-        private static void ConvertImage(BaseBitmap bitmap)
+        private static bool ConvertImage(BaseBitmap bitmap)
         {
             BitmapFormat targetFormat = bitmap.Format;
             var data = bitmap.Data;
@@ -377,17 +378,17 @@ namespace TagTool.Bitmaps.Converter
                     }
                     data = fixedData;
                 }
-                if (DXTFlip)
-                {
-                    for (int j = 0; j < bitmap.Data.Length; j += 2)
-                        Array.Reverse(bitmap.Data, j, 2);
-                }
 
                 bitmap.UpdateFormat(targetFormat);
                 bitmap.Data = data;
             }
 
             bitmap.Data = data;
+
+            if (DXTFlip)
+                return false;
+
+            return true;
         }
 
         private static void FlipImage(BaseBitmap bitmap, Bitmap.Image image)
@@ -398,9 +399,8 @@ namespace TagTool.Bitmaps.Converter
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
-                    if(!(bitmap.Height != bitmap.NearestHeight || bitmap.Width != bitmap.NearestWidth)) // this means it has been flipped
-                        for (int j = 0; j < bitmap.Data.Length; j += 2)
-                            Array.Reverse(bitmap.Data, j, 2);
+                    for (int j = 0; j < bitmap.Data.Length; j += 2)
+                        Array.Reverse(bitmap.Data, j, 2);
                     break;
 
                 case BitmapFormat.AY8:
