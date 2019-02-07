@@ -679,6 +679,22 @@ namespace TagTool.Shaders.ShaderMatching
         {
             switch (blamTagName)
             {
+                case @"levels\dlc\sidewinder\shaders\justin\sw_ground_ice1":
+                case @"levels\dlc\sidewinder\shaders\justin\sw_ground_rock1":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2_0");
+                        }
+                        catch { }
+                    }
+                    break;
+
                 case @"levels\multi\snowbound\sky\shaders\skydome":
                     try
                     {
