@@ -232,7 +232,7 @@ namespace TagTool.Tags.Definitions
             SpartanLaser,
         }
 
-        public enum SpecialHudVersionValue : short
+        public enum SpecialHudVersionValue : int
         {
             DefaultNoOutline2 = -28,
             Default30 = 0,
