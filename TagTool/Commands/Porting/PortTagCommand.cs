@@ -576,11 +576,6 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertStyle(style);
 					break;
 
-				// Fix shotgun reloading
-				case Weapon weapon when blamTag.Name == "objects\\weapons\\rifle\\shotgun\\shotgun":
-					weapon.Unknown24 = 1 << 16;
-					break;
-                
                 // Fix warthog horn
 				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
 					foreach (var attach in weapon.Attachments)
