@@ -617,6 +617,23 @@ namespace TagTool.Commands.Porting
                     rmct.Material = ConvertStringId(rmct.Material);
                     ConvertShaderCortana(rmct, cacheStream, resourceStreams);
                     break;
+
+                case UserInterfaceSharedGlobalsDefinition wigl:
+                    if (BlamCache.Version == CacheVersion.Halo3Retail)
+                    {
+                        wigl.UiWidgetBipeds = new List<UserInterfaceSharedGlobalsDefinition.UiWidgetBiped>
+                        {
+                            new UserInterfaceSharedGlobalsDefinition.UiWidgetBiped
+                            {
+                                AppearanceBipedName = "b_chief",
+                                RosterPlayer1BipedName = "b_player0",
+                                RosterPlayer2BipedName = "b_player1",
+                                RosterPlayer3BipedName = "b_player2",
+                                RosterPlayer4BipedName = "b_player3",
+                            }
+                        };
+                    }
+                    break;
             }
 
             //
