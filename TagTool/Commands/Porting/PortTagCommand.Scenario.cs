@@ -1444,6 +1444,13 @@ namespace TagTool.Commands.Porting
             // expression type, value type, script expression name, original value, comment
             // Ideally this should use a dictionary with a list of script expressions per map name. I'm using a simple text format as this is how I dump scripts and modify them currently.
 
+
+            //fix texture_camera aspect ratio
+            ["mainmenu"] = new List<string>
+            {
+                "00002377,ECBC0949,FFFFFFFF,0006,BC74E33F,Expression,Real,real,value, //default:560E2D3F"
+            },
+
             ["mainmenu_odst"] = new List<string>
             {
                 "00001043,E7860413,E79B0428,0112,140487E7,Group,Void,unit_enable_vision_mode, //default:E78B0418",

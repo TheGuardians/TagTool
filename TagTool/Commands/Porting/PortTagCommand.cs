@@ -625,11 +625,8 @@ namespace TagTool.Commands.Porting
                         {
                             new UserInterfaceSharedGlobalsDefinition.UiWidgetBiped
                             {
-                                AppearanceBipedName = "b_chief",
-                                RosterPlayer1BipedName = "b_player0",
-                                RosterPlayer2BipedName = "b_player1",
-                                RosterPlayer3BipedName = "b_player2",
-                                RosterPlayer4BipedName = "b_player3",
+                                AppearanceBipedName = "chief",
+                                RosterPlayer1BipedName = "elite",
                             }
                         };
                     }

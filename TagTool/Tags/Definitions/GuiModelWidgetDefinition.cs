@@ -35,11 +35,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Zoom;
+        public float FOV = 25.0f;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown8;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UnknownBlock> ZoomFunction;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort MovementLeft;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -64,6 +66,7 @@ namespace TagTool.Tags.Definitions
         public ushort Unknown20;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public ushort Unknown21;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<TexCam> TextureCameraSections;
 
