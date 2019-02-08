@@ -154,7 +154,10 @@ namespace TagTool.Bitmaps.Converter
                             }
                             else
                             {
-                                xboxBitmap.Offset = 4 * (int)(BitmapUtils.RoundSize(xboxBitmap.Width / 2, 4) * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
+                                var width = xboxBitmap.Width / 2;
+                                if (width == 0)
+                                    width = 1;
+                                xboxBitmap.Offset = 4 * (int)(BitmapUtils.RoundSize(width, 4) * xboxBitmap.BlockDimension / xboxBitmap.CompressionFactor);
                             }
                             
                         }
