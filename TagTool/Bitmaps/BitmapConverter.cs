@@ -148,9 +148,16 @@ namespace TagTool.Bitmaps.Converter
                         // Formula seems quite complex, small hack to make it work
                         if(xboxBitmap.BlockDimension == 4)
                         {
-                            if(xboxBitmap.Width >= xboxBitmap.Height)
+                            if(xboxBitmap.Width > xboxBitmap.Height)
                             {
                                 xboxBitmap.Offset = 4 * (int)(BitmapUtils.RoundSize(xboxBitmap.Height, 4) * xboxBitmap.VirtualWidth / xboxBitmap.CompressionFactor);
+                            }
+                            else if(xboxBitmap.Width == xboxBitmap.Height)
+                            {
+                                var width = xboxBitmap.Width;
+                                if (xboxBitmap.Width >= 4)
+                                    width = 4;
+                                xboxBitmap.Offset = 4 * (int)(width * 4 / xboxBitmap.CompressionFactor);
                             }
                             else
                             {
