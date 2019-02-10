@@ -83,7 +83,7 @@ namespace TagTool.Commands.Porting
             {
                 for (var i = 0; i < edDef.WeaponsProperties.Count; i++)
                 {
-                    if (edDef.WeaponsProperties[i].Weapon != null)
+                    if (edDef.WeaponsProperties[i].Weapon != null || h3Def.WeaponsProperties[i].Weapon == null)
                         continue;
 
                     edDef.WeaponsProperties[i].Weapon = ConvertTag(cacheStream, resourceStreams,
@@ -95,7 +95,7 @@ namespace TagTool.Commands.Porting
             {
                 for (var i = 0; i < edDef.VehicleProperties.Count; i++)
                 {
-                    if (edDef.VehicleProperties[i].Unit != null)
+                    if (edDef.VehicleProperties[i].Unit != null || h3Def.VehicleProperties[i].Unit == null)
                         continue;
 
                     edDef.VehicleProperties[i].Unit = ConvertTag(cacheStream, resourceStreams,
@@ -107,7 +107,7 @@ namespace TagTool.Commands.Porting
             {
                 for (var i = 0; i < edDef.EquipmentProperties.Count; i++)
                 {
-                    if (edDef.EquipmentProperties[i].Equipment != null)
+                    if (edDef.EquipmentProperties[i].Equipment != null || h3Def.EquipmentProperties[i].Equipment == null)
                         continue;
 
                     edDef.EquipmentProperties[i].Equipment = ConvertTag(cacheStream, resourceStreams,
