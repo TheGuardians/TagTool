@@ -143,7 +143,7 @@ namespace TagTool.Commands.Porting
 
             Matcher.FixRmdfTagRef(finalRm);
 
-            FixAnimationProperties(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2);
+            FixAnimationProperties(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
@@ -190,7 +190,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private RenderMethod FixAnimationProperties(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2)
+        private RenderMethod FixAnimationProperties(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CacheFile blamCache, HaloOnlineCacheContext CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].AnimationProperties.Count == 0)
@@ -397,6 +397,9 @@ namespace TagTool.Commands.Porting
             {
                 if (!validEDRegisters.Contains((a.RegisterIndex)))
                 {
+                    // Display a warning
+                    Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
+
                     // Abort, disable functions
                     finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>(); // no idea what it does, but it crashes sometimes if it's null. on Shrine, it's the shader loop effect
                     finalRm.ShaderProperties[0].AnimationProperties = new List<RenderMethod.AnimationPropertiesBlock>();
@@ -411,6 +414,5 @@ namespace TagTool.Commands.Porting
 
             return finalRm;
         }
-
     }
 }

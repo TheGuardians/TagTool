@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.IO;
 using TagTool.Ai;
 using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Porting
@@ -67,6 +70,50 @@ namespace TagTool.Commands.Porting
             }
 
             return style;
+        }
+
+        private void MergeCharacter(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTagInstance edTag, CacheFile.IndexItem h3Tag)
+        {
+            var edDef = CacheContext.Deserialize<Character>(cacheStream, edTag);
+
+            var h3Def = BlamCache.Deserializer.Deserialize<Character>(
+                new CacheSerializationContext(ref BlamCache, h3Tag));
+
+            if (edDef.WeaponsProperties.Count == h3Def.WeaponsProperties.Count)
+            {
+                for (var i = 0; i < edDef.WeaponsProperties.Count; i++)
+                {
+                    if (edDef.WeaponsProperties[i].Weapon != null)
+                        continue;
+
+                    edDef.WeaponsProperties[i].Weapon = ConvertTag(cacheStream, resourceStreams,
+                        BlamCache.GetIndexItemFromID(h3Def.WeaponsProperties[i].Weapon.Index));
+                }
+            }
+
+            if (edDef.VehicleProperties.Count == h3Def.VehicleProperties.Count)
+            {
+                for (var i = 0; i < edDef.VehicleProperties.Count; i++)
+                {
+                    if (edDef.VehicleProperties[i].Unit != null)
+                        continue;
+
+                    edDef.VehicleProperties[i].Unit = ConvertTag(cacheStream, resourceStreams,
+                        BlamCache.GetIndexItemFromID(h3Def.VehicleProperties[i].Unit.Index));
+                }
+            }
+
+            if (edDef.EquipmentProperties.Count == h3Def.EquipmentProperties.Count)
+            {
+                for (var i = 0; i < edDef.EquipmentProperties.Count; i++)
+                {
+                    if (edDef.EquipmentProperties[i].Equipment != null)
+                        continue;
+
+                    edDef.EquipmentProperties[i].Equipment = ConvertTag(cacheStream, resourceStreams,
+                        BlamCache.GetIndexItemFromID(h3Def.EquipmentProperties[i].Equipment.Index));
+                }
+            }
         }
 
         private Character ConvertCharacter(Character character)
