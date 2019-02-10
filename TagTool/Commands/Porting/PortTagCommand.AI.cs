@@ -79,6 +79,8 @@ namespace TagTool.Commands.Porting
             var h3Def = BlamCache.Deserializer.Deserialize<Character>(
                 new CacheSerializationContext(ref BlamCache, h3Tag));
 
+            var merged = false;
+
             if (edDef.WeaponsProperties.Count == h3Def.WeaponsProperties.Count)
             {
                 for (var i = 0; i < edDef.WeaponsProperties.Count; i++)
@@ -88,6 +90,8 @@ namespace TagTool.Commands.Porting
 
                     edDef.WeaponsProperties[i].Weapon = ConvertTag(cacheStream, resourceStreams,
                         BlamCache.GetIndexItemFromID(h3Def.WeaponsProperties[i].Weapon.Index));
+
+                    merged = true;
                 }
             }
 
@@ -100,6 +104,8 @@ namespace TagTool.Commands.Porting
 
                     edDef.VehicleProperties[i].Unit = ConvertTag(cacheStream, resourceStreams,
                         BlamCache.GetIndexItemFromID(h3Def.VehicleProperties[i].Unit.Index));
+
+                    merged = true;
                 }
             }
 
@@ -112,8 +118,13 @@ namespace TagTool.Commands.Porting
 
                     edDef.EquipmentProperties[i].Equipment = ConvertTag(cacheStream, resourceStreams,
                         BlamCache.GetIndexItemFromID(h3Def.EquipmentProperties[i].Equipment.Index));
+
+                    merged = true;
                 }
             }
+
+            if (merged)
+                CacheContext.Serialize(cacheStream, edTag, edDef);
         }
 
         private Character ConvertCharacter(Character character)
