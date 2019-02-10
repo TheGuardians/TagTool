@@ -630,7 +630,6 @@ namespace TagTool.Shaders.ShaderMatching
                 case "bump_map_m_1":
                 case "bump_map_m_2":
                 case "bump_map_m_3":
-                case "bump_detail_map":
                 case "detail_bump_m_0":
                 case "detail_bump_m_1":
                 case "detail_bump_m_2":
@@ -638,6 +637,9 @@ namespace TagTool.Shaders.ShaderMatching
                 case "height_map":
                 case "vector_map":
                     return @"shaders\default_bitmaps\bitmaps\default_vector";
+
+                case "bump_detail_map":
+                    return @"shaders\default_bitmaps\bitmaps\bump_detail";
 
                 case "environment_map":
                     return @"shaders\default_bitmaps\bitmaps\default_dynamic_cube_map";
