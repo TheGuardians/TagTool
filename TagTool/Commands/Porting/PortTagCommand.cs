@@ -188,8 +188,8 @@ namespace TagTool.Commands.Porting
 				case "sncl": // always use the default sncl tag
 					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
-				//case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
-					//return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+				case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
+					return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
 				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
 

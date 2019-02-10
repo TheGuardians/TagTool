@@ -398,7 +398,7 @@ namespace TagTool.Commands.Porting
                 if (!validEDRegisters.Contains((a.RegisterIndex)))
                 {
                     // Display a warning
-                    Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
+                    // Console.WriteLine($"INVALID REGISTERS IN TAG {blamTagName}!");
 
                     // Abort, disable functions
                     finalRm.ShaderProperties[0].Unknown = new List<RenderMethod.ShaderProperty.UnknownBlock1>(); // no idea what it does, but it crashes sometimes if it's null. on Shrine, it's the shader loop effect
