@@ -265,7 +265,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x24)]
-        public class GodraysPropertiesBlock
+        public class GodraysPropertiesBlock : TagStructure
         {
             public FlagsValue Flags;
 
