@@ -459,7 +459,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case CameraFxSettings cfxs:
-					blamDefinition = ConvertCameraFxSettings(cfxs);
+					blamDefinition = ConvertCameraFxSettings(cfxs, blamTag.Name);
 					break;
 
 				case Character character:

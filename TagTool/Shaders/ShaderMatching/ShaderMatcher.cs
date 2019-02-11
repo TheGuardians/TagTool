@@ -681,6 +681,21 @@ namespace TagTool.Shaders.ShaderMatching
         {
             switch (blamTagName)
             {
+                case @"levels\dlc\fortress\shaders\panel_platform_center":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0_0");
+                        }
+                        catch { }
+                    }
+                    break;
+
                 case @"levels\dlc\sidewinder\shaders\justin\sw_ground_ice1":
                 case @"levels\dlc\sidewinder\shaders\justin\sw_ground_rock1":
                     try

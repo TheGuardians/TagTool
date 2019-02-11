@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -151,40 +152,20 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<UnknownBlock6> Unknown38;
 
-        //
-        // Godrays
-        //
-
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public FlagsValue Flags17;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Unknown39;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown40;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown41;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float ColorR;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float ColorG;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float ColorB;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown42;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown43;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown44;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown45;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown46;
+        public GodraysPropertiesBlock GodraysProperties;
 
         [Flags]
         public enum FlagsValue : ushort
         {
             None = 0,
-            Disable = 1 << 0
+            UseDefault = 1 << 0,
+            MaximumChangeIsRelative = 1 << 1,
+            AutoAdjustTarget = 1 << 2,
+            Unused1 = 1 << 3,
+            Fixed1 = 1 << 4,
+            Unused2 = 1 << 5,
+            Fixed2 = 1 << 6
         }
 
         [TagStructure(Size = 0x58)]
@@ -281,6 +262,24 @@ namespace TagTool.Tags.Definitions
             public float Unknown8;
             public float Unknown9;
             public float Unknown10;
+        }
+
+        [TagStructure(Size = 0x24)]
+        public class GodraysPropertiesBlock
+        {
+            public FlagsValue Flags;
+
+            [TagField(Padding = true, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public float Radius;
+            public float AngleBias;
+            public RealRgbColor Color;
+            public float Strength;
+            public float PowerExponent;
+            public float BlurSharpness;
+            public float DecoratorDarkening;
+            public float HemiRejectionFalloff;
         }
     }
 }

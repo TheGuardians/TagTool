@@ -183,25 +183,44 @@ namespace TagTool.Commands.Porting
             return Lbsp;
         }
 
-        private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs)
+        private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs, string blamTagName)
         {
-            cfxs.Flags15 = CameraFxSettings.FlagsValue.Disable;
-            cfxs.Flags16 = CameraFxSettings.FlagsValue.Disable;
-            cfxs.Flags17 = CameraFxSettings.FlagsValue.Disable;
+            cfxs.Flags15 = CameraFxSettings.FlagsValue.UseDefault;
+            cfxs.Flags16 = CameraFxSettings.FlagsValue.UseDefault;
 
-            //
-            // Not sure if Flags17 at disable will ignore those values. Using default HO settings
-            //
+            switch (blamTagName)
+            {
+                // citadel godrays
+                case @"levels\dlc\fortress\fortress_fx":
+                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    {
+                        Flags = CameraFxSettings.FlagsValue.MaximumChangeIsRelative | CameraFxSettings.FlagsValue.Fixed2,
+                        Radius = 57.0f,
+                        AngleBias = 125.0f,
+                        Color = new RealRgbColor(0.9882353f, 0.9372549f, 0.6039216f),
+                        Strength = 5000.0f,
+                        PowerExponent = 0.9f,
+                        BlurSharpness = 1.0f,
+                        DecoratorDarkening = 0.7f,
+                        HemiRejectionFalloff = 4.0f
+                    };
+                    break;
 
-            cfxs.ColorR = 1.0f;
-            cfxs.ColorG = 1.0f;
-            cfxs.ColorB = 1.0f;
-
-            cfxs.Unknown42 = 5000.0f;
-            cfxs.Unknown43 = 0.0f;
-            cfxs.Unknown44 = 0.5f;
-            cfxs.Unknown45 = 2.0f;
-            cfxs.Unknown46 = 1.0f;
+                default:
+                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    {
+                        Flags = CameraFxSettings.FlagsValue.UseDefault,
+                        Radius = 0.0f,
+                        AngleBias = 0.0f,
+                        Color = new RealRgbColor(1.0f, 1.0f, 1.0f),
+                        Strength = 5000.0f,
+                        PowerExponent = 0.0f,
+                        BlurSharpness = 0.5f,
+                        DecoratorDarkening = 2.0f,
+                        HemiRejectionFalloff = 1.0f
+                    };
+                    break;
+            }
 
             return cfxs;
         }
