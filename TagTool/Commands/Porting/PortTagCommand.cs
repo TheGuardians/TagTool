@@ -446,13 +446,13 @@ namespace TagTool.Commands.Porting
 
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
-					}
-					if (blamTag.Name == @"levels\ui\mainmenu\sky\ui")
-					{
-						sefc.ScreenEffects[0].Unknown4 = 1E-19f;
-						sefc.ScreenEffects[0].Duration = 1E-19f;
-					}
-					break;
+                    }
+                    if (sefc.ScreenEffects[0].Duration == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
+                    {
+                        sefc.ScreenEffects[0].Duration = 1E-19f;
+                        sefc.ScreenEffects[0].MaximumDistance = 1E-19f;
+                    }
+                    break;
 
 				case Bitmap bitm:
 					blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
