@@ -586,12 +586,20 @@ namespace TagTool.Commands.Porting
                     rmsh.Material = ConvertStringId(rmsh.Material);
                     switch (blamTag.Name)
                     {
+                        // Fix citadel glass
                         case @"levels\dlc\fortress\shaders\floor_glass":
-                            rmsh.ShaderProperties[0].Transparency = 1; // Fix citadel glass
+                            rmsh.ShaderProperties[0].Transparency = 1;
                             break;
 
+                        // Fix avalanche trees
                         case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
-                            rmsh.ShaderProperties[0].BlendMode = 1; // Fix avalanche trees
+                            rmsh.ShaderProperties[0].BlendMode = 1;
+                            break;
+
+                        // Fix citadel panel wall alcove
+                        case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
+                            rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove");
+                            rmsh.ShaderProperties[0].ShaderMaps[2].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump");
                             break;
                     }
                     break;
@@ -616,6 +624,11 @@ namespace TagTool.Commands.Porting
                 case ShaderCortana rmct:
                     rmct.Material = ConvertStringId(rmct.Material);
                     ConvertShaderCortana(rmct, cacheStream, resourceStreams);
+                    break;
+
+                case Scenery scen:
+                    if (blamTag.Name == @"objects\levels\dlc\sandbox\grid\grid")
+                        scen.MultiplayerObjectProperties[0].Unknown = 1; // sandbox grid gametype render flags
                     break;
 
                 case UserInterfaceSharedGlobalsDefinition wigl:
