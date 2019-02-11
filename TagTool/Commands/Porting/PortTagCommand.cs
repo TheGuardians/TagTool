@@ -449,8 +449,8 @@ namespace TagTool.Commands.Porting
                     }
                     if (sefc.ScreenEffects[0].Duration == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
                     {
-                        sefc.ScreenEffects[0].Duration = 1E-19f;
-                        sefc.ScreenEffects[0].MaximumDistance = 1E-19f;
+                        sefc.ScreenEffects[0].Duration = 1E+19f;
+                        sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
                     }
                     break;
 
