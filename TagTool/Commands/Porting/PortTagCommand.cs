@@ -572,10 +572,6 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertSoundMix(snmx);
 					break;
 
-				case StructureDesign sddt:
-					blamDefinition = ConvertStructureDesign(sddt);
-					break;
-
 				case Style style:
 					blamDefinition = ConvertStyle(style);
 					break;

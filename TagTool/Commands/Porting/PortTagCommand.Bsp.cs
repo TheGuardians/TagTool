@@ -115,14 +115,6 @@ namespace TagTool.Commands.Porting
             return sbsp;
         }
 
-        private StructureDesign ConvertStructureDesign(StructureDesign sddt)
-        {
-            foreach(var mopp in sddt.WaterMoppCodes)
-                mopp.Data.ForEach(i => i.ValueNew = (ushort)i.ValueOld);
-
-            return sddt;
-        }
-
         List<ScenarioStructureBsp.Cluster.DecoratorGrid> ConvertDecoratorGrid(List<TinyPositionVertex> vertices, ScenarioStructureBsp.Cluster.DecoratorGrid grid)
         {
             List<ScenarioStructureBsp.Cluster.DecoratorGrid> decoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();

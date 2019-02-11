@@ -14,15 +14,10 @@ namespace TagTool.Havok
         [TagField(Padding = true, Length = 3)]
         public byte[] Unused = new byte[3];
 
-        [TagStructure(Size = 0x1, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x1)]
 		public class Datum : TagStructure
 		{
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public byte ValueOld;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ushort ValueNew;
+            public byte Value;
         }
     }
 }
