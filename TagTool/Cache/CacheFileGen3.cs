@@ -580,7 +580,7 @@ namespace TagTool.Cache
 
             var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
 
-            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
+            if (segment.OptionalPageIndex == -1 || segment.OptionalSegmentOffset == -1)
                 return null;
 
             int pageIndex = segment.OptionalPageIndex;

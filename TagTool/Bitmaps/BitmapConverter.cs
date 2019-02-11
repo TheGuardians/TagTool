@@ -131,7 +131,8 @@ namespace TagTool.Bitmaps.Converter
                         }
                         else
                         {
-                            throw new Exception($"Unsupported layout. Compute bitmap offset for weird bitmap.");
+                            //throw new Exception($"Unsupported layout. Compute bitmap offset for weird bitmap.");
+                            mipMapData = null;
                         }
                     }
                     else
