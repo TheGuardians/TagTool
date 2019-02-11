@@ -598,8 +598,8 @@ namespace TagTool.Commands.Porting
 
                         // Fix citadel panel wall alcove
                         case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
-                            rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove");
-                            rmsh.ShaderProperties[0].ShaderMaps[2].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump");
+                            rmsh.ShaderProperties[0].ShaderMaps[0].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove.bitmap")[0]);
+                            rmsh.ShaderProperties[0].ShaderMaps[2].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\100_citadel\bitmaps\panel_wall_alcove_bump.bitmap")[0]);
                             break;
                     }
                     break;
