@@ -1192,7 +1192,7 @@ namespace TagTool.Commands.Porting
                 switch (expr.Opcode)
                 {
                     case 0x0B3:
-                        expr.Opcode = 0x3A6; // Change the player appearance aspect ratio
+                        expr.Opcode = 0x0B9; // Change the player appearance aspect ratio
                         if (scnr.MapId == 0x10231971 && // mainmenu map id
                             expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
