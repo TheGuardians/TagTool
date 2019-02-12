@@ -1191,9 +1191,21 @@ namespace TagTool.Commands.Porting
             {
                 switch (expr.Opcode)
                 {
+                    case 0x0B3:
+                        expr.Opcode = 0x3A6; // Change the player appearance aspect ratio
+                        if (scnr.MapId == 0x10231971 && // mainmenu map id
+                            expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                        {
+                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 2];
+                            expr2.Data = BitConverter.GetBytes(1.777f).Reverse().ToArray();
+                        }
+                        return true;
+
                     case 0x353:
                         expr.Opcode = 0x3A6; // Remove the additional H3 argument
-                        if (expr.ExpressionType == ScriptExpressionType.Group && expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
                             var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 4];
                             expr2.NextExpressionHandle = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 5].NextExpressionHandle;
@@ -1443,13 +1455,6 @@ namespace TagTool.Commands.Porting
             // Format: Script expression tagblock index (dec), expression handle (salt + tagblock index), next expression handle (salt + tagblock index), opcode, data, 
             // expression type, value type, script expression name, original value, comment
             // Ideally this should use a dictionary with a list of script expressions per map name. I'm using a simple text format as this is how I dump scripts and modify them currently.
-
-
-            //fix texture_camera aspect ratio
-            ["mainmenu"] = new List<string>
-            {
-                "00002377,ECBC0949,FFFFFFFF,0006,BC74E33F,Expression,Real,real,value, //default:560E2D3F"
-            },
 
             ["mainmenu_odst"] = new List<string>
             {
