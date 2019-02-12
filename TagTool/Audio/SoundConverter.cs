@@ -119,13 +119,13 @@ namespace TagTool.Audio
                     blamSound.SampleCount = newSampleCount;
                     break;
                 case 4:
-                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length);
+                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 2);
                     //WAVRLR = LoadWAVData(WAV2BlUnk, (int)length / 2);
                     blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVRLR)
                     blamSound.Encoding.value = Encoding.EncodingValue.Stereo;
                     break;
                 case 6:
-                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length);
+                    WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 3);
                     //WAVCCL = LoadWAVData(WAV2CUnk, (int)length / 3);
                     //WAVRLR = LoadWAVData(WAV3BlUnk, (int)length / 3);
                     blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVCCL, WAVRLR)
