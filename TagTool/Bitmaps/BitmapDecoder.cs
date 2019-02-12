@@ -1222,9 +1222,25 @@ namespace TagTool.Bitmaps
                     break;
 
                 case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.X8R8G8B8:
                     blockSizeX = 1;
                     blockSizeY = 1;
                     texPitch = 4;
+                    break;
+
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.V8U8:
+                case BitmapFormat.R5G6B5:
+                case BitmapFormat.A4R4G4B4:
+                    blockSizeX = 1;
+                    blockSizeY = 1;
+                    texPitch = 2;
+                    break;
+
+                case BitmapFormat.A16B16G16R16F:
+                    blockSizeX = 1;
+                    blockSizeY = 1;
+                    texPitch = 8;
                     break;
 
                 default:
