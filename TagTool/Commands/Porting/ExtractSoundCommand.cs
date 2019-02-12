@@ -16,21 +16,21 @@ using TagTool.Audio;
 
 namespace TagTool.Commands.Porting
 {
-    public class ExtractXMACommand : Command
+    public class ExtractSoundCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
         private CacheFile BlamCache;
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
 
-        public ExtractXMACommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
+        public ExtractSoundCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
             base(true,
 
-                "ExtractXMA",
-                "Extracts XMA Files for selected Sound.",
+                "ExtractSound",
+                "Extracts Sound Files for selected Sound.",
 
-                "ExtractXMA <tag name> <output directory>",
+                "ExtractSound <tag name> <output directory>",
 
-                "Extracts XMA Files for selected Sound.")
+                "Extracts Sound Files for selected Sound.")
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
@@ -39,7 +39,6 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-
             var directory = "";
             var blamTagName = "";
             bool convertAll = false;
@@ -93,15 +92,15 @@ namespace TagTool.Commands.Porting
                     return true;
                 }
 
-                ExtractXMA(blamTag, directory);
+                ExtractWAV(blamTag, directory);
             }
             else
             {
                 foreach (var tag in BlamCache.IndexItems)
                 {
-                    if ((tag.GroupTag == "bitm"))
+                    if ((tag.GroupTag == "snd!"))
                     {
-                        ExtractXMA(tag, directory);
+                        ExtractWAV(tag, directory);
                     }
                 }
             }
@@ -111,8 +110,9 @@ namespace TagTool.Commands.Porting
             return true;
         }
 
-        public void ExtractXMA(CacheFile.IndexItem blamTag, string directory)
+        public void ExtractWAV(CacheFile.IndexItem blamTag, string directory)
         {
+            Console.WriteLine($"Extracting {blamTag.Name}.sound");
             if (BlamSoundGestalt == null)
                 BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(CacheContext, ref BlamCache);
 
@@ -120,10 +120,7 @@ namespace TagTool.Commands.Porting
 
             var sound = BlamCache.Deserializer.Deserialize<Sound>(blamContext);
 
-
             var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
-            if (xmaFileSize < 0)
-                return;
 
             var xmaData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
 
@@ -133,8 +130,9 @@ namespace TagTool.Commands.Porting
                 return;
             }
 
-            var parts = blamTag.Name.Split('\\');
-            string baseName = parts[parts.Length - 1];
+            var OutDir = directory;
+            string sound_name = blamTag.Name.Replace('\\', '_');
+            sound_name = Path.Combine(directory, sound_name); 
 
             for (int pitchRangeIndex = sound.SoundReference.PitchRangeIndex; pitchRangeIndex < sound.SoundReference.PitchRangeIndex + sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
@@ -143,14 +141,13 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < permutationCount; i++)
                 {
-                    BlamSound blamSound = SoundConverter.GetXMA(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData);
-                    string permutationName = $"{baseName}_{relativePitchRangeIndex}_{i}";
-                    var fileName = $"{directory}\\{permutationName}.xma";
+                    string permutationName = $"{sound_name}_{relativePitchRangeIndex}_{i}";
+                    permutationName += ".mp3";
 
-                    using (EndianWriter output = new EndianWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData);
+                    using (EndianWriter output = new EndianWriter(new FileStream(permutationName, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                     {
-                        XMAFile XMAfile = new XMAFile(blamSound);
-                        XMAfile.Write(output);
+                        output.WriteBlock(blamSound.Data);
                     }
                 }
             }

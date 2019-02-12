@@ -89,7 +89,7 @@ namespace TagTool.Tags.Definitions
             public sbyte PromotionIndex;
             public sbyte CustomPlaybackIndex;
             public short ExtraInfoIndex;
-            public int Unknown5;
+            public int LongestPermutationDurationMs;
 
             public int ZoneAssetHandle;
             [TagField(Padding = true, Length = 4)]

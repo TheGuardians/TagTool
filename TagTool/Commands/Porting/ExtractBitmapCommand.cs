@@ -50,6 +50,9 @@ namespace TagTool.Commands.Porting
             else
                 return false;
 
+            if (args[0].ToLower() == "all")
+                convertAll = true;
+
             //
             // Verify input
             //
@@ -67,9 +70,6 @@ namespace TagTool.Commands.Porting
                 else
                     return false;
             }
-
-            if (args[0].ToLower() == "all")
-                convertAll = true;
 
             if (!convertAll)
             {

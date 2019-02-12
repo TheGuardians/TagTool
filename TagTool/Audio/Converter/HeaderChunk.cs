@@ -103,8 +103,8 @@ namespace TagTool.Audio.Converter
 
                 case 6:
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
-                    Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
                     Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_CENTER | ChannelMask.XMA_SPEAKER_LFE));
+                    Streams.Add(new XMAStream(sampleRate, 2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
                     ChunkSize += 0x3C;
                     NumberOfStreams = 3;
                     break;
@@ -143,6 +143,107 @@ namespace TagTool.Audio.Converter
         
     }
 
+    class XMA2FMTChunk : HeaderChunk
+    {
+        public int StructureSize;
+
+        public byte Version = 4;
+        public byte NumberOfStreams;
+        public byte Reserved = 0;
+        public byte LoopCount = 0;
+        public int LoopBegin = 0;
+        public int LoopEnd;
+        public int SampleRate = 44100;
+        public int EncodeOptions = 0;
+        public int PsuedoBytesPerSec = 0;
+        public int BlockSizeInBytes = 0x800;
+        public int SamplesEncoded;
+        public int SamplesInSource;
+        public int BlockCount = 0;
+
+        List<XMA2Stream> Streams;
+
+        public XMA2FMTChunk(int channels, int sampleRate, int sampleCount)
+        {
+            Name = 0x584d4132;
+            ChunkSize = 0x28;
+            LoopEnd = 0;
+            SamplesEncoded = sampleCount;
+            SamplesInSource = sampleCount;
+
+            Streams = new List<XMA2Stream>();
+
+            // Figure out proper streams for 3.1 and 5.1 encoding.
+            switch (channels)
+            {
+                case 1:
+                    Streams.Add(new XMA2Stream(1, ChannelMask.XMA_SPEAKER_CENTER));
+                    ChunkSize += 0x4;
+                    NumberOfStreams = 1;
+                    break;
+
+                case 2:
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
+                    ChunkSize += 0x4;
+                    NumberOfStreams = 1;
+                    break;
+
+                case 4:
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
+                    ChunkSize += 0x8;
+                    NumberOfStreams = 2;
+                    break;
+
+                case 6:
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_LEFT | ChannelMask.XMA_SPEAKER_RIGHT));
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_LEFT_BACK | ChannelMask.XMA_SPEAKER_RIGHT_BACK));
+                    Streams.Add(new XMA2Stream(2, ChannelMask.XMA_SPEAKER_CENTER | ChannelMask.XMA_SPEAKER_LFE));
+                    ChunkSize += 0xC;
+                    NumberOfStreams = 3;
+                    break;
+
+                default:
+                    break;
+            }
+
+            StructureSize = ChunkSize;
+        }
+
+        override public void WriteChunk(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Name);
+            writer.Format = EndianFormat.LittleEndian;
+            writer.Write(StructureSize);
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Version);
+            writer.Write(NumberOfStreams);
+            writer.Write(Reserved);
+            writer.Write(LoopCount);
+            writer.Write(LoopBegin);
+            writer.Write(LoopEnd);
+            writer.Write(SampleRate);
+            writer.Write(EncodeOptions);
+            writer.Write(PsuedoBytesPerSec);
+            writer.Write(BlockSizeInBytes);
+            writer.Write(SamplesEncoded);
+            writer.Write(SamplesInSource);
+            writer.Write(BlockCount);
+
+            for (int i = 0; i < NumberOfStreams; i++)
+            {
+                Streams[i].Write(writer);
+            }
+        }
+
+        override public void ReadChunk(EndianReader reader)
+        {
+            return;
+        }
+
+    }
+
     class WAVFMTChunk : HeaderChunk
     {
         int SubchunkSize;
@@ -156,12 +257,12 @@ namespace TagTool.Audio.Converter
         public WAVFMTChunk(int channels, int sampleRate, int PCMType = 0x10)
         {
             Name = 0x666D7420;
-            SubchunkSize = PCMType;
+            SubchunkSize = 0x10;
             Channels = (short)channels;
             SampleRate = sampleRate;
             ByteRate = SampleRate * Channels * 2;
             BlockAlign = (short)(Channels * 2);
-            BitsPerSecond = 0x10;
+            BitsPerSecond = (short)PCMType;
             ChunkSize = 0x18;
         }
 
@@ -232,20 +333,6 @@ namespace TagTool.Audio.Converter
         }
     }
 
-    [Flags]
-    public enum ChannelMask : short
-    {
-        None =                          0x00,
-        XMA_SPEAKER_LEFT =              0x01,
-        XMA_SPEAKER_RIGHT =             0x02,
-        XMA_SPEAKER_CENTER =            0x04,
-        XMA_SPEAKER_LFE =               0x08,
-        XMA_SPEAKER_LEFT_SURROUND =     0x10,
-        XMA_SPEAKER_RIGHT_SURROUND =    0x20,
-        XMA_SPEAKER_LEFT_BACK =         0x40,
-        XMA_SPEAKER_RIGHT_BACK =        0x80
-    }
-
     class XMAStream
     {
         public int BytesPerSecond = 0;
@@ -258,7 +345,7 @@ namespace TagTool.Audio.Converter
 
         public XMAStream(int sampleRate, int channels, ChannelMask mask)
         {
-            SampleRate = sampleRate;
+            SampleRate = 44100;     // XMA only accept this, convert to th right sample rate after conversion to wav
             Channels = (byte)channels;
             Mask = mask;
         }
@@ -282,4 +369,162 @@ namespace TagTool.Audio.Converter
 
 
     }
+
+    class XMA2Stream
+    {
+        byte Channels;
+        byte Reserved = 0;
+        ChannelMask ChannelMask;
+
+        public XMA2Stream(int channels, ChannelMask mask)
+        {
+            Channels = (byte)channels;
+            ChannelMask = mask;
+        }
+
+        public void Write(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Channels);
+            writer.Write(Reserved);
+            writer.Write((short)ChannelMask);
+        }
+
+        public byte[] Read()
+        {
+            return null;
+        }
+    }
+
+    class FSB4ArchiveHeader : HeaderChunk
+    {
+        public int NumberOfFiles = 1;
+        public int DirectoryLength = 0x50;
+        public int DataLength;
+        public int ExtendedVersion = 0x40000;
+        public int Flags;
+        public int Unused1 = 0;
+        public int Unused2 = 0;
+        public int Hash1 = 0;
+        public int Hash2 = 0;
+        public int Hash3 = 0;
+        public int Hash4 = 0;
+
+        public FSB4ArchiveHeader(int dataLength, int flags=0x20)
+        {
+            Name = 0x46534234;
+            ChunkSize = 0x30;
+            DataLength = dataLength;
+            Flags = flags;
+        }
+
+        override public void WriteChunk(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.BigEndian;
+            writer.Write(Name);
+            writer.Format = EndianFormat.LittleEndian;
+            writer.Write(NumberOfFiles);
+            writer.Write(DirectoryLength);
+            writer.Write(DataLength);
+            writer.Write(ExtendedVersion);
+            writer.Write(Flags);
+            writer.Write(Unused1);
+            writer.Write(Unused2);
+            writer.Write(Hash1);
+            writer.Write(Hash2);
+            writer.Write(Hash3);
+            writer.Write(Hash4);
+
+        }
+
+        override public void ReadChunk(EndianReader reader)
+        {
+
+        }
+    }
+
+    class FSB4FileHeader : HeaderChunk
+    {
+        public short Length = 0x50;
+        public byte[] FileName = new byte[30];
+        public int SampleCount;
+        public int CompressedFileLength;
+        public int LoopBegin;
+        public int LoopEnd;
+        public int Mode;
+        public int SampleRate;
+        public short Volume;
+        public short Pan;
+        public short Pri;
+        public short ChannelCount;
+        public float MinDistance;
+        public float MaxDistance;
+        public int VariableFrequency;
+        public short VariableVolume;
+        public short VariablePan;
+
+        public FSB4FileHeader(int length, int sampleCount, int sampleRate, int loopBegin, int loopEnd, int channelCount)
+        {
+            ChunkSize = 0x50;
+            SampleCount = sampleCount;
+            CompressedFileLength = length;
+            LoopBegin = loopBegin;
+            LoopEnd = loopEnd;
+            Mode = 0x240;
+            SampleRate = sampleRate;
+            Volume = 0xFF;
+            Pan = 0x80;
+            Pri = 0x80;
+            ChannelCount = (short)channelCount;
+            MinDistance = 1.0f;
+            MaxDistance = 10000.0f;
+            VariableFrequency = 0x50;
+            VariableVolume = 0;
+            VariablePan = 0;
+        }
+
+        override public void WriteChunk(EndianWriter writer)
+        {
+            writer.Format = EndianFormat.LittleEndian;
+            writer.Write(Length);
+            writer.WriteBlock(FileName);
+            writer.Write(SampleCount);
+            writer.Write(CompressedFileLength);
+            writer.Write(LoopBegin);
+            writer.Write(LoopEnd);
+            writer.Write(Mode);
+            writer.Write(SampleRate);
+            writer.Write(Volume);
+            writer.Write(Pan);
+            writer.Write(Pri);
+            writer.Write(ChannelCount);
+            writer.Write(MinDistance);
+            writer.Write(MaxDistance);
+            writer.Write(VariableFrequency);
+            writer.Write(VariableVolume);
+            writer.Write(VariablePan);
+
+        }
+
+        override public void ReadChunk(EndianReader reader)
+        {
+
+        }
+    }
+
+    [Flags]
+    public enum ChannelMask : short
+    {
+        None = 0x00,
+        XMA_SPEAKER_LEFT = 0x01,
+        XMA_SPEAKER_RIGHT = 0x02,
+        XMA_SPEAKER_CENTER = 0x04,
+        XMA_SPEAKER_LFE = 0x08,
+        XMA_SPEAKER_LEFT_SURROUND = 0x10,
+        XMA_SPEAKER_RIGHT_SURROUND = 0x20,
+        XMA_SPEAKER_LEFT_BACK = 0x40,
+        XMA_SPEAKER_RIGHT_BACK = 0x80
+    }
+
 }
+

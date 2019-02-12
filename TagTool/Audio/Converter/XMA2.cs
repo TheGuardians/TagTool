@@ -1,32 +1,37 @@
-﻿using TagTool.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TagTool.IO;
 
 namespace TagTool.Audio.Converter
 {
-    public class XMAFile : SoundFile
+    public class XMA2File : SoundFile
     {
         public int RealHeaderSize;
         public int TotalSize;
         RIFFChunk RIFF;
-        XMAFMTChunk FMT;
+        XMA2FMTChunk FMT;
         DataChunk Data;
 
-        public XMAFile(byte[] data, int channels, int sampleRate)
+        public XMA2File(byte[] data, int channels, int sampleRate, int sampleCount)
         {
-            InitXMAFile(data, channels, sampleRate);
+            InitXMA2File(data, channels, sampleRate, sampleCount);
         }
 
-        public XMAFile(BlamSound blamSound)
+        public XMA2File(BlamSound blamSound)
         {
-            InitXMAFile(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz());
+            InitXMA2File(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz(), (int)blamSound.SampleCount);
         }
 
-        private void InitXMAFile(byte[] data, int channels, int sampleRate)
+        private void InitXMA2File(byte[] data, int channels, int sampleRate, int sampleCount)
         {
             // More like min header size in this case
             HeaderSize = 0x3C;
 
             Data = new DataChunk(data);
-            FMT = new XMAFMTChunk(channels, sampleRate);
+            FMT = new XMA2FMTChunk(channels, sampleRate, sampleCount);
             RIFF = new RIFFChunk(data.Length, Data.ChunkSize + FMT.ChunkSize);
 
             RealHeaderSize = Data.ChunkSize + FMT.ChunkSize + RIFF.ChunkSize;
@@ -52,6 +57,7 @@ namespace TagTool.Audio.Converter
         {
             return;
         }
+
 
 
     }

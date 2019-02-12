@@ -11,6 +11,16 @@ namespace TagTool.Audio.Converter
 
         public WAVFile(byte[] data, int channels, int sampleRate)
         {
+            InitWAVFile(data, channels, sampleRate);
+        }
+
+        public WAVFile(BlamSound blamSound)
+        {
+            InitWAVFile(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz());
+        }
+
+        private void InitWAVFile(byte[] data, int channels, int sampleRate)
+        {
             HeaderSize = 0x2C;
 
             Data = new DataChunk(data);
@@ -19,9 +29,8 @@ namespace TagTool.Audio.Converter
 
             if (Data.ChunkSize + FMT.ChunkSize + RIFF.ChunkSize == HeaderSize)
                 isValid = true;
-                TotalSize = HeaderSize + Data.GetDataLength();
+            TotalSize = HeaderSize + Data.GetDataLength();
         }
-
 
         override public void Write(EndianWriter writer)
         {

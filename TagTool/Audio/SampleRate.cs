@@ -9,22 +9,20 @@ namespace TagTool.Audio
 
         public enum SampleRateValue : sbyte
         {
-            _48khz,
+            _22khz,
             _44khz,
             _32khz
         }
-
-        // File converted using either 48000 or 24000 are broken, using 44100 seems to work for now.
 
         public int GetSampleRateHz()
         {
             switch (value)
             {
-                case SampleRateValue._48khz:
-                    return 44100;
+                case SampleRateValue._22khz:
+                    return 22050;
 
                 case SampleRateValue._32khz:
-                    return 44100;
+                    return 32000;
 
                 case SampleRateValue._44khz:
                 default:
@@ -36,11 +34,11 @@ namespace TagTool.Audio
         {
             switch (value)
             {
-                case SampleRateValue._48khz:
-                    return 44.100f;
+                case SampleRateValue._22khz:
+                    return 22.050f;
 
                 case SampleRateValue._32khz:
-                    return 44.100f;
+                    return 32.000f;
 
                 case SampleRateValue._44khz:
                 default:

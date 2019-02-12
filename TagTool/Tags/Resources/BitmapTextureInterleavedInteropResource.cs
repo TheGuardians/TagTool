@@ -60,7 +60,7 @@ namespace TagTool.Tags.Resources
 
             /// <summary>
             /// The format of the bitmap as a D3DFORMAT enum.
-            /// Note that this is actually unused and the game reads the format from <see cref="Format"/>.
+            /// Note that this is actually unused and the game reads the format from <see cref="Format1"/>.
             /// Setting this value is still suggested however.
             /// </summary>
             public int D3DFormatUnused1;
@@ -116,7 +116,7 @@ namespace TagTool.Tags.Resources
 
             /// <summary>
             /// The format of the bitmap as a D3DFORMAT enum.
-            /// Note that this is actually unused and the game reads the format from <see cref="Format"/>.
+            /// Note that this is actually unused and the game reads the format from <see cref="Format2"/>.
             /// Setting this value is still suggested however.
             /// </summary>
             public int D3DFormatUnused2;
