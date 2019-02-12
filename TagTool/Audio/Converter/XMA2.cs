@@ -22,7 +22,7 @@ namespace TagTool.Audio.Converter
 
         public XMA2File(BlamSound blamSound)
         {
-            InitXMA2File(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz(), (int)blamSound.SampleCount);
+            InitXMA2File(blamSound.Data, Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz(), (int)blamSound.SampleCount);
         }
 
         private void InitXMA2File(byte[] data, int channels, int sampleRate, int sampleCount)

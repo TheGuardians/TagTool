@@ -17,7 +17,7 @@ namespace TagTool.Audio.Converter
 
         public XMAFile(BlamSound blamSound)
         {
-            InitXMAFile(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz());
+            InitXMAFile(blamSound.Data, Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz());
         }
 
         private void InitXMAFile(byte[] data, int channels, int sampleRate)

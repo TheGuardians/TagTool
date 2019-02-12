@@ -98,7 +98,7 @@ namespace TagTool.Commands.Sounds
 
                     using (EndianWriter writer = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
                     {
-                        var channelCount = Definition.PlatformCodec.Encoding.GetChannelCount();
+                        var channelCount = Encoding.GetChannelCount(Definition.PlatformCodec.Encoding);
                         var sampleRate = Definition.SampleRate.GetSampleRateHz();
 
                         switch (Definition.PlatformCodec.Compression)

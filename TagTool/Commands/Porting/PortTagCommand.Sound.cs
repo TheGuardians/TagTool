@@ -50,7 +50,7 @@ namespace TagTool.Commands.Porting
 
             sound.PlaybackParameters = playbackParameters;
             sound.Scale = scale;
-            sound.PlatformCodec = platformCodec;
+            sound.PlatformCodec = platformCodec.DeepClone();
             sound.Promotion = promotion;
             sound.CustomPlayBacks = customPlayBack;
 
@@ -124,12 +124,12 @@ namespace TagTool.Commands.Porting
                 // Determine the audio channel count
                 //
 
-                var channelCount = sound.PlatformCodec.Encoding.GetChannelCount();
+                var channelCount = Encoding.GetChannelCount(sound.PlatformCodec.Encoding);
 
                 //
                 // Set compression format
                 //
-
+               
                 sound.PlatformCodec.Compression = Compression.MP3;
 
                 //
@@ -169,7 +169,7 @@ namespace TagTool.Commands.Porting
 
                     byte[] permutationData = null;
 
-                    if ((permutationName != null && !exists) || !useCache)
+                    if ( !exists || !useCache)
                     {
                         BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, BlamSoundGestalt, sound, relativePitchRangeIndex, i, xmaData);
                         permutationData = blamSound.Data;
@@ -184,12 +184,6 @@ namespace TagTool.Commands.Porting
                     else
                     {
                         permutationData = File.ReadAllBytes(cacheFileName);
-                    }
-                    
-                    if (!useCache)
-                    {
-                        if (File.Exists(cacheFileName))
-                            File.Delete(cacheFileName);
                     }
 
                     permutation.PermutationChunks.Add(new PermutationChunk(currentSoundDataOffset, permutationData.Length));

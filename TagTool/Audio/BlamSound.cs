@@ -11,7 +11,7 @@ namespace TagTool.Audio
     public class BlamSound
     {
         public SampleRate SampleRate;
-        public Encoding Encoding;
+        public EncodingValue Encoding;
         public Compression Compression;
         public uint SampleCount;
         public int RealPermutationIndex;

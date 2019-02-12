@@ -2,20 +2,9 @@
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x1)]
-    public class Encoding : TagStructure
+    public static class Encoding
 	{
-        public EncodingValue value;
-
-        public enum EncodingValue : sbyte
-        {
-            Mono,
-            Stereo,
-            Surround,
-            _51Surround
-        }
-
-        public int GetChannelCount()
+        public static int GetChannelCount(EncodingValue value)
         {
             switch (value)
             {
@@ -33,5 +22,13 @@ namespace TagTool.Audio
                     return 1;
             }
         }
+    }
+
+    public enum EncodingValue : sbyte
+    {
+        Mono,
+        Stereo,
+        Surround,
+        _51Surround
     }
 }

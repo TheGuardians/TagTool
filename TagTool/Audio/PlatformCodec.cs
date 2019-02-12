@@ -20,7 +20,7 @@ namespace TagTool.Audio
         [TagField(Gen3Only = true)]
         public SampleRate SampleRate;
 
-        public Encoding Encoding;
+        public EncodingValue Encoding;
 
         public Compression Compression;
     }

@@ -20,7 +20,7 @@ namespace TagTool.Audio.Converter
 
         public FSB4File(BlamSound blamSound)
         {
-            InitFSB4File(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz(), (int)blamSound.SampleCount);
+            InitFSB4File(blamSound.Data, Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz(), (int)blamSound.SampleCount);
         }
 
         private void InitFSB4File(byte[] data, int channels, int sampleRate, int sampleCount)

@@ -30,20 +30,39 @@ namespace TagTool.Audio
             if (blamSound.Compression == Compression.UnknownWTF)
                 throw new Exception("Unknown compression");
 
+            var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
+            var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
+            var sampleRate = blamSound.SampleRate.GetSampleRateHz();
+
             WriteXMAFile(blamSound);
-            ConvertToWAV(XMAFile);
-            LoadANdMergeWAV(blamSound);
-            WriteWAVFile(blamSound);
-            
-            if (sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound))
+
+            if (channelCount > 2)
             {
-                ConvertWAVToMP3Looping(WAVFile);
-                blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
+                // channelCount is 4 or 6, ignore looping
+                ConvertToWAV(XMAFile, false);
+                byte[] originalWAVdata = File.ReadAllBytes(WAVFile);
+                byte[] truncatedWAVdata = TruncateWAVFile(originalWAVdata, sampleRate, channelCount, 0x4E);
+                blamSound.UpdateFormat(Compression.PCM, truncatedWAVdata);
+                WriteWAVFile(blamSound);
+                ConvertToMP3(WAVFile);
+                LoadMP3Data(blamSound);
+            }
+            else if (!loop)
+            {
+                // not looping stereo or mono
+                ConvertToWAV(XMAFile, true);
+                blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
+                WriteWAVFile(blamSound);
+                ConvertToMP3(WAVFile);
+                LoadMP3Data(blamSound);
             }
             else
             {
-                ConvertToMP3(WAVFile);
-                LoadMP3Data(blamSound);
+                ConvertToWAV(XMAFile, true);
+                blamSound.UpdateFormat(Compression.PCM, LoadWAVData(WAVFile, -1, false));
+                WriteWAVFile(blamSound);
+                ConvertWAVToMP3Looping(WAVFile);
+                blamSound.UpdateFormat(Compression.MP3, File.ReadAllBytes(MP3File));
             }
             ClearFiles();
             return blamSound;
@@ -70,20 +89,39 @@ namespace TagTool.Audio
             return new BlamSound(sound, permutationGestaltIndex, permutationData, cache.Version, soundGestalt);
         }
 
-        private static void ConvertToWAV(string XMAFileName)
+        private static void ConvertToWAV(string XMAFileName, bool useTowav = true)
         {
-            ProcessStartInfo info = new ProcessStartInfo(@"Tools\towav.exe")
+            if (useTowav)
             {
-                Arguments = " " + XMAFileName,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false,
-                RedirectStandardInput = false
-            };
-            Process ffmpeg = Process.Start(info);
-            ffmpeg.WaitForExit();
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\towav.exe")
+                {
+                    Arguments = " " + XMAFileName,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process towav = Process.Start(info);
+                towav.WaitForExit();
+            }
+            else
+            {
+                ProcessStartInfo info = new ProcessStartInfo(@"Tools\ffmpeg.exe")
+                {
+                    Arguments = "-i " + XMAFileName + " -q:a 0 " +WAVFile,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardInput = false
+                };
+                Process ffmpeg = Process.Start(info);
+                ffmpeg.WaitForExit();
+            }
+            
         }
 
         private static void ConvertToMP3(string WAVFileName)
@@ -104,32 +142,32 @@ namespace TagTool.Audio
 
         private static bool LoadANdMergeWAV(BlamSound blamSound)
         {
-            uint length = (uint)(2 * blamSound.SampleCount * blamSound.Encoding.GetChannelCount());
+            uint length = (uint)(2 * blamSound.SampleCount * Encoding.GetChannelCount(blamSound.Encoding));
 
             byte[] WAVFLR = null;
             //byte[] WAVRLR = null;
             //byte[] WAVCCL = null;
-            switch (blamSound.Encoding.GetChannelCount())
+            switch (Encoding.GetChannelCount(blamSound.Encoding))
             {
                 case 1:
                 case 2:
                     byte[] data = LoadWAVData(WAVFile, (int)length, false);
                     blamSound.UpdateFormat(Compression.PCM, data);
-                    uint newSampleCount = (uint)(data.Length / (blamSound.Encoding.GetChannelCount() * 2));
+                    uint newSampleCount = (uint)(data.Length / (Encoding.GetChannelCount(blamSound.Encoding) * 2));
                     blamSound.SampleCount = newSampleCount;
                     break;
                 case 4:
                     WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 2);
                     //WAVRLR = LoadWAVData(WAV2BlUnk, (int)length / 2);
                     blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVRLR)
-                    blamSound.Encoding.value = Encoding.EncodingValue.Stereo;
+                    blamSound.Encoding = EncodingValue.Stereo;
                     break;
                 case 6:
                     WAVFLR = LoadWAVData(WAV1FlUnk, (int)length / 3);
                     //WAVCCL = LoadWAVData(WAV2CUnk, (int)length / 3);
                     //WAVRLR = LoadWAVData(WAV3BlUnk, (int)length / 3);
                     blamSound.UpdateFormat(Compression.PCM, WAVFLR); //MergeChannels(length, WAVFLR, WAVCCL, WAVRLR)
-                    blamSound.Encoding.value = Encoding.EncodingValue.Stereo;
+                    blamSound.Encoding = EncodingValue.Stereo;
                     break;
             }
             return true;
@@ -211,6 +249,21 @@ namespace TagTool.Audio
             if (File.Exists(name))
                 File.Delete(name);
         }
+
+        private static byte[] TruncateWAVFile(byte[] data, int sampleRate, int channelCount, int additionalOffset = 0)
+        {
+            var bytesPerSample = 2;         //16 bit PCM
+            int startOffset = (0x240 * channelCount * bytesPerSample);                       // Offset from index 0 
+            int endOffset = (0xBE * channelCount * bytesPerSample);                                           // Offset from index data.Length -1
+            if (channelCount == 1)
+                endOffset = 0;
+
+            int size = data.Length - startOffset - endOffset - additionalOffset;
+            byte[] result = new byte[size];
+            Array.Copy(data, startOffset + additionalOffset, result, 0, size);
+            return result;
+        }
+
 
         private static byte[] LoadWAVData(string name, int length, bool matchLength=true)
         {

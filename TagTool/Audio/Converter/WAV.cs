@@ -16,7 +16,7 @@ namespace TagTool.Audio.Converter
 
         public WAVFile(BlamSound blamSound)
         {
-            InitWAVFile(blamSound.Data, blamSound.Encoding.GetChannelCount(), blamSound.SampleRate.GetSampleRateHz());
+            InitWAVFile(blamSound.Data, Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz());
         }
 
         private void InitWAVFile(byte[] data, int channels, int sampleRate)
