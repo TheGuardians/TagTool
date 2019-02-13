@@ -61,6 +61,9 @@ namespace TagTool.Commands.Files
                 {
                     ResourceCache resourceCache = null;
                     var location = (ResourceLocation)value;
+                    
+                    if (location == ResourceLocation.None)
+                        continue;
 
                     try
                     {
