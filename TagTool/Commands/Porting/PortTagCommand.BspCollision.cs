@@ -16,6 +16,58 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
+        private int ConvertMOPPWorldIndex(int worldIndex)
+        {
+            int descriptor = 0x1;
+            int flags = (worldIndex & 0x70000) >> 16;
+            int surfaceIndex = worldIndex & 0xFFFF;
+
+            int result = 0;
+            result += descriptor << 29;
+            result += flags << 26;
+            result += surfaceIndex;
+            return result;
+        }
+
+        private int ConvertMOPPInstancedGeometryIndex(int geoIndex)
+        {
+            int descriptor = 0x2;
+            int surfaceIndex = (geoIndex & 0x1FFF0000) >> 16;
+            int instancedGeometryIndex = geoIndex & 0xFFFF;
+
+            int result = 0;
+            result += descriptor << 29;
+            result += surfaceIndex << 26;
+            result += instancedGeometryIndex;
+            return result;
+        }
+
+        private int ConvertMOPPType00(int worldIndex)
+        {
+            int descriptor = 0x0;
+            int flags = (worldIndex & 0x70000) >> 16;
+            int surfaceIndex = worldIndex & 0xFFFF;
+
+            int result = 0;
+            result += descriptor << 29;
+            result += flags << 26;
+            result += surfaceIndex;
+            return result;
+        }
+
+        private int ConvertMOPPType11(int worldIndex)
+        {
+            int descriptor = 0x3;
+            int flags = (worldIndex & 0x70000) >> 16;
+            int surfaceIndex = worldIndex & 0xFFFF;
+
+            int result = 0;
+            result += descriptor << 29;
+            result += flags << 26;
+            result += surfaceIndex;
+            return result;
+        }
+
         private List<CollisionMoppCode.Datum> ConvertCollisionMoppData(List<CollisionMoppCode.Datum> moppData)
         {
             if (BlamCache.Version > CacheVersion.Halo3Retail)
@@ -60,15 +112,6 @@ namespace TagTool.Commands.Porting
 
                     case 0x0A: // HK_MOPP_TERM_REOFFSET16
                         i += 2;
-                        break;
-
-                    case 0x0B: // HK_MOPP_TERM_REOFFSET32
-                        if ((moppData[i + 1].Value == 0x20) && (moppData[i + 2].Value == 0x05))
-                        {
-                            moppData[i + 1] = new CollisionMoppCode.Datum { Value = 0x34 };
-                            moppData[i + 2] = new CollisionMoppCode.Datum { Value = 0x00 };
-                        }
-                        i += 4;
                         break;
 
                     case 0x0C: // HK_MOPP_JUMP_CHUNK
@@ -182,9 +225,35 @@ namespace TagTool.Commands.Porting
                         i += 3;
                         break;
 
+                    case 0x0B: // HK_MOPP_TERM_REOFFSET32
                     case 0x53: // HK_MOPP_TERM32
-                        moppData[i + 1] = new CollisionMoppCode.Datum { Value = (byte)(moppData[i + 1].Value + (byte)(moppData[i + 2].Value * 4)) };
-                        moppData[i + 2] = new CollisionMoppCode.Datum { Value = 0x00 };
+                        int result = BitConverter.ToInt32(new byte[] { moppData[i + 4].Value, moppData[i + 3].Value, moppData[i + 2].Value, moppData[i + 1].Value }, 0);
+
+                        if (moppData[i + 1].Value == 0x20)
+                        {
+                            result = ConvertMOPPWorldIndex(result);
+                        }
+                        else if (moppData[i + 1].Value == 0x40)
+                        {
+                            result = ConvertMOPPInstancedGeometryIndex(result);
+                        }
+                        else if (moppData[i + 1].Value == 0x00)
+                        {
+                            result = ConvertMOPPType00(result);
+                        }
+                        else if (moppData[i + 1].Value == 0x60)
+                        {
+                            result = ConvertMOPPType11(result);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException($"Type of 0x{moppData[i + 1].Value:X2} {result:X8}");
+                        }
+                        moppData[i + 1] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x7F000000) >> 24) };
+                        moppData[i + 2] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x00FF0000) >> 16) };
+                        moppData[i + 3] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x0000FF00) >> 8) };
+                        moppData[i + 4] = new CollisionMoppCode.Datum { Value = (byte)(result & 0x000000FF) };
+
                         i += 4;
                         break;
 
