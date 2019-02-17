@@ -384,7 +384,10 @@ namespace TagTool.Commands.Porting
                 }
 
                 foreach (var instance in resourceDefinition.InstancedGeometry)
+                {
                     instance.Unknown5 = new TagBlock<StructureBspTagResources.InstancedGeometryBlock.Unknown4Block>();
+                    instance.Unknown2 = new TagBlock<StructureBspTagResources.InstancedGeometryBlock.Unknown2Block>();
+                }
             }
 
             //
@@ -641,7 +644,8 @@ namespace TagTool.Commands.Porting
                     instance.Unknown1.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < instance.Unknown1.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<StructureBspTagResources.InstancedGeometryBlock.Unknown1Block>(dataContext));
-
+                    
+                    /*
                     StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Unknown2.Address.Offset;
                     instance.Unknown2.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
@@ -654,7 +658,7 @@ namespace TagTool.Commands.Porting
                             element.Unknown2 = element.Unknown2_H3;
                         }
                         CacheContext.Serializer.Serialize(dataContext, element);
-                    }
+                    */
 
                     StreamUtil.Align(dataStream, 0x4); // 0x4 > 0x10
                     blamResourceStream.Position = instance.Unknown3.Address.Offset;
