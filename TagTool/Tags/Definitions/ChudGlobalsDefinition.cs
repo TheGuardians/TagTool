@@ -215,59 +215,26 @@ namespace TagTool.Tags.Definitions
             public ArgbColor WaypointBlip;
             public ArgbColor DistantWaypointBlip;
             public ArgbColor FriendlyWaypoint;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic16;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic17;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic18;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public ArgbColor BlueWaypoint_HO;
+
             public ArgbColor GlobalDynamic19;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic20;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic21;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public ArgbColor TextFadeIn;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public ArgbColor GlobalDynamic22;
             public ArgbColor GlobalDynamic23;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic24;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic25;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic26;
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public ArgbColor GlobalDynamic27;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor NeutralWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor HostileWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor DeadWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor BlueWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor TextFadeIn_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic21_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic22_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic23_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic24_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor GlobalDynamic25_UnknownWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor ShootingWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor TakingDamageWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public ArgbColor SpeakingWaypoint_HO;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public ArgbColor GlobalDynamic29_HO; //White
+
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public ArgbColor DefaultItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -282,6 +249,7 @@ namespace TagTool.Tags.Definitions
 			public ArgbColor RNGItemOutline;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public ArgbColor PWRItemOutline;
+
 			public List<HudAttribute> HudAttributes;
 			public List<HudSound> HudSounds;
 			public CachedTagInstance Unknown;
@@ -474,7 +442,8 @@ namespace TagTool.Tags.Definitions
 				public float StateCenterOffsetY;
 				public float Unknown28;
 				public float Unknown29;
-				public float StateScale;
+                public float Unknown30;
+				public float StateScale;    
 
                 //HO ONLY
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -485,8 +454,6 @@ namespace TagTool.Tags.Definitions
 				public float Unknown33;
 				[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 				public float Unknown34;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown35;
 
                 public float NotificationScale;
 				public float NotificationLineSpacing;

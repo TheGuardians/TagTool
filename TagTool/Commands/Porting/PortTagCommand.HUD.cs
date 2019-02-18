@@ -193,12 +193,19 @@ namespace TagTool.Commands.Porting
                 H3globs.WaypointBlip = ConvertColor(H3globs.WaypointBlip);
                 H3globs.DistantWaypointBlip = ConvertColor(H3globs.DistantWaypointBlip);
                 H3globs.FriendlyWaypoint = ConvertColor(H3globs.FriendlyWaypoint);
+                H3globs.GlobalDynamic16 = ConvertColor(H3globs.GlobalDynamic16);
+                H3globs.GlobalDynamic17 = ConvertColor(H3globs.GlobalDynamic17);
+                H3globs.GlobalDynamic18 = ConvertColor(H3globs.GlobalDynamic18);
+                H3globs.GlobalDynamic19 = ConvertColor(H3globs.GlobalDynamic19);
+                H3globs.GlobalDynamic20 = ConvertColor(H3globs.GlobalDynamic20);
+                H3globs.GlobalDynamic21 = ConvertColor(H3globs.GlobalDynamic21);
+                H3globs.GlobalDynamic22 = ConvertColor(H3globs.GlobalDynamic22);
+                H3globs.GlobalDynamic23 = ConvertColor(H3globs.GlobalDynamic23);
+                H3globs.GlobalDynamic24 = ConvertColor(H3globs.GlobalDynamic24);
+                H3globs.GlobalDynamic25 = ConvertColor(H3globs.GlobalDynamic25);
+                H3globs.GlobalDynamic26 = ConvertColor(H3globs.GlobalDynamic26);
+                H3globs.GlobalDynamic27 = ConvertColor(H3globs.GlobalDynamic27);
 
-                H3globs.TextFadeIn_HO = ConvertColor(H3globs.TextFadeIn);
-                H3globs.GlobalDynamic21_HO = ConvertColor(H3globs.GlobalDynamic21);
-                H3globs.GlobalDynamic23_HO = ConvertColor(H3globs.GlobalDynamic23);
-                H3globs.GlobalDynamic24_HO = ConvertColor(H3globs.GlobalDynamic24);
-                H3globs.GlobalDynamic25_UnknownWaypoint_HO = ConvertColor(H3globs.GlobalDynamic25);
 
                 //fixups
                 H3globs.GrenadeScematicsSpacing = 1.5f * H3globs.GrenadeScematicsSpacing;

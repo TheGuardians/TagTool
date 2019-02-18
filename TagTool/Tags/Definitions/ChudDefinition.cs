@@ -150,8 +150,8 @@ namespace TagTool.Tags.Definitions
                     CampaignSolo = 1 << 0,
                     CampaignCoop = 1 << 1,
                     Survival = 1 << 2, //not sure about this one
-                    Unknown2 = 1 << 3,
-                    Unknown3 = 1 << 4,
+                    FFAgame = 1 << 3,
+                    Teamgame = 1 << 4,
                     CTF = 1 << 5,
                     Slayer = 1 << 6,
                     Oddball = 1 << 7,
