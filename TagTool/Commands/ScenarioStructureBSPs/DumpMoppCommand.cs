@@ -31,18 +31,17 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (args.Count != 1)
                 return false;
 
-            
             using (var fileStream = File.Create(args[0]))
             using (var fileWriter = new StreamWriter(fileStream))
             {
-
                 var moppData = Definition.CollisionMoppCodes[0].Data;
                 var print = false;
+
                 for (var i = 0; i < moppData.Count; i++)
                 {
                     var moppOperator = moppData[i].Value;
                     print = false;
-                    
+
                     var count = 0;
                     switch (moppOperator)
                     {
@@ -263,26 +262,25 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         default:
                             throw new NotSupportedException($"Opcode 0x{moppOperator:X2}");
                     }
+
                     if (print)
                     {
                         fileWriter.Write($"{moppOperator.ToString("X2")}");
                         ReadArguments(count, i, moppData, fileWriter);
                         fileWriter.Write(Environment.NewLine);
                     }
+
                     i += count;
-                    
                 }
             }
+
             return true;
         }
 
-        public void ReadArguments(int count,int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
+        public void ReadArguments(int count, int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
         {
-            for(int i = 0; i < count; i++)
-            {
-                fileWriter.Write($":{moppData[offset+i+1].Value.ToString("X2")}");
-            }
-            return;
+            for (int i = 0; i < count; i++)
+                fileWriter.Write($":{moppData[offset + i + 1].Value.ToString("X2")}");
         }
     }
 }
