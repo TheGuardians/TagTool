@@ -146,7 +146,7 @@ namespace TagTool.Shaders.ShaderMatching
                         for (var i = 0; i < vectorArgsCount; i++)
                         {
                             reader.SeekTo(instance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
-                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            arguments.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
                         }
                     }
 
@@ -167,7 +167,6 @@ namespace TagTool.Shaders.ShaderMatching
                 }
             }
         }
-
 
         private List<ShaderTemplateItem> CollectRmt2Info(Stream cacheStream, CacheFile.IndexItem bmRmt2Instance, List<string> bmMaps, List<string> bmArgs)
         {
