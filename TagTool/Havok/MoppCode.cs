@@ -22,7 +22,7 @@ namespace TagTool.Havok
         public byte[] Unused3 = new byte[4];
 
         public int DataSize;
-        public int DataCapacityAndFlags;
+        public uint DataCapacityAndFlags;
         public sbyte DataBuildType;
 
         [TagField(Padding = true, Length = 3)]

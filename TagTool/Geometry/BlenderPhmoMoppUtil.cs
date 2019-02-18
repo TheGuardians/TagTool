@@ -87,7 +87,7 @@ namespace TagTool.Geometry
                 DataBuildType = -101
             };
 
-            resource.DataCapacityAndFlags = resource.DataSize;
+            resource.DataCapacityAndFlags = (uint)resource.DataSize;
 
             return resource;
         }

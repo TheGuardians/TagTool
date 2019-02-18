@@ -4,21 +4,22 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.IO;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class DumpMoppCommand : Command
+    class MoppDataCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public DumpMoppCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp bsp) :
+        public MoppDataCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp bsp) :
             base(true,
 
-                "DumpMopp",
-                "Dumps bsp mopp.",
+                "MoppData",
+                "Modify Mopp data",
 
-                "DumpMopp <Output File>",
+                "MoppData <export/import/parse> <output/input file>",
 
                 "")
         {
@@ -28,11 +29,83 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count != 2)
                 return false;
 
+            string mode = args[0].ToLower();
+            string file = args[1].ToLower();
+
+            if (mode.Equals("export"))
+            {
+                ExportMopps(file);
+            }
+            else if (mode.Equals("import"))
+            {
+                ImportMopps(file);
+            }
+            else if(mode.Equals("parse"))
+            {
+                ParseMopps(file);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid mode {mode}");
+            }
+
+
+
+
             
-            using (var fileStream = File.Create(args[0]))
+            return true;
+        }
+
+        private void ImportMopps(string file)
+        {
+            Console.WriteLine($"Don't forget to savetagchanges after importing new mopp data!");
+
+            if (!File.Exists(file))
+            {
+                Console.WriteLine($"File {file} does not exists!");
+                return;
+            }
+                
+
+            List<CollisionMoppCode.Datum> newMoppData = new List<CollisionMoppCode.Datum>();
+            using (var reader = new EndianReader(File.Open(file, FileMode.Open)))
+            {
+                for(int i =0; i < reader.Length; i++)
+                {
+                    var newMopp = new CollisionMoppCode.Datum
+                    {
+                        Value = reader.ReadByte()
+                    };
+                    newMoppData.Add(newMopp);
+                }
+            }
+
+            var moppData = Definition.CollisionMoppCodes[0];
+            moppData.DataSize = newMoppData.Count;
+            moppData.DataCapacityAndFlags = (uint)(moppData.DataSize + 0x80000000);
+            moppData.Data = newMoppData;
+
+
+        }
+
+        private void ExportMopps(string file)
+        {
+            var moppData = Definition.CollisionMoppCodes[0];
+            using (var writer = new EndianWriter(File.Create(file), EndianFormat.LittleEndian))
+            {
+                for(int i = 0; i< moppData.Data.Count; i++)
+                {
+                    writer.Write(moppData.Data[i].Value);
+                }
+            }
+        }
+
+        private void ParseMopps(string file)
+        {
+            using (var fileStream = File.Create(file))
             using (var fileWriter = new StreamWriter(fileStream))
             {
 
@@ -42,7 +115,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 {
                     var moppOperator = moppData[i].Value;
                     print = true;
-                    
+
                     var count = 0;
                     switch (moppOperator)
                     {
@@ -270,13 +343,12 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         fileWriter.Write(Environment.NewLine);
                     }
                     i += count;
-                    
+
                 }
             }
-            return true;
         }
 
-        public void ReadArguments(int count,int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
+        private void ReadArguments(int count,int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
         {
             for(int i = 0; i < count; i++)
             {
