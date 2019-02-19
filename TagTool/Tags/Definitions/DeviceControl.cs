@@ -3,7 +3,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "device_control", Tag = "ctrl", Size = 0x44)]
+    [TagStructure(Name = "device_control", Tag = "ctrl", Size = 0x3C)]
     public class DeviceControl : Device
     {
         public TypeValue Type;
@@ -13,9 +13,6 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance On;
         public CachedTagInstance Off;
         public CachedTagInstance Deny;
-        public StringId NodeName;
-        public short Unknown1;
-        public short Unknown2;
 
         public enum TypeValue : short
         {
