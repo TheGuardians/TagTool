@@ -330,7 +330,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         string description = GetMoppDescription(moppOperator);
                         int descriptionMaxLength = 40;
                         description = description.PadRight(descriptionMaxLength);
-                        string data = GetMoppDataString(moppOperator, moppData, i+1, count);
+                        string data = GetMoppDataString(moppOperator, moppData, i, count);
                         string parsedLine = $"{lineIndex}: 0x{moppOperator:X2}: {description} {data}";
 
                         fileWriter.Write(parsedLine);
@@ -730,7 +730,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private string GetMoppDataString(int opcode, List<CollisionMoppCode.Datum> moppData, int index, int count)
         {
             string result = "";
-            byte[] data = GetMoppData(moppData, index, count);
+            byte[] data = GetMoppData(moppData, index + 1, count);
             int offset;
             int address;
             switch (opcode)
@@ -739,33 +739,33 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     break;
 
                 case 0x01: // HK_MOPP_SCALE1
-                    break;
-
                 case 0x02: // HK_MOPP_SCALE2
-                    break;
                 case 0x03: // HK_MOPP_SCALE3
-                    break;
                 case 0x04: // HK_MOPP_SCALE4
+                    var xOffset = data[0];
+                    var yOffset = data[1];
+                    var zOffset = data[2];
+                    result = $"Offset by: X={xOffset:X2} Y={yOffset:X2} Z={zOffset:X2} and scale result by 2^{opcode}"; // more work required to get the actual x,y,z offset (8 bit float maybe)
                     break;
 
                 case 0x05: // HK_MOPP_JUMP8
-                    offset = GetInt8(data);
-                    result = $"Offset = {offset:X8}";
+                    offset = GetInt8(data) + 2 + index;
+                    result = $"Goto offset = {offset:X8}";
                     break;
 
                 case 0x06: // HK_MOPP_JUMP16
-                    offset = GetInt16(data);
-                    result = $"Offset = {offset:X8}";
+                    offset = GetInt16(data) + 3 + index;
+                    result = $"Goto offset = {offset:X8}";
                     break;
 
                 case 0x07: // HK_MOPP_JUMP24
-                    offset = GetInt24(data);
-                    result = $"Offset = {offset:X8}";
+                    offset = GetInt24(data) + 4 + index;
+                    result = $"Goto offset = {offset:X8}";
                     break;
 
                 case 0x08: // HK_MOPP_JUMP32 (NOT IMPLEMENTED)
-                    offset = GetInt32(data);
-                    result = $"Offset = {offset:X8}";
+                    offset = GetInt32(data) + 5 + index;
+                    result = $"Goto Offset = {offset:X8}";
                     break;
 
                 case 0x09: // HK_MOPP_TERM_REOFFSET8
