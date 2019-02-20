@@ -750,22 +750,22 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 case 0x05: // HK_MOPP_JUMP8
                     offset = GetInt8(data) + 2 + index;
-                    result = $"Goto offset = {offset:X8}";
+                    result = $"Goto offset = 0x{offset:X8}";
                     break;
 
                 case 0x06: // HK_MOPP_JUMP16
                     offset = GetInt16(data) + 3 + index;
-                    result = $"Goto offset = {offset:X8}";
+                    result = $"Goto offset = 0x{offset:X8}";
                     break;
 
                 case 0x07: // HK_MOPP_JUMP24
                     offset = GetInt24(data) + 4 + index;
-                    result = $"Goto offset = {offset:X8}";
+                    result = $"Goto offset = 0x{offset:X8}";
                     break;
 
                 case 0x08: // HK_MOPP_JUMP32 (NOT IMPLEMENTED)
                     offset = GetInt32(data) + 5 + index;
-                    result = $"Goto Offset = {offset:X8}";
+                    result = $"Goto Offset = 0x{offset:X8}";
                     break;
 
                 case 0x09: // HK_MOPP_TERM_REOFFSET8
