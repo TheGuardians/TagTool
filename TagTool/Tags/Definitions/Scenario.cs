@@ -1843,7 +1843,7 @@ namespace TagTool.Tags.Definitions
                 public short PointSetIndex;
                 public SquadPatrolMode PatrolMode;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused3 = new byte[2];
 
                 public List<SquadPoint> PatrolPoints;

@@ -294,6 +294,8 @@ namespace TagTool.Commands.Porting
                         MergeMultiplayerEvent(cacheStream, resourceStreams, edEvent, h3Event);
                 }
             }
+
+            CacheContext.Serialize(cacheStream, edTag, edDef);
         }
     }
 }
