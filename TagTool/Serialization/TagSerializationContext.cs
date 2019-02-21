@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Serialization
 {
@@ -95,6 +96,11 @@ namespace TagTool.Serialization
         public IDataBlock CreateBlock()
         {
             return new TagDataBlock(this);
+        }
+
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
+        {
+            throw new NotImplementedException();
         }
 
         private class TagDataBlock : IDataBlock

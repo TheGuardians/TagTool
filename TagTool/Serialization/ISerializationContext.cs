@@ -1,3 +1,4 @@
+using System.Collections;
 using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Tags;
@@ -65,5 +66,7 @@ namespace TagTool.Serialization
         /// </summary>
         /// <returns>The created block.</returns>
         IDataBlock CreateBlock();
+
+        void AddResourceBlock(int count, CacheAddress address, IList block);
     }
 }

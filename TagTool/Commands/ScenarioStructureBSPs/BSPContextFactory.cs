@@ -22,6 +22,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         {
             commandContext.AddCommand(new CollisionTestCommand(cacheContext, tag, bsp));
             commandContext.AddCommand(new ResourceDataCommand(cacheContext, tag, bsp));
+            commandContext.AddCommand(new ExtractCollisionGeometryCommand(cacheContext, bsp));
             commandContext.AddCommand(new ExtractRenderGeometryCommand(cacheContext, bsp));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cacheContext, bsp.Geometry, "Decorator"));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cacheContext, bsp.Geometry2, "Bsp"));

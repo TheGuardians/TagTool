@@ -3,6 +3,7 @@ using TagTool.IO;
 using System;
 using System.IO;
 using TagTool.Tags;
+using System.Collections;
 
 namespace TagTool.Serialization
 {
@@ -68,6 +69,11 @@ namespace TagTool.Serialization
         }
 
         public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }

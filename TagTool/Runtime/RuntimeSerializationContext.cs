@@ -4,6 +4,7 @@ using TagTool.Tags;
 using System;
 using System.IO;
 using TagTool.Serialization;
+using System.Collections;
 
 namespace TagTool.Runtime
 {
@@ -52,6 +53,11 @@ namespace TagTool.Runtime
         }
 
         public CachedTagInstance GetTagByName(TagGroup group, string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }

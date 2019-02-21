@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -96,6 +97,17 @@ namespace TagTool.Serialization
         public IDataBlock CreateBlock()
         {
             return new ResourceDataBlock(this);
+        }
+
+        private Dictionary<(int, CacheAddress), IList> ResourceBlocks = new Dictionary<(int, CacheAddress), IList>();
+
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
+        {
+            foreach (var key in ResourceBlocks.Keys)
+                if (key.Item1 == count && key.Item2 == address)
+                    throw new InvalidOperationException();
+
+            ResourceBlocks[(count, address)] = block;
         }
 
         private class ResourceDataBlock : IDataBlock

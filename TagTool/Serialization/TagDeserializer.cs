@@ -303,8 +303,8 @@ namespace TagTool.Serialization
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
             
-            var pointer = reader.ReadUInt32();
-            if (count == 0 || pointer == 0)
+            var pointer = new CacheAddress(reader.ReadUInt32());
+            if (count == 0 || pointer.Value == 0)
             {
                 // Null tag block
                 reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
@@ -317,7 +317,7 @@ namespace TagTool.Serialization
 
             var addMethod = valueType.GetMethod("Add");
 
-            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer);
+            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer.Value);
 
             for (var i = 0; i < count; i++)
             {
