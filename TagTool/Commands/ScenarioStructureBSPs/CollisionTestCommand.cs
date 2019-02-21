@@ -174,60 +174,60 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 {
                     #region compression's resource data
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Bsp3dNodes.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Bsp3dNodes.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Bsp3dNodes.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Bsp3dNodes.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Bsp3dNode));
-                        instance.CollisionBsp.Bsp3dNodes.Add((CollisionGeometry.Bsp3dNode)element);
+                        instance.CollisionInfo.Bsp3dNodes.Add((CollisionGeometry.Bsp3dNode)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Planes.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Planes.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Planes.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Planes.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Plane));
-                        instance.CollisionBsp.Planes.Add((CollisionGeometry.Plane)element);
+                        instance.CollisionInfo.Planes.Add((CollisionGeometry.Plane)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Leaves.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Leaves.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Leaves.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Leaves.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Leaf));
-                        instance.CollisionBsp.Leaves.Add((CollisionGeometry.Leaf)element);
+                        instance.CollisionInfo.Leaves.Add((CollisionGeometry.Leaf)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Bsp2dReferences.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Bsp2dReferences.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Bsp2dReferences.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Bsp2dReferences.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Bsp2dReference));
-                        instance.CollisionBsp.Bsp2dReferences.Add((CollisionGeometry.Bsp2dReference)element);
+                        instance.CollisionInfo.Bsp2dReferences.Add((CollisionGeometry.Bsp2dReference)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Bsp2dNodes.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Bsp2dNodes.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Bsp2dNodes.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Bsp2dNodes.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Bsp2dNode));
-                        instance.CollisionBsp.Bsp2dNodes.Add((CollisionGeometry.Bsp2dNode)element);
+                        instance.CollisionInfo.Bsp2dNodes.Add((CollisionGeometry.Bsp2dNode)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Surfaces.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Surfaces.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Surfaces.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Surfaces.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Surface));
-                        instance.CollisionBsp.Surfaces.Add((CollisionGeometry.Surface)element);
+                        instance.CollisionInfo.Surfaces.Add((CollisionGeometry.Surface)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Edges.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Edges.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Edges.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Edges.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Edge));
-                        instance.CollisionBsp.Edges.Add((CollisionGeometry.Edge)element);
+                        instance.CollisionInfo.Edges.Add((CollisionGeometry.Edge)element);
                     }
 
-                    reader.BaseStream.Position = instance.CollisionBsp.Vertices.Address.Offset;
-                    for (var i = 0; i < instance.CollisionBsp.Vertices.Count; i++)
+                    reader.BaseStream.Position = instance.CollisionInfo.Vertices.Address.Offset;
+                    for (var i = 0; i < instance.CollisionInfo.Vertices.Count; i++)
                     {
                         var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(CollisionGeometry.Vertex));
-                        instance.CollisionBsp.Vertices.Add((CollisionGeometry.Vertex)element);
+                        instance.CollisionInfo.Vertices.Add((CollisionGeometry.Vertex)element);
                     }
 
                     #endregion
@@ -319,12 +319,12 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                     #region compression's havok collision data
 
-                    foreach (var collision in instance.CollisionMoppCodes)
+                    foreach (var collision in instance.BspPhysics)
                     {
                         for (var i = 0; i < collision.Data.Count; i++)
                         {
                             var element = CacheContext.Deserializer.DeserializeValue(reader, null, null, typeof(byte));
-                            collision.Data.Add(new StructureBspTagResources.CollisionMoppCodeResource.Datum { Value = (byte)element });
+                            collision.Data.Add(new StructureBspTagResources.CollisionBspPhysicsBlock.Datum { Value = (byte)element });
                         }
                     }
 

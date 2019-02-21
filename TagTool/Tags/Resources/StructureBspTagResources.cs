@@ -103,11 +103,12 @@ namespace TagTool.Tags.Resources
         [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnline106708)]
         public class InstancedGeometryBlock : TagStructure
 		{
-            public RealQuaternion Position;
-            public float Radius;
-            public CollisionBspBlock CollisionBsp;
+            public int Checksum;
+            public RealPoint3d BoundingSphereOffset;
+            public float BoundingSphereRadius;
+            public CollisionBspBlock CollisionInfo;
             public List<CollisionBspBlock> CollisionGeometries;
-            public List<CollisionMoppCodeResource> CollisionMoppCodes;
+            public List<CollisionBspPhysicsBlock> BspPhysics;
             public TagBlock<Unknown1Block> Unknown1;
             public TagBlock<Unknown2Block> Unknown2;
             public TagBlock<Unknown3Block> Unknown3;
@@ -143,15 +144,14 @@ namespace TagTool.Tags.Resources
                 public int Unknown2;
             }
 
-            [TagStructure]
+            [TagStructure(Size = 0x4)]
             public class Unknown3Block : TagStructure
 			{
-                // public uint Unknown;
                 public short Unknown;
                 public short Unknown1;
             }
 
-            [TagStructure]
+            [TagStructure(Size = 0x4)]
             public class Unknown4Block : TagStructure
 			{
                 public uint Unknown;
@@ -179,7 +179,7 @@ namespace TagTool.Tags.Resources
         }
 
         [TagStructure(Size = 0x40, Align = 0x10)]
-        public class CollisionMoppCodeResource : TagStructure
+        public class CollisionBspPhysicsBlock : TagStructure
 		{
             public int Unused1;
             public short Size;
