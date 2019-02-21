@@ -576,6 +576,10 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertStyle(style);
 					break;
 
+                case TextValuePairDefinition sily:
+                    Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
+                    break;
+
                 // Fix warthog horn
 				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
 					foreach (var attach in weapon.Attachments)
