@@ -57,7 +57,7 @@ namespace TagTool.Commands.Sounds
             {
 
                 fileSize = (int)dataStream.Length;
-                var resourceContext = new ResourceSerializationContext(Definition.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource);
                 CacheContext.Serializer.Serialize(resourceContext,
                     new SoundResourceDefinition
                     {

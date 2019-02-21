@@ -114,7 +114,7 @@ namespace TagTool.Commands.RenderModels
 
             Console.WriteLine($"File date: {File.GetLastWriteTime(args[0])}");
 
-            var builder = new RenderModelBuilder(CacheContext.Version);
+            var builder = new RenderModelBuilder(CacheContext);
 
             using (var importer = new AssimpContext())
             {

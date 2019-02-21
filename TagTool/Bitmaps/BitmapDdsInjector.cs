@@ -41,7 +41,7 @@ namespace TagTool.Bitmaps
                 };
 
                 bitmap.Resources[imageIndex].Resource = resource;
-                resourceContext = new ResourceSerializationContext(resource);
+                resourceContext = new ResourceSerializationContext(CacheContext, resource);
                 definition = new BitmapTextureInteropResource
                 {
                     Texture = new TagStructureReference<BitmapTextureInteropResource.BitmapDefinition>
@@ -57,7 +57,7 @@ namespace TagTool.Bitmaps
             else
             {
                 // Deserialize the old definition
-                resourceContext = new ResourceSerializationContext(resource);
+                resourceContext = new ResourceSerializationContext(CacheContext, resource);
                 definition = deserializer.Deserialize<BitmapTextureInteropResource>(resourceContext);
             }
             if (definition.Texture == null || definition.Texture.Definition == null)

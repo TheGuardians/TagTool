@@ -42,7 +42,7 @@ namespace TagTool.Commands.Geometry
             else
                 file = args[1];
 
-            var resourceContext = new ResourceSerializationContext(Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Geometry.Resource);
             var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             if (args.Count == 2)

@@ -423,7 +423,7 @@ namespace TagTool.Commands.Porting
 
                     dataStream.Position = 0;
 
-                    CacheContext.Serializer.Serialize(new ResourceSerializationContext(group.Resource), resourceDefinition[resDefIndex]);
+                    CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, group.Resource), resourceDefinition[resDefIndex]);
 
                     group.Resource.ChangeLocation(ResourceLocation.ResourcesB);
                     var resource = group.Resource;

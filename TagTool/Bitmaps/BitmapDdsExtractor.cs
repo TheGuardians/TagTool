@@ -24,7 +24,7 @@ namespace TagTool.Bitmaps
 
             // Deserialize the resource definition and verify it
             var resource = bitmap.Resources[imageIndex];
-            var resourceContext = new ResourceSerializationContext(resource.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource.Resource);
             var definition = CacheContext.Deserializer.Deserialize<BitmapTextureInteropResource>(resourceContext);
             if (definition.Texture == null || definition.Texture.Definition == null)
                 throw new ArgumentException("Invalid bitmap definition");

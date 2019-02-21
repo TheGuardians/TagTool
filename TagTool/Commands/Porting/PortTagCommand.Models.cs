@@ -687,7 +687,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            var builder = new RenderModelBuilder(CacheContext.Version);
+            var builder = new RenderModelBuilder(CacheContext);
 
             foreach (var node in mode.Nodes)
                 builder.AddNode(node);

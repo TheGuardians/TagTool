@@ -782,7 +782,7 @@ namespace TagTool.Cache
         }
 
         public T Deserialize<T>(PageableResource pageable) =>
-            Deserialize<T>(new ResourceSerializationContext(pageable));
+            Deserialize<T>(new ResourceSerializationContext(this, pageable));
 
         public object Deserialize(PageableResource pageable)
         {
@@ -816,7 +816,7 @@ namespace TagTool.Cache
         }
 
         public void Serialize(PageableResource pageable, object definition) =>
-            Serialize(new ResourceSerializationContext(pageable), definition);
+            Serialize(new ResourceSerializationContext(this, pageable), definition);
 
         private class LoadedResourceCache
         {

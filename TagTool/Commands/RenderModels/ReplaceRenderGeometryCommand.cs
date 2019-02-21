@@ -64,7 +64,7 @@ namespace TagTool.Commands.RenderModels
 					PostProcessSteps.Triangulate);
 			}
 
-			var builder = new RenderModelBuilder(CacheContext.Version);
+			var builder = new RenderModelBuilder(CacheContext);
 			var nodes = new Dictionary<string, sbyte>();
 			var materialIndices = new Dictionary<string, short>();
 

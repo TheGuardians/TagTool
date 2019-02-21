@@ -329,7 +329,7 @@ namespace TagTool.Commands.Porting
 
             var data = soundDataAggregate.ToArray();
 
-            var resourceContext = new ResourceSerializationContext(sound.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, sound.Resource);
             CacheContext.Serializer.Serialize(resourceContext,
                 new SoundResourceDefinition
                 {

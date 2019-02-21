@@ -418,7 +418,7 @@ namespace TagTool.Commands.Porting
                             BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
                 }
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.PathfindingResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.PathfindingResource), resourceDefinition);
                 resourceWriter.BaseStream.Position = 0;
                 dataStream.Position = 0;
 

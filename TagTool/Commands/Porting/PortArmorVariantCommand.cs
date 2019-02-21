@@ -421,7 +421,7 @@ namespace TagTool.Commands.Porting
 
                 edResourceStream.Position = 0;
 
-                var resourceContext = new ResourceSerializationContext(edModeDefinition.Geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
                 edModeDefinition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
                 CacheContext.AddResource(edModeDefinition.Geometry.Resource, edResourceStream);

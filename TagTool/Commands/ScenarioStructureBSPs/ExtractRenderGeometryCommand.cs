@@ -50,7 +50,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(Definition.Geometry2.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry2.Resource);
             var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             using (var resourceStream = new MemoryStream())

@@ -36,7 +36,7 @@ namespace TagTool.Commands.Video
 
             var binkFile = new FileInfo(args[0]);
             
-            var resourceContext = new ResourceSerializationContext(Definition.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<BinkResource>(resourceContext);
 
             using (var resourceStream = new MemoryStream())

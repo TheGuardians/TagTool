@@ -54,7 +54,7 @@ namespace TagTool.Commands.Sounds
 
 
             var resource = Definition.Resource;
-            var resourceContext = new ResourceSerializationContext(resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<SoundResourceDefinition>(resourceContext);
 
             if (resourceDefinition.Data == null)

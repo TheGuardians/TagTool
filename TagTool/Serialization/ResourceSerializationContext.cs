@@ -17,12 +17,14 @@ namespace TagTool.Serialization
     {
         private const int DefaultBlockAlign = 0x0;
 
+        private GameCacheContext CacheContext { get; }
         private PageableResource Resource { get; }
         private List<TagResourceGen3.ResourceFixup> ResourceFixups { get; } = new List<TagResourceGen3.ResourceFixup>();
         private List<TagResourceGen3.ResourceDefinitionFixup> ResourceDefinitionFixups { get; } = new List<TagResourceGen3.ResourceDefinitionFixup>();
 
-        public ResourceSerializationContext(PageableResource resource)
+        public ResourceSerializationContext(GameCacheContext cacheContext, PageableResource resource)
         {
+            CacheContext = cacheContext;
             Resource = resource;
         }
 

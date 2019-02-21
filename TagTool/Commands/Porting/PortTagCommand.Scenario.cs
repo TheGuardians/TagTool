@@ -43,7 +43,7 @@ namespace TagTool.Commands.Porting
                     if (sbsp.PathfindingResource != null)
                     {
                         pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
-                            new ResourceSerializationContext(sbsp.PathfindingResource));
+                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource));
 
                         using (var resourceStream = new MemoryStream())
                         using (var resourceReader = new EndianReader(resourceStream))

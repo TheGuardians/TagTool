@@ -28,7 +28,7 @@ namespace TagTool.Commands.Porting
 
             if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
             {
-                var resourceContext = new ResourceSerializationContext(sbsp.Geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource);
                 var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
                 using (var edResourceStream = new MemoryStream())

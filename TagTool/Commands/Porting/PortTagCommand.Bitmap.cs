@@ -90,7 +90,7 @@ namespace TagTool.Commands.Porting
                     Resource = resource,
                     Unknown4 = 0
                 };
-                var resourceContext = new ResourceSerializationContext(resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, resource);
 
                 // Create new definition
                 var resourceDefinition = new BitmapTextureInteropResource

@@ -17,7 +17,8 @@ namespace TagTool.Geometry
     /// </summary>
     public class RenderModelBuilder
     {
-        private readonly CacheVersion _version;
+        private GameCacheContext CacheContext { get; }
+
         private readonly RenderModel _model = new RenderModel();
         private RenderModel.Region _currentRegion;
         private RenderModel.Region.Permutation _currentPermutation;
@@ -29,9 +30,9 @@ namespace TagTool.Geometry
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderModelBuilder"/> class for a particular engine version.
         /// </summary>
-        public RenderModelBuilder(CacheVersion version)
+        public RenderModelBuilder(GameCacheContext cacheContext)
         {
-            _version = version;
+            CacheContext = cacheContext;
             _model.Regions = new List<RenderModel.Region>();
             _model.Nodes = new List<RenderModel.Node>();
             _model.RuntimeNodeOrientations = new List<RenderModel.RuntimeNodeOrientation>();
@@ -491,13 +492,13 @@ namespace TagTool.Geometry
                     Unknown2 = 1
                 }
             };
-            var context = new ResourceSerializationContext(_model.Geometry.Resource);
+            var context = new ResourceSerializationContext(CacheContext, _model.Geometry.Resource);
             serializer.Serialize(context, definition);
         }
 
         private int SerializeVertexBuffer(MeshData mesh, Stream outStream)
         {
-            var vertexStream = VertexStreamFactory.Create(_version, outStream);
+            var vertexStream = VertexStreamFactory.Create(CacheContext.Version, outStream);
 
             if (mesh.RigidVertices != null)
             {

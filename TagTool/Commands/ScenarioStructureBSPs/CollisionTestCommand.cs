@@ -33,7 +33,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             // Deserialize the definition data
-            var resourceContext = new ResourceSerializationContext(BSP.CollisionBspResource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, BSP.CollisionBspResource);
             var definition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
 
             // Extract the resource data

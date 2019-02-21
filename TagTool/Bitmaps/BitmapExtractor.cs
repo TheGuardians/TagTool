@@ -24,7 +24,7 @@ namespace TagTool.Bitmaps
         public void ExtractBitmap(Bitmap bitmap, int imageIndex, Stream outStream)
         {
             var resource = bitmap.Resources[imageIndex];
-            var resourceContext = new ResourceSerializationContext(resource.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource.Resource);
             var definition = ExtractResourceDefinition(resource, resourceContext);
 
             var header = new DDSHeader(definition.Texture.Definition);

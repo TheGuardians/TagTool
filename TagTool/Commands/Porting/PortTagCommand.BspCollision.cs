@@ -398,7 +398,7 @@ namespace TagTool.Commands.Porting
 
             if (resourceData == null)
             {
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
                 return bsp.CollisionBspResource;
             }
 
@@ -672,7 +672,7 @@ namespace TagTool.Commands.Porting
 
                 dataStream.Position = 0;
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(bsp.CollisionBspResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
 
                 bsp.CollisionBspResource.ChangeLocation(ResourceLocation.ResourcesB);
                 var resource = bsp.CollisionBspResource;

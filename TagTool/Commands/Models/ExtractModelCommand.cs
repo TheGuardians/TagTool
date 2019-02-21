@@ -90,7 +90,7 @@ namespace TagTool.Commands.Models
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(renderModel.Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, renderModel.Geometry.Resource);
             var resourceDefinition = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             using (var resourceStream = new MemoryStream())

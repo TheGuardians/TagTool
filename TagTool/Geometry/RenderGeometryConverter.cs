@@ -371,7 +371,7 @@ namespace TagTool.Geometry
                 geometry.Resource.Page.UncompressedBlockSize = (uint)dataStream.Length;
                 geometry.Resource.DisableChecksum();
 
-                var resourceContext = new ResourceSerializationContext(geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             }
 

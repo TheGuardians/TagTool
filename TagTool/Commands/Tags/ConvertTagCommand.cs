@@ -351,7 +351,7 @@ namespace TagTool.Commands.Tags
                 var outVertexStream = VertexStreamFactory.Create(destCacheContext.Version, outStream);
 
                 // Deserialize the definition data
-                var resourceContext = new ResourceSerializationContext(geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource);
                 var definition = srcCacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
                 // Convert each vertex buffer
