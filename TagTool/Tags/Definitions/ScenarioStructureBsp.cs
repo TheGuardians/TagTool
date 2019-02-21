@@ -88,9 +88,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown66;
         public List<CollisionMoppCode> CollisionMoppCodes;
         public uint Unknown67;
-        public Bounds<float> CollisionWorldBoundsX;
-        public Bounds<float> CollisionWorldBoundsY;
-        public Bounds<float> CollisionWorldBoundsZ;
+        public RealPoint3d CollisionWorldBoundsLower;
+        public RealPoint3d CollisionWorldBoundsUpper;
         public List<CollisionMoppCode> BreakableSurfaceMoppCodes;
         public List<BreakableSurfaceKeyTableBlock> BreakableSurfaceKeyTable;
         public uint Unknown68;

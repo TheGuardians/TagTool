@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -417,15 +419,32 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         baseVertex += largeBsp.Vertices.Count;
                     }
 
-                    foreach (var instance in resourceDefinition.InstancedGeometry)
+                    foreach (var instanceDef in Definition.InstancedGeometryInstances)
                     {
+                        if (instanceDef.InstanceDefinition == -1)
+                            continue;
+
+                        var instance = resourceDefinition.InstancedGeometry[instanceDef.InstanceDefinition];
+
+                        var instanceName = instanceDef.Name != StringId.Invalid ?
+                            CacheContext.GetString(instanceDef.Name) :
+                            $"instance_{instanceDef.InstanceDefinition}";
+
                         for (var i = 0; i < instance.CollisionInfo.Vertices.Count; i++)
                         {
                             var vertex = instance.CollisionInfo.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                            var point = Vector3.Transform(
+                                new Vector3(vertex.Point.X, vertex.Point.Y, vertex.Point.Z),
+                                new Matrix4x4(
+                                    instanceDef.Matrix.m11, instanceDef.Matrix.m12, instanceDef.Matrix.m13, 0.0f,
+                                    instanceDef.Matrix.m21, instanceDef.Matrix.m22, instanceDef.Matrix.m23, 0.0f,
+                                    instanceDef.Matrix.m31, instanceDef.Matrix.m32, instanceDef.Matrix.m33, 0.0f,
+                                    instanceDef.Matrix.m41, instanceDef.Matrix.m42, instanceDef.Matrix.m43, 0.0f));
+
+                            writer.WriteLine($"v {point.X} {point.Z} {point.Y}");
                         }
 
-                        writer.WriteLine($"g instance_{resourceDefinition.InstancedGeometry.IndexOf(instance)}_main_surfaces");
+                        writer.WriteLine($"g {instanceName}_main_surfaces");
 
                         for (var i = 0; i < instance.CollisionInfo.Surfaces.Count; i++)
                         {
@@ -470,7 +489,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                 writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
                             }
 
-                            writer.WriteLine($"g instance_{resourceDefinition.InstancedGeometry.IndexOf(instance)}_bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
+                            writer.WriteLine($"g {instanceName}_bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
 
                             for (var i = 0; i < bsp.Surfaces.Count; i++)
                             {
