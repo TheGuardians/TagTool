@@ -22,7 +22,7 @@ namespace TagTool.Ai
         public uint Unknown6;
         public uint Unknown7;
         public uint Unknown8;
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public CachedTagInstance Character;
         public uint Unknown9;
         public StringId Unknown10;

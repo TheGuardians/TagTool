@@ -679,7 +679,7 @@ namespace TagTool.Commands.Files
                             {
                                 for (int i = 0; i < tagFieldAttribute.Length; i++)
                                 {
-                                    if (tagFieldAttribute.Padding)
+                                    if (tagFieldAttribute.Flags.HasFlag(TagFieldFlags.Padding))
                                     {
                                         AssemblyPluginField assemblyPluginField = new AssemblyPluginField(elementAssemblyPluginType, fieldName + "Padding " + i.ToString(), ref offset);
                                         assemblyPluginField.attributes["visible"] = "false";
@@ -879,12 +879,6 @@ namespace TagTool.Commands.Files
                     if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
                         continue;
 
-                    if (tagFieldAttribute.HaloOnlineOnly && cacheVersion != CacheVersion.HaloOnline106708)
-                        continue;
-
-                    if (tagFieldAttribute.Gen3Only && !CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo3Retail, CacheVersion.Halo3ODST))
-                        continue;
-
                     pluginFields.AddRange(GetAssemblyPluginFields(fieldInfo.FieldType, tagFieldAttribute, ref offset, cacheVersion, fieldInfo.Name));
                 }
 
@@ -893,12 +887,6 @@ namespace TagTool.Commands.Files
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
                     if (!CacheVersionDetection.IsBetween(cacheVersion, tagFieldAttribute.MinVersion, tagFieldAttribute.MaxVersion))
-                        continue;
-
-                    if (tagFieldAttribute.HaloOnlineOnly && cacheVersion != CacheVersion.HaloOnline106708)
-                        continue;
-
-                    if (tagFieldAttribute.Gen3Only && !CacheVersionDetection.IsBetween(cacheVersion, CacheVersion.Halo3Retail, CacheVersion.Halo3ODST))
                         continue;
 
                     if (tagFieldAttribute.Version != CacheVersion.Unknown)

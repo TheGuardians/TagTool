@@ -17,7 +17,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
         public class HudWidget : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
             public byte Unknown;
@@ -760,7 +760,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C)]
             public class PlacementDatum : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public AnchorValue Anchor;
                 public short Unknown;
                 public RealPoint2d MirrorOffset;
@@ -877,7 +877,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class RenderDatum : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public ShaderIndexValue ShaderIndex;
                 public short Unknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -1347,7 +1347,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x54)]
             public class BitmapWidget : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown;
@@ -1392,7 +1392,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class TextWidget : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown1;

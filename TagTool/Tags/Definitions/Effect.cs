@@ -48,7 +48,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeLocalSpaceDeathDelay;
         public List<ConicalDistribution> ConicalDistributions;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -107,7 +107,7 @@ namespace TagTool.Tags.Definitions
                 public EffectEventPriority Priority;
                 public EffectEventPartCameraMode CameraMode;
                 public Tag RuntimeBaseGroupTag;
-                [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloReach)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Unused;
                 public CachedTagInstance Type;
                 public Bounds<float> VelocityBounds;
@@ -128,7 +128,7 @@ namespace TagTool.Tags.Definitions
                 public CreateInDispositionValue CreateInDisposition;
 
                 public short LocationIndex;
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Unused;
 
                 public float AccelerationAmount;
@@ -201,7 +201,7 @@ namespace TagTool.Tags.Definitions
                     public byte Version;
                     public EmissionShapeValue EmissionShape;
 
-                    [TagField(Padding = true, Length = 1)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
                     public byte[] Unused;
 
                     public FlagsValue EmitterFlags;
@@ -393,7 +393,7 @@ namespace TagTool.Tags.Definitions
                             public TypeValue Tyoe;
                             public FlagsValue Flags;
 
-                            [TagField(Padding = true, Length = 1)]
+                            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
                             public byte[] Unused;
 
                             public List<Parameter> Parameters;

@@ -34,7 +34,7 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<VertexBuffer> VertexBuffers;
 
-        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -52,7 +52,7 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<NodeMapping> NodeMap;
 
-        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused2 = new byte[4];
 
         [TagField(Length = 8, MinVersion = CacheVersion.Halo3Retail)]
@@ -76,7 +76,7 @@ namespace TagTool.Geometry
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public PrimitiveType IndexBufferType;
 
-        [TagField(Padding = true, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused3;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -165,7 +165,7 @@ namespace TagTool.Geometry
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public float LodMipmapMagicNumber;
 
-            [TagField(Padding = true, Length = 24, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 24, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused = new byte[24];
 
             public enum PartTypeOld : short
@@ -259,7 +259,7 @@ namespace TagTool.Geometry
             public float Radius;
             public byte NodeIndex;
 
-            [TagField(Padding = true, Length = 3)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
             public byte[] Unused = new byte[3];
         }
 

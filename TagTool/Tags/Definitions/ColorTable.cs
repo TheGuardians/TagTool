@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class ColorTableBlock : TagStructure
 		{
-            [TagField(Label = true, Length = 32)]
+            [TagField(Flags = TagFieldFlags.Label, Length = 32)]
             public string String;
 
             public RealArgbColor Color;

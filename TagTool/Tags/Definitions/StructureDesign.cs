@@ -44,7 +44,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public SoftCeilingType Type;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public List<SoftCeilingTriangle> SoftCeilingTriangles;
@@ -75,7 +75,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short WaterNameIndex;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public RealVector3d FlowVelocity;

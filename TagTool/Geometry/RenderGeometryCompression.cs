@@ -17,7 +17,7 @@ namespace TagTool.Geometry
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderGeometryCompressionFlags Flags;
 
-        [TagField(Padding = true, Length = 0x2, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] Padding;
 
         /// <summary>

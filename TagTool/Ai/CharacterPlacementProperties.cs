@@ -5,7 +5,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x34)]
     public class CharacterPlacementProperties : TagStructure
 	{
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused;
 
         public float FewUpgradeChanceEasy;

@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
 	{
         public List<PerformanceBlock> Performance;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x38)]

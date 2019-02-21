@@ -19,13 +19,13 @@ namespace TagTool.Tags
 		/// </summary>
 		public CacheAddress Address;
 
-		[TagField(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
-		public uint UnusedPointer;
+		[TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+		public byte[] Unused = new byte[4];
 
 		/// <summary>
 		/// The list of elements within the tag block.
 		/// </summary>
-		[TagField(Runtime = true)]
+		[TagField(Flags = TagFieldFlags.Runtime)]
 		protected IList<TagStructure> Elements;
 
 		public TagBlock() : this(0, new CacheAddress()) { }

@@ -8,7 +8,7 @@ namespace TagTool.Ai
     public class CharacterDialogueVariation : TagStructure
 	{
         public CachedTagInstance Dialogue;
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public StringId Name;
         public float Weight;
     }

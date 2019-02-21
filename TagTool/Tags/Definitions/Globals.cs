@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123)]
     public class Globals : TagStructure
 	{
-        [TagField(Padding = true, Length = 172)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 172)]
         public byte[] Unused;
 
         public GameLanguage Language;
@@ -161,14 +161,14 @@ namespace TagTool.Tags.Definitions
 			[TagStructure(Size = 0x10)]
 			public class DamageGroup : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Name;
 				public List<ArmorModifier> ArmorModifiers;
 
 				[TagStructure(Size = 0x8)]
 				public class ArmorModifier : TagStructure
 				{
-                    [TagField(Label = true)]
+                    [TagField(Flags = TagFieldFlags.Label)]
                     public StringId Name;
 					public float DamageMultiplier;
 				}
@@ -440,7 +440,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// The equipment tag associated with the grenade.
             /// </summary>
-            [TagField(Label = true, ValidTags = new[] { "eqip" })]
+            [TagField(Flags = TagFieldFlags.Label, ValidTags = new[] { "eqip" })]
             public CachedTagInstance Equipment;
 
             /// <summary>
@@ -479,7 +479,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x30)]
             public class GfxUiString : TagStructure
 			{
-                [TagField(Label = true, Length = 32)]
+                [TagField(Flags = TagFieldFlags.Label, Length = 32)]
                 public string Name;
                 public CachedTagInstance Strings;
             }
@@ -531,7 +531,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST)]
         public class PlayerRepresentationBlock : TagStructure
 		{
-            [TagField(Label = true, MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3ODST)]
             public StringId Name;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -622,7 +622,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x178, MinVersion = CacheVersion.HaloOnline106708)]
         public class Material : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public StringId ParentName;
             public short RuntimeMaterialIndex;
@@ -721,7 +721,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0xC)]
             public class UnderwaterProxy : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId SurfaceName;
                 public StringId SubmergedName;
                 public short SurfaceIndex;
@@ -815,7 +815,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public int MedalUptime;
 
-                [TagField(Label = true, MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3ODST)]
                 public StringId EventName;
             }
 
@@ -851,7 +851,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short Index;
             public short Version;
-            [TagField(Label = true, Length = 32)]
+            [TagField(Flags = TagFieldFlags.Label, Length = 32)]
             public string Name;
         }
     }

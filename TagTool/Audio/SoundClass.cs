@@ -13,7 +13,7 @@ namespace TagTool.Audio
         [TagField(Version = CacheVersion.Halo3ODST)]
         public SoundClassHalo3ODST Halo3ODST;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public SoundClassHaloOnline HaloOnline;
 
         [TagField(Version = CacheVersion.HaloReach)]

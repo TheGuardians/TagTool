@@ -8,7 +8,7 @@ namespace TagTool.Ai
 	{
         public short ScatterKilledCount;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused;
 
         public float ScatterRadius;

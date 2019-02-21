@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         #region exposure
         public FlagsValue Flags;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused1 = new byte[2];
 
         public float OverexposureAmount;
@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions
         #region auto-exposure sensitivity
         public FlagsValue Flags2;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused2 = new byte[2];
 
         public float Unknown3;
@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         #region exposure compensation
         public FlagsValue Flags3;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused3 = new byte[2];
 
         public float Unknown5;
@@ -45,7 +45,7 @@ namespace TagTool.Tags.Definitions
         #region bloom point
         public FlagsValue Flags4;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused4 = new byte[2];
 
         public float Base;
@@ -269,7 +269,7 @@ namespace TagTool.Tags.Definitions
         {
             public FlagsValue Flags;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public float Radius;

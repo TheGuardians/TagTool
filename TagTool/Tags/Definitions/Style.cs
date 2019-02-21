@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
 
         public CombatStatusDecayOptionsValue CombatStatusDecayOptions;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused = new byte[2];
 
         public StyleControlFlags StyleControl;

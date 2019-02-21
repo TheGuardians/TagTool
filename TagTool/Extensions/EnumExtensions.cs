@@ -53,5 +53,10 @@ namespace System
 					yield return value;
 			}
 		}
+
+        public static bool HasFlag<T>(this T value, T flags) where T: Enum
+        {
+            return value.HasFlag(flags);
+        }
 	}
 }

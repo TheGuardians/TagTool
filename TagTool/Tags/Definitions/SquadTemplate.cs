@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
 
             public DifficultyFlagsValue DifficultyFlags;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Padding1;
 
             public short MinimumRound;
@@ -37,7 +37,7 @@ namespace TagTool.Tags.Definitions
 
             public CharacterGrenadeType GrenadeType;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Padding2;
 
             public CachedTagInstance Vehicle;
@@ -60,7 +60,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public DifficultyFlagsValue DifficultyFlags;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Padding1;
 
                 public short MinimumRound;
@@ -70,7 +70,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTagInstance Object;
                 public short Probability;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Padding2;
             }
         }

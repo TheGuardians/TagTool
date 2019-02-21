@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeMassOverRadiusCubed;
         public float RuntimeInverseDensity;
 
-        [TagField(Padding = true, Length = 20)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
         public byte[] Unused1;
 
         public float Density;
@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public float SurfaceFriction;
         public float Elasticity;
 
-        [TagField(Padding = true, Length = 12)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
         public byte[] Unused2;
 
         [Flags]

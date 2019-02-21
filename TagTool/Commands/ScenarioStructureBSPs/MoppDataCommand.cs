@@ -732,7 +732,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             string result = "";
             byte[] data = GetMoppData(moppData, index + 1, count);
             int offset;
-            int address;
             switch (opcode)
             {
                 case 0x00: // HK_MOPP_RETURN

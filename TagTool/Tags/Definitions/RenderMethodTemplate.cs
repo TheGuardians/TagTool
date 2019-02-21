@@ -18,7 +18,7 @@ namespace TagTool.Tags.Definitions
         public List<ShaderArgument> BooleanArguments;
         public List<ShaderArgument> SamplerArguments;
 
-        [TagField(Padding = true, Length = 12)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
         public byte[] Unused;
 
         public enum RenderMethodExtern : byte

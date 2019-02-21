@@ -18,10 +18,10 @@ namespace TagTool.Cache
         /// </summary>
         public int Size;
 
-        [TagField(Runtime = true)]
+        [TagField(Flags = TagFieldFlags.Runtime)]
         public int CacheOffset = -1;
 
-        [TagField(Runtime = true)]
+        [TagField(Flags = TagFieldFlags.Runtime)]
         public uint AddressMask = uint.MaxValue;
 
         public void InitializeCacheOffset(int cacheOffset, bool interopIsNull)

@@ -14,55 +14,55 @@ namespace TagTool.Tags.Definitions
 	{
         public FlagsValue Flags;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown1;
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown2;
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown3;
         
         public SoundClass SoundClass;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public SampleRate SampleRate;
 
-        [TagField(Gen3Only = true)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public SoundCacheFileGestaltReference SoundReference;
         
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public byte Unknown6;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public ImportType ImportType;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public PlaybackParameter PlaybackParameters;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public Scale Scale;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public PlatformCodec PlatformCodec;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public Promotion Promotion;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<PitchRange> PitchRanges;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<CustomPlayback> CustomPlayBacks;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<ExtraInfo> ExtraInfo;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<LanguageBlock> Languages;
 
-        [TagField(Pointer = true, HaloOnlineOnly = true)]
+        [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource Resource;
         
-        [TagField(Padding = true, Length = 4, HaloOnlineOnly = true)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -92,7 +92,7 @@ namespace TagTool.Tags.Definitions
             public int LongestPermutationDurationMs;
 
             public int ZoneAssetHandle;
-            [TagField(Padding = true, Length = 4)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
             public byte[] Unused;
         }
 

@@ -56,7 +56,7 @@ namespace TagTool.Cache
         [TagField(Length = 256)]
         public BudgetEntry[] BudgetEntries = new BudgetEntry[256];
 
-        [TagField(Padding = true, Length = 320)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 320)]
         public byte[] Unused = new byte[320];
 
         [TagStructure(Size = 0x54)]

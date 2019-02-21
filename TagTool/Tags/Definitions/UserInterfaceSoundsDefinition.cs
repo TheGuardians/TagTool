@@ -33,7 +33,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<AtlasSound> AtlasSounds;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x14)]

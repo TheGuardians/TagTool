@@ -7,7 +7,7 @@ namespace TagTool.Common
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
 	public class TagReferenceBlock : TagStructure
 	{
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public CachedTagInstance Instance;
     }
 }

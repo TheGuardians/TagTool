@@ -163,10 +163,10 @@ namespace TagTool.Tags
 				case TypeCode.Single:
 				case TypeCode.Int32:
 				case TypeCode.UInt32:
-				case TypeCode.Object when attr != null && attr.Pointer:
+				case TypeCode.Object when attr != null && attr.Flags.HasFlag(TagFieldFlags.Pointer):
 				case TypeCode.Object when type == typeof(Tag):
 				case TypeCode.Object when type == typeof(CacheAddress):
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Short:
+				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(TagFieldFlags.Short):
                 //case TypeCode.Object when type == typeof(RgbColor):
                 case TypeCode.Object when type == typeof(ArgbColor):
                 case TypeCode.Object when type == typeof(Point2d):

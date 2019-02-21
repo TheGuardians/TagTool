@@ -15,7 +15,7 @@ namespace TagTool.Tags.Definitions
         public float GustSize;
         public CachedTagInstance GustNoiseBitmap;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

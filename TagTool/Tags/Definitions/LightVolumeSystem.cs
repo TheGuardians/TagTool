@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions
 	{
         public List<LightVolumeSystemBlock> LightVolume;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [Flags]
@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
 
             public LightVolumeFlags Flags;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             /// <summary>

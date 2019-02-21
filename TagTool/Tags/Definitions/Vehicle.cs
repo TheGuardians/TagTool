@@ -56,7 +56,7 @@ namespace TagTool.Tags.Definitions
 
         public PlayerTrainingVehicleTypeValue PlayerTrainingVehicleType;
 
-        [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused2 = new byte[1];
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -88,12 +88,12 @@ namespace TagTool.Tags.Definitions
 
         public VehicleSizeValue VehicleSize;
 
-        [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused3 = new byte[1];
 
         public sbyte ComplexSuspensionSampleCount;
 
-        [TagField(Padding = true, Length = 1)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
         public byte[] Unused4 = new byte[1];
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -263,7 +263,7 @@ namespace TagTool.Tags.Definitions
             public List<AlienFighterPhysics> AlienFighter;
             public List<TurretPhysics> Turret;
 
-            [TagField(Padding = true, Length = 12)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
             public byte[] Unused = new byte[12]; // tag_block
 
             public List<VtolPhysics> Vtol;
@@ -432,7 +432,7 @@ namespace TagTool.Tags.Definitions
 
             public VehicleScoutPhysicsFlags Flags;
 
-            [TagField(Padding = true, Length = 3)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
             public byte[] Unused = new byte[3];
 
             public float DragCoefficient;
@@ -474,7 +474,7 @@ namespace TagTool.Tags.Definitions
             public float CruisingThrottle;
             public float DiveSpeedScale;
 
-            [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
             public byte[] Unused = new byte[4];
         }
 
@@ -588,10 +588,10 @@ namespace TagTool.Tags.Definitions
             public float AntigravNormalK0;
             public float Radius;
 
-            [TagField(Padding = true, Length = 12)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
             public byte[] Unused1 = new byte[12];
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused2 = new byte[2];
 
             public short DamageSourceRegionIndex;

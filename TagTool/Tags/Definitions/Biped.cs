@@ -202,7 +202,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class CameraHeightBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Class;
             public float StandingHeightFraction;
             public float CrouchingHeightFraction;
@@ -233,7 +233,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class ContactPoint : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId MarkerName;
         }
     }

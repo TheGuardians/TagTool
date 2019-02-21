@@ -141,7 +141,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int SpecialHudIcon;
         
-        [TagField(Padding = true, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] UnknownBlock;
         
         public List<FirstPersonBlock> FirstPerson;

@@ -7,7 +7,7 @@ namespace TagTool.Ai
     public class CharacterGrenadesProperties : TagStructure
 	{
         public int GrenadesFlags;
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public CharacterGrenadeType GrenadeType;
         public CharacterGrenadeTrajectoryType TrajectoryType;
         public int MinimumEnemyCount;

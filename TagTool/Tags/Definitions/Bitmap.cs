@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// Used by detail maps and illum maps. 0 means fade by last mipmap, 1 means fade by first mipmap
         /// </summary>
-        [TagField(IsFraction = true, Format = "[0,1]")]
+        [TagField(Flags = TagFieldFlags.Fraction, Format = "[0,1]")]
         public float FadeFactor;
 
         /// <summary>
@@ -139,13 +139,13 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40)]
         public class Sequence : TagStructure
 		{
-            [TagField(Label = true, Length = 32)]
+            [TagField(Flags = TagFieldFlags.Label, Length = 32)]
             public string Name;
 
             public short FirstBitmapIndex;
             public short BitmapCount;
 
-            [TagField(Padding = true, Length = 16)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 16)]
             public byte[] Unused;
 
             public List<Sprite> Sprites;
@@ -155,10 +155,10 @@ namespace TagTool.Tags.Definitions
 			{
                 public short BitmapIndex;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Unused1;
 
-                [TagField(Padding = true, Length = 4)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
                 public byte[] Unused2;
 
                 public float Left;
@@ -200,7 +200,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapFlagsXbox XboxFlags;
 
-            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused1;
 
 
@@ -213,9 +213,9 @@ namespace TagTool.Tags.Definitions
             public byte UnknownFlags;
 
             // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
-            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused2_1;
-            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
             public byte[] Unused2_3;
 
             /// <summary>
@@ -223,7 +223,7 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public BitmapFormat Format;
 
-            [TagField(Padding = true, Length = 1, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Unused2_2;
 
 
@@ -267,7 +267,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public int ZoneAssetHandleOld;
-            [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public PageableResource Resource;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int ZoneAssetHandleNew;

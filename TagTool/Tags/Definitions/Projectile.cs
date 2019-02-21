@@ -40,7 +40,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance DetonationSound;
         public DamageReportingType DamageReportingType;
 
-        [TagField(Padding = true, Length = 3)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Unused2;
 
         public CachedTagInstance AttachedSuperDetonationDamage;
@@ -116,11 +116,11 @@ namespace TagTool.Tags.Definitions
 		{
             public FlagBits Flags;
             public ResponseValue DefaultResponse;
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId MaterialName;
             public short GlobalMaterialIndex;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused1;
 
             public ResponseValue PotentialResponse;
@@ -130,7 +130,7 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> AndVelocity;
             public ScaleEffectsByValue ScaleEffectsBy;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused2;
 
             public Angle AngularNoise;

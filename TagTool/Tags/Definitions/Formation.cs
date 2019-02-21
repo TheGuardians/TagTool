@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public StringId Name;
         public List<Primitive> Primitives;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
         
         [TagStructure(Size = 0x24)]
@@ -21,7 +21,7 @@ namespace TagTool.Tags.Definitions
             public FlagBits Flags;
             public short Priority;
             public short Capacity;
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused;
             public float DistanceForwards;
             public float DistanceBackwards;

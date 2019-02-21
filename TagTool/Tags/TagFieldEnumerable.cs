@@ -73,31 +73,13 @@ namespace TagTool.Tags
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attribute = TagStructure.GetTagFieldAttribute(type, field);
+					var attr = TagStructure.GetTagFieldAttribute(type, field);
 
-					if (attribute.Gen3Only)
-					{
-						if (Info.Version == CacheVersion.Halo3Retail || Info.Version == CacheVersion.Halo3ODST || Info.Version == CacheVersion.HaloReach)
-							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
-						continue;
-					}
-
-					if (attribute.HaloOnlineOnly)
-					{
-						if (CacheVersionDetection.IsBetween(Info.Version, CacheVersion.HaloOnline106708, CacheVersion.HaloOnline700123))
-							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
-						continue;
-					}
-
-					if (attribute.Version != CacheVersion.Unknown)
-					{
-						if (Info.Version == attribute.Version)
-							CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
-						continue;
-					}
-
-					if (CacheVersionDetection.IsBetween(Info.Version, attribute.MinVersion, attribute.MaxVersion))
-						CreateTagFieldInfo(field, attribute, Info.Version, ref offset);
+                    if ((attr.Version != CacheVersion.Unknown && attr.Version == Info.Version) ||
+                        (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Info.Version, attr.MinVersion, attr.MaxVersion)))
+                    {
+                        CreateTagFieldInfo(field, attr, Info.Version, ref offset);
+                    }
 				}
 			}
 		}

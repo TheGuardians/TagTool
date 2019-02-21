@@ -6,7 +6,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0xC)]
     public class AiVocalizationResponse : TagStructure
 	{
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public StringId VocalizationName;
         public AiVocalizationResponseFlags Flags;
         public short VocalizationIndex;

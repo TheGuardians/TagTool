@@ -126,7 +126,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
             public short Unknown3;
             public short Unknown4;
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
         }
 
@@ -135,7 +135,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Length = 16)]
             public byte[] Guid;
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
         }
 
@@ -220,7 +220,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class ScenarioZonesetGroup : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public int BspGroupIndex;
             public BspFlagsValue ImportLoadedBsps;

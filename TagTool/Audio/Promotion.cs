@@ -14,11 +14,11 @@ namespace TagTool.Audio
         public uint Unknown2;
         public uint Unknown3;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint LongestPermutationDuration;
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint TotalSampleSize;
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown11;
 
         [TagStructure(Size = 0x10)]

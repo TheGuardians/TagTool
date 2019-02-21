@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20)]
         public class SkeletonNode : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public short NextSiblingNodeIndex;
             public short FirstChildNodeIndex;
@@ -138,7 +138,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1C)]
         public class BlendScreen : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Label;
             public Angle RightYawPerFrame;
             public Angle LeftYawPerFrame;
@@ -186,7 +186,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
         public class Animation : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -553,7 +553,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
         public class Mode : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Label;
             public List<WeaponClassBlock> WeaponClass;
             public List<ModeIkBlock> ModeIk;
@@ -570,7 +570,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
             public class WeaponClassBlock : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Label;
 
                 public List<WeaponTypeBlock> WeaponType;
@@ -583,7 +583,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x34)]
                 public class WeaponTypeBlock : TagStructure
 				{
-                    [TagField(Label = true)]
+                    [TagField(Flags = TagFieldFlags.Label)]
                     public StringId Label;
 
                     public List<Entry> Actions;
@@ -600,7 +600,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x8)]
                     public class Entry : TagStructure
 					{
-                        [TagField(Label = true)]
+                        [TagField(Flags = TagFieldFlags.Label)]
                         public StringId Label;
                         public short GraphIndex;
                         public short Animation;
@@ -610,7 +610,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
                     public class DeathAndDamageBlock : TagStructure
 					{
-                        [TagField(Label = true)]
+                        [TagField(Flags = TagFieldFlags.Label)]
                         public StringId Label;
 
                         public List<Direction> Directions;
@@ -634,7 +634,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
                     public class Transition : TagStructure
 					{
-                        [TagField(Label = true)]
+                        [TagField(Flags = TagFieldFlags.Label)]
                         public StringId FullName;
                         public StringId StateName;
                         public short Unknown;
@@ -645,7 +645,7 @@ namespace TagTool.Tags.Definitions
                         [TagStructure(Size = 0x14)]
                         public class Destination : TagStructure
 						{
-                            [TagField(Label = true)]
+                            [TagField(Flags = TagFieldFlags.Label)]
                             public StringId FullName;
                             public StringId ModeName;
                             public StringId StateName;
@@ -677,14 +677,14 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x10)]
                 public class SyncActionGroup : TagStructure
 				{
-                    [TagField(Label = true)]
+                    [TagField(Flags = TagFieldFlags.Label)]
                     public StringId Name;
                     public List<SyncAction> SyncActions;
 
                     [TagStructure(Size = 0x1C)]
                     public class SyncAction : TagStructure
 					{
-                        [TagField(Label = true)]
+                        [TagField(Flags = TagFieldFlags.Label)]
                         public StringId Name;
                         public List<SameTypeParticipant> SameTypeParticipants;
                         public List<OtherParticipant> OtherParticipants;
@@ -740,7 +740,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class VehicleSuspensionBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Label;
             public short GraphIndex;
             public short Animation;
@@ -757,18 +757,18 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class ObjectOverlay : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Label;
             public short GraphIndex;
             public short Animation;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused1;
 
             public FunctionControlsValue FunctionControls;
             public StringId Function;
 
-            [TagField(Padding = true, Length = 4)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
             public byte[] Unused2;
 
             public enum FunctionControlsValue : short
@@ -811,7 +811,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class WeaponListBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId WeaponName;
             public StringId WeaponClass;
         }
@@ -819,7 +819,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x3C)]
         public class AdditionalNodeDataBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId NodeName;
             public RealQuaternion DefaultRotation;
             public RealPoint3d DefaultTranslation;
@@ -831,7 +831,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class CacheBlock : TagStructure
 		{
-            [TagField(Short = true)]
+            [TagField(Flags = TagFieldFlags.Short)]
             public CachedTagInstance Owner;
 
             public int BlockSize;
@@ -862,10 +862,10 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public int ZoneAssetDatumIndex;
 
-            [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
             public PageableResource Resource;
 
-            [TagField(Padding = true, Length = 4)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
             public byte[] Padding;
         }
     }

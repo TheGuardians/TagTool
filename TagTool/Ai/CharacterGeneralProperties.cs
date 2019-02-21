@@ -19,7 +19,7 @@ namespace TagTool.Ai
         /// </summary>
         public AiFollowerPositioning FollowerPositioning;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused;
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class CollisionSphere : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId ObjectMarkerName;
             public float Radius;
         }
@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
         public float WindFlappinessScale;
         public float LongestRod;
 
-        [TagField(Padding = true, Length = 24)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 24)]
         public byte[] Unused;
     }
 }

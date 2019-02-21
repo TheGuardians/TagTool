@@ -7,7 +7,7 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloReach)]
     public sealed class CacheFileHeader : TagStructure
 	{
-        [TagField(Runtime = true)]
+        [TagField(Flags = TagFieldFlags.Runtime)]
         public int Magic;
 
         public Tag HeadTag;

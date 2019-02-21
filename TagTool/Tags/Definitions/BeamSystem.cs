@@ -10,13 +10,13 @@ namespace TagTool.Tags.Definitions
 	{
         public List<BeamSystemBlock> Beam;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x208, Align = 0x10)]
         public class BeamSystemBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public RenderMethod RenderMethod;
 

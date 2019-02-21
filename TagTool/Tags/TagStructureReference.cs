@@ -9,7 +9,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The definition data for the object.
         /// </summary>
-        [TagField(Pointer = true)]
+        [TagField(Flags = TagFieldFlags.Pointer)]
         public TDefinition Definition;
 
         /// <summary>

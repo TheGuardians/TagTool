@@ -58,7 +58,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The resource containing the raw geometry data.
         /// </summary>
-        [TagField(Pointer = true, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource Resource;
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public int ZoneAssetHandle;
         
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x30)]
@@ -133,7 +133,7 @@ namespace TagTool.Geometry
 
             public short VertexBufferIndex;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused;
 
             [TagStructure(Size = 0x4)]

@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 	{
         public List<TagReferenceBlock> GlobalTags;
 
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused;
     }
 }

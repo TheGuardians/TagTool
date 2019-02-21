@@ -37,13 +37,13 @@ namespace TagTool.Ai
         public float DangerBodyDamage;
         public float DangerExtendedBodyDamage;
 
-        [TagField(Padding = true, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused1;
 
         public CachedTagInstance GlobalDialogue;
         public StringId DefaultMissionDialogueSoundEffect;
 
-        [TagField(Padding = true, Length = 20, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 20, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused2;
 
         public float JumpDown;
@@ -62,7 +62,7 @@ namespace TagTool.Ai
         public Bounds<float> HoistCrouch;
         public Bounds<float> HoistStand;
 
-        [TagField(Padding = true, Length = 24, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 24, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused3;
 
         public Bounds<float> VaultStep;
@@ -80,12 +80,12 @@ namespace TagTool.Ai
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SearchRangeGiant; // 200
 
-        [TagField(Padding = true, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused4;
 
         public List<GravemindPropertyBlock> GravemindProperties;
 
-        [TagField(Padding = true, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused5;
 
         public float ScaryTargetThreshold;

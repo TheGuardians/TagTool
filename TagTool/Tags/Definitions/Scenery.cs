@@ -11,10 +11,10 @@ namespace TagTool.Tags.Definitions
         public SceneryFlagBits SceneryFlags;
         public LightmappingPolicyValue LightmappingPolicy;
 
-        [TagField(Padding = true, Length = 2)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Unused2;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused3;
 
         public enum PathfindingPolicyValue : short

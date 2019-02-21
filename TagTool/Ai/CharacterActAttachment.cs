@@ -7,7 +7,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x1C)]
     public class CharacterActAttachment : TagStructure
 	{
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public StringId ActivityName;
         public CachedTagInstance Crate;
         public StringId CrateMarkerName;

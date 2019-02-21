@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public PathfindingPolicyValue PathfindingPolicy;
         public short Unknown6;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unknown7;
  
         public enum TypeValue : short

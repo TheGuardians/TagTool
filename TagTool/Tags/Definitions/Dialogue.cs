@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         public List<Vocalization> Vocalizations;
         public StringId MissionDialogueDesignator;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x18)]

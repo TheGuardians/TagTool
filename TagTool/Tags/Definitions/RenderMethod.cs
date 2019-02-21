@@ -30,7 +30,7 @@ namespace TagTool.Tags.Definitions
             // TODO: determine if this is an enum or an index
             public int Type;
 
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId InputName;
 
             public StringId RangeName;
@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x3C)]
         public class ImportDatum : TagStructure
         {
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
 
             public RenderMethodOption.OptionBlock.OptionDataType Type;
@@ -87,7 +87,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18)]
             public class ShaderMap : TagStructure
             {
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Bitmap;
                 public sbyte Unknown;
                 public sbyte BitmapIndex;

@@ -49,11 +49,11 @@ namespace TagTool.Tags
             public uint BlockOffset;
             public CacheAddress Address;
 
-            [TagField(Runtime = true)]
+            [TagField(Flags = TagFieldFlags.Runtime)]
             public int Type;
-            [TagField(Runtime = true)]
+            [TagField(Flags = TagFieldFlags.Runtime)]
             public int Offset;
-            [TagField(Runtime = true)]
+            [TagField(Flags = TagFieldFlags.Runtime)]
             public int RawAddress;
         }
 

@@ -11,12 +11,12 @@ namespace TagTool.Tags.Definitions
 	{
         public CameraTrackFlags Flags;
 
-        [TagField(Padding = true, Length = 3)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Unused1 = new byte[3];
 
         public List<CameraPoint> CameraPoints;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2 = new byte[4];
 
         [TagStructure(Size = 0x1C)]

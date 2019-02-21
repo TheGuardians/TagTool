@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 32)]
             public string ImportName;
 
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public StringId Variant;
             public CachedTagInstance PuppetAnimation;
@@ -100,7 +100,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public uint Unknown;
 
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance CinematicLight;
                 public int OwnerPuppetIndex;
                 public StringId Marker;
@@ -131,7 +131,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x24)]
             public class SoundBlock : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Sound;
                 public int Frame;
                 public float Unknown1;
@@ -144,7 +144,7 @@ namespace TagTool.Tags.Definitions
             public class BackgroundSoundBlock : TagStructure
 			{
                 public uint Unknown1;
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Sound;
                 public int Frame;
             }
@@ -152,7 +152,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C)]
             public class EffectBlock : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Effect;
                 public int Frame;
                 public StringId Marker;
@@ -163,7 +163,7 @@ namespace TagTool.Tags.Definitions
             public class FunctionBlock : TagStructure
 			{
                 public int OwnerPuppetIndex;
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId TargetFunctionName;
                 public List<UnknownBlock2> Unknown;
 
@@ -180,7 +180,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x18)]
             public class ScreenEffectBlock : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Effect;
                 public int StartFrame;
                 public int EndFrame;
@@ -189,7 +189,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x14)]
             public class CortanaEffectBlock : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public CachedTagInstance Effect;
                 public uint Unknown;
             }
@@ -235,7 +235,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class TextureCameraBlock : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public StringId Unknown;
             public List<CameraShotBlock> Shots;

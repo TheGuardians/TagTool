@@ -8,7 +8,7 @@ namespace TagTool.Ai
     {
         public AiDialogueType DialogueType;
         public short VocalizationsIndex;
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public StringId VocalizationName;
         public AiDialogueSpeakerType SpeakerType;
         public AiDialogueSpeakerType ListenerType;

@@ -30,7 +30,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public float BeginFadeDistance;
 
-        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1;
 
         public float ReduceToL1SuperLow;
@@ -39,13 +39,13 @@ namespace TagTool.Tags.Definitions
         public float ReduceToL4High;
         public float ReduceToL5SuperHigh;
 
-        [TagField(Padding = true, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused2;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public ShadowFadeDistanceValue ShadowFadeDistance;
 
-        [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused3;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -76,7 +76,7 @@ namespace TagTool.Tags.Definitions
 
         public List<Node> Nodes;
 
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused4;
 
         public List<ModelObjectDatum> ModelObjectData;
@@ -214,7 +214,7 @@ namespace TagTool.Tags.Definitions
 
                 public short ParentVariant;
 
-                [TagField(Padding = true, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2, MaxVersion = CacheVersion.Halo2Vista)]
                 public byte[] Unused = new byte[2];
 
                 public List<Permutation> Permutations;
@@ -230,15 +230,15 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte RenderModelPermutationIndex;
 
-                    [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
                     public byte[] Unused1 = new byte[2];
 
                     public FlagsValue Flags;
 
-                    [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.HaloOnline106708)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.HaloOnline106708)]
                     public byte[] Unused2 = new byte[2];
 
-                    [TagField(Padding = true, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
                     public byte[] Unused3 = new byte[3];
 
                     public float Probability;
@@ -372,7 +372,7 @@ namespace TagTool.Tags.Definitions
             public StringId MaterialName;
             public short GlobalMaterialIndex;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public enum MaterialTypeValue : short
@@ -429,23 +429,23 @@ namespace TagTool.Tags.Definitions
             /// </summary>
             public short IndirectDamageSection;
 
-            [TagField(Padding = true, Length = 6)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 6)]
             public byte[] Unused1 = new byte[6];
 
             public DamageReportingType CollisionDamageReportingType;
 
-            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused2 = new byte[1];
 
             public DamageReportingType ResponseDamageReportingType;
 
-            [TagField(Padding = true, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused3 = new byte[1];
 
-            [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Unused4 = new byte[2];
 
-            [TagField(Padding = true, Length = 20)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
             public byte[] Unused5 = new byte[20];
 
             public float MaxVitality;
@@ -454,7 +454,7 @@ namespace TagTool.Tags.Definitions
             public float RechargeTime;
             public float RechargeFraction;
 
-            [TagField(Padding = true, Length = 64)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 64)]
             public byte[] Unused6 = new byte[64];
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -519,7 +519,7 @@ namespace TagTool.Tags.Definitions
                 public float VitalityPercentage;
                 public List<InstantResponse> InstantResponses;
 
-                [TagField(Padding = true, Length = 20)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
                 public byte[] Unused1 = new byte[20];
 
                 [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -534,7 +534,7 @@ namespace TagTool.Tags.Definitions
                 public StringId ResurrectionRegionName;
                 public short RessurectionRegionRuntimeIndex;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Unused2 = new byte[2];
 
                 [Flags]
@@ -586,7 +586,7 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public short SecondaryRuntimeRegionIndex;
 
-                    [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
                     public byte[] Unused = new byte[2];
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -745,7 +745,7 @@ namespace TagTool.Tags.Definitions
                     public StringId DamageRegionName;
                     public short RuntimeDamageRegionIndex;
 
-                    [TagField(Padding = true, Length = 2)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                     public short Unused;
 
                     public float DirectDamageScaleMinor;
@@ -1009,7 +1009,7 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Scenario;
             public byte[] Data;
 
-            [TagField(Padding = true, Length = 32)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 32)]
             public byte[] Unused;
         }
 

@@ -551,7 +551,7 @@ namespace TagTool.Cache
 
             if (length > decompressed.Length || (length + segmentOffset) > decompressed.Length)
             {
-                if (padding == true)
+                if (padding)
                 {
                     length = decompressed.Length;
                     if (length + segmentOffset > decompressed.Length)
@@ -601,7 +601,7 @@ namespace TagTool.Cache
 
             if (length > decompressed.Length || (length + segmentOffset) > decompressed.Length)
             {
-                if (padding == true)
+                if (padding)
                 {
                     length = decompressed.Length;
                     if (length + segmentOffset > decompressed.Length)

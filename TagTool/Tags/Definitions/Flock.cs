@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public float PositionScale;
         public Bounds<float> PositionRadii;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

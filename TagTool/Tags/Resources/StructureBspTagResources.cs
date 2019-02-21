@@ -170,7 +170,7 @@ namespace TagTool.Tags.Resources
             [TagStructure(Size = 0x20)]
             public class HavokGeometry : TagStructure
 			{
-                [TagField(Padding = true, Length = 4)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
                 public byte[] Unused;
                 public int CollisionType;
                 public int ShapeCount;

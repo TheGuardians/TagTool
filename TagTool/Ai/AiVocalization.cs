@@ -9,7 +9,7 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3ODST)]
     public class AiVocalization : TagStructure
 	{
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public StringId Name;
         public short ParentIndex;
         public AiVocalizationPriority Priority;

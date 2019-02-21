@@ -9,9 +9,9 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
     public class Permutation : TagStructure
 	{
-        [TagField(Gen3Only = true)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short ImportNameIndex;
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public StringId ImportName;
 
         //Convert
@@ -36,7 +36,7 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint IsNotFirstPermutation;
 
-        [TagField(HaloOnlineOnly = true)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<PermutationChunk> PermutationChunks;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]

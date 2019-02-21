@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
     public class Bink : TagStructure
 	{
         public int FrameCount;
-        [TagField(Pointer = true)]
+        [TagField(Flags = TagFieldFlags.Pointer)]
         public PageableResource Resource;
         public int UselessPadding;
         public uint Unknown;

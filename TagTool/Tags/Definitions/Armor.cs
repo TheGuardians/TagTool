@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance FirstPersonModel;
         public CachedTagInstance ThirdPersonModel;
 
-        [TagField(Padding = true, Length = 4)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused4;
     }
 }

@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance EnterUnderater;
         public CachedTagInstance ExitUnderwater;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

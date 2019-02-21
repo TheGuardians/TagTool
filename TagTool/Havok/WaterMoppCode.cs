@@ -11,7 +11,7 @@ namespace TagTool.Havok
 
         public sbyte MoppBuildType;
 
-        [TagField(Padding = true, Length = 3)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Unused = new byte[3];
 
         [TagStructure(Size = 0x1)]

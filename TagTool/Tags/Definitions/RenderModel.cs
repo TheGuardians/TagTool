@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public short Version;
         public int Checksum;
 
-        [TagField(Padding = true, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1 = new byte[8];
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
@@ -57,7 +57,7 @@ namespace TagTool.Tags.Definitions
         public List<MarkerGroup> MarkerGroups;
         public List<RenderMaterial> Materials;
 
-        [TagField(Padding = true, Length = 12)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
         public byte[] Unused; // "Errors" block
 
         public float DontDrawOverCameraCosineAngle;
@@ -117,7 +117,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// The name of the region.
             /// </summary>
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
 
             /// <summary>
@@ -147,7 +147,7 @@ namespace TagTool.Tags.Definitions
                 /// <summary>
                 /// The name of the permutation as a string id.
                 /// </summary>
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Name;
 
                 /// <summary>
@@ -204,7 +204,7 @@ namespace TagTool.Tags.Definitions
 		{
             public RenderGeometryClassification GlobalGeometryClassification;
 
-            [TagField(Padding = true, Length = 2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             public ushort TotalVertexCount;
@@ -234,14 +234,14 @@ namespace TagTool.Tags.Definitions
             public uint ResourceDataSize;
             public List<TagResourceGen2> Resources;
 
-            [TagField(Short = true)]
+            [TagField(Flags = TagFieldFlags.Short)]
             public CachedTagInstance Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
-            [TagField(Short = true)]
+            [TagField(Flags = TagFieldFlags.Short)]
             public CachedTagInstance Runtime;
         }
 
@@ -391,14 +391,14 @@ namespace TagTool.Tags.Definitions
             public uint ResourceDataSize;
             public List<TagResourceGen2> Resources;
 
-            [TagField(Short = true)]
+            [TagField(Flags = TagFieldFlags.Short)]
             public CachedTagInstance Original;
 
             public short OwnerTagSectionOffset;
             public byte RuntimeLinked;
             public byte RuntimeLoaded;
 
-            [TagField(Short = true)]
+            [TagField(Flags = TagFieldFlags.Short)]
             public CachedTagInstance Runtime;
 
             [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]

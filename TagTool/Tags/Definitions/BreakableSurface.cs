@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance CrackBitmap;
         public CachedTagInstance HoleBitmap;
 
-        [TagField(Padding = true, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x24)]

@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
         public int InputEffectName;
         public List<AdditionalSoundInput> AdditionalSoundInputs;
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x1C)]

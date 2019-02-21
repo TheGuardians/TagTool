@@ -9,7 +9,7 @@ namespace TagTool.Ai
     public class CharacterWeaponsProperties : TagStructure
 	{
         public CharacterWeaponFlags Flags;
-        [TagField(Label = true)]
+        [TagField(Flags = TagFieldFlags.Label)]
         public CachedTagInstance Weapon;
         public float MaximumFiringRange;
         public float MinimumFiringRange;

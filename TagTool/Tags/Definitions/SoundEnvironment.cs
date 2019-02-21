@@ -26,7 +26,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown5;
         public uint Unknown6;
 
-        [TagField(Padding = true, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

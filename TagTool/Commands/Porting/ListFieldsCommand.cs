@@ -38,7 +38,7 @@ namespace TagTool.Commands.Porting
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
-				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Padding == true)
+				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
 					continue;
 
 				var nameString = tagFieldInfo.Name;

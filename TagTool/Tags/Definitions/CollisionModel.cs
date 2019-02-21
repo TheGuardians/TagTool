@@ -14,13 +14,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int CollisionModelChecksum;
 
-        [TagField(Padding = true, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] UnusedImportInfoBlock = new byte[8];
 
-        [TagField(Padding = true, Length = 8)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
         public byte[] UnusedErrorsBlock = new byte[8];
 
-        [TagField(Padding = true, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] UnusedErrorsBlock2 = new byte[4];
 
         public CollisionModelFlags Flags;
@@ -33,7 +33,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class Material : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
         }
 
@@ -41,7 +41,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Region : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
 
             public List<Permutation> Permutations;
@@ -50,7 +50,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Permutation : TagStructure
 			{
-                [TagField(Label = true)]
+                [TagField(Flags = TagFieldFlags.Label)]
                 public StringId Name;
 
                 public List<Bsp> Bsps;
@@ -65,7 +65,7 @@ namespace TagTool.Tags.Definitions
 				{
                     public short NodeIndex;
 
-                    [TagField(Padding = true, Length = 2)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
                     public CollisionGeometry Geometry;
@@ -93,7 +93,7 @@ namespace TagTool.Tags.Definitions
                     public float Unknown13;
                     public uint Unknown14;
 
-                    [TagField(Short = true)]
+                    [TagField(Flags = TagFieldFlags.Short)]
                     public CachedTagInstance Model;
 
                     public uint Unknown15;
@@ -157,7 +157,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xC)]
         public class Node : TagStructure
 		{
-            [TagField(Label = true)]
+            [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
             public NodeFlags Flags;
             public short ParentNode;

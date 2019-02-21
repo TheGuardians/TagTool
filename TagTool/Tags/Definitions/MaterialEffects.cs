@@ -26,7 +26,7 @@ namespace TagTool.Tags.Definitions
                 public short GlobalMaterialIndex;
                 public SweetenerModeValue SweetenerMode;
 
-                [TagField(Padding = true, Length = 1)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
                 public byte[] Unused;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]

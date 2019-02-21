@@ -303,7 +303,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public UnitCameraFlagBits CameraFlags;
 
-            [TagField(Padding = true, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Unused = new byte[2];
 
             public StringId CameraMarkerName;

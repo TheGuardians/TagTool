@@ -85,21 +85,23 @@ namespace TagTool.Serialization
         /// <exception cref="System.InvalidOperationException">Offset for property is outside of its structure</exception>
         public void DeserializeProperty(EndianReader reader, ISerializationContext context, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (tagFieldInfo.Attribute.Runtime == true)
+            var attr = tagFieldInfo.Attribute;
+
+            if (attr.Flags.HasFlag(TagFieldFlags.Runtime))
                 return;
 
-            if (tagFieldInfo.Attribute.Padding == true)
+            if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
             {
                 reader.BaseStream.Position += tagFieldInfo.Attribute.Length;
             }
             else
             {
-                if (tagFieldInfo.Attribute.Offset >= 0)
-                    reader.BaseStream.Position = baseOffset + tagFieldInfo.Attribute.Offset;
-                var startOffset = reader.BaseStream.Position;
-                tagFieldInfo.SetValue(instance, DeserializeValue(reader, context, tagFieldInfo.Attribute, tagFieldInfo.FieldType));
-                if (tagFieldInfo.Attribute.Size > 0)
-                    reader.BaseStream.Position = startOffset + tagFieldInfo.Attribute.Size; // Honor the value's size if it has one set
+                if ((attr.Version != CacheVersion.Unknown && attr.Version == Version) ||
+                    (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Version, attr.MinVersion, attr.MaxVersion)))
+                {
+                    var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
+                    tagFieldInfo.SetValue(instance, value);
+                }
             }
         }
 
@@ -168,7 +170,7 @@ namespace TagTool.Serialization
         {
             // Indirect objects
             // TODO: Remove ResourceReference hax, the Indirect flag wasn't available when I generated the tag structures
-            if (valueInfo != null && valueInfo.Pointer)
+            if (valueInfo != null && valueInfo.Flags.HasFlag(TagFieldFlags.Pointer))
                 return DeserializeIndirectValue(reader, context, valueType);
 
             // enum = Enum type
@@ -359,7 +361,7 @@ namespace TagTool.Serialization
         /// <returns>The deserialized tag reference.</returns>
         public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
-            if (valueInfo == null || !valueInfo.Short)
+            if (valueInfo == null || !valueInfo.Flags.HasFlag(TagFieldFlags.Short))
                 reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
             
             var result = context.GetTagByIndex(reader.ReadInt32());

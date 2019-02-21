@@ -33,7 +33,7 @@ namespace TagTool.Tags.Resources
             {
                 public ushort Flags;
 
-                [TagField(Padding = true, Length = 2)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
                 public List<BspReference> Bsps;
@@ -49,7 +49,7 @@ namespace TagTool.Tags.Resources
                     public uint BspHandle;
                     public short NodeIndex;
 
-                    [TagField(Padding = true, Length = 2)]
+                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
                     public TagBlock<Bsp2dRef> Bsp2dRefs;
@@ -76,7 +76,7 @@ namespace TagTool.Tags.Resources
                 public short UserJumpIndex;
                 public byte DestOnly;
 
-                [TagField(Padding = true, Length = 1)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
                 public byte[] Unused = new byte[1];
 
                 public float Length;
