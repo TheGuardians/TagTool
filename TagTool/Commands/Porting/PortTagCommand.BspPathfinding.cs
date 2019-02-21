@@ -185,9 +185,6 @@ namespace TagTool.Commands.Porting
                         bsp.UnknownRaw7ths[i] :
                         BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext);
 
-                    if (element.Unknown0 != -1 || element.Unknown2 != -1)
-                        Console.WriteLine();
-
                     CacheContext.Serializer.Serialize(dataContext, element);
                 }
 

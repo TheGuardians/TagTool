@@ -516,7 +516,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case PhysicsModel phmo:
-					blamDefinition = ConvertPhysicsModel(phmo);
+					blamDefinition = ConvertPhysicsModel(edTag, phmo);
 					break;
 
 				case Projectile proj:
@@ -625,12 +625,7 @@ namespace TagTool.Commands.Porting
                     rmct.Material = ConvertStringId(rmct.Material);
                     ConvertShaderCortana(rmct, cacheStream, resourceStreams);
                     break;
-
-                case Scenery scen:
-                    if (blamTag.Name == @"objects\levels\dlc\sandbox\grid\grid")
-                        scen.MultiplayerObjectProperties[0].Unknown = 1; // sandbox grid gametype render flags
-                    break;
-
+                    
                 case UserInterfaceSharedGlobalsDefinition wigl:
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
