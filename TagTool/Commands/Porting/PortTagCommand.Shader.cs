@@ -173,18 +173,33 @@ namespace TagTool.Commands.Porting
                         }
                     };
 
-            if (blamTagName == @"levels\multi\isolation\sky\shaders\skydome")
+            switch (blamTagName)
             {
-                for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
-                {
-                    var templateArg = edRmt2.VectorArguments[i];
-
-                    if (CacheContext.GetString(templateArg.Name) == "albedo_color")
+                case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
+                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
                     {
-                        finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.447059f, 0.376471f, 0.898039f, 1.0f };
-                        break;
+                        var templateArg = edRmt2.VectorArguments[i];
+
+                        if (CacheContext.GetString(templateArg.Name) == "env_tint_color")
+                        {
+                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0f, 0f, 0f, 0f };
+                            break;
+                        }
                     }
-                }
+                    break;
+
+                case @"levels\multi\isolation\sky\shaders\skydome":
+                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    {
+                        var templateArg = edRmt2.VectorArguments[i];
+
+                        if (CacheContext.GetString(templateArg.Name) == "albedo_color")
+                        {
+                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.447059f, 0.376471f, 0.898039f, 1.0f };
+                            break;
+                        }
+                    }
+                    break;
             }
 
             return finalRm;
