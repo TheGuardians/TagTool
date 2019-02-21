@@ -4,13 +4,26 @@ using TagTool.Tags.Definitions;
 using System;
 using System.IO;
 using TagTool.Serialization;
+using TagTool.Cache;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private PhysicsModel ConvertPhysicsModel(PhysicsModel phmo)
+        private PhysicsModel ConvertPhysicsModel(CachedTagInstance instance, PhysicsModel phmo)
         {
+            //
+            // Allow syncing of specific tags in MP (hax)
+            //
+
+            switch (instance.Name)
+            {
+                case @"objects\levels\solo\060_floodship\flood_danglers\large_dangler\large_dangler":
+                case @"objects\levels\solo\060_floodship\flood_danglers\small_dangler\small_dangler":
+                    phmo.Flags &= ~PhysicsModel.PhysicsModelFlags.MakePhysicalChildrenKeyframed;
+                    break;
+            }
+
             //
             // Fix mopp code array headers for both H3 and ODST
             //

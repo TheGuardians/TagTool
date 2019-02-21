@@ -316,7 +316,6 @@ namespace TagTool.Tags.Definitions
             public EngineFlagsValue EngineFlags;
             public ObjectTypeValue ObjectType;
             public byte TeleporterFlags;
-            public sbyte Unknown;
             public FlagsValue Flags;
             public ObjectShapeValue Shape;
             public SpawnTimerModeValue SpawnTimerMode;
@@ -387,7 +386,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum FlagsValue : byte
+        public enum FlagsValue : ushort
         {
             None,
             OnlyRenderInEditor = 1 << 0,
@@ -397,7 +396,15 @@ namespace TagTool.Tags.Definitions
             Bit4 = 1 << 4,
             Bit5 = 1 << 5,
             Bit6 = 1 << 6,
-            Bit7 = 1 << 7
+            Bit7 = 1 << 7,
+            Bit8 = 1 << 8,
+            Bit9 = 1 << 9,
+            Bit10 = 1 << 10,
+            Bit11 = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15
         }
 
         public enum SpawnTimerModeValue : sbyte

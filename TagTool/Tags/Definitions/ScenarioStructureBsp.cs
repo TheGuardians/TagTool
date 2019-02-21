@@ -225,8 +225,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class Plane : TagStructure
 		{
+            public short Unknown1;
             public short ClusterIndex;
-            public short Unknown;
         }
 
         [TagStructure(Size = 0x28)]

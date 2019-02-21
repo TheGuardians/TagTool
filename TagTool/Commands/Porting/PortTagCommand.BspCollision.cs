@@ -449,7 +449,10 @@ namespace TagTool.Commands.Porting
                     blamResourceStream.Position = collisionBsp.Surfaces.Address.Offset;
                     collisionBsp.Surfaces.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
                     for (var i = 0; i < collisionBsp.Surfaces.Count; i++)
-                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<CollisionGeometry.Surface>(dataContext));
+                    {
+                        var surface = BlamCache.Deserializer.Deserialize<CollisionGeometry.Surface>(dataContext);
+                        CacheContext.Serializer.Serialize(dataContext, surface);
+                    }
 
                     StreamUtil.Align(dataStream, 0x10); // 0x4 > 0x10
                     blamResourceStream.Position = collisionBsp.Edges.Address.Offset;

@@ -76,7 +76,7 @@ namespace TagTool.Tags.Resources
                 public short Unknown;
                 public short BreakableSurface;
                 public CollisionGeometry.SurfaceFlags Flags;
-                public byte BestPlaneCalculationVertex;
+                public sbyte BestPlaneCalculationVertex;
             }
 
             [TagStructure(Size = 0x18)]
