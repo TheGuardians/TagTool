@@ -200,7 +200,7 @@ namespace TagTool.Geometry
 		{
             public short Plane;
 
-            public short FirstEdge;
+            public ushort FirstEdge;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
             public SurfaceFlags Flags_H2;
@@ -230,8 +230,8 @@ namespace TagTool.Geometry
 		{
             public short StartVertex;
             public short EndVertex;
-            public short ForwardEdge;
-            public short ReverseEdge;
+            public ushort ForwardEdge;
+            public ushort ReverseEdge;
             public short LeftSurface;
             public short RightSurface;
         }
