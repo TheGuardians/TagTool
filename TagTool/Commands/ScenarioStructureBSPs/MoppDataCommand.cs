@@ -768,12 +768,18 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     break;
 
                 case 0x09: // HK_MOPP_TERM_REOFFSET8
+                    offset = GetInt8(data);
+                    result = $"Add 0x{offset:X8} to some unknown value";
                     break;
 
                 case 0x0A: // HK_MOPP_TERM_REOFFSET16
+                    offset = GetInt16(data);
+                    result = $"Add 0x{offset:X8} to some unknown value";
                     break;
 
                 case 0x0B: // HK_MOPP_TERM_REOFFSET32
+                    offset = GetInt32(data);
+                    result = $"Set 0x{offset:X8} to some unknown value";
                     break;
 
                 case 0x0C: // HK_MOPP_JUMP_CHUNK
@@ -919,15 +925,23 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     break;
 
                 case 0x50: // HK_MOPP_TERM8
+                    offset = GetInt8(data);
+                    result = $"Offset 0x{offset:X8}";
                     break;
 
                 case 0x51: // HK_MOPP_TERM16
+                    offset = GetInt16(data);
+                    result = $"Offset 0x{offset:X8}";
                     break;
 
                 case 0x52: // HK_MOPP_TERM24
+                    offset = GetInt24(data);
+                    result = $"Offset 0x{offset:X8}";
                     break;
 
                 case 0x53: // HK_MOPP_TERM32
+                    offset = GetInt32(data);
+                    result = $"Offset 0x{offset:X8}";
                     break;
 
                 case 0x54: // HK_MOPP_NTERM_8
