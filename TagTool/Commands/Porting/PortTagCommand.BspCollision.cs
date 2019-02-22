@@ -20,9 +20,6 @@ namespace TagTool.Commands.Porting
         {
             var hexIn = worldIndex.ToString("X");
 
-            if (hexIn.StartsWith("2005"))
-                Console.WriteLine();
-
             int descriptor = 0x1;
             int flags = (worldIndex & 0x70000) >> 16;
             int surfaceIndex = worldIndex & 0xFFFF;
