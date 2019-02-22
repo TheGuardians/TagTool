@@ -121,6 +121,12 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y /= 1.5f;
                     }
 
+                    //fix enemy scorebar spacing
+                    if (bitmapwidgetname.Contains("enemy_area"))
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 12.0f;
+                    }
+
                     //widget names of widgets whose bitmapwidgets need extra scaling
                     List<string> bitmappatchlist = new List<string>(){
                         "vitality_meter", "compass", "in_helmet" };
