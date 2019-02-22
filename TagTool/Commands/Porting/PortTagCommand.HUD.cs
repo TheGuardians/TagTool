@@ -111,10 +111,7 @@ namespace TagTool.Commands.Porting
                     //Fix the scoreboard 'who am i?' arrow in forge.
                     if (bitmapwidgetname.Contains("who_am_i"))
                     {
-                        for (int stateDataIndex = 0; stateDataIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDataIndex++)
-                        {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDataIndex].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
-                        }
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
                     }
 
                     //fix elite upper corner weirdness
