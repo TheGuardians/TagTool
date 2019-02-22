@@ -94,15 +94,6 @@ namespace TagTool.Commands.Porting
 
                 for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
                 {
-                    //Fix the scoreboard 'who am i?' arrow in forge.
-                    if (chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name == CacheContext.GetStringId("who_am_i"))
-                    {
-                        for (int stateDataIndex = 0; stateDataIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDataIndex++)
-                        {
-                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDataIndex].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
-                        }
-                    }
-
                     for (int stateDatumIndex = 0; stateDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDatumIndex++)
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex] = ConvertStateData(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDatumIndex]);
                     for (int renderDatumIndex = 0; renderDatumIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData.Count; renderDatumIndex++)
@@ -112,15 +103,34 @@ namespace TagTool.Commands.Porting
                     var bitmapwidgetname = CacheContext.GetString(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].Name);
 
                     //fixup for waypoint light
-                    if (bitmapwidgetname.Contains("waypoint_light") && BlamCache.Version == CacheVersion.Halo3ODST)
+                    if (bitmapwidgetname.Contains("waypoint_light"))
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC_HO = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
                     }
 
-                    //fixup for widgets without global placement data
+                    //Fix the scoreboard 'who am i?' arrow in forge.
+                    if (bitmapwidgetname.Contains("who_am_i"))
+                    {
+                        for (int stateDataIndex = 0; stateDataIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData.Count; stateDataIndex++)
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[stateDataIndex].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
+                        }
+                    }
+
+                    //fix elite upper corner weirdness
+                    if (bitmapwidgetname.Contains("upper_corners_720"))
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X /= 1.5f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y /= 1.5f;
+                    }
+
+                    //widget names of widgets whose bitmapwidgets need extra scaling
+                    List<string> bitmappatchlist = new List<string>(){
+                        "vitality_meter", "compass", "in_helmet" };
+
+                    //fixup for widgets without global placement data and those that need extra scaling
                     if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0
-                        || (BlamCache.Version == CacheVersion.Halo3ODST && widgetname.Contains("vitality_meter"))
-                        || (BlamCache.Version == CacheVersion.Halo3ODST && widgetname.Contains("compass")))
+                        || bitmappatchlist.Contains(widgetname))
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
@@ -295,9 +305,9 @@ namespace TagTool.Commands.Porting
             H3Definition.HealthCriticalThreshold = 0.5f;
 
             //upscale blip bitmap sizes
-            H3Definition.LargeSensorBlipScale *= 1.5f;
-            H3Definition.MediumSensorBlipScale *= 1.5f;
-            H3Definition.SmallSensorBlipScale *= 1.5f;
+            H3Definition.LargeSensorBlipScale = 2.7f;
+            H3Definition.MediumSensorBlipScale = 1.9f;
+            H3Definition.SmallSensorBlipScale = 1.2f;
 
             //prevent crash?
             H3Definition.Unknown72 = 3.0f;
