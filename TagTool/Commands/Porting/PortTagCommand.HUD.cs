@@ -108,8 +108,8 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].RenderData[0].OutputColorC_HO = ChudDefinition.HudWidget.RenderDatum.OutputColorValue_HO.LocalB;
                     }
 
-                    //Fix the scoreboard 'who am i?' arrow in forge.
-                    if (bitmapwidgetname.Contains("who_am_i"))
+                    //Fix some elements not displaying in forge mode
+                    if (bitmapwidgetname.Contains("who_am_i") || bitmapwidgetname.Contains("summary_sandbox_title"))
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].EngineFlags_H3 |= ChudDefinition.HudWidget.StateDatum.Engine_H3.Editor;
                     }
@@ -244,7 +244,7 @@ namespace TagTool.Commands.Porting
                     H3att.HorizontalScale = 1.0f;
                     H3att.VerticalScale = 1.0f;
                     H3att.PickupDialogOffset.Y = 0.3f;
-                    H3att.PickupDialogScale = 1.2f;
+                    H3att.PickupDialogScale = 1.5f;
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
                 }
