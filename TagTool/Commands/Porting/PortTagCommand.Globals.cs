@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Ai;
@@ -133,7 +134,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].GeneralEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].GeneralEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].GeneralEvents.Count; j++)
                 {
@@ -148,7 +153,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].FlavorEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].FlavorEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].FlavorEvents.Count; j++)
                 {
@@ -163,7 +172,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].SlayerEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].SlayerEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].SlayerEvents.Count; j++)
                 {
@@ -178,7 +191,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].CtfEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].CtfEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].CtfEvents.Count; j++)
                 {
@@ -193,7 +210,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].OddballEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].OddballEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].OddballEvents.Count; j++)
                 {
@@ -208,7 +229,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].KingOfTheHillEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].KingOfTheHillEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].KingOfTheHillEvents.Count; j++)
                 {
@@ -223,7 +248,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].VipEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].VipEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].VipEvents.Count; j++)
                 {
@@ -238,7 +267,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].JuggernautEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].JuggernautEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].JuggernautEvents.Count; j++)
                 {
@@ -253,7 +286,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].TerritoriesEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].TerritoriesEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].TerritoriesEvents.Count; j++)
                 {
@@ -268,7 +305,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].AssaultEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].AssaultEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].AssaultEvents.Count; j++)
                 {
@@ -283,7 +324,11 @@ namespace TagTool.Commands.Porting
             for (var i = 0; i < h3Def.Runtime[0].InfectionEvents.Count; i++)
             {
                 var h3Event = h3Def.Runtime[0].InfectionEvents[i];
-                var h3String = CacheContext.GetString(ConvertStringId(h3Event.DisplayString));
+
+                if (h3Event.DisplayString == StringId.Invalid)
+                    continue;
+
+                var h3String = BlamCache.Strings.GetString(h3Event.DisplayString);
 
                 for (var j = 0; j < edDef.Runtime[0].InfectionEvents.Count; j++)
                 {
