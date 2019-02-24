@@ -121,6 +121,12 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y /= 1.5f;
                     }
 
+                    //fix spartan bottom HUD gap
+                    if (bitmapwidgetname.Contains("middle_bar_720"))
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].MirrorOffset.X = 1.0179f;
+                    }
+
                     //fix enemy scorebar spacing
                     if (bitmapwidgetname.Contains("enemy_area"))
                     {
