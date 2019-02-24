@@ -124,7 +124,7 @@ namespace TagTool.Commands.Porting
                     //fix enemy scorebar spacing
                     if (bitmapwidgetname.Contains("enemy_area"))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 12.0f;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y = 13.0f;
                     }
 
                     //widget names of widgets whose bitmapwidgets need extra scaling
@@ -237,8 +237,8 @@ namespace TagTool.Commands.Porting
                     //more fixups
                     H3att.ResolutionWidth = (uint)(H3att.ResolutionWidth * 1.5f);
                     H3att.ResolutionHeight = (uint)(H3att.ResolutionHeight * 1.5f);
-                    H3att.MotionSensorOffset.X = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.X));
-                    H3att.MotionSensorOffset.Y = (float)Math.Ceiling((double)(1.5f * H3att.MotionSensorOffset.Y));
+                    H3att.MotionSensorOffset.X *= 1.5f;
+                    H3att.MotionSensorOffset.Y *= 1.5f;
                     H3att.MotionSensorRadius *= 1.5f;
                     H3att.MotionSensorScale *= 1.5f;
                     H3att.HorizontalScale = 1.0f;
@@ -247,6 +247,8 @@ namespace TagTool.Commands.Porting
                     H3att.PickupDialogScale = 1.5f;
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
+                    H3att.NotificationScale *= 1.5f;
+                    H3att.NotificationLineSpacing *= 1.5f;
                 }
 
 
@@ -308,9 +310,10 @@ namespace TagTool.Commands.Porting
             H3Definition.HealthCriticalThreshold = 0.5f;
 
             //upscale blip bitmap sizes
-            H3Definition.LargeSensorBlipScale = 2.7f;
-            H3Definition.MediumSensorBlipScale = 1.9f;
-            H3Definition.SmallSensorBlipScale = 1.2f;
+            H3Definition.LargeSensorBlipScale *= 1.5f;
+            H3Definition.MediumSensorBlipScale *= 1.5f;
+            H3Definition.SmallSensorBlipScale *= 1.5f;
+            H3Definition.SensorBlipGlowRadius *= 1.5f;
 
             //prevent crash?
             H3Definition.Unknown72 = 3.0f;
