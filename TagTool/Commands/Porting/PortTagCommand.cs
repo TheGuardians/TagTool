@@ -586,7 +586,7 @@ namespace TagTool.Commands.Porting
                         Enum.TryParse(Barrel.FlagsH3.ToString(), out Barrel.FlagsHO);
 
                     //fix warthog horn
-                    if (blamTag.Name.EndsWith("\\weapon\\warthog_horn"))
+                    if (blamTag.Name.EndsWith("horn"))
                     {
                         foreach (var attach in weapon.Attachments)
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
