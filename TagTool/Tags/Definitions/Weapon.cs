@@ -378,7 +378,10 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1AC, MinVersion = CacheVersion.HaloOnline106708)]
         public class Barrel : TagStructure
 		{
-            public uint Flags;
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public BarrelFlagsH3 FlagsH3;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            public BarrelFlagsHO FlagsHO;
             public Bounds<float> RoundsPerSecond;
             public float AccelerationTime;
             public float DecelerationTime;
@@ -470,6 +473,60 @@ namespace TagTool.Tags.Definitions
             public uint Unknown9;
             public float BloomRateOfDecay;
             public List<FiringEffect> FiringEffects;
+
+            [Flags]
+            public enum BarrelFlagsH3 : int
+            {
+                None = 0,
+                TracksFiredProjectile = 1 << 0,
+                RandomFiringEffects = 1 << 1,
+                CanFireWithPartialAmmo = 1 << 2,
+                ProjectilesUseWeaponOrigin = 1 << 3,
+                EjectsDuringChamber = 1 << 4,
+                UseErrorWhenUnzoomed = 1 << 5,
+                ProjectileVectorCannotBeAdjusted = 1 << 6,
+                ProjectilesHaveIdenticalError = 1 << 7,
+                ProjectilesFireParallel = 1 << 8,
+                CantFireWhenOthersFiring = 1 << 9,
+                CantFireWhenOthersRecovering = 1 << 10,
+                DontClearFireBitAfterRecovering = 1 << 11,
+                StaggerFireAcrossMultipleMarkers = 1 << 12,
+                FiresLockedProjectiles = 1 << 13,
+                bit14 = 1 << 14,
+                ShrineDefender = 1 << 15,
+                HornetWeapons = 1 << 16,
+                bit17 = 1 << 17,
+                BeamWeapons = 1 << 18,
+                bit19 = 1 << 19,
+                bit20 = 1 << 20
+            }
+
+            [Flags]
+            public enum BarrelFlagsHO : int
+            {
+                None = 0,
+                TracksFiredProjectile = 1 << 0,
+                RandomFiringEffects = 1 << 1,
+                CanFireWithPartialAmmo = 1 << 2,
+                ProjectilesUseWeaponOrigin = 1 << 3,
+                EjectsDuringChamber = 1 << 4,
+                UseErrorWhenUnzoomed = 1 << 5,
+                ProjectileVectorCannotBeAdjusted = 1 << 6,
+                ProjectilesHaveIdenticalError = 1 << 7,
+                ProjectilesFireParallel = 1 << 8,
+                CantFireWhenOthersFiring = 1 << 9,
+                CantFireWhenOthersRecovering = 1 << 10,
+                DontClearFireBitAfterRecovering = 1 << 11,
+                StaggerFireAcrossMultipleMarkers = 1 << 12,
+                FiresLockedProjectiles = 1 << 13,
+                ShrineDefender = 1 << 14,
+                HornetWeapons = 1 << 15,
+                bit16 = 1 << 16,
+                bit17 = 1 << 17,
+                bit18 = 1 << 18,
+                BeamWeapons = 1 << 19,
+                bit20 = 1 << 20
+            }
 
             public enum PredictionTypeValue : short
             {

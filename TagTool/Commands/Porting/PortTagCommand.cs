@@ -580,10 +580,17 @@ namespace TagTool.Commands.Porting
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
                     break;
 
-                // Fix warthog horn
-				case Weapon weapon when blamTag.Name.EndsWith("\\weapon\\warthog_horn"):
-					foreach (var attach in weapon.Attachments)
-						attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                case Weapon weapon:
+                    //fix barrels flags
+                    foreach (var Barrel in weapon.Barrels)
+                        Enum.TryParse(Barrel.FlagsH3.ToString(), out Barrel.FlagsHO);
+
+                    //fix warthog horn
+                    if (blamTag.Name.EndsWith("\\weapon\\warthog_horn"))
+                    {
+                        foreach (var attach in weapon.Attachments)
+                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                    }
 					break;
 
                 case Shader rmsh:
