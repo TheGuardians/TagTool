@@ -581,10 +581,6 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Weapon weapon:
-                    //fix barrels flags
-                    foreach (var Barrel in weapon.Barrels)
-                        Enum.TryParse(Barrel.FlagsH3.ToString(), out Barrel.FlagsHO);
-
                     //fix warthog horn
                     if (blamTag.Name.EndsWith("horn"))
                     {
@@ -1013,6 +1009,11 @@ namespace TagTool.Commands.Porting
                             };
                             break;
                     }
+                    break;
+
+                case Weapon.Barrel.BarrelFlags flags:
+                    if (!Enum.TryParse(flags.Halo3.ToString(), out flags.HaloOnline))
+                        throw new NotSupportedException(flags.Halo3.ToString());
                     break;
             }
 
