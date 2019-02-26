@@ -802,6 +802,76 @@ namespace TagTool.Shaders.ShaderMatching
                     catch { }
                     break;
 
+                case @"levels\dlc\chillout\shaders\chillout_capsule_liquid":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_2_5_1_0_1_2_1");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\chillout\shaders\chillout_flood_godrays":
+                case @"levels\dlc\chillout\shaders\chillout_invis_godrays":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_5_1_0_0_1_1");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\levels\dlc\chillout\shaders\chill_energy_blocker_small":
+                case @"objects\levels\dlc\chillout\shaders\chill_viewing_area_blocker":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_8_1_0_0_4_1");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\chillout\shaders\chillout_floodroom01":
+                case @"levels\dlc\chillout\shaders\chillout_floodroom02":
+                case @"levels\dlc\chillout\shaders\chillout_floodroom03":
+                case @"levels\dlc\chillout\shaders\chillout_transporter":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_2_5_0_0_1_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\chillout\shaders\chillout_flood_suckers":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_1_1_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\shared\shaders\flood\flood_sackyb":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_0_1_0_0_3_1_1_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\characters\flood_infection\shaders\flood_fronds":
+                case @"objects\characters\flood_tank\shaders\flood_fronds":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\characters\flood_infection\shaders\flood_infection":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_1_0_0_1");
+                    }
+                    catch { }
+                    break;
+
                 case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
                     try
                     {

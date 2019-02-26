@@ -489,6 +489,10 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertDialogue(cacheStream, udlg);
 					break;
 
+                case Effect effe:
+                    blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
+                    break;
+
 				case Globals matg:
 					blamDefinition = ConvertGlobals(matg, cacheStream);
 					break;
@@ -666,7 +670,32 @@ namespace TagTool.Commands.Porting
 			return edTag;
 		}
 
-		public object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
+        private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
+        {
+            switch (blamTagName)
+            {
+                case @"levels\dlc\chillout\fx\flood_tube\flood_tube":
+                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
+                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
+                    effe.Events[0].ParticleSystems[1].Unknown7 = 10000;
+                    effe.Events[0].ParticleSystems[1].Unknown8 = 1;
+                    break;
+
+                case @"levels\dlc\chillout\fx\flood_tube\flood_twitch_bubbles":
+                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
+                    effe.Events[0].ParticleSystems[0].Unknown8 = 1;
+                    break;
+
+                case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter":
+                case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter":
+                    effe.Events[1].ParticleSystems[0].Unknown7 = 0.898723f;
+                    break;
+            }
+
+            return effe;
+        }
+
+        public object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
 		{
 			switch (data)
 			{

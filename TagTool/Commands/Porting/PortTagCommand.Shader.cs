@@ -175,6 +175,76 @@ namespace TagTool.Commands.Porting
 
             switch (blamTagName)
             {
+                case @"levels\dlc\chillout\shaders\chillout_flood_godrays" when finalRm is ShaderHalogram:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            if (CacheContext.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            {
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_flood_godrays.bitmap")[0]);
+                                break;
+                            }
+                        }
+
+                        // Fixup arguments
+                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        {
+                            var templateArg = edRmt2.VectorArguments[i];
+
+                            switch (CacheContext.GetString(templateArg.Name))
+                            {
+                                case "overlay_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    break;
+
+                                case "overlay_tint":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.3764706f, 0.7254902f, 0.9215687f, 1f };
+                                    break;
+
+                                case "overlay_intensity":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.25f, 1.25f, 1.25f, 1.25f };
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
+                case @"levels\dlc\chillout\shaders\chillout_invis_godrays" when finalRm is ShaderHalogram:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            if (CacheContext.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            {
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_invis_godrays.bitmap")[0]);
+                                break;
+                            }
+                        }
+
+                        // Fixup arguments
+                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        {
+                            var templateArg = edRmt2.VectorArguments[i];
+
+                            switch (CacheContext.GetString(templateArg.Name))
+                            {
+                                case "overlay_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    break;
+
+                                case "overlay_tint":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.3058824f, 0.7098039f, 0.937255f, 1f };
+                                    break;
+
+                                case "overlay_intensity":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
                 case @"levels\solo\020_base\lights\light_volume_hatlight" when finalRm is ShaderHalogram:
                     {
                         // Fixup bitmaps
