@@ -175,7 +175,56 @@ namespace TagTool.Commands.Porting
 
             switch (blamTagName)
             {
-                case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
+                case @"levels\solo\020_base\lights\light_volume_hatlight" when finalRm is ShaderHalogram:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            if (CacheContext.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
+                            {
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\020_base\bitmaps\light_volume_hatlight.bitmap")[0]);
+                                break;
+                            }
+                        }
+
+                        // Fixup arguments
+                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        {
+                            var templateArg = edRmt2.VectorArguments[i];
+
+                            switch (CacheContext.GetString(templateArg.Name))
+                            {
+                                case "overlay_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 2f, 1f, 0f, 0f };
+                                    break;
+
+                                case "overlay_tint":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.9960785f, 1f, 0.8039216f, 1f };
+                                    break;
+
+                                case "overlay_intensity":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
+                case @"levels\dlc\armory\shaders\concrete_floor_smooth" when finalRm is Shader:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            if (CacheContext.GetString(edRmt2.SamplerArguments[i].Name) == "bump_map")
+                            {
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\armory\bitmaps\concrete_floor_bump.bitmap")[0]);
+                                break;
+                            }
+                        }
+                        break;
+                    }
+
+                case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow" when finalRm is Shader:
                     for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
                     {
                         var templateArg = edRmt2.VectorArguments[i];
@@ -188,7 +237,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-                case @"levels\multi\isolation\sky\shaders\skydome":
+                case @"levels\multi\isolation\sky\shaders\skydome" when finalRm is Shader:
                     for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
                     {
                         var templateArg = edRmt2.VectorArguments[i];

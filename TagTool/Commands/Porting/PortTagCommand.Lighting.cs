@@ -206,6 +206,22 @@ namespace TagTool.Commands.Porting
                     };
                     break;
 
+                // rat's nest godrays
+                case @"levels\dlc\armory\sky\armory_camera":
+                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    {
+                        Flags = CameraFxSettings.FlagsValue.MaximumChangeIsRelative | CameraFxSettings.FlagsValue.Fixed2,
+                        Radius = 67.5f,
+                        AngleBias = -156.0f,
+                        Color = new RealRgbColor(1f, 0.7333333f, 0.4745098f),
+                        Strength = 5000.0f,
+                        PowerExponent = 0.6f,
+                        BlurSharpness = 0.08f,
+                        DecoratorDarkening = 1.0f,
+                        HemiRejectionFalloff = 8.0f
+                    };
+                    break;
+
                 default:
                     cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
                     {

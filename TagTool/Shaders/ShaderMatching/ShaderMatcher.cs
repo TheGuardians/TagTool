@@ -58,8 +58,6 @@ namespace TagTool.Shaders.ShaderMatching
         /// </summary>
         private bool IsValid = false;
 
-
-
         //
         // Methods
         //
@@ -741,7 +739,69 @@ namespace TagTool.Shaders.ShaderMatching
                     }
                     break;
 
-                //Weapons
+                case @"levels\solo\020_base\lights\light_volume_hatlight":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_5_1_0_0_1_1");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\armory\shaders\metal_doodad_a":
+                case @"levels\dlc\armory\shaders\metal_doodad_a_illum_blue":
+                case @"levels\dlc\armory\shaders\metal_doodad_a_illum_cool":
+                case @"levels\dlc\armory\shaders\metal_doodad_a_illum_red":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_7_2_0_1_1_0_1_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\armory\shaders\razor_wire":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_5_2_0_1_0_1_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\multi\deadlock\shaders\deadlock_concrete_wall_a_rubble":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_0_0_0_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\solo\020_base\shaders\hb_metal_arch_unwrap_a":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_7_2_0_1_2_1_0_0_1_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\dlc\armory\shaders\concrete_wall_01":
+                case @"levels\dlc\armory\shaders\concrete_wall_01_blue":
+                case @"levels\dlc\armory\shaders\concrete_wall_01_red":
+                case @"levels\dlc\armory\shaders\concrete_wall_02_blue":
+                case @"levels\dlc\armory\shaders\concrete_wall_02_red":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_7_2_0_1_7_0_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\levels\solo\010_jungle\shaders\dam_fence":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_1_1_2_0_0_0_1_0");
+                    }
+                    catch { }
+                    break;
+
                 case @"objects\weapons\melee\energy_blade\shaders\energy_blade":
                     try
                     {
