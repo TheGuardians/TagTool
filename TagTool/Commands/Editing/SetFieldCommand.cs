@@ -127,7 +127,7 @@ namespace TagTool.Commands.Editing
                     {
                         case FileInfo file:
                             if (!pageable.GetLocation(out newLocation))
-                                return false;
+                                newLocation = ResourceLocation.ResourcesB;
                             resourceFile = file;
                             break;
 
@@ -140,37 +140,37 @@ namespace TagTool.Commands.Editing
                             throw new FormatException(fieldValue.ToString());
                     }
 
+                    ResourceCache oldCache = null;
+
                     if (pageable.GetLocation(out var oldLocation))
+                        oldCache = CacheContext.GetResourceCache(oldLocation);
+
+                    var newCache = CacheContext.GetResourceCache(newLocation);
+
+                    var data = File.ReadAllBytes(resourceFile.FullName);
+
+                    pageable.Page.UncompressedBlockSize = (uint)data.Length;
+
+                    if (oldLocation == newLocation && pageable.Page.Index != -1)
                     {
-                        var oldCache = CacheContext.GetResourceCache(oldLocation);
-                        var newCache = CacheContext.GetResourceCache(newLocation);
-
-                        var data = File.ReadAllBytes(resourceFile.FullName);
-
-                        pageable.Page.UncompressedBlockSize = (uint)data.Length;
-
-                        if (oldLocation == newLocation && pageable.Page.Index != -1)
+                        using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
                         {
-                            using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
-                            {
-                                pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
-                            }
+                            pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
                         }
-                        else
-                        {
-                            using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
-                            {
-                                pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
-                            }
-
-                            pageable.ChangeLocation(newLocation);
-                        }
-
-                        pageable.DisableChecksum();
-
-                        field.SetValue(Owner, fieldValue = pageable);
                     }
-                    else throw new InvalidDataException(pageable.ToString());
+                    else
+                    {
+                        using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
+                        {
+                            pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
+                        }
+
+                        pageable.ChangeLocation(newLocation);
+                    }
+
+                    pageable.DisableChecksum();
+
+                    field.SetValue(Owner, fieldValue = pageable);
                 }
             }
             else

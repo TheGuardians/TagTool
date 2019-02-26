@@ -12,7 +12,7 @@ namespace TagTool.Commands.Porting
     {
         private PhysicsModel ConvertPhysicsModel(CachedTagInstance instance, PhysicsModel phmo)
         {
-            //
+            /*
             // Allow syncing of specific tags in MP (hax)
             //
 
@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
                 case @"objects\levels\solo\060_floodship\flood_danglers\small_dangler\small_dangler":
                     phmo.Flags &= ~PhysicsModel.PhysicsModelFlags.MakePhysicalChildrenKeyframed;
                     break;
-            }
+            }*/
 
             //
             // Fix mopp code array headers for both H3 and ODST
