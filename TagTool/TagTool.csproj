@@ -238,6 +238,16 @@
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
+    <Compile Include="Scripting\Compiler\IScriptSyntax.cs" />
+    <Compile Include="Scripting\Compiler\ScriptBoolean.cs" />
+    <Compile Include="Scripting\Compiler\ScriptGroup.cs" />
+    <Compile Include="Scripting\Compiler\ScriptInteger.cs" />
+    <Compile Include="Scripting\Compiler\ScriptInvalid.cs" />
+    <Compile Include="Scripting\Compiler\ScriptSyntaxReader.cs" />
+    <Compile Include="Scripting\Compiler\ScriptReal.cs" />
+    <Compile Include="Scripting\Compiler\ScriptString.cs" />
+    <Compile Include="Scripting\Compiler\ScriptSymbol.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />

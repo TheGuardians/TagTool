@@ -686,8 +686,8 @@ namespace TagTool.Commands.Porting
                     effe.Events[0].ParticleSystems[0].Unknown8 = 1;
                     break;
 
-                case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter":
-                case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter":
+                case @"objects\levels\dlc\chillout\teleporter_reciever\fx\teleporter" when BlamCache.Header.Name == "chillout":
+                case @"objects\levels\dlc\chillout\teleporter_sender\fx\teleporter" when BlamCache.Header.Name == "chillout":
                     effe.Events[1].ParticleSystems[0].Unknown7 = 0.898723f;
                     break;
             }
