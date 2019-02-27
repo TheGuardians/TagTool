@@ -678,6 +678,30 @@ namespace TagTool.Shaders.ShaderMatching
         {
             switch (blamTagName)
             {
+                case @"fx\particles\energy\electric_arcs_blue":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\particle_templates\_2_8_0_0_0_0_1_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\weapons\melee\energy_blade\fx\particles\plasma_wispy":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\particle_templates\_5_8_0_0_0_1_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\weapons\melee\energy_blade\fx\particles\energy_pulse":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\particle_templates\_3_7_0_0_1_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
                 case @"levels\dlc\fortress\shaders\panel_platform_center":
                     try
                     {

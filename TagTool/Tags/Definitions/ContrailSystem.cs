@@ -49,7 +49,8 @@ namespace TagTool.Tags.Definitions
             public TagMapping ShaderFunction6;
             public TagMapping ShaderFunction7;
 
-            public int Unknown19;
+            public ushort Unknown19_Flags;
+            public ushort Unknown19_Unused;
 
             public RenderMethod RenderMethod;
 

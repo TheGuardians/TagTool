@@ -25,7 +25,9 @@ namespace TagTool.Commands.Porting
             // Halo 3 scenario ai data
             //
 
-            if (BlamCache.Version == CacheVersion.Halo3Retail && Flags.HasFlag(PortingFlags.Recursive))
+            if (BlamCache.Version == CacheVersion.Halo3Retail &&
+                scnr.MapType == ScenarioMapType.SinglePlayer &&
+                Flags.HasFlag(PortingFlags.Recursive))
             {
                 var pathfindingBsps = new List<StructureBspCacheFileTagResources>();
 
