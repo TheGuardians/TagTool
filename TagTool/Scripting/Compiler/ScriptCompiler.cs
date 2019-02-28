@@ -334,34 +334,64 @@ namespace TagTool.Scripting.Compiler
                         throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Script:
-                    break;
+                    if (node is ScriptSymbol scriptValue)
+                        return CompileScriptExpression(scriptValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.StringId:
-                    break;
+                    if (node is ScriptString stringIdValue)
+                        return CompileStringIdExpression(stringIdValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.UnitSeatMapping:
-                    break;
+                    if (node is ScriptSymbol unitSeatMappingValue)
+                        return CompileUnitSeatMappingExpression(unitSeatMappingValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.TriggerVolume:
-                    break;
+                    if (node is ScriptSymbol triggerVolumeValue)
+                        return CompileTriggerVolumeExpression(triggerVolumeValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneFlag:
-                    break;
+                    if (node is ScriptSymbol cutsceneFlagValue)
+                        return CompileCutsceneFlagExpression(cutsceneFlagValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint:
-                    break;
+                    if (node is ScriptSymbol cutsceneCameraPointValue)
+                        return CompileCutsceneCameraPointExpression(cutsceneCameraPointValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneTitle:
-                    break;
+                    if (node is ScriptSymbol cutsceneTitleValue)
+                        return CompileCutsceneTitleExpression(cutsceneTitleValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneRecording:
-                    break;
+                    if (node is ScriptString cutsceneRecordingValue)
+                        return CompileCutsceneRecordingExpression(cutsceneRecordingValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.DeviceGroup:
-                    break;
+                    if (node is ScriptSymbol deviceGroupValue)
+                        return CompileDeviceGroupExpression(deviceGroupValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Ai:
-                    break;
+                    if (node is ScriptSymbol aiValue)
+                        return CompileAiExpression(aiValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiCommandList:
                     break;
@@ -588,6 +618,56 @@ namespace TagTool.Scripting.Compiler
         }
 
         private uint CompileStringExpression(ScriptString stringValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileScriptExpression(ScriptSymbol scriptValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileStringIdExpression(ScriptString stringIdValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileDeviceGroupExpression(ScriptSymbol deviceGroupValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileAiExpression(ScriptSymbol aiValue)
         {
             throw new NotImplementedException();
         }

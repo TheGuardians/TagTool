@@ -374,16 +374,54 @@ namespace TagTool.Commands.Files
                 /// <param name="fieldName">The name of the field in BlamCore.</param>
                 /// <param name="offset">The tag field offset.</param>
                 /// <returns>A list of AssemblyPluginFields that represent Vector2, two floats.</returns>
+                public static List<AssemblyPluginField> Point2(string[] format, string fieldName, ref int offset)
+                {
+                    if (format.Count() != 2)
+                        throw new ArgumentException("Invalid Point2 Format");
+
+                    return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.int16, fieldName + format[0], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.int16, fieldName + format[1], ref offset),
+                    };
+                }
+
+                /// <summary>
+                /// Returns the assembly plugin fields that represent a Vector2.
+                /// </summary>
+                /// <param name="format">The names of the two fields. Eg x and y, i and j.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
+                /// <param name="offset">The tag field offset.</param>
+                /// <returns>A list of AssemblyPluginFields that represent Vector2, two floats.</returns>
                 public static List<AssemblyPluginField> Vector2(string[] format, string fieldName, ref int offset)
                 {
                     if (format.Count() != 2)
                         throw new ArgumentException("Invalid Vector2 Format");
 
                     return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[0], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[1], ref offset),
+                    };
+                }
+
+                /// <summary>
+                /// Returns the assembly plugin fields that represent a Vector2.
+                /// </summary>
+                /// <param name="format">The names of the two fields. Eg x and y, i and j.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
+                /// <param name="offset">The tag field offset.</param>
+                /// <returns>A list of AssemblyPluginFields that represent Vector2, two floats.</returns>
+                public static List<AssemblyPluginField> Angle2(string[] format, string fieldName, ref int offset)
                 {
-                    new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[0], ref offset),
-                    new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[1], ref offset),
-                };
+                    if (format.Count() != 2)
+                        throw new ArgumentException("Invalid Angle2 Format");
+
+                    return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.degree, fieldName + format[0], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.degree, fieldName + format[1], ref offset),
+                    };
                 }
 
                 /// <summary>
@@ -399,11 +437,31 @@ namespace TagTool.Commands.Files
                         throw new ArgumentException("Invalid Vector3 Format");
 
                     return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[0], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[1], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[2], ref offset)
+                    };
+                }
+
+                /// <summary>
+                /// Returns the assembly plugin fields that represent a Vector3.
+                /// </summary>
+                /// <param name="format">The names of the three fields. Eg x, y and z, i j and k.</param>
+                /// <param name="fieldName">The name of the field in BlamCore.</param>
+                /// <param name="offset">The tag field offset.</param>
+                /// <returns>A list of AssemblyPluginFields that represent Vector3, three floats.</returns>
+                public static List<AssemblyPluginField> Angle3(string[] format, string fieldName, ref int offset)
                 {
-                    new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[0], ref offset),
-                    new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[1], ref offset),
-                    new AssemblyPluginField(AssemblyPluginFieldTypes.@float, fieldName + format[2], ref offset)
-                };
+                    if (format.Count() != 3)
+                        throw new ArgumentException("Invalid Angle3 Format");
+
+                    return new List<AssemblyPluginField>
+                    {
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.degree, fieldName + format[0], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.degree, fieldName + format[1], ref offset),
+                        new AssemblyPluginField(AssemblyPluginFieldTypes.degree, fieldName + format[2], ref offset)
+                    };
                 }
 
                 /// <summary>
@@ -636,13 +694,13 @@ namespace TagTool.Commands.Files
                             throw new NotImplementedException(boundsValueType.ToString() + " bounds are not supported.");
                     }
                     else if (fieldType == typeof(Point2d))
-                        assemblyPluginFields.AddRange(CommonFieldTypes.Vector2(new string[2] { "X", "Y" }, fieldName, ref offset));
+                        assemblyPluginFields.AddRange(CommonFieldTypes.Point2(new string[2] { "X", "Y" }, fieldName, ref offset));
                     else if (fieldType == typeof(RealBoundingBox))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RealBoundingBox(fieldName, ref offset));
                     else if (fieldType == typeof(RealEulerAngles2d))
-                        assemblyPluginFields.AddRange(CommonFieldTypes.Vector2(new string[2] { "Yaw", "Pitch" }, fieldName, ref offset));
+                        assemblyPluginFields.AddRange(CommonFieldTypes.Angle2(new string[2] { "Yaw", "Pitch" }, fieldName, ref offset));
                     else if (fieldType == typeof(RealEulerAngles3d))
-                        assemblyPluginFields.AddRange(CommonFieldTypes.Vector3(new string[3] { "Yaw", "Pitch", "Roll" }, fieldName, ref offset));
+                        assemblyPluginFields.AddRange(CommonFieldTypes.Angle3(new string[3] { "Yaw", "Pitch", "Roll" }, fieldName, ref offset));
                     else if (fieldType == typeof(RealPlane2d))
                         assemblyPluginFields.AddRange(CommonFieldTypes.Vector3(new string[3] { "I", "J", "Distance" }, fieldName, ref offset));
                     else if (fieldType == typeof(RealPlane3d))
