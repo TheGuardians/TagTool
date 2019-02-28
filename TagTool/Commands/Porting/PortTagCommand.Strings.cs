@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using TagTool.Cache;
+using TagTool.Serialization;
+using System;
 
 namespace TagTool.Commands.Porting
 {
@@ -106,6 +109,61 @@ namespace TagTool.Commands.Porting
             unic.OffsetCounts = new ushort[24];
 
             return unic;
+        }
+
+        private void MergeMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTagInstance edTag, CacheFile.IndexItem h3Tag)
+        {
+            var edDef = CacheContext.Deserialize<MultilingualUnicodeStringList>(cacheStream, edTag);
+
+            var h3Def = BlamCache.Deserializer.Deserialize<MultilingualUnicodeStringList>(
+                new CacheSerializationContext(ref BlamCache, h3Tag));
+
+            ConvertMultilingualUnicodeStringList(cacheStream, resourceStreams, h3Def);
+
+            var mergedStringCount = 0;
+
+            for (var i = 0; i < h3Def.Strings.Count; i++)
+            {
+                var found = false;
+
+                for (var j = 0; j < edDef.Strings.Count; j++)
+                {
+                    if (h3Def.Strings[i].StringID == edDef.Strings[j].StringID)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    var localizedStr = new LocalizedString
+                    {
+                        StringID = h3Def.Strings[i].StringID,
+                        StringIDStr = h3Def.Strings[i].StringIDStr
+                    };
+
+                    edDef.Strings.Add(localizedStr);
+
+                    for (var x = 0; x < 12; x++)
+                    {
+                        edDef.SetString(
+                            localizedStr,
+                            (GameLanguage)x,
+                            h3Def.GetString(
+                                h3Def.Strings[i],
+                                (GameLanguage)x));
+                    }
+
+                    mergedStringCount++;
+                }
+            }
+
+            if (mergedStringCount > 0)
+            {
+                Console.WriteLine($"Merged {mergedStringCount} localized strings.");
+                CacheContext.Serialize(cacheStream, edTag, edDef);
+            }
         }
     }
 }

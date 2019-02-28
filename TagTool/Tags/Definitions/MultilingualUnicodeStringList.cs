@@ -97,13 +97,13 @@ namespace TagTool.Tags.Definitions
         /// <summary>
         /// The string's stringID.
         /// </summary>
-        public StringId StringID;
+        public StringId StringID = StringId.Invalid;
 
         /// <summary>
         /// The stringID's string value. Can be empty.
         /// </summary>
         [TagField(Length = 0x20)]
-        public string StringIDStr;
+        public string StringIDStr = "";
 
         /// <summary>
         /// The array of offsets for each language.
@@ -111,15 +111,9 @@ namespace TagTool.Tags.Definitions
         /// There must be 12 of these (one offset per language).
         /// </summary>
         [TagField(Length = 12)]
-        public int[] Offsets;
-
-        public LocalizedString()
+        public int[] Offsets = new int[12]
         {
-            StringID = StringId.Invalid;
-            StringIDStr = "";
-            Offsets = new int[12];
-            for (var i = 0; i < Offsets.Length; i++)
-                Offsets[i] = -1;
-        }
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+        };
     }
 }

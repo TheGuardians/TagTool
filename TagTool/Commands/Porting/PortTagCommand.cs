@@ -342,6 +342,10 @@ namespace TagTool.Commands.Porting
                                 case "mulg":
                                     MergeMultiplayerGlobals(cacheStream, resourceStreams, instance, blamTag);
                                     break;
+
+                                case "unic":
+                                    MergeMultilingualUnicodeStringList(cacheStream, resourceStreams, instance, blamTag);
+                                    break;
                             }
                         }
 
