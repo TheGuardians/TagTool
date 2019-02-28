@@ -128,6 +128,10 @@ namespace TagTool.Scripting.Compiler
 
         private void CompileScript(IScriptSyntax node)
         {
+            //
+            // Verify the input syntax node is in the right format
+            //
+
             if (!(node is ScriptGroup group) ||
                 !(group.Head is ScriptSymbol symbol && symbol.Value == "script") ||
                 !(group.Tail is ScriptGroup declGroup))
@@ -135,30 +139,118 @@ namespace TagTool.Scripting.Compiler
                 throw new FormatException(node.ToString());
             }
 
+            //
+            // Compile the script type
+            //
+
             var scriptType = CompileScriptType(declGroup.Head);
+
+            //
+            // Compile the script return type
+            //
 
             if (!(declGroup.Tail is ScriptGroup declTailGroup))
                 throw new FormatException(declGroup.Tail.ToString());
 
             var scriptReturnType = CompileScriptValueType(declTailGroup.Head);
 
+            //
+            // Compile the script name and parameters (if any)
+            //
+
             if (!(declTailGroup.Tail is ScriptGroup declTailTailGroup))
                 throw new FormatException(declTailGroup.Tail.ToString());
 
-            //
-            // BEGIN TODO: Parse paremeters in possible (script_name (type1 name1) (type2 name2) ...)
-            //
+            string scriptName;
+            var scriptParams = new List<ScriptParameter>();
 
-            if (!(declTailTailGroup.Head is ScriptSymbol declName))
-                throw new FormatException(declTailGroup.Head.ToString());
+            switch (declTailTailGroup.Head)
+            {
+                // (script static boolean do_stuff ...)
+                case ScriptSymbol declName:
+                    scriptName = declName.Value;
+                    break;
 
-            var scriptName = declName.Value;
+                // (script static boolean (do_stuff (real a) (real b)) ...)
+                case ScriptGroup declNameGroup:
+                    {
+                        //
+                        // Get the name of the script
+                        //
+
+                        if (!(declNameGroup.Head is ScriptSymbol declGroupName))
+                            throw new FormatException(declNameGroup.Head.ToString());
+
+                        scriptName = declGroupName.Value;
+
+                        //
+                        // Get a list of script parameters
+                        //
+
+                        if (!(declNameGroup.Tail is ScriptGroup declParamGroup))
+                            throw new FormatException(declNameGroup.Tail.ToString());
+
+                        for (IScriptSyntax param = declParamGroup;
+                            param is ScriptGroup paramGroup;
+                            param = paramGroup.Tail)
+                        {
+                            //
+                            // Verify the input parameter syntax is correct: (type name)
+                            //
+
+                            if (!(paramGroup.Head is ScriptGroup paramDeclGroup))
+                                throw new FormatException(paramGroup.Head.ToString());
+
+                            //
+                            // Get the parameter type
+                            //
+
+                            if (!(paramDeclGroup.Head is ScriptSymbol paramDeclType))
+                                throw new FormatException(paramDeclGroup.Head.ToString());
+
+                            var paramType = CompileScriptValueType(paramDeclType);
+
+                            //
+                            // Get the parameter name
+                            //
+
+                            if (!(paramDeclGroup.Tail is ScriptGroup paramDeclTailGroup))
+                                throw new FormatException(paramDeclGroup.Tail.ToString());
+
+                            if (!(paramDeclTailGroup.Head is ScriptSymbol paramDeclName))
+                                throw new FormatException(paramDeclTailGroup.Head.ToString());
+
+                            var paramName = paramDeclName.Value;
+
+                            if (!(paramDeclTailGroup.Tail is ScriptInvalid))
+                                throw new FormatException(paramDeclTailGroup.Tail.ToString());
+
+                            //
+                            // Add an entry to the script parameters list
+                            //
+
+                            scriptParams.Add(new ScriptParameter
+                            {
+                                Name = paramName,
+                                Type = paramType
+                            });
+                        }
+                    }
+                    break;
+
+                default:
+                    throw new FormatException(declTailGroup.Head.ToString());
+            }
 
             //
-            // END TODO
+            // Compile the script expressions
             //
 
             var scriptInit = CompileExpression(declTailTailGroup.Head);
+
+            //
+            // Add the script to the scenario definition
+            //
 
             Definition.Scripts.Add(new Script
             {
@@ -166,7 +258,7 @@ namespace TagTool.Scripting.Compiler
                 Type = scriptType,
                 ReturnType = scriptReturnType,
                 RootExpressionHandle = scriptInit,
-                Parameters = new List<ScriptParameter>() // TODO
+                Parameters = scriptParams
             });
         }
 
