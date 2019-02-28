@@ -50,6 +50,7 @@ namespace TagTool.Common
 
 		// Common Blam Types
 		Pointer,
+        DatumIndex,
 		Tag,
 		CacheAddress,
 		CachedTagInstance,

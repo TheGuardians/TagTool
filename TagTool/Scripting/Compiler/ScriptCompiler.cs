@@ -16,6 +16,14 @@ namespace TagTool.Scripting.Compiler
         public ScriptCompiler(Scenario definition)
         {
             Definition = definition;
+
+            Definition.ScriptStrings = new byte[0];
+
+            Definition.Globals.Clear();
+            Definition.Scripts.Clear();
+            Definition.ScriptExpressions.Clear();
+            Definition.ScriptSourceFileReferences.Clear();
+            Definition.ScriptExternalFileReferences.Clear();
         }
 
         public void CompileFile(FileInfo file)
@@ -70,7 +78,7 @@ namespace TagTool.Scripting.Compiler
             }
         }
 
-        private ScriptValueType CompileScriptValueType(IScriptSyntax node)
+        private ScriptValueType ParseScriptValueType(IScriptSyntax node)
         {
             var result = new ScriptValueType();
 
@@ -83,7 +91,7 @@ namespace TagTool.Scripting.Compiler
             return result;
         }
 
-        private ScriptType CompileScriptType(IScriptSyntax node)
+        private ScriptType ParseScriptType(IScriptSyntax node)
         {
             if (!(node is ScriptSymbol symbol) ||
                 !Enum.TryParse<ScriptType>(symbol.Value, out var result))
@@ -96,6 +104,10 @@ namespace TagTool.Scripting.Compiler
 
         private void CompileGlobal(IScriptSyntax node)
         {
+            //
+            // Verify the input syntax node is in the right format
+            //
+
             if (!(node is ScriptGroup group) ||
                 !(group.Head is ScriptSymbol symbol && symbol.Value == "group") ||
                 !(group.Tail is ScriptGroup declGroup))
@@ -103,7 +115,15 @@ namespace TagTool.Scripting.Compiler
                 throw new FormatException(node.ToString());
             }
 
-            var globalType = CompileScriptValueType(declGroup.Head);
+            //
+            // Compile the global type
+            //
+
+            var globalType = ParseScriptValueType(declGroup.Head);
+
+            //
+            // Compile the global name
+            //
 
             if (!(declGroup.Tail is ScriptGroup declTailGroup))
                 throw new FormatException(declGroup.Tail.ToString());
@@ -113,10 +133,18 @@ namespace TagTool.Scripting.Compiler
 
             var globalName = declName.Value;
 
+            //
+            // Compile the global initialization expression
+            //
+
             if (!(declTailGroup.Tail is ScriptGroup declTailTailGroup))
                 throw new FormatException(declTailGroup.Tail.ToString());
 
-            var globalInit = CompileExpression(declTailTailGroup.Head);
+            var globalInit = CompileExpression(globalType, declTailTailGroup.Head);
+
+            //
+            // Add an entry to the globals block in the scenario definition
+            //
 
             Definition.Globals.Add(new ScriptGlobal
             {
@@ -143,7 +171,7 @@ namespace TagTool.Scripting.Compiler
             // Compile the script type
             //
 
-            var scriptType = CompileScriptType(declGroup.Head);
+            var scriptType = ParseScriptType(declGroup.Head);
 
             //
             // Compile the script return type
@@ -152,7 +180,7 @@ namespace TagTool.Scripting.Compiler
             if (!(declGroup.Tail is ScriptGroup declTailGroup))
                 throw new FormatException(declGroup.Tail.ToString());
 
-            var scriptReturnType = CompileScriptValueType(declTailGroup.Head);
+            var scriptReturnType = ParseScriptValueType(declTailGroup.Head);
 
             //
             // Compile the script name and parameters (if any)
@@ -208,7 +236,7 @@ namespace TagTool.Scripting.Compiler
                             if (!(paramDeclGroup.Head is ScriptSymbol paramDeclType))
                                 throw new FormatException(paramDeclGroup.Head.ToString());
 
-                            var paramType = CompileScriptValueType(paramDeclType);
+                            var paramType = ParseScriptValueType(paramDeclType);
 
                             //
                             // Get the parameter name
@@ -246,10 +274,16 @@ namespace TagTool.Scripting.Compiler
             // Compile the script expressions
             //
 
-            var scriptInit = CompileExpression(declTailTailGroup.Tail);
+            var scriptInit = CompileExpression(
+                scriptReturnType,
+                new ScriptGroup
+                {
+                    Head = new ScriptSymbol { Value = "begin" },
+                    Tail = declTailTailGroup.Tail
+                });
 
             //
-            // Add the script to the scenario definition
+            // Add an entry to the scripts block in the scenario definition
             //
 
             Definition.Scripts.Add(new Script
@@ -262,7 +296,293 @@ namespace TagTool.Scripting.Compiler
             });
         }
 
-        private uint CompileExpression(IScriptSyntax head)
+        private uint CompileExpression(ScriptValueType type, IScriptSyntax node)
+        {
+            if (node is ScriptGroup group)
+                return CompileGroupExpression(type, group);
+
+            switch (type.Halo3ODST)
+            {
+                case ScriptValueType.Halo3ODSTValue.Boolean:
+                    if (node is ScriptBoolean boolValue)
+                        return CompileBooleanExpression(boolValue);
+                    else
+                        throw new FormatException(node.ToString());
+
+                case ScriptValueType.Halo3ODSTValue.Real:
+                    if (node is ScriptReal realValue)
+                        return CompileRealExpression(realValue);
+                    else
+                        throw new FormatException(node.ToString());
+
+                case ScriptValueType.Halo3ODSTValue.Short:
+                    if (node is ScriptInteger shortValue)
+                        return CompileShortExpression(shortValue);
+                    else
+                        throw new FormatException(node.ToString());
+
+                case ScriptValueType.Halo3ODSTValue.Long:
+                    if (node is ScriptInteger longValue)
+                        return CompileShortExpression(longValue);
+                    else
+                        throw new FormatException(node.ToString());
+
+                case ScriptValueType.Halo3ODSTValue.String:
+                    if (node is ScriptString stringValue)
+                        return CompileStringExpression(stringValue);
+                    else
+                        throw new FormatException(node.ToString());
+
+                case ScriptValueType.Halo3ODSTValue.Script:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.StringId:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.UnitSeatMapping:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.TriggerVolume:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CutsceneFlag:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CutsceneTitle:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CutsceneRecording:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.DeviceGroup:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Ai:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AiCommandList:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AiCommandScript:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AiBehavior:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AiOrders:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AiLine:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.StartingProfile:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Conversation:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ZoneSet:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.DesignerZone:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.PointReference:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Style:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ObjectList:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Folder:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Sound:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Effect:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Damage:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.LoopingSound:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AnimationGraph:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.DamageEffect:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ObjectDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Bitmap:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Shader:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.RenderModel:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.StructureDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.LightmapDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CinematicDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CinematicSceneDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.BinkDefinition:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AnyTag:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AnyTagNotResolving:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.GameDifficulty:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Team:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.MpTeam:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Controller:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ButtonPreset:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.JoystickPreset:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.PlayerColor:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.PlayerCharacterType:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.VoiceOutputSetting:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.VoiceMask:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.SubtitleSetting:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ActorType:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ModelState:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Event:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CharacterPhysics:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.PrimarySkull:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.SecondarySkull:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Object:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Unit:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Vehicle:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Weapon:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Device:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.Scenery:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.EffectScenery:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.ObjectName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.UnitName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.VehicleName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.WeaponName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.DeviceName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.SceneryName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.EffectSceneryName:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.CinematicLightprobe:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.AnimationBudgetReference:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.LoopingSoundBudgetReference:
+                    break;
+
+                case ScriptValueType.Halo3ODSTValue.SoundBudgetReference:
+                    break;
+            }
+
+            throw new NotImplementedException(type.ToString());
+        }
+
+        private uint CompileGroupExpression(ScriptValueType type, ScriptGroup group)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileBooleanExpression(ScriptBoolean boolean)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileRealExpression(ScriptReal real)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileShortExpression(ScriptInteger integer)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileStringExpression(ScriptString stringValue)
         {
             throw new NotImplementedException();
         }
