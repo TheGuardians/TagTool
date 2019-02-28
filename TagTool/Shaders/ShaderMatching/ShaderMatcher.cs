@@ -691,10 +691,17 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\vehicles\ghost\shaders\ghost_torn":
                 case @"objects\vehicles\banshee\shaders\banshee_torn":
                 case @"objects\vehicles\wraith\shaders\wraith_torn":
-                case @"objects\vehicles\wraith\shaders\wraith_torn_metal":
                     try
                     {
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_2_2_0_0_0_1_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"objects\vehicles\wraith\shaders\wraith_torn_metal":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_1_2_0_0_0_1_0");
                     }
                     catch { }
                     break;
