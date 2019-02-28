@@ -678,6 +678,14 @@ namespace TagTool.Shaders.ShaderMatching
         {
             switch (blamTagName)
             {
+                case @"objects\vehicles\ghost\shaders\ghost_dash_zcam":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_11_0_1_0_2_0");
+                    }
+                    catch { }
+                    break;
+
                 case @"fx\particles\energy\electric_arcs_blue":
                     try
                     {

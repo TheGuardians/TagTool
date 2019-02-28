@@ -246,7 +246,7 @@ namespace TagTool.Scripting.Compiler
             // Compile the script expressions
             //
 
-            var scriptInit = CompileExpression(declTailTailGroup.Head);
+            var scriptInit = CompileExpression(declTailTailGroup.Tail);
 
             //
             // Add the script to the scenario definition

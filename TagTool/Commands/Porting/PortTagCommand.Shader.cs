@@ -280,6 +280,12 @@ namespace TagTool.Commands.Porting
                         break;
                     }
 
+                case @"objects\vehicles\ghost\shaders\ghost_dash_zcam" when finalRm is ShaderHalogram:
+                case @"objects\weapons\rifle\sniper_rifle\shaders\scope_alpha" when finalRm is ShaderHalogram:
+                    finalRm.InputVariable = TagTool.Tags.TagMapping.VariableTypeValue.ParticleRandom1;
+                    finalRm.RangeVariable = TagTool.Tags.TagMapping.VariableTypeValue.ParticleAge;
+                    break;
+
                 case @"levels\dlc\armory\shaders\concrete_floor_smooth" when finalRm is Shader:
                     {
                         // Fixup bitmaps
