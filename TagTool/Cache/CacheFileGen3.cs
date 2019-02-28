@@ -156,7 +156,7 @@ namespace TagTool.Cache
             }
             else
             {
-                Header.Magic = Header.StringIDsIndicesOffset - 0x3000;
+                Header.Magic = Header.StringIDsIndicesOffset - (int)TagStructure.GetTagStructureInfo(typeof(CacheFileHeader), version).TotalSize;
 
                 Header.TagNamesBufferOffset -= Header.Magic;
                 Header.TagNamesIndicesOffset -= Header.Magic;

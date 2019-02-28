@@ -323,7 +323,7 @@ namespace TagTool.Scripting.Compiler
 
                 case ScriptValueType.Halo3ODSTValue.Long:
                     if (node is ScriptInteger longValue)
-                        return CompileShortExpression(longValue);
+                        return CompileLongExpression(longValue);
                     else
                         throw new FormatException(node.ToString());
 
@@ -578,6 +578,11 @@ namespace TagTool.Scripting.Compiler
         }
 
         private uint CompileShortExpression(ScriptInteger integer)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileLongExpression(ScriptInteger integer)
         {
             throw new NotImplementedException();
         }
