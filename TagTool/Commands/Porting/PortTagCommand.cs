@@ -765,6 +765,9 @@ namespace TagTool.Commands.Porting
 				case WeaponFlags weaponFlags:
 					return ConvertWeaponFlags(weaponFlags);
 
+                case BarrelFlags barrelflags:
+                    return ConvertBarrelFlags(barrelflags);
+
                 case Vehicle.VehicleFlagBits vehicleFlags:
                     return ConvertVehicleFlags(vehicleFlags);
 
@@ -1047,11 +1050,6 @@ namespace TagTool.Commands.Porting
                             break;
                     }
                     break;
-
-                case Weapon.Barrel.BarrelFlags flags:
-                    if (!Enum.TryParse(flags.Halo3.ToString(), out flags.HaloOnline))
-                        throw new NotSupportedException(flags.Halo3.ToString());
-                    break;
             }
 
             return data;
@@ -1127,7 +1125,19 @@ namespace TagTool.Commands.Porting
 				throw new FormatException(BlamCache.Version.ToString());
 
 			return weaponFlags;
-		}
+        }
+
+        private object ConvertBarrelFlags(BarrelFlags barrelflags)
+        {
+            //fire locked projectiles flag has been removed completely in HO
+            if (barrelflags.Halo3.HasFlag(BarrelFlags.Halo3Value.FiresLockedProjectiles))
+                barrelflags.Halo3 &= ~BarrelFlags.Halo3Value.FiresLockedProjectiles;
+
+            if (!Enum.TryParse(barrelflags.Halo3.ToString(), out barrelflags.HaloOnline))
+                throw new NotSupportedException(barrelflags.Halo3.ToString());
+
+            return barrelflags;
+        }
 
         private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
         {

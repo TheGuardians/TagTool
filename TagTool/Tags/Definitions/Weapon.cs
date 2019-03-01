@@ -469,71 +469,7 @@ namespace TagTool.Tags.Definitions
             public float RateOfFireDecelerationTime;
             public uint Unknown9;
             public float BloomRateOfDecay;
-            public List<FiringEffect> FiringEffects;
-
-            [TagStructure(Size = 0x4)]
-            public class BarrelFlags : TagStructure
-            {
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public Halo3Value Halo3;
-
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public HaloOnlineValue HaloOnline;
-
-                [Flags]
-                public enum Halo3Value : int
-                {
-                    None = 0,
-                    TracksFiredProjectile = 1 << 0,
-                    RandomFiringEffects = 1 << 1,
-                    CanFireWithPartialAmmo = 1 << 2,
-                    ProjectilesUseWeaponOrigin = 1 << 3,
-                    EjectsDuringChamber = 1 << 4,
-                    UseErrorWhenUnzoomed = 1 << 5,
-                    ProjectileVectorCannotBeAdjusted = 1 << 6,
-                    ProjectilesHaveIdenticalError = 1 << 7,
-                    ProjectilesFireParallel = 1 << 8,
-                    CantFireWhenOthersFiring = 1 << 9,
-                    CantFireWhenOthersRecovering = 1 << 10,
-                    DontClearFireBitAfterRecovering = 1 << 11,
-                    StaggerFireAcrossMultipleMarkers = 1 << 12,
-                    FiresLockedProjectiles = 1 << 13,
-                    Bit14 = 1 << 14,
-                    ShrineDefender = 1 << 15,
-                    HornetWeapons = 1 << 16,
-                    Bit17 = 1 << 17,
-                    ProjectileFiresInMarkerDirection = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20
-                }
-
-                [Flags]
-                public enum HaloOnlineValue : int
-                {
-                    None = 0,
-                    TracksFiredProjectile = 1 << 0,
-                    RandomFiringEffects = 1 << 1,
-                    CanFireWithPartialAmmo = 1 << 2,
-                    ProjectilesUseWeaponOrigin = 1 << 3,
-                    EjectsDuringChamber = 1 << 4,
-                    UseErrorWhenUnzoomed = 1 << 5,
-                    ProjectileVectorCannotBeAdjusted = 1 << 6,
-                    ProjectilesHaveIdenticalError = 1 << 7,
-                    ProjectilesFireParallel = 1 << 8,
-                    CantFireWhenOthersFiring = 1 << 9,
-                    CantFireWhenOthersRecovering = 1 << 10,
-                    DontClearFireBitAfterRecovering = 1 << 11,
-                    StaggerFireAcrossMultipleMarkers = 1 << 12,
-                    FiresLockedProjectiles = 1 << 13,
-                    ShrineDefender = 1 << 14,
-                    HornetWeapons = 1 << 15,
-                    Bit16 = 1 << 16,
-                    Bit17 = 1 << 17,
-                    Bit18 = 1 << 18,
-                    ProjectileFiresInMarkerDirection = 1 << 19,
-                    Bit20 = 1 << 20
-                }
-            }
+            public List<FiringEffect> FiringEffects;            
 
             public enum PredictionTypeValue : short
             {
@@ -641,6 +577,70 @@ namespace TagTool.Tags.Definitions
         public class FirstPersonOffsetBlock : TagStructure
 		{
             public RealVector3d Offset;
+        }
+    }
+
+    [TagStructure(Size = 0x4)]
+    public class BarrelFlags : TagStructure
+    {
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        public Halo3Value Halo3;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public HaloOnlineValue HaloOnline;
+
+        [Flags]
+        public enum Halo3Value : int
+        {
+            None = 0,
+            TracksFiredProjectile = 1 << 0,
+            RandomFiringEffects = 1 << 1,
+            CanFireWithPartialAmmo = 1 << 2,
+            ProjectilesUseWeaponOrigin = 1 << 3,
+            EjectsDuringChamber = 1 << 4,
+            UseErrorWhenUnzoomed = 1 << 5,
+            ProjectileVectorCannotBeAdjusted = 1 << 6,
+            ProjectilesHaveIdenticalError = 1 << 7,
+            ProjectilesFireParallel = 1 << 8,
+            CantFireWhenOthersFiring = 1 << 9,
+            CantFireWhenOthersRecovering = 1 << 10,
+            DontClearFireBitAfterRecovering = 1 << 11,
+            StaggerFireAcrossMultipleMarkers = 1 << 12,
+            FiresLockedProjectiles = 1 << 13,
+            PlasmaPistol = 1 << 14,
+            ShrineDefender = 1 << 15,
+            HornetWeapons = 1 << 16,
+            Bit17 = 1 << 17,
+            ProjectileFiresInMarkerDirection = 1 << 18,
+            Bit19 = 1 << 19,
+            Bit20 = 1 << 20
+        }
+
+        [Flags]
+        public enum HaloOnlineValue : int
+        {
+            None = 0,
+            TracksFiredProjectile = 1 << 0,
+            RandomFiringEffects = 1 << 1,
+            CanFireWithPartialAmmo = 1 << 2,
+            ProjectilesUseWeaponOrigin = 1 << 3,
+            EjectsDuringChamber = 1 << 4,
+            UseErrorWhenUnzoomed = 1 << 5,
+            ProjectileVectorCannotBeAdjusted = 1 << 6,
+            ProjectilesHaveIdenticalError = 1 << 7,
+            ProjectilesFireParallel = 1 << 8,
+            CantFireWhenOthersFiring = 1 << 9,
+            CantFireWhenOthersRecovering = 1 << 10,
+            DontClearFireBitAfterRecovering = 1 << 11,
+            StaggerFireAcrossMultipleMarkers = 1 << 12,
+            PlasmaPistol = 1 << 13,
+            ShrineDefender = 1 << 14,
+            HornetWeapons = 1 << 15,
+            Bit16 = 1 << 16,
+            Bit17 = 1 << 17,
+            Bit18 = 1 << 18,
+            ProjectileFiresInMarkerDirection = 1 << 19,
+            Bit20 = 1 << 20
         }
     }
 
