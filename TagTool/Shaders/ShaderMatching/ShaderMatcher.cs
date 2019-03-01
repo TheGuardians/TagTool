@@ -678,6 +678,14 @@ namespace TagTool.Shaders.ShaderMatching
         {
             switch (blamTagName)
             {
+                case @"levels\multi\snowbound\shaders\cov_grey_icy":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_7_2_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
                 case @"objects\vehicles\ghost\shaders\ghost_damage":
                 case @"objects\vehicles\wraith\shaders\wraith_blown_open":
                 case @"objects\vehicles\banshee\shaders\banshee_damage":
@@ -834,6 +842,9 @@ namespace TagTool.Shaders.ShaderMatching
                     catch { }
                     break;
 
+                case @"levels\multi\snowbound\shaders\rock_cliffs":
+                case @"levels\multi\snowbound\shaders\rock_rocky":
+                case @"levels\multi\snowbound\shaders\rock_rocky_icy":
                 case @"levels\solo\020_base\shaders\hb_metal_arch_unwrap_a":
                     try
                     {

@@ -325,6 +325,280 @@ namespace TagTool.Commands.Porting
                         }
                     }
                     break;
+
+                case @"levels\multi\snowbound\shaders\cov_grey_icy" when finalRm is Shader:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            switch (CacheContext.GetString(edRmt2.SamplerArguments[i].Name))
+                            {
+                                case "base_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_dif.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "detail_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "bump_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_platebump.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "bump_detail_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_bump.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+                            }
+                        }
+
+                        // Fixup arguments
+                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        {
+                            var templateArg = edRmt2.VectorArguments[i];
+
+                            switch (CacheContext.GetString(templateArg.Name))
+                            {
+                                case "base_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    break;
+
+                                case "detail_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.5f, 1.5f, 0f, 0f };
+                                    break;
+
+                                case "albedo_color":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.554902f, 0.5588236f, 0.5921569f, 1f };
+                                    break;
+
+                                case "bump_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                    break;
+
+                                case "bump_detail_map":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 2f, 2f, 0f, 0f };
+                                    break;
+
+                                case "diffuse_coefficient":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.4f, 0.4f, 0.4f, 0.4f };
+                                    break;
+
+                                case "specular_coefficient":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 1f, 1f };
+                                    break;
+
+                                case "roughness":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
+                                    break;
+
+                                case "analytical_specular_contribution":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.2f, 0.2f, 0.2f, 0.2f };
+                                    break;
+
+                                case "area_specular_contribution":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.1f, 0.1f, 0.1f, 0.1f };
+                                    break;
+
+                                case "environment_map_specular_contribution":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.15f, 0.15f, 0.15f, 0.15f };
+                                    break;
+
+                                case "specular_tint":
+                                    finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.8431373f, 0.8470589f, 0.8117648f, 1f };
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
+                case @"levels\multi\snowbound\shaders\rock_cliffs" when finalRm is Shader:
+                case @"levels\multi\snowbound\shaders\rock_rocky" when finalRm is Shader:
+                case @"levels\multi\snowbound\shaders\rock_rocky_icy" when finalRm is Shader:
+                    {
+                        // Fixup bitmaps
+                        for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                        {
+                            switch (CacheContext.GetString(edRmt2.SamplerArguments[i].Name))
+                            {
+                                case "base_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "detail_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_detail.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "detail_map2":
+                                    try
+                                    {
+                                        switch (blamTagName)
+                                        {
+                                            case @"levels\multi\snowbound\shaders\rock_rocky_icy":
+                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_icy_blend.bitmap")[0]);
+                                                break;
+
+                                            default:
+                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_cliff_dif.bitmap")[0]);
+                                                break;
+                                        }
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "bump_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_bump.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "bump_detail_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_bump.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "height_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_parallax.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+
+                                case "environment_map":
+                                    try
+                                    {
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"shaders\default_bitmaps\bitmaps\color_white.bitmap")[0]);
+                                    }
+                                    catch { }
+                                    break;
+                            }
+                        }
+
+                        // Fixup arguments
+                        for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                        {
+                            var templateArg = edRmt2.VectorArguments[i];
+
+                            switch (CacheContext.GetString(templateArg.Name))
+                            {
+                                case "base_map":
+                                    switch (blamTagName)
+                                    {
+                                        case @"levels\multi\snowbound\shaders\rock_cliffs":
+                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 16f, 2f, 0f, 0.5f };
+                                            break;
+                                    }
+                                    break;
+
+                                case "detail_map":
+                                    switch (blamTagName)
+                                    {
+                                        case @"levels\multi\snowbound\shaders\rock_cliffs":
+                                        case @"levels\multi\snowbound\shaders\rock_rocky":
+                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 320f, 20f, 0f, 0f };
+                                            break;
+                                    }
+                                    break;
+
+                                case "detail_map2":
+                                    switch (blamTagName)
+                                    {
+                                        case @"levels\multi\snowbound\shaders\rock_cliffs":
+                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1f, 1f, 0f, 0f };
+                                            break;
+                                    }
+                                    break;
+
+                                case "bump_detail_map":
+                                    switch (blamTagName)
+                                    {
+                                        case @"levels\multi\snowbound\shaders\rock_cliffs":
+                                        case @"levels\multi\snowbound\shaders\rock_rocky":
+                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 320f, 20f, 0f, 0f };
+                                            break;
+                                    }
+                                    break;
+
+                                case "diffuse_coefficient":
+                                    switch (blamTagName)
+                                    {
+                                        case @"levels\multi\snowbound\shaders\rock_rocky_icy":
+                                            finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 1.2f, 1.2f, 1.2f, 1.2f };
+                                            break;
+                                    }
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
+                case @"levels\multi\snowbound\shaders\cov_metalplates_icy" when finalRm is Shader:
+                    // Fixup bitmaps
+                    for (var i = 0; i < edRmt2.SamplerArguments.Count; i++)
+                    {
+                        switch (CacheContext.GetString(edRmt2.SamplerArguments[i].Name))
+                        {
+                            case "detail_map":
+                                try
+                                {
+                                    finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy4");
+                                }
+                                catch { }
+                                break;
+
+                            case "detail_map2":
+                                try
+                                {
+                                    finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = CacheContext.GetTag<Bitmap>(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy3");
+                                }
+                                catch { }
+                                break;
+                        }
+                    }
+                    break;
+
+                case @"levels\multi\snowbound\shaders\invis_col_glass" when finalRm is Shader:
+                    // Fixup arguments
+                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    {
+                        var templateArg = edRmt2.VectorArguments[i];
+
+                        switch (CacheContext.GetString(templateArg.Name))
+                        {
+                            case "albedo_color":
+                                finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0f, 0f, 0f, 0f };
+                                break;
+                        }
+                    }
+                    break;
             }
 
             return finalRm;

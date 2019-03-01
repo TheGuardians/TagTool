@@ -678,6 +678,10 @@ namespace TagTool.Commands.Porting
         {
             switch (blamTagName)
             {
+                case @"fx\scenery_fx\weather\snow\snow_snowbound\snow_snowbound":
+                    effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
+                    break;
+
                 case @"levels\dlc\chillout\fx\flood_tube\flood_tube":
                     effe.Events[0].ParticleSystems[0].Unknown7 = 10000;
                     effe.Events[0].ParticleSystems[0].Unknown8 = 1;

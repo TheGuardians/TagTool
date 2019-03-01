@@ -394,10 +394,16 @@ namespace TagTool.Scripting.Compiler
                         throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiCommandList:
-                    break;
+                    if (node is ScriptSymbol aiCommandListValue)
+                        return CompileAiCommandListExpression(aiCommandListValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiCommandScript:
-                    break;
+                    if (node is ScriptSymbol aiCommandScriptValue)
+                        return CompileAiCommandScriptExpression(aiCommandScriptValue);
+                    else
+                        throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiBehavior:
                     break;
@@ -668,6 +674,16 @@ namespace TagTool.Scripting.Compiler
         }
 
         private uint CompileAiExpression(ScriptSymbol aiValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileAiCommandListExpression(ScriptSymbol aiCommandListValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private uint CompileAiCommandScriptExpression(ScriptSymbol aiCommandScriptValue)
         {
             throw new NotImplementedException();
         }
