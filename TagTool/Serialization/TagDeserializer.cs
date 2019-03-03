@@ -253,6 +253,9 @@ namespace TagTool.Serialization
             if (valueType == typeof(Angle))
                 return Angle.FromRadians(reader.ReadSingle());
 
+            if (valueType == typeof(DatumIndex))
+                return new DatumIndex(reader.ReadUInt32());
+
             // Non-byte array = Inline array
             // TODO: Define more clearly in general what constitutes a data reference and what doesn't
             if (valueType.IsArray)

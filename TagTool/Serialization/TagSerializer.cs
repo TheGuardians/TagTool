@@ -237,6 +237,8 @@ namespace TagTool.Serialization
                 block.Writer.Write(((StringId)value).Value);
             else if (valueType == typeof(Angle))
                 block.Writer.Write(((Angle)value).Radians);
+            else if (valueType == typeof(DatumIndex))
+                block.Writer.Write(((DatumIndex)value).Value);
             else if (valueType == typeof(VertexShaderReference))
                 block.Writer.Write(0); // TODO: fix  (not used in halo online)
             else if (valueType == typeof(PixelShaderReference))
