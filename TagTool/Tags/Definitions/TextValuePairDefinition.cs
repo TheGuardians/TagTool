@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "text_value_pair_definition", Tag = "sily", Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
     public class TextValuePairDefinition : TagStructure
 	{
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public ParameterValue_H3 ParameterH3;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public ParameterValue ParameterHO;
