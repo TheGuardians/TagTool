@@ -123,6 +123,34 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            if (edDef.FiringPatternProperties.Count == h3Def.FiringPatternProperties.Count)
+            {
+                for (var i = 0; i < edDef.FiringPatternProperties.Count; i++)
+                {
+                    if (edDef.FiringPatternProperties[i].Weapon != null || h3Def.FiringPatternProperties[i].Weapon == null)
+                        continue;
+
+                    edDef.FiringPatternProperties[i].Weapon = ConvertTag(cacheStream, resourceStreams,
+                        BlamCache.GetIndexItemFromID(h3Def.FiringPatternProperties[i].Weapon.Index));
+
+                    merged = true;
+                }
+            }
+
+            if (edDef.ActAttachments.Count == h3Def.ActAttachments.Count)
+            {
+                for (var i = 0; i < edDef.ActAttachments.Count; i++)
+                {
+                    if (edDef.ActAttachments[i].Crate != null || h3Def.ActAttachments[i].Crate == null)
+                        continue;
+
+                    edDef.ActAttachments[i].Crate = ConvertTag(cacheStream, resourceStreams,
+                        BlamCache.GetIndexItemFromID(h3Def.ActAttachments[i].Crate.Index));
+
+                    merged = true;
+                }
+            }
+
             if (merged)
                 CacheContext.Serialize(cacheStream, edTag, edDef);
         }
