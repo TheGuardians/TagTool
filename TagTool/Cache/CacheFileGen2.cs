@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Cache
@@ -53,8 +54,8 @@ namespace TagTool.Cache
                 cache.Header.Magic = TagGroupsOffset - (cache.Header.TagIndexOffset + 32);
                 TagGroupCount = reader.ReadInt32();
                 TagsOffset = reader.ReadInt32() - cache.Header.Magic;
-                ScenarioHandle = reader.ReadUInt32();
-                GlobalsHandle = reader.ReadUInt32();
+                ScenarioHandle = reader.ReadDatumIndex();
+                GlobalsHandle = reader.ReadDatumIndex();
                 CRC = reader.ReadInt32();
                 TagCount = reader.ReadInt32();
                 reader.ReadTag(); // 'tags'
@@ -174,13 +175,13 @@ namespace TagTool.Cache
             }
         }
 
-        public override byte[] GetRawFromID(int ID, int DataLength)
+        public override byte[] GetRawFromID(DatumIndex ID, int DataLength)
         {
             EndianReader er;
             string fName = "";
 
-            long cIndex = (ID & 0xC0000000) >> 30;
-            int offset = ID & 0x3FFFFFFF;
+            long cIndex = (ID.Value & 0xC0000000) >> 30;
+            int offset = (int)ID.Value & 0x3FFFFFFF;
 
             if (cIndex != 0)
             {

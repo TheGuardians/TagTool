@@ -65,7 +65,7 @@ namespace TagTool.Geometry
         /// The index of the resource entry in the cache_file_resource_gestalt tag.
         /// </summary>
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int ZoneAssetHandle;
+        public DatumIndex ZoneAssetHandle;
         
         [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
         public byte[] Unused;

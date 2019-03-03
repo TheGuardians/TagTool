@@ -266,11 +266,13 @@ namespace TagTool.Tags.Definitions
         public class BitmapResource : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public int ZoneAssetHandleOld;
+            public DatumIndex ZoneAssetHandleOld;
+
             [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
             public PageableResource Resource;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int ZoneAssetHandleNew;
+            public DatumIndex ZoneAssetHandleNew;
 
             public int Unknown4;
         }

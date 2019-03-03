@@ -4,6 +4,8 @@ namespace TagTool.Common
 {
     public struct DatumIndex : IEquatable<DatumIndex>, IComparable<DatumIndex>, IBlamType
     {
+        public static DatumIndex None { get; } = new DatumIndex(uint.MaxValue);
+
         public uint Value;
 
         public ushort Salt
@@ -45,6 +47,12 @@ namespace TagTool.Common
             obj is DatumIndex datumIndex ?
                 Equals(datumIndex) :
                 false;
+
+        public static bool operator ==(DatumIndex lhs, DatumIndex rhs) =>
+            lhs.Equals(rhs);
+
+        public static bool operator !=(DatumIndex lhs, DatumIndex rhs) =>
+            !(lhs == rhs);
 
         public int CompareTo(DatumIndex other) =>
             Index.CompareTo(other.Index);

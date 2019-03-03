@@ -61,7 +61,7 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version >= CacheVersion.Halo3ODST)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex4 & ushort.MaxValue];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex4.Index];
 
                 bsp.PathfindingResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
                 bsp.PathfindingResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();

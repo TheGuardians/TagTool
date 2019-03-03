@@ -417,15 +417,15 @@ namespace TagTool.Cache
             return decompressed;
         }
 
-        public override byte[] GetRawFromID(int ID, int DataLength)
+        public override byte[] GetRawFromID(DatumIndex ID, int DataLength)
         {
-            if (ID == -1)
+            if (ID == DatumIndex.None)
                 return null;
 
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var resource = ResourceGestalt.TagResources[ID.Index];
 
             if (resource.SegmentIndex == -1) return null;
 
@@ -466,12 +466,12 @@ namespace TagTool.Cache
             return data;
         }
 
-        public override byte[] GetSoundRaw(int ID, int size)
+        public override byte[] GetSoundRaw(DatumIndex ID, int size)
         {
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var resource = ResourceGestalt.TagResources[ID.Index];
 
             if (resource.SegmentIndex == -1)
                 return null;
@@ -515,15 +515,15 @@ namespace TagTool.Cache
             return data;
         }
 
-        public override byte[] GetPrimaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        public override byte[] GetPrimaryResource(DatumIndex ID, int dataLength, int offset = 0, bool padding = false)
         {
-            if (ID == -1)
+            if (ID == DatumIndex.None)
                 return null;
 
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var resource = ResourceGestalt.TagResources[ID.Index];
 
             if (resource.SegmentIndex == -1)
                 return null;
@@ -566,15 +566,15 @@ namespace TagTool.Cache
             return data;
         }
 
-        public override byte[] GetSecondaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        public override byte[] GetSecondaryResource(DatumIndex ID, int dataLength, int offset = 0, bool padding = false)
         {
-            if (ID == -1)
+            if (ID == DatumIndex.None)
                 return null;
 
             if (ResourceLayoutTable == null || ResourceGestalt == null)
                 LoadResourceTags();
 
-            var resource = ResourceGestalt.TagResources[ID & ushort.MaxValue];
+            var resource = ResourceGestalt.TagResources[ID.Index];
 
             if (resource.SegmentIndex == -1) return null;
 

@@ -344,7 +344,7 @@ namespace TagTool.Commands.Porting
             // Port Blam resource definition
             //
             
-            var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3 & ushort.MaxValue];
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3.Index];
 
             bsp.CollisionBspResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
             bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();

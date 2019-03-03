@@ -228,7 +228,7 @@ namespace TagTool.Tags.Definitions
             public short RigidNode;
             public SectionFlags Flags;
             public List<Mesh> Meshes;
-            public int BlockOffset;
+            public DatumIndex BlockOffset;
             public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;
@@ -385,7 +385,7 @@ namespace TagTool.Tags.Definitions
             public List<ClusterBasisBlock> ClusterBasis;
             public List<RawPcaDatum> RawPcaData;
             public List<Mesh.VertexBuffer> VertexBuffers;
-            public int BlockOffset;
+            public DatumIndex BlockOffset;
             public int BlockSize;
             public uint SectionDataSize;
             public uint ResourceDataSize;

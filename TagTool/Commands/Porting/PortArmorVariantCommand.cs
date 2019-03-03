@@ -281,7 +281,7 @@ namespace TagTool.Commands.Porting
 
             Console.Write("Loading Blam render_geometry resource definition...");
 
-            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.ZoneAssetHandle & ushort.MaxValue];
+            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.ZoneAssetHandle.Index];
 
             var resourceDefinition = new RenderGeometryApiResourceDefinition
             {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
@@ -59,14 +60,14 @@ namespace TagTool.Commands.Scenarios
                     csvFileName = a;
 
             csvQueue1 = new List<string>();
-            var globals = new Dictionary<uint, string>();
+            var globals = new Dictionary<DatumIndex, string>();
 
             var i = -1;
             CsvAdd("Globals");
             foreach (var a in Definition.Globals)
             {
                 i++;
-                var salt = a.InitializationExpressionHandle >> 16;
+                var salt = a.InitializationExpressionHandle.Salt;
 
                 CsvAdd(
                     $"{i:D4}," +
@@ -101,16 +102,16 @@ namespace TagTool.Commands.Scenarios
                     continue;
 
                 var scriptGroupName = "";
-                if (expr.NextExpressionHandle == 0xFFFFFFFF &&
+                if (expr.NextExpressionHandle == DatumIndex.None &&
                     expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
                     expr.Opcode == 0x0)
                 {
-                    var ScriptGroupName = Definition.Scripts.Find(x => (x.RootExpressionHandle >> 16) == expr.Salt);
+                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Salt);
                     if (ScriptGroupName != null)
                         scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
                 }
 
-                var ExpressionHandle = (uint)((expr.Salt << 16) + i);
+                var ExpressionHandle = new DatumIndex((uint)((expr.Salt << 16) + i));
 
                 if (globals.ContainsKey(ExpressionHandle))
                     scriptGroupName = $"G:{globals[ExpressionHandle]}";

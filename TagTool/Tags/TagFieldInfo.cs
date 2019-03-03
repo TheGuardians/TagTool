@@ -211,6 +211,9 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(RealMatrix4x3):
 					return 0x30;
 
+                case TypeCode.Object when type == typeof(DatumIndex):
+                    return sizeof(uint);
+
 				case TypeCode.String:
 				case TypeCode.Object when type.IsArray:
 					return (uint)attr.Length;

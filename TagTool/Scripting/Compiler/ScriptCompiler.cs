@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Common;
 using TagTool.Scripting.Compiler;
 using TagTool.Tags.Definitions;
 
@@ -296,7 +297,7 @@ namespace TagTool.Scripting.Compiler
             });
         }
 
-        private uint CompileExpression(ScriptValueType type, IScriptSyntax node)
+        private DatumIndex CompileExpression(ScriptValueType type, IScriptSyntax node)
         {
             if (node is ScriptGroup group)
                 return CompileGroupExpression(type, group);
@@ -598,92 +599,92 @@ namespace TagTool.Scripting.Compiler
             throw new NotImplementedException(type.ToString());
         }
 
-        private uint CompileGroupExpression(ScriptValueType type, ScriptGroup group)
+        private DatumIndex CompileGroupExpression(ScriptValueType type, ScriptGroup group)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileBooleanExpression(ScriptBoolean boolean)
+        private DatumIndex CompileBooleanExpression(ScriptBoolean boolean)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileRealExpression(ScriptReal real)
+        private DatumIndex CompileRealExpression(ScriptReal real)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileShortExpression(ScriptInteger integer)
+        private DatumIndex CompileShortExpression(ScriptInteger integer)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileLongExpression(ScriptInteger integer)
+        private DatumIndex CompileLongExpression(ScriptInteger integer)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileStringExpression(ScriptString stringValue)
+        private DatumIndex CompileStringExpression(ScriptString stringValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileScriptExpression(ScriptSymbol scriptValue)
+        private DatumIndex CompileScriptExpression(ScriptSymbol scriptValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileStringIdExpression(ScriptString stringIdValue)
+        private DatumIndex CompileStringIdExpression(ScriptString stringIdValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingValue)
+        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeValue)
+        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagValue)
+        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointValue)
+        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleValue)
+        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingValue)
+        private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileDeviceGroupExpression(ScriptSymbol deviceGroupValue)
+        private DatumIndex CompileDeviceGroupExpression(ScriptSymbol deviceGroupValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileAiExpression(ScriptSymbol aiValue)
+        private DatumIndex CompileAiExpression(ScriptSymbol aiValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileAiCommandListExpression(ScriptSymbol aiCommandListValue)
+        private DatumIndex CompileAiCommandListExpression(ScriptSymbol aiCommandListValue)
         {
             throw new NotImplementedException();
         }
 
-        private uint CompileAiCommandScriptExpression(ScriptSymbol aiCommandScriptValue)
+        private DatumIndex CompileAiCommandScriptExpression(ScriptSymbol aiCommandScriptValue)
         {
             throw new NotImplementedException();
         }

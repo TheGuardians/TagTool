@@ -1,3 +1,4 @@
+using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Scripting
@@ -9,6 +10,6 @@ namespace TagTool.Scripting
         public string Name;
         public ScriptValueType Type;
         public short Unknown;
-        public uint InitializationExpressionHandle;
+        public DatumIndex InitializationExpressionHandle;
     }
 }

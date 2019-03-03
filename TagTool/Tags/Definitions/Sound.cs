@@ -91,7 +91,8 @@ namespace TagTool.Tags.Definitions
             public short ExtraInfoIndex;
             public int LongestPermutationDurationMs;
 
-            public int ZoneAssetHandle;
+            public DatumIndex ZoneAssetHandle;
+
             [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
             public byte[] Unused;
         }

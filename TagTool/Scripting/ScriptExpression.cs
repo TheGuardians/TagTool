@@ -1,3 +1,4 @@
+using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Scripting
@@ -9,7 +10,7 @@ namespace TagTool.Scripting
         public ushort Opcode;
         public ScriptValueType ValueType; // 30 max length
         public ScriptExpressionType ExpressionType; // 18 max length
-        public uint NextExpressionHandle;
+        public DatumIndex NextExpressionHandle;
         public uint StringAddress;
 
         [TagField(Length = 4)]

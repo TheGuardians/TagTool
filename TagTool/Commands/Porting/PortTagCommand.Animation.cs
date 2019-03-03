@@ -23,7 +23,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var group in resourceGroups)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetDatumIndex & ushort.MaxValue];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetHandle.Index];
 
                 group.Resource = new PageableResource
                 {
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting
                         groupSize += 4;
                 }
 
-                var resourceData = BlamCache.GetRawFromID(group.ZoneAssetDatumIndex, groupSize);
+                var resourceData = BlamCache.GetRawFromID(group.ZoneAssetHandle, groupSize);
 
                 if (resourceData == null)
                     return null;

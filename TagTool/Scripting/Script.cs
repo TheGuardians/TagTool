@@ -1,6 +1,7 @@
 using TagTool.Tags;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Common;
 
 namespace TagTool.Scripting
 {
@@ -12,7 +13,7 @@ namespace TagTool.Scripting
         public string ScriptName;
         public ScriptType Type;
         public ScriptValueType ReturnType;
-        public uint RootExpressionHandle;
+        public DatumIndex RootExpressionHandle;
         public List<ScriptParameter> Parameters;
     }
 }

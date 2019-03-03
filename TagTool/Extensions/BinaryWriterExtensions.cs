@@ -42,5 +42,10 @@ namespace Sytem.IO
             writer.Write(value.Bottom, format);
             writer.Write(value.Right, format);
         }
+
+        public static void Write(this BinaryWriter writer, DatumIndex value, EndianFormat format = EndianFormat.LittleEndian)
+        {
+            writer.Write(value.Value, format);
+        }
     }
 }

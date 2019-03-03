@@ -36,7 +36,7 @@ namespace TagTool.Bitmaps.Converter
             int mipMapSize = 0;
 
             var image = bitmapTag.Images[index];
-            int handle = GetBitmapResourceHandle(bitmapTag, index, version);
+            var handle = GetBitmapResourceHandle(bitmapTag, index, version);
 
             if (!ResourceEntryValid(cache, handle) || (!HasPrimaryResource(cache, handle) && !HasSecondaryResource(cache, handle)))
             {
@@ -469,10 +469,10 @@ namespace TagTool.Bitmaps.Converter
             return finalBitmap;
         }
 
-        private static int GetBitmapResourceHandle(Bitmap bitmap, int index, CacheVersion version)
+        private static DatumIndex GetBitmapResourceHandle(Bitmap bitmap, int index, CacheVersion version)
         {
             var image = bitmap.Images[index];
-            int handle = 0;
+            DatumIndex handle = DatumIndex.None;
             int resourceIndex = 0;
 
             List<Bitmap.BitmapResource> resources = null;
@@ -514,9 +514,9 @@ namespace TagTool.Bitmaps.Converter
             return handle;
         }
 
-        private static BitmapTextureInteropResource GetResourceDefinition(CacheFile cache, int handle)
+        private static BitmapTextureInteropResource GetResourceDefinition(CacheFile cache, DatumIndex handle)
         {
-            var resourceEntry = cache.ResourceGestalt.TagResources[handle & ushort.MaxValue];
+            var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
             var definitionData = cache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
             BitmapTextureInteropResource definition;
             using (var definitionStream = new MemoryStream(definitionData, true))
@@ -542,9 +542,9 @@ namespace TagTool.Bitmaps.Converter
             return definition;
         }
 
-        private static BitmapTextureInterleavedInteropResource GetInterleavedResourceDefinition(CacheFile cache, int handle)
+        private static BitmapTextureInterleavedInteropResource GetInterleavedResourceDefinition(CacheFile cache, DatumIndex handle)
         {
-            var resourceEntry = cache.ResourceGestalt.TagResources[handle & ushort.MaxValue];
+            var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
             var definitionData = cache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
             BitmapTextureInterleavedInteropResource definition;
             using (var definitionStream = new MemoryStream(definitionData, true))
@@ -570,26 +570,26 @@ namespace TagTool.Bitmaps.Converter
             return definition;
         }
 
-        private static bool ResourceEntryValid(CacheFile cache, int handle)
+        private static bool ResourceEntryValid(CacheFile cache, DatumIndex handle)
         {
-            var resourceEntry = cache.ResourceGestalt.TagResources[handle & ushort.MaxValue];
+            var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
             if (resourceEntry.ParentTag == null || resourceEntry.FixupInformationLength == 0 || resourceEntry.SegmentIndex == -1)
                 return false;
             else
                 return true;
         }
 
-        private static bool HasPrimaryResource(CacheFile cache, int handle)
+        private static bool HasPrimaryResource(CacheFile cache, DatumIndex handle)
         {
-            var resourceEntry = cache.ResourceGestalt.TagResources[handle & ushort.MaxValue];
+            var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
             var segmentIndex = resourceEntry.SegmentIndex;
             var segment = cache.ResourceLayoutTable.Segments[segmentIndex];
             return segment.RequiredPageIndex != -1;
         }
 
-        private static bool HasSecondaryResource(CacheFile cache, int handle)
+        private static bool HasSecondaryResource(CacheFile cache, DatumIndex handle)
         {
-            var resourceEntry = cache.ResourceGestalt.TagResources[handle & ushort.MaxValue];
+            var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
             var segmentIndex = resourceEntry.SegmentIndex;
             var segment = cache.ResourceLayoutTable.Segments[segmentIndex];
             return segment.OptionalPageIndex != -1;

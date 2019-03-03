@@ -735,7 +735,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown2;
             public ushort OldManualBspFlagsNowZoneSets;
             public StringId UniqueName;
-            public uint UniqueHandle;
+            public DatumIndex UniqueHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public SourceValue Source;
@@ -3105,7 +3105,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class AiObjectId : TagStructure
 		{
-            public uint ObjectHandle;
+            public DatumIndex ObjectHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public ScenarioInstance.SourceValue Source;

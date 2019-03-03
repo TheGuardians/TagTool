@@ -161,7 +161,7 @@ namespace TagTool.Geometry
             // Port Blam resource definition
             //
 
-            var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle & ushort.MaxValue];
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle.Index];
 
             geometry.Resource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
             geometry.Resource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();

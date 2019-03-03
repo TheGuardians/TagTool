@@ -860,7 +860,7 @@ namespace TagTool.Tags.Definitions
             public int MemberCount;
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public int ZoneAssetDatumIndex;
+            public DatumIndex ZoneAssetHandle;
 
             [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
             public PageableResource Resource;

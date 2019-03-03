@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using TagTool.Audio.Converter;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 
@@ -68,7 +69,7 @@ namespace TagTool.Audio
             return blamSound;
         }
 
-        public static byte[] GetXMAData(CacheFile cache, int handle, int size)
+        public static byte[] GetXMAData(CacheFile cache, DatumIndex handle, int size)
         {
             return cache.GetSoundRaw(handle, size);
         }

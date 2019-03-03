@@ -72,8 +72,8 @@ namespace TagTool.Cache
             public int TagGroupsOffset;
             public int TagGroupCount;
             public int TagsOffset;
-            public uint ScenarioHandle;
-            public uint GlobalsHandle;
+            public DatumIndex ScenarioHandle;
+            public DatumIndex GlobalsHandle;
             public int CRC;
             public int TagCount;
             public int TagInfoHeaderCount;
@@ -429,27 +429,27 @@ namespace TagTool.Cache
             return IndexItems.GetItemByID(id);
         }
 
-        public byte[] GetRawFromID(int ID)
+        public byte[] GetRawFromID(DatumIndex ID)
         {
             return GetRawFromID(ID, -1);
         }
 
-        public virtual byte[] GetRawFromID(int ID, int DataLength)
+        public virtual byte[] GetRawFromID(DatumIndex ID, int DataLength)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetSoundRaw(int ID, int size)
+        public virtual byte[] GetSoundRaw(DatumIndex ID, int size)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetPrimaryResource(int ID, int dataLength, int offset=0, bool padding = false)
+        public virtual byte[] GetPrimaryResource(DatumIndex ID, int dataLength, int offset=0, bool padding = false)
         {
             throw new NotImplementedException();
         }
 
-        public virtual byte[] GetSecondaryResource(int ID, int dataLength, int offset = 0, bool padding = false)
+        public virtual byte[] GetSecondaryResource(DatumIndex ID, int dataLength, int offset = 0, bool padding = false)
         {
             throw new NotImplementedException();
         }

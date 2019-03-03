@@ -104,11 +104,11 @@ namespace TagTool.Commands.Scenarios
         {
             scriptWriter.Write('(');
 
-            for (var exprIndex = Definition.ScriptExpressions.IndexOf(expr) + 1; Definition.ScriptExpressions[exprIndex].ValueType.HaloOnline != ScriptValueType.HaloOnlineValue.Invalid; exprIndex = (ushort)(Definition.ScriptExpressions[exprIndex].NextExpressionHandle & ushort.MaxValue))
+            for (var exprIndex = Definition.ScriptExpressions.IndexOf(expr) + 1; Definition.ScriptExpressions[exprIndex].ValueType.HaloOnline != ScriptValueType.HaloOnlineValue.Invalid; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
             {
                 WriteExpression(Definition.ScriptExpressions[exprIndex], stringReader, scriptWriter);
 
-                if ((Definition.ScriptExpressions[exprIndex].NextExpressionHandle & ushort.MaxValue) == ushort.MaxValue)
+                if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue)
                     break;
 
                 scriptWriter.Write(' ');
@@ -160,7 +160,7 @@ namespace TagTool.Commands.Scenarios
                 {
                     scriptWriter.Write($"(global {scriptGlobal.Type.ToString().ToSnakeCase()} {scriptGlobal.Name} ");
 
-                    WriteExpression(Definition.ScriptExpressions[(ushort)(scriptGlobal.InitializationExpressionHandle & ushort.MaxValue)], scriptStringReader, scriptWriter);
+                    WriteExpression(Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index], scriptStringReader, scriptWriter);
 
                     scriptWriter.WriteLine(')');
                 }
@@ -191,7 +191,7 @@ namespace TagTool.Commands.Scenarios
                         scriptWriter.WriteLine(')');
                     }
 
-                    WriteExpression(Definition.ScriptExpressions[(ushort)(script.RootExpressionHandle & ushort.MaxValue)], scriptStringReader, scriptWriter);
+                    WriteExpression(Definition.ScriptExpressions[script.RootExpressionHandle.Index], scriptStringReader, scriptWriter);
 
                     scriptWriter.WriteLine(')');
 

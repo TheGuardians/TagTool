@@ -105,7 +105,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown85;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public int ZoneAssetIndex3;
+        public DatumIndex ZoneAssetIndex3;
         [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource CollisionBspResource;
 
@@ -114,12 +114,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public int UnknownH3;
 
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        public DatumIndex ZoneAssetIndex4;
         [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource PathfindingResource;
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public int ZoneAssetIndex4;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public int UselessPadding4;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
         public int Unknown86;
 
@@ -600,7 +601,7 @@ namespace TagTool.Tags.Definitions
 
                 public List<BspReference> Bsps;
 
-                public uint ObjectHandle;
+                public DatumIndex ObjectHandle;
                 public short OriginBspIndex;
                 public ScenarioObjectType ObjectType;
                 public Scenario.ScenarioInstance.SourceValue Source;
@@ -608,7 +609,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x18)]
                 public class BspReference : TagStructure
 				{
-                    public uint BspHandle;
+                    public DatumIndex BspHandle;
                     public short NodeIndex;
 
                     [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
