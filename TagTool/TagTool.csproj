@@ -237,8 +237,10 @@
     <Compile Include="Commands\Porting\ExtractXMACommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
+    <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
     <Compile Include="Common\DatumIndex.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Scripting\Compiler\EndOfFile.cs" />
     <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
     <Compile Include="Scripting\Compiler\IScriptSyntax.cs" />
     <Compile Include="Scripting\Compiler\ScriptBoolean.cs" />

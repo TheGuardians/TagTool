@@ -14,12 +14,18 @@ namespace TagTool.Scripting.Compiler
     {
         public Scenario Definition { get; }
 
+        private List<Script> Scripts = new List<Script>();
+        private List<ScriptGlobal> Globals = new List<ScriptGlobal>();
+        private List<ScriptExpression> ScriptExpressions = new List<ScriptExpression>();
+
         public ScriptCompiler(Scenario definition)
         {
             Definition = definition;
+        }
 
+        private void ClearScenarioScripting()
+        {
             Definition.ScriptStrings = new byte[0];
-
             Definition.Globals.Clear();
             Definition.Scripts.Clear();
             Definition.ScriptExpressions.Clear();
@@ -46,7 +52,9 @@ namespace TagTool.Scripting.Compiler
             //
 
             foreach (var node in nodes)
-                CompileToplevel(node);
+            {
+                //CompileToplevel(node);
+            }
         }
 
         private void CompileToplevel(IScriptSyntax node)
@@ -147,7 +155,7 @@ namespace TagTool.Scripting.Compiler
             // Add an entry to the globals block in the scenario definition
             //
 
-            Definition.Globals.Add(new ScriptGlobal
+            Globals.Add(new ScriptGlobal
             {
                 Name = globalName,
                 Type = globalType,
@@ -287,7 +295,7 @@ namespace TagTool.Scripting.Compiler
             // Add an entry to the scripts block in the scenario definition
             //
 
-            Definition.Scripts.Add(new Script
+            Scripts.Add(new Script
             {
                 ScriptName = scriptName,
                 Type = scriptType,
@@ -307,386 +315,698 @@ namespace TagTool.Scripting.Compiler
                 case ScriptValueType.Halo3ODSTValue.Boolean:
                     if (node is ScriptBoolean boolValue)
                         return CompileBooleanExpression(boolValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Real:
                     if (node is ScriptReal realValue)
                         return CompileRealExpression(realValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Short:
                     if (node is ScriptInteger shortValue)
                         return CompileShortExpression(shortValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Long:
                     if (node is ScriptInteger longValue)
                         return CompileLongExpression(longValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.String:
                     if (node is ScriptString stringValue)
                         return CompileStringExpression(stringValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Script:
-                    if (node is ScriptSymbol scriptValue)
-                        return CompileScriptExpression(scriptValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol scriptSymbol)
+                        return CompileScriptExpression(scriptSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.StringId:
-                    if (node is ScriptString stringIdValue)
-                        return CompileStringIdExpression(stringIdValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString stringIdString)
+                        return CompileStringIdExpression(stringIdString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.UnitSeatMapping:
-                    if (node is ScriptSymbol unitSeatMappingValue)
-                        return CompileUnitSeatMappingExpression(unitSeatMappingValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol unitSeatMappingSymbol)
+                        return CompileUnitSeatMappingExpression(unitSeatMappingSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.TriggerVolume:
-                    if (node is ScriptSymbol triggerVolumeValue)
-                        return CompileTriggerVolumeExpression(triggerVolumeValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol triggerVolumeSymbol)
+                        return CompileTriggerVolumeExpression(triggerVolumeSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneFlag:
-                    if (node is ScriptSymbol cutsceneFlagValue)
-                        return CompileCutsceneFlagExpression(cutsceneFlagValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol cutsceneFlagSymbol)
+                        return CompileCutsceneFlagExpression(cutsceneFlagSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint:
-                    if (node is ScriptSymbol cutsceneCameraPointValue)
-                        return CompileCutsceneCameraPointExpression(cutsceneCameraPointValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol cutsceneCameraPointSymbol)
+                        return CompileCutsceneCameraPointExpression(cutsceneCameraPointSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneTitle:
-                    if (node is ScriptSymbol cutsceneTitleValue)
-                        return CompileCutsceneTitleExpression(cutsceneTitleValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptSymbol cutsceneTitleSymbol)
+                        return CompileCutsceneTitleExpression(cutsceneTitleSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CutsceneRecording:
-                    if (node is ScriptString cutsceneRecordingValue)
-                        return CompileCutsceneRecordingExpression(cutsceneRecordingValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString cutsceneRecordingString)
+                        return CompileCutsceneRecordingExpression(cutsceneRecordingString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.DeviceGroup:
-                    if (node is ScriptSymbol deviceGroupValue)
-                        return CompileDeviceGroupExpression(deviceGroupValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString deviceGroupString)
+                        return CompileDeviceGroupExpression(deviceGroupString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Ai:
-                    if (node is ScriptSymbol aiValue)
-                        return CompileAiExpression(aiValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString aiString)
+                        return CompileAiExpression(aiString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiCommandList:
-                    if (node is ScriptSymbol aiCommandListValue)
-                        return CompileAiCommandListExpression(aiCommandListValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString aiCommandListString)
+                        return CompileAiCommandListExpression(aiCommandListString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiCommandScript:
-                    if (node is ScriptSymbol aiCommandScriptValue)
-                        return CompileAiCommandScriptExpression(aiCommandScriptValue);
-                    else
-                        throw new FormatException(node.ToString());
+                    if (node is ScriptString aiCommandScriptString)
+                        return CompileAiCommandScriptExpression(aiCommandScriptString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiBehavior:
-                    break;
+                    if (node is ScriptString aiBehaviorString)
+                        return CompileAiBehaviorExpression(aiBehaviorString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiOrders:
-                    break;
+                    if (node is ScriptString aiOrdersString)
+                        return CompileAiOrdersExpression(aiOrdersString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AiLine:
-                    break;
+                    if (node is ScriptString aiLineString)
+                        return CompileAiLineExpression(aiLineString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.StartingProfile:
-                    break;
+                    if (node is ScriptString startingProfileString)
+                        return CompileStartingProfileExpression(startingProfileString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Conversation:
-                    break;
+                    if (node is ScriptString conversationString)
+                        return CompileConversationExpression(conversationString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ZoneSet:
-                    break;
+                    if (node is ScriptString zoneSetString)
+                        return CompileZoneSetExpression(zoneSetString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.DesignerZone:
-                    break;
+                    if (node is ScriptString designerZoneString)
+                        return CompileDesignerZoneExpression(designerZoneString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.PointReference:
-                    break;
+                    if (node is ScriptString pointReferenceString)
+                        return CompilePointReferenceExpression(pointReferenceString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Style:
-                    break;
+                    if (node is ScriptString styleString)
+                        return CompileStyleExpression(styleString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ObjectList:
-                    break;
+                    if (node is ScriptString objectListString)
+                        return CompileObjectListExpression(objectListString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Folder:
-                    break;
+                    if (node is ScriptString folderString)
+                        return CompileFolderExpression(folderString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Sound:
-                    break;
+                    if (node is ScriptString soundString)
+                        return CompileSoundExpression(soundString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Effect:
-                    break;
+                    if (node is ScriptString effectString)
+                        return CompileEffectExpression(effectString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Damage:
-                    break;
+                    if (node is ScriptString damageString)
+                        return CompileDamageExpression(damageString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.LoopingSound:
-                    break;
+                    if (node is ScriptString loopingSoundString)
+                        return CompileLoopingSoundExpression(loopingSoundString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AnimationGraph:
-                    break;
+                    if (node is ScriptString animationGraphString)
+                        return CompileAnimationGraphExpression(animationGraphString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.DamageEffect:
-                    break;
+                    if (node is ScriptString damageEffectString)
+                        return CompileDamageEffectExpression(damageEffectString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ObjectDefinition:
-                    break;
+                    if (node is ScriptString objectDefinitionString)
+                        return CompileObjectDefinitionExpression(objectDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Bitmap:
-                    break;
+                    if (node is ScriptString bitmapString)
+                        return CompileBitmapExpression(bitmapString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Shader:
-                    break;
+                    if (node is ScriptString shaderString)
+                        return CompileShaderExpression(shaderString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.RenderModel:
-                    break;
+                    if (node is ScriptString renderModelString)
+                        return CompileRenderModelExpression(renderModelString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.StructureDefinition:
-                    break;
+                    if (node is ScriptString structureDefinitionString)
+                        return CompileStructureDefinitionExpression(structureDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.LightmapDefinition:
-                    break;
+                    if (node is ScriptString lightmapDefinitionString)
+                        return CompileLightmapDefinitionExpression(lightmapDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CinematicDefinition:
-                    break;
+                    if (node is ScriptString cinematicDefinitionString)
+                        return CompileCinematicDefinitionExpression(cinematicDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CinematicSceneDefinition:
-                    break;
+                    if (node is ScriptString cinematicSceneDefinitionString)
+                        return CompileCinematicSceneDefinitionExpression(cinematicSceneDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.BinkDefinition:
-                    break;
+                    if (node is ScriptString binkDefinitionString)
+                        return CompileBinkDefinitionExpression(binkDefinitionString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AnyTag:
-                    break;
+                    if (node is ScriptString anyTagString)
+                        return CompileAnyTagExpression(anyTagString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AnyTagNotResolving:
-                    break;
+                    if (node is ScriptString anyTagNotResolvingString)
+                        return CompileAnyTagNotResolvingExpression(anyTagNotResolvingString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.GameDifficulty:
-                    break;
+                    if (node is ScriptSymbol gameDifficultySymbol)
+                        return CompileGameDifficultyExpression(gameDifficultySymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Team:
-                    break;
+                    if (node is ScriptSymbol teamSymbol)
+                        return CompileTeamExpression(teamSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.MpTeam:
-                    break;
+                    if (node is ScriptSymbol mpTeamSymbol)
+                        return CompileMpTeamExpression(mpTeamSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Controller:
-                    break;
+                    if (node is ScriptInteger controllerInteger)
+                        return CompileControllerExpression(controllerInteger);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ButtonPreset:
-                    break;
+                    if (node is ScriptSymbol buttonPresetSymbol)
+                        return CompileButtonPresetExpression(buttonPresetSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.JoystickPreset:
-                    break;
+                    if (node is ScriptSymbol joystickPresetSymbol)
+                        return CompileJoystickPresetExpression(joystickPresetSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.PlayerColor:
-                    break;
+                    if (node is ScriptSymbol playerColorSymbol)
+                        return CompilePlayerColorExpression(playerColorSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.PlayerCharacterType:
-                    break;
+                    if (node is ScriptSymbol playerCharacterTypeSymbol)
+                        return CompilePlayerCharacterTypeExpression(playerCharacterTypeSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.VoiceOutputSetting:
-                    break;
+                    if (node is ScriptSymbol voiceOutputSettingSymbol)
+                        return CompileVoiceOutputSettingExpression(voiceOutputSettingSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.VoiceMask:
-                    break;
+                    if (node is ScriptSymbol voiceMaskSymbol)
+                        return CompileVoiceMaskExpression(voiceMaskSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.SubtitleSetting:
-                    break;
+                    if (node is ScriptSymbol subtitleSettingSymbol)
+                        return CompileSubtitleSettingExpression(subtitleSettingSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ActorType:
-                    break;
+                    if (node is ScriptSymbol actorTypeSymbol)
+                        return CompileActorTypeExpression(actorTypeSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ModelState:
-                    break;
+                    if (node is ScriptSymbol modelStateSymbol)
+                        return CompileModelStateExpression(modelStateSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Event:
-                    break;
+                    if (node is ScriptSymbol eventSymbol)
+                        return CompileEventExpression(eventSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CharacterPhysics:
-                    break;
+                    if (node is ScriptSymbol characterPhysicsSymbol)
+                        return CompileCharacterPhysicsExpression(characterPhysicsSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.PrimarySkull:
-                    break;
+                    if (node is ScriptSymbol primarySkullSymbol)
+                        return CompilePrimarySkullExpression(primarySkullSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.SecondarySkull:
-                    break;
+                    if (node is ScriptSymbol secondarySkullSymbol)
+                        return CompileSecondarySkullExpression(secondarySkullSymbol);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Object:
-                    break;
+                    if (node is ScriptString objectString)
+                        return CompileObjectExpression(objectString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Unit:
-                    break;
+                    if (node is ScriptString unitString)
+                        return CompileUnitExpression(unitString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Vehicle:
-                    break;
+                    if (node is ScriptString vehicleString)
+                        return CompileVehicleExpression(vehicleString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Weapon:
-                    break;
+                    if (node is ScriptString weaponString)
+                        return CompileWeaponExpression(weaponString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Device:
-                    break;
+                    if (node is ScriptString deviceString)
+                        return CompileDeviceExpression(deviceString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Scenery:
-                    break;
+                    if (node is ScriptString sceneryString)
+                        return CompileSceneryExpression(sceneryString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.EffectScenery:
-                    break;
+                    if (node is ScriptString effectSceneryString)
+                        return CompileEffectSceneryExpression(effectSceneryString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ObjectName:
-                    break;
+                    if (node is ScriptString objectNameString)
+                        return CompileObjectNameExpression(objectNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.UnitName:
-                    break;
+                    if (node is ScriptString unitNameString)
+                        return CompileUnitNameExpression(unitNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.VehicleName:
-                    break;
+                    if (node is ScriptString vehicleNameString)
+                        return CompileVehicleNameExpression(vehicleNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.WeaponName:
-                    break;
+                    if (node is ScriptString weaponNameString)
+                        return CompileWeaponNameExpression(weaponNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.DeviceName:
-                    break;
+                    if (node is ScriptString deviceNameString)
+                        return CompileDeviceNameExpression(deviceNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.SceneryName:
-                    break;
+                    if (node is ScriptString sceneryNameString)
+                        return CompileSceneryNameExpression(sceneryNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.EffectSceneryName:
-                    break;
+                    if (node is ScriptString effectSceneryNameString)
+                        return CompileEffectSceneryNameExpression(effectSceneryNameString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.CinematicLightprobe:
-                    break;
+                    if (node is ScriptString cinematicLightprobeString)
+                        return CompileCinematicLightprobeExpression(cinematicLightprobeString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.AnimationBudgetReference:
-                    break;
+                    if (node is ScriptString animationBudgetReferenceString)
+                        return CompileAnimationBudgetReferenceExpression(animationBudgetReferenceString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.LoopingSoundBudgetReference:
-                    break;
+                    if (node is ScriptString loopingSoundBudgetReferenceString)
+                        return CompileLoopingSoundBudgetReferenceExpression(loopingSoundBudgetReferenceString);
+                    else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.SoundBudgetReference:
-                    break;
+                    if (node is ScriptString soundBudgetReferenceString)
+                        return CompileSoundBudgetReferenceExpression(soundBudgetReferenceString);
+                    else throw new FormatException(node.ToString());
             }
 
             throw new NotImplementedException(type.ToString());
         }
 
-        private DatumIndex CompileGroupExpression(ScriptValueType type, ScriptGroup group)
+        private DatumIndex AllocateExpression(ScriptValueType.Halo3ODSTValue valueType, ScriptExpressionType expressionType, ushort? opcode = null)
         {
-            throw new NotImplementedException();
+            ushort salt = 0; // TODO?
+            uint stringAddress = 0; // TODO?
+
+            var expression = new ScriptExpression
+            {
+                Salt = salt,
+                Opcode = opcode ?? (ushort)valueType,
+                ValueType = new ScriptValueType { Halo3ODST = valueType },
+                ExpressionType = expressionType,
+                NextExpressionHandle = DatumIndex.None,
+                StringAddress = stringAddress,
+                Data = BitConverter.GetBytes(-1),
+                LineNumber = -1,
+            };
+
+            ScriptExpressions.Add(expression);
+
+            return new DatumIndex(salt, (ushort)ScriptExpressions.IndexOf(expression));
         }
 
-        private DatumIndex CompileBooleanExpression(ScriptBoolean boolean)
-        {
+        private DatumIndex CompileGroupExpression(ScriptValueType type, ScriptGroup group) =>
             throw new NotImplementedException();
+
+        private DatumIndex CompileBooleanExpression(ScriptBoolean boolValue)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Boolean, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+                Array.Copy(BitConverter.GetBytes(boolValue.Value), ScriptExpressions[handle.Index].Data, 1);
+
+            return handle;
         }
 
-        private DatumIndex CompileRealExpression(ScriptReal real)
+        private DatumIndex CompileRealExpression(ScriptReal realValue)
         {
-            throw new NotImplementedException();
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Real, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+                Array.Copy(BitConverter.GetBytes((float)realValue.Value), ScriptExpressions[handle.Index].Data, 4);
+
+            return handle;
         }
 
-        private DatumIndex CompileShortExpression(ScriptInteger integer)
+        private DatumIndex CompileShortExpression(ScriptInteger shortValue)
         {
-            throw new NotImplementedException();
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Short, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+                Array.Copy(BitConverter.GetBytes((short)shortValue.Value), ScriptExpressions[handle.Index].Data, 2);
+
+            return handle;
         }
 
-        private DatumIndex CompileLongExpression(ScriptInteger integer)
+        private DatumIndex CompileLongExpression(ScriptInteger longValue)
         {
-            throw new NotImplementedException();
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Long, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+                Array.Copy(BitConverter.GetBytes((int)longValue.Value), ScriptExpressions[handle.Index].Data, 4);
+
+            return handle;
         }
 
-        private DatumIndex CompileStringExpression(ScriptString stringValue)
-        {
+        private DatumIndex CompileStringExpression(ScriptString stringValue) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileScriptExpression(ScriptSymbol scriptValue)
-        {
+        private DatumIndex CompileScriptExpression(ScriptSymbol scriptSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileStringIdExpression(ScriptString stringIdValue)
-        {
+        private DatumIndex CompileStringIdExpression(ScriptString stringIdString) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingValue)
-        {
+        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeValue)
-        {
+        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagValue)
-        {
+        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointValue)
-        {
+        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleValue)
-        {
+        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingValue)
-        {
+        private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingString) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileDeviceGroupExpression(ScriptSymbol deviceGroupValue)
-        {
+        private DatumIndex CompileDeviceGroupExpression(ScriptString deviceGroupString) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileAiExpression(ScriptSymbol aiValue)
-        {
+        private DatumIndex CompileAiExpression(ScriptString aiString) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileAiCommandListExpression(ScriptSymbol aiCommandListValue)
-        {
+        private DatumIndex CompileAiCommandListExpression(ScriptString aiCommandListString) =>
             throw new NotImplementedException();
-        }
 
-        private DatumIndex CompileAiCommandScriptExpression(ScriptSymbol aiCommandScriptValue)
-        {
+        private DatumIndex CompileAiCommandScriptExpression(ScriptString aiCommandScriptString) =>
             throw new NotImplementedException();
-        }
+
+        private DatumIndex CompileAiBehaviorExpression(ScriptString aiBehaviorString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAiOrdersExpression(ScriptString aiOrdersString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAiLineExpression(ScriptString aiLineString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileStartingProfileExpression(ScriptString startingProfileString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileConversationExpression(ScriptString conversationString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileZoneSetExpression(ScriptString zoneSetString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileDesignerZoneExpression(ScriptString designerZoneString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompilePointReferenceExpression(ScriptString pointReferenceString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileStyleExpression(ScriptString styleString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileObjectListExpression(ScriptString objectListString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileFolderExpression(ScriptString folderString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSoundExpression(ScriptString soundString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileEffectExpression(ScriptString effectString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileDamageExpression(ScriptString damageString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileLoopingSoundExpression(ScriptString loopingSoundString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAnimationGraphExpression(ScriptString animationGraphString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileDamageEffectExpression(ScriptString damageEffectString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileObjectDefinitionExpression(ScriptString objectDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileBitmapExpression(ScriptString bitmapString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileShaderExpression(ScriptString shaderString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileRenderModelExpression(ScriptString renderModelString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileStructureDefinitionExpression(ScriptString structureDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileLightmapDefinitionExpression(ScriptString lightmapDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileBinkDefinitionExpression(ScriptString binkDefinitionString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAnyTagExpression(ScriptString anyTagString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileTeamExpression(ScriptSymbol teamSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileMpTeamExpression(ScriptSymbol mpTeamSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileControllerExpression(ScriptInteger controllerInteger) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompilePlayerColorExpression(ScriptSymbol playerColorSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileActorTypeExpression(ScriptSymbol actorTypeSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileModelStateExpression(ScriptSymbol modelStateSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileEventExpression(ScriptSymbol eventSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileObjectExpression(ScriptString objectString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileUnitExpression(ScriptString unitString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileVehicleExpression(ScriptString vehicleString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileWeaponExpression(ScriptString weaponString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileDeviceExpression(ScriptString deviceString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSceneryExpression(ScriptString sceneryString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileEffectSceneryExpression(ScriptString effectSceneryString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileObjectNameExpression(ScriptString objectNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileUnitNameExpression(ScriptString unitNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileVehicleNameExpression(ScriptString vehicleNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileWeaponNameExpression(ScriptString weaponNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileDeviceNameExpression(ScriptString deviceNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSceneryNameExpression(ScriptString sceneryNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileEffectSceneryNameExpression(ScriptString effectSceneryNameString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileCinematicLightprobeExpression(ScriptString cinematicLightprobeString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileAnimationBudgetReferenceExpression(ScriptString animationBudgetReferenceString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileLoopingSoundBudgetReferenceExpression(ScriptString loopingSoundBudgetReferenceString) =>
+            throw new NotImplementedException();
+
+        private DatumIndex CompileSoundBudgetReferenceExpression(ScriptString soundBudgetReferenceString) =>
+            throw new NotImplementedException();
     }
 }

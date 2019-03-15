@@ -46,13 +46,13 @@ namespace TagTool.Scripting.Compiler
             }
 
             if (Reader.BaseStream.Position >= Reader.BaseStream.Length)
-                return null;
+                return "eof";
 
             var c = '\0';
             while ((Reader.BaseStream.Position < Reader.BaseStream.Length) && char.IsWhiteSpace(c = Reader.ReadChar())) ;
 
             if (Reader.BaseStream.Position >= Reader.BaseStream.Length)
-                return null;
+                return "eof";
 
             if (Delimiters.Contains(c))
                 return c.ToString();
@@ -68,10 +68,10 @@ namespace TagTool.Scripting.Compiler
                     Reader.BaseStream.Position--;
                     break;
                 }
-                
+
                 result += c;
             }
-            
+
             return result;
         }
 
@@ -82,14 +82,17 @@ namespace TagTool.Scripting.Compiler
             switch (token)
             {
                 case ")":
-                    return default(ScriptInvalid);
+                    return new ScriptInvalid();
+
+                case "eof":
+                    return new EndOfFile();
 
                 case ".":
                     {
                         var node = Read();
-                        
-                        if ((token = ReadToken()) == null || token != ")")
-                            throw new Exception(token != null ? $"Syntax error: {token}" : "End of file");
+
+                        if ((token = ReadToken()) == "eof" || token != ")")
+                            throw new Exception(token != "eof" ? $"Syntax error: {token}" : "End of file");
 
                         return node;
                     }
@@ -102,8 +105,8 @@ namespace TagTool.Scripting.Compiler
 
             return new ScriptGroup
             {
-                Head = Read() ?? throw new Exception("End of file"),
-                Tail = ReadGroup() ?? throw new Exception("End of file")
+                Head = Read(),
+                Tail = ReadGroup()
             };
         }
 
@@ -126,7 +129,7 @@ namespace TagTool.Scripting.Compiler
                 Head = new ScriptSymbol { Value = "quote" },
                 Tail = new ScriptGroup
                 {
-                    Head = Read() ?? throw new Exception("End of file"),
+                    Head = Read(),
                     Tail = new ScriptInvalid()
                 }
             };
@@ -139,7 +142,7 @@ namespace TagTool.Scripting.Compiler
                 Head = new ScriptSymbol { Value = "quasiquote" },
                 Tail = new ScriptGroup
                 {
-                    Head = Read() ?? throw new Exception("End of file"),
+                    Head = Read(),
                     Tail = new ScriptInvalid()
                 }
             };
@@ -152,7 +155,7 @@ namespace TagTool.Scripting.Compiler
                 Head = new ScriptSymbol { Value = "unquote" },
                 Tail = new ScriptGroup
                 {
-                    Head = Read() ?? throw new Exception("End of file"),
+                    Head = Read(),
                     Tail = new ScriptInvalid()
                 }
             };
@@ -162,15 +165,15 @@ namespace TagTool.Scripting.Compiler
         {
         begin:
             if (Reader.BaseStream.Position >= Reader.BaseStream.Length)
-                return null;
+                return new EndOfFile();
 
             var token = ReadToken();
 
-            if (token == null)
-                return null;
-
             switch (token)
             {
+                case "eof":
+                    return new EndOfFile(); //handle this in a way that does not suck. Ew.
+
                 case "(":
                     return ReadGroup();
 
@@ -210,7 +213,7 @@ namespace TagTool.Scripting.Compiler
             {
                 var node = Read();
 
-                if (node == null)
+                if (node is EndOfFile)
                     break;
 
                 nodes.Add(node);
