@@ -1,39 +1,48 @@
+using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Havok;
-using System;
-using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x34, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x54, MinVersion = CacheVersion.HaloReach)]
     public class CollisionModel : TagStructure
 	{
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int CollisionModelChecksum;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] UnusedImportInfoBlock = new byte[8];
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
+        [TagField(Flags = Padding, Length = 8)]
         public byte[] UnusedErrorsBlock = new byte[8];
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] UnusedErrorsBlock2 = new byte[4];
 
         public CollisionModelFlags Flags;
 
         public List<Material> Materials;
         public List<Region> Regions;
+
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Unused1 = new byte[12];
+
         public List<PathfindingSphere> PathfindingSpheres;
         public List<Node> Nodes;
-        
+
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
+        public byte[] Unused2 = new byte[4];
+
         [TagStructure(Size = 0x4)]
         public class Material : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
         }
 
@@ -41,7 +50,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Region : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
 
             public List<Permutation> Permutations;
@@ -50,7 +59,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Permutation : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
 
                 public List<Bsp> Bsps;
@@ -60,12 +69,13 @@ namespace TagTool.Tags.Definitions
                 public List<CollisionMoppCode> BspMoppCodes;
 
                 [TagStructure(Size = 0x44, MaxVersion = CacheVersion.Halo2Vista)]
-                [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail)]
+                [TagStructure(Size = 0x64, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
                 public class Bsp : TagStructure
 				{
                     public short NodeIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
                     public CollisionGeometry Geometry;
@@ -75,6 +85,10 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST)]
                 public class BspPhysicsBlock : TagStructure
 				{
+                    //
+                    // TODO: Update BspPhysicsBlock for reach
+                    //
+
                     public int Unknown;
                     public short Size;
                     public short Count;
@@ -93,7 +107,7 @@ namespace TagTool.Tags.Definitions
                     public float Unknown13;
                     public uint Unknown14;
 
-                    [TagField(Flags = TagFieldFlags.Short)]
+                    [TagField(Flags = Short)]
                     public CachedTagInstance Model;
 
                     public uint Unknown15;
@@ -157,7 +171,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xC)]
         public class Node : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public NodeFlags Flags;
             public short ParentNode;

@@ -11,6 +11,10 @@ namespace TagTool.Geometry
     public class CollisionGeometry : TagStructure
 	{
         public List<Bsp3dNode> Bsp3dNodes;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Bsp3dSupernode> Bsp3dSupernodes;
+
         public List<Plane> Planes;
         public List<Leaf> Leaves;
         public List<Bsp2dReference> Bsp2dReferences;
@@ -129,6 +133,18 @@ namespace TagTool.Geometry
                     Value = BitConverter.ToUInt64(allBytes, 0);
                 }
             }
+        }
+
+        [TagStructure(Size = 0x80)]
+        public class Bsp3dSupernode
+        {
+            [TagField(Length = 15)]
+            public float[] PlaneValues = new float[15];
+
+            public int PlaneDimensions;
+
+            [TagField(Length = 16)]
+            public int[] ChildIndices = new int[16];
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]

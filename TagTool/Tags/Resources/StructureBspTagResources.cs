@@ -23,6 +23,9 @@ namespace TagTool.Tags.Resources
         public class CollisionBspBlock : TagStructure
 		{
             public TagBlock<CollisionGeometry.Bsp3dNode> Bsp3dNodes;
+            //
+            // TODO: Add supernodes block for reach and beyond?
+            //
             public TagBlock<CollisionGeometry.Plane> Planes;
             public TagBlock<CollisionGeometry.Leaf> Leaves;
             public TagBlock<CollisionGeometry.Bsp2dReference> Bsp2dReferences;
@@ -36,6 +39,9 @@ namespace TagTool.Tags.Resources
         public class LargeCollisionBspBlock : TagStructure
 		{
             public TagBlock<Bsp3dNode> Bsp3dNodes;
+            //
+            // TODO: Add supernodes block for reach and beyond?
+            //
             public TagBlock<CollisionGeometry.Plane> Planes;
             public TagBlock<CollisionGeometry.Leaf> Leaves;
             public TagBlock<Bsp2dReference> Bsp2dReferences;
