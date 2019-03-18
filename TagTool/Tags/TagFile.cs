@@ -32,9 +32,11 @@ namespace TagTool.Tags
         public List<StringReference> StringReferences;
 
         /// <summary>
-        /// 
+        /// The definition data of the tag instance in the file.
         /// </summary>
         public byte[] DefinitionData;
+
+        public List<ResourceDatum> ResourceData;
 
         /// <summary>
         /// A tag reference descriptor.
@@ -65,6 +67,15 @@ namespace TagTool.Tags
             /// </summary>
             [TagField(Length = 256)]
             public string Value;
+        }
+
+        [TagStructure]
+        public class ResourceDatum : TagStructure
+        {
+            /// <summary>
+            /// The non-compressed data of the resource.
+            /// </summary>
+            public byte[] Data;
         }
     }
 }

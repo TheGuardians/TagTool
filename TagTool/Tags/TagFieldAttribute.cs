@@ -30,7 +30,17 @@ namespace TagTool.Tags
         /// <summary>
         /// The tag field version.
         /// </summary>
-        public CacheVersion Version = CacheVersion.Unknown;
+        public CacheVersion Version { get; set; } = CacheVersion.Unknown;
+
+        /// <summary>
+        /// The name of the field to upgrade to (if any).
+        /// </summary>
+        public string Upgrade { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The name of the field to downgrade to (if any).
+        /// </summary>
+        public string Downgrade { get; set; } = string.Empty;
 
         /// <summary>
         /// If the value is an inline array, determines the number of elements in the array.

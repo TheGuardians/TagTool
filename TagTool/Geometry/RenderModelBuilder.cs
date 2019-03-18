@@ -291,8 +291,8 @@ namespace TagTool.Geometry
             {
                 MaterialIndex = materialIndex,
                 TransparentSortingIndex = -1,
-                FirstIndex = firstIndex,
-                IndexCount = indexCount,
+                FirstIndexOld = firstIndex,
+                IndexCountOld = indexCount,
                 FirstSubPartIndex = (short)(_currentMesh.Mesh.SubParts.Count - 1),
                 SubPartCount = 0,
                 // TODO: Unknown values here

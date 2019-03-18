@@ -774,11 +774,11 @@ namespace TagTool.Commands.Porting
                         {
                             var partIndices = new HashSet<short>();
 
-                            for (var i = part.FirstIndex; i < part.FirstIndex + part.IndexCount; i++)
+                            for (var i = part.FirstIndexOld; i < part.FirstIndexOld + part.IndexCountOld; i++)
                                 if (!partIndices.Contains(mesh.StripIndices[i].Index))
                                     partIndices.Add(mesh.StripIndices[i].Index);
 
-                            builder.BeginPart(part.MaterialIndex, part.FirstIndex, part.IndexCount, (ushort)partIndices.Count);
+                            builder.BeginPart(part.MaterialIndex, part.FirstIndexOld, part.IndexCountOld, (ushort)partIndices.Count);
                             
                             for (var i = 0; i < part.SubPartCount; i++)
                             {

@@ -10,7 +10,8 @@ namespace TagTool.Geometry
     /// </summary>
     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline571627)]
-    [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
     public class RenderMaterial : TagStructure
 	{
         /// <summary>
@@ -25,9 +26,11 @@ namespace TagTool.Geometry
         [TagField(Flags = TagFieldFlags.Label)]
         public CachedTagInstance RenderMethod;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Version = CacheVersion.HaloOnline700123)]
         public List<Skin> Skins;
+
         public List<Property> Properties;
+
         public int Unknown;
         public sbyte BreakableSurfaceIndex;
         public sbyte Unknown2;

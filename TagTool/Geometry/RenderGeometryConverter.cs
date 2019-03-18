@@ -261,7 +261,7 @@ namespace TagTool.Geometry
                         for (int j = 0; j < mesh.Parts.Count(); j++)
                         {
                             var part = mesh.Parts[j];
-                            waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndex, part.IndexCount, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles)));
+                            waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndexOld, part.IndexCountOld, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles)));
                         }
                         waterData.Sort();
                         WaterData.Add(waterData);
@@ -325,7 +325,7 @@ namespace TagTool.Geometry
                         var indexCount = 0;
 
                         foreach (var part in mesh.Parts)
-                            indexCount += part.IndexCount;
+                            indexCount += part.IndexCountOld;
 
                         mesh.IndexBufferIndices[0] = CreateIndexBuffer(resourceDefinition, dataStream, indexCount);
                     }

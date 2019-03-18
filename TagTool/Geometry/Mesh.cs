@@ -1,101 +1,105 @@
-using TagTool.Tags;
 using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Tags;
+using static TagTool.Cache.CacheVersion;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Geometry
 {
     /// <summary>
     /// A 3D mesh which can be rendered.
     /// </summary>
-    [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x4C, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0xB4, MaxVersion = Halo2Vista)]
+    [TagStructure(Size = 0x4C, MaxVersion = HaloOnline700123)]
+    [TagStructure(Size = 0x5C, MinVersion = HaloReach)]
     public class Mesh : TagStructure
 	{
         public List<Part> Parts;
         public List<SubPart> SubParts;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<VisibilityBinding> VisibilityBounds;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<RawVertex> RawVertices;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<StripIndex> StripIndices;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public byte[] VisibilityMoppCodeData;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<StripIndex> MoppReorderTable;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<VertexBuffer> VertexBuffers;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 4, MaxVersion = Halo2Vista)]
         public byte[] Unused1;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<RawPoint> RawPoints;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public byte[] RuntimePointData;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<RigidPointGroup> RigidPointGroups;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<PointDataIndex> VertexPointIndices;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MaxVersion = Halo2Vista)]
         public List<NodeMapping> NodeMap;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 4, MaxVersion = Halo2Vista)]
         public byte[] Unused2 = new byte[4];
 
-        [TagField(Length = 8, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 8, MinVersion = Halo3Retail)]
         public ushort[] VertexBufferIndices;
 
-        [TagField(Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 2, MinVersion = Halo3Retail)]
         public ushort[] IndexBufferIndices;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public MeshFlags Flags;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail, Format = nameof(Flags))]
         public sbyte RigidNodeIndex;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public VertexType Type;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public PrtType PrtType;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public PrimitiveType IndexBufferType;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = Padding, Length = 3, MinVersion = Halo3Retail)]
         public byte[] Unused3;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public List<InstancedGeometryBlock> InstancedGeometry;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = Halo3Retail)]
         public List<WaterBlock> Water;
 
         /// <summary>
         /// Associates geometry with a specific material.
         /// </summary>
-        [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x48, MaxVersion = Halo2Vista)]
+        [TagStructure(Size = 0x10, MaxVersion = HaloOnline700123)]
+        [TagStructure(Size = 0x18, MinVersion = HaloReach)]
         public class Part : TagStructure
 		{
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista, Upgrade = nameof(TypeNew))]
             public PartTypeOld TypeOld;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista, Upgrade = nameof(FlagsNew))]
             public PartFlagsOld FlagsOld;
 
             /// <summary>
@@ -106,18 +110,32 @@ namespace TagTool.Geometry
             /// <summary>
             /// The transparent sorting index of the mesh part.
             /// </summary>
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = Halo3Retail)]
             public short TransparentSortingIndex;
 
             /// <summary>
             /// The index of the first vertex in the index buffer.
             /// </summary>
-            public ushort FirstIndex;
+            [TagField(MaxVersion = HaloOnline700123, Upgrade = nameof(FirstIndexNew))]
+            public ushort FirstIndexOld;
+
+            /// <summary>
+            /// The index of the first vertex in the index buffer.
+            /// </summary>
+            [TagField(MinVersion = HaloReach, Downgrade = nameof(FirstIndexOld))]
+            public uint FirstIndexNew;
 
             /// <summary>
             /// The number of indices in the part.
             /// </summary>
-            public ushort IndexCount;
+            [TagField(MaxVersion = HaloOnline700123, Upgrade = nameof(IndexCountNew))]
+            public ushort IndexCountOld;
+
+            /// <summary>
+            /// The number of indices in the part.
+            /// </summary>
+            [TagField(MinVersion = HaloReach, Downgrade = nameof(IndexCountOld))]
+            public uint IndexCountNew;
 
             /// <summary>
             /// The index of the first subpart that makes up this part.
@@ -132,43 +150,62 @@ namespace TagTool.Geometry
             /// <summary>
             /// The type of the mesh part.
             /// </summary>
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = Halo3Retail, Downgrade = nameof(TypeOld))]
             public PartTypeNew TypeNew;
+
+            [TagField(MinVersion = HaloReach)]
+            public sbyte Unknown1; // specialized render?
+
+            [TagField(MinVersion = HaloReach)]
+            public sbyte Unknown2; // other flags?
 
             /// <summary>
             /// The flags of the mesh part.
             /// </summary>
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = Halo3Retail, Downgrade = nameof(FlagsOld))]
             public PartFlagsNew FlagsNew;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista)]
             public byte MaxNodesPerVertex;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista)]
             public byte ContributingCompoundNodeCount;
 
             /// <summary>
             /// The number of vertices that the mesh part uses.
             /// </summary>
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = Halo3Retail)]
             public ushort VertexCount;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = Padding, Length = 2, MinVersion = HaloReach)]
+            public byte[] Unused1 = new byte[2];
+
+            [TagField(MaxVersion = Halo2Vista)]
             public RealPoint3d Position;
 
-            [TagField(Length = 4, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Length = 4, MaxVersion = Halo2Vista)]
             public byte[] NodeIndex = new byte[4];
 
-            [TagField(Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Length = 3, MaxVersion = Halo2Vista)]
             public float[] NodeWeight = new float[3];
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista)]
             public float LodMipmapMagicNumber;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 24, MaxVersion = CacheVersion.Halo2Vista)]
-            public byte[] Unused = new byte[24];
+            [TagField(Flags = Padding, Length = 24, MaxVersion = Halo2Vista)]
+            public byte[] Unused2 = new byte[24];
 
             public enum PartTypeOld : short
+            {
+                NotDrawn,
+                OpaqueShadowOnly,
+                OpaqueShadowCasting,
+                OpaqueNonshadowing,
+                Transparent,
+                LightmapOnly
+            }
+
+            public enum PartTypeNew : sbyte
             {
                 NotDrawn,
                 OpaqueShadowOnly,
@@ -187,16 +224,6 @@ namespace TagTool.Geometry
                 DislikesPhotons = 1 << 2,
                 OverrideTriangleList = 1 << 3,
                 IgnoredByLightmapper = 1 << 4
-            }
-
-            public enum PartTypeNew : sbyte
-            {
-                NotDrawn,
-                OpaqueShadowOnly,
-                OpaqueShadowCasting,
-                OpaqueNonshadowing,
-                Transparent,
-                LightmapOnly
             }
 
             [Flags]
@@ -233,7 +260,7 @@ namespace TagTool.Geometry
             /// <summary>
             /// The index of the subpart visibility bounds.
             /// </summary>
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(MaxVersion = Halo2Vista)]
             public short VisibilityBoundsIndex;
 
             /// <summary>
@@ -248,7 +275,7 @@ namespace TagTool.Geometry
             /// Note that this actually seems to be unused. The value is pulled from
             /// the vertex buffer definition instead.
             /// </remarks>
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(MinVersion = Halo3Retail)]
             public ushort VertexCount;
         }
 
@@ -259,7 +286,7 @@ namespace TagTool.Geometry
             public float Radius;
             public byte NodeIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
+            [TagField(Flags = Padding, Length = 3)]
             public byte[] Unused = new byte[3];
         }
 

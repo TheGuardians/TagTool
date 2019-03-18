@@ -47,7 +47,7 @@ namespace TagTool.Geometry
 
                 indicesList.Add(indices);
 
-                if (part.IndexCount > 0)
+                if (part.IndexCountOld > 0)
                     indexCount += indices.Length;
             }
 
@@ -239,13 +239,13 @@ namespace TagTool.Geometry
 
             // Read the indices
             var indexStream = reader.OpenIndexBufferStream(indexBuffer, resourceStream);
-            indexStream.Position = part.FirstIndex;
+            indexStream.Position = part.FirstIndexOld;
             switch (indexBuffer.Format)
             {
                 case IndexBufferFormat.TriangleList:
-                    return indexStream.ReadIndices(part.IndexCount);
+                    return indexStream.ReadIndices(part.IndexCountOld);
                 case IndexBufferFormat.TriangleStrip:
-                    return indexStream.ReadTriangleStrip(part.IndexCount);
+                    return indexStream.ReadTriangleStrip(part.IndexCountOld);
                 default:
                     throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
             }
