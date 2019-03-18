@@ -39,6 +39,20 @@ namespace TagTool.Commands.Scenarios
             return result;
         }
 
+        private string OpcodeLookup(ushort Opcode)
+        {
+            string result = "Unknown_OpCode!";
+            ScriptInfo info = new ScriptInfo();
+
+            if (ScriptInfo.Scripts[CacheVersion.HaloOnline106708].ContainsKey(Opcode))
+            {
+                info = ScriptInfo.Scripts[CacheVersion.HaloOnline106708][Opcode];
+                result = info.Name;
+            }
+
+            return result;
+        }
+
         private void WriteValueExpression(ScriptExpression expr, BinaryReader stringReader, StreamWriter scriptWriter)
         {
             var valueType = (ScriptValueType.Halo3ODSTValue)Enum.Parse(typeof(ScriptValueType.Halo3ODSTValue), expr.ValueType.HaloOnline.ToString());
@@ -46,8 +60,8 @@ namespace TagTool.Commands.Scenarios
             switch (valueType)
             {
                 case ScriptValueType.Halo3ODSTValue.FunctionName:
-                    scriptWriter.Write(expr.StringAddress == 0 ? "none" : ReadScriptString(stringReader, expr.StringAddress));
-                    break;
+                    scriptWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress)); 
+                    break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
                 case ScriptValueType.Halo3ODSTValue.Boolean:
                     scriptWriter.Write(expr.Data[0] == 0 ? "false" : "true");
@@ -91,6 +105,10 @@ namespace TagTool.Commands.Scenarios
                 case ScriptValueType.Halo3ODSTValue.Object:
                 case ScriptValueType.Halo3ODSTValue.Device:
                 case ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint:
+                case ScriptValueType.Halo3ODSTValue.TriggerVolume:
+                case ScriptValueType.Halo3ODSTValue.UnitSeatMapping:
+                case ScriptValueType.Halo3ODSTValue.Vehicle:
+                case ScriptValueType.Halo3ODSTValue.VehicleName:
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
@@ -173,7 +191,7 @@ namespace TagTool.Commands.Scenarios
 
                 foreach (var script in Definition.Scripts)
                 {
-                    scriptWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {script.ReturnType.ToString().ToSnakeCase()} ");
+                    scriptWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {script.ReturnType.HaloOnline.ToString().ToSnakeCase()} ");
 
                     if (script.Parameters.Count == 0)
                     {
