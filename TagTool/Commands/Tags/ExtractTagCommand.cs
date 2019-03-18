@@ -13,11 +13,11 @@ namespace TagTool.Commands.Tags
             : base(true,
 
                   "ExtractTag",
-                  "",
+                  "Writes tag data to a file. (To be used with 'ImportTag')",
 
                   "ExtractTag <Tag> <Path>",
 
-                  "")
+                  "Writes tag data to a file. (To be used with 'ImportTag')")
         {
             CacheContext = cacheContext;
         }

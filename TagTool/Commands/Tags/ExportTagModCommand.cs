@@ -15,11 +15,19 @@ namespace TagTool.Commands.Tags
             base(false,
 
                 "ExportTagMod",
-                "",
+                "Generates a 'Mod Installer' for the specified tags. See 'Help ExportTagMod' instructions.",
 
                 "ExportTagMod <Name> <Directory> {Tag1, ..., TagN}",
 
-                "")
+                "Generates a complete 'Mod Installer' for the specified tag(s).\n" +
+                "Any dependencies/resources are dealt with automatically.\n" +
+                "\n" +
+                "Instructions:\n" +
+                "1. Enter the command. Example: 'ExportTagMod MyMod myModFolder\n" +
+                "2. You can now specify the tags you want to be used, seperate each tag with a new line.\n" +
+                "3. After you have entered all of your tags, press enter while on an empty line to start the process.\n" +
+                "\n" +
+                "Warning: Tags with a ton of dependencies will cause the command to take a long time to finish.")
         {
             CacheContext = cacheContext;
         }
@@ -75,6 +83,8 @@ namespace TagTool.Commands.Tags
                         queue = nextQueue;
                     }
                 }
+
+                Console.WriteLine("Please specify the tags to be used:");
 
                 string line;
 
@@ -401,6 +411,8 @@ namespace TagTool.Commands.Tags
                 scriptWriter.WriteLine("Exit");
                 scriptWriter.WriteLine();
             }
+
+            Console.WriteLine("Done.");
 
             return true;
         }

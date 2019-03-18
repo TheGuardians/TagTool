@@ -25,7 +25,9 @@ namespace TagTool.Commands.RenderModels
 				"ReplaceRenderGeometry <COLLADA Scene>",
 
 				"Replaces the render_geometry of the current render_model tag " +
-				"with geometry compiled from a COLLADA scene file (.DAE)")
+				"with geometry compiled from a COLLADA scene file (.DAE)\n" +
+                "Your collada file must contain a single mesh for every permutation.\n" +
+                "Name your meshes as {region}:{permutation}. Example: 'hull:base'")
 		{
 			CacheContext = cacheContext;
 			Tag = tag;

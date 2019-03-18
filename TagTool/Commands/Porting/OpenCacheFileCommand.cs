@@ -15,11 +15,11 @@ namespace TagTool.Commands.Porting
             : base(false,
 
                   "OpenCacheFile",
-                  "Opens a porting context on a cache file from H3B/H3/ODST.",
+                  "Opens a porting context with the specified cache file.",
 
                   "OpenCacheFile <Cache File>",
 
-                  "Opens a porting context on a cache file from H3B/H3/ODST.")
+                  "Opens a porting context with the specified cache file.")
         {
             ContextStack = contextStack;
             CacheContext = cacheContext;

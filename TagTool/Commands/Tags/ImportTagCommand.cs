@@ -13,11 +13,11 @@ namespace TagTool.Commands.Tags
             : base(true,
 
                   "ImportTag",
-                  "",
+                  "Overwrites a tag with data from a file.",
 
-                  "ImportTag <index> <path>",
+                  "ImportTag <Tag> <Path>",
 
-                  "")
+                  "Overwrites a tag with data from a file.")
         {
             CacheContext = cacheContext;
         }
