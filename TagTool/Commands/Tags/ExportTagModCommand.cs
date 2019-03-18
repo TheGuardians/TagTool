@@ -15,11 +15,11 @@ namespace TagTool.Commands.Tags
             base(false,
 
                 "ExportTagMod",
-                "Generates a 'Mod Installer' for the specified tags. See 'Help ExportTagMod' instructions.",
+                "Generates a TagTool script for the specified tag(s). See 'Help ExportTagMod' instructions.",
 
                 "ExportTagMod <Name> <Directory> {Tag1, ..., TagN}",
 
-                "Generates a complete 'Mod Installer' for the specified tag(s).\n" +
+                "Generates a TagTool script for the specified tag(s).\n" +
                 "Any dependencies/resources are dealt with automatically.\n" +
                 "\n" +
                 "Instructions:\n" +
