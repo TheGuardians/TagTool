@@ -39,13 +39,12 @@ namespace TagTool.Commands.Scenarios
             if (!srcTxt.Exists)
                 throw new FileNotFoundException(srcTxt.FullName);
 
-            ScriptCompiler scriptCompiler = new ScriptCompiler(Definition);
+            ScriptCompiler scriptCompiler = new ScriptCompiler(CacheContext, Definition);
 
             scriptCompiler.CompileFile(srcTxt);
 
-            //Console.WriteLine("New expressions: " + scriptCompiler.NewExpressions.Count);
-
             Console.WriteLine("Done.");
+
             return true;
         }
     }

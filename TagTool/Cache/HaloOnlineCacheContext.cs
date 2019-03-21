@@ -491,7 +491,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="value">The value to search for.</param>
         /// <returns></returns>
-        public StringId GetStringId(string value) => StringIdCache.GetStringId(value);
+        public override StringId GetStringId(string value) => StringIdCache.GetStringId(value);
 
         /// <summary>
         /// Gets the string_id associated with the specified index from the string_id cache.

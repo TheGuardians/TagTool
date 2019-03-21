@@ -83,6 +83,13 @@ namespace TagTool.Cache
         public abstract string GetString(StringId id);
 
         /// <summary>
+        /// Gets the <see cref="StringId"/> associated with the input string from the current cache.
+        /// </summary>
+        /// <param name="input">The input string represented by the <see cref="StringId"/>.</param>
+        /// <returns>The <see cref="StringId"/> associated with the input string from the current cache.</returns>
+        public abstract StringId GetStringId(string input);
+
+        /// <summary>
         /// Adds a new pageable_resource to the current cache.
         /// </summary>
         /// <param name="pageable">The <see cref="PageableResource"/> to add.</param>

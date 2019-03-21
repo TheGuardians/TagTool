@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting.Compiler;
 using TagTool.Tags.Definitions;
@@ -12,25 +13,27 @@ namespace TagTool.Scripting.Compiler
 {
     public class ScriptCompiler
     {
+        public GameCacheContext CacheContext { get; }
         public Scenario Definition { get; }
 
-        private List<Script> Scripts = new List<Script>();
-        private List<ScriptGlobal> Globals = new List<ScriptGlobal>();
-        private List<ScriptExpression> ScriptExpressions = new List<ScriptExpression>();
+        private List<Script> Scripts;
+        private List<ScriptGlobal> Globals;
+        private List<ScriptExpression> ScriptExpressions;
 
-        public ScriptCompiler(Scenario definition)
+        private BinaryWriter StringWriter;
+        private Dictionary<string, uint> StringOffsets;
+
+        public ScriptCompiler(GameCacheContext cacheContext, Scenario definition)
         {
+            CacheContext = cacheContext;
             Definition = definition;
-        }
 
-        private void ClearScenarioScripting()
-        {
-            Definition.ScriptStrings = new byte[0];
-            Definition.Globals.Clear();
-            Definition.Scripts.Clear();
-            Definition.ScriptExpressions.Clear();
-            Definition.ScriptSourceFileReferences.Clear();
-            Definition.ScriptExternalFileReferences.Clear();
+            Scripts = new List<Script>();
+            Globals = new List<ScriptGlobal>();
+            ScriptExpressions = new List<ScriptExpression>();
+
+            StringWriter = new BinaryWriter(new MemoryStream());
+            StringOffsets = new Dictionary<string, uint>();
         }
 
         public void CompileFile(FileInfo file)
@@ -53,7 +56,7 @@ namespace TagTool.Scripting.Compiler
 
             foreach (var node in nodes)
             {
-                //CompileToplevel(node);
+                CompileToplevel(node);
             }
         }
 
@@ -109,6 +112,19 @@ namespace TagTool.Scripting.Compiler
             }
 
             return result;
+        }
+
+        private uint CompileStringAddress(string input)
+        {
+            if (!StringOffsets.ContainsKey(input))
+            {
+                var offset = (uint)StringWriter.BaseStream.Position;
+                StringWriter.Write(input.ToArray());
+                StringWriter.Write('\0');
+                StringOffsets[input] = offset;
+            }
+
+            return StringOffsets[input];
         }
 
         private void CompileGlobal(IScriptSyntax node)
@@ -781,29 +797,131 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileStringExpression(ScriptString stringValue) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileStringExpression(ScriptString stringValue)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.String, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileScriptExpression(ScriptSymbol scriptSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(stringValue.Value);
 
-        private DatumIndex CompileStringIdExpression(ScriptString stringIdString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileScriptExpression(ScriptSymbol scriptSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Script, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(scriptSymbol.Value);
+                
+                //
+                // TODO: Compile script data here
+                //
 
-        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagSymbol) =>
-            throw new NotImplementedException();
+                throw new NotImplementedException(ScriptValueType.Halo3ODSTValue.Script.ToString());
+            }
 
-        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointSymbol) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileStringIdExpression(ScriptString stringIdString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.StringId, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var stringId = CacheContext.GetStringId(stringIdString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(stringIdString.Value);
+                Array.Copy(BitConverter.GetBytes(stringId.Value), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.UnitSeatMapping, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(unitSeatMappingSymbol.Value);
+
+                //
+                // TODO: Compile unit_seat_mapping data here
+                //
+
+                throw new NotImplementedException(ScriptValueType.Halo3ODSTValue.UnitSeatMapping.ToString());
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.TriggerVolume, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeSymbol.Value == CacheContext.GetString(tv.Name));
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(triggerVolumeSymbol.Value);
+                Array.Copy(BitConverter.GetBytes(triggerVolumeIndex), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CutsceneFlag, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagSymbol.Value == CacheContext.GetString(cf.Name));
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cutsceneFlagSymbol.Value);
+                Array.Copy(BitConverter.GetBytes(cutsceneFlagIndex), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var cutsceneCameraPointIndex = Definition.CutsceneCameraPoints.FindIndex(ccp => cutsceneCameraPointSymbol.Value == ccp.Name);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cutsceneCameraPointSymbol.Value);
+                Array.Copy(BitConverter.GetBytes(cutsceneCameraPointIndex), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CutsceneTitle, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var cutsceneTitleIndex = Definition.CutsceneTitles.FindIndex(ct => cutsceneTitleSymbol.Value == CacheContext.GetString(ct.Name));
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cutsceneTitleSymbol.Value);
+                Array.Copy(BitConverter.GetBytes(cutsceneTitleIndex), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingString) =>
             throw new NotImplementedException();
