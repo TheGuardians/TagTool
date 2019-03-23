@@ -95,7 +95,7 @@ namespace TagTool.Scripting.Compiler
             var result = new ScriptValueType();
 
             if (!(node is ScriptSymbol symbol) ||
-                !Enum.TryParse(symbol.Value, out result.Halo3ODST))
+                !Enum.TryParse(symbol.Value, true, out result.Halo3ODST))
             {
                 throw new FormatException(node.ToString());
             }
@@ -106,7 +106,7 @@ namespace TagTool.Scripting.Compiler
         private ScriptType ParseScriptType(IScriptSyntax node)
         {
             if (!(node is ScriptSymbol symbol) ||
-                !Enum.TryParse<ScriptType>(symbol.Value, out var result))
+                !Enum.TryParse<ScriptType>(symbol.Value, true, out var result))
             {
                 throw new FormatException(node.ToString());
             }
