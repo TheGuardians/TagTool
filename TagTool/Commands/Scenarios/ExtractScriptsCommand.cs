@@ -41,14 +41,10 @@ namespace TagTool.Commands.Scenarios
 
         private string OpcodeLookup(ushort Opcode)
         {
-            string result = "Unknown_OpCode!";
-            ScriptInfo info = new ScriptInfo();
+            string result = "unk_op";
 
-            if (ScriptInfo.Scripts[CacheVersion.HaloOnline106708].ContainsKey(Opcode))
-            {
-                info = ScriptInfo.Scripts[CacheVersion.HaloOnline106708][Opcode];
-                result = info.Name;
-            }
+            if (ScriptInfo.Scripts[CacheVersion.Halo3ODST].ContainsKey(Opcode))
+                result = ScriptInfo.Scripts[CacheVersion.Halo3ODST][Opcode].Name;
 
             return result;
         }
