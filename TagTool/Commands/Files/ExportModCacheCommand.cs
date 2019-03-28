@@ -166,16 +166,7 @@ namespace TagTool.Commands.Files
                                     {
                                         Page = new RawPage
                                         {
-                                            OldFlags =
-                                                resourceLocation == ResourceLocation.Audio ?
-                                                    OldRawPageFlags.InAudio :
-                                                resourceLocation == ResourceLocation.Resources ?
-                                                    OldRawPageFlags.InResources :
-                                                resourceLocation == ResourceLocation.Textures ?
-                                                    OldRawPageFlags.InTextures :
-                                                resourceLocation == ResourceLocation.TexturesB ?
-                                                    OldRawPageFlags.InTexturesB :
-                                                    OldRawPageFlags.InResourcesB,
+                                            OldFlags = OldRawPageFlags.InMods,
                                             Index = newResourceIndex
                                         }
                                     };
