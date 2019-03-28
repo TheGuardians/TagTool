@@ -105,7 +105,10 @@ namespace TagTool.Cache
         /// </summary>
         InResourcesB = 1 << 5,
 
-        Unknown6 = 1 << 6,
+        /// <summary>
+        /// Indicates that the resource is in mods.dat.
+        /// </summary>
+        InMods = 1 << 6,
 
         /// <summary>
         /// Indicates that the resource's checksum should be validated.

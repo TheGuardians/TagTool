@@ -247,7 +247,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum FlagsValue : short
+            public enum FlagsValue : ushort
             {
                 None,
                 ForceAlwaysOn = 1 << 0,

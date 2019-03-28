@@ -70,7 +70,7 @@ namespace TagTool.Cache
         /// </summary>
         public TagCache TagCache { get; set; }
 
-        public TagCache CreateTagCache(DirectoryInfo directory = null)
+        public TagCache CreateTagCache(DirectoryInfo directory, out FileInfo file)
         {
             if (directory == null)
                 directory = Directory;
@@ -78,7 +78,7 @@ namespace TagTool.Cache
             if (!directory.Exists)
                 directory.Create();
 
-            var file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
+            file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
 
             TagCache cache = null;
 
@@ -514,6 +514,7 @@ namespace TagTool.Cache
             { ResourceLocation.ResourcesB, "resources_b.dat" },
             { ResourceLocation.RenderModels, "render_models.dat" },
             { ResourceLocation.Lightmaps, "lightmaps.dat" },
+            { ResourceLocation.Mods, "mods.dat" }
         };
 
         /// <summary>
@@ -568,12 +569,12 @@ namespace TagTool.Cache
             return cache.Cache;
         }
 
-        public ResourceCache CreateResourceCache(DirectoryInfo directory, ResourceLocation location)
+        public ResourceCache CreateResourceCache(DirectoryInfo directory, ResourceLocation location, out FileInfo file)
         {
             if (!directory.Exists)
                 directory.Create();
 
-            var file = new FileInfo(Path.Combine(directory.FullName, ResourceCacheNames[location]));
+            file = new FileInfo(Path.Combine(directory.FullName, ResourceCacheNames[location]));
 
             ResourceCache cache = null;
 

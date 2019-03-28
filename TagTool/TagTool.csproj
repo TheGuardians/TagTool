@@ -231,6 +231,7 @@
     <Compile Include="Cache\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
+    <Compile Include="Commands\Files\ExportModCacheCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />

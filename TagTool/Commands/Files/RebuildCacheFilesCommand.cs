@@ -102,7 +102,7 @@ namespace TagTool.Commands.Files
             if (!destDirectory.Exists)
                 destDirectory.Create();
 
-            var destTagCache = CacheContext.CreateTagCache(destDirectory);
+            var destTagCache = CacheContext.CreateTagCache(destDirectory, out var _);
 
             var destStringIdPath = Path.Combine(destDirectory.FullName, CacheContext.StringIdCacheFile.Name);
 
@@ -134,7 +134,7 @@ namespace TagTool.Commands.Files
                 CopiedResources[location] = new Dictionary<int, PageableResource>();
 
                 srcResourceCaches[location] = resourceCache;
-                destResourceCaches[location] = CacheContext.CreateResourceCache(destDirectory, location);
+                destResourceCaches[location] = CacheContext.CreateResourceCache(destDirectory, location, out var _);
             }
 
             var destCacheContext = new HaloOnlineCacheContext(destDirectory);

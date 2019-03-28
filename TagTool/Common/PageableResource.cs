@@ -177,6 +177,9 @@ namespace TagTool.Common
                 case ResourceLocation.Lightmaps:
                     Page.NewFlags |= NewRawPageFlags.InLightmaps;
                     break;
+                case ResourceLocation.Mods:
+                    Page.OldFlags |= OldRawPageFlags.InMods;
+                    break;
                 default:
                     throw new ArgumentException("Unsupported resource location");
             }
@@ -236,5 +239,10 @@ namespace TagTool.Common
         /// The resource is in lightmaps.dat.
         /// </summary>
         Lightmaps,
+
+        /// <summary>
+        /// The resource is in mods.dat.
+        /// </summary>
+        Mods
     }
 }

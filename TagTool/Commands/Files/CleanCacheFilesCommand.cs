@@ -88,9 +88,9 @@ namespace TagTool.Commands.Files
 
                 foreach (var entry in srcResourceStreams)
                 {
-                    var resourceCache = CacheContext.CreateResourceCache(destDirectory, entry.Key);
+                    var resourceCache = CacheContext.CreateResourceCache(destDirectory, entry.Key, out var file);
                     destResourceCaches[entry.Key] = resourceCache;
-                    destResourceStreams[entry.Key] = File.Open(Path.Combine(destDirectory.FullName, CacheContext.ResourceCacheNames[entry.Key]), FileMode.Open, FileAccess.ReadWrite);
+                    destResourceStreams[entry.Key] = file.Open(FileMode.Open, FileAccess.ReadWrite);
                 }
 
                 //
