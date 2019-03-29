@@ -84,7 +84,7 @@ namespace TagTool.Tags.Definitions
         public List<NodeMap> NodeMaps;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<MultiplayerObjectProperty> MultiplayerObjectProperties;
+        public List<MultiplayerObjectBlock> MultiplayerObject;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public CachedTagInstance SimulationInterpolation;
@@ -311,36 +311,36 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC4, MinVersion = CacheVersion.Halo3Retail)]
-        public class MultiplayerObjectProperty : TagStructure
+        public class MultiplayerObjectBlock : TagStructure
 		{
             public EngineFlagsValue EngineFlags;
-            public ObjectTypeValue ObjectType;
-            public byte TeleporterFlags;
+            public TypeValue Type;
+            public TeleporterPassabilityFlags TeleporterPassability;
             public FlagsValue Flags;
-            public ObjectShapeValue Shape;
-            public SpawnTimerModeValue SpawnTimerMode;
+            public BoundaryShapeValue BoundaryShape;
+            public SpawnTimerTypeValue SpawnTimerType;
             public short SpawnTime;
-            public short UnknownSpawnTime;
-            public float RadiusWidth;
-            public float Length;
-            public float Top;
-            public float Bottom;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public int Unknown5;
-            public int Unknown6;
-            public CachedTagInstance ChildObject;
-            public int Unknown7;
-            public CachedTagInstance ShapeShader;
-            public CachedTagInstance UnknownShader;
-            public CachedTagInstance Unknown8;
-            public CachedTagInstance Unknown9;
-            public CachedTagInstance Unknown10;
-            public CachedTagInstance Unknown11;
-            public CachedTagInstance Unknown12;
-            public CachedTagInstance Unknown13;
+            public short AbandonTime;
+            public float BoundaryWidth;
+            public float BoundaryLength;
+            public float BoundaryTop;
+            public float BoundaryBottom;
 
+            public uint RespawnZoneUnknown1;
+            public uint RespawnZoneUnknown2;
+            public uint RespawnZoneUnknown3;
+
+            public StringId BoundaryCenterMarker;
+            public StringId SpawnedObjectMarkerName;
+
+            public CachedTagInstance SpawnedObject;
+
+            public StringId NyiBoundaryMaterial;
+
+            [TagField(Length = (int)BoundaryShapeValue.Count)]
+            public BoundaryShader[] BoundaryShaders = new BoundaryShader[(int)BoundaryShapeValue.Count];
+
+            [Flags]
             public enum EngineFlagsValue : ushort
             {
                 None = 0,
@@ -355,70 +355,90 @@ namespace TagTool.Tags.Definitions
                 Infection = 1 << 8,
                 Bit9 = 1 << 9
             }
-        }
 
-        public enum ObjectTypeValue : sbyte
-        {
-            Ordinary,
-            Weapon,
-            Grenade,
-            Projectile,
-            Powerup,
-            Equipment,
-            LightLandVehicle,
-            HeavyLandVehicle,
-            FlyingVehicle,
-            Teleporter2way,
-            TeleporterSender,
-            TeleporterReceiver,
-            PlayerSpawnLocation,
-            PlayerRespawnZone,
-            HoldSpawnObjective,
-            CaptureSpawnObjective,
-            HoldDestinationObjective,
-            CaptureDestinationObjective,
-            HillObjective,
-            InfectionHavenObjective,
-            TerritoryObjective,
-            VipBoundaryObjective,
-            VipDestinationObjective,
-            JuggernautDestinationObjective
-        }
+            public enum TypeValue : sbyte
+            {
+                Ordinary,
+                Weapon,
+                Grenade,
+                Projectile,
+                Powerup,
+                Equipment,
+                LightLandVehicle,
+                HeavyLandVehicle,
+                FlyingVehicle,
+                Teleporter2way,
+                TeleporterSender,
+                TeleporterReceiver,
+                PlayerSpawnLocation,
+                PlayerRespawnZone,
+                HoldSpawnObjective,
+                CaptureSpawnObjective,
+                HoldDestinationObjective,
+                CaptureDestinationObjective,
+                HillObjective,
+                InfectionHavenObjective,
+                TerritoryObjective,
+                VipBoundaryObjective,
+                VipDestinationObjective,
+                JuggernautDestinationObjective
+            }
 
-        [Flags]
-        public enum FlagsValue : ushort
-        {
-            None,
-            OnlyRenderInEditor = 1 << 0,
-            ValidInitialPlayerSpawn = 1 << 1,
-            FixedBoundaryOrientation = 1 << 2,
-            InheritOwningTeamColor = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15
-        }
+            [Flags]
+            public enum TeleporterPassabilityFlags : byte
+            {
+                None,
+                DisallowPlayers = 1 << 0,
+                AllowLightLandVehicles = 1 << 1,
+                AllowHeavyLandVehicles = 1 << 2,
+                AllowFlyingVehicles = 1 << 3,
+                AllowProjectiles = 1 << 4,
+            }
 
-        public enum SpawnTimerModeValue : sbyte
-        {
-            DefaultOne,
-            Multiple
-        }
+            [Flags]
+            public enum FlagsValue : ushort
+            {
+                None,
+                OnlyRenderInEditor = 1 << 0,
+                ValidInitialPlayerSpawn = 1 << 1,
+                FixedBoundaryOrientation = 1 << 2,
+                InheritOwningTeamColor = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15
+            }
 
-        public enum ObjectShapeValue : sbyte
-        {
-            None,
-            Sphere,
-            Cylinder,
-            Box
+            public enum SpawnTimerTypeValue : sbyte
+            {
+                StartsOnDeath,
+                StartsOnDisturbance
+            }
+
+            public enum BoundaryShapeValue : sbyte
+            {
+                None,
+                Sphere,
+                Cylinder,
+                Box,
+
+                Count
+            }
+
+            [TagStructure(Size = 0x20)]
+            public class BoundaryShader : TagStructure
+            {
+                public CachedTagInstance StandardShader;
+                public CachedTagInstance OpaqueShader;
+            }
         }
 
         [TagStructure(Size = 0x14)]
