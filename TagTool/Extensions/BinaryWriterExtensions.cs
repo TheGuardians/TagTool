@@ -24,6 +24,11 @@ namespace Sytem.IO
                 writer.Write(value);
         }
 
+        public static void Write(this BinaryWriter writer, Tag value, EndianFormat format = EndianFormat.LittleEndian)
+        {
+            writer.Write(value.Value);
+        }
+
         public static void Write(this BinaryWriter writer, Half value, EndianFormat format = EndianFormat.LittleEndian)
         {
             writer.Write(value.value, format);

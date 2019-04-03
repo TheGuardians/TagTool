@@ -63,7 +63,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new Shaders.RegenerateShaders(cacheContext));
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new ForEachCommand(contextStack, cacheContext));
-            context.AddCommand(new ExportModCacheCommand(cacheContext));
+            context.AddCommand(new ExportModPackageCommand(cacheContext));
 
             return context;
         }

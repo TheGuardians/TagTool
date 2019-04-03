@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Resources;
+using System.Text;
 
 namespace TagTool.Cache
 {
@@ -80,10 +81,15 @@ namespace TagTool.Cache
 
             file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
 
+            using (var stream = file.Create())
+                return CreateTagCache(stream);
+        }
+
+        public TagCache CreateTagCache(Stream stream)
+        {
             TagCache cache = null;
 
-            using (var stream = file.Create())
-            using (var writer = new BinaryWriter(stream))
+            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
             {
                 // Write the new resource cache file
                 writer.Write(0);                  // padding
@@ -576,10 +582,15 @@ namespace TagTool.Cache
 
             file = new FileInfo(Path.Combine(directory.FullName, ResourceCacheNames[location]));
 
+            using (var stream = file.Create())
+                return CreateResourceCache(stream);
+        }
+
+        public ResourceCache CreateResourceCache(Stream stream)
+        {
             ResourceCache cache = null;
 
-            using (var stream = file.Create())
-            using (var writer = new BinaryWriter(stream))
+            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
             {
                 // Write the new resource cache file
                 writer.Write(0);                  // padding
