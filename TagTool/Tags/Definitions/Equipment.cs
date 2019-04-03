@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
-using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,23 +14,25 @@ namespace TagTool.Tags.Definitions
         public float UseDuration;
         public uint Unknown8;
         public short NumberOfUses;
-        public ushort Flags3;
+        public EquipmentFlagBits EquipmentFlags;
         public float Unknown9;
         public float Unknown10;
         public float Unknown11;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public List<EquipmentCameraBlock> EquipmentCamera;
+        public List<OptionalUnitCameraBlock> OverrideCamera;
 
         public List<HealthPackBlock> HealthPack;
-        public List<PowerupBlock> Powerup;
-        public List<ObjectCreationBlock> ObjectCreation;
-        public List<DestructionBlock> Destruction;
-        public List<RadarManipulationBlock> RadarManipulation;
+        public List<MultiplayerPowerupBlock> MultiplayerPowerup;
+        public List<SpawnerBlock> Spawner;
+        public List<ProximityMineBlock> ProximityMine;
+        public List<MotionTrackerNoiseBlock> MotionTrackerNoise;
+
         //Probably a unused tagblock
         public uint Unknown12;
         public uint Unknown13;
         public uint Unknown14;
+
         public List<InvisibilityBlock> Invisibility;
         public List<InvincibilityBlock> Invincibility;
         public List<RegeneratorBlock> Regenerator;
@@ -82,21 +86,52 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public StringId ExitAnimation;
 
+        [Flags]
+        public enum EquipmentFlagBits : ushort
+        {
+            None,
+            PathfindingObstacle = 1 << 0,
+            EquipmentIsDangerousToAi = 1 << 1,
+            NeverDroppedByAi = 1 << 2,
+            ProtectsParentFromAoe = 1 << 3,
+            ThirdPersonCameraAlways = 1 << 4,
+            UseForcedPrimaryChangeColor = 1 << 5,
+            UseForcedSecondaryChangeColor = 1 << 6,
+            CanNotBePickedUpByPlayer = 1 << 7,
+            IsRemovedFromWorldOnDeactivation = 1 << 8,
+            IsDroppedByPlayer = 1 << 9,
+            IsDroppedByAi = 1 << 10
+        }
+
         [TagStructure(Size = 0x3C)]
-        public class EquipmentCameraBlock : TagStructure
+        public class OptionalUnitCameraBlock : TagStructure
 		{
-            public short Flags;
-            public short Unknown;
+            public FlagBits Flags;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
             public StringId CameraMarkerName;
             public StringId CameraSubmergedMarkerName;
             public Angle PitchAutoLevel;
-            public Angle PitchRangeMin;
-            public Angle PitchRangeMax;
+            public Bounds<Angle> PitchRange;
             public List<CameraTrack> CameraTracks;
+
             public Angle Unknown2;
             public Angle Unknown3;
             public Angle Unknown4;
-            public List<UnknownBlock> Unknown5;
+
+            public List<CameraAccelerationBlock> CameraAcceleration;
+
+            [Flags]
+            public enum FlagBits : ushort
+            {
+                None,
+                PitchBoundsAbsoluteSpace = 1 << 0,
+                OnlyCollidesWithEnvironment = 1 << 1,
+                HidesPlayerUnitFromCamera = 1 << 2,
+                UseAimingVectorInsteadOfMarkerForward = 1 << 3
+            }
 
             [TagStructure(Size = 0x10)]
             public class CameraTrack : TagStructure
@@ -105,7 +140,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x4C)]
-            public class UnknownBlock : TagStructure
+            public class CameraAccelerationBlock : TagStructure
 			{
                 public uint Unknown;
                 public uint Unknown2;
@@ -141,48 +176,59 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class PowerupBlock : TagStructure
+        public class MultiplayerPowerupBlock : TagStructure
 		{
-            public PowerupTraitSetValue PowerupTraitSet;
+            public FlavorValue Flavor;
 
-            public enum PowerupTraitSetValue : int
+            public enum FlavorValue : int
             {
-                Red,
-                Blue,
-                Yellow,
+                RedPowerup,
+                BluePowerup,
+                YellowPowerup,
+                CustomPowerup
             }
         }
 
         [TagStructure(Size = 0x34)]
-        public class ObjectCreationBlock : TagStructure
+        public class SpawnerBlock : TagStructure
 		{
-            public CachedTagInstance Object;
-            public CachedTagInstance Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public float ObjectForce;
-            public uint Unknown5;
+            public CachedTagInstance SpawnedObject;
+            public CachedTagInstance SpawnedEffect;
+            public float SpawnRadius;
+            public float SpawnZOffset;
+            public float SpawnAreaRadius;
+            public float SpawnVelocity;
+            public TypeValue Type;
+
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+
+            public enum TypeValue : short
+            {
+                AlongAimingVector,
+                CameraPosZPlane,
+                FootPosZPlane
+            }
         }
 
         [TagStructure(Size = 0x30)]
-        public class DestructionBlock : TagStructure
+        public class ProximityMineBlock : TagStructure
 		{
-            public CachedTagInstance DestroyEffect;
-            public CachedTagInstance DestroyDamageEffect;
-            public uint Unknown;
-            public float SelfDestructionTime;
-            public uint Unknown2;
-            public uint Unknown3;
+            public CachedTagInstance ExplosionEffect;
+            public CachedTagInstance ExplosionDamageEffect;
+            public float ArmTime;
+            public float SelfDestructTime;
+            public float TriggerTime;
+            public float TriggerVelocity;
         }
 
         [TagStructure(Size = 0x10)]
-        public class RadarManipulationBlock : TagStructure
+        public class MotionTrackerNoiseBlock : TagStructure
 		{
-            public uint Unknown;
-            public float FakeBlipRadius;
-            public int FakeBlipCount;
-            public uint Unknown2;
+            public float ArmTime;
+            public float NoiseRadius;
+            public int NoiseCount;
+            public float FlashRadius;
         }
 
         [TagStructure(Size = 0x8)]
