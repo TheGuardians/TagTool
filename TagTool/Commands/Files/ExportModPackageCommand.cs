@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Sytem.IO;
@@ -20,7 +21,7 @@ namespace TagTool.Commands.Files
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage <Package File>",
+                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] <Package File>",
 
                 "")
         {
@@ -29,27 +30,76 @@ namespace TagTool.Commands.Files
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count < 1 || args.Count > 5)
                 return false;
+
+            bool promptTags = false;
+            bool promptMaps = false;
+            int? fromIndex = null;
+            int? toIndex = null;
+
+            while (args.Count != 1)
+            {
+                switch (args[0].ToLower())
+                {
+                    case "prompttags":
+                        promptTags = true;
+                        args.RemoveRange(0, 1);
+                        break;
+
+                    case "promptmaps":
+                        promptMaps = true;
+                        args.RemoveRange(0, 1);
+                        break;
+
+                    case "from:":
+                        if (CacheContext.TryGetTag(args[1], out var fromInstance) && fromInstance != null)
+                            fromIndex = fromInstance.Index;
+                        args.RemoveRange(0, 2);
+                        break;
+
+                    case "to:":
+                        if (CacheContext.TryGetTag(args[1], out var toInstance) && toInstance != null)
+                            toIndex = toInstance.Index;
+                        args.RemoveRange(0, 2);
+                        break;
+
+                    default:
+                        throw new ArgumentException(args[0]);
+                }
+            }
+
+            if (!promptTags && !promptMaps && !fromIndex.HasValue && !toIndex.HasValue)
+            {
+                promptTags = true;
+                promptMaps = true;
+            }
+
+            if (fromIndex.HasValue && !toIndex.HasValue)
+                toIndex = CacheContext.TagCache.Index.NonNull().Last().Index;
 
             var packageFile = new FileInfo(args[0]);
 
-            using (var srcTagStream = CacheContext.OpenTagCacheRead())
-            using (var destTagsStream = new MemoryStream())
-            using (var destResourceStream = new MemoryStream())
+            var tagIndices = new HashSet<int>();
+            var mapFiles = new HashSet<string>();
+            string line = null;
+
+            if (fromIndex.HasValue && toIndex.HasValue)
+                foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value))
+                    if (!tagIndices.Contains(entry))
+                        tagIndices.Add(entry);
+
+            if (promptTags)
             {
-                var tagIndices = new HashSet<int>();
-
                 Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
-
-                string line;
 
                 while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
                     if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
                         tagIndices.Add(instance.Index);
+            }
 
-                var mapFiles = new HashSet<string>();
-
+            if (promptMaps)
+            {
                 Console.WriteLine("Please specify the .map files to be used (enter an empty line to finish):");
 
                 while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
@@ -59,7 +109,12 @@ namespace TagTool.Commands.Files
                     if (mapFile.Exists && mapFile.Extension == ".map" && !mapFiles.Contains(mapFile.FullName))
                         mapFiles.Add(mapFile.FullName);
                 }
+            }
 
+            using (var srcTagStream = CacheContext.OpenTagCacheRead())
+            using (var destTagsStream = new MemoryStream())
+            using (var destResourceStream = new MemoryStream())
+            {
                 var destTagCache = CacheContext.CreateTagCache(destTagsStream);
                 var destResourceCache = CacheContext.CreateResourceCache(destResourceStream);
 
