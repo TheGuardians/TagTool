@@ -86,7 +86,7 @@ namespace TagTool.Commands.Files
 
             if (fromIndex.HasValue && toIndex.HasValue)
                 foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value))
-                    if (!tagIndices.Contains(entry))
+                    if (!tagIndices.Contains(entry) && CacheContext.GetTag(entry) != null)
                         tagIndices.Add(entry);
 
             if (promptTags)
