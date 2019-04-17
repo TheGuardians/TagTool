@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Editing
 {
@@ -179,6 +180,9 @@ namespace TagTool.Commands.Editing
 
         private string GetLabel(IList elements, int index)
         {
+            if (index < 0 || index >= elements.Count)
+                return null;
+
             foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], CacheContext.Version))
             {
                 if (info.Attribute == null || !info.Attribute.Flags.HasFlag(TagFieldFlags.Label))
@@ -190,6 +194,8 @@ namespace TagTool.Commands.Editing
                     return (string)value;
                 else if (info.FieldType == typeof(StringId))
                     return CacheContext.GetString((StringId)value);
+                else if (info.FieldType.IsPrimitive && Tag.IsInGroup<Scenario>())
+                    return GetLabel((IList)typeof(Scenario).GetField(nameof(Scenario.ObjectNames)).GetValue(Owner), Convert.ToInt32(value));
                 else
                     return value.ToString();
             }
