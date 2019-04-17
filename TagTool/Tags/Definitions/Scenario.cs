@@ -766,7 +766,7 @@ namespace TagTool.Tags.Definitions
             public short PaletteIndex;
             [TagField(Flags = TagFieldFlags.Label)]
             public short NameIndex;
-            public ObjectPlacementFlags PlacementFlags;
+            public ObjectPlacementFlags PlacementFlags; // int
             public RealPoint3d Position;
             public RealEulerAngles3d Rotation;
             public float Scale;
@@ -777,8 +777,8 @@ namespace TagTool.Tags.Definitions
             public DatumIndex UniqueHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
-            public SourceValue Source;
-            public BspPolicyValue BspPolicy;
+            public SourceValue Source; // sbyte
+            public BspPolicyValue BspPolicy; // sbyte
             public sbyte Unknown3;
             public short EditorFolderIndex;
             public short Unknown4;
@@ -853,7 +853,7 @@ namespace TagTool.Tags.Definitions
             public byte MultiplayerFlags;
             public short SpawnTime;
             public short UnknownSpawnTime;
-            public sbyte Unknown13;
+            public sbyte TeleporterFlags;
             public ShapeValue Shape;
             public sbyte TeleporterChannel;
             public sbyte Unknown14;

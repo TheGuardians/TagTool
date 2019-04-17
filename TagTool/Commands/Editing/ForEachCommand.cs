@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TagTool.Common;
 
 namespace TagTool.Commands.Editing
 {
@@ -22,7 +23,7 @@ namespace TagTool.Commands.Editing
                   "ForEach",
                   "Executes a command for each element in the specified tag block.",
 
-                  "ForEach <Tag Block> <Command>",
+                  "ForEach <Tag Block> [From: *] [To: *] <Command>",
 
                   "Executes a command for each element in the specified tag block.")
         {
@@ -102,10 +103,53 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
+            string fromName = null;
+            int? from = null;
+
+            string toName = null;
+            int? to = null;
+
+            while (true)
+            {
+                var found = false;
+
+                switch (args[1].ToLower())
+                {
+                    case "from:":
+                        if (char.IsNumber(args[2][0]))
+                            from = int.Parse(args[2]);
+                        else
+                        {
+                            fromName = args[2];
+                            from = FindLabelIndex(fieldValue, fromName);
+                        }
+                        args.RemoveRange(1, 2);
+                        found = true;
+                        break;
+
+                    case "to:":
+                        if (char.IsNumber(args[2][0]))
+                            to = int.Parse(args[2]);
+                        else
+                        {
+                            toName = args[2];
+                            to = FindLabelIndex(fieldValue, toName);
+                        }
+                        args.RemoveRange(1, 2);
+                        found = true;
+                        break;
+                }
+
+                if (!found)
+                    break;
+            }
+
             blockName = args[0];
             args = args.Skip(1).ToList();
 
-            for (var i = 0; i < fieldValue.Count; i++)
+            for (var i = (from.HasValue ? from.Value : 0);
+                i < (to.HasValue ? to.Value + 1 : fieldValue.Count);
+                i++)
             {
                 while (ContextStack.Context != previousContext)
                     ContextStack.Pop();
@@ -118,7 +162,9 @@ namespace TagTool.Commands.Editing
                         .Equals(false))
                     return false;
 
-                Console.Write($"[{i}] ");
+                var label = GetLabel(fieldValue, i);
+
+                Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
                 ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
             }
 
@@ -129,6 +175,42 @@ namespace TagTool.Commands.Editing
             Structure = previousStructure;
 
             return true;
+        }
+
+        private string GetLabel(IList elements, int index)
+        {
+            foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], CacheContext.Version))
+            {
+                if (info.Attribute == null || !info.Attribute.Flags.HasFlag(TagFieldFlags.Label))
+                    continue;
+
+                var value = info.FieldInfo.GetValue(elements[index]);
+
+                if (info.FieldType == typeof(string))
+                    return (string)value;
+                else if (info.FieldType == typeof(StringId))
+                    return CacheContext.GetString((StringId)value);
+                else
+                    return value.ToString();
+            }
+
+            return null;
+        }
+
+        private int FindLabelIndex(IList elements, string displayName)
+        {
+            for (var i = 0; i < elements.Count; i++)
+            {
+                var label = GetLabel(elements, i);
+
+                if (label == null)
+                    continue;
+
+                if (displayName == label)
+                    return i;
+            }
+
+            throw new KeyNotFoundException(displayName);
         }
     }
 }

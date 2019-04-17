@@ -17,7 +17,7 @@ namespace TagTool.Commands.CollisionModels
 
         public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, CollisionModel definition)
         {
-            commandContext.AddCommand(new ExtractModelCommand(definition));
+            commandContext.AddCommand(new ExtractModelCommand(cacheContext, definition));
         }
     }
 }

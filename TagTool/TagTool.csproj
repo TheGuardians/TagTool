@@ -231,6 +231,7 @@
     <Compile Include="Cache\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
+    <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
@@ -252,6 +253,7 @@
     <Compile Include="Scripting\Compiler\ScriptReal.cs" />
     <Compile Include="Scripting\Compiler\ScriptString.cs" />
     <Compile Include="Scripting\Compiler\ScriptSymbol.cs" />
+    <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />

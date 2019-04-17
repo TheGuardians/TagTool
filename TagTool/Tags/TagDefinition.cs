@@ -139,6 +139,7 @@ namespace TagTool.Tags
             { new Tag("clwd"), typeof(Cloth) },
             { new Tag("cmoe"), typeof(Camo) },
             { new Tag("cntl"), typeof(ContrailSystem) },
+            { new Tag("cobj"), typeof(CustomObject) },
             { new Tag("coll"), typeof(CollisionModel) },
             { new Tag("colo"), typeof(ColorTable) },
             { new Tag("cprl"), typeof(ChudWidgetParallaxData) },

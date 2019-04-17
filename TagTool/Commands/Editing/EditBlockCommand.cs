@@ -130,6 +130,7 @@ namespace TagTool.Commands.Editing
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(CacheContext, blockStructure, blockValue));
             blockContext.AddCommand(new SetFieldCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new ExtractResourceCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new EditBlockCommand(ContextStack, CacheContext, Tag, blockValue));
             blockContext.AddCommand(new AddBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new RemoveBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));

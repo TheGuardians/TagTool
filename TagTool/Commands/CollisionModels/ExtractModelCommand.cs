@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.CollisionModels
 {
     class ExtractModelCommand : Command
     {
+        private HaloOnlineCacheContext CacheContext { get; }
         private CollisionModel Definition { get; }
 
-        public ExtractModelCommand(CollisionModel definition) :
+        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, CollisionModel definition) :
             base(true,
 
                 "ExtractModel",
@@ -19,6 +22,7 @@ namespace TagTool.Commands.CollisionModels
 
                 "")
         {
+            CacheContext = cacheContext;
             Definition = definition;
         }
 
@@ -38,22 +42,27 @@ namespace TagTool.Commands.CollisionModels
 
                 foreach (var region in Definition.Regions)
                 {
+                    var regionName = CacheContext.GetString(region.Name);
+
                     foreach (var permutation in region.Permutations)
                     {
+                        var permutationName = CacheContext.GetString(permutation.Name);
+
                         foreach (var collisionBsp in permutation.Bsps)
                         {
+                            var offset = new RealPoint3d();
+
                             for (var i = 0; i < collisionBsp.Geometry.Vertices.Count; i++)
                             {
-                                var vertex = collisionBsp.Geometry.Vertices[i];
-                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                                var v = offset + collisionBsp.Geometry.Vertices[i].Point;
+                                writer.WriteLine($"v {v.X} {v.Z} {v.Y}");
                             }
 
-                            writer.WriteLine($"g bsp_surfaces_{permutation.Bsps.IndexOf(collisionBsp)}");
+                            writer.WriteLine($"g {regionName}:{permutationName}");
 
                             for (var i = 0; i < collisionBsp.Geometry.Surfaces.Count; i++)
                             {
                                 var surface = collisionBsp.Geometry.Surfaces[i];
-                                var vertices = new HashSet<short>();
                                 var edge = collisionBsp.Geometry.Edges[surface.FirstEdge];
 
                                 writer.Write("f");
