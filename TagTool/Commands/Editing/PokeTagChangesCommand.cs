@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using TagTool.IO;
-using TagTool.Runtime;
 using TagTool.Cache;
+using TagTool.Serialization;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing

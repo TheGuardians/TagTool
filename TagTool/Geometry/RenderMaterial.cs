@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Geometry
 {
@@ -17,13 +18,13 @@ namespace TagTool.Geometry
         /// <summary>
         /// The OLD render method tag to use to render the material.
         /// </summary>
-        [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Label, MaxVersion = CacheVersion.Halo2Vista)]
         public CachedTagInstance OldRenderMethod;
 
         /// <summary>
         /// The render method tag to use to render the material.
         /// </summary>
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public CachedTagInstance RenderMethod;
 
         [TagField(Version = CacheVersion.HaloOnline700123)]
@@ -40,7 +41,7 @@ namespace TagTool.Geometry
         [TagStructure(Size = 0x14)]
         public class Skin : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public CachedTagInstance RenderMethod;
         }
@@ -49,10 +50,10 @@ namespace TagTool.Geometry
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
         public class PropertyType : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(Flags = Label, MaxVersion = CacheVersion.Halo2Vista)]
             public Halo2Value Halo2;
 
-            [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = Label, MinVersion = CacheVersion.Halo3Retail)]
             public Halo3Value Halo3;
 
             public enum Halo2Value : short

@@ -1,5 +1,6 @@
 using TagTool.Tags;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Havok
 {
@@ -9,7 +10,7 @@ namespace TagTool.Havok
         public List<Datum> Data;
         public sbyte MoppBuildType;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
+        [TagField(Flags = Padding, Length = 3)]
         public byte[] Unused = new byte[3];
 
         [TagStructure(Size = 0x1)]

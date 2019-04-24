@@ -4,6 +4,7 @@ using TagTool.Geometry;
 using TagTool.Havok;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -16,7 +17,7 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
         public ContentPolicyFlagsValue ContentPolicyFlags;
         public ContentPolicyFlagsValue FailedContentPolicyFlags;
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused1;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown3;
@@ -29,7 +30,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> WorldBoundsZ;
         public List<UnknownRaw6th> UnknownRaw6ths;
         public List<Plane> Planes;
-        [TagField(Flags = TagFieldFlags.Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] UnknownUnused1;
         public List<ClusterPortal> ClusterPortals;
         public List<UnknownBlock2> Unknown14;
@@ -106,7 +107,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex3;
-        [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource CollisionBspResource;
 
         public int UselessPadding3;
@@ -116,7 +117,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex4;
-        [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource PathfindingResource;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public int UselessPadding4;
@@ -186,7 +187,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class CollisionMaterial : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public CachedTagInstance RenderMethod;
             public short RuntimeGlobalMaterialIndex;
             public short ConveyorSurfaceIndex;
@@ -596,7 +597,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public ushort Flags;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
                 public List<BspReference> Bsps;
@@ -612,7 +613,7 @@ namespace TagTool.Tags.Definitions
                     public DatumIndex BspHandle;
                     public short NodeIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
                     public List<Bsp2dRef> Bsp2dRefs;
@@ -705,7 +706,7 @@ namespace TagTool.Tags.Definitions
                 public short UserJumpIndex;
                 public byte DestOnly;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Unused = new byte[1];
 
                 public float Length;
@@ -717,7 +718,7 @@ namespace TagTool.Tags.Definitions
 				{
                     public short JumpIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
                 }
             }
@@ -727,7 +728,7 @@ namespace TagTool.Tags.Definitions
 			{
                 public short ScenarioObjectIndex;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
             }
         }
@@ -856,7 +857,7 @@ namespace TagTool.Tags.Definitions
             public float Scale;
             public short PaletteIndex;
             public FlagsValue Flags;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+            [TagField(Flags = Padding, Length = 1)]
             public byte[] Unused = new byte[1];
             public int UniqueId;
             [TagField(Length = 32)]

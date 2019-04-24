@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -16,7 +17,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class ColorTableBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label, Length = 32)]
+            [TagField(Flags = Label, Length = 32)]
             public string String;
 
             public RealArgbColor Color;

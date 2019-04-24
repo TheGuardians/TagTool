@@ -292,7 +292,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.Index.Last(tag => tag.IsInGroup(starGroupTag));
+                result = TagCache.Index.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
                 return true;
             }
 

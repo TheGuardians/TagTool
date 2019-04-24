@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -49,11 +50,11 @@ namespace TagTool.Tags
             public uint BlockOffset;
             public CacheAddress Address;
 
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int Type;
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int Offset;
-            [TagField(Flags = TagFieldFlags.Runtime)]
+            [TagField(Flags = Runtime)]
             public int RawAddress;
         }
 

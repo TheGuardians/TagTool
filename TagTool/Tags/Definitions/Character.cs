@@ -1,6 +1,7 @@
 using TagTool.Ai;
 using TagTool.Cache;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -40,12 +41,12 @@ namespace TagTool.Tags.Definitions
         public List<CharacterVocalizationProperties> VocalizationProperties;
         public List<CharacterBoardingProperties> BoardingProperties;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Flags = Padding, Length = 12, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused1; // guardian properties
         
         public List<CharacterCombatformProperties> CombatformProperties;
        
-        [TagField(Flags = TagFieldFlags.Padding, Length = 24, MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 24, MinVersion = CacheVersion.Halo3ODST)]
         public byte[] Unused2;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

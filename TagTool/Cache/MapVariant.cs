@@ -1,6 +1,7 @@
 ﻿using TagTool.Common;
 using TagTool.Tags;
 using System.Runtime.InteropServices;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
@@ -56,7 +57,7 @@ namespace TagTool.Cache
         [TagField(Length = 256)]
         public BudgetEntry[] BudgetEntries = new BudgetEntry[256];
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 320)]
+        [TagField(Flags = Padding, Length = 320)]
         public byte[] Unused = new byte[320];
 
         [TagStructure(Size = 0x54)]

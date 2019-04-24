@@ -466,7 +466,7 @@ namespace TagTool.Commands.Porting
                 BlamCache.LoadResourceTags();
 
             definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, resourceStreams, definition.ResourceGroups);
-            definition.Modes = definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+            definition.Modes = definition.Modes.OrderBy(a => a.Name.Set).ThenBy(a => a.Name.Index).ToList();
 
             foreach (var mode in definition.Modes)
             {

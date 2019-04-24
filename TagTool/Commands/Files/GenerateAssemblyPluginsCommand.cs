@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Files
 {
@@ -737,7 +738,7 @@ namespace TagTool.Commands.Files
                             {
                                 for (int i = 0; i < tagFieldAttribute.Length; i++)
                                 {
-                                    if (tagFieldAttribute.Flags.HasFlag(TagFieldFlags.Padding))
+                                    if (tagFieldAttribute.Flags.HasFlag(Padding))
                                     {
                                         AssemblyPluginField assemblyPluginField = new AssemblyPluginField(elementAssemblyPluginType, fieldName + "Padding " + i.ToString(), ref offset);
                                         assemblyPluginField.attributes["visible"] = "false";

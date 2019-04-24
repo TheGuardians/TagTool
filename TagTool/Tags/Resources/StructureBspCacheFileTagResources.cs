@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
@@ -34,7 +35,7 @@ namespace TagTool.Tags.Resources
             {
                 public ushort Flags;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
                 public List<BspReference> Bsps;
@@ -50,7 +51,7 @@ namespace TagTool.Tags.Resources
                     public DatumIndex BspHandle;
                     public short NodeIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
                     public TagBlock<Bsp2dRef> Bsp2dRefs;
@@ -77,7 +78,7 @@ namespace TagTool.Tags.Resources
                 public short UserJumpIndex;
                 public byte DestOnly;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Unused = new byte[1];
 
                 public float Length;

@@ -1,6 +1,7 @@
 ﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Geometry
 {
@@ -17,8 +18,8 @@ namespace TagTool.Geometry
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public RenderGeometryCompressionFlags Flags;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Retail)]
-        public byte[] Padding;
+        [TagField(Flags = Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Retail)]
+        public byte[] Unused = new byte[2];
 
         /// <summary>
         /// The minimum X value in the uncompressed geometry.

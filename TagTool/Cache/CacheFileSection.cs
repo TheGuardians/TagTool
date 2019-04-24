@@ -1,4 +1,5 @@
 ﻿using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
@@ -18,10 +19,10 @@ namespace TagTool.Cache
         /// </summary>
         public int Size;
 
-        [TagField(Flags = TagFieldFlags.Runtime)]
+        [TagField(Flags = Runtime)]
         public int CacheOffset = -1;
 
-        [TagField(Flags = TagFieldFlags.Runtime)]
+        [TagField(Flags = Runtime)]
         public uint AddressMask = uint.MaxValue;
 
         public void InitializeCacheOffset(int cacheOffset, bool interopIsNull)

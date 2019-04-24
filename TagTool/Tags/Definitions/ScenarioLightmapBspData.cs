@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -91,7 +92,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown68;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x10)]

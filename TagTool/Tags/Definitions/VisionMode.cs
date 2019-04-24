@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -69,7 +70,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance Unknown54;
         public CachedTagInstance Unknown55;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

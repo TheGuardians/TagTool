@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -15,7 +16,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The flags of the field.
         /// </summary>
-        public TagFieldFlags Flags { get; set; } = TagFieldFlags.None;
+        public TagFieldFlags Flags { get; set; } = None;
 
         /// <summary>
         /// The minimum cache version the tag field is present in.

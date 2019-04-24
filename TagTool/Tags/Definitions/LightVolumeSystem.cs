@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -11,7 +12,7 @@ namespace TagTool.Tags.Definitions
 	{
         public List<LightVolumeSystemBlock> LightVolume;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [Flags]
@@ -43,7 +44,7 @@ namespace TagTool.Tags.Definitions
 
             public LightVolumeFlags Flags;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused = new byte[2];
 
             /// <summary>

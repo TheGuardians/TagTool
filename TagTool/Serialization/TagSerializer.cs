@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Serialization
 {
@@ -90,7 +91,7 @@ namespace TagTool.Serialization
         /// <exception cref="System.InvalidOperationException">Offset for property \ + property.Name + \ is outside of its structure</exception>
         private void SerializeProperty(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object instance, TagFieldInfo tagFieldInfo, long baseOffset)
         {
-            if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Runtime))
+            if (tagFieldInfo.Attribute.Flags.HasFlag(Runtime))
                 return;
 
             SerializeValue(version, context, tagStream, block,
@@ -180,7 +181,7 @@ namespace TagTool.Serialization
         /// <param name="valueType">Type of the value.</param>
         private void SerializeComplexValue(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object value, TagFieldAttribute valueInfo, Type valueType)
         {
-            if (valueInfo != null && valueInfo.Flags.HasFlag(TagFieldFlags.Pointer))
+            if (valueInfo != null && valueInfo.Flags.HasFlag(Pointer))
                 SerializeIndirectValue(version, context, tagStream, block, value, valueType);
             else if (valueType.IsEnum)
                 SerializePrimitiveValue(block.Writer, value, valueType.GetEnumUnderlyingType());
@@ -194,7 +195,7 @@ namespace TagTool.Serialization
                 block.Writer.Write(((CacheAddress)value).Value);
             else if (valueType == typeof(byte[]))
             {
-                if (valueInfo.Flags.HasFlag(TagFieldFlags.Padding) || (value == null && valueInfo.Length > 0))
+                if (valueInfo.Flags.HasFlag(Padding) || (value == null && valueInfo.Length > 0))
                     block.Writer.Write(new byte[valueInfo.Length]);
                 else if (valueInfo.Length > 0)
                     block.Writer.Write((byte[])value);
@@ -301,7 +302,7 @@ namespace TagTool.Serialization
                     if (!referencedTag.IsInGroup(tag))
                        throw new Exception($"Invalid group for tag reference: {referencedTag.Group.Tag}");
             
-            if (valueInfo == null || !valueInfo.Flags.HasFlag(TagFieldFlags.Short))
+            if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
             {
                 writer.Write((referencedTag != null) ? referencedTag.Group.Tag.Value : -1);
                 writer.Write(0);

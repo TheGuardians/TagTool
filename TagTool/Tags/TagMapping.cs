@@ -1,4 +1,5 @@
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -15,7 +16,7 @@ namespace TagTool.Tags
         public float RuntimeMConstantValue;
         public byte RuntimeMFlags;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
+        [TagField(Flags = Padding, Length = 3)]
         public byte[] Unused = new byte[3];
 
         public enum VariableTypeValue : sbyte

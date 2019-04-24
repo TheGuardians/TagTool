@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -48,7 +49,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeLocalSpaceDeathDelay;
         public List<ConicalDistribution> ConicalDistributions;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -107,7 +108,7 @@ namespace TagTool.Tags.Definitions
                 public EffectEventPriority Priority;
                 public EffectEventPartCameraMode CameraMode;
                 public Tag RuntimeBaseGroupTag;
-                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
+                [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Unused;
                 public CachedTagInstance Type;
                 public Bounds<float> VelocityBounds;
@@ -128,7 +129,7 @@ namespace TagTool.Tags.Definitions
                 public CreateInDispositionValue CreateInDisposition;
 
                 public short LocationIndex;
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused;
 
                 public float AccelerationAmount;
@@ -201,7 +202,7 @@ namespace TagTool.Tags.Definitions
                     public byte Version;
                     public EmissionShapeValue EmissionShape;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                    [TagField(Flags = Padding, Length = 1)]
                     public byte[] Unused;
 
                     public FlagsValue EmitterFlags;
@@ -393,7 +394,7 @@ namespace TagTool.Tags.Definitions
                             public TypeValue Tyoe;
                             public FlagsValue Flags;
 
-                            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                            [TagField(Flags = Padding, Length = 1)]
                             public byte[] Unused;
 
                             public List<Parameter> Parameters;

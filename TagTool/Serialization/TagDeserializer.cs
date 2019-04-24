@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Serialization
 {
@@ -87,10 +88,10 @@ namespace TagTool.Serialization
         {
             var attr = tagFieldInfo.Attribute;
 
-            if (attr.Flags.HasFlag(TagFieldFlags.Runtime))
+            if (attr.Flags.HasFlag(Runtime))
                 return;
 
-            if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
+            if (tagFieldInfo.Attribute.Flags.HasFlag(Padding))
             {
                 reader.BaseStream.Position += tagFieldInfo.Attribute.Length;
             }
@@ -170,7 +171,7 @@ namespace TagTool.Serialization
         {
             // Indirect objects
             // TODO: Remove ResourceReference hax, the Indirect flag wasn't available when I generated the tag structures
-            if (valueInfo != null && valueInfo.Flags.HasFlag(TagFieldFlags.Pointer))
+            if (valueInfo != null && valueInfo.Flags.HasFlag(Pointer))
                 return DeserializeIndirectValue(reader, context, valueType);
 
             // enum = Enum type
@@ -364,7 +365,7 @@ namespace TagTool.Serialization
         /// <returns>The deserialized tag reference.</returns>
         public CachedTagInstance DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
-            if (valueInfo == null || !valueInfo.Flags.HasFlag(TagFieldFlags.Short))
+            if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
                 reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
             
             var result = context.GetTagByIndex(reader.ReadInt32());

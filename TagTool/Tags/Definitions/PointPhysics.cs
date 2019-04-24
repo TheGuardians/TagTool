@@ -1,4 +1,5 @@
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -10,7 +11,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeMassOverRadiusCubed;
         public float RuntimeInverseDensity;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 20)]
+        [TagField(Flags = Padding, Length = 20)]
         public byte[] Unused1;
 
         public float Density;
@@ -19,7 +20,7 @@ namespace TagTool.Tags.Definitions
         public float SurfaceFriction;
         public float Elasticity;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused2;
 
         [Flags]

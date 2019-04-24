@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -26,7 +27,7 @@ namespace TagTool.Tags.Definitions
                 public short GlobalMaterialIndex;
                 public SweetenerModeValue SweetenerMode;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Unused;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]

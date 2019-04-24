@@ -1,4 +1,5 @@
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -19,7 +20,7 @@ namespace TagTool.Ai
         /// </summary>
         public AiFollowerPositioning FollowerPositioning;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused;
 
         /// <summary>

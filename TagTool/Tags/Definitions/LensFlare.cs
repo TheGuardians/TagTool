@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -24,7 +25,7 @@ namespace TagTool.Tags.Definitions
 
         public float OcclusionRadius;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused1;
 
         public OcclusionOffsetDirectionValue OcclusionOffsetDirection;
@@ -40,14 +41,14 @@ namespace TagTool.Tags.Definitions
 
         public RotationFunctionValue RotationFunction;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused2;
 
         public Angle RotationFunctionScale;
 
         public FalloffFunctionValue FalloffFunction;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused3;
 
         //
@@ -63,7 +64,7 @@ namespace TagTool.Tags.Definitions
 
         public AnimationFlagsValue AnimationFlags;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused4;
 
         public List<BrightnessBlock> TimeBrightness;
@@ -206,7 +207,7 @@ namespace TagTool.Tags.Definitions
 
             public OutputModifierValue OutputModifier;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
 
             public StringId OutputModifierInput;

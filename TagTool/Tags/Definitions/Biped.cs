@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -202,7 +203,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class CameraHeightBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Class;
             public float StandingHeightFraction;
             public float CrouchingHeightFraction;
@@ -233,7 +234,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class ContactPoint : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId MarkerName;
         }
     }

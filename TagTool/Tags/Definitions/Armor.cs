@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,7 +10,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance FirstPersonModel;
         public CachedTagInstance ThirdPersonModel;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+        [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused4;
     }
 }

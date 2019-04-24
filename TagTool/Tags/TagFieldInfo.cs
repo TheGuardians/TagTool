@@ -5,6 +5,7 @@ using System.Reflection;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -166,7 +167,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when attr != null && attr.Flags.HasFlag(TagFieldFlags.Pointer):
 				case TypeCode.Object when type == typeof(Tag):
 				case TypeCode.Object when type == typeof(CacheAddress):
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(TagFieldFlags.Short):
+				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(Short):
                 //case TypeCode.Object when type == typeof(RgbColor):
                 case TypeCode.Object when type == typeof(ArgbColor):
                 case TypeCode.Object when type == typeof(Point2d):

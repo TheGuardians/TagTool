@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -303,7 +304,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public UnitCameraFlagBits CameraFlags;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Unused = new byte[2];
 
             public StringId CameraMarkerName;

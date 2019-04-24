@@ -3,6 +3,7 @@ using TagTool.Common;
 using System.Collections.Generic;
 using TagTool.Damage;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -141,7 +142,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int SpecialHudIcon;
         
-        [TagField(Flags = TagFieldFlags.Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] UnknownBlock;
         
         public List<FirstPersonBlock> FirstPerson;

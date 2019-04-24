@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -196,7 +197,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2B0, MinVersion = CacheVersion.HaloOnline106708)]
         public class HudGlobal : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public BipedValue Biped;
 
             public ArgbColor HUDDisabled;
@@ -629,7 +630,7 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public BipedTypeValue_HO BipedType_HO;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public byte[] Unused = new byte[3];
 
                     public CachedTagInstance Sound;
@@ -658,7 +659,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class MultiplayerMedal : TagStructure
             {
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Medal;
             }
         }
@@ -757,7 +758,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class PlayerTrainingDatum : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId DisplayString;
             public short MaxDisplayTime;
             public short DisplayCount;

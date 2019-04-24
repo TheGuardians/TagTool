@@ -6,7 +6,7 @@ using System.IO;
 using TagTool.Serialization;
 using System.Collections;
 
-namespace TagTool.Runtime
+namespace TagTool.Serialization
 {
     public class RuntimeSerializationContext : ISerializationContext
     {

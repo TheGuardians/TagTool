@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -11,10 +12,10 @@ namespace TagTool.Tags.Definitions
         public SceneryFlagBits SceneryFlags;
         public LightmappingPolicyValue LightmappingPolicy;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused2;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused3;
 
         public enum PathfindingPolicyValue : short

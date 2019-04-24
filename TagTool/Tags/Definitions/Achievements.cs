@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -10,7 +11,7 @@ namespace TagTool.Tags.Definitions
     {
         public List<AchievementInformationBlock> AchievementInformation;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x18)]
@@ -18,7 +19,7 @@ namespace TagTool.Tags.Definitions
         {
             public int Unknown;
             public int Unknown2;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId LevelName;
             public int Unknown3;
             public int Unknown4;

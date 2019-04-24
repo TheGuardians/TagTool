@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using TagTool.Audio;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -59,10 +60,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<LanguageBlock> Languages;
 
-        [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
         public PageableResource Resource;
         
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -93,7 +94,7 @@ namespace TagTool.Tags.Definitions
 
             public DatumIndex ZoneAssetHandle;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+            [TagField(Flags = Padding, Length = 4)]
             public byte[] Unused;
         }
 

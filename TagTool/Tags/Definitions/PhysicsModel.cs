@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Havok;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -18,7 +19,7 @@ namespace TagTool.Tags.Definitions
         public float MaximumPenetrationDepthScale;
         public sbyte ImportVersion;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
+        [TagField(Flags = Padding, Length = 3)]
         public byte[] Unused;
 
         public List<DampedSprintMotor> DampedSpringMotors;
@@ -30,7 +31,7 @@ namespace TagTool.Tags.Definitions
         public List<Material> Materials;
         public List<Sphere> Spheres;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedMultiSpheres;
 
         public List<Pill> Pills;
@@ -40,7 +41,7 @@ namespace TagTool.Tags.Definitions
         public List<PolyhedronFourVector> PolyhedronFourVectors;
         public List<PolyhedronPlaneEquation> PolyhedronPlaneEquations;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedMassDistributions;
 
         public List<List> Lists;
@@ -59,13 +60,13 @@ namespace TagTool.Tags.Definitions
         public uint Unknown16;
         public List<LimitedHingeConstraint> LimitedHingeConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedBallAndSocketConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedStiffSprintConstraints;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedPrismaticConstraints;
 
         public List<Phantom> Phantoms;
@@ -262,13 +263,13 @@ namespace TagTool.Tags.Definitions
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused1;
 
             public StringId MarkerName;
             public StringId AlignmentMarkerName;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
+            [TagField(Flags = Padding, Length = 8)]
             public byte[] Unused2;
 
             public float HookesLawE;
@@ -280,14 +281,14 @@ namespace TagTool.Tags.Definitions
             public float DirectionAcceleration;
             public float DirectionMaxVelocity;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 28)]
+            [TagField(Flags = Padding, Length = 28)]
             public byte[] Unused3;
 
             public float AlignmentHookesLawE;
             public float AlignmentAcceleration;
             public float AlignmentMaxVelocity;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 8)]
+            [TagField(Flags = Padding, Length = 8)]
             public byte[] Unused4;
         }
 

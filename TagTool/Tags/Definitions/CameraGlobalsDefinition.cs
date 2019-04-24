@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -7,7 +8,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "camera_globals_definition", Tag = "glca", Size = 0xA4, MinVersion = CacheVersion.Halo3ODST)]
     public class CameraGlobalsDefinition : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Label, ValidTags = new[] { "trak" })]
+        [TagField(Flags = Label, ValidTags = new[] { "trak" })]
         public CachedTagInstance DefaultUnitCameraTrack;
 
         public float Unknown1;

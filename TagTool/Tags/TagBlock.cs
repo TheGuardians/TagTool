@@ -2,6 +2,7 @@ using TagTool.Cache;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -19,13 +20,13 @@ namespace TagTool.Tags
 		/// </summary>
 		public CacheAddress Address;
 
-		[TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+		[TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
 		public byte[] Unused = new byte[4];
 
 		/// <summary>
 		/// The list of elements within the tag block.
 		/// </summary>
-		[TagField(Flags = TagFieldFlags.Runtime)]
+		[TagField(Flags = Runtime)]
 		protected IList<TagStructure> Elements;
 
 		public TagBlock() : this(0, new CacheAddress()) { }

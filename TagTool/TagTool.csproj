@@ -562,7 +562,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Runtime\RuntimeSerializationContext.cs" />
+    <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Scripting\Script.cs" />
     <Compile Include="Scripting\ScriptExpression.cs" />
     <Compile Include="Scripting\ScriptGlobal.cs" />

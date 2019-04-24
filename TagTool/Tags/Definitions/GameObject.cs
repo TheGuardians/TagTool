@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -66,13 +67,13 @@ namespace TagTool.Tags.Definitions
 
         public short HudTextMessageIndex;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Unused1;
 
         public List<Attachment> Attachments;
         public List<TagReferenceBlock> Widgets;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(Flags = Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] OldFunctionsBlock = new byte[8];
 
         public List<ChangeColor> ChangeColors;
@@ -130,7 +131,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class EarlyMoverProperty : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public Bounds<float> XBounds;
             public Bounds<float> YBounds;
@@ -219,7 +220,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public AtlasFlagsValue AtlasFlags;
 
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public CachedTagInstance Type;
 
             public StringId Marker;
@@ -268,7 +269,7 @@ namespace TagTool.Tags.Definitions
                 public float Weight;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId VariantName;
             }
 
@@ -276,7 +277,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail)]
             public class Function : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused = new byte[4];
 
                 public ScaleFlagsValue ScaleFlags;
@@ -300,7 +301,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short Type;
             public short ResourceIndex;
-            [TagField(Flags = TagFieldFlags.Short)]
+            [TagField(Flags = Short)]
             public CachedTagInstance TagIndex;
         }
 
@@ -540,7 +541,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] Unused1;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
@@ -552,7 +553,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public GameObjectTypeHaloOnline HaloOnline;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused2;
     }
 
