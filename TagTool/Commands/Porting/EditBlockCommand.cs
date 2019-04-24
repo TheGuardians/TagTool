@@ -130,6 +130,7 @@ namespace TagTool.Commands.Porting
             var blockContext = new CommandContext(ContextStack.Context, contextName);
             blockContext.AddCommand(new ListFieldsCommand(BlamCache, blockStructure, blockValue));
             blockContext.AddCommand(new EditBlockCommand(ContextStack, BlamCache, Tag, blockValue));
+            blockContext.AddCommand(new CopyBlockElementsCommand(ContextStack, BlamCache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new Editing.ExitToCommand(ContextStack));
             ContextStack.Push(blockContext);
 

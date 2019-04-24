@@ -82,11 +82,11 @@ namespace TagTool.Commands.Editing
                 }
             }
 
-			var field = TagStructure.GetTagFieldEnumerable(Structure)
-				.Find(f =>
-					f.Name == fieldName ||
-					f.Name.ToLower() == fieldNameLow ||
-					f.Name.ToSnakeCase() == fieldNameSnake);
+            var field = TagStructure.GetTagFieldEnumerable(Structure)
+                .Find(f =>
+                    f.Name == fieldName ||
+                    f.Name.ToLower() == fieldNameLow ||
+                    f.Name.ToSnakeCase() == fieldNameSnake);
 
             var ownerType = Owner.GetType();
 

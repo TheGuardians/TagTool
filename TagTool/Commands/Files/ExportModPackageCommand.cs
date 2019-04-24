@@ -21,7 +21,7 @@ namespace TagTool.Commands.Files
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] <Package File>",
+                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] [ForCache: <Directory>] <Package File>",
 
                 "")
         {
@@ -37,6 +37,7 @@ namespace TagTool.Commands.Files
             bool promptMaps = false;
             int? fromIndex = null;
             int? toIndex = null;
+            string forCache = null;
 
             while (args.Count != 1)
             {
@@ -61,6 +62,11 @@ namespace TagTool.Commands.Files
                     case "to:":
                         if (CacheContext.TryGetTag(args[1], out var toInstance) && toInstance != null)
                             toIndex = toInstance.Index;
+                        args.RemoveRange(0, 2);
+                        break;
+
+                    case "forCache:":
+                        forCache = args[1];
                         args.RemoveRange(0, 2);
                         break;
 
@@ -355,6 +361,56 @@ namespace TagTool.Commands.Files
                     writer.Write(resourceCacheOffset);
                     writer.Write(mapFileTableCount == 0 ? 0 : mapFileTableOffset);
                     writer.Write(mapFileTableCount);
+                }
+            }
+
+            return true;
+        }
+
+        private bool ExportForCache(string cachePath, string packagePath)
+        {
+            var srcCacheContext = new HaloOnlineCacheContext(new DirectoryInfo(cachePath));
+            var changedTags = new Dictionary<int, bool>();
+
+            using (var srcTagStream = srcCacheContext.OpenTagCacheRead())
+            using (var srcReader = new BinaryReader(srcTagStream))
+            using (var destTagStream = CacheContext.OpenTagCacheRead())
+            using (var destReader = new BinaryReader(destTagStream))
+            {
+                var tagCount = Math.Max(srcCacheContext.TagCache.Index.Count, CacheContext.TagCache.Index.Count);
+                var crc = new Crc32();
+
+                for (var i = 0; i < tagCount; i++)
+                {
+                    if (!srcCacheContext.TryGetTag(i, out var srcTag))
+                        srcTag = null;
+
+                    if (!CacheContext.TryGetTag(i, out var destTag))
+                        destTag = null;
+
+                    if (srcTag == null && destTag == null)
+                    {
+                        changedTags[i] = false;
+                        continue;
+                    }
+
+                    if (srcTag.TotalSize != destTag.TotalSize)
+                    {
+                        changedTags[i] = true;
+                        continue;
+                    }
+
+                    srcReader.BaseStream.Position = srcTag.HeaderOffset + 4;
+                    var srcCrc = crc.ComputeHash(srcReader.ReadBytes((int)srcTag.TotalSize - 4));
+
+                    destReader.BaseStream.Position = destTag.HeaderOffset + 4;
+                    var destCrc = crc.ComputeHash(destReader.ReadBytes((int)destTag.TotalSize - 4));
+
+                    if (srcCrc != destCrc)
+                    {
+                        changedTags[i] = true;
+                        continue;
+                    }
                 }
             }
 

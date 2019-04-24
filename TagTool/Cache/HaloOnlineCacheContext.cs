@@ -133,10 +133,28 @@ namespace TagTool.Cache
         /// <returns>The tag at the specified index from the current cache.</returns>
         public override CachedTagInstance GetTag(int index)
         {
-            if (index < 0 || index >= TagCache.Index.Count)
+            if (!TryGetTag(index, out var result))
                 throw new IndexOutOfRangeException($"0x{index:X4}");
 
-            return TagCache.Index[index];
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to get a tag from the current cache.
+        /// </summary>
+        /// <param name="index">The index of the tag.</param>
+        /// <param name="instance">The tag at the specified index from the current cache.</param>
+        /// <returns>true if the index is within the range of the tag cache, false otherwise.</returns>
+        public bool TryGetTag(int index, out CachedTagInstance instance)
+        {
+            if (index < 0 || index >= TagCache.Index.Count)
+            {
+                instance = null;
+                return false;
+            }
+
+            instance = TagCache.Index[index];
+            return true;
         }
 
         /// <summary>

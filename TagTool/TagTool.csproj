@@ -233,6 +233,7 @@
     <Compile Include="Cache\TagCacheIndex.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\ExportModPackageCommand.cs" />
+    <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
@@ -240,6 +241,7 @@
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
     <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
+    <Compile Include="Common\Crc32.cs" />
     <Compile Include="Common\DatumIndex.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />

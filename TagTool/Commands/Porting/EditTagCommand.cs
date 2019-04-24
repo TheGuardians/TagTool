@@ -62,7 +62,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var blamTag in BlamCache.IndexItems)
             {
-                if ((blamTag.GroupTag == groupTag.ToString()) && (blamTag.Name == blamTagName))
+                if ((blamTag.GroupTag == groupTag.ToString()) && (blamTagName == "*" || blamTag.Name == blamTagName))
                 {
                     tag = blamTag;
                     break;
@@ -76,12 +76,14 @@ namespace TagTool.Commands.Porting
 
             var tagType = TagDefinition.Find(groupTag);
             var definition = (TagStructure)BlamCache.Deserializer.Deserialize(new CacheSerializationContext(ref BlamCache, tag), tagType);
+            var structure = definition.GetTagStructureInfo(BlamCache.Version);
 
             var oldContext = ContextStack.Context;
 
             var commandContext = new CommandContext(ContextStack.Context, string.Format("{0}.{1}", tagName, groupTagInput));
-            commandContext.AddCommand(new ListFieldsCommand(BlamCache, definition.GetTagStructureInfo(BlamCache.Version), definition));
+            commandContext.AddCommand(new ListFieldsCommand(BlamCache, structure, definition));
             commandContext.AddCommand(new EditBlockCommand(ContextStack, BlamCache, tag, definition));
+            commandContext.AddCommand(new CopyBlockElementsCommand(ContextStack, BlamCache, tag, structure, definition));
             commandContext.AddCommand(new Editing.ExitToCommand(ContextStack));
             ContextStack.Push(commandContext);
 

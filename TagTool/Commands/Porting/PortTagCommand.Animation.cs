@@ -109,16 +109,16 @@ namespace TagTool.Commands.Porting
                 {
                     var dataContext = new DataSerializationContext(resourceReader, resourceWriter);
 
-                    var memberIndex = -1;
                     var memberOffset = 0;
-                    foreach (var member in resourceDefinition[resDefIndex].GroupMembers)
+
+                    for (var memberIndex = 0; memberIndex < resourceDefinition[resDefIndex].GroupMembers.Count; memberIndex++)
                     {
-                        memberIndex++;
+                        var member = resourceDefinition[resDefIndex].GroupMembers[memberIndex];
 
                         ModelAnimationTagResource.GroupMember.Codec codec;
                         ModelAnimationTagResource.GroupMember.FrameInfo frameInfo;
 
-                        if ((byte)member.BaseHeader != 0)
+                        if (member.BaseHeader != ModelAnimationTagResource.GroupMemberHeaderType.Overlay)
                         {
                             blamResourceStream.Position = member.AnimationData.Address.Offset;
                             dataStream.Position = member.AnimationData.Address.Offset;
@@ -145,7 +145,6 @@ namespace TagTool.Commands.Porting
                             dataStream.Position = blamResourceStream.Position;
                             for (int i = 0; i < codec.ScaleNodeCount; i++)
                                 CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
-
                         }
 
                         // If the overlay header is alone, member.OverlayOffset = 0

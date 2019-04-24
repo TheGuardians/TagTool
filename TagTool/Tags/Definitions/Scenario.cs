@@ -1419,12 +1419,16 @@ namespace TagTool.Tags.Definitions
             public RealPoint3d Position;
             public RealEulerAngles2d Facing;
             public short InsertionPointIndex;
+
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public PlayerUnitTypeValue UnitType;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public PlayerStartingLocationFlags Flags;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short EditorFolderIndex;
+
             [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3ODST)]
             public byte[] Unused;
         }
@@ -1571,11 +1575,22 @@ namespace TagTool.Tags.Definitions
         public class Decal : TagStructure
 		{
             public short DecalPaletteIndex;
-            public sbyte Yaw;
-            public sbyte Pitch;
+            public FlagBits Flags;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+            public byte[] Unused = new byte[1];
+
             public RealQuaternion Rotation;
             public RealPoint3d Position;
             public float Scale;
+
+            [Flags]
+            public enum FlagBits : byte
+            {
+                None,
+                ForcePlaner = 1 << 0,
+                ProjectUVs = 1 << 1
+            }
         }
 
         [TagStructure(Size = 0x28)]
