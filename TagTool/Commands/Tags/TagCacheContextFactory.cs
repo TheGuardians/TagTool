@@ -64,6 +64,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new ForEachCommand(contextStack, cacheContext));
             context.AddCommand(new ExportModPackageCommand(cacheContext));
+            context.AddCommand(new ClearMultiplayerCustomizationCommand(cacheContext));
 
             return context;
         }

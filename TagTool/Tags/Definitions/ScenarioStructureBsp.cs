@@ -1025,7 +1025,7 @@ namespace TagTool.Tags.Definitions
             public List<InstancedGeometryBlock> InstancedGeometry;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public List<HavokDatum> HavokData;
+            public List<StructureBspTagResources.HavokDatum> HavokData;
 
             [TagStructure(Size = 0x60)]
             public class LargeCollisionBspBlock : TagStructure
@@ -1068,26 +1068,6 @@ namespace TagTool.Tags.Definitions
                 public float Unknown6;
             }
 
-            [TagStructure(Size = 0x34)]
-            public class HavokDatum : TagStructure
-            {
-                public int PrefabIndex;
-                public List<HavokGeometry> HavokGeometries;
-                public List<HavokGeometry> HavokInvertedGeometries;
-                public RealPoint3d ShapesBoundsMinimum;
-                public RealPoint3d ShapesBoundsMaximum;
-
-                [TagStructure(Size = 0x20)]
-                public class HavokGeometry : TagStructure
-                {
-                    [TagField(Flags = Padding, Length = 4)]
-                    public byte[] Unused;
-                    public int CollisionType;
-                    public int ShapeCount;
-                    public byte[] Data;
-                }
-            }
-
             [TagStructure(Size = 0x40, Align = 0x10)]
             public class CollisionBspPhysicsBlock : TagStructure
             {
@@ -1103,16 +1083,10 @@ namespace TagTool.Tags.Definitions
                 public sbyte DataBuildType;
                 public sbyte Unused4;
                 public short Unused5;
-                public List<Datum> Data;
+                public List<StructureBspTagResources.CollisionBspPhysicsBlock.Datum> Data;
                 public sbyte MoppBuildType;
                 public byte Unused6;
                 public short Unused7;
-
-                [TagStructure(Size = 0x1)]
-                public class Datum : TagStructure
-                {
-                    public byte Value;
-                }
             }
         }
     }

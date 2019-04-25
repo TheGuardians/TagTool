@@ -322,7 +322,8 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             {
                 new ScenarioStructureBsp.TagResourcesBlock
                 {
-                    CollisionBsps = resourceDefinition.CollisionBsps.Select(x => new CollisionGeometry
+                    CollisionBsps = resourceDefinition.CollisionBsps.Select(
+                        x => new CollisionGeometry
                     {
                         Bsp3dNodes = x.Bsp3dNodes.Elements,
                         Planes = x.Planes.Elements,
@@ -333,6 +334,84 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         Edges = x.Edges.Elements,
                         Vertices = x.Vertices.Elements
                     }).ToList(),
+
+                    LargeCollisionBsps = resourceDefinition.LargeCollisionBsps.Select(
+                        x => new ScenarioStructureBsp.TagResourcesBlock.LargeCollisionBspBlock
+                    {
+                        Bsp3dNodes = x.Bsp3dNodes.Elements,
+                        Planes = x.Planes.Elements,
+                        Leaves = x.Leaves.Elements,
+                        Bsp2dReferences = x.Bsp2dReferences.Elements,
+                        Bsp2dNodes = x.Bsp2dNodes.Elements,
+                        Surfaces = x.Surfaces.Elements,
+                        Edges = x.Edges.Elements,
+                        Vertices = x.Vertices.Elements
+                    }).ToList(),
+
+                    InstancedGeometry = resourceDefinition.InstancedGeometry.Select(
+                        x => new ScenarioStructureBsp.TagResourcesBlock.InstancedGeometryBlock
+                    {
+                        Checksum = x.Checksum,
+                        BoundingSphereOffset = x.BoundingSphereOffset,
+                        BoundingSphereRadius = x.BoundingSphereRadius,
+
+                        CollisionInfo = new CollisionGeometry
+                        {
+                            Bsp3dNodes = x.CollisionInfo.Bsp3dNodes.Elements,
+                            Planes = x.CollisionInfo.Planes.Elements,
+                            Leaves = x.CollisionInfo.Leaves.Elements,
+                            Bsp2dReferences = x.CollisionInfo.Bsp2dReferences.Elements,
+                            Bsp2dNodes = x.CollisionInfo.Bsp2dNodes.Elements,
+                            Surfaces = x.CollisionInfo.Surfaces.Elements,
+                            Edges = x.CollisionInfo.Edges.Elements,
+                            Vertices = x.CollisionInfo.Vertices.Elements
+                        },
+
+                        CollisionGeometries = x.CollisionGeometries.Select(
+                            y => new CollisionGeometry
+                        {
+                            Bsp3dNodes = y.Bsp3dNodes.Elements,
+                            Planes = y.Planes.Elements,
+                            Leaves = y.Leaves.Elements,
+                            Bsp2dReferences = y.Bsp2dReferences.Elements,
+                            Bsp2dNodes = y.Bsp2dNodes.Elements,
+                            Surfaces = y.Surfaces.Elements,
+                            Edges = y.Edges.Elements,
+                            Vertices = y.Vertices.Elements
+                        }).ToList(),
+
+                        BspPhysics = x.BspPhysics.Select(
+                            y => new ScenarioStructureBsp.TagResourcesBlock.CollisionBspPhysicsBlock
+                        {
+                            Unused1 = y.Unused1,
+                            Size = y.Size,
+                            Count = y.Count,
+                            Address = y.Address,
+                            Unused2 = y.Unused2,
+                            Offset = y.Offset,
+                            Unused3 = y.Unused3,
+                            DataSize = y.DataSize,
+                            DataCapacityAndFlags = y.DataCapacityAndFlags,
+                            DataBuildType = y.DataBuildType,
+                            Unused4 = y.Unused4,
+                            Unused5 = y.Unused5,
+                            Data = y.Data.Elements,
+                            MoppBuildType = y.MoppBuildType,
+                            Unused6 = y.Unused6,
+                            Unused7 = y.Unused7
+                        }).ToList(),
+
+                        Unknown1 = x.Unknown1.Elements,
+                        Unknown2 = x.Unknown2.Elements,
+                        Unknown3 = x.Unknown3.Elements,
+                        MeshIndex = x.MeshIndex,
+                        CompressionIndex = x.CompressionIndex,
+                        Unknown4 = x.Unknown4,
+                        Unknown5 = x.Unknown5.Elements,
+                        Unknown6 = x.Unknown6
+                    }).ToList(),
+
+                    HavokData = resourceDefinition.HavokData
                 }
             };
 

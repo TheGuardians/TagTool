@@ -28,6 +28,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             commandContext.AddCommand(new DumpRenderGeometryCommand(cacheContext, bsp.Geometry2, "Bsp"));
             commandContext.AddCommand(new DumpMoppCommand(cacheContext, bsp));
             commandContext.AddCommand(new MoppDataCommand(cacheContext, bsp));
+            commandContext.AddCommand(new LocalizeTagResourcesCommand(cacheContext, bsp, tag));
         }
     }
 }
