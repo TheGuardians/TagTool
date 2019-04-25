@@ -5,6 +5,7 @@ using TagTool.Havok;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,7 +13,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708)]
     public class ScenarioStructureBsp : TagStructure
-	{
+    {
         public int BspChecksum;
         public FlagsValue Flags;
         public ContentPolicyFlagsValue ContentPolicyFlags;
@@ -157,7 +158,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x28)]
         public class SeamIdentifier : TagStructure
-		{
+        {
             [TagField(Length = 4)]
             public int[] SeamIDs;
             public List<Edge> EdgeMapping;
@@ -165,13 +166,13 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class Edge : TagStructure
-			{
+            {
                 public int StructureEdgeIndex;
             }
 
             [TagStructure(Size = 0x10)]
             public class Cluster : TagStructure
-			{
+            {
                 public int ClusterIndex;
                 public RealPoint3d ClusterCenter;
             }
@@ -186,7 +187,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x18)]
         public class CollisionMaterial : TagStructure
-		{
+        {
             [TagField(Flags = Label)]
             public CachedTagInstance RenderMethod;
             public short RuntimeGlobalMaterialIndex;
@@ -204,14 +205,14 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x1)]
         public class Leaf : TagStructure
-		{
+        {
             public byte Cluster;
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
         public class UnknownRaw6th : TagStructure
-		{
+        {
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public short PlaneIndexOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -225,14 +226,14 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4)]
         public class Plane : TagStructure
-		{
+        {
             public short Unknown1;
             public short ClusterIndex;
         }
 
         [TagStructure(Size = 0x28)]
         public class ClusterPortal : TagStructure
-		{
+        {
             public short BackCluster;
             public short FrontCluster;
             public int PlaneIndex;
@@ -253,15 +254,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-			public class Vertex : TagStructure
-			{
+            public class Vertex : TagStructure
+            {
                 public RealPoint3d Position;
             }
         }
 
         [TagStructure(Size = 0x78)]
         public class UnknownBlock2 : TagStructure
-		{
+        {
             [TagField(Length = 32)]
             public string Name;
 
@@ -297,7 +298,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x8)]
         public class FogBlock : TagStructure
-		{
+        {
             public StringId Name;
             public short Unknown;
             public short Unknown2;
@@ -305,7 +306,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x30)]
         public class CameraEffect : TagStructure
-		{
+        {
             public StringId Name;
             public CachedTagInstance Effect;
             public sbyte Unknown;
@@ -322,7 +323,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x34)]
         public class DetailObject : TagStructure
-		{
+        {
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -337,13 +338,13 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x20)]
             public class UnknownBlock : TagStructure
-			{
+            {
                 public List<UnknownBlock2> Unknown;
                 public byte[] Unknown2;
 
                 [TagStructure(Size = 0x10)]
                 public class UnknownBlock2 : TagStructure
-				{
+                {
                     public uint Unknown;
                     public uint Unknown2;
                     public uint Unknown3;
@@ -354,7 +355,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0xDC)]
         public class Cluster : TagStructure
-		{
+        {
             public Bounds<float> BoundsX;
             public Bounds<float> BoundsY;
             public Bounds<float> BoundsZ;
@@ -406,20 +407,20 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x2)]
             public class Portal : TagStructure
-			{
+            {
                 public short PortalIndex;
             }
 
             [TagStructure(Size = 0x1)]
             public class Seam : TagStructure
-			{
+            {
                 public sbyte SeamIndex;
             }
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloOnline106708)]
             public class DecoratorGrid : TagStructure
-			{
+            {
                 public short Amount;
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
@@ -430,12 +431,12 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorIndex_HO;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)] 
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorVariant;
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public short DecoratorGeometryIndex_HO;
-                
+
                 public int DecoratorGeometryOffset;
                 public RealPoint3d Position;
                 public float Radius;
@@ -445,14 +446,14 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class ObjectPlacement : TagStructure
-			{
+            {
                 public short Unknown;
                 public short Unknown2;
             }
 
             [TagStructure(Size = 0x10)]
             public class UnknownBlock2 : TagStructure
-			{
+            {
                 public float Unknown;
                 public float Unknown2;
                 public float Unknown3;
@@ -462,21 +463,21 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x2)]
-		public class SkyOwnerClusterBlock : TagStructure
-		{
+        public class SkyOwnerClusterBlock : TagStructure
+        {
             public short Value;
         }
 
         [TagStructure(Size = 0x18)]
         public class ConveyorSurface : TagStructure
-		{
+        {
             public RealVector3d U;
             public RealVector3d V;
         }
 
         [TagStructure(Size = 0x20)]
         public class BreakableSurface : TagStructure
-		{
+        {
             public uint Unknown1;
             public uint Unknown2;
             public uint Unknown3;
@@ -489,7 +490,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0xA0)]
         public class PathfindingDatum : TagStructure
-		{
+        {
             public List<Sector> Sectors;
             public List<Link> Links;
             public List<Reference> References;
@@ -509,7 +510,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x8)]
             public class Sector : TagStructure
-			{
+            {
                 public FlagsValue PathfindingSectorFlags;
                 public short HintIndex;
                 public int FirstLink;
@@ -539,7 +540,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x10)]
             public class Link : TagStructure
-			{
+            {
                 public short Vertex1;
                 public short Vertex2;
                 public FlagsValue LinkFlags;
@@ -574,13 +575,13 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class Reference : TagStructure
-			{
+            {
                 public int NodeOrSectorIndex;
             }
 
             [TagStructure(Size = 0x14)]
             public class Bsp2dNode : TagStructure
-			{
+            {
                 public RealPlane2d Plane;
                 public int LeftChild;
                 public int RightChild;
@@ -588,13 +589,13 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0xC)]
             public class Vertex : TagStructure
-			{
+            {
                 public RealPoint3d Position;
             }
 
             [TagStructure(Size = 0x18)]
             public class ObjectReference : TagStructure
-			{
+            {
                 public ushort Flags;
 
                 [TagField(Flags = Padding, Length = 2)]
@@ -609,7 +610,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x18)]
                 public class BspReference : TagStructure
-				{
+                {
                     public DatumIndex BspHandle;
                     public short NodeIndex;
 
@@ -622,7 +623,7 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0x4)]
                     public class Bsp2dRef : TagStructure
-					{
+                    {
                         public int Index;
                     }
                 }
@@ -630,7 +631,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x14)]
             public class PathfindingHint : TagStructure
-			{
+            {
                 public HintTypeValue HintType;
                 public short SquadGroupFilter; // block index
                 public int HintData0;
@@ -677,32 +678,32 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class InstancedGeometryReference : TagStructure
-			{
+            {
                 public short PathfindingObjectIndex;
                 public short Unknown;
             }
 
             [TagStructure(Size = 0x4)]
             public class GiantPathfindingBlock : TagStructure
-			{
+            {
                 public int Bsp2dIndex;
             }
 
             [TagStructure(Size = 0xC)]
             public class Seam : TagStructure
-			{
+            {
                 public List<LinkIndexBlock> LinkIndices;
 
                 [TagStructure(Size = 0x4)]
                 public class LinkIndexBlock : TagStructure
-				{
+                {
                     public int LinkIndex;
                 }
             }
 
             [TagStructure(Size = 0x14)]
             public class JumpSeam : TagStructure
-			{
+            {
                 public short UserJumpIndex;
                 public byte DestOnly;
 
@@ -715,7 +716,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x4)]
                 public class JumpIndexBlock : TagStructure
-				{
+                {
                     public short JumpIndex;
 
                     [TagField(Flags = Padding, Length = 2)]
@@ -725,7 +726,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x4)]
             public class Door : TagStructure
-			{
+            {
                 public short ScenarioObjectIndex;
 
                 [TagField(Flags = Padding, Length = 2)]
@@ -736,7 +737,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.Halo3ODST)]
         public class BackgroundSoundEnvironmentPaletteBlock : TagStructure
-		{
+        {
             public StringId Name;
             public CachedTagInstance SoundEnvironment;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -794,7 +795,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C)]
         public class Marker : TagStructure
-		{
+        {
             [TagField(Length = 32)]
             public string Name;
             public RealQuaternion Rotation;
@@ -803,13 +804,13 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x2)]
         public class RuntimeLight : TagStructure
-		{
+        {
             public short LightIndex;
         }
 
         [TagStructure(Size = 0x24)]
         public class RuntimeDecal : TagStructure
-		{
+        {
             public short PaletteIndex;
             public sbyte Yaw;
             public sbyte Pitch;
@@ -820,7 +821,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x24)]
         public class EnvironmentObjectPaletteBlock : TagStructure
-		{
+        {
             public CachedTagInstance Definition;
             public CachedTagInstance Model;
             public ObjectTypeValue ObjectType;
@@ -849,7 +850,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x6C)]
         public class EnvironmentObject : TagStructure
-		{
+        {
             [TagField(Length = 32)]
             public string Name;
             public RealQuaternion Rotation;
@@ -875,7 +876,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnline106708)]
         public class InstancedGeometryInstance : TagStructure
-		{
+        {
             public float Scale;
             public RealMatrix4x3 Matrix;
             public short InstanceDefinition;
@@ -922,7 +923,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo3Retail, Align = 0x10)]
             [TagStructure(Size = 0x80, MinVersion = CacheVersion.Halo3ODST, Align = 0x10)]
             public class CollisionDefinition : TagStructure
-			{
+            {
                 public int Unknown;
                 public short Size;
                 public short Count;
@@ -968,7 +969,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x1C)]
         public class UnknownSoundClustersBlock : TagStructure
-		{
+        {
             public short BackgroundSoundEnvironmentIndex;
             public short Unknown;
             public List<PortalDesignatorBlock> PortalDesignators;
@@ -976,28 +977,28 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x2)]
             public class PortalDesignatorBlock : TagStructure
-			{
+            {
                 public short PortalDesignator;
             }
 
             [TagStructure(Size = 0x2)]
             public class InteriorClusterIndexBlock : TagStructure
-			{
+            {
                 public short InteriorClusterIndex;
             }
         }
 
         [TagStructure(Size = 0x14)]
         public class TransparentPlane : TagStructure
-		{
+        {
             public short MeshIndex;
             public short PartIndex;
             public RealPlane3d Plane;
         }
-        
+
         [TagStructure(Size = 0x20)]
         public class BreakableSurfaceKeyTableBlock : TagStructure
-		{
+        {
             public short InstancedGeometryIndex;
             public sbyte BreakableSurfaceIndex;
             public byte BreakableSurfaceSubIndex;
@@ -1009,10 +1010,112 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x14)]
         public class LeafSystem : TagStructure
-		{
+        {
             public short Unknown;
             public short Unknown2;
             public CachedTagInstance LeafSystem2;
+        }
+        [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3ODST)]
+        public class TagResourcesBlock : TagStructure
+        {
+            public List<CollisionGeometry> CollisionBsps;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public List<LargeCollisionBspBlock> LargeCollisionBsps;
+
+            public List<InstancedGeometryBlock> InstancedGeometry;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public List<HavokDatum> HavokData;
+
+            [TagStructure(Size = 0x60)]
+            public class LargeCollisionBspBlock : TagStructure
+            {
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Bsp3dNode> Bsp3dNodes;
+                //
+                // TODO: Add supernodes block for reach and beyond?
+                //
+                public List<CollisionGeometry.Plane> Planes;
+                public List<CollisionGeometry.Leaf> Leaves;
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Bsp2dReference> Bsp2dReferences;
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Bsp2dNode> Bsp2dNodes;
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Surface> Surfaces;
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Edge> Edges;
+                public List<StructureBspTagResources.LargeCollisionBspBlock.Vertex> Vertices;
+            }
+
+            [TagStructure(Size = 0xB8, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnline106708)]
+            public class InstancedGeometryBlock : TagStructure
+            {
+                public int Checksum;
+                public RealPoint3d BoundingSphereOffset;
+                public float BoundingSphereRadius;
+                public CollisionGeometry CollisionInfo;
+                public List<CollisionGeometry> CollisionGeometries;
+                public List<CollisionBspPhysicsBlock> BspPhysics;
+                public List<StructureBspTagResources.InstancedGeometryBlock.Unknown1Block> Unknown1;
+                public List<StructureBspTagResources.InstancedGeometryBlock.Unknown2Block> Unknown2;
+                public List<StructureBspTagResources.InstancedGeometryBlock.Unknown3Block> Unknown3;
+                public short MeshIndex;
+                public short CompressionIndex;
+
+                public float Unknown4;
+
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public List<StructureBspTagResources.InstancedGeometryBlock.Unknown4Block> Unknown5;
+
+                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                public float Unknown6;
+            }
+
+            [TagStructure(Size = 0x34)]
+            public class HavokDatum : TagStructure
+            {
+                public int PrefabIndex;
+                public List<HavokGeometry> HavokGeometries;
+                public List<HavokGeometry> HavokInvertedGeometries;
+                public RealPoint3d ShapesBoundsMinimum;
+                public RealPoint3d ShapesBoundsMaximum;
+
+                [TagStructure(Size = 0x20)]
+                public class HavokGeometry : TagStructure
+                {
+                    [TagField(Flags = Padding, Length = 4)]
+                    public byte[] Unused;
+                    public int CollisionType;
+                    public int ShapeCount;
+                    public byte[] Data;
+                }
+            }
+
+            [TagStructure(Size = 0x40, Align = 0x10)]
+            public class CollisionBspPhysicsBlock : TagStructure
+            {
+                public int Unused1;
+                public short Size;
+                public short Count;
+                public int Address;
+                public int Unused2;
+                public RealQuaternion Offset;
+                public int Unused3;
+                public int DataSize;
+                public int DataCapacityAndFlags;
+                public sbyte DataBuildType;
+                public sbyte Unused4;
+                public short Unused5;
+                public List<Datum> Data;
+                public sbyte MoppBuildType;
+                public byte Unused6;
+                public short Unused7;
+
+                [TagStructure(Size = 0x1)]
+                public class Datum : TagStructure
+                {
+                    public byte Value;
+                }
+            }
         }
     }
 }

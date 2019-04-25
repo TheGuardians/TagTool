@@ -127,9 +127,12 @@ namespace TagTool.Cache
 
             for (var i = 1; i < Strings.Count; i++)
             {
+                if (Strings[i] != value)
+                    continue;
+
                 var stringId = GetStringId(i, version);
 
-                if (set != stringId.Set)
+                if (stringId.Set != 0 && set != stringId.Set)
                     continue;
 
                 var stringValue = GetString(stringId);
