@@ -216,7 +216,7 @@ namespace TagTool.Commands.Porting
                             {
                                 BspHandle = bspRef.BspHandle,
                                 NodeIndex = bspRef.NodeIndex,
-                                Bsp2dRefs = new TagBlock<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(bspRef.Bsp2dRefs.Count, new CacheAddress()),
+                                Bsp2dRefs = new TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(bspRef.Bsp2dRefs.Count, new CacheAddress()),
                                 VertexOffset = bspRef.VertexOffset
                             });
                         }

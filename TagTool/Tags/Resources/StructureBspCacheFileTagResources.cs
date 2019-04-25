@@ -54,15 +54,9 @@ namespace TagTool.Tags.Resources
                     [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
-                    public TagBlock<Bsp2dRef> Bsp2dRefs;
+                    public TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef> Bsp2dRefs;
 
                     public int VertexOffset;
-
-                    [TagStructure(Size = 0x4)]
-                    public class Bsp2dRef : TagStructure
-                    {
-                        public int Index;
-                    }
                 }
             }
 

@@ -102,9 +102,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown73;
         public RenderGeometry Geometry2;
         public List<LeafSystem> LeafSystems;
-        public uint Unknown83;
-        public uint Unknown84;
-        public uint Unknown85;
+        public List<TagResourcesBlock> TagResources;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex3;

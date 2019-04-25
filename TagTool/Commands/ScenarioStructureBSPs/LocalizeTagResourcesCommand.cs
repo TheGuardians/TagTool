@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
-using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -15,28 +13,30 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class ExtractCollisionGeometryCommand : Command
+    class LocalizeTagResourcesCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
+        private CachedTagInstance Tag { get; }
 
-        public ExtractCollisionGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition) :
-            base(false,
+        public LocalizeTagResourcesCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition, CachedTagInstance tag) :
+            base(true,
                 
-                "ExtractCollisionGeometry",
+                "LocalizeTagResources",
                 "",
                 
-                "ExtractCollisionGeometry <OBJ File>",
+                "LocalizeTagResources",
                 
                 "")
         {
             CacheContext = cacheContext;
             Definition = definition;
+            Tag = tag;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count != 0)
                 return false;
 
             if (Definition.CollisionBspResource == null)
@@ -45,8 +45,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 return true;
             }
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.CollisionBspResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
+            var resourceDefinition = CacheContext.Deserialize<StructureBspTagResources>(Definition.CollisionBspResource);
 
             using (var resourceStream = new MemoryStream())
             {
@@ -317,218 +316,25 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         }
                     }
                 }
-
-                var file = new FileInfo(args[0]);
-
-                if (!file.Directory.Exists)
-                    file.Directory.Create();
-
-                using (var writer = new StreamWriter(file.Create()))
-                {
-                    var baseVertex = 0;
-
-                    foreach (var bsp in resourceDefinition.CollisionBsps)
-                    {
-                        for (var i = 0; i < bsp.Vertices.Count; i++)
-                        {
-                            var vertex = bsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
-                        }
-
-                        writer.WriteLine($"g bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
-
-                        for (var i = 0; i < bsp.Surfaces.Count; i++)
-                        {
-                            var surface = bsp.Surfaces[i];
-                            var vertices = new HashSet<short>();
-                            var edge = bsp.Edges[surface.FirstEdge];
-
-                            writer.Write("f");
-
-                            while (true)
-                            {
-                                if (edge.LeftSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.StartVertex + 1}");
-
-                                    if (edge.ForwardEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = bsp.Edges[edge.ForwardEdge];
-                                }
-                                else if (edge.RightSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.EndVertex + 1}");
-
-                                    if (edge.ReverseEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = bsp.Edges[edge.ReverseEdge];
-                                }
-                            }
-
-                            writer.WriteLine();
-                        }
-
-                        baseVertex += bsp.Vertices.Count;
-                    }
-
-                    foreach (var largeBsp in resourceDefinition.LargeCollisionBsps)
-                    {
-                        for (var i = 0; i < largeBsp.Vertices.Count; i++)
-                        {
-                            var vertex = largeBsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
-                        }
-
-                        writer.WriteLine($"g large_bsp_surfaces_{resourceDefinition.LargeCollisionBsps.IndexOf(largeBsp)}");
-
-                        for (var i = 0; i < largeBsp.Surfaces.Count; i++)
-                        {
-                            var surface = largeBsp.Surfaces[i];
-                            var vertices = new HashSet<short>();
-                            var edge = largeBsp.Edges[surface.FirstEdge];
-
-                            writer.Write("f");
-
-                            while (true)
-                            {
-                                if (edge.LeftSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.StartVertex + 1}");
-
-                                    if (edge.ForwardEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = largeBsp.Edges[edge.ForwardEdge];
-                                }
-                                else if (edge.RightSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.EndVertex + 1}");
-
-                                    if (edge.ReverseEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = largeBsp.Edges[edge.ReverseEdge];
-                                }
-                            }
-
-                            writer.WriteLine();
-                        }
-
-                        baseVertex += largeBsp.Vertices.Count;
-                    }
-
-                    foreach (var instanceDef in Definition.InstancedGeometryInstances)
-                    {
-                        if (instanceDef.InstanceDefinition == -1)
-                            continue;
-
-                        var instance = resourceDefinition.InstancedGeometry[instanceDef.InstanceDefinition];
-
-                        var instanceName = instanceDef.Name != StringId.Invalid ?
-                            CacheContext.GetString(instanceDef.Name) :
-                            $"instance_{instanceDef.InstanceDefinition}";
-
-                        for (var i = 0; i < instance.CollisionInfo.Vertices.Count; i++)
-                        {
-                            var vertex = instance.CollisionInfo.Vertices[i];
-                            var point = Vector3.Transform(
-                                new Vector3(vertex.Point.X, vertex.Point.Y, vertex.Point.Z),
-                                new Matrix4x4(
-                                    instanceDef.Matrix.m11, instanceDef.Matrix.m12, instanceDef.Matrix.m13, 0.0f,
-                                    instanceDef.Matrix.m21, instanceDef.Matrix.m22, instanceDef.Matrix.m23, 0.0f,
-                                    instanceDef.Matrix.m31, instanceDef.Matrix.m32, instanceDef.Matrix.m33, 0.0f,
-                                    instanceDef.Matrix.m41, instanceDef.Matrix.m42, instanceDef.Matrix.m43, 0.0f));
-
-                            writer.WriteLine($"v {point.X} {point.Z} {point.Y}");
-                        }
-
-                        writer.WriteLine($"g {instanceName}_main_surfaces");
-
-                        for (var i = 0; i < instance.CollisionInfo.Surfaces.Count; i++)
-                        {
-                            var surface = instance.CollisionInfo.Surfaces[i];
-                            var vertices = new HashSet<short>();
-                            var edge = instance.CollisionInfo.Edges[surface.FirstEdge];
-
-                            writer.Write("f");
-
-                            while (true)
-                            {
-                                if (edge.LeftSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.StartVertex + 1}");
-
-                                    if (edge.ForwardEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = instance.CollisionInfo.Edges[edge.ForwardEdge];
-                                }
-                                else if (edge.RightSurface == i)
-                                {
-                                    writer.Write($" {baseVertex + edge.EndVertex + 1}");
-
-                                    if (edge.ReverseEdge == surface.FirstEdge)
-                                        break;
-                                    else
-                                        edge = instance.CollisionInfo.Edges[edge.ReverseEdge];
-                                }
-                            }
-
-                            writer.WriteLine();
-                        }
-
-                        baseVertex += instance.CollisionInfo.Vertices.Count;
-
-                        foreach (var bsp in instance.CollisionGeometries)
-                        {
-                            for (var i = 0; i < bsp.Vertices.Count; i++)
-                            {
-                                var vertex = bsp.Vertices[i];
-                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
-                            }
-
-                            writer.WriteLine($"g {instanceName}_bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
-
-                            for (var i = 0; i < bsp.Surfaces.Count; i++)
-                            {
-                                var surface = bsp.Surfaces[i];
-                                var vertices = new HashSet<short>();
-                                var edge = bsp.Edges[surface.FirstEdge];
-
-                                writer.Write("f");
-
-                                while (true)
-                                {
-                                    if (edge.LeftSurface == i)
-                                    {
-                                        writer.Write($" {baseVertex + edge.StartVertex + 1}");
-
-                                        if (edge.ForwardEdge == surface.FirstEdge)
-                                            break;
-                                        else
-                                            edge = bsp.Edges[edge.ForwardEdge];
-                                    }
-                                    else if (edge.RightSurface == i)
-                                    {
-                                        writer.Write($" {baseVertex + edge.EndVertex + 1}");
-
-                                        if (edge.ReverseEdge == surface.FirstEdge)
-                                            break;
-                                        else
-                                            edge = bsp.Edges[edge.ReverseEdge];
-                                    }
-                                }
-
-                                writer.WriteLine();
-                            }
-
-                            baseVertex += bsp.Vertices.Count;
-                        }
-                    }
-                }
             }
+
+            Definition.TagResources = new List<ScenarioStructureBsp.TagResourcesBlock>
+            {
+                new ScenarioStructureBsp.TagResourcesBlock
+                {
+                    CollisionBsps = resourceDefinition.CollisionBsps.Select(x => new CollisionGeometry
+                    {
+                        Bsp3dNodes = x.Bsp3dNodes.Elements,
+                        Planes = x.Planes.Elements,
+                        Leaves = x.Leaves.Elements,
+                        Bsp2dReferences = x.Bsp2dReferences.Elements,
+                        Bsp2dNodes = x.Bsp2dNodes.Elements,
+                        Surfaces = x.Surfaces.Elements,
+                        Edges = x.Edges.Elements,
+                        Vertices = x.Vertices.Elements
+                    }).ToList(),
+                }
+            };
 
             return true;
         }
