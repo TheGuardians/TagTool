@@ -127,12 +127,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                             destGroupMember.Name = destCacheContext.GetStringId(CacheContext.GetString(destGroupMember.Name));
 
                             using (var resourceStream = new MemoryStream())
-                            using (var memberStream = new MemoryStream())
                             {
                                 CacheContext.ExtractResource(srcResourceGroup.Resource, resourceStream);
+                                destGroupMember.AnimationData.Data = new byte[destGroupMember.AnimationData.Size];
                                 resourceStream.Position = destGroupMember.AnimationData.Address.Offset;
-                                resourceStream.CopyTo(memberStream, destGroupMember.AnimationData.Size);
-                                destGroupMember.AnimationData.Data = memberStream.ToArray();
+                                resourceStream.Read(destGroupMember.AnimationData.Data, 0, destGroupMember.AnimationData.Size);
                             }
 
                             destGroupMembers.Add(destGroupMember);
@@ -149,6 +148,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     groupMember.AnimationData.Address = new CacheAddress(CacheAddressType.Resource, (int)destResourceStream.Position);
                     destResourceStream.Write(groupMember.AnimationData.Data, 0, groupMember.AnimationData.Size);
                 }
+
+                destResourceStream.Position = 0;
 
                 // Cache a new tag resource for the animation resource group
                 var resource = new PageableResource(TagResourceTypeGen3.Animation, ResourceLocation.ResourcesB);

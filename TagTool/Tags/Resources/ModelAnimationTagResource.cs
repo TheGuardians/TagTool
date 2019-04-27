@@ -1,6 +1,7 @@
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
@@ -9,29 +10,43 @@ namespace TagTool.Tags.Resources
 	{
         public List<GroupMember> GroupMembers;
 
+        /*public enum GroupMemberHeaderType : sbyte
+        {
+            Overlay = 0,
+            Base_H3 = 0x18,
+            Base_HO = 0x0C
+        }*/
+
+        [TagStructure(Size = 0x10)]
+        public class GroupMemberSizes
+        {
+            public byte StaticNodeFlags;    // BaseHeader; 0x0 means no base header
+            public byte AnimatedNodeFlags;  // OverlayHeader; 0x0 means no overlay header (there's always one)
+            public ushort MovementData;     // Unknown1; value/offset if MovementDataType.dx_dy or dx_dy_dyaw
+            public ushort PillOffsetData;   // Unknown2
+            public ushort DefaultData;      // OverlayOffset; with member offset as origin
+            public ushort UncompressedData; // Unknown3; always 0x0
+            public ushort CompressedData;   // Unknown4; always 0x0
+            public ushort BlendScreenData;  // FlagsOffset; with OverlayOffset as origin, not member offset
+            public ushort ObjectSpaceOffsetData; // ^^^
+        }
+
         [TagStructure(Size = 0x30)]
         public class GroupMember : TagStructure
 		{
+            [TagField(Flags = Label)]
             public StringId Name;
-            public uint Checksum;
+            public uint AnimationChecksum;
             public short FrameCount;
             public byte NodeCount;
             public GroupMemberMovementDataType MovementDataType; // sbyte
-            public GroupMemberHeaderType BaseHeader; // sbyte; 0x0 means no base header
-            public GroupMemberHeaderType OverlayHeader; // sbyte; 0x0 means no overlay header (there's always one)
-            public short Unknown1; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
-            public short Unknown2;
-            public short OverlayOffset; // with member offset as origin
-            public short Unknown3; // always 0x0
-            public short Unknown4; // always 0x0
-            public uint FlagsOffset; // with OverlayOffset as origin , not member offset
-
+            public GroupMemberSizes Sizes;
             public TagData AnimationData; // this will point to an Animation object
 
             [TagStructure(Size = 0xC)]
-            public class Codec : TagStructure
+            public class CompressionCodecData : TagStructure
 			{
-                public AnimationCompressionFormats AnimationCodec; // base/overlay
+                public CompressionCodecType Type; // base/overlay
                 public byte RotationNodeCount; // number of nodes with rotation frames (XYZW short per frame)
                 public byte PositionNodeCount; // number of nodes with position frames (XYZ float per frame)
                 public byte ScaleNodeCount; // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
@@ -47,8 +62,6 @@ namespace TagTool.Tags.Resources
                 public uint RotationFramesSize;
                 public uint PositionFramesSize;
                 public uint ScaleFramesSize;
-
-                // public uint RotationFramesOffset; // hidden, always 0x20
             }
 
             [TagStructure(Size = 0x14)]
@@ -130,13 +143,13 @@ namespace TagTool.Tags.Resources
             }
 
             [TagStructure(Size = 0x1)]
-            public class Keyframe : TagStructure
+            public class ByteKeyframe : TagStructure
 			{
                 public byte Frame;
             }
 
             [TagStructure(Size = 0x2)]
-            public class KeyframeType5 : TagStructure
+            public class WordKeyframe : TagStructure
 			{
                 public short Frame;
             }
@@ -242,25 +255,18 @@ namespace TagTool.Tags.Resources
             }
         }
 
-        public enum GroupMemberHeaderType : sbyte
-        {
-            Overlay = 0,
-            Base_H3 = 0x18,
-            Base_HO = 0x0C
-        }
-
-        public enum AnimationCompressionFormats : sbyte
+        public enum CompressionCodecType : sbyte
         {
             // ty xbox7887
-            None_,        // _no_compression_codec
-            Type1,        // _uncompressed_static_data_codec
-            Type2_Unused, // _uncompressed_animated_data_codec
-            Type3,        // _8byte_quantized_rotation_only_codec
-            Type4,        // byte_keyframe_lightly_quantized
-            Type5, // word_keyframe_lightly_quantized
-            Type6,        // reverse_byte_keyframe_lightly_quantized
-            Type7,        // reverse_word_keyframe_lightly_quantized
-            Type8         // _blend_screen_codec
+            None,                                // _no_compression_codec
+            UncompressedStaticData,              // _uncompressed_static_data_codec
+            UncompressedAnimatedData,            // _uncompressed_animated_data_codec
+            _8byteQuantizedRotationOnly,         // _8byte_quantized_rotation_only_codec
+            ByteKeyframeLightlyQuantized,        // byte_keyframe_lightly_quantized
+            WordKeyframeLightlyQuantized,        // word_keyframe_lightly_quantized
+            ReverseByteKeyframeLightlyQuantized, // reverse_byte_keyframe_lightly_quantized
+            ReverseWordKeyframeLightlyQuantized, // reverse_word_keyframe_lightly_quantized
+            BlendScreenCodec                     // _blend_screen_codec
         }
 
         [Flags]
@@ -341,7 +347,7 @@ namespace TagTool.Tags.Resources
 
         public enum GroupMemberMovementDataType : sbyte
         {
-            None,
+            dyaw,
             dx_dy,
             dx_dy_dyaw,
             dx_dy_dz_dyaw,
