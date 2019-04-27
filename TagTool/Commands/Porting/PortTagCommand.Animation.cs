@@ -84,7 +84,6 @@ namespace TagTool.Commands.Porting
                 using (var resourceWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
                 {
                     var dataContext = new DataSerializationContext(resourceReader, resourceWriter);
-
                     var memberOffset = 0;
 
                     for (var memberIndex = 0; memberIndex < resourceDefinition.GroupMembers.Count; memberIndex++)
@@ -328,52 +327,36 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
-                        #region Node List Block
-                        // DemonicSandwich - http://remnantmods.com/forums/viewtopic.php?f=13&t=1574
-                        // Just a block of flags. Tick a flag and the respective node will be affected by animation.
-                        // The size of this block should always be a multiple of 12. It's size is determined my the meta value Node List Size [byte, offset: 61] 
-                        // When set to 12, the list can handle objects with a node count up to 32 (0-31).
-                        // When set to 24, the object can have 64 nodes and so on.
-                        // The block is split into 3 groups of flags.
-                        // The first group determines what nodes are affected by rotation, the second group for position, and the third group for scale.
-                        // 
-                        // If looking at it in hex, the Node ticks for each group will be in order as follows:
-                        // [7][6][5][4][3][2][1][0] - [15][14][13][12][11][10][9][8] - etc.
-                        // Each flag corresponding to a Node index.
-                        #endregion
-
-                        #region Footer/Flag block
-                        // There's one bitfield32 for every 32 nodes that are animated which i'll call a node flags. 
-                        // There's at least 3 flags if the animation only has an overlay header, which i'll call a flag set.
-                        // There's at least 6 flags if the animation has both a base header and an overlay header, so 2 sets.
-                        // If the animated nodes count is over 32, then a new flags set is added.
-                        // 1 set per header is added, such as 32 nodes = 1 set, 64 = 2 sets, 96 = 3 sets etc , 128-256 maybe max
-                        #endregion
+                        //
+                        // Read the node flags
+                        //
 
                         dataStream.Position = blamResourceStream.Position =
                             (long)member.AnimationData.Address.Offset + member.Sizes.DefaultData + member.Sizes.CompressedData;
 
-                        //
-                        // Read the static node flags
-                        //
+                        if (member.Sizes.StaticNodeFlags > 0)
+                        {
+                            //
+                            // TODO: fix this shit
+                            //
 
-                        var staticNodeFlagsCount = member.Sizes.StaticNodeFlags /
-                            typeof(ModelAnimationTagResource.GroupMember.StaticNodeFlagsData).GetSize(BlamCache.Version);
+                            var staticNodeFlagsCount = member.Sizes.StaticNodeFlags /
+                                typeof(ModelAnimationTagResource.GroupMember.StaticNodeFlagsData).GetSize(BlamCache.Version);
 
-                        for (int i = 0; i < staticNodeFlagsCount; i++)
-                            CacheContext.Serializer.Serialize(dataContext,
-                                BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.StaticNodeFlagsData>(dataContext));
+                            for (int i = 0; i < staticNodeFlagsCount; i++)
+                                CacheContext.Serializer.Serialize(dataContext,
+                                    BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.StaticNodeFlagsData>(dataContext));
+                        }
 
-                        //
-                        // Read the animated node flags data
-                        //
+                        if (member.Sizes.AnimatedNodeFlags > 0)
+                        {
+                            var animatedNodeFlagsCount = member.Sizes.AnimatedNodeFlags /
+                                typeof(ModelAnimationTagResource.GroupMember.AnimatedNodeFlagsData).GetSize(BlamCache.Version);
 
-                        var animatedNodeFlagsCount = member.Sizes.AnimatedNodeFlags /
-                            typeof(ModelAnimationTagResource.GroupMember.AnimatedNodeFlagsData).GetSize(BlamCache.Version);
-
-                        for (int i = 0; i < animatedNodeFlagsCount; i++)
-                            CacheContext.Serializer.Serialize(dataContext,
-                                BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.AnimatedNodeFlagsData>(dataContext));
+                            for (int i = 0; i < animatedNodeFlagsCount; i++)
+                                CacheContext.Serializer.Serialize(dataContext,
+                                    BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.AnimatedNodeFlagsData>(dataContext));
+                        }
 
                         //
                         // Read the movement data
@@ -432,7 +415,8 @@ namespace TagTool.Commands.Porting
                             if (blamResourceStream.Position == blamResourceStream.Length)
                                 break;
 
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                            CacheContext.Serializer.Serialize(dataContext,
+                                BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
                         // Align the next animation member to 0x10. 
