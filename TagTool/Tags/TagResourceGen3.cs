@@ -38,8 +38,8 @@ namespace TagTool.Tags
 
         public CacheAddress DefinitionAddress;
 
-        public List<ResourceFixup> ResourceFixups;
-        public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
+        public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
+        public List<ResourceDefinitionFixup> ResourceDefinitionFixups = new List<ResourceDefinitionFixup>();
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public int Unknown2 = 1;

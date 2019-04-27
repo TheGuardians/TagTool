@@ -25,10 +25,8 @@ namespace TagTool.Tags.Resources
             public ushort MovementData;     // Unknown1; value/offset if MovementDataType.dx_dy or dx_dy_dyaw
             public ushort PillOffsetData;   // Unknown2
             public ushort DefaultData;      // OverlayOffset; with member offset as origin
-            public ushort UncompressedData; // Unknown3; always 0x0
-            public ushort CompressedData;   // Unknown4; always 0x0
-            public ushort BlendScreenData;  // FlagsOffset; with OverlayOffset as origin, not member offset
-            public ushort ObjectSpaceOffsetData; // ^^^
+            public uint UncompressedData;   // Unknown3; always 0x0
+            public uint CompressedData;   // FlagsOffset; with OverlayOffset as origin, not member offset
         }
 
         [TagStructure(Size = 0x30)]
@@ -55,9 +53,9 @@ namespace TagTool.Tags.Resources
             }
 
             [TagStructure(Size = 0x14)]
-            public class Format1 : TagStructure // used by Format3
+            public class DefaultFrameInfo : TagStructure // used by Format3
 			{
-                public uint DataStart;
+                public uint PositionFramesOffset;
                 public uint ScaleFramesOffset;
                 public uint RotationFramesSize;
                 public uint PositionFramesSize;
@@ -65,7 +63,7 @@ namespace TagTool.Tags.Resources
             }
 
             [TagStructure(Size = 0x14)]
-            public class Format8 : TagStructure // Format8; OverlayRotations are 4x uint32) per frame
+            public class BlendScreenData : TagStructure // Format8; OverlayRotations are 4x uint32) per frame
 			{
                 public uint PositionFramesOffset;
                 public uint ScaleFramesOffset;
@@ -205,6 +203,18 @@ namespace TagTool.Tags.Resources
                 public uint Y;
                 public uint Z;
                 public uint W;
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class StaticNodeFlagsData
+            {
+                public int Flags;
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class AnimatedNodeFlagsData
+            {
+                public int Flags;
             }
 
             [TagStructure(Size = 0xC)]
