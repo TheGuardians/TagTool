@@ -85,7 +85,7 @@ namespace TagTool.Serialization
 
         public CachedTagInstance GetTagByName(TagGroup group, string name)
         {
-            if (group == TagGroup.None)
+            if (group != TagGroup.None)
                 foreach (var instance in Context.TagCache.Index)
                     if ((instance?.IsInGroup(group) ?? false) && (instance?.Name?.Equals(name) ?? false))
                         return instance;

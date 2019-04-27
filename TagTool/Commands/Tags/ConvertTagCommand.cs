@@ -312,8 +312,7 @@ namespace TagTool.Commands.Tags
 
         private ResourceLocation FixResourceLocation(ResourceLocation location, CacheVersion srcVersion, CacheVersion destVersion)
         {
-            return ResourceLocation.ResourcesB;
-            /*if (CacheVersionDetection.Compare(destVersion, CacheVersion.HaloOnline235640) >= 0)
+            if (CacheVersionDetection.Compare(destVersion, CacheVersion.HaloOnline235640) >= 0)
                 return location;
             switch (location)
             {
@@ -322,7 +321,7 @@ namespace TagTool.Commands.Tags
                 case ResourceLocation.Lightmaps:
                     return ResourceLocation.Textures;
             }
-            return location;*/
+            return location;
         }
 
         private RenderGeometry ConvertGeometry(RenderGeometry geometry, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)

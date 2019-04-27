@@ -20,6 +20,9 @@ namespace TagTool.Tags
 
         public int Unused10;
 
+        [TagField(Flags = TagFieldFlags.Runtime)]
+        public byte[] Data;
+
         public TagData()
         {
         }

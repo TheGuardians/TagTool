@@ -17,12 +17,32 @@ namespace TagTool.Common
         /// <summary>
         /// The <see cref="RawPage"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public RawPage Page;
+        public RawPage Page = new RawPage
+        {
+            Index = -1
+        };
 
         /// <summary>
         /// The <see cref="TagResourceGen3"/> of the <see cref="PageableResource"/>.
         /// </summary>
-        public TagResourceGen3 Resource;
+        public TagResourceGen3 Resource = new TagResourceGen3
+        {
+            ResourceType = TagResourceTypeGen3.None,
+            ResourceFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceFixup>(),
+            ResourceDefinitionFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceDefinitionFixup>()
+        };
+
+        public PageableResource() { }
+
+        public PageableResource(TagResourceTypeGen3 type) : this()
+        {
+            Resource.ResourceType = type;
+        }
+
+        public PageableResource(TagResourceTypeGen3 type, ResourceLocation location) : this(type)
+        {
+            ChangeLocation(location);
+        }
 
         /// <summary>
         /// Gets the definition type of the pageable_resource.

@@ -42,7 +42,7 @@ namespace TagTool.Tags
         public List<ResourceDefinitionFixup> ResourceDefinitionFixups;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public int Unknown2;
+        public int Unknown2 = 1;
 
         [TagStructure(Size = 0x8)]
         public class ResourceFixup : TagStructure
