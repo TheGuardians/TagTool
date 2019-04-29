@@ -214,5 +214,10 @@ namespace TagTool.Tags.Definitions
             return fileSize;
         }
 
+        public PermutationChunk GetPermutationChunk(int permutationChunkIndex)
+        {
+            return PermutationChunks[permutationChunkIndex];
+        }
+
     }
 }

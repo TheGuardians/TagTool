@@ -209,13 +209,17 @@ namespace TagTool.Commands.Porting
             {
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
 
-                var languagePermutation = new ExtraInfo.LanguagePermutation
-                {
-                    RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>()
-                };
+                
+
+
 
                 for (int i = 0; i < sound.PitchRanges[u].PermutationCount; i++)
                 {
+                    var languagePermutation = new ExtraInfo.LanguagePermutation
+                    {
+                        RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>()
+                    };
+
                     var rawInfo = new ExtraInfo.LanguagePermutation.RawInfoBlock
                     {
                         SkipFractionName = StringId.Invalid,
@@ -227,10 +231,26 @@ namespace TagTool.Commands.Porting
                         ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset
                     };
 
-                    languagePermutation.RawInfo.Add(rawInfo);
-                }
+                    var unknownBlock = new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown();
 
-                extraInfo.LanguagePermutations.Add(languagePermutation);
+                    var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex);
+                    var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
+
+                    unknownBlock.Unknown1 = permutationChunk.UnknownA;
+                    unknownBlock.Unknown2 = permutationChunk.UnknownSize;
+                    unknownBlock.Unknown3 = 0;
+                    unknownBlock.Unknown4 = permutation.SampleSize;
+                    unknownBlock.Unknown5 = 0;
+                    unknownBlock.Unknown6 = permutationChunk.EncodedSize & 0xFFFF;
+
+                    rawInfo.UnknownList.Add(unknownBlock);
+
+                    languagePermutation.RawInfo.Add(rawInfo);
+
+                    extraInfo.LanguagePermutations.Add(languagePermutation);
+                }
+                
+
             }
 
             if (sound.SoundReference.ExtraInfoIndex != -1)

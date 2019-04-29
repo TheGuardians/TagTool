@@ -54,9 +54,9 @@ namespace TagTool.Audio
                 public short Compression;
                 public byte Language;
                 public byte Unknown19;
-                public uint SampleCount;
-                public uint ResourceSampleOffset;
                 public uint ResourceSampleSize;
+                public uint ResourceSampleOffset;
+                public uint SampleCount;
                 public uint Unknown20;
                 public uint Unknown21;
                 public uint Unknown22;
@@ -66,12 +66,12 @@ namespace TagTool.Audio
                 [TagStructure(Size = 0x18)]
                 public class Unknown : TagStructure
 				{
-                    public uint Unknown1;
-                    public uint Unknown2;
-                    public uint Unknown3;
+                    public int Unknown1;
+                    public int Unknown2;
+                    public int Unknown3;
                     public uint Unknown4;
-                    public uint Unknown5;
-                    public uint Unknown6;
+                    public int Unknown5;
+                    public int Unknown6;
                 }
             }
         }
