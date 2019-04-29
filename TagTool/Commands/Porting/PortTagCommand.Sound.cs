@@ -208,11 +208,12 @@ namespace TagTool.Commands.Porting
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
-                var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex);
-                var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
 
                 for (int i = 0; i < pitchRange.PermutationCount; i++)
                 {
+                    var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex + i);
+                    var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
+
                     extraInfo.LanguagePermutations.Add(new ExtraInfo.LanguagePermutation
                     {
                         RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>
