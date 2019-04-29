@@ -168,14 +168,11 @@ namespace TagTool.Commands.Porting
 
                         if (member.Sizes.CompressedData > 0)
                         {
-                            // If the overlay header is alone, member.Sizes.DefaultData = 0
                             dataStream.Position = blamResourceStream.Position =
                                 (long)member.AnimationData.Address.Offset + member.Sizes.DefaultData;
                             
                             var codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.CompressionCodecData>(dataContext);
                             CacheContext.Serializer.Serialize(dataContext, codec);
-
-                            // deserialize second header. or as first header if the type1/format1 header isn't used.
 
                             switch (codec.Type)
                             {
@@ -478,6 +475,27 @@ namespace TagTool.Commands.Porting
                         // Read the node flags
                         //
 
+                        #region Static/Animated Node Flags
+                        // DemonicSandwich - http://remnantmods.com/forums/viewtopic.php?f=13&t=1574
+                        //
+                        // Just a block of flags. Tick a flag and the respective node will be affected by animation.
+                        // The size of this block should always be a multiple of 12. It's size is determined my the meta value Node List Size [byte, offset: 61] 
+                        // When set to 12, the list can handle objects with a node count up to 32 (0-31).
+                        // When set to 24, the object can have 64 nodes and so on.
+                        // The block is split into 3 groups of flags.
+                        // The first group determines what nodes are affected by rotation, the second group for position, and the third group for scale.
+                        // 
+                        // If looking at it in hex, the Node ticks for each group will be in order as follows:
+                        // [7][6][5][4][3][2][1][0] - [15][14][13][12][11][10][9][8] - etc.
+                        // Each flag corresponding to a Node index.
+                        //
+                        // There's one bitfield32 for every 32 nodes that are animated which i'll call a node flags. 
+                        // There's at least 3 flags if the animation only has an overlay header, which i'll call a flag set.
+                        // There's at least 6 flags if the animation has both a base header and an overlay header, so 2 sets.
+                        // If the animated nodes count is over 32, then a new flags set is added.
+                        // 1 set per header is added, such as 32 nodes = 1 set, 64 = 2 sets, 96 = 3 sets etc , 128-256 maybe max
+                        #endregion
+
                         dataStream.Position = blamResourceStream.Position =
                             (long)member.AnimationData.Address.Offset + member.Sizes.DefaultData + member.Sizes.CompressedData;
 
@@ -486,12 +504,12 @@ namespace TagTool.Commands.Porting
                             switch (member.Sizes.AnimatedNodeFlags)
                             {
                                 case 0xC:
-                                    var footer32 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Footer32>(dataContext);
+                                    var footer32 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.NodeFlags32>(dataContext);
                                     CacheContext.Serializer.Serialize(dataContext, footer32);
                                     break;
 
                                 case 0x18:
-                                    var footer64 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Footer64>(dataContext);
+                                    var footer64 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.NodeFlags64>(dataContext);
                                     CacheContext.Serializer.Serialize(dataContext, footer64);
                                     break;
 
@@ -505,12 +523,12 @@ namespace TagTool.Commands.Porting
                             switch (member.Sizes.AnimatedNodeFlags)
                             {
                                 case 0xC:
-                                    var footer32 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Footer32>(dataContext);
+                                    var footer32 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.NodeFlags32>(dataContext);
                                     CacheContext.Serializer.Serialize(dataContext, footer32);
                                     break;
 
                                 case 0x18:
-                                    var footer64 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Footer64>(dataContext);
+                                    var footer64 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.NodeFlags64>(dataContext);
                                     CacheContext.Serializer.Serialize(dataContext, footer64);
                                     break;
 
@@ -523,102 +541,64 @@ namespace TagTool.Commands.Porting
                         // Read the movement data
                         //
 
-                        switch (member.MovementDataType)
+                        if (member.Sizes.MovementData > 0)
                         {
-                            case ModelAnimationTagResource.GroupMemberMovementDataType.dyaw:
+                            for (int i = 0; i < member.FrameCount; i++)
+                            {
+                                switch (member.MovementDataType)
                                 {
-                                    if (member.Sizes.MovementData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dyaw:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDyaw>(dataContext));
+                                        break;
 
-                                    if (member.Sizes.PillOffsetData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDy>(dataContext));
+                                        break;
 
-                                    break;
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        break;
+
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
+                                        break;
+
+                                    default:
+                                        throw new NotSupportedException(member.MovementDataType.ToString());
                                 }
+                            }
+                        }
 
-                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
+                        //
+                        // Read the pill offset data
+                        //
+
+                        if (member.Sizes.PillOffsetData > 0)
+                        {
+                            for (int i = 0; i < member.FrameCount; i++)
+                            {
+                                switch (member.MovementDataType)
                                 {
-                                    if (member.Sizes.MovementData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDy>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dyaw:
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        break;
 
-                                    if (member.Sizes.PillOffsetData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
+                                    case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
+                                        break;
 
-                                    break;
+                                    default:
+                                        throw new NotSupportedException(member.MovementDataType.ToString());
                                 }
-
-                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
-                                {
-                                    if (member.Sizes.MovementData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
-
-                                    if (member.Sizes.PillOffsetData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
-
-                                    break;
-                                }
-
-                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
-                                {
-                                    if (member.Sizes.MovementData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
-
-                                    if (member.Sizes.PillOffsetData > 0)
-                                    {
-                                        for (int i = 0; i < member.FrameCount; i++)
-                                        {
-                                            var frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext);
-                                            CacheContext.Serializer.Serialize(dataContext, frameInfo);
-                                        }
-                                    }
-
-                                    break;
-                                }
-
-                            default:
-                                throw new NotSupportedException(member.MovementDataType.ToString());
+                            }
                         }
 
                         //
@@ -638,10 +618,14 @@ namespace TagTool.Commands.Porting
                                     BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                             }
 
+                            var bullshitCount = dataStream.Position - (memberOffset + member.AnimationData.Size);
+
                             // Align the next animation member to 0x10. 
                             memberOffset += member.AnimationData.Size;
+                            bullshitCount = memberOffset;
                             while (memberOffset % 0x10 != 0)
                                 memberOffset += 4;
+                            bullshitCount = memberOffset - bullshitCount;
                         }
                     }
 

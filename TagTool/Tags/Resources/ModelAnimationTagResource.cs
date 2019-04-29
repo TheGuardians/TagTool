@@ -205,49 +205,8 @@ namespace TagTool.Tags.Resources
                 public Angle Yaw;
             }
 
-            #region Static/Animated Node Flags
-            // DemonicSandwich - http://remnantmods.com/forums/viewtopic.php?f=13&t=1574
-            //
-            // Just a block of flags. Tick a flag and the respective node will be affected by animation.
-            // The size of this block should always be a multiple of 12. It's size is determined my the meta value Node List Size [byte, offset: 61] 
-            // When set to 12, the list can handle objects with a node count up to 32 (0-31).
-            // When set to 24, the object can have 64 nodes and so on.
-            // The block is split into 3 groups of flags.
-            // The first group determines what nodes are affected by rotation, the second group for position, and the third group for scale.
-            // 
-            // If looking at it in hex, the Node ticks for each group will be in order as follows:
-            // [7][6][5][4][3][2][1][0] - [15][14][13][12][11][10][9][8] - etc.
-            // Each flag corresponding to a Node index.
-            //
-            // There's one bitfield32 for every 32 nodes that are animated which i'll call a node flags. 
-            // There's at least 3 flags if the animation only has an overlay header, which i'll call a flag set.
-            // There's at least 6 flags if the animation has both a base header and an overlay header, so 2 sets.
-            // If the animated nodes count is over 32, then a new flags set is added.
-            // 1 set per header is added, such as 32 nodes = 1 set, 64 = 2 sets, 96 = 3 sets etc , 128-256 maybe max
-            #endregion
-
-            [TagStructure(Size = 0x4)]
-            public class StaticNodeFlagsData
-            {
-                //
-                // TODO: fix this shit
-                //
-
-                public int Flags;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class AnimatedNodeFlagsData
-            {
-                //
-                // TODO: fix this shit
-                //
-
-                public int Flags;
-            }
-
             [TagStructure(Size = 0xC)]
-            public class Footer32 : TagStructure
+            public class NodeFlags32 : TagStructure
 			{
                 public PrimaryNodeFlags RotationFlags;
                 public PrimaryNodeFlags PositionFlags;
@@ -255,7 +214,7 @@ namespace TagTool.Tags.Resources
             }
 
             [TagStructure(Size = 0x18)]
-            public class Footer64 : TagStructure
+            public class NodeFlags64 : TagStructure
 			{
                 public PrimaryNodeFlags RotationFlags1;
                 public SecondaryNodeFlags RotationFlags2;
@@ -263,34 +222,6 @@ namespace TagTool.Tags.Resources
                 public SecondaryNodeFlags PositionFlags2;
                 public PrimaryNodeFlags ScaleFlags1;
                 public SecondaryNodeFlags ScaleFlags2;
-            }
-
-            [TagStructure(Size = 0x18)]
-            public class Footer32_Overlay : TagStructure
-			{
-                public PrimaryNodeFlags RotationFlags;
-                public PrimaryNodeFlags PositionFlags;
-                public PrimaryNodeFlags ScaleFlags;
-                public PrimaryNodeFlags RotationFlags_Overlay;
-                public PrimaryNodeFlags PositionFlags_Overlay;
-                public PrimaryNodeFlags ScaleFlags_Overlay;
-            }
-
-            [TagStructure(Size = 0x30)]
-            public class Footer64_Overlay : TagStructure
-			{
-                public PrimaryNodeFlags RotationFlags1;
-                public SecondaryNodeFlags RotationFlags2;
-                public PrimaryNodeFlags PositionFlags1;
-                public SecondaryNodeFlags PositionFlags2;
-                public PrimaryNodeFlags ScaleFlags1;
-                public SecondaryNodeFlags ScaleFlags2;
-                public PrimaryNodeFlags RotationFlags1_Overlay;
-                public SecondaryNodeFlags RotationFlags2_Overlay;
-                public PrimaryNodeFlags PositionFlags1_Overlay;
-                public SecondaryNodeFlags PositionFlags2_Overlay;
-                public PrimaryNodeFlags ScaleFlags1_Overlay;
-                public SecondaryNodeFlags ScaleFlags2_Overlay;
             }
         }
 
