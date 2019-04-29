@@ -208,49 +208,39 @@ namespace TagTool.Commands.Porting
             for (int u = 0; u < sound.SoundReference.PitchRangeCount; u++)
             {
                 var pitchRange = BlamSoundGestalt.PitchRanges[sound.SoundReference.PitchRangeIndex + u];
+                var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex);
+                var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
 
-                
-
-
-
-                for (int i = 0; i < sound.PitchRanges[u].PermutationCount; i++)
+                for (int i = 0; i < pitchRange.PermutationCount; i++)
                 {
-                    var languagePermutation = new ExtraInfo.LanguagePermutation
+                    extraInfo.LanguagePermutations.Add(new ExtraInfo.LanguagePermutation
                     {
-                        RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>()
-                    };
-
-                    var rawInfo = new ExtraInfo.LanguagePermutation.RawInfoBlock
-                    {
-                        SkipFractionName = StringId.Invalid,
-                        Unknown24 = 480,
-                        UnknownList = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown>(),
-                        Compression = 8,
-                        SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
-                        ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
-                        ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset
-                    };
-
-                    var unknownBlock = new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown();
-
-                    var permutation = BlamSoundGestalt.GetPermutation(pitchRange.FirstPermutationIndex);
-                    var permutationChunk = BlamSoundGestalt.GetPermutationChunk(permutation.FirstPermutationChunkIndex);
-
-                    unknownBlock.Unknown1 = permutationChunk.UnknownA;
-                    unknownBlock.Unknown2 = permutationChunk.UnknownSize;
-                    unknownBlock.Unknown3 = 0;
-                    unknownBlock.Unknown4 = permutation.SampleSize;
-                    unknownBlock.Unknown5 = 0;
-                    unknownBlock.Unknown6 = permutationChunk.EncodedSize & 0xFFFF;
-
-                    rawInfo.UnknownList.Add(unknownBlock);
-
-                    languagePermutation.RawInfo.Add(rawInfo);
-
-                    extraInfo.LanguagePermutations.Add(languagePermutation);
+                        RawInfo = new List<ExtraInfo.LanguagePermutation.RawInfoBlock>
+                        {
+                            new ExtraInfo.LanguagePermutation.RawInfoBlock
+                            {
+                                SkipFractionName = StringId.Invalid,
+                                Unknown24 = 480,
+                                UnknownList = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown>
+                                {
+                                    new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown
+                                    {
+                                        Unknown1 = permutationChunk.UnknownA,
+                                        Unknown2 = permutationChunk.UnknownSize,
+                                        Unknown3 = 0,
+                                        Unknown4 = permutation.SampleSize,
+                                        Unknown5 = 0,
+                                        Unknown6 = permutationChunk.EncodedSize & 0xFFFF
+                                    }
+                                },
+                                Compression = 8,
+                                SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
+                                ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
+                                ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset
+                            }
+                        }
+                    });
                 }
-                
-
             }
 
             if (sound.SoundReference.ExtraInfoIndex != -1)
