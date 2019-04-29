@@ -215,7 +215,6 @@ namespace TagTool.Commands.Porting
                             new ExtraInfo.LanguagePermutation.RawInfoBlock
                             {
                                 SkipFractionName = StringId.Invalid,
-                                Unknown24 = 480,
                                 UnknownList = new List<ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown>
                                 {
                                     new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown
@@ -229,10 +228,11 @@ namespace TagTool.Commands.Porting
                                     }
                                 },
                                 Compression = 8,
+                                ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
+                                ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset,
                                 SampleCount = (uint)pitchRange.Permutations[i].PermutationChunks[0].EncodedSize & 0x3FFFFFF,
                                 //SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
-                                ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
-                                ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset
+                                Unknown24 = 480
                             }
                         }
                     });
