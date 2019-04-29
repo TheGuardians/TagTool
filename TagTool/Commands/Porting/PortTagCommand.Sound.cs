@@ -68,12 +68,6 @@ namespace TagTool.Commands.Porting
             // Process all the pitch ranges
             //
 
-            sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
-
-            var soundDataAggregate = new byte[0].AsEnumerable();
-            var currentSoundDataOffset = 0;
-            var totalSampleCount = (uint)0;
-
             var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount);
 
             if (xmaFileSize < 0)
@@ -84,16 +78,15 @@ namespace TagTool.Commands.Porting
             if (xmaData == null)
                 return null;
 
+            sound.PitchRanges = new List<PitchRange>(sound.SoundReference.PitchRangeCount);
+
+            var soundDataAggregate = new byte[0].AsEnumerable();
+            var currentSoundDataOffset = 0;
+            var totalSampleCount = (uint)0;
+
             for (int pitchRangeIndex = sound.SoundReference.PitchRangeIndex; pitchRangeIndex < sound.SoundReference.PitchRangeIndex + sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
-                var relativePitchRangeIndex = pitchRangeIndex - sound.SoundReference.PitchRangeIndex;
-                var firstPermutationIndex = BlamSoundGestalt.GetFirstPermutationIndex(pitchRangeIndex);
-                var pitchRangeSampleCount = BlamSoundGestalt.GetSamplesPerPitchRange(pitchRangeIndex);
-
-                totalSampleCount += pitchRangeSampleCount;
-
-
-                var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex);
+                totalSampleCount += BlamSoundGestalt.GetSamplesPerPitchRange(pitchRangeIndex);
 
                 //
                 // Convert Blam pitch range to ElDorado format
@@ -141,6 +134,8 @@ namespace TagTool.Commands.Porting
                     GetTagFileFriendlyName(blamTag_Name));
 
                 var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+                var permutationOrder = BlamSoundGestalt.GetPermutationOrder(pitchRangeIndex);
+                var relativePitchRangeIndex = pitchRangeIndex - sound.SoundReference.PitchRangeIndex;
 
                 for (int i = 0; i < permutationCount; i++)
                 {
@@ -148,14 +143,13 @@ namespace TagTool.Commands.Porting
                     var permutationSize = BlamSoundGestalt.GetPermutationSize(permutationIndex);
                     var permutationOffset = BlamSoundGestalt.GetPermutationOffset(permutationIndex);
 
-                    var permutation = BlamSoundGestalt.GetPermutation(permutationIndex);
+                    var permutation = BlamSoundGestalt.GetPermutation(permutationIndex).DeepClone();
 
                     permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name);
                     permutation.SkipFraction = new Bounds<float>(0.0f, permutation.Gain);
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);
-
 
                     string permutationName = $"{basePermutationCacheName}_{relativePitchRangeIndex}_{i}";
 
@@ -235,7 +229,8 @@ namespace TagTool.Commands.Porting
                                     }
                                 },
                                 Compression = 8,
-                                SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
+                                SampleCount = (uint)pitchRange.Permutations[i].PermutationChunks[0].EncodedSize & 0x3FFFFFF,
+                                //SampleCount = (uint)Math.Floor(pitchRange.Permutations[i].SampleSize * 128000.0 / (8 * sound.SampleRate.GetSampleRateHz())),
                                 ResourceSampleSize = pitchRange.Permutations[i].SampleSize,
                                 ResourceSampleOffset = (uint)pitchRange.Permutations[i].PermutationChunks[0].Offset
                             }
