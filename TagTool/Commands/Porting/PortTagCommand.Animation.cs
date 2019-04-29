@@ -501,7 +501,7 @@ namespace TagTool.Commands.Porting
 
                         if (member.Sizes.StaticNodeFlags > 0)
                         {
-                            switch (member.Sizes.AnimatedNodeFlags)
+                            switch (member.Sizes.StaticNodeFlags)
                             {
                                 case 0xC:
                                     var footer32 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.NodeFlags32>(dataContext);
@@ -514,7 +514,7 @@ namespace TagTool.Commands.Porting
                                     break;
 
                                 default:
-                                    throw new NotSupportedException();
+                                    throw new NotSupportedException($"{nameof(member.Sizes.StaticNodeFlags)} == {member.Sizes.StaticNodeFlags}");
                             }
                         }
 
@@ -533,7 +533,7 @@ namespace TagTool.Commands.Porting
                                     break;
 
                                 default:
-                                    throw new NotSupportedException();
+                                    throw new NotSupportedException($"{nameof(member.Sizes.StaticNodeFlags)} == {member.Sizes.StaticNodeFlags}");
                             }
                         }
 
