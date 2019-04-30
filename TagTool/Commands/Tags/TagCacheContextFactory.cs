@@ -66,6 +66,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ExportModPackageCommand(cacheContext));
             context.AddCommand(new ClearMultiplayerCustomizationCommand(cacheContext));
             context.AddCommand(new ModelAnimationGraphs.AnimationTestCommand(cacheContext));
+            context.AddCommand(new ExportTagDefinitionsCommand(cacheContext));
 
             return context;
         }

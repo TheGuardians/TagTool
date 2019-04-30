@@ -1,117 +1,61 @@
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
     [TagStructure(Name = "model_animation_tag_resource", Size = 0xC)]
     public class ModelAnimationTagResource : TagStructure
-	{
+    {
         public List<GroupMember> GroupMembers;
-
-        [TagStructure(Size = 0x10)]
-        public class AnimationDataSizes
-        {
-            public byte StaticNodeFlags;    // BaseHeader; 0x0 means no base header
-            public byte AnimatedNodeFlags;  // OverlayHeader; 0x0 means no overlay header (there's always one)
-            public ushort MovementData;     // Unknown1; value/offset if MovementDataType.dx_dy or dx_dy_dyaw
-            public ushort PillOffsetData;   // Unknown2
-            public ushort DefaultData;      // OverlayOffset; with member offset as origin
-            public uint UncompressedData;   // Unknown3; always 0x0
-            public uint CompressedData;     // FlagsOffset; with OverlayOffset as origin, not member offset
-        }
-
-        public enum CompressionCodecType : sbyte
-        {
-            // ty xbox7887
-            None,                                // _no_compression_codec
-            UncompressedStaticData,              // _uncompressed_static_data_codec
-            UncompressedAnimatedData,            // _uncompressed_animated_data_codec
-            _8byteQuantizedRotationOnly,         // _8byte_quantized_rotation_only_codec
-            ByteKeyframeLightlyQuantized,        // byte_keyframe_lightly_quantized
-            WordKeyframeLightlyQuantized,        // word_keyframe_lightly_quantized
-            ReverseByteKeyframeLightlyQuantized, // reverse_byte_keyframe_lightly_quantized
-            ReverseWordKeyframeLightlyQuantized, // reverse_word_keyframe_lightly_quantized
-            BlendScreenCodec                     // _blend_screen_codec
-        }
-
-        [TagStructure(Size = 0xC)]
-        public class CompressionCodecData : TagStructure
-        {
-            public CompressionCodecType Type; // base/overlay
-            public byte RotationNodeCount;    // number of nodes with rotation frames (XYZW short per frame)
-            public byte PositionNodeCount;    // number of nodes with position frames (XYZ float per frame)
-            public byte ScaleNodeCount;       // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
-            public uint Unknown0;             // always 0x0 (not always 0x0)
-            public float PlaybackRate = 1.0f;
-        }
-
-        public enum GroupMemberMovementDataType : sbyte
-        {
-            dyaw,
-            dx_dy,
-            dx_dy_dyaw,
-            dx_dy_dz_dyaw,
-            dx_dy_dz_dangleaxis,
-            x_y_z_absolute,
-            Auto
-        }
 
         [TagStructure(Size = 0x30)]
         public class GroupMember : TagStructure
-		{
-            /// <summary>
-            /// The name of the group member.
-            /// </summary>
-            [TagField(Flags = Label)]
+        {
             public StringId Name;
-
-            /// <summary>
-            /// The animation checksum of the group member.
-            /// </summary>
-            public uint AnimationChecksum;
-
-            /// <summary>
-            /// The total number of frames in the group member.
-            /// </summary>
+            public uint Checksum;
             public short FrameCount;
-
-            /// <summary>
-            /// The total number of nodes in the group member.
-            /// </summary>
             public byte NodeCount;
+            public GroupMemberMovementDataType MovementDataType; // sbyte
+            public GroupMemberHeaderType BaseHeader; // sbyte; 0x0 means no base header
+            public GroupMemberHeaderType OverlayHeader; // sbyte; 0x0 means no overlay header (there's always one)
+            public short Unknown1; // value/offset if MovementDataType.dx_dy or dx_dy_dyaw
+            public short Unknown2;
+            public short OverlayOffset; // with member offset as origin
+            public short Unknown3; // always 0x0
+            public short Unknown4; // always 0x0
+            public uint FlagsOffset; // with OverlayOffset as origin , not member offset
 
-            /// <summary>
-            /// The movement data type of the group member. (8-bit)
-            /// </summary>
-            public GroupMemberMovementDataType MovementDataType;
-
-            /// <summary>
-            /// The animation data sizes of the group member.
-            /// </summary>
-            public AnimationDataSizes Sizes;
-
-            /// <summary>
-            /// The animation data of the group member.
-            /// </summary>
             public TagData AnimationData; // this will point to an Animation object
 
-            [TagStructure(Size = 0x14)]
-            public class DefaultFrameInfo : TagStructure // used by Format3
-			{
-                public uint RotationFramesEnd;
-                public uint PositionFramesEnd;
-                public uint RotationFramesSize;
-                public uint PositionFramesSize;
-                public uint ScaleFramesSize;
+            [TagStructure(Size = 0xC)]
+            public class Codec : TagStructure
+            {
+                public AnimationCompressionFormats AnimationCodec; // base/overlay
+                public byte RotationNodeCount; // number of nodes with rotation frames (XYZW short per frame)
+                public byte PositionNodeCount; // number of nodes with position frames (XYZ float per frame)
+                public byte ScaleNodeCount; // number of nodes with position frames (X float per frame); something that affects node render draw distance or lightning
+                public uint Unknown0;       // always 0x0
+                public float PlaybackRate = 1.0f;
             }
 
             [TagStructure(Size = 0x14)]
-            public class BlendScreenData : TagStructure // Format8; OverlayRotations are 4x uint32) per frame
-			{
-                public uint RotationFramesEnd;
-                public uint PositionFramesEnd;
+            public class Format1 : TagStructure // used by Format3
+            {
+                public uint DataStart;
+                public uint ScaleFramesOffset;
+                public uint RotationFramesSize;
+                public uint PositionFramesSize;
+                public uint ScaleFramesSize;
+
+                // public uint RotationFramesOffset; // hidden, always 0x20
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class Format8 : TagStructure // Format8; OverlayRotations are 4x uint32) per frame
+            {
+                public uint PositionFramesOffset;
+                public uint ScaleFramesOffset;
                 public uint FrameCountPerNode;  // spooky sbyte; FrameCount = FrameCountPerNode / 10
                 public uint Unknown2;
                 public uint Unknown3; // Unknown3 = Unknown2 / 3
@@ -119,103 +63,148 @@ namespace TagTool.Tags.Resources
 
             [TagStructure(Size = 0x24)]
             public class Overlay : TagStructure // Format4,Format6,Format7
-			{
-                public uint RotationNodesEnd;
-                public uint PositionNodesEnd;
-                public uint ScaleNodesEnd;
-                public uint RotationKeyframesEnd;
-                public uint PositionKeyframesEnd;
-                public uint ScaleKeyframesEnd;
-                public uint RotationFramesEnd;
-                public uint PositionFramesEnd;
-                public uint ScaleFramesEnd;
+            {
+                public uint PositionFrameInfoOffset;
+                public uint ScaleFrameInfoOffset;
+                public uint RotationKeyframesOffset;
+                public uint PositionKeyframesOffset;
+                public uint ScaleKeyframesOffset;
+                public uint RotationFramesOffset;
+                public uint PositionFramesOffset;
+                public uint ScaleFramesOffset;
+                public uint UselessPadding;
+            }
+
+            [TagStructure(Size = 0x24)]
+            public class Node : TagStructure
+            {
+                public List<RotationNode> RotationNodes;
+                public List<PositionNode> PositionNodes;
+                public List<ScaleNode> ScaleNodes;
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class RotationNode : TagStructure
+            {
+                public List<RotationFrame> RotationFrames;
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class PositionNode : TagStructure
+            {
+                public List<PositionFrame> PositionFrames;
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class ScaleNode : TagStructure
+            {
+                public List<ScaleFrame> ScaleFrames;
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class FrameInfoNode : TagStructure
+            {
+                public List<FrameInfoDxDy> frameInfoDxDy;
+                public List<FrameInfoDxDyDyaw> frameInfoDxDyDyaw;
             }
 
             [TagStructure(Size = 0x8)]
-            public class RotationFrameShort : TagStructure
-			{
-                public short I;
-                public short J;
-                public short K;
+            public class RotationFrame : TagStructure
+            {
+                public short X;
+                public short Y;
+                public short Z;
                 public short W;
             }
 
             [TagStructure(Size = 0x4)]
             public class ScaleFrame : TagStructure
-			{
-                public float Scale;
+            {
+                public uint X;
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class PositionFramesCountPerNode : TagStructure
+            {
+                public uint X;
             }
 
             [TagStructure(Size = 0x1)]
-            public class ByteKeyframe : TagStructure
-			{
+            public class Keyframe : TagStructure
+            {
                 public byte Frame;
             }
 
             [TagStructure(Size = 0x2)]
-            public class WordKeyframe : TagStructure
-			{
+            public class KeyframeType5 : TagStructure
+            {
                 public short Frame;
             }
 
             [TagStructure(Size = 0x10)]
-            public class RotationFrame : TagStructure
-			{
-                public RealQuaternion Rotation;
+            public class RotationFrameFloat : TagStructure
+            {
+                public uint X;
+                public uint Y;
+                public uint Z;
+                public uint W;
             }
 
             [TagStructure(Size = 0xC)]
             public class PositionFrame : TagStructure
-			{
-                public RealPoint3d Position;
+            {
+                public uint X;
+                public uint Y;
+                public uint Z;
             }
 
             [TagStructure(Size = 0x4)]
             public class FrameInfo : TagStructure
             {
-                public uint Value;
-
-                public uint KeyframesOffset => Value & 0x00FFF000;
-                public uint KeyframeCount => Value & 0x00000FFF;
+                public uint FrameCount;
             }
 
             [TagStructure(Size = 0x4)]
             public class FrameInfoDyaw : TagStructure
-			{
-                public Angle Yaw;
+            {
+                public uint X;
             }
 
             [TagStructure(Size = 0x8)]
             public class FrameInfoDxDy : TagStructure
-			{
-                public RealPoint2d Point;
+            {
+                public uint X;
+                public uint Y;
             }
 
             [TagStructure(Size = 0xC)]
             public class FrameInfoDxDyDyaw : TagStructure
-			{
-                public RealPoint2d Point;
-                public Angle Yaw;
+            {
+                public uint X;
+                public uint Y;
+                public uint Z;
             }
 
             [TagStructure(Size = 0x10)]
             public class FrameInfoDxDyDzDyaw : TagStructure
-			{
-                public RealPoint3d Point;
-                public Angle Yaw;
+            {
+                public uint X;
+                public uint Y;
+                public uint Z;
+                public uint W;
             }
 
             [TagStructure(Size = 0xC)]
-            public class NodeFlags32 : TagStructure
-			{
+            public class Footer32 : TagStructure
+            {
                 public PrimaryNodeFlags RotationFlags;
                 public PrimaryNodeFlags PositionFlags;
                 public PrimaryNodeFlags ScaleFlags;
             }
 
             [TagStructure(Size = 0x18)]
-            public class NodeFlags64 : TagStructure
-			{
+            public class Footer64 : TagStructure
+            {
                 public PrimaryNodeFlags RotationFlags1;
                 public SecondaryNodeFlags RotationFlags2;
                 public PrimaryNodeFlags PositionFlags1;
@@ -223,6 +212,55 @@ namespace TagTool.Tags.Resources
                 public PrimaryNodeFlags ScaleFlags1;
                 public SecondaryNodeFlags ScaleFlags2;
             }
+
+            [TagStructure(Size = 0x18)]
+            public class Footer32_Overlay : TagStructure
+            {
+                public PrimaryNodeFlags RotationFlags;
+                public PrimaryNodeFlags PositionFlags;
+                public PrimaryNodeFlags ScaleFlags;
+                public PrimaryNodeFlags RotationFlags_Overlay;
+                public PrimaryNodeFlags PositionFlags_Overlay;
+                public PrimaryNodeFlags ScaleFlags_Overlay;
+            }
+
+            [TagStructure(Size = 0x30)]
+            public class Footer64_Overlay : TagStructure
+            {
+                public PrimaryNodeFlags RotationFlags1;
+                public SecondaryNodeFlags RotationFlags2;
+                public PrimaryNodeFlags PositionFlags1;
+                public SecondaryNodeFlags PositionFlags2;
+                public PrimaryNodeFlags ScaleFlags1;
+                public SecondaryNodeFlags ScaleFlags2;
+                public PrimaryNodeFlags RotationFlags1_Overlay;
+                public SecondaryNodeFlags RotationFlags2_Overlay;
+                public PrimaryNodeFlags PositionFlags1_Overlay;
+                public SecondaryNodeFlags PositionFlags2_Overlay;
+                public PrimaryNodeFlags ScaleFlags1_Overlay;
+                public SecondaryNodeFlags ScaleFlags2_Overlay;
+            }
+        }
+
+        public enum GroupMemberHeaderType : sbyte
+        {
+            Overlay = 0,
+            Base_H3 = 0x18,
+            Base_HO = 0x0C
+        }
+
+        public enum AnimationCompressionFormats : sbyte
+        {
+            // ty xbox7887
+            None_,        // _no_compression_codec
+            Type1,        // _uncompressed_static_data_codec
+            Type2_Unused, // _uncompressed_animated_data_codec
+            Type3,        // _8byte_quantized_rotation_only_codec
+            Type4,        // byte_keyframe_lightly_quantized
+            Type5, // word_keyframe_lightly_quantized
+            Type6,        // reverse_byte_keyframe_lightly_quantized
+            Type7,        // reverse_word_keyframe_lightly_quantized
+            Type8         // _blend_screen_codec
         }
 
         [Flags]
@@ -299,6 +337,17 @@ namespace TagTool.Tags.Resources
             Node61 = 1 << 61,
             Node62 = 1 << 62,
             Node63 = 1 << 63
+        }
+
+        public enum GroupMemberMovementDataType : sbyte
+        {
+            None,
+            dx_dy,
+            dx_dy_dyaw,
+            dx_dy_dz_dyaw,
+            dx_dy_dz_dangleaxis,
+            x_y_z_absolute,
+            Auto
         }
     }
 }
