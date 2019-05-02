@@ -91,7 +91,7 @@ namespace TagTool.Commands.Files
             string line = null;
 
             if (fromIndex.HasValue && toIndex.HasValue)
-                foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value))
+                foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value + 1))
                     if (!tagIndices.Contains(entry) && CacheContext.GetTag(entry) != null)
                         tagIndices.Add(entry);
 
