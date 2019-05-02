@@ -18,8 +18,7 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
         public ContentPolicyFlagsValue ContentPolicyFlags;
         public ContentPolicyFlagsValue FailedContentPolicyFlags;
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused1;
+        public StructureBspCompatibilityValue CompatibilityFlags;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown3;
         public List<SeamIdentifier> SeamIdentifiers;
@@ -152,6 +151,13 @@ namespace TagTool.Tags.Definitions
             None = 0,
             HasWorkingPathfinding = 1 << 0,
             ConvexDecompositionEnabled = 1 << 1
+        }
+
+        [Flags]
+        public enum StructureBspCompatibilityValue : ushort
+        {
+            None = 0,
+            UseMoppIndexPatch  = 1 << 0
         }
 
         [TagStructure(Size = 0x28)]

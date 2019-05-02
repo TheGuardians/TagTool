@@ -21,6 +21,15 @@ namespace TagTool.Commands.Porting
             sbsp.Unknown86 = 1;
 
             //
+            // Set compatibility flag for H3 mopps
+            //
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+                sbsp.CompatibilityFlags = ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
+            else
+                sbsp.CompatibilityFlags = ScenarioStructureBsp.StructureBspCompatibilityValue.None;
+
+            //
             // Fix cluster tag ref and decorator grids
             //
 
