@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
-        public List<UnknownRaw6th> UnknownRaw6ths;
+        public List<SurfacesPlanes> SurfacePlanes;
         public List<Plane> Planes;
         [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] UnknownUnused1;
@@ -179,8 +179,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class UnknownRaw7th : TagStructure
         {
-            public short Unknown0;
-            public short Unknown2;
+            public short UnknownIndex;  //used in the structure seam global
+            public short SeamIdentifierIndex;
         }
 
         [TagStructure(Size = 0x18)]
@@ -209,10 +209,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
-        public class UnknownRaw6th : TagStructure
+        public class SurfacesPlanes : TagStructure
         {
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public short PlaneIndexOld;
+            public ushort PlaneIndexOld;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public int PlaneIndexNew;
 

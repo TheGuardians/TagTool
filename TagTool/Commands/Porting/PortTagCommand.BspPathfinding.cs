@@ -98,7 +98,7 @@ namespace TagTool.Commands.Porting
             {
                 resourceDefinition = new StructureBspCacheFileTagResources()
                 {
-                    UnknownRaw6ths = new TagBlock<ScenarioStructureBsp.UnknownRaw6th>(bsp.UnknownRaw6ths.Count, new CacheAddress()),
+                    SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(bsp.SurfacePlanes.Count, new CacheAddress()),
                     Planes = new TagBlock<ScenarioStructureBsp.Plane>(bsp.Planes.Count, new CacheAddress()),
                     UnknownRaw7ths = new TagBlock<ScenarioStructureBsp.UnknownRaw7th>(bsp.UnknownRaw7ths.Count, new CacheAddress()),
                     PathfindingData = new List<StructureBspCacheFileTagResources.PathfindingDatum>() // TODO: copy from bsp.PathfindingData...
@@ -117,23 +117,23 @@ namespace TagTool.Commands.Porting
                 var dataContext = new DataSerializationContext(resourceReader, resourceWriter);
 
                 //
-                // UnknownRaw6ths
+                // Surfaces Planes 
                 //
 
                 StreamUtil.Align(dataStream, 0x4);
 
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                    blamResourceStream.Position = resourceDefinition.UnknownRaw6ths.Address.Offset;
+                    blamResourceStream.Position = resourceDefinition.SurfacePlanes.Address.Offset;
 
-                resourceDefinition.UnknownRaw6ths = new TagBlock<ScenarioStructureBsp.UnknownRaw6th>(
-                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.UnknownRaw6ths.Count : resourceDefinition.UnknownRaw6ths.Count),
+                resourceDefinition.SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(
+                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.SurfacePlanes.Count : resourceDefinition.SurfacePlanes.Count),
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
-                for (var i = 0; i < resourceDefinition.UnknownRaw6ths.Count; i++)
+                for (var i = 0; i < resourceDefinition.SurfacePlanes.Count; i++)
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
-                        bsp.UnknownRaw6ths[i] :
-                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(dataContext);
+                        bsp.SurfacePlanes[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(dataContext);
 
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
@@ -456,7 +456,7 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version < CacheVersion.Halo3ODST)
             {
-                bsp.UnknownRaw6ths.Clear();
+                bsp.SurfacePlanes.Clear();
                 bsp.Planes.Clear();
                 bsp.UnknownRaw7ths.Clear();
                 bsp.PathfindingData.Clear();

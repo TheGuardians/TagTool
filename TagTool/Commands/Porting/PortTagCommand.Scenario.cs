@@ -70,11 +70,11 @@ namespace TagTool.Commands.Porting
 
                             var resourceDataContext = new DataSerializationContext(resourceReader);
 
-                            resourceStream.Position = pathfindingBsp.UnknownRaw6ths.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.UnknownRaw6ths.Count; i++)
+                            resourceStream.Position = pathfindingBsp.SurfacePlanes.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.SurfacePlanes.Count; i++)
                             {
-                                var UnknownRaw6th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw6th>(resourceDataContext);
-                                pathfindingBsp.UnknownRaw6ths.Add(UnknownRaw6th);
+                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(resourceDataContext);
+                                pathfindingBsp.SurfacePlanes.Add(surfacePlanes);
                             }
 
                             resourceStream.Position = pathfindingBsp.Planes.Address.Offset;
