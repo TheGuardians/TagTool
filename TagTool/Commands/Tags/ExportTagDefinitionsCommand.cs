@@ -101,9 +101,12 @@ namespace TagTool.Commands.Tags
 
                     if (ExportedTypes.ContainsKey(field.FieldType.FullName))
                     {
+                        typeInfo = ExportedTypes[field.FieldType.FullName];
+
                         continue;
                     }
-                    else if (field.FieldType.IsArray)
+
+                    if (field.FieldType.IsArray)
                     {
                     }
                     else if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
@@ -115,6 +118,12 @@ namespace TagTool.Commands.Tags
 
                         while (typeBaseName.StartsWith("_"))
                             typeBaseName = typeBaseName.Substring(1);
+
+                        ExportedTypes[field.FieldType.FullName] = new ExportedType
+                        {
+                            Name = $"c_tag_block<s_{typeBaseName}>",
+                            File = file.FullName
+                        };
 
                         typeInfo = ExportedTypes[field.FieldType.GetGenericArguments()[0].FullName] = new ExportedType
                         {
@@ -154,6 +163,7 @@ namespace TagTool.Commands.Tags
 
                         writer.WriteLine($"struct {typeInfo.Name}");
                         writer.WriteLine("{");
+
                         writer.WriteLine("};");
                     }
                     else if (field.FieldType.IsEnum)

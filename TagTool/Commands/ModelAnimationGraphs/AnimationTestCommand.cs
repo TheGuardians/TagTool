@@ -152,7 +152,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 destResourceStream.Position = 0;
 
                 // Cache a new tag resource for the animation resource group
-                var resource = new PageableResource(TagResourceTypeGen3.Animation, ResourceLocation.ResourcesB);
+                var resource = new PageableResource(TagResourceTypeGen3.Animation, destCacheContext.Version, ResourceLocation.ResourcesB);
                 destCacheContext.Serialize(resource, new ModelAnimationTagResource { GroupMembers = destGroupMembers });
                 destCacheContext.AddResource(resource, destResourceStream);
 

@@ -38,6 +38,12 @@ namespace TagTool.Geometry
                 BlamCache.LoadResourceTags();
 
             //
+            // Set up ElDorado resource reference
+            //
+
+            geometry.Resource = new PageableResource(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
+
+            //
             // Convert byte[] of UnknownBlock
             //
 
@@ -135,27 +141,6 @@ namespace TagTool.Geometry
                     geometry.UnknownSections[i].Unknown = outStream.ToArray();
                 }
             }
-
-            //
-            // Set up ElDorado resource reference
-            //
-
-            geometry.Resource = new PageableResource
-            {
-                Page = new RawPage
-                {
-                    Index = -1
-                },
-                Resource = new TagResourceGen3
-                {
-                    ResourceType = TagResourceTypeGen3.RenderGeometry,
-                    DefinitionData = new byte[0x30],
-                    DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
-                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                    Unknown2 = 1
-                }
-            };
 
             //
             // Port Blam resource definition

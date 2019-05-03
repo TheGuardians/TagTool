@@ -34,12 +34,50 @@ namespace TagTool.Common
 
         public PageableResource() { }
 
-        public PageableResource(TagResourceTypeGen3 type) : this()
+        public PageableResource(TagResourceTypeGen3 type, CacheVersion version) :
+            this()
         {
+            uint? size = null;
+            switch (type)
+            {
+                case TagResourceTypeGen3.Collision:
+                    size = typeof(StructureBspTagResources).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Bitmap:
+                    size = typeof(BitmapTextureInteropResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.BitmapInterleaved:
+                    size = typeof(BitmapTextureInterleavedInteropResource).GetSize(version);
+                    break;
+                case TagResourceTypeGen3.Sound:
+                    size = typeof(SoundResourceDefinition).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Animation:
+                    size = typeof(ModelAnimationTagResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.RenderGeometry:
+                    size = typeof(RenderGeometryApiResourceDefinition).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Bink:
+                    size = typeof(BinkResource).GetSize(version);
+                    break;
+
+                case TagResourceTypeGen3.Pathfinding:
+                    size = typeof(StructureBspCacheFileTagResources).GetSize(version);
+                    break;
+            }
+
+            Resource.DefinitionData = new byte[size ?? 0];
             Resource.ResourceType = type;
         }
 
-        public PageableResource(TagResourceTypeGen3 type, ResourceLocation location) : this(type)
+        public PageableResource(TagResourceTypeGen3 type, CacheVersion version, ResourceLocation location) :
+            this(type, version)
         {
             ChangeLocation(location);
         }

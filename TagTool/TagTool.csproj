@@ -234,6 +234,7 @@
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\ExportModPackageCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
