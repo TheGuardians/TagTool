@@ -1059,18 +1059,24 @@ namespace TagTool.Commands.Porting
 		{
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {
-                // skip the field if no conversion is needed
-                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
+                var attr = tagFieldInfo.Attribute;
+
+                if ((attr.Version != CacheVersion.Unknown && attr.Version == BlamCache.Version) ||
+                    (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(BlamCache.Version, attr.MinVersion, attr.MaxVersion)))
+                {
+                    // skip the field if no conversion is needed
+                    if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
                     tagFieldInfo.FieldType == typeof(string))
-                    continue;
+                        continue;
 
-                var oldValue = tagFieldInfo.GetValue(data);
-                if (oldValue is null)
-                    continue;
+                    var oldValue = tagFieldInfo.GetValue(data);
+                    if (oldValue is null)
+                        continue;
 
-                // convert the field
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                tagFieldInfo.SetValue(data, newValue);
+                    // convert the field
+                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                    tagFieldInfo.SetValue(data, newValue);
+                }
             }
 
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
