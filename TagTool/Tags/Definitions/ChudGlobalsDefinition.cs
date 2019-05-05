@@ -56,13 +56,15 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float HealthCriticalThreshold;
 
-        //POSSIBLY SHADER RELATED
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown12;
+        public float Unknown12 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown13;
+        public float Unknown13 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown13_2;
+        public float Unknown13_2 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown14;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -92,23 +94,37 @@ namespace TagTool.Tags.Definitions
 
         //DAMAGE MASK FUNCTIONS AND VARIABLES
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction DamageMaskFunction1;
+        public TagFunction DamageMaskFunction1 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x08, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6F, 0x12, 0x83, 0x3A,
+                0x6F, 0x12, 0x03, 0x3B, 0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x0A, 0x00, 0x00, 0xCD, 0xFF, 0xFF, 0x7F, 0x7F, 0x77, 0xBE, 0xFF, 0xBF,
+                0xD9, 0xCE, 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x4B, 0xDD, 0x97, 0x40
+            }
+        };
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown28;
+        public float Unknown28 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown29;
+        public float Unknown29 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown30;
+        public float Unknown30 = 1.0f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown31;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown32;
+        public RealVector3d Unknown32 = new RealVector3d(-0.362636f, -0.840421f, -0.857739f);
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown33;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown34;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown35;
+        public float Unknown35 = 0.5f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown36;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -117,16 +133,26 @@ namespace TagTool.Tags.Definitions
         public float Unknown38;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float Unknown39;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown40;
+        public RealVector3d Unknown40 = new RealVector3d(0.121569f, 0.00984327f, 0.0071511f);
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown41;
+        public float Unknown43 = 0.5f;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown42;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown43;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction DamageMaskFunction2;
+        public TagFunction DamageMaskFunction2 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x08, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+                0x0A, 0x00, 0x00, 0xCD, 0xFF, 0xFF, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0xC0,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x4B, 0xDD, 0x97, 0x40
+            }
+        };
 
         //ODST VALUES FOR PDA/BEACON
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -148,39 +174,139 @@ namespace TagTool.Tags.Definitions
 
         //HO VALUES
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOVMultiplier;
+        public float SprintFOVMultiplier = 1.0f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOVTransitionInTime;
+        public float SprintFOVTransitionInTime = 0.5f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float SprintFOXTransitionOutTime;
+        public float SprintFOXTransitionOutTime = 1.0f;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public CachedTagInstance ParallaxData = null;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown49;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown60;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown61;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown62;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown63;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown64;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown65;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown66;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown67;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown68;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown69;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public TagFunction Unknown70;
 
-        //NOT SURE WHAT THIS IS
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown60 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown61 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown62 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown63 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown64 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public float Unknown65 = 1.33f;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown66 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown67 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0x9A, 0x99, 0x99, 0xBD, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x00, 0xCD, 0xCC, 0xCC, 0xBD,
+                0xCD, 0xCC, 0x8C, 0x3F
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown68 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0xBC, 0x74, 0x93, 0xBB, 0xBC, 0x74, 0x93, 0x3B,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x3F
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown69 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            }
+        };
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public TagFunction Unknown70 = new TagFunction
+        {
+            Data = new byte[]
+            {
+                0x03, 0x34, 0x00, 0x00, 0x6F, 0x12, 0x83, 0xBB, 0x6F, 0x12, 0x83, 0x3B,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00, 0x3F, 0xCD, 0xCC, 0xCC, 0xBD,
+                0xCD, 0xCC, 0x8C, 0x3F
+            }
+        };
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTagInstance Unknown71 = null;  //chdt tagreference which activates in firefight
 
