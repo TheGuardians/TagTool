@@ -13,6 +13,7 @@ using TagTool.Scripting;
 using TagTool.Commands.Common;
 using System.Collections;
 using TagTool.Serialization;
+using TagTool.Shaders;
 
 namespace TagTool.Commands.Tags
 {
@@ -264,7 +265,7 @@ namespace TagTool.Commands.Tags
 		private T ConvertStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
         {
 			// Convert each field
-			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), destCacheContext.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), destCacheContext.Version))
 			{
 				var oldValue = tagFieldInfo.GetValue(data);
 				var newValue = Convert(oldValue, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
@@ -601,8 +602,6 @@ namespace TagTool.Commands.Tags
 
         private void FixGlobalVertexShader(GlobalVertexShader glvs)
         {
-            throw new NotImplementedException();
-            /*TODO: Fix this
             var usedShaders = new bool[glvs.Shaders.Count];
             for (var i = 0; i < glvs.VertexTypes.Count; i++)
             {
@@ -629,19 +628,17 @@ namespace TagTool.Commands.Tags
             {
                 if (!usedShaders[i])
                     glvs.Shaders[i].PCShaderBytecode = null;
-            }*/
+            }
         }
 
         private void FixPixelShader(PixelShader ps)
         {
-            throw new NotImplementedException();
-            /*TODO: Fix this
             FixDrawModeList(ps.DrawModes);
 
             // Disable z_only
             if (ps.DrawModes.Count > 18)
             {
-                ps.DrawModes[18].Index = 0;
+                ps.DrawModes[18].Offset = 0;
                 ps.DrawModes[18].Count = 0;
             }
 
@@ -653,13 +650,13 @@ namespace TagTool.Commands.Tags
                 {
                     if (i != 0 || IsDecalShader)
                     {
-                        Console.WriteLine("- Recompiling pixel shader {0}...", mode.Index + j);
-                        var shader = ps.Shaders[mode.Index + j];
+                        Console.WriteLine("- Recompiling pixel shader {0}...", mode.Offset + j);
+                        var shader = ps.Shaders[mode.Offset + j];
                         var newBytecode = ShaderConverter.ConvertNewPixelShaderToOld(shader.PCShaderBytecode, i);
                         if (newBytecode != null)
                             shader.PCShaderBytecode = newBytecode;
                     }
-                    usedShaders[mode.Index + j] = true;
+                    usedShaders[mode.Offset + j] = true;
                 }
             }
 
@@ -668,7 +665,7 @@ namespace TagTool.Commands.Tags
             {
                 if (!usedShaders[i])
                     ps.Shaders[i].PCShaderBytecode = null;
-            }*/
+            }
         }
 
         private void FixVertexShader(VertexShader vs)

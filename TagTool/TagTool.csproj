@@ -236,6 +236,7 @@
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />
+    <Compile Include="Commands\Porting\ExportMultiplayerScriptCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
@@ -259,6 +260,7 @@
     <Compile Include="Scripting\Compiler\ScriptReal.cs" />
     <Compile Include="Scripting\Compiler\ScriptString.cs" />
     <Compile Include="Scripting\Compiler\ScriptSymbol.cs" />
+    <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />

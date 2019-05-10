@@ -728,7 +728,7 @@ namespace TagTool.Commands.Porting
 								if (instance == null || instance.Name == null)
 									continue;
 
-								if (instance.Name == blamTagName)
+								if (instance.Name == tag.Name)
 									return instance;
 							}
 

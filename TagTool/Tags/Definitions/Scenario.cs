@@ -423,7 +423,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2C)]
         public class ZoneSetPvsBlock : TagStructure
 		{
-            public uint StructureBspMask;
+            public BspFlags StructureBspMask;
             public short Version;
             public ZoneSetPotentiallyVisibleSetFlags Flags;
             public List<BspChecksum> BspChecksums;
@@ -1755,7 +1755,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST)]
-        public class SquadSpawnConditions : TagStructure
+        public class AiConditions : TagStructure
         {
             public SquadDifficultyFlags DifficultyFlags;
 
@@ -1852,7 +1852,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Label, MinVersion = CacheVersion.Halo3ODST)]
                 public StringId Name;
 
-                public SquadSpawnConditions SpawnConditions;
+                public AiConditions SpawnConditions;
 
                 public short SpawnCount;
                 public short MajorUpgrade;
@@ -1909,7 +1909,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x10)]
                 public class CharacterTypeBlock : TagStructure
                 {
-                    public SquadSpawnConditions SpawnConditions;
+                    public AiConditions SpawnConditions;
                     public short CharacterTypeIndex;
                     public short Chance;
                 }
@@ -1917,7 +1917,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x10)]
                 public class ItemTypeBlock : TagStructure
                 {
-                    public SquadSpawnConditions SpawnConditions;
+                    public AiConditions SpawnConditions;
                     public short ItemTypeIndex;
                     public short Probability;
                 }
@@ -1926,7 +1926,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x6C)]
             public class SpawnFormation : TagStructure
 			{
-                public SquadSpawnConditions SpawnConditions;
+                public AiConditions SpawnConditions;
                 [TagField(Flags = Label)]
                 public StringId Name;
                 public AiPoint3d Point;
@@ -1960,7 +1960,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3ODST)]
             public class SpawnPoint : TagStructure
 			{
-                public SquadSpawnConditions Condition;
+                public AiConditions Condition;
 
                 [TagField(Flags = Label)]
                 public StringId Name;
@@ -3251,14 +3251,7 @@ namespace TagTool.Tags.Definitions
             public class Task : TagStructure
 			{
                 public TaskFlags Flags;
-                public TaskInhibitGroups InhibitGroups;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown1;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown2;
-
-                public SquadDifficultyFlags InhibitOnDifficulty;
+                public AiConditions PlaceOn;
                 public MovementValue Movement;
                 public FollowValue Follow;
                 public short FollowSquadIndex;
@@ -3284,7 +3277,7 @@ namespace TagTool.Tags.Definitions
                 public short CommandScriptIndex;
                 public short ExhaustionScriptIndex;
 
-                public short SquadGroupFilter;
+                public TaskInhibitGroups InhibitGroups;
 
                 /// <summary>
                 /// When someone enters this task for the first time, they play this type of dialogue.
