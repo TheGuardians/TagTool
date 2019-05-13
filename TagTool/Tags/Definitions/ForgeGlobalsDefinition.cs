@@ -29,6 +29,16 @@ namespace TagTool.Tags.Definitions
         public List<ReForgeMaterial> ReForgeMaterials;
 
         /// <summary>
+        /// The collection of material types available to ReForge materials.
+        /// </summary>
+        public List<ReForgeMaterialType> ReForgeMaterialTypes;
+
+        /// <summary>
+        /// The collection of ReForge objects.
+        /// </summary>
+        public List<TagReferenceBlock> ReForgeObjects;
+
+        /// <summary>
         /// The object designated as the "prematch camera" handle.
         /// </summary>
         [TagField(ValidTags = new[] { "obje" })]
@@ -78,6 +88,19 @@ namespace TagTool.Tags.Definitions
 
             [TagField(ValidTags = new[] { "rm  " })]
             public CachedTagInstance RenderMethod;
+        }
+
+        /// <summary>
+        /// A material type for ReForge materials.
+        /// </summary>
+        [TagStructure(Size = 0x24)]
+        public class ReForgeMaterialType : TagStructure
+        {
+            [TagField(Length = 32)]
+            public string Name;
+
+            public short CollisionMaterialIndex;
+            public short PhysicsMaterialIndex;
         }
 
         /// <summary>

@@ -62,11 +62,7 @@ namespace TagTool.Tags.Definitions
         public List<PlayerRepresentationBlock> PlayerRepresentation;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown57;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown58;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown59;
+        public List<PlayerCharacterType> PlayerCharacterTypes;
 
         public List<FallingDamageBlock> FallingDamage;
 
@@ -547,6 +543,29 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CachedTagInstance CombatDialogue;
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class PlayerCharacterType : TagStructure
+        {
+            [TagField(Flags = Label)]
+            public StringId Name;
+
+            public FlagsValue Flags;
+            public sbyte PlayerInformation;
+            public sbyte PlayerControl;
+            public sbyte CampaignRepresentation;
+            public sbyte MultiplayerRepresentation;
+            public sbyte MultiplayerArmorCustomization;
+            public sbyte ChudGlobals;
+            public sbyte FirstPersonInterface;
+
+            [Flags]
+            public enum FlagsValue : byte
+            {
+                None,
+                CanSprint = 1 << 0
+            }
         }
 
         [TagStructure(Size = 0x78)]

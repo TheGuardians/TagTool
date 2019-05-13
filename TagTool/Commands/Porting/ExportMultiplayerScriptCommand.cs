@@ -92,8 +92,6 @@ namespace TagTool.Commands.Porting
                 return true;
             }
 
-            var bspBlockFlags = (Scenario.BspFlags)(1 << bspIndex);
-
             //
             // Update scenario zone set pvs
             //
@@ -114,8 +112,6 @@ namespace TagTool.Commands.Porting
 
                 if (!removePvsPortals.ContainsKey(i))
                     removePvsPortals[i] = new HashSet<int>();
-
-                var values = Enum.GetValues(typeof(Scenario.BspFlags)).Cast<Enum>().ToArray();
 
                 for (int j = 0, k = 0; j < 32; j++)
                 {
@@ -720,16 +716,30 @@ namespace TagTool.Commands.Porting
                 writer.WriteLine();
                 writer.WriteLine("ForEach ZoneSetPvs SetField StructureBspMask Bsp0");
 
-                if (bspIndex < (scnr.StructureBsps.Count - 1))
+                foreach (var entry in removePvsBspChecksums)
                 {
-                    writer.WriteLine($"ForEach ZoneSetPvs ForEach StructureBspPotentiallyVisibleSets ForEach Clusters RemoveBlockElements BitVectors {bspIndex + 1} {scnr.StructureBsps.Count - (bspIndex + 1)}");
-                    writer.WriteLine($"ForEach ZoneSetPvs ForEach StructureBspPotentiallyVisibleSets ForEach ClustersDoorsClosed RemoveBlockElements BitVectors {bspIndex + 1} {scnr.StructureBsps.Count - (bspIndex + 1)}");
-                }
+                    var pvs = scnr.ZoneSetPvs[entry.Key];
 
-                if (bspIndex > 0)
-                {
-                    writer.WriteLine($"ForEach ZoneSetPvs ForEach StructureBspPotentiallyVisibleSets ForEach Clusters RemoveBlockElements BitVectors 0 {bspIndex}");
-                    writer.WriteLine($"ForEach ZoneSetPvs ForEach StructureBspPotentiallyVisibleSets ForEach ClustersDoorsClosed RemoveBlockElements BitVectors 0 {bspIndex}");
+                    foreach (var set in pvs.StructureBspPotentiallyVisibleSets)
+                    {
+                        var setIndex = pvs.StructureBspPotentiallyVisibleSets.IndexOf(set);
+
+                        foreach (var cluster in set.Clusters)
+                        {
+                            var clusterIndex = set.Clusters.IndexOf(cluster);
+
+                            foreach (var index in entry.Value.Reverse())
+                                writer.WriteLine($"RemoveBlockElements ZoneSetPvs[{entry.Key}].StructureBspPotentiallyVisibleSets[{setIndex}].Clusters[{clusterIndex}].BitVectors {index} 1");
+                        }
+
+                        foreach (var cluster in set.ClustersDoorsClosed)
+                        {
+                            var clusterIndex = set.ClustersDoorsClosed.IndexOf(cluster);
+
+                            foreach (var index in entry.Value.Reverse())
+                                writer.WriteLine($"RemoveBlockElements ZoneSetPvs[{entry.Key}].StructureBspPotentiallyVisibleSets[{setIndex}].ClustersDoorsClosed[{clusterIndex}].BitVectors {index} 1");
+                        }
+                    }
                 }
 
                 writer.WriteLine();
@@ -945,7 +955,7 @@ namespace TagTool.Commands.Porting
                         writer.WriteLine($"SetField FlockPalette[{i}].Object null");
 
                 writer.WriteLine();
-                writer.WriteLine($"ForEach Scenery SetField BspIndex 0");
+                writer.WriteLine($"ForEach Flocks SetField BspIndex 0");
                 writer.WriteLine();
                 writer.WriteLine("RemoveBlockElements SoftCeilings 0 *");
                 writer.WriteLine("RemoveBlockElements PlayerStartingProfile 0 *");
