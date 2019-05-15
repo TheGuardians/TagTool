@@ -39,8 +39,13 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance Unknown2;
             public List<WeaponSet> WeaponSets;
             public List<VehicleSet> VehicleSets;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+            [TagField(Version = CacheVersion.HaloOnline106708)]
+            public List<PlayerCharacterType> PlayerCharacterTypes;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline235640)]
             public List<PodiumAnimation> PodiumAnimations;
+
             public CachedTagInstance EngineSettings;
 
             [TagStructure(Size = 0xC)]
@@ -181,6 +186,12 @@ namespace TagTool.Tags.Definitions
                     public StringId OriginalVehicle;
                     public StringId SubstitutedVehicle;
                 }
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class PlayerCharacterType : TagStructure
+            {
+                public StringId Name;
             }
 
             [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline449175)]
