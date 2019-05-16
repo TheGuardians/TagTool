@@ -233,6 +233,8 @@
     <Compile Include="Cache\TagCacheIndex.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\ExportModPackageCommand.cs" />
+    <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
+    <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />

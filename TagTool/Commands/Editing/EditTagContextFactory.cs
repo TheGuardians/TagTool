@@ -17,6 +17,7 @@ using TagTool.Commands.Scenarios;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
+using TagTool.Commands.Forge;
 
 namespace TagTool.Commands.Editing
 {
@@ -48,6 +49,10 @@ namespace TagTool.Commands.Editing
 
                 case "coll":
                     CollisionModelContextFactory.Populate(commandContext, cacheContext, tag, (CollisionModel)definition);
+                    break;
+
+                case "forg":
+                    ForgeContextFactory.Populate(commandContext, cacheContext, tag, (ForgeGlobalsDefinition)definition);
                     break;
 
                 case "hlmt": // model

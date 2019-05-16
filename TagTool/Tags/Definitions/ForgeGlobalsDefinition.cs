@@ -5,81 +5,37 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    /// <summary>
-    /// ElDewrito Forge globals.
-    /// </summary>
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x90)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xC0)]
 	public class ForgeGlobalsDefinition : TagStructure
 	{
-        /// <summary>
-        /// The "invisible" render method.
-        /// </summary>
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTagInstance InvisibleRenderMethod;
 
-        /// <summary>
-        /// The "default" render method used on ReForge objects.
-        /// </summary>
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTagInstance DefaultRenderMethod;
 
-        /// <summary>
-        /// The collection of materials available to ReForge objects.
-        /// </summary>
         public List<ReForgeMaterial> ReForgeMaterials;
-
-        /// <summary>
-        /// The collection of material types available to ReForge materials.
-        /// </summary>
         public List<ReForgeMaterialType> ReForgeMaterialTypes;
-
-        /// <summary>
-        /// The collection of ReForge objects.
-        /// </summary>
         public List<TagReferenceBlock> ReForgeObjects;
 
-        /// <summary>
-        /// The object designated as the "prematch camera" handle.
-        /// </summary>
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTagInstance PrematchCameraObject;
 
-        /// <summary>
-        /// The object designated as the "map modifier" handle.
-        /// </summary>
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTagInstance ModifierObject;
 
-        /// <summary>
-        /// The object designated as the "kill volume" handle.
-        /// </summary>
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTagInstance KillVolumeObject;
 
-        /// <summary>
-        /// The object designed as the "garbage volume" object.
-        /// </summary>
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTagInstance GarbageVolumeObject;
 
-        /// <summary>
-        /// The list of items available to the Forge palette.
-        /// </summary>
+        public List<Description> Descriptions;
+        public List<PaletteCategory> PaletteCategories;
         public List<PaletteItem> Palette;
-
-        /// <summary>
-        /// The collection of weather effects used in Forge.
-        /// </summary>
         public List<WeatherEffect> WeatherEffects;
-
-        /// <summary>
-        /// The collection of skies used in Forge.
-        /// </summary>
         public List<Sky> Skies;
 
-        /// <summary>
-        /// A material reference for ReForge objects.
-        /// </summary>
         [TagStructure(Size = 0x30)]
 		public class ReForgeMaterial : TagStructure
 		{
@@ -90,9 +46,6 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance RenderMethod;
         }
 
-        /// <summary>
-        /// A material type for ReForge materials.
-        /// </summary>
         [TagStructure(Size = 0x24)]
         public class ReForgeMaterialType : TagStructure
         {
@@ -103,10 +56,14 @@ namespace TagTool.Tags.Definitions
             public short PhysicsMaterialIndex;
         }
 
-        /// <summary>
-        /// The category of a Forge object palette item.
-        /// </summary>
-        public enum PaletteItemCategory : short
+        [TagStructure(Size = 0x100)]
+        public class Description : TagStructure
+        {
+            [TagField(Length = 256)]
+            public string Text;
+        }
+
+        public enum PaletteCategoryType : short
         {
             Tool,
             Prop,
@@ -125,55 +82,140 @@ namespace TagTool.Tags.Definitions
             KingOfTheHill,
             Territories,
             Slayer,
-            VIP
+            VIP,
+            Prefab,
+            Recent,
+            MapOptions
         }
 
-        /// <summary>
-        /// A single item of the Forge object palette.
-        /// </summary>
-        [TagStructure(Size = 0x40)]
-		public class PaletteItem : TagStructure
-		{
-            /// <summary>
-            /// The name of the palette item.
-            /// </summary>
+        [TagStructure(Size = 0x28)]
+        public class PaletteCategory : TagStructure
+        {
             [TagField(Length = 32)]
             public string Name;
 
-            /// <summary>
-            /// The category of the palette item.
-            /// </summary>
-            public PaletteItemCategory Category;
+            public short DescriptionIndex;
+            public short ParentCategoryIndex;
 
-            /// <summary>
-            /// The maximum number of the palette item allowed to be spawned.
-            /// </summary>
+            public PaletteCategoryType Type;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            public byte[] Unused = new byte[2];
+        }
+
+        [TagStructure(Size = 0x40)]
+		public class PaletteItem : TagStructure
+		{
+            [TagField(Length = 32)]
+            public string Name;
+
+            public short CategoryIndex;
             public ushort MaxAllowed;
 
-            /// <summary>
-            /// The object associated with the palette item.
-            /// </summary>
             [TagField(ValidTags = new[] { "obje" })]
             public CachedTagInstance Object;
 
-            /// <summary>
-            /// The list of property setters of the palette item.
-            /// </summary>
             public List<Setter> Setters;
 
-            /// <summary>
-            /// The type of a property being managed by a property setter.
-            /// </summary>
-            public enum SetterType : short
+            public enum SetterTarget : short
             {
-                Boolean,
+                General_OnMapAtStart,
+                General_Symmetry,
+                General_RespawnRate,
+                General_SpareClips,
+                General_SpawnOrder,
+                General_Team,
+                General_TeleporterChannel,
+                General_ShapeType,
+                General_ShapeRadius,
+                General_ShapeWidth,
+                General_ShapeTop,
+                General_ShapeBottom,
+                General_ShapeDepth,
+                General_Physics,
+                General_EngineFlags,
+
+                Reforge_Material,
+                Reforge_Material_ColorR,
+                Reforge_Material_ColorG,
+                Reforge_Material_ColorB,
+                Reforge_Material_TextureOverride,
+                Reforge_Material_TextureScale,
+                Reforge_Material_TextureOffsetX,
+                Reforge_Material_TextureOffsetY,
+                Reforge_MaterialAllowsProjectiles,
+                Reforge_MaterialType,
+
+                Light_Type,
+                Light_ColorR,
+                Light_ColorG,
+                Light_ColorB,
+                Light_Intensity,
+                Light_Radius,
+                Light_FieldOfView,
+                Light_NearWidth,
+                Light_IlluminationType,
+                Light_IlluminationBase,
+                Light_IlluminationFreq,
+
+                Fx_Range,
+                Fx_LightIntensity,
+                Fx_Hue,
+                Fx_Saturation,
+                Fx_Desaturation,
+                Fx_GammaIncrease,
+                Fx_GammaDecrease,
+                Fx_ColorFilterR,
+                Fx_ColorFilterG,
+                Fx_ColorFilterB,
+                Fx_ColorFloorR,
+                Fx_ColorFloorG,
+                Fx_ColorFloorB,
+                Fx_Tracing,
+
+                GarbageVolume_CollectDeadBiped,
+                GarbageVolume_CollectWeapons,
+                GarbageVolume_CollectObjectives,
+                GarbageVolume_CollectGrenades,
+                GarbageVolume_CollectEquipment,
+                GarbageVolume_CollectVehicles,
+                GarbageVolume_Interval,
+
+                KillVolume_AlwaysVisible,
+                KillVolume_DestroyVehicles,
+                KillVolume_DamageCause,
+
+                Map_DisablePushBarrier,
+                Map_DisableDeathBarrier,
+                Map_PhysicsGravity,
+
+                CameraFx_Exposure,
+                CameraFx_LightIntensity,
+                CameraFx_Bloom,
+                CameraFx_LightBloom,
+
+                AtmosphereProperties_Enabled,
+                AtmosphereProperties_Weather,
+                AtmosphereProperties_Brightness,
+                AtmosphereProperties_FogDensity,
+                AtmosphereProperties_FogVisibility,
+                AtmosphereProperties_FogColorR,
+                AtmosphereProperties_FogColorG,
+                AtmosphereProperties_FogColorB,
+                AtmosphereProperties_Skybox,
+                AtmosphereProperties_SkyboxOffsetZ,
+                AtmosphereProperties_SkyboxOverrideTransform,
+
+                Budget_Minimum,
+                Budget_Maximum
+            }
+
+            public enum SetterType : sbyte
+            {
                 Integer,
                 Real
             }
 
-            /// <summary>
-            /// The flags of a property setter.
-            /// </summary>
             [Flags]
             public enum SetterFlags : byte
             {
@@ -181,139 +223,61 @@ namespace TagTool.Tags.Definitions
                 Hidden = 1 << 0
             }
 
-            /// <summary>
-            /// A property setter descriptor.
-            /// </summary>
-            [TagStructure(Size = 0x2C)]
+            [TagStructure(Size = 0xC)]
 			public class Setter : TagStructure
 			{
-                /// <summary>
-                /// The target of the property setter.
-                /// </summary>
-                [TagField(Length = 32)]
-                public string Target;
-
-                /// <summary>
-                /// The type of the property being set.
-                /// </summary>
+                public SetterTarget Target;
                 public SetterType Type;
-
-                /// <summary>
-                /// The flags of the property
-                /// </summary>
                 public SetterFlags Flags;
-
-                /// <summary>
-                /// The boolean value of the property setter.
-                /// </summary>
-                public bool BooleanValue;
-
-                /// <summary>
-                /// The integer value of the property setter.
-                /// </summary>
                 public int IntegerValue;
-
-                /// <summary>
-                /// The real value of the property setter.
-                /// </summary>
                 public float RealValue;
             }
         }
 
-        /// <summary>
-        /// A weather effect reference descriptor.
-        /// </summary>
         [TagStructure(Size = 0x30)]
 		public class WeatherEffect : TagStructure
 		{
-            /// <summary>
-            /// The name of the weather effect.
-            /// </summary>
             [TagField(Length = 32)]
             public string Name;
 
-            /// <summary>
-            /// The effect associated with the weather effect.
-            /// </summary>
             [TagField(ValidTags = new[] { "effe" })]
             public CachedTagInstance Effect;
         }
 
-        /// <summary>
-        /// Flags for a Forge sky descriptor.
-        /// </summary>
         [Flags]
         public enum SkyFlags : int
         {
             None
         }
 
-        /// <summary>
-        /// A Forge sky descriptor.
-        /// </summary>
         [TagStructure(Size = 0xAC)]
 		public class Sky : TagStructure
 		{
-            /// <summary>
-            /// The name of the sky.
-            /// </summary>
             [TagField(Length = 32)]
             public string Name;
 
-            /// <summary>
-            /// The flags of the sky.
-            /// </summary>
             public SkyFlags Flags;
-
-            /// <summary>
-            /// The default translation of the sky.
-            /// </summary>
             public RealPoint3d Translation;
-            
-            /// <summary>
-            /// The default orientation of the sky.
-            /// </summary>
             public RealEulerAngles3d Orientation;
 
-            /// <summary>
-            /// The object associated with the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "scen" })]
             public CachedTagInstance Object;
 
-            /// <summary>
-            /// The parameters of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "skya" })]
             public CachedTagInstance Parameters;
 
-            /// <summary>
-            /// The wind of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "wind" })]
             public CachedTagInstance Wind;
 
-            /// <summary>
-            /// The camera effects of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "cfxs" })]
             public CachedTagInstance CameraFX;
 
-            /// <summary>
-            /// The screen effects of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "sefc" })]
             public CachedTagInstance ScreenFX;
 
-            /// <summary>
-            /// The global lighting of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "chmt" })]
             public CachedTagInstance GlobalLighting;
 
-            /// <summary>
-            /// The background sound of the sky.
-            /// </summary>
             [TagField(ValidTags = new[] { "lsnd" })]
             public CachedTagInstance BackgroundSound;
         }
