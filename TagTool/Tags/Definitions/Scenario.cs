@@ -413,19 +413,11 @@ namespace TagTool.Tags.Definitions
             public BspShortFlags ActiveBsps;
         }
 
-        [Flags]
-        public enum ZoneSetPotentiallyVisibleSetFlags : ushort
-        {
-            None = 0,
-            EmptyDebugPotentiallyVisibleSet = 1 << 0
-        }
-
         [TagStructure(Size = 0x2C)]
         public class ZoneSetPvsBlock : TagStructure
 		{
             public BspFlags StructureBspMask;
-            public short Version;
-            public ZoneSetPotentiallyVisibleSetFlags Flags;
+            public int Version;
             public List<BspChecksum> BspChecksums;
             public List<StructureBspPotentiallyVisibleSet> StructureBspPotentiallyVisibleSets;
             public List<PortalToDeviceMapping> PortalToDeviceMappings;
@@ -515,9 +507,14 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown;
                 }
 
-                [TagStructure(Size = 0xC)]
+                [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
                 public class Cluster2 : TagStructure
 				{
+                    [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                    public int Unknown;
+
+                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public List<UnknownBlock> Unknowns;
 
                     [TagStructure(Size = 0x1)]

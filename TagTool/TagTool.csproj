@@ -238,7 +238,7 @@
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />
-    <Compile Include="Commands\Porting\ExportMultiplayerScriptCommand.cs" />
+    <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />
     <Compile Include="Commands\Porting\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />

@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708)]
     public class ScenarioStructureBsp : TagStructure
     {
-        public int BspChecksum;
+        public uint BspChecksum;
         public FlagsValue Flags;
         public ContentPolicyFlagsValue ContentPolicyFlags;
         public ContentPolicyFlagsValue FailedContentPolicyFlags;

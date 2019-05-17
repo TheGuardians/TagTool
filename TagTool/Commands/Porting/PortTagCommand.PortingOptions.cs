@@ -123,7 +123,7 @@ namespace TagTool.Commands.Porting
 		/// (<see cref="PortTagCommand.Flags"/> &amp; flags) == flags
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to check.</param>
-		private bool FlagsAllSet(PortingFlags flags) => (Flags & flags) == flags;
+		public bool FlagsAllSet(PortingFlags flags) => (Flags & flags) == flags;
 		
 		/// <summary>
 		/// True if the flag is set (this is 100% the same as <see cref="FlagsAnySet(PortingFlags)"/>,
@@ -131,32 +131,32 @@ namespace TagTool.Commands.Porting
 		/// </summary>
 		/// <param name="flag"></param>
 		/// <returns></returns>
-		private bool FlagIsSet(PortingFlags flag) => (Flags & flag) != 0;
+		public bool FlagIsSet(PortingFlags flag) => (Flags & flag) != 0;
 
 		/// <summary>
 		/// True if ANY of the supplied <see cref="PortingFlags"/> are set, false if none are:
 		/// (<see cref="PortTagCommand.Flags"/> &amp; flags) != 0
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to check.</param>
-		private bool FlagsAnySet(PortingFlags flags) => (Flags & flags) != 0;
+		public bool FlagsAnySet(PortingFlags flags) => (Flags & flags) != 0;
 
 		/// <summary>
 		/// Sets flags explicitly (<see cref="PortTagCommand.Flags"/> |= <see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to set.</param>
-		private PortingFlags SetFlags(PortingFlags flags) => Flags |= flags;
+		public PortingFlags SetFlags(PortingFlags flags) => Flags |= flags;
 
 		/// <summary>
 		/// Removes flags explicitly (<see cref="PortTagCommand.Flags"/> &amp;= ~<see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to remove.</param>
-		private PortingFlags RemoveFlags(PortingFlags flags) => Flags &= ~flags;
+		public PortingFlags RemoveFlags(PortingFlags flags) => Flags &= ~flags;
 
 		/// <summary>
 		/// Toggles flags on or off (<see cref="PortTagCommand.Flags"/> ^= <see cref="PortingFlags"/>).
 		/// </summary>
 		/// <param name="flags">The <see cref="PortingFlags"/> to toggle.</param>
-		private PortingFlags ToggleFlags(PortingFlags flags) => Flags ^= flags;
+		public PortingFlags ToggleFlags(PortingFlags flags) => Flags ^= flags;
 
 		/// <summary>
 		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>.
