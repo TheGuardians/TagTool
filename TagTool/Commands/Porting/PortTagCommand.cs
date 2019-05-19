@@ -589,13 +589,11 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Weapon weapon:
-                    //fix warthog horn
-                    if (blamTag.Name.EndsWith("horn"))
-                    {
-                        foreach (var attach in weapon.Attachments)
+                    //fix weapon firing looping sounds
+                    foreach (var attach in weapon.Attachments)
+                        if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
-                    }
-					break;
+                    break;
 
                 case Shader rmsh:
                     rmsh.Material = ConvertStringId(rmsh.Material);
