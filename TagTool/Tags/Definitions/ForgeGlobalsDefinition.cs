@@ -6,8 +6,8 @@ using TagTool.Common;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xC0)]
-	public class ForgeGlobalsDefinition : TagStructure
-	{
+    public class ForgeGlobalsDefinition : TagStructure
+    {
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTagInstance InvisibleRenderMethod;
 
@@ -37,8 +37,8 @@ namespace TagTool.Tags.Definitions
         public List<Sky> Skies;
 
         [TagStructure(Size = 0x30)]
-		public class ReForgeMaterial : TagStructure
-		{
+        public class ReForgeMaterial : TagStructure
+        {
             [TagField(Length = 32)]
             public string Name;
 
@@ -63,8 +63,9 @@ namespace TagTool.Tags.Definitions
             public string Text;
         }
 
-        public enum PaletteCategoryType : short
+        public enum PaletteItemType : ushort
         {
+            None,
             Tool,
             Prop,
             Light,
@@ -82,13 +83,10 @@ namespace TagTool.Tags.Definitions
             KingOfTheHill,
             Territories,
             Slayer,
-            VIP,
-            Prefab,
-            Recent,
-            MapOptions
+            VIP
         }
 
-        [TagStructure(Size = 0x28)]
+        [TagStructure(Size = 0x24)]
         public class PaletteCategory : TagStructure
         {
             [TagField(Length = 32)]
@@ -96,20 +94,17 @@ namespace TagTool.Tags.Definitions
 
             public short DescriptionIndex;
             public short ParentCategoryIndex;
-
-            public PaletteCategoryType Type;
-
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
         }
 
-        [TagStructure(Size = 0x40)]
-		public class PaletteItem : TagStructure
-		{
+        [TagStructure(Size = 0x44)]
+        public class PaletteItem : TagStructure
+        {
             [TagField(Length = 32)]
             public string Name;
 
+            public PaletteItemType Type;
             public short CategoryIndex;
+            public short DescriptionIndex;
             public ushort MaxAllowed;
 
             [TagField(ValidTags = new[] { "obje" })]
@@ -224,8 +219,8 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0xC)]
-			public class Setter : TagStructure
-			{
+            public class Setter : TagStructure
+            {
                 public SetterTarget Target;
                 public SetterType Type;
                 public SetterFlags Flags;
@@ -235,8 +230,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x30)]
-		public class WeatherEffect : TagStructure
-		{
+        public class WeatherEffect : TagStructure
+        {
             [TagField(Length = 32)]
             public string Name;
 
@@ -251,8 +246,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xAC)]
-		public class Sky : TagStructure
-		{
+        public class Sky : TagStructure
+        {
             [TagField(Length = 32)]
             public string Name;
 

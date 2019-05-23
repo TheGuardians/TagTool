@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.Definitions.ForgeGlobalsDefinition;
 
 namespace TagTool.Commands.Forge
 {
@@ -17,12 +19,12 @@ namespace TagTool.Commands.Forge
 
         public ParseItemsXmlCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance instance, ForgeGlobalsDefinition definition) :
             base(true,
-                
+
                 "ParseItemsXml",
                 "",
-                
+
                 "ParseItemsXml <File>",
-                
+
                 "")
         {
             CacheContext = cacheContext;
@@ -41,12 +43,48 @@ namespace TagTool.Commands.Forge
             foreach (XmlNode node in xml["root"].ChildNodes)
                 ParseXmlNode(node);
 
+            string[] extraObjects = new string[]
+            {
+                @"objects\multi\box_l\box_l.crate",
+                @"objects\multi\box_m\box_m.crate",
+                @"objects\multi\box_xl\box_xl.crate",
+                @"objects\multi\box_xxl\box_xxl.crate",
+                @"objects\multi\box_xxxl\box_xxxl.crate",
+                @"objects\multi\wall_l\wall_l.crate",
+                @"objects\multi\wall_m\wall_m.crate",
+                @"objects\multi\wall_xl\wall_xl.crate",
+                @"objects\multi\wall_xxl\wall_xxl.crate",
+                @"objects\multi\wall_xxxl\wall_xxxl.crate"
+            };
+
+            foreach (var objTagName in extraObjects)
+            {
+                CachedTagInstance tag;
+                CacheContext.TryGetTag(objTagName, out tag);
+                var item = new PaletteItem();
+                item.Object = tag;
+                item.CategoryIndex = -1;
+                item.DescriptionIndex = -1;
+                item.MaxAllowed = 0;
+                Definition.Palette.Add(item);
+            }
+
             return true;
+        }
+
+        string TagName(CachedTagInstance tag)
+        {
+            if (tag == null)
+                return "null";
+            if (tag.Name == null || tag.Name.Length < 1)
+                return tag.ToString();
+
+            return $"{tag.Name}.{tag.Group}";
         }
 
         private Dictionary<string, short> DescriptionIndices { get; } = new Dictionary<string, short>();
 
-        private ForgeGlobalsDefinition.PaletteCategoryType? CategoryType { get; set; } = null;
+
         private Stack<(string, int)> CategoryStack { get; } = new Stack<(string, int)>();
 
         private ForgeGlobalsDefinition.PaletteItem Item { get; set; } = null;
@@ -65,10 +103,11 @@ namespace TagTool.Commands.Forge
                     var categoryName = node.Attributes["name"].InnerText;
 
                     if (node.Attributes["id"] != null)
-                        CategoryType = ParseEnum<ForgeGlobalsDefinition.PaletteCategoryType>(node.Attributes["id"].InnerText);
-
-                    if (!CategoryType.HasValue)
-                        throw new FormatException();
+                    {
+                        var type = node.Attributes["id"].InnerText;
+                        if (type == "prefabs" || type == "recent" || type == "map_options")
+                            return;
+                    }
 
                     var categoryHelp = "";
 
@@ -96,8 +135,7 @@ namespace TagTool.Commands.Forge
                     {
                         Name = categoryName,
                         DescriptionIndex = (short)descriptionIndex,
-                        ParentCategoryIndex = (short)(CategoryStack.Count > 0 ? CategoryStack.Peek().Item2 : -1),
-                        Type = CategoryType.Value
+                        ParentCategoryIndex = (short)(CategoryStack.Count > 0 ? CategoryStack.Peek().Item2 : -1)
                     });
 
                     CategoryStack.Push((categoryName, categoryIndex));
@@ -112,11 +150,19 @@ namespace TagTool.Commands.Forge
                     if (CategoryStack.Count == 0)
                         throw new FormatException();
 
+                    ushort maxAllowed = 0;
+                    if (node.Attributes["max_allowed"] != null)
+                        maxAllowed = ushort.Parse(node.Attributes["max_allowed"].InnerText);
+
                     Item = new ForgeGlobalsDefinition.PaletteItem
                     {
                         Name = node.Attributes["name"].InnerText,
                         CategoryIndex = (short)CategoryStack.Peek().Item2,
+                        DescriptionIndex = -1,
+                        MaxAllowed = maxAllowed,
                         Object = CacheContext.TryGetTag(node.Attributes["tagindex"].InnerText, out var obj) ? obj : null,
+                        Type = ParseEnum<ForgeGlobalsDefinition.PaletteItemType>(node.Attributes["type"].InnerText)
+                            ?? ForgeGlobalsDefinition.PaletteItemType.None,
                         Setters = new List<ForgeGlobalsDefinition.PaletteItem.Setter>()
                     };
 
@@ -158,7 +204,7 @@ namespace TagTool.Commands.Forge
 
         private ForgeGlobalsDefinition.PaletteItem.SetterTarget ParseSetterTarget(string query)
         {
-            switch(query)
+            switch (query)
             {
                 case "on_map_at_start":
                     return ForgeGlobalsDefinition.PaletteItem.SetterTarget.General_OnMapAtStart;
@@ -325,25 +371,15 @@ namespace TagTool.Commands.Forge
             }
         }
 
-        private T? ParseEnum<T>(string query) where T: struct
+        private T? ParseEnum<T>(string query) where T : struct
         {
             object found;
 
             switch (query.ToLower())
             {
-                case "koth" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteCategoryType):
+                case "koth" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteItemType):
                     query = "KingOfTheHill";
                     break;
-                case "props" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteCategoryType):
-                    query = "Prop";
-                    break;
-                case "gameplay" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteCategoryType):
-                    query = "Game";
-                    break;
-                case "prefabs" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteCategoryType):
-                    query = "Prefab";
-                    break;
-
                 case "int" when typeof(T) == typeof(ForgeGlobalsDefinition.PaletteItem.SetterType):
                     query = "Integer";
                     break;
