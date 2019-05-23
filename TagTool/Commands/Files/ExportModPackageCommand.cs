@@ -8,6 +8,7 @@ using Sytem.IO;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Files
 {
@@ -74,6 +75,19 @@ namespace TagTool.Commands.Files
                         throw new ArgumentException(args[0]);
                 }
             }
+
+            var contentItem = new ContentItemMetadata();
+
+            Console.WriteLine("Enter the name of the mod package:");
+            contentItem.Name = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the description of the mod package:");
+            contentItem.Description = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the author of the mod package:");
+            contentItem.Author = Console.ReadLine().Trim();
 
             if (!promptTags && !promptMaps && !fromIndex.HasValue && !toIndex.HasValue)
             {
@@ -257,13 +271,19 @@ namespace TagTool.Commands.Files
                     packageFile.Directory.Create();
 
                 using (var packageStream = packageFile.Create())
-                using (var writer = new BinaryWriter(packageStream))
+                using (var writer = new EndianWriter(packageStream))
                 {
                     //
                     // reserve header space
                     //
 
                     writer.Write(new byte[48]);
+
+                    //
+                    // write content item metadata
+                    //
+
+                    CacheContext.Serialize(new DataSerializationContext(writer), contentItem);
 
                     //
                     // write tag cache

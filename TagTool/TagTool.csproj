@@ -216,6 +216,7 @@
     <Compile Include="Cache\CacheFileSharedType.cs" />
     <Compile Include="Cache\CacheFileType.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
+    <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
     <Compile Include="Cache\MapVariant.cs" />

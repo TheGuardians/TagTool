@@ -437,11 +437,25 @@ namespace TagTool.Commands.Porting
 
 			blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Name);
 
-			//
-			// Perform post-conversion fixups to Blam data
-			//
+            //
+            // Perform post-conversion fixups to Blam data
+            //
 
-			switch (blamDefinition)
+            if (blamDefinition is GameObject obje && BlamCache.Version < CacheVersion.Halo3ODST)
+            {
+                //
+                // fix weapon firing looping sounds
+                //
+
+                var primaryFiring = CacheContext.GetStringId("primary_firing");
+                var primaryRateOfFire = CacheContext.GetStringId("primary_rate_of_fire");
+
+                foreach (var attach in obje.Attachments)
+                    if (attach.PrimaryScale == primaryFiring)
+                        attach.PrimaryScale = primaryRateOfFire;
+            }
+
+            switch (blamDefinition)
 			{
 				case AreaScreenEffect sefc:
 					if (BlamCache.Version < CacheVersion.Halo3ODST)
@@ -586,13 +600,6 @@ namespace TagTool.Commands.Porting
 
                 case TextValuePairDefinition sily:
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
-                    break;
-
-                case Weapon weapon:
-                    //fix weapon firing looping sounds
-                    foreach (var attach in weapon.Attachments)
-                        if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
-                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                     break;
 
                 case Shader rmsh:

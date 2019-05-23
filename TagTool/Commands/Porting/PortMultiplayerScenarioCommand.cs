@@ -310,7 +310,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Scenery in newScenery)
+            {
                 Scenery.OriginBspIndex = 0;
+                Scenery.AllowedZoneSets = 1;
+            }
 
             scnr.Scenery = newScenery;
 
@@ -329,7 +332,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Biped in newBipeds)
+            {
                 Biped.OriginBspIndex = 0;
+                Biped.AllowedZoneSets = 1;
+            }
 
             scnr.Bipeds = newBipeds;
 
@@ -348,7 +354,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Vehicle in newVehicles)
+            {
                 Vehicle.OriginBspIndex = 0;
+                Vehicle.AllowedZoneSets = 1;
+            }
 
             scnr.Vehicles = newVehicles;
 
@@ -367,7 +376,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Equipment in newEquipment)
+            {
                 Equipment.OriginBspIndex = 0;
+                Equipment.AllowedZoneSets = 1;
+            }
 
             scnr.Equipment = newEquipment;
 
@@ -386,7 +398,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Weapon in newWeapons)
+            {
                 Weapon.OriginBspIndex = 0;
+                Weapon.AllowedZoneSets = 1;
+            }
 
             scnr.Weapons = newWeapons;
 
@@ -405,7 +420,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Machine in newMachines)
+            {
                 Machine.OriginBspIndex = 0;
+                Machine.AllowedZoneSets = 1;
+            }
 
             scnr.Machines = newMachines;
 
@@ -424,7 +442,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Terminal in newTerminals)
+            {
                 Terminal.OriginBspIndex = 0;
+                Terminal.AllowedZoneSets = 1;
+            }
 
             scnr.Terminals = newTerminals;
 
@@ -432,20 +453,26 @@ namespace TagTool.Commands.Porting
             // Rebuild the scenario alternateRealityDevice placements
             //
 
-            var newAlternateRealityDevices = new List<Scenario.AlternateRealityDeviceInstance>();
-
-            foreach (var alternateRealityDevice in scnr.AlternateRealityDevices)
+            if (scnr.AlternateRealityDevicePalette != null)
             {
-                if (alternateRealityDevice.OriginBspIndex == bspIndex)
-                    newAlternateRealityDevices.Add(alternateRealityDevice);
-                else if (alternateRealityDevice.PaletteIndex != -1)
-                    scnr.AlternateRealityDevicePalette[alternateRealityDevice.PaletteIndex].Object = null;
+                var newAlternateRealityDevices = new List<Scenario.AlternateRealityDeviceInstance>();
+
+                foreach (var alternateRealityDevice in scnr.AlternateRealityDevices)
+                {
+                    if (alternateRealityDevice.OriginBspIndex == bspIndex)
+                        newAlternateRealityDevices.Add(alternateRealityDevice);
+                    else if (alternateRealityDevice.PaletteIndex != -1)
+                        scnr.AlternateRealityDevicePalette[alternateRealityDevice.PaletteIndex].Object = null;
+                }
+
+                foreach (var AlternateRealityDevice in newAlternateRealityDevices)
+                {
+                    AlternateRealityDevice.OriginBspIndex = 0;
+                    AlternateRealityDevice.AllowedZoneSets = 1;
+                }
+
+                scnr.AlternateRealityDevices = newAlternateRealityDevices;
             }
-
-            foreach (var AlternateRealityDevice in newAlternateRealityDevices)
-                AlternateRealityDevice.OriginBspIndex = 0;
-
-            scnr.AlternateRealityDevices = newAlternateRealityDevices;
 
             //
             // Rebuild the scenario control placements
@@ -462,7 +489,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Control in newControls)
+            {
                 Control.OriginBspIndex = 0;
+                Control.AllowedZoneSets = 1;
+            }
 
             scnr.Controls = newControls;
 
@@ -481,7 +511,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var SoundScenery in newSoundScenery)
+            {
                 SoundScenery.OriginBspIndex = 0;
+                SoundScenery.AllowedZoneSets = 1;
+            }
 
             scnr.SoundScenery = newSoundScenery;
 
@@ -500,7 +533,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Giant in newGiants)
+            {
                 Giant.OriginBspIndex = 0;
+                Giant.AllowedZoneSets = 1;
+            }
 
             scnr.Giants = newGiants;
 
@@ -519,7 +555,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var EffectScenery in newEffectScenery)
+            {
                 EffectScenery.OriginBspIndex = 0;
+                EffectScenery.AllowedZoneSets = 1;
+            }
 
             scnr.EffectScenery = newEffectScenery;
 
@@ -538,7 +577,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var LightVolume in newLightVolumes)
+            {
                 LightVolume.OriginBspIndex = 0;
+                LightVolume.AllowedZoneSets = 1;
+            }
 
             scnr.LightVolumes = newLightVolumes;
 
@@ -557,7 +599,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Crate in newCrates)
+            {
                 Crate.OriginBspIndex = 0;
+                Crate.AllowedZoneSets = 1;
+            }
 
             scnr.Crates = newCrates;
 
@@ -596,7 +641,10 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var Creature in newCreatures)
+            {
                 Creature.OriginBspIndex = 0;
+                Creature.AllowedZoneSets = 1;
+            }
 
             for (short x = 0; x < scnr.CreaturePalette.Count; x++)
             {
