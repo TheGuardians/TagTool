@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TagTool.Tags;
+using static System.Runtime.InteropServices.CharSet;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Serialization
@@ -269,14 +270,34 @@ namespace TagTool.Serialization
         {
             if (valueInfo == null || valueInfo.Length == 0)
                 throw new ArgumentException("Cannot serialize a string with no length set");
+
+            var charSize = valueInfo.CharSet == Unicode ? 2 : 1;
+            var byteCount = valueInfo.Length * charSize;
             var clampedLength = 0;
+
             if (str != null)
             {
-                var bytes = Encoding.ASCII.GetBytes(str);
-                clampedLength = Math.Min(valueInfo.Length - 1, bytes.Length);
+                byte[] bytes = null;
+
+                switch (valueInfo.CharSet)
+                {
+                    case Ansi:
+                        bytes = Encoding.ASCII.GetBytes(str);
+                        break;
+
+                    case Unicode:
+                        bytes = Encoding.Unicode.GetBytes(str);
+                        break;
+
+                    default:
+                        throw new NotSupportedException(valueInfo.CharSet.ToString());
+                }
+
+                clampedLength = Math.Min(byteCount - charSize, bytes.Length);
                 writer.Write(bytes, 0, clampedLength);
             }
-            for (var i = clampedLength; i < valueInfo.Length; i++)
+
+            for (var i = clampedLength; i < byteCount; i++)
                 writer.Write((byte)0);
         }
 
