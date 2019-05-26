@@ -68,6 +68,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ModelAnimationGraphs.AnimationTestCommand(cacheContext));
             context.AddCommand(new ExportTagDefinitionsCommand(cacheContext));
             context.AddCommand(new ModelAnimationGraphs.ApplySprintFixupsCommand(cacheContext));
+            context.AddCommand(new RenderModels.ListMultiMeshModelsCommand(cacheContext));
 
             return context;
         }

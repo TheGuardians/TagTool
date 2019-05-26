@@ -172,6 +172,8 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Animations\Codecs\AnimationCodec.cs" />
+    <Compile Include="Animations\Codecs\AnimationCodecHeader.cs" />
     <Compile Include="Audio\BlamSound.cs" />
     <Compile Include="Audio\Converter\FSB4.cs" />
     <Compile Include="Audio\Converter\HeaderChunk.cs" />
@@ -244,6 +246,7 @@
     <Compile Include="Commands\Porting\ExtractSoundCommand.cs" />
     <Compile Include="Commands\Porting\MergeAnimationGraphsCommand.cs" />
     <Compile Include="Commands\Porting\ExtractXMACommand.cs" />
+    <Compile Include="Commands\RenderModels\ListMultiMeshModelsCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\LocalizeTagResourcesCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
