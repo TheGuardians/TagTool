@@ -46,6 +46,7 @@ namespace TagTool.Commands.Models
             {
                 case "obj":
                 case "amf":
+                case "dae":
                     break;
 
                 default:
@@ -62,8 +63,9 @@ namespace TagTool.Commands.Models
                 return true;
             }
 
+            
             var modelVariant = Definition.Variants.FirstOrDefault(v => (CacheContext.GetString(v.Name) ?? v.Name.ToString()) == variantName);
-            if (modelVariant == null && Definition.Variants.Count > 0)
+            if (modelVariant == null && Definition.Variants.Count > 0 && fileType != "dae")
             {
                 Console.WriteLine("Unable to find variant \"{0}\"", variantName);
                 Console.WriteLine("Use \"listvariants\" to list available variants.");
@@ -116,6 +118,12 @@ namespace TagTool.Commands.Models
                         ExtractAmf(modelFile, renderModel, modelVariant, resourceDefinition, resourceStream);
                         break;
 
+                    case "dae":
+                        ModelExtractor extractor = new ModelExtractor(CacheContext, renderModel, null, null, null);
+                        extractor.ExtractRenderModel();
+                        extractor.ExportCollada(modelFile);
+                        break;
+                    
                     default:
                         throw new NotImplementedException(fileType);
                 }

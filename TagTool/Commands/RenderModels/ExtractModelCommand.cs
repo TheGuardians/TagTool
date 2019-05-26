@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Serialization;
+using Assimp;
 
 namespace TagTool.Commands.RenderModels
 {
@@ -41,6 +42,7 @@ namespace TagTool.Commands.RenderModels
             switch (fileType)
             {
                 case "obj":
+                case "dae":
                     break;
 
                 default:
@@ -77,7 +79,10 @@ namespace TagTool.Commands.RenderModels
                 {
                     case "obj":
                         return ExtractObj(variantName, modelFile, Definition, resourceDefinition, resourceStream);
-                        
+/*
+                    case "dae":
+                        return ExtractCollada("test");
+                        */
                     default:
                         throw new NotImplementedException(fileType);
                 }
@@ -86,7 +91,7 @@ namespace TagTool.Commands.RenderModels
 
         private bool ExtractObj(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
         {
-            var meshes = new Dictionary<string, Mesh>();
+            var meshes = new Dictionary<string, TagTool.Geometry.Mesh>();
             var vertexCompressor = new VertexCompressor(renderModel.Geometry.Compression[0]);
 
             foreach (var region in renderModel.Regions)
@@ -132,6 +137,58 @@ namespace TagTool.Commands.RenderModels
             Console.WriteLine("done!");
 
             return true;
+        }
+
+        private bool ExtractCollada(string variantName, FileInfo modelFile, RenderModel renderModel, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
+        {
+            var meshes = new Dictionary<string, TagTool.Geometry.Mesh>();
+            var vertexCompressor = new VertexCompressor(renderModel.Geometry.Compression[0]);
+
+            foreach (var region in renderModel.Regions)
+            {
+                var regionName = CacheContext.GetString(region.Name);
+
+                foreach (var permutation in region.Permutations)
+                {
+                    var permutationName = CacheContext.GetString(permutation.Name);
+
+                    if (variantName != "*" && variantName != permutationName)
+                        continue;
+
+                    for (var i = 0; i < permutation.MeshCount; i++)
+                    {
+                        var name = $"{regionName}_{permutationName}_{i}";
+                        meshes[name] = renderModel.Geometry.Meshes[permutation.MeshIndex + i];
+                    }
+                }
+            }
+
+            if (meshes.Count == 0)
+            {
+                Console.WriteLine($"ERROR: No meshes found under variant '{variantName}'!");
+                return false;
+            }
+
+            Console.Write("Extracting {0} mesh(es)...", meshes.Count);
+
+            using (var objFile = new StreamWriter(modelFile.Create()))
+            {
+                var objExtractor = new ObjExtractor(objFile);
+
+                foreach (var entry in meshes)
+                {
+                    var meshReader = new MeshReader(CacheContext.Version, entry.Value, resourceDefinition);
+                    objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream, entry.Key);
+                }
+
+                objExtractor.Finish();
+            }
+
+            Console.WriteLine("done!");
+
+            return true;
+
+            
         }
     }
 }

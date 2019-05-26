@@ -255,6 +255,7 @@
     <Compile Include="Common\Crc32.cs" />
     <Compile Include="Common\DatumIndex.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Geometry\ModelExtractor.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />
     <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
     <Compile Include="Scripting\Compiler\IScriptSyntax.cs" />
