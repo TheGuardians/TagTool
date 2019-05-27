@@ -210,7 +210,7 @@ namespace TagTool.Geometry
             // get offset in the list of all vertices for the mesh
             var vertexOffset = GetPartVertexOffset(meshIndex, partIndex);
 
-            vertices = vertices.GetRange(vertexOffset, geometryPart.VertexCount);
+            //vertices = vertices.GetRange(vertexOffset, geometryPart.VertexCount);
 
             var indices = ReadIndices(meshReader, geometryPart, RenderModelResourceStream);
 
@@ -228,11 +228,12 @@ namespace TagTool.Geometry
             
             mesh.SetIndices(int_indices, 3);
 
-            foreach (var vertex in vertices)
+            for(int i = vertexOffset; i<vertexOffset + geometryPart.VertexCount; i++)
             {
+                var vertex = vertices[i];
                 mesh.Vertices.Add(vertex.Position);
 
-                if(vertex.Normal != null)
+                if (vertex.Normal != null)
                     mesh.Normals.Add(vertex.Normal);
 
                 if (vertex.TexCoords != null)
@@ -244,18 +245,30 @@ namespace TagTool.Geometry
                 if (vertex.Binormals != null)
                     mesh.BiTangents.Add(vertex.Binormals);
 
-               // Add skinned mesh support and more
+                // Add skinned mesh support and more
             }
-               
-            // create faces VERIFY WHEN INDEX COUNT IS NOT A MULTIPLE OF 3
+            
+            // create faces
 
-            for(int i =0; i< indices.Length; i+=3)
-            {
-                int[] face_indices = { indices[i], indices[i + 1], indices[i + 2] };
-                mesh.Faces.Add(new Face(face_indices));
-            }
+            mesh.Faces.AddRange(GenerateFaces(int_indices));
 
             return mesh;
+        }
+
+        private List<Face> GenerateFaces(int[] indices)
+        {
+            List<Face> faces = new List<Face>();
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                var a = indices[i];
+                var b = indices[i + 1];
+                var c = indices[i + 2];
+                if (a == b || b == c || a == c) // remove 2 vertex faces
+                    continue;
+                else
+                    faces.Add(new Face(new int[] { a, b, c }));
+            }
+            return faces;
         }
 
         private int GetPartVertexOffset(int meshIndex, int partIndex)
