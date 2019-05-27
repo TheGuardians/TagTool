@@ -111,6 +111,7 @@ namespace TagTool.Geometry
         {
             Node node = new Node(CacheContext.GetString(permutation.Name));
 
+            /* Disabled until assimpNet / assimp is fixed 
             // No need to add another layer of nodes since there is only one mesh
             if(permutation.MeshCount == 1)
             {
@@ -134,10 +135,12 @@ namespace TagTool.Geometry
             // build a layer of nodes for each mesh
             else
             {
-                for (int i = 0; i < permutation.MeshCount; i++)
-                {
-                    node.Children.Add(ExtractMesh(i));
-                }
+                
+            }*/
+
+            for (int i = 0; i < permutation.MeshCount; i++)
+            {
+                node.Children.Add(ExtractMesh(i + permutation.MeshIndex));
             }
             return node;
         }
@@ -153,18 +156,20 @@ namespace TagTool.Geometry
             var mesh = RenderModel.Geometry.Meshes[mesh_index];
             for (int i = 0; i < mesh.Parts.Count; i++)
             {
+                Node newNode = new Node($"part_{i}");
                 int absSubMeshIndex = GetAbsoluteIndexSubMesh(mesh_index) + i;
                 if (MeshMapping.ContainsKey(absSubMeshIndex))
                 {
                     MeshMapping.TryGetValue(absSubMeshIndex, out int sceneMeshIndex);
-                    node.MeshIndices.Add(sceneMeshIndex);
+                    newNode.MeshIndices.Add(sceneMeshIndex);
                 }
                 else
                 {
                     int sceneMeshIndex = ExtractMeshPart(mesh_index, i);
                     MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
-                    node.MeshIndices.Add(sceneMeshIndex);
+                    newNode.MeshIndices.Add(sceneMeshIndex);
                 }
+                node.Children.Add(newNode);
             }
             return node;
         }
