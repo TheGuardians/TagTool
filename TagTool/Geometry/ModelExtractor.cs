@@ -255,19 +255,19 @@ namespace TagTool.Geometry
             
             // create faces
 
-            mesh.Faces.AddRange(GenerateFaces(int_indices));
+            mesh.Faces.AddRange(GenerateFaces(int_indices, vertexOffset));
 
             return mesh;
         }
 
-        private List<Face> GenerateFaces(int[] indices)
+        private List<Face> GenerateFaces(int[] indices, int vertexOffset)
         {
             List<Face> faces = new List<Face>();
             for (int i = 0; i < indices.Length; i += 3)
             {
-                var a = indices[i];
-                var b = indices[i + 1];
-                var c = indices[i + 2];
+                var a = indices[i]  - vertexOffset;
+                var b = indices[i + 1] - vertexOffset;
+                var c = indices[i + 2] - vertexOffset;
                 if (a == b || b == c || a == c) // remove 2 vertex faces
                     continue;
                 else
