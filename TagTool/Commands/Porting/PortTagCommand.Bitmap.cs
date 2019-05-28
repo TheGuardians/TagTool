@@ -68,6 +68,12 @@ namespace TagTool.Commands.Porting
             var image = bitmap.Images[imageIndex];
             BaseBitmap baseBitmap = BitmapConverter.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex, BlamCache.Version);
 
+            if(tagName == $"shaders\\default_bitmaps\\bitmaps\\color_white")
+            {
+                baseBitmap.Data = new byte[] { 0xFF, 0xFF, 0xFF, 0x00 };
+            }
+
+
             if (baseBitmap == null)
                 return null;
 
