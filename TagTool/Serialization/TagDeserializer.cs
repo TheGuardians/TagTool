@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
+using BindingFlags = System.Reflection.BindingFlags;
 
 namespace TagTool.Serialization
 {
@@ -91,9 +92,26 @@ namespace TagTool.Serialization
             if (attr.Flags.HasFlag(Runtime))
                 return;
 
-            if (tagFieldInfo.Attribute.Flags.HasFlag(Padding))
+            if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
             {
-                reader.BaseStream.Position += tagFieldInfo.Attribute.Length;
+                var type = instance.GetType();
+                var field = type.GetField(
+                    attr.Field,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+
+                var attr2 = TagStructure.GetTagFieldAttribute(type, field);
+
+                if ((attr2.Version != CacheVersion.Unknown && attr2.Version == Version) ||
+                    (attr2.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Version, attr2.MinVersion, attr2.MaxVersion)))
+                {
+                    attr.Length = (int)Convert.ChangeType(field.GetValue(instance), typeof(int));
+                }
+                else throw new InvalidOperationException(attr2.Field);
+            }
+
+            if (attr.Flags.HasFlag(Padding))
+            {
+                reader.BaseStream.Position += attr.Length;
             }
             else
             {

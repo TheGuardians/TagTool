@@ -70,6 +70,16 @@ namespace TagTool.Tags
         /// (i.e., world units, [0,1], degrees, etc...)
         /// </summary>
         public string Format { get; set; } = "";
+
+        /// <summary>
+        /// If the field is an array and has relative length, the name of the field containing the length.
+        /// </summary>
+        public string Field { get; set; } = "";
+
+        /// <summary>
+        /// If the field is a real number, the compression of the field.
+        /// </summary>
+        public TagFieldCompression Compression { get; set; } = TagFieldCompression.None;
     }
 
     [Flags]
@@ -81,7 +91,16 @@ namespace TagTool.Tags
         Padding = 1 << 2,
         Pointer = 1 << 3,
         Runtime = 1 << 4,
-        Fraction = 1 << 5,
-        Resource = 1 << 6,
+        Relative = 1 << 5,
+        Fraction = 1 << 6,
+        Resource = 1 << 7,
+    }
+
+    public enum TagFieldCompression
+    {
+        None,
+        Real8,
+        Real16,
+        Real32
     }
 }

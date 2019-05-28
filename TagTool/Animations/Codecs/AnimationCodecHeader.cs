@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldCompression;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Animations.Codecs
 {
@@ -22,9 +25,9 @@ namespace TagTool.Animations.Codecs
         public byte RotationNodeCount;
 
         /// <summary>
-        /// The number of nodes with position frames.
+        /// The number of nodes with translation frames.
         /// </summary>
-        public byte PositionNodeCount;
+        public byte TranslationNodeCount;
 
         /// <summary>
         /// The number of nodes with scale frames.
