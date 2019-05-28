@@ -186,6 +186,7 @@ namespace TagTool.Tags
             { new Tag("mdlg"), typeof(AiMissionDialogue) },
             { new Tag("mffn"), typeof(Muffin) },
             { new Tag("mode"), typeof(RenderModel) },
+            { new Tag("modg"), typeof(ModGlobalsDefinition) },
             { new Tag("mulg"), typeof(MultiplayerGlobals) },
             { new Tag("nclt"), typeof(NewCinematicLighting) },
             { new Tag("obje"), typeof(GameObject) },
