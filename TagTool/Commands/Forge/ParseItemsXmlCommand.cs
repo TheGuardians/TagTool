@@ -45,6 +45,7 @@ namespace TagTool.Commands.Forge
 
             string[] extraObjects = new string[]
             {
+                @"objects\levels\multi\shrine\behemoth\behemoth_forge.vehicle",
                 @"objects\multi\box_l\box_l.crate",
                 @"objects\multi\box_m\box_m.crate",
                 @"objects\multi\box_xl\box_xl.crate",
