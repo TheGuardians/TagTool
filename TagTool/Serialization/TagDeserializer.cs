@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
+using System.IO;
 
 namespace TagTool.Serialization
 {
@@ -97,7 +98,7 @@ namespace TagTool.Serialization
                 var type = instance.GetType();
                 var field = type.GetField(
                     attr.Field,
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                    BindingFlags.Instance | BindingFlags.Public);
 
                 var attr2 = TagStructure.GetTagFieldAttribute(type, field);
 
@@ -192,6 +193,11 @@ namespace TagTool.Serialization
             if (valueInfo != null && valueInfo.Flags.HasFlag(Pointer))
                 return DeserializeIndirectValue(reader, context, valueType);
 
+            var compression = TagFieldCompression.None;
+
+            if (valueInfo != null && valueInfo.Compression != TagFieldCompression.None)
+                compression = valueInfo.Compression;
+
             // enum = Enum type
             if (valueType.IsEnum)
                 return DeserializePrimitiveValue(reader, valueType.GetEnumUnderlyingType());
@@ -218,9 +224,9 @@ namespace TagTool.Serialization
 
             // Color types
             if (valueType == typeof(RealRgbColor))
-                return new RealRgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealRgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(RealArgbColor))
-                return new RealArgbColor(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealArgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(ArgbColor))
                 return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 
@@ -231,38 +237,38 @@ namespace TagTool.Serialization
 
             if (valueType == typeof(RealEulerAngles2d))
             {
-                var i = Angle.FromRadians(reader.ReadSingle());
-                var j = Angle.FromRadians(reader.ReadSingle());
+                var i = Angle.FromRadians(reader.ReadSingle(compression));
+                var j = Angle.FromRadians(reader.ReadSingle(compression));
                 return new RealEulerAngles2d(i, j);
             }
             else if (valueType == typeof(RealEulerAngles3d))
             {
-                var i = Angle.FromRadians(reader.ReadSingle());
-                var j = Angle.FromRadians(reader.ReadSingle());
-                var k = Angle.FromRadians(reader.ReadSingle());
+                var i = Angle.FromRadians(reader.ReadSingle(compression));
+                var j = Angle.FromRadians(reader.ReadSingle(compression));
+                var k = Angle.FromRadians(reader.ReadSingle(compression));
                 return new RealEulerAngles3d(i, j, k);
             }
 
             if (valueType == typeof(RealPoint2d))
-                return new RealPoint2d(reader.ReadSingle(), reader.ReadSingle());
+                return new RealPoint2d(reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealPoint3d))
-                return new RealPoint3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealPoint3d(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealVector2d))
-                return new RealVector2d(reader.ReadSingle(), reader.ReadSingle());
+                return new RealVector2d(reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealVector3d))
-                return new RealVector3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealVector3d(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealQuaternion))
-                return new RealQuaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealQuaternion(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealPlane2d))
-                return new RealPlane2d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealPlane2d(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealPlane3d))
-                return new RealPlane3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                return new RealPlane3d(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             if (valueType == typeof(RealMatrix4x3))
                 return new RealMatrix4x3(
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression),
+                    reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression),
+                    reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression),
+                    reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
 
             // StringID
             if (valueType == typeof(StringId))
@@ -270,7 +276,7 @@ namespace TagTool.Serialization
 
             // Angle (radians)
             if (valueType == typeof(Angle))
-                return Angle.FromRadians(reader.ReadSingle());
+                return Angle.FromRadians(reader.ReadSingle(compression));
 
             if (valueType == typeof(DatumIndex))
                 return new DatumIndex(reader.ReadUInt32());
@@ -435,9 +441,6 @@ namespace TagTool.Serialization
         /// <returns>The deserialized array.</returns>
         public Array DeserializeInlineArray(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
         {
-            if (valueInfo == null || valueInfo.Length == 0)
-                throw new ArgumentException("Cannot deserialize an inline array with no count set");
-
             // Create the array and read the elements in order
             var elementCount = valueInfo.Length;
             var elementType = valueType.GetElementType();

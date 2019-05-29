@@ -172,9 +172,9 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
-    <Compile Include="Animations\Codecs\AnimationCodec.cs" />
+    <Compile Include="Animations\Codecs\AnimationCodecData.cs" />
+    <Compile Include="Animations\Codecs\AnimationCodecType.cs" />
     <Compile Include="Animations\Codecs\AnimationCodecHeader.cs" />
-    <Compile Include="Animations\Codecs\AnimationData.cs" />
     <Compile Include="Animations\Codecs\QuantizedRotationOnlyData.cs" />
     <Compile Include="Animations\Codecs\UncompressedAnimatedData.cs" />
     <Compile Include="Animations\Codecs\UncompressedStaticData.cs" />

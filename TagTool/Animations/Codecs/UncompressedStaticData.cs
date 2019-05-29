@@ -1,75 +1,99 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Sytem.IO;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Tags;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Animations.Codecs
 {
-    public class UncompressedStaticData : AnimationData
+    public class UncompressedStaticData : AnimationCodecData
     {
         public override void Read(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianReader reader)
         {
-            RotationFrames = new List<List<RealQuaternion>>();
+            RotationKeyframes = new List<List<int>>();
+            Rotations = new List<List<RealQuaternion>>();
 
             for (var i = 0; i < header.RotationNodeCount; i++)
-                RotationFrames.Add(
-                    new List<RealQuaternion>
-                    {
-                        new RealQuaternion(
-                            reader.ReadInt16() / (float)short.MaxValue,
-                            reader.ReadInt16() / (float)short.MaxValue,
-                            reader.ReadInt16() / (float)short.MaxValue,
-                            reader.ReadInt16() / (float)short.MaxValue)
-                        .Normalize()
-                    });
+            {
+                Rotations.Add(new List<RealQuaternion>
+                {
+                    new RealQuaternion(
+                        reader.ReadSingle(TagFieldCompression.Int16),
+                        reader.ReadSingle(TagFieldCompression.Int16),
+                        reader.ReadSingle(TagFieldCompression.Int16),
+                        reader.ReadSingle(TagFieldCompression.Int16))
+                    .Normalize()
+                });
+            }
 
-            TranslationFrames = new List<List<RealPoint3d>>();
+            TranslationKeyframes = new List<List<int>>();
+            Translations = new List<List<RealPoint3d>>();
 
             for (var i = 0; i < header.TranslationNodeCount; i++)
-                TranslationFrames.Add(
-                    new List<RealPoint3d>
-                    {
-                        new RealPoint3d(
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle())
-                    });
+            {
+                Translations.Add(new List<RealPoint3d>
+                {
+                    new RealPoint3d(
+                        reader.ReadSingle() * 100.0f,
+                        reader.ReadSingle() * 100.0f,
+                        reader.ReadSingle() * 100.0f)
+                });
+            }
 
-            ScaleFrames = new List<List<float>>();
+            ScaleKeyframes = new List<List<int>>();
+            Scales = new List<List<float>>();
 
             for (var i = 0; i < header.ScaleNodeCount; i++)
-                ScaleFrames.Add(new List<float> { reader.ReadSingle() });
+            {
+                Scales.Add(new List<float>
+                {
+                    reader.ReadSingle()
+                });
+            }
         }
 
         public override void Write(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianWriter writer)
         {
-            header.RotationNodeCount = (byte)RotationFrames.Count;
+            groupMember.FrameCount = 0;
 
-            foreach (var rotations in RotationFrames)
+            RotationKeyframes = new List<List<int>>();
+            TranslationKeyframes = new List<List<int>>();
+            ScaleKeyframes = new List<List<int>>();
+
+            header.RotationNodeCount = (byte)Rotations.Count;
+
+            foreach (var rotations in Rotations)
             {
                 var rotation = rotations[0];
-
-                writer.Write((short)(short.MaxValue * rotation.I));
-                writer.Write((short)(short.MaxValue * rotation.J));
-                writer.Write((short)(short.MaxValue * rotation.K));
-                writer.Write((short)(short.MaxValue * rotation.W));
+                writer.Write(rotation.I, TagFieldCompression.Int16);
+                writer.Write(rotation.J, TagFieldCompression.Int16);
+                writer.Write(rotation.K, TagFieldCompression.Int16);
+                writer.Write(rotation.W, TagFieldCompression.Int16);
             }
 
-            header.TranslationNodeCount = (byte)TranslationFrames.Count;
+            header.TranslationNodeCount = (byte)Translations.Count;
 
-            foreach (var translations in TranslationFrames)
+            foreach (var translations in Translations)
             {
                 var translation = translations[0];
-
-                writer.Write(translation.X);
-                writer.Write(translation.Y);
-                writer.Write(translation.Z);
+                writer.Write(translation.X / 100.0f);
+                writer.Write(translation.Y / 100.0f);
+                writer.Write(translation.Z / 100.0f);
             }
 
-            header.ScaleNodeCount = (byte)ScaleFrames.Count;
+            header.ScaleNodeCount = (byte)Scales.Count;
 
-            foreach (var scales in ScaleFrames)
-                writer.Write(scales[0]);
+            foreach (var scales in Scales)
+            {
+                var scale = scales[0];
+                writer.Write(scale);
+            }
         }
     }
 }

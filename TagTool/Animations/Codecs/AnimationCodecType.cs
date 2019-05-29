@@ -1,6 +1,6 @@
 ﻿namespace TagTool.Animations.Codecs
 {
-    public enum AnimationCodec : sbyte
+    public enum AnimationCodecType : sbyte
     {
         NoCompression,
         UncompressedStatic,
@@ -10,6 +10,6 @@
         WordKeyframeLightlyQuantized,
         ReverseByteKeyframeLightlyQuantized,
         ReverseWordKeyframeLightlyQuantized,
-        BlendScreen
+        BlendScreen,
     }
 }

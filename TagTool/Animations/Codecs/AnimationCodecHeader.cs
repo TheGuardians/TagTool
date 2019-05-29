@@ -17,7 +17,7 @@ namespace TagTool.Animations.Codecs
         /// <summary>
         /// The codec type used for the animation data.
         /// </summary>
-        public AnimationCodec Codec;
+        public AnimationCodecType CodecType;
 
         /// <summary>
         /// The number of nodes with rotation frames.
@@ -34,17 +34,17 @@ namespace TagTool.Animations.Codecs
         /// </summary>
         public byte ScaleNodeCount;
 
-        public uint Unknown4;
+        public float Unknown4;
 
         /// <summary>
         /// The playback rate of the animation data.
         /// </summary>
         public float PlaybackRate = 1.0f;
 
-        public uint UnknownC;
-        public uint Unknown10;
-        public uint Unknown14;
-        public uint Unknown18;
-        public uint Unknown1C;
+        public float UnknownC;
+        public float Unknown10;
+        public float Unknown14;
+        public float Unknown18;
+        public float Unknown1C;
     }
 }

@@ -99,8 +99,8 @@ namespace TagTool.Tags
     public enum TagFieldCompression
     {
         None,
-        Real8,
-        Real16,
-        Real32
+        Int8,
+        Int16,
+        Int32
     }
 }

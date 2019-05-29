@@ -14,6 +14,8 @@ namespace TagTool.Commands.Files
 {
     class ExportModPackageCommand : Command
     {
+        public const uint Version = 1;
+
         private HaloOnlineCacheContext CacheContext { get; }
 
         public ExportModPackageCommand(HaloOnlineCacheContext cacheContext) :
@@ -277,7 +279,7 @@ namespace TagTool.Commands.Files
                     // reserve header space
                     //
 
-                    writer.Write(new byte[48]);
+                    writer.Write(new byte[64]);
 
                     //
                     // write content item metadata
@@ -364,7 +366,7 @@ namespace TagTool.Commands.Files
                     // calculate package sha1
                     //
 
-                    packageStream.Position = 48;
+                    packageStream.Position = 64;
                     var packageSha1 = new SHA1Managed().ComputeHash(packageStream);
 
                     //
@@ -374,6 +376,10 @@ namespace TagTool.Commands.Files
                     packageStream.Position = 0;
 
                     writer.Write(new Tag("mod!"));
+                    writer.Write(Version);
+                    writer.Write(0);
+                    writer.Write(0);
+                    writer.Write(0);
                     writer.Write(packageSha1);
                     writer.Write(tagCacheOffset);
                     writer.Write(tagNamesTableCount == 0 ? 0 : tagNamesTableOffset);

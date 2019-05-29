@@ -431,6 +431,8 @@ namespace TagTool.Commands.Porting
 					break;
 			}
 
+            ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
+
 			//
 			// Perform automatic conversion on the Blam tag definition
 			//
@@ -440,6 +442,8 @@ namespace TagTool.Commands.Porting
             //
             // Perform post-conversion fixups to Blam data
             //
+
+            ((TagStructure)blamDefinition).PostConvert(BlamCache.Version, CacheContext.Version);
 
             switch (blamDefinition)
 			{

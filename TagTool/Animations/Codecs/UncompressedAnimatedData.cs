@@ -1,120 +1,91 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Animations.Codecs
 {
-    public class UncompressedAnimatedData : AnimationData
+    public class UncompressedAnimatedData : AnimationCodecData
     {
         public override void Read(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianReader reader)
         {
-            RotationFrames = new List<List<RealQuaternion>>();
+            RotationKeyframes = new List<List<int>>();
+            Rotations = new List<List<RealQuaternion>>();
 
             for (var i = 0; i < header.RotationNodeCount; i++)
             {
-                var rotations = new List<RealQuaternion>();
-
-                for (var j = 0; j < groupMember.FrameCount; j++)
-                    rotations.Add(
-                        new RealQuaternion(
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle())
-                        .Normalize());
-
-                RotationFrames.Add(rotations);
+                Rotations.Add(new List<RealQuaternion>
+                {
+                    new RealQuaternion(
+                        reader.ReadSingle(),
+                        reader.ReadSingle(),
+                        reader.ReadSingle(),
+                        reader.ReadSingle())
+                    .Normalize()
+                });
             }
 
-            TranslationFrames = new List<List<RealPoint3d>>();
+            TranslationKeyframes = new List<List<int>>();
+            Translations = new List<List<RealPoint3d>>();
 
             for (var i = 0; i < header.TranslationNodeCount; i++)
             {
-                var translations = new List<RealPoint3d>();
-
-                for (var j = 0; j < groupMember.FrameCount; j++)
-                    translations.Add(
-                        new RealPoint3d(
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle()));
-
-                TranslationFrames.Add(translations);
+                Translations.Add(new List<RealPoint3d>
+                {
+                    new RealPoint3d(
+                        reader.ReadSingle() * 100.0f,
+                        reader.ReadSingle() * 100.0f,
+                        reader.ReadSingle() * 100.0f)
+                });
             }
 
-            ScaleFrames = new List<List<float>>();
+            ScaleKeyframes = new List<List<int>>();
+            Scales = new List<List<float>>();
 
             for (var i = 0; i < header.ScaleNodeCount; i++)
             {
-                var scales = new List<float>();
-
-                for (var j = 0; j < groupMember.FrameCount; j++)
-                    scales.Add(reader.ReadSingle());
-
-                ScaleFrames.Add(scales);
+                Scales.Add(new List<float>
+                {
+                    reader.ReadSingle()
+                });
             }
         }
 
         public override void Write(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianWriter writer)
         {
-            int? frameCount = null;
+            groupMember.FrameCount = 0;
 
-            header.RotationNodeCount = (byte)RotationFrames.Count;
+            RotationKeyframes = new List<List<int>>();
+            TranslationKeyframes = new List<List<int>>();
+            ScaleKeyframes = new List<List<int>>();
 
-            foreach (var rotations in RotationFrames)
+            header.RotationNodeCount = (byte)Rotations.Count;
+
+            foreach (var rotations in Rotations)
             {
-                if (!frameCount.HasValue)
-                    frameCount = rotations.Count;
-                else if (rotations.Count != frameCount.Value)
-                    throw new FormatException($"Invalid rotation frame count: {rotations.Count}");
-
-                foreach (var rotation in rotations)
-                {
-                    writer.Write(rotation.I);
-                    writer.Write(rotation.J);
-                    writer.Write(rotation.K);
-                    writer.Write(rotation.W);
-                }
+                var rotation = rotations[0];
+                writer.Write(rotation.I);
+                writer.Write(rotation.J);
+                writer.Write(rotation.K);
+                writer.Write(rotation.W);
             }
 
-            header.TranslationNodeCount = (byte)TranslationFrames.Count;
+            header.TranslationNodeCount = (byte)Translations.Count;
 
-            foreach (var translations in TranslationFrames)
+            foreach (var translations in Translations)
             {
-                if (!frameCount.HasValue)
-                    frameCount = translations.Count;
-                else if (translations.Count != frameCount.Value)
-                    throw new FormatException($"Invalid translation frame count: {translations.Count}");
-
-                foreach (var translation in translations)
-                {
-                    writer.Write(translation.X);
-                    writer.Write(translation.Y);
-                    writer.Write(translation.Z);
-                }
+                var translation = translations[0];
+                writer.Write(translation.X / 100.0f);
+                writer.Write(translation.Y / 100.0f);
+                writer.Write(translation.Z / 100.0f);
             }
 
-            header.ScaleNodeCount = (byte)ScaleFrames.Count;
+            header.ScaleNodeCount = (byte)Scales.Count;
 
-            foreach (var scales in ScaleFrames)
+            foreach (var scales in Scales)
             {
-                if (!frameCount.HasValue)
-                    frameCount = scales.Count;
-                else if (scales.Count != frameCount.Value)
-                    throw new FormatException($"Invalid scale frame count: {scales.Count}");
-
-                foreach (var scale in scales)
-                    writer.Write(scale);
-            }
-
-            if (frameCount.HasValue)
-            {
-                if (frameCount.Value < 0 || frameCount.Value > short.MaxValue)
-                    throw new FormatException($"Invalid frame count: {frameCount.Value}");
-
-                groupMember.FrameCount = (short)frameCount.Value;
+                var scale = scales[0];
+                writer.Write(scale);
             }
         }
     }
