@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Serialization;
-using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using static TagTool.Cache.CacheFile;
+using static TagTool.Commands.Porting.PortTagCommand;
+using static TagTool.Tags.Definitions.Scenario;
 
 namespace TagTool.Commands.Porting
 {
@@ -18,15 +18,25 @@ namespace TagTool.Commands.Porting
         private CacheFile BlamCache { get; }
         private PortTagCommand PortTag { get; }
 
+        [Flags]
+        public enum MultiplayerScenarioConversionFlags
+        {
+            None,
+            Objects,
+            Audio,
+
+            Default = Objects | Audio
+        }
+
         public PortMultiplayerScenarioCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache, PortTagCommand portTag) :
             base(true,
-                
-                "PortMultiplayerScenario",
-                "Builds a multiplayer map from a single campaign map scenario_structure_bsp.",
-                
-                "PortMultiplayerScenario <Tag>",
 
-                "Builds a multiplayer map from a single campaign map scenario_structure_bsp.")
+                "PortMultiplayerScenario",
+                "Builds a multiplayer map from one or more bsps within a given zone set",
+
+                "PortMultiplayerScenario [options] [sbsp tag (leave blank for a wizard)]",
+
+                "Builds a multiplayer map from one or more bsps within a given zone set")
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
@@ -35,734 +45,328 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
-                return false;
-
-            var tagName = args[0];
-            CacheFile.IndexItem scnrInstance = null;
-
             var blamCache = BlamCache;
+            int zoneSetIndex = -1;
+            BspFlags bspMask = 0;
+            MultiplayerScenarioConversionFlags conversionFlags;
 
-            //
-            // Look up the map's scenario tag
-            //
+            var firstNonFlagArgumentIndex = ParseConversionFlags(args, out conversionFlags);
+            args = args.Skip(firstNonFlagArgumentIndex).ToList();
 
-            foreach (var instance in blamCache.IndexItems)
+            IndexItem blamScnrTag = BlamCache.IndexItems.First(x => x.GroupTag == "scnr");
+            var blamScnr = BlamCache.Deserializer.Deserialize<Scenario>(
+                new CacheSerializationContext(ref blamCache, blamScnrTag));
+
+            if (args.Count < 1)
             {
-                if (instance == null)
-                    continue;
+                Dictionary<string, int> structureBspsByName = new Dictionary<string, int>();
+                Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
 
-                if (instance.IsInGroup<Scenario>())
+                Console.WriteLine("-----------------------------------------");
+                for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
+                    Console.WriteLine($"{i}. {blamCache.Strings.GetString(blamScnr.ZoneSets[i].Name)}");
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine("Enter the name or index of the zone set to use:");
+                string zoneSetName = Console.ReadLine().Trim();
+
+
+                for (int i = 0; i < blamScnr.StructureBsps.Count; i++)
+                    structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
+
+                if (zoneSetsByName.ContainsKey(zoneSetName))
+                    zoneSetIndex = zoneSetsByName[zoneSetName];
+                else
                 {
-                    scnrInstance = instance;
-                    break;
+                    if (!int.TryParse(zoneSetName, out zoneSetIndex))
+                        zoneSetIndex = -1;
                 }
-            }
 
-            if (scnrInstance == null)
-            {
-                Console.WriteLine("ERROR: No scenario tag found!");
-                return true;
-            }
-
-            var scnr = blamCache.Deserializer.Deserialize<Scenario>(
-                new CacheSerializationContext(ref blamCache, scnrInstance));
-
-            //
-            // Look up the bsp index
-            //
-
-            var bspIndex = -1;
-            var removeStructureBsps = new HashSet<int>();
-
-            for (var i = 0; i < scnr.StructureBsps.Count; i++)
-            {
-                var reference = scnr.StructureBsps[i];
-
-                if (reference.StructureBsp == null)
-                    continue;
-
-                if (reference.StructureBsp.Name == tagName)
-                    bspIndex = i;
-                else if (!removeStructureBsps.Contains(i))
-                    removeStructureBsps.Add(i);
-            }
-
-            if (bspIndex == -1)
-            {
-                Console.WriteLine($"ERROR: Invalid bsp name: {tagName}");
-                return true;
-            }
-
-            var sbsp = blamCache.Deserializer.Deserialize<ScenarioStructureBsp>(
-                new CacheSerializationContext(
-                    ref blamCache,
-                    blamCache.GetIndexItemFromID(scnr.StructureBsps[bspIndex].StructureBsp.Index)));
-
-            var resourceStreams = new Dictionary<ResourceLocation, Stream>();
-
-            sbsp.SeamIdentifiers.Clear();
-
-            //
-            // Rebuild scenario zone set pvs
-            //
-
-            var newPvs = new Scenario.ZoneSetPvsBlock
-            {
-                StructureBspMask = Scenario.BspFlags.Bsp0,
-                Version = 9,
-                BspChecksums = new List<Scenario.ZoneSetPvsBlock.BspChecksum>
+                if (zoneSetIndex == -1)
                 {
-                    new Scenario.ZoneSetPvsBlock.BspChecksum
-                    {
-                        Checksum = sbsp.BspChecksum
-                    }
-                },
-                StructureBspPotentiallyVisibleSets = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet>
-                {
-                    new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet
-                    {
-                        Clusters = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster>(),
-                        ClustersDoorsClosed = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster>(),
-                        ClusterSkies = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky>(),
-                        ClusterVisibleSkies = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky>(),
-                        Unknown = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock>
-                        {
-                            new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock()
-                        },
-                        Unknown2 = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock>
-                        {
-                            new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock()
-                        },
-                        ClusterMappings = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping>()
-                    }
-                },
-                PortalToDeviceMappings = new List<Scenario.ZoneSetPvsBlock.PortalToDeviceMapping>
-                {
-                    new Scenario.ZoneSetPvsBlock.PortalToDeviceMapping()
+                    Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
+                    return true;
                 }
-            };
 
-            for (var i = 0; i < scnr.ZoneSetPvs.Count; i++)
-            {
-                var oldPvs = scnr.ZoneSetPvs[i];
+                var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
 
-                for (int j = 0, k = 0; j < 32; j++)
+                Console.WriteLine("-----------------------------------------");
+                for (int i = 0; i < 32; i++)
                 {
-                    if ((oldPvs.StructureBspMask & (Scenario.BspFlags)(1 << j)) == 0)
-                        continue;
+                    if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
+                        Console.WriteLine($"{i}. {blamScnr.StructureBsps[i].StructureBsp.Name}");
+                }
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine("Enter the name or index of each bsp to include on a new line followed by a blank line:");
 
-                    if (j == bspIndex)
+                for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                {
+                    var sbspName = line.Trim();
+                    int bspIndex = -1;
+
+                    if (structureBspsByName.ContainsKey(sbspName))
+                        bspIndex = structureBspsByName[sbspName];
+                    else
                     {
-                        var oldSet = oldPvs.StructureBspPotentiallyVisibleSets[k];
-                        var newSet = newPvs.StructureBspPotentiallyVisibleSets[0];
-
-                        for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
-                        {
-                            while (clusterIndex >= newSet.Clusters.Count)
-                                newSet.Clusters.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster
-                                {
-                                    BitVectors = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector>
-                                    {
-                                        new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector
-                                        {
-                                            Bits = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit>
-                                            {
-                                                new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit()
-                                            }
-                                        }
-                                    }
-                                });
-
-                            var oldCluster = oldSet.Clusters[clusterIndex];
-                            var newCluster = newSet.Clusters[clusterIndex];
-
-                            for (int l = 0; l < 32; l++)
-                                if ((oldCluster.BitVectors[k].Bits[0].Allow & (Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags)(1 << l)) != 0)
-                                    newCluster.BitVectors[0].Bits[0].Allow |= (Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags)(1 << l);
-                        }
-
-                        for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
-                        {
-                            while (clusterIndex >= newSet.ClustersDoorsClosed.Count)
-                                newSet.ClustersDoorsClosed.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster
-                                {
-                                    BitVectors = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector>
-                                    {
-                                        new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector
-                                        {
-                                            Bits = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit>
-                                            {
-                                                new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit()
-                                            }
-                                        }
-                                    }
-                                });
-
-                            var oldCluster = oldSet.ClustersDoorsClosed[clusterIndex];
-                            var newCluster = newSet.ClustersDoorsClosed[clusterIndex];
-
-                            for (int l = 0; l < 32; l++)
-                                if ((oldCluster.BitVectors[k].Bits[0].Allow & (Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags)(1 << l)) != 0)
-                                    newCluster.BitVectors[0].Bits[0].Allow |= (Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster.BitVector.Bit.AllowFlags)(1 << l);
-                        }
-
-                        for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
-                        {
-                            while (clusterIndex >= newSet.ClusterSkies.Count)
-                                newSet.ClusterSkies.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky
-                                {
-                                    SkyIndex = -1
-                                });
-
-                            var oldClusterSky = oldSet.ClusterSkies[clusterIndex];
-                            var newClusterSky = newSet.ClusterSkies[clusterIndex];
-
-                            if (oldClusterSky.SkyIndex != -1)
-                                newClusterSky.SkyIndex = oldClusterSky.SkyIndex;
-                        }
-
-                        for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
-                        {
-                            while (clusterIndex >= newSet.ClusterVisibleSkies.Count)
-                                newSet.ClusterVisibleSkies.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Sky
-                                {
-                                    SkyIndex = -1
-                                });
-
-                            var oldClusterSky = oldSet.ClusterVisibleSkies[clusterIndex];
-                            var newClusterSky = newSet.ClusterVisibleSkies[clusterIndex];
-
-                            if (oldClusterSky.SkyIndex != -1)
-                                newClusterSky.SkyIndex = oldClusterSky.SkyIndex;
-                        }
-
-                        for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
-                        {
-                            while (clusterIndex >= newSet.ClusterMappings.Count)
-                                newSet.ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping());
-                        }
+                        if (!int.TryParse(sbspName, out bspIndex))
+                            bspIndex = -1;
                     }
 
-                    k++;
+                    if (bspIndex == -1)
+                        Console.WriteLine($"Could not find bsp '{sbspName}'");
+
+                    bspMask |= (BspFlags)(1u << bspIndex);
                 }
             }
-
-            scnr.ZoneSetPvs = new List<Scenario.ZoneSetPvsBlock> { newPvs };
-
-            //
-            // Rebuild scenario zone set audibility
-            //
-
-            var newZoneSetAudibility = new List<Scenario.ZoneSetAudibilityBlock>();
-
-            foreach (var audibility in scnr.ZoneSetAudibility)
-            {
-                var newAudibility = audibility.DeepClone();
-
-                newAudibility.BspClusterToRoomBoundsMappings = new List<Scenario.ZoneSetAudibilityBlock.BspClusterToRoomBoundsMapping>
-                {
-                    audibility.BspClusterToRoomBoundsMappings[bspIndex].DeepClone()
-                };
-
-                newAudibility.GamePortalToDoorOccluderMappings = new List<Scenario.ZoneSetAudibilityBlock.GamePortalToDoorOccluderMapping>
-                {
-                    audibility.GamePortalToDoorOccluderMappings[bspIndex].DeepClone()
-                };
-
-                newZoneSetAudibility.Add(newAudibility);
-            }
-
-            scnr.ZoneSetAudibility = newZoneSetAudibility;
-
-            //
-            // Rebuild the scenario zone sets
-            //
-
-            scnr.ZoneSets = new List<Scenario.ZoneSet>
-            {
-                new Scenario.ZoneSet
-                {
-                    LoadedBsps = Scenario.BspFlags.Bsp0
-                }
-            };
-
-            scnr.BspAtlas = new List<Scenario.BspAtlasBlock>
-            {
-                new Scenario.BspAtlasBlock
-                {
-                    Bsp = Scenario.BspFlags.Bsp0
-                }
-            };
-
-            //
-            // Rebuild the scenario scenery placements
-            //
-
-            var newScenery = new List<Scenario.SceneryInstance>();
-
-            foreach (var scenery in scnr.Scenery)
-            {
-                if (scenery.OriginBspIndex == bspIndex)
-                    newScenery.Add(scenery);
-                else if (scenery.PaletteIndex != -1)
-                    scnr.SceneryPalette[scenery.PaletteIndex].Object = null;
-            }
-
-            foreach (var Scenery in newScenery)
-            {
-                Scenery.OriginBspIndex = 0;
-                Scenery.AllowedZoneSets = 1;
-            }
-
-            scnr.Scenery = newScenery;
-
-            //
-            // Rebuild the scenario biped placements
-            //
-
-            var newBipeds = new List<Scenario.BipedInstance>();
-
-            foreach (var biped in scnr.Bipeds)
-            {
-                if (biped.OriginBspIndex == bspIndex)
-                    newBipeds.Add(biped);
-                else if (biped.PaletteIndex != -1)
-                    scnr.BipedPalette[biped.PaletteIndex].Object = null;
-            }
-
-            foreach (var Biped in newBipeds)
-            {
-                Biped.OriginBspIndex = 0;
-                Biped.AllowedZoneSets = 1;
-            }
-
-            scnr.Bipeds = newBipeds;
-
-            //
-            // Rebuild the scenario vehicle placements
-            //
-
-            var newVehicles = new List<Scenario.VehicleInstance>();
-
-            foreach (var vehicle in scnr.Vehicles)
-            {
-                if (vehicle.OriginBspIndex == bspIndex)
-                    newVehicles.Add(vehicle);
-                else if (vehicle.PaletteIndex != -1)
-                    scnr.VehiclePalette[vehicle.PaletteIndex].Object = null;
-            }
-
-            foreach (var Vehicle in newVehicles)
-            {
-                Vehicle.OriginBspIndex = 0;
-                Vehicle.AllowedZoneSets = 1;
-            }
-
-            scnr.Vehicles = newVehicles;
-
-            //
-            // Rebuild the scenario equipment placements
-            //
-
-            var newEquipment = new List<Scenario.EquipmentInstance>();
-
-            foreach (var equipment in scnr.Equipment)
-            {
-                if (equipment.OriginBspIndex == bspIndex)
-                    newEquipment.Add(equipment);
-                else if (equipment.PaletteIndex != -1)
-                    scnr.EquipmentPalette[equipment.PaletteIndex].Object = null;
-            }
-
-            foreach (var Equipment in newEquipment)
-            {
-                Equipment.OriginBspIndex = 0;
-                Equipment.AllowedZoneSets = 1;
-            }
-
-            scnr.Equipment = newEquipment;
-
-            //
-            // Rebuild the scenario weapon placements
-            //
-
-            var newWeapons = new List<Scenario.WeaponInstance>();
-
-            foreach (var weapon in scnr.Weapons)
-            {
-                if (weapon.OriginBspIndex == bspIndex)
-                    newWeapons.Add(weapon);
-                else if (weapon.PaletteIndex != -1)
-                    scnr.WeaponPalette[weapon.PaletteIndex].Object = null;
-            }
-
-            foreach (var Weapon in newWeapons)
-            {
-                Weapon.OriginBspIndex = 0;
-                Weapon.AllowedZoneSets = 1;
-            }
-
-            scnr.Weapons = newWeapons;
-
-            //
-            // Rebuild the scenario machine placements
-            //
-
-            var newMachines = new List<Scenario.MachineInstance>();
-
-            foreach (var machine in scnr.Machines)
-            {
-                if (machine.OriginBspIndex == bspIndex)
-                    newMachines.Add(machine);
-                else if (machine.PaletteIndex != -1)
-                    scnr.MachinePalette[machine.PaletteIndex].Object = null;
-            }
-
-            foreach (var Machine in newMachines)
-            {
-                Machine.OriginBspIndex = 0;
-                Machine.AllowedZoneSets = 1;
-            }
-
-            scnr.Machines = newMachines;
-
-            //
-            // Rebuild the scenario terminal placements
-            //
-
-            var newTerminals = new List<Scenario.TerminalInstance>();
-
-            foreach (var terminal in scnr.Terminals)
-            {
-                if (terminal.OriginBspIndex == bspIndex)
-                    newTerminals.Add(terminal);
-                else if (terminal.PaletteIndex != -1)
-                    scnr.TerminalPalette[terminal.PaletteIndex].Object = null;
-            }
-
-            foreach (var Terminal in newTerminals)
-            {
-                Terminal.OriginBspIndex = 0;
-                Terminal.AllowedZoneSets = 1;
-            }
-
-            scnr.Terminals = newTerminals;
-
-            //
-            // Rebuild the scenario alternateRealityDevice placements
-            //
-
-            if (scnr.AlternateRealityDevicePalette != null)
-            {
-                var newAlternateRealityDevices = new List<Scenario.AlternateRealityDeviceInstance>();
-
-                foreach (var alternateRealityDevice in scnr.AlternateRealityDevices)
-                {
-                    if (alternateRealityDevice.OriginBspIndex == bspIndex)
-                        newAlternateRealityDevices.Add(alternateRealityDevice);
-                    else if (alternateRealityDevice.PaletteIndex != -1)
-                        scnr.AlternateRealityDevicePalette[alternateRealityDevice.PaletteIndex].Object = null;
-                }
-
-                foreach (var AlternateRealityDevice in newAlternateRealityDevices)
-                {
-                    AlternateRealityDevice.OriginBspIndex = 0;
-                    AlternateRealityDevice.AllowedZoneSets = 1;
-                }
-
-                scnr.AlternateRealityDevices = newAlternateRealityDevices;
-            }
-
-            //
-            // Rebuild the scenario control placements
-            //
-
-            var newControls = new List<Scenario.ControlInstance>();
-
-            foreach (var control in scnr.Controls)
-            {
-                if (control.OriginBspIndex == bspIndex)
-                    newControls.Add(control);
-                else if (control.PaletteIndex != -1)
-                    scnr.ControlPalette[control.PaletteIndex].Object = null;
-            }
-
-            foreach (var Control in newControls)
-            {
-                Control.OriginBspIndex = 0;
-                Control.AllowedZoneSets = 1;
-            }
-
-            scnr.Controls = newControls;
-
-            //
-            // Rebuild the scenario soundScenery placements
-            //
-
-            var newSoundScenery = new List<Scenario.SoundSceneryInstance>();
-
-            foreach (var soundScenery in scnr.SoundScenery)
-            {
-                if (soundScenery.OriginBspIndex == bspIndex)
-                    newSoundScenery.Add(soundScenery);
-                else if (soundScenery.PaletteIndex != -1)
-                    scnr.SoundSceneryPalette[soundScenery.PaletteIndex].Object = null;
-            }
-
-            foreach (var SoundScenery in newSoundScenery)
-            {
-                SoundScenery.OriginBspIndex = 0;
-                SoundScenery.AllowedZoneSets = 1;
-            }
-
-            scnr.SoundScenery = newSoundScenery;
-
-            //
-            // Rebuild the scenario giant placements
-            //
-
-            var newGiants = new List<Scenario.GiantInstance>();
-
-            foreach (var giant in scnr.Giants)
-            {
-                if (giant.OriginBspIndex == bspIndex)
-                    newGiants.Add(giant);
-                else if (giant.PaletteIndex != -1)
-                    scnr.GiantPalette[giant.PaletteIndex].Object = null;
-            }
-
-            foreach (var Giant in newGiants)
-            {
-                Giant.OriginBspIndex = 0;
-                Giant.AllowedZoneSets = 1;
-            }
-
-            scnr.Giants = newGiants;
-
-            //
-            // Rebuild the scenario effectScenery placements
-            //
-
-            var newEffectScenery = new List<Scenario.EffectSceneryInstance>();
-
-            foreach (var effectScenery in scnr.EffectScenery)
-            {
-                if (effectScenery.OriginBspIndex == bspIndex)
-                    newEffectScenery.Add(effectScenery);
-                else if (effectScenery.PaletteIndex != -1)
-                    scnr.EffectSceneryPalette[effectScenery.PaletteIndex].Object = null;
-            }
-
-            foreach (var EffectScenery in newEffectScenery)
-            {
-                EffectScenery.OriginBspIndex = 0;
-                EffectScenery.AllowedZoneSets = 1;
-            }
-
-            scnr.EffectScenery = newEffectScenery;
-
-            //
-            // Rebuild the scenario lightVolume placements
-            //
-
-            var newLightVolumes = new List<Scenario.LightVolumeInstance>();
-
-            foreach (var lightVolume in scnr.LightVolumes)
-            {
-                if (lightVolume.OriginBspIndex == bspIndex)
-                    newLightVolumes.Add(lightVolume);
-                else if (lightVolume.PaletteIndex != -1)
-                    scnr.LightVolumePalette[lightVolume.PaletteIndex].Object = null;
-            }
-
-            foreach (var LightVolume in newLightVolumes)
-            {
-                LightVolume.OriginBspIndex = 0;
-                LightVolume.AllowedZoneSets = 1;
-            }
-
-            scnr.LightVolumes = newLightVolumes;
-
-            //
-            // Rebuild the scenario crate placements
-            //
-
-            var newCrates = new List<Scenario.CrateInstance>();
-
-            foreach (var crate in scnr.Crates)
-            {
-                if (crate.OriginBspIndex == bspIndex)
-                    newCrates.Add(crate);
-                else if (crate.PaletteIndex != -1)
-                    scnr.CratePalette[crate.PaletteIndex].Object = null;
-            }
-
-            foreach (var Crate in newCrates)
-            {
-                Crate.OriginBspIndex = 0;
-                Crate.AllowedZoneSets = 1;
-            }
-
-            scnr.Crates = newCrates;
-
-            //
-            // Rebuild the scenario flock placements
-            //
-
-            var newFlocks = new List<Scenario.Flock>();
-            var flockPaletteIndices = new List<short>();
-
-            foreach (var flock in scnr.Flocks)
-            {
-                if (flock.BspIndex == bspIndex)
-                    newFlocks.Add(flock);
-                else if (flock.CreaturePaletteIndex != -1)
-                    flockPaletteIndices.Add(flock.CreaturePaletteIndex);
-            }
-
-            foreach (var Flock in newFlocks)
-                Flock.BspIndex = (short)bspIndex;
-
-            scnr.Flocks = newFlocks;
-
-            //
-            // Rebuild the scenario creature placements
-            //
-
-            var newCreatures = new List<Scenario.CreatureInstance>();
-
-            foreach (var creature in scnr.Creatures)
-            {
-                if (creature.OriginBspIndex == bspIndex && flockPaletteIndices.Contains(creature.PaletteIndex))
-                    newCreatures.Add(creature);
-                else if (creature.PaletteIndex != -1)
-                    scnr.CreaturePalette[creature.PaletteIndex].Object = null;
-            }
-
-            foreach (var Creature in newCreatures)
-            {
-                Creature.OriginBspIndex = 0;
-                Creature.AllowedZoneSets = 1;
-            }
-
-            for (short x = 0; x < scnr.CreaturePalette.Count; x++)
-            {
-                if (!flockPaletteIndices.Contains(x))
-                {
-                    scnr.CreaturePalette[x].Object = null;
-                    continue;
-                }
-            }
-
-            scnr.Creatures = newCreatures;
-
-            //
-            // Rebuild the scenario cluster data
-            //
-
-            scnr.ScenarioClusterData = new List<Scenario.ScenarioClusterDatum> { scnr.ScenarioClusterData[bspIndex] };
-
-            //
-            // Final cleanup to the scenario definition
-            //
-
-            scnr.MapType = ScenarioMapType.Multiplayer;
-            scnr.MapSubType = ScenarioMapSubType.None;
-            scnr.CampaignId = -1;
-
-            scnr.StructureBsps = new List<Scenario.StructureBspBlock> { scnr.StructureBsps[bspIndex] };
-
-            scnr.PlayerStartingProfile.Clear();
-
-            var initialPoint = newScenery.Where(x => x.OriginBspIndex != -1).First().Position;
-
-            scnr.PlayerStartingLocations = new List<Scenario.PlayerStartingLocation>
-            {
-                new Scenario.PlayerStartingLocation
-                {
-                    Position = initialPoint
-                }
-            };
-
-            scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>
-            {
-                new Scenario.CutsceneCameraPoint
-                {
-                    Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,
-                    Position = initialPoint
-                }
-            };
-
-            scnr.SoftCeilings = new List<Scenario.SoftCeiling>();
-            scnr.TriggerVolumes = new List<Scenario.TriggerVolume>();
-            scnr.RecordedAnimations = new List<Scenario.RecordedAnimation>();
-            scnr.ZonesetSwitchTriggerVolumes = new List<Scenario.ZoneSetSwitchTriggerVolume>();
-            scnr.Unknown32 = new List<Scenario.UnknownBlock>();
-            scnr.Unknown33 = new List<Scenario.UnknownBlock>();
-            scnr.Unknown34 = new List<Scenario.UnknownBlock>();
-            scnr.Unknown35 = new List<Scenario.UnknownBlock>();
-            scnr.Unknown36 = new List<Scenario.UnknownBlock>();
-            scnr.StylePalette = new List<TagReferenceBlock>();
-            scnr.SquadGroups = new List<Scenario.SquadGroup>();
-            scnr.Squads = new List<Scenario.Squad>();
-            scnr.Zones = new List<Scenario.Zone>();
-            scnr.SquadPatrols = new List<Scenario.SquadPatrol>();
-            scnr.MissionScenes = new List<Scenario.MissionScene>();
-            scnr.CharacterPalette = new List<TagReferenceBlock>();
-            scnr.AiPathfindingData = new List<Scenario.AiPathfindingDatum> { new Scenario.AiPathfindingDatum() };
-            scnr.Scripts = new List<Scripting.Script>();
-            scnr.Globals = new List<Scripting.ScriptGlobal>();
-            scnr.ScriptingData = new List<Scenario.ScriptingDatum> { new Scenario.ScriptingDatum() };
-            scnr.CutsceneFlags = new List<Scenario.CutsceneFlag>();
-            scnr.CutsceneTitles = new List<Scenario.CutsceneTitle>();
-            scnr.CustomObjectNameStrings = null;
-            scnr.ChapterTitleStrings = null;
-            scnr.UnitSeatsMapping = new List<Scenario.UnitSeatsMappingBlock>();
-            scnr.ScenarioKillTriggers = new List<Scenario.ScenarioKillTrigger>();
-            scnr.ScenarioSafeTriggers = new List<Scenario.ScenarioSafeTrigger>();
-            scnr.ScriptExpressions = new List<Scripting.ScriptExpression>();
-            scnr.SubtitleStrings = null;
-            scnr.MissionDialogue = new List<TagReferenceBlock>();
-            scnr.ObjectiveStrings = null;
-            scnr.Interpolators = new List<Scenario.Interpolator>();
-            scnr.SimulationDefinitionTable = new List<Scenario.SimulationDefinitionTableBlock>();
-            scnr.AiObjectIds = new List<Scenario.AiObjectId>();
-            scnr.AiObjectives = new List<Scenario.AiObjective>();
-            scnr.DesignerZoneSets = new List<Scenario.DesignerZoneSet>();
-            scnr.Unknown135 = new List<Scenario.UnknownBlock5>();
-            scnr.Cinematics = new List<TagReferenceBlock>();
-            scnr.CinematicLighting = new List<Scenario.CinematicLightingBlock>();
-            scnr.ScenarioMetagame = new List<Scenario.ScenarioMetagameBlock>();
-
-            var sLdT = blamCache.Deserializer.Deserialize<ScenarioLightmap>(
-                new CacheSerializationContext(
-                    ref blamCache, blamCache.GetIndexItemFromID(scnr.Lightmap.Index)));
-
-            if (blamCache.Version < CacheVersion.Halo3ODST)
-                sLdT.Lightmaps = new List<ScenarioLightmapBspData> { sLdT.Lightmaps[bspIndex] };
             else
-                sLdT.LightmapDataReferences = new List<ScenarioLightmap.LightmapDataReference> { sLdT.LightmapDataReferences[bspIndex] };
+            {
+                var tagName = args[0].Trim();
+                var bspIndex = blamScnr.StructureBsps.FindIndex(x => x.StructureBsp.Name == tagName);
+                if (bspIndex == -1)
+                {
+                    Console.WriteLine($"Could not find bsp '{tagName}'");
+                    return true;
+                }
+
+                bspMask = (BspFlags)(1u << bspIndex);
+                for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
+                {
+                    if ((blamScnr.ZoneSets[i].LoadedBsps & bspMask) != 0)
+                    {
+                        zoneSetIndex = i;
+                        break;
+                    }
+                }
+
+                if (zoneSetIndex == -1)
+                {
+                    Console.WriteLine($"No zone set includes bsp '{tagName}'!");
+                    return true;
+                }
+            }
+
+            Console.WriteLine("Converting...");
+            Convert(zoneSetIndex, bspMask, conversionFlags);
+            return true;
+        }
+
+        int ParseConversionFlags(List<string> args, out MultiplayerScenarioConversionFlags flags)
+        {
+            flags = MultiplayerScenarioConversionFlags.Default;
+            var endIndex = 0;
+
+            for (int i = 0; i < args.Count; i++)
+            {
+                var arg = args[i];
+
+                bool not = false;
+                string flagName = "";
+                if (arg.Length > 1)
+                {
+                    not = arg[0] == '!';
+                    flagName = arg.Substring(1);
+                }
+
+                MultiplayerScenarioConversionFlags flag;
+                if (Enum.TryParse(flagName, true, out flag))
+                {
+                    endIndex++;
+
+                    if (not)
+                        flags &= ~flag;
+                    else
+                        flags |= flag;
+                }
+            }
+
+            return endIndex;
+        }
+
+        private void Convert(int zoneSetIndex, BspFlags bspMask, MultiplayerScenarioConversionFlags conversionFlags)
+        {
+            var blamCache = BlamCache;
+            var blamScnrTag = BlamCache.IndexItems.FirstOrDefault(x => x.GroupTag == "scnr");
+            var blamScnr = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(ref blamCache, blamScnrTag));
 
             using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
             {
-                PortTag.SetFlags(PortTagCommand.PortingFlags.Default);
-                PortTag.RemoveFlags(PortTagCommand.PortingFlags.Ms30 | PortTagCommand.PortingFlags.ForgePalette);
+                var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-                CacheContext.Serialize(cacheStream,
-                    CacheContext.AllocateTag<ScenarioStructureBsp>(scnr.StructureBsps[0].StructureBsp.Name),
-                    (ScenarioStructureBsp)PortTag.ConvertData(cacheStream, resourceStreams, sbsp, sbsp, scnr.StructureBsps[0].StructureBsp.Name));
+                var defaultPortingFlags = PortingFlags.Default;
+                if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Audio))
+                    defaultPortingFlags &= ~PortingFlags.Audio;
 
-                CacheContext.Serialize(cacheStream,
-                    CacheContext.AllocateTag<ScenarioLightmap>(scnr.Lightmap.Name),
-                    (ScenarioLightmap)PortTag.ConvertData(cacheStream, resourceStreams, sLdT, sLdT, scnr.Lightmap.Name));
-
-                var newScnrTag = CacheContext.AllocateTag<Scenario>(scnrInstance.Name);
-                scnr = (Scenario)PortTag.ConvertData(cacheStream, resourceStreams, scnr, scnr, scnrInstance.Name);
-                
-                scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>
+                if (blamScnr.Lightmap != null)
                 {
-                    new Scenario.PlayerStartingProfileBlock
+                    PortTag.SetFlags(defaultPortingFlags);
+                    ConvertLightmap(cacheStream, resourceStreams,
+                        blamCache.GetIndexItemFromID(blamScnr.Lightmap.Index), zoneSetIndex, bspMask);
+                }
+
+                var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, zoneSetIndex, bspMask, conversionFlags);
+                tagCollector.Collect();
+
+                PortTag.SetFlags(defaultPortingFlags);
+                foreach (var tag in tagCollector.Tags)
+                    PortTag.ConvertTag(cacheStream, resourceStreams, tag);
+
+                PortTag.RemoveFlags(defaultPortingFlags);
+                var scnrTag = PortTag.ConvertTag(cacheStream, resourceStreams, blamScnrTag);
+
+                new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
+
+                foreach (var entry in resourceStreams.Values)
+                    entry.Close();
+            }
+
+            using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
+                CacheContext.StringIdCache.Save(stringIdCacheStream);
+
+            CacheContext.SaveTagNames();
+        }
+
+        private void ConvertLightmap(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams,
+            IndexItem blamLightmapTag, int zoneSetIndex, BspFlags bspMask)
+        {
+            var blamCache = BlamCache;
+            var blamLightmap = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(
+                new CacheSerializationContext(ref blamCache, blamLightmapTag));
+
+            if (blamCache.Version < CacheVersion.Halo3ODST)
+            {
+                var lightmapTag = CacheContext.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
+                var lightmap = blamLightmap;
+
+                for (int i = 0, j = 0; i < blamLightmap.Lightmaps.Count; i++)
+                {
+                    if (((BspFlags)(1u << i) & bspMask) == 0)
+                        continue;
+
+                    var blamLbsp = blamLightmap.Lightmaps[i];
+                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, resourceStreams,
+                        blamLbsp, blamLbsp, blamLightmapTag.Name);
+
+                    Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
+                    Lbsp.Airprobes.AddRange(blamLightmap.Airprobes);
+                    Lbsp.BspIndex = (short)j++;
+
+                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>(blamLightmapTag.Name + "_data");
+                    CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
+
+                    lightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
+                }
+
+                lightmap.Airprobes.Clear();
+                CacheContext.Serialize(cacheStream, lightmapTag, lightmap);
+            }
+            else
+            {
+                var lightmapTag = CacheContext.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
+                var lightmap = blamLightmap;
+                var newDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
+
+                for (int i = 0, j = 0; i < blamLightmap.LightmapDataReferences.Count; i++)
+                {
+                    if (((BspFlags)(1u << i) & bspMask) == 0)
+                        continue;
+
+                    var blamLbspTag = blamCache.GetIndexItemFromID(blamLightmap.LightmapDataReferences[i].LightmapData.Index);
+                    var blamLbsp = blamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(
+                        new CacheSerializationContext(ref blamCache, blamLbspTag));
+
+                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, resourceStreams, blamLbsp, blamLbsp, blamLbspTag.Name);
+                    Lbsp.BspIndex = (short)j++;
+
+                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>(blamLbspTag.Name);
+                    CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
+
+                    newDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
+                }
+
+                lightmap.LightmapDataReferences = newDataReferences;
+                CacheContext.Serialize(cacheStream, lightmapTag, lightmap);
+            }
+        }
+
+        class MultiplayerScenarioFixup
+        {
+            private HaloOnlineCacheContext CacheContext;
+            private Stream CacheStream;
+            private CachedTagInstance ScnrTag;
+            private Scenario Scnr;
+            private int DesiredZoneSetIndex;
+            private BspFlags DesiredBsps;
+            private MultiplayerScenarioConversionFlags ConversionFlags;
+            private Dictionary<int, int> BspIndexRemapping;
+
+            public MultiplayerScenarioFixup(
+                Stream cacheStream, HaloOnlineCacheContext cacheContext, string scenarioTagName, int desiredZoneSetIndex,
+                BspFlags desiredBsps, MultiplayerScenarioConversionFlags conversionFlags)
+            {
+                this.CacheContext = cacheContext;
+                this.CacheStream = cacheStream;
+                this.ScnrTag = cacheContext.GetTag<Scenario>(scenarioTagName);
+                this.Scnr = cacheContext.Deserialize<Scenario>(new TagSerializationContext(cacheStream, cacheContext, this.ScnrTag));
+                this.DesiredZoneSetIndex = desiredZoneSetIndex;
+                this.DesiredBsps = desiredBsps;
+                this.ConversionFlags = conversionFlags;
+                this.BspIndexRemapping = new Dictionary<int, int>();
+            }
+
+            public void Fixup()
+            {
+                Scnr.MapType = ScenarioMapType.Multiplayer;
+                Scnr.MapSubType = ScenarioMapSubType.None;
+                Scnr.CampaignId = -1;
+
+                FixupStructureBspReferences();
+                FixupZoneSets();
+                FixupAllScenarioObjects();
+
+                Scnr.BspAtlas.Clear();
+                Scnr.CampaignPlayers.Clear();
+                Scnr.SoftCeilings.Clear();
+                Scnr.PlayerStartingProfile.Clear();
+                Scnr.PlayerStartingLocations.Clear();
+                Scnr.TriggerVolumes.Clear();
+                Scnr.RecordedAnimations.Clear();
+                Scnr.ZonesetSwitchTriggerVolumes.Clear();
+                Scnr.Unknown32.Clear();
+                Scnr.Unknown33.Clear();
+                Scnr.Unknown34.Clear();
+                Scnr.Unknown35.Clear();
+                Scnr.Unknown36.Clear();
+                Scnr.StylePalette.Clear();
+                Scnr.SquadGroups.Clear();
+                Scnr.Squads.Clear();
+                Scnr.Zones.Clear();
+                Scnr.SquadPatrols.Clear();
+                Scnr.MissionScenes.Clear();
+                Scnr.CharacterPalette.Clear();
+                Scnr.Scripts.Clear();
+                Scnr.Globals.Clear();
+                Scnr.CutsceneFlags.Clear();
+                Scnr.CutsceneCameraPoints.Clear();
+                Scnr.CutsceneTitles.Clear();
+                Scnr.CustomObjectNameStrings = null;
+                Scnr.ChapterTitleStrings = null;
+                Scnr.UnitSeatsMapping.Clear();
+                Scnr.ScenarioKillTriggers.Clear();
+                Scnr.ScenarioSafeTriggers.Clear();
+                Scnr.ScriptExpressions.Clear();
+                Scnr.SubtitleStrings = null;
+                Scnr.MissionDialogue.Clear();
+                Scnr.ObjectiveStrings = null;
+                Scnr.Interpolators.Clear();
+                Scnr.SimulationDefinitionTable.Clear();
+                Scnr.AiObjectIds.Clear();
+                Scnr.AiObjectives.Clear();
+                Scnr.DesignerZoneSets.Clear();
+                Scnr.Unknown135.Clear();
+                Scnr.ScenarioMetagame.Clear();
+
+                Scnr.PlayerStartingProfile = new List<PlayerStartingProfileBlock>
+                {
+                    new PlayerStartingProfileBlock
                     {
                         Name = "start_assault",
                         PrimaryWeapon = CacheContext.GetTag<Weapon>(@"objects\weapons\rifle\assault_rifle\assault_rifle"),
@@ -773,10 +377,343 @@ namespace TagTool.Commands.Porting
                     }
                 };
 
-                CacheContext.Serialize(cacheStream, newScnrTag, scnr);
+                CacheContext.Serialize(CacheStream, ScnrTag, Scnr);
+
+                FixupInstancedGeometry();
             }
 
-            return true;
+            private void FixupStructureBspReferences()
+            {
+                var newStructureBsps = new List<StructureBspBlock>();
+                for (int bspIndex = 0; bspIndex < Scnr.StructureBsps.Count; bspIndex++)
+                {
+                    if (DesiredBsps.HasFlag((BspFlags)(1 << bspIndex)))
+                    {
+                        BspIndexRemapping[bspIndex] = newStructureBsps.Count;
+                        newStructureBsps.Add(Scnr.StructureBsps[bspIndex]);
+                    }
+                }
+                Scnr.StructureBsps = newStructureBsps;
+            }
+
+            private void FixupZoneSets()
+            {
+                var zoneSet = Scnr.ZoneSets[DesiredZoneSetIndex];
+                var zoneSetAudibility = Scnr.ZoneSetAudibility[zoneSet.ScenarioBspAudibilityIndex];
+                var zoneSetPvs = Scnr.ZoneSetPvs[zoneSet.PotentiallyVisibleSetIndex];
+
+                uint newBspZoneFlags = 0;
+                uint desiredBspPvsFlags = 0;
+                for (int bspIndex = 0, newBspIndex = 0; bspIndex < 32; bspIndex++)
+                {
+                    if (DesiredBsps.HasFlag((BspFlags)(1 << bspIndex)))
+                    {
+                        var bspPvsIndex = ScenarioPvsBspPvsIndexGet(zoneSet.LoadedBsps, bspIndex);
+                        if (bspPvsIndex < 0)
+                            throw new NotSupportedException($"bsp index {bspIndex} is not in zone set {DesiredZoneSetIndex}");
+
+                        newBspZoneFlags |= (1u << newBspIndex);
+                        desiredBspPvsFlags |= (1u << bspPvsIndex);
+                        newBspIndex++;
+                    }
+                }
+
+                Scnr.ZoneSets = new List<ZoneSet>()
+                {
+                    new ZoneSet()
+                    {
+                        BspAtlasIndex = -1,
+                        PotentiallyVisibleSetIndex = 0,
+                        LoadedBsps = (BspFlags)newBspZoneFlags
+                    }
+                };
+
+                zoneSetPvs.StructureBspMask = (BspFlags)newBspZoneFlags;
+                Scnr.ZoneSetPvs = new List<ZoneSetPvsBlock>() { zoneSetPvs };
+                Scnr.ZoneSetAudibility = new List<ZoneSetAudibilityBlock>() { zoneSetAudibility };
+
+                ClearBspPvsBlockElements(zoneSetPvs.BspChecksums, desiredBspPvsFlags);
+                ClearBspPvsBlockElements(zoneSetPvs.StructureBspPotentiallyVisibleSets, desiredBspPvsFlags);
+
+                for (int i = 0; i < zoneSetPvs.StructureBspPotentiallyVisibleSets.Count; i++)
+                {
+                    var pvs = zoneSetPvs.StructureBspPotentiallyVisibleSets[i];
+                    int clusterCount = pvs.Clusters.Count;
+                    for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)
+                    {
+                        ClearBspPvsBlockElements(pvs.Clusters[clusterIndex].BitVectors, desiredBspPvsFlags);
+                        ClearBspPvsBlockElements(pvs.ClustersDoorsClosed[clusterIndex].BitVectors, desiredBspPvsFlags);
+                        ClearBspPvsBlockElements(pvs.ClusterMappings[clusterIndex].Clusters, desiredBspPvsFlags);
+                    }
+                }
+
+                CacheContext.Serialize(CacheStream, ScnrTag, Scnr);
+            }
+
+            private void FixupLightmap()
+            {
+                CachedTagInstance lightmapTag;
+                if (!CacheContext.TryGetTag<ScenarioLightmap>(Scnr.Lightmap.Name, out lightmapTag))
+                    return;
+
+                var lightmap = CacheContext.Deserialize<ScenarioLightmap>(new TagSerializationContext(CacheStream, CacheContext, lightmapTag));
+
+                var newLightmapDataReference = new List<ScenarioLightmap.LightmapDataReference>();
+                for (int i = 0; i < lightmap.LightmapDataReferences.Count; i++)
+                {
+                    if (DesiredBsps.HasFlag((BspFlags)(1 << i)))
+                        newLightmapDataReference.Add(lightmap.LightmapDataReferences[i]);
+                }
+
+                for (int i = 0; i < newLightmapDataReference.Count; i++)
+                {
+                    var lbspTag = newLightmapDataReference[i].LightmapData;
+                    if (lbspTag == null)
+                        continue;
+
+                    var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(CacheStream, lbspTag);
+                    lbsp.BspIndex = (sbyte)i;
+
+                    CacheContext.Serialize(CacheStream, lbspTag, lbsp);
+                }
+
+                lightmap.LightmapDataReferences = newLightmapDataReference;
+                CacheContext.Serialize(CacheStream, lightmapTag, lightmap);
+            }
+
+            private void FixupInstancedGeometry()
+            {
+                for (var i = 0; i < Scnr.StructureBsps.Count; i++)
+                {
+                    var sbspTag = Scnr.StructureBsps[i].StructureBsp;
+                    if (sbspTag == null) continue;
+
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(CacheStream, sbspTag);
+
+                    foreach (var instance in sbsp.InstancedGeometryInstances)
+                    {
+                        foreach (var def in instance.CollisionDefinitions)
+                        {
+                            def.BspIndex = (sbyte)i;
+                        }
+                    }
+
+                    CacheContext.Serialize(CacheStream, sbspTag, sbsp);
+                }
+            }
+
+            void ClearBspPvsBlockElements<T>(List<T> block, ulong keepMask)
+            {
+                var newBlock = new List<T>();
+                for (int i = 0; i < block.Count; i++)
+                {
+                    if (((1u << i) & keepMask) != 0)
+                        newBlock.Add(block[i]);
+                }
+                block.Clear();
+                block.AddRange(newBlock);
+            }
+
+            int ScenarioPvsBspPvsIndexGet(BspFlags bspZoneFlags, int bspIndex)
+            {
+                for (int i = 0, k = 0; i < 32; i++)
+                {
+                    if (bspZoneFlags.HasFlag((BspFlags)(1u << i)))
+                    {
+                        if (i == bspIndex)
+                            return k;
+                        k++;
+                    }
+                }
+                return -1;
+            }
+
+            private void FixupAllScenarioObjects()
+            {
+                FixupScenarioObjects(Scnr.Scenery, Scnr.SceneryPalette);
+                FixupScenarioObjects(Scnr.Bipeds, Scnr.BipedPalette);
+                FixupScenarioObjects(Scnr.Vehicles, Scnr.VehiclePalette);
+                FixupScenarioObjects(Scnr.Equipment, Scnr.EquipmentPalette);
+                FixupScenarioObjects(Scnr.Weapons, Scnr.WeaponPalette);
+                FixupScenarioObjects(Scnr.Machines, Scnr.MachinePalette);
+                FixupScenarioObjects(Scnr.Terminals, Scnr.TerminalPalette);
+                FixupScenarioObjects(Scnr.Controls, Scnr.ControlPalette);
+                FixupScenarioObjects(Scnr.SoundScenery, Scnr.SoundSceneryPalette);
+                FixupScenarioObjects(Scnr.Giants, Scnr.GiantPalette);
+                FixupScenarioObjects(Scnr.EffectScenery, Scnr.EffectSceneryPalette);
+                FixupScenarioObjects(Scnr.LightVolumes, Scnr.LightVolumePalette);
+                FixupScenarioObjects(Scnr.Crates, Scnr.CratePalette);
+                FixupScenarioObjects(Scnr.Creatures, Scnr.CreaturePalette);
+            }
+
+            private void FixupScenarioObjects<T>(List<T> objects, List<ScenarioPaletteEntry> palette)
+                where T : ScenarioInstance
+            {
+                if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Objects))
+                {
+                    objects.Clear();
+                    palette.Clear();
+                    return;
+                }
+
+                var visitedPaletteObjects = new HashSet<CachedTagInstance>();
+                var newPalette = new List<ScenarioPaletteEntry>();
+                var newObjects = new List<T>();
+                var keepPaletteIndices = new HashSet<int>();
+
+                for (int placementIndex = 0; placementIndex < objects.Count; placementIndex++)
+                {
+                    var obj = objects[placementIndex];
+
+                    if (obj.OriginBspIndex < 0)
+                        continue;
+                    if (!DesiredBsps.HasFlag((BspFlags)(1 << (obj.OriginBspIndex))))
+                        continue;
+                    if (obj.PaletteIndex < 0 || obj.PaletteIndex >= palette.Count)
+                        continue;
+
+                    keepPaletteIndices.Add(obj.PaletteIndex);
+
+                    obj.OriginBspIndex = (short)BspIndexRemapping[obj.OriginBspIndex];
+                    obj.AllowedZoneSets = (1 << 0);
+
+                    newObjects.Add(obj);
+
+                    if (obj.NameIndex >= 0 && obj.NameIndex < Scnr.ObjectNames.Count)
+                    {
+                        var name = Scnr.ObjectNames[obj.NameIndex];
+                        name.PlacementIndex = (short)(newObjects.Count - 1);
+                    }
+                }
+
+                for (int i = 0; i < palette.Count; i++)
+                {
+                    if (!keepPaletteIndices.Contains(i))
+                        palette[i].Object = null;
+                }
+
+                objects.Clear();
+                objects.AddRange(newObjects);
+            }
+        }
+
+        class MultiplayerScenarioTagCollector
+        {
+            private CacheFile BlamCache;
+            private Scenario BlamScnr;
+            private BspFlags DesiredBsps;
+            private int DesiredZoneSetIndex;
+            private MultiplayerScenarioConversionFlags ConversionFlags;
+            public List<IndexItem> Tags;
+
+            public MultiplayerScenarioTagCollector(CacheFile blamCache, Scenario blamScnr,
+                int desiredZoneSetIndex, BspFlags desiredBsps, MultiplayerScenarioConversionFlags conversionFlags)
+            {
+                this.BlamCache = blamCache;
+                this.BlamScnr = blamScnr;
+                this.DesiredZoneSetIndex = desiredZoneSetIndex;
+                this.DesiredBsps = desiredBsps;
+                this.ConversionFlags = conversionFlags;
+                this.Tags = new List<IndexItem>();
+            }
+
+            private void Add(CachedTagInstance tag)
+            {
+                if (tag != null) Tags.Add(BlamCache.GetIndexItemFromID(tag.Index));
+            }
+
+            public void Collect()
+            {
+                for (int i = 0; i < BlamScnr.StructureBsps.Count; i++)
+                {
+                    if (DesiredBsps.HasFlag((BspFlags)(1 << i)))
+                    {
+                        Add(BlamScnr.StructureBsps[i].StructureBsp);
+                        Add(BlamScnr.StructureBsps[i].Design);
+                        Add(BlamScnr.StructureBsps[i].Lighting);
+                        Add(BlamScnr.StructureBsps[i].Wind);
+                        Add(BlamScnr.StructureBsps[i].Cubemap);
+                    }
+                }
+
+                CollectSkies();
+                CollectAllScenarioObjects();
+                CollectFlocks();
+
+                Add(BlamScnr.DefaultScreenFx);
+                Add(BlamScnr.DefaultCameraFx);
+                Add(BlamScnr.SkyParameters);
+                Add(BlamScnr.GlobalLighting);
+                Add(BlamScnr.PerformanceThrottles);
+            }
+
+            private void CollectSkies()
+            {
+                var zoneSet = BlamScnr.ZoneSets[DesiredZoneSetIndex];
+                for (int i = 0; i < BlamScnr.SkyReferences.Count; i++)
+                {
+                    var skyReference = BlamScnr.SkyReferences[i];
+                    if ((skyReference.ActiveBsps & (BspShortFlags)zoneSet.LoadedBsps) != 0)
+                        Add(skyReference.SkyObject);
+                }
+            }
+
+            private void CollectAllScenarioObjects()
+            {
+                if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Objects))
+                    return;
+
+                CollectScenarioObjects(BlamScnr.Scenery, BlamScnr.SceneryPalette);
+                CollectScenarioObjects(BlamScnr.Bipeds, BlamScnr.BipedPalette);
+                CollectScenarioObjects(BlamScnr.Vehicles, BlamScnr.VehiclePalette);
+                CollectScenarioObjects(BlamScnr.Equipment, BlamScnr.EquipmentPalette);
+                CollectScenarioObjects(BlamScnr.Weapons, BlamScnr.WeaponPalette);
+                CollectScenarioObjects(BlamScnr.Machines, BlamScnr.MachinePalette);
+                CollectScenarioObjects(BlamScnr.Terminals, BlamScnr.TerminalPalette);
+                CollectScenarioObjects(BlamScnr.Controls, BlamScnr.ControlPalette);
+                CollectScenarioObjects(BlamScnr.SoundScenery, BlamScnr.SoundSceneryPalette);
+                CollectScenarioObjects(BlamScnr.Giants, BlamScnr.GiantPalette);
+                CollectScenarioObjects(BlamScnr.EffectScenery, BlamScnr.EffectSceneryPalette);
+                CollectScenarioObjects(BlamScnr.LightVolumes, BlamScnr.LightVolumePalette);
+                CollectScenarioObjects(BlamScnr.Crates, BlamScnr.CratePalette);
+                CollectScenarioObjects(BlamScnr.Creatures, BlamScnr.CreaturePalette);
+            }
+
+            private void CollectScenarioObjects(IEnumerable<ScenarioInstance> objects, List<ScenarioPaletteEntry> palette)
+            {
+                if (objects == null || palette == null)
+                    return;
+
+                foreach (var obj in objects.Where(x => DesiredBsps.HasFlag((BspFlags)(1 << (x.OriginBspIndex))) && x.PaletteIndex != -1))
+                {
+                    if (obj.PaletteIndex < 0 || obj.PaletteIndex >= palette.Count)
+                        continue;
+
+                    var paletteEntry = palette[obj.PaletteIndex];
+                    if (paletteEntry.Object != null)
+                        Add(palette[obj.PaletteIndex].Object);
+                }
+            }
+
+            private void CollectFlocks()
+            {
+                foreach (var flock in BlamScnr.Flocks.Where(x => DesiredBsps.HasFlag((BspFlags)(1 << (x.BspIndex)))))
+                {
+                    if (flock.FlockPaletteIndex >= 0 && flock.FlockPaletteIndex < BlamScnr.CreaturePalette.Count)
+                    {
+                        var flockTag = BlamScnr.FlockPalette[flock.FlockPaletteIndex];
+                        if (flockTag != null && flockTag.Instance != null)
+                            Add(flockTag.Instance);
+                    }
+
+                    if (flock.CreaturePaletteIndex >= 0 && flock.CreaturePaletteIndex < BlamScnr.CreaturePalette.Count)
+                    {
+                        var creatureTag = BlamScnr.CreaturePalette[flock.CreaturePaletteIndex];
+                        if (creatureTag != null && creatureTag.Object != null)
+                            Add(creatureTag.Object);
+                    }
+                }
+            }
         }
     }
 }
