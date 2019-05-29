@@ -1,37 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Animations.Codecs
 {
-    public class UncompressedAnimatedData : AnimationData
+    public class QuantizedRotationOnlyData : AnimationData
     {
         public override void Read(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianReader reader)
         {
+            RotationKeyframes = new List<List<int>>();
             RotationFrames = new List<List<RealQuaternion>>();
 
             for (var i = 0; i < header.RotationNodeCount; i++)
             {
+                RotationKeyframes.Add(Enumerable.Range(0, groupMember.FrameCount).ToList());
+
                 var rotations = new List<RealQuaternion>();
 
                 for (var j = 0; j < groupMember.FrameCount; j++)
                     rotations.Add(
                         new RealQuaternion(
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle(),
-                            reader.ReadSingle())
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue)
                         .Normalize());
 
                 RotationFrames.Add(rotations);
             }
 
+            TranslationKeyframes = new List<List<int>>();
             TranslationFrames = new List<List<RealPoint3d>>();
 
             for (var i = 0; i < header.TranslationNodeCount; i++)
             {
+                TranslationKeyframes.Add(Enumerable.Range(0, groupMember.FrameCount).ToList());
+
                 var translations = new List<RealPoint3d>();
 
                 for (var j = 0; j < groupMember.FrameCount; j++)
@@ -44,10 +53,13 @@ namespace TagTool.Animations.Codecs
                 TranslationFrames.Add(translations);
             }
 
+            ScaleKeyframes = new List<List<int>>();
             ScaleFrames = new List<List<float>>();
 
             for (var i = 0; i < header.ScaleNodeCount; i++)
             {
+                ScaleKeyframes.Add(Enumerable.Range(0, groupMember.FrameCount).ToList());
+
                 var scales = new List<float>();
 
                 for (var j = 0; j < groupMember.FrameCount; j++)
@@ -72,10 +84,10 @@ namespace TagTool.Animations.Codecs
 
                 foreach (var rotation in rotations)
                 {
-                    writer.Write(rotation.I);
-                    writer.Write(rotation.J);
-                    writer.Write(rotation.K);
-                    writer.Write(rotation.W);
+                    writer.Write((short)(short.MaxValue * rotation.I));
+                    writer.Write((short)(short.MaxValue * rotation.J));
+                    writer.Write((short)(short.MaxValue * rotation.K));
+                    writer.Write((short)(short.MaxValue * rotation.W));
                 }
             }
 

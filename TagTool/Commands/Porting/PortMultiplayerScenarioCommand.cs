@@ -134,7 +134,7 @@ namespace TagTool.Commands.Porting
                         {
                             new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.UnknownBlock()
                         },
-                        Clusters2 = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster2>()
+                        ClusterMappings = new List<Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping>()
                     }
                 },
                 PortalToDeviceMappings = new List<Scenario.ZoneSetPvsBlock.PortalToDeviceMapping>
@@ -239,8 +239,8 @@ namespace TagTool.Commands.Porting
 
                         for (var clusterIndex = 0; clusterIndex < sbsp.Clusters.Count; clusterIndex++)
                         {
-                            while (clusterIndex >= newSet.Clusters2.Count)
-                                newSet.Clusters2.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.Cluster2());
+                            while (clusterIndex >= newSet.ClusterMappings.Count)
+                                newSet.ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.StructureBspPotentiallyVisibleSet.BspSeamClusterMapping());
                         }
                     }
 

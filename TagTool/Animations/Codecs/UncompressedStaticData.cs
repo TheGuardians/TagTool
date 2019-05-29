@@ -7,63 +7,69 @@ namespace TagTool.Animations.Codecs
 {
     public class UncompressedStaticData : AnimationData
     {
-        public List<RealQuaternion> Rotations;
-        public List<RealPoint3d> Translations;
-        public List<float> Scales;
-
         public override void Read(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianReader reader)
         {
-            Rotations = new List<RealQuaternion>();
+            RotationFrames = new List<List<RealQuaternion>>();
 
             for (var i = 0; i < header.RotationNodeCount; i++)
-                Rotations.Add(
-                    new RealQuaternion(
-                        reader.ReadInt16() / (float)short.MaxValue,
-                        reader.ReadInt16() / (float)short.MaxValue,
-                        reader.ReadInt16() / (float)short.MaxValue,
-                        reader.ReadInt16() / (float)short.MaxValue)
-                    .Normalize());
+                RotationFrames.Add(
+                    new List<RealQuaternion>
+                    {
+                        new RealQuaternion(
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue,
+                            reader.ReadInt16() / (float)short.MaxValue)
+                        .Normalize()
+                    });
 
-            Translations = new List<RealPoint3d>();
+            TranslationFrames = new List<List<RealPoint3d>>();
 
             for (var i = 0; i < header.TranslationNodeCount; i++)
-                Translations.Add(
-                    new RealPoint3d(
-                        reader.ReadSingle(),
-                        reader.ReadSingle(),
-                        reader.ReadSingle()));
+                TranslationFrames.Add(
+                    new List<RealPoint3d>
+                    {
+                        new RealPoint3d(
+                            reader.ReadSingle(),
+                            reader.ReadSingle(),
+                            reader.ReadSingle())
+                    });
 
-            Scales = new List<float>();
+            ScaleFrames = new List<List<float>>();
 
             for (var i = 0; i < header.ScaleNodeCount; i++)
-                Scales.Add(reader.ReadSingle());
+                ScaleFrames.Add(new List<float> { reader.ReadSingle() });
         }
 
         public override void Write(ModelAnimationTagResource.GroupMember groupMember, AnimationCodecHeader header, EndianWriter writer)
         {
-            header.RotationNodeCount = (byte)Rotations.Count;
+            header.RotationNodeCount = (byte)RotationFrames.Count;
 
-            foreach (var rotation in Rotations)
+            foreach (var rotations in RotationFrames)
             {
+                var rotation = rotations[0];
+
                 writer.Write((short)(short.MaxValue * rotation.I));
                 writer.Write((short)(short.MaxValue * rotation.J));
                 writer.Write((short)(short.MaxValue * rotation.K));
                 writer.Write((short)(short.MaxValue * rotation.W));
             }
 
-            header.TranslationNodeCount = (byte)Translations.Count;
+            header.TranslationNodeCount = (byte)TranslationFrames.Count;
 
-            foreach (var translation in Translations)
+            foreach (var translations in TranslationFrames)
             {
+                var translation = translations[0];
+
                 writer.Write(translation.X);
                 writer.Write(translation.Y);
                 writer.Write(translation.Z);
             }
 
-            header.ScaleNodeCount = (byte)Scales.Count;
+            header.ScaleNodeCount = (byte)ScaleFrames.Count;
 
-            foreach (var scale in Scales)
-                writer.Write(scale);
+            foreach (var scales in ScaleFrames)
+                writer.Write(scales[0]);
         }
     }
 }

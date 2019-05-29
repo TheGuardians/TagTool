@@ -437,7 +437,7 @@ namespace TagTool.Tags.Definitions
                 public List<Sky> ClusterVisibleSkies;
                 public List<UnknownBlock> Unknown;
                 public List<UnknownBlock> Unknown2;
-                public List<Cluster2> Clusters2;
+                public List<BspSeamClusterMapping> ClusterMappings;
 
                 [TagStructure(Size = 0xC)]
                 public class Cluster : TagStructure
@@ -507,20 +507,15 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown;
                 }
 
-                [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-                [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnline106708)]
-                public class Cluster2 : TagStructure
+                [TagStructure(Size = 0xC)]
+                public class BspSeamClusterMapping : TagStructure
 				{
-                    [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                    public int Unknown;
-
-                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                    public List<UnknownBlock> Unknowns;
+                    public List<ClusterReference> Clusters;
 
                     [TagStructure(Size = 0x1)]
-                    public class UnknownBlock : TagStructure
+                    public class ClusterReference : TagStructure
 					{
-                        public sbyte Unknown;
+                        public sbyte ClusterIndex;
                     }
                 }
             }

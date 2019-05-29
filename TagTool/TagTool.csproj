@@ -175,6 +175,7 @@
     <Compile Include="Animations\Codecs\AnimationCodec.cs" />
     <Compile Include="Animations\Codecs\AnimationCodecHeader.cs" />
     <Compile Include="Animations\Codecs\AnimationData.cs" />
+    <Compile Include="Animations\Codecs\QuantizedRotationOnlyData.cs" />
     <Compile Include="Animations\Codecs\UncompressedAnimatedData.cs" />
     <Compile Include="Animations\Codecs\UncompressedStaticData.cs" />
     <Compile Include="Audio\BlamSound.cs" />
