@@ -238,6 +238,8 @@
     <Compile Include="Cache\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
+    <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
+    <Compile Include="Commands\Bipeds\CreateCharacterType.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
