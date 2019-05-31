@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Animations.Codecs;
+using TagTool.Animations;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
@@ -61,11 +61,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         var header = CacheContext.Deserialize<AnimationCodecHeader>(
                             new DataSerializationContext(reader));
 
-                        if (header.CodecType != AnimationCodecType.UncompressedStatic)
+                        if (header.CodecType == AnimationCodecType.UncompressedStatic)
                             continue;
 
-                        var data = new UncompressedStaticData();
-                        data.Read(groupMember, header, reader);
+                        var data = new AnimationData(groupMember, header);
+                        data.Read(reader);
                     }
                 }
             }

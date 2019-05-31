@@ -30,10 +30,10 @@ namespace System.IO
             switch (compression)
             {
                 case TagFieldCompression.Int8:
-                    return reader.ReadSByte() / (float)sbyte.MaxValue;
+                    return (float)reader.ReadSByte() / sbyte.MaxValue;
 
                 case TagFieldCompression.Int16:
-                    return reader.ReadInt16() / (float)short.MaxValue;
+                    return (float)reader.ReadInt16() / short.MaxValue;
 
                 default:
                     return reader.ReadSingle();

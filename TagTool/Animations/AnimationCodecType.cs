@@ -1,4 +1,4 @@
-﻿namespace TagTool.Animations.Codecs
+﻿namespace TagTool.Animations
 {
     public enum AnimationCodecType : sbyte
     {
