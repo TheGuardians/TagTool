@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TagTool.Common;
-using TagTool.IO;
-using TagTool.Tags;
-using static TagTool.Tags.TagFieldCompression;
-using static TagTool.Tags.TagFieldFlags;
+﻿using TagTool.Tags;
 
-namespace TagTool.Animations.Codecs
+namespace TagTool.Animations
 {
     [TagStructure(Size = 0x20)]
     public class AnimationCodecHeader
