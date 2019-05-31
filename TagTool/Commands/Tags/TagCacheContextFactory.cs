@@ -8,6 +8,7 @@ using TagTool.Commands.Porting;
 using TagTool.Commands.RenderModels;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Strings;
+using TagTool.Commands.Modding;
 
 namespace TagTool.Commands.Tags
 {
@@ -63,12 +64,18 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new Shaders.RegenerateShaders(cacheContext));
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new ForEachCommand(contextStack, cacheContext));
-            context.AddCommand(new ExportModPackageCommand(cacheContext));
             context.AddCommand(new ClearMultiplayerCustomizationCommand(cacheContext));
             context.AddCommand(new ModelAnimationGraphs.AnimationTestCommand(cacheContext));
             context.AddCommand(new ExportTagDefinitionsCommand(cacheContext));
             context.AddCommand(new ModelAnimationGraphs.ApplySprintFixupsCommand(cacheContext));
-            context.AddCommand(new RenderModels.ListMultiMeshModelsCommand(cacheContext));
+            context.AddCommand(new ListMultiMeshModelsCommand(cacheContext));
+
+            //
+            // Modding commands
+            //
+
+            context.AddCommand(new ExportModPackageCommand(cacheContext));
+            context.AddCommand(new CreateCharacterType(cacheContext));
 
             return context;
         }

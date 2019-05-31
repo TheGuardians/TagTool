@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
-namespace TagTool.Commands.Bipeds
+namespace TagTool.Commands.Modding
 {
     class CreateCharacterType : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
-        private Biped Biped { get; }
         private ModGlobalsDefinition ModGlobals;
         private Globals Globals;
 
-        public CreateCharacterType(HaloOnlineCacheContext cacheContext, Biped biped) :
+        public CreateCharacterType(HaloOnlineCacheContext cacheContext) :
             base(true,
 
                 "CreateCharacterType",
@@ -27,7 +23,6 @@ namespace TagTool.Commands.Bipeds
                 "Builds a character type from the current biped tag")
         {
             CacheContext = cacheContext;
-            Biped = biped;
         }
 
         public override object Execute(List<string> args)

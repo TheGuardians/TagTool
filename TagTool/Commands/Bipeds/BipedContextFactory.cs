@@ -17,7 +17,6 @@ namespace TagTool.Commands.Bipeds
 
         public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Biped biped)
         {
-            commandContext.AddCommand(new CreateCharacterType(cacheContext, biped));
         }
     }
 }
