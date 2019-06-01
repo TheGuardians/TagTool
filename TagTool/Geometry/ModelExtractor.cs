@@ -16,28 +16,22 @@ namespace TagTool.Geometry
     {
         private readonly Scene Scene;
         private readonly HaloOnlineCacheContext CacheContext;
+
         private Dictionary<int, int> MeshMapping;   //key is the absolute subMesh index, value is the Scene.Meshes index
-
-        private readonly RenderModel RenderModel;
-        private readonly ModelAnimationGraph ModelAnimationGraph;
-        private readonly CollisionModel CollisionModel;
-        private readonly PhysicsModel PhysicsModel;
-
         private List<Node> BoneNodes;
 
+        private readonly RenderModel RenderModel; 
         private readonly RenderGeometryApiResourceDefinition RenderModelResourceDefinition;
         private Stream RenderModelResourceStream;
 
-        public ModelExtractor(HaloOnlineCacheContext cacheContext, RenderModel renderModel, ModelAnimationGraph animationGraph, CollisionModel collisionModel, PhysicsModel physicsModel)
+        public ModelExtractor(HaloOnlineCacheContext cacheContext, RenderModel renderModel)
         {
             Scene = new Scene();
-            CacheContext = cacheContext;
-            MeshMapping = new Dictionary<int, int>();
-            RenderModel = renderModel;
-            ModelAnimationGraph = animationGraph;
-            CollisionModel = collisionModel;
-            PhysicsModel = physicsModel;
 
+            CacheContext = cacheContext;
+            RenderModel = renderModel;
+
+            MeshMapping = new Dictionary<int, int>();
             BoneNodes = new List<Node>();
 
             // Deserialize the render_model resource
@@ -45,7 +39,7 @@ namespace TagTool.Geometry
             RenderModelResourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
             RenderModelResourceStream = new MemoryStream();
             CacheContext.ExtractResource(RenderModel.Geometry.Resource, RenderModelResourceStream);
-            // Add more deserialization as required here
+
         }
 
         ~ModelExtractor()
@@ -73,7 +67,7 @@ namespace TagTool.Geometry
         /// Build a node structure and mesh from the render model.
         /// </summary>
         /// <returns></returns>
-        public void ExtractRenderModel()
+        public void ExtractRenderModel(string variantName = "*")
         {
             Scene.RootNode = new Node(CacheContext.GetString(RenderModel.Name));
             // Pass 1 create bones and assimp nodes as enumerated in render model nodes
@@ -107,33 +101,37 @@ namespace TagTool.Geometry
                 foreach (var permutation in region.Permutations)
                 {
                     var permutationName = CacheContext.GetString(permutation.Name);
-                    for (int i = 0; i < permutation.MeshCount; i++)
+                    // only export the specified permutations
+                    if( permutationName == variantName || variantName == "*")
                     {
-                        var meshName = $"mesh_{i}";
-                        var meshIndex = i + permutation.MeshIndex;
-                        var mesh = RenderModel.Geometry.Meshes[meshIndex];
-
-                        for (int j = 0; j < mesh.Parts.Count; j++)
+                        for (int i = 0; i < permutation.MeshCount; i++)
                         {
-                            var partName = $"part_{j}";
-                            int absSubMeshIndex = GetAbsoluteIndexSubMesh(meshIndex) + j;
-                            int sceneMeshIndex;
+                            var meshName = $"mesh_{i}";
+                            var meshIndex = i + permutation.MeshIndex;
+                            var mesh = RenderModel.Geometry.Meshes[meshIndex];
 
-                            if (!MeshMapping.ContainsKey(absSubMeshIndex))
+                            for (int j = 0; j < mesh.Parts.Count; j++)
                             {
-                                sceneMeshIndex = ExtractMeshPart(meshIndex, j);
-                                MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
+                                var partName = $"part_{j}";
+                                int absSubMeshIndex = GetAbsoluteIndexSubMesh(meshIndex) + j;
+                                int sceneMeshIndex;
+
+                                if (!MeshMapping.ContainsKey(absSubMeshIndex))
+                                {
+                                    sceneMeshIndex = ExtractMeshPart(meshIndex, j);
+                                    MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
+                                }
+                                else
+                                {
+                                    MeshMapping.TryGetValue(absSubMeshIndex, out sceneMeshIndex);
+                                }
+                                Node node = new Node
+                                {
+                                    Name = $"{regionName}:{permutationName}:{meshName}:{partName}"
+                                };
+                                node.MeshIndices.Add(sceneMeshIndex);
+                                Scene.RootNode.Children.Add(node);
                             }
-                            else
-                            {
-                                MeshMapping.TryGetValue(absSubMeshIndex, out sceneMeshIndex);
-                            }
-                            Node node = new Node
-                            {
-                                Name = $"{regionName}:{permutationName}:{meshName}:{partName}"
-                            };
-                            node.MeshIndices.Add(sceneMeshIndex);
-                            Scene.RootNode.Children.Add(node);
                         }
                     }
                 }
@@ -160,8 +158,7 @@ namespace TagTool.Geometry
             Scene.Meshes.Add(mesh);
             return index;
         }
-
-        // TODO: There is a bug with faces, some clipping and mission sections
+       
         private Assimp.Mesh ExtractMeshPartGeometry(int meshIndex, int partIndex)
         {
             // create new assimp mesh

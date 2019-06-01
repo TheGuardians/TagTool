@@ -119,7 +119,7 @@ namespace TagTool.Commands.Models
                         break;
 
                     case "dae":
-                        ModelExtractor extractor = new ModelExtractor(CacheContext, renderModel, null, null, null);
+                        ModelExtractor extractor = new ModelExtractor(CacheContext, renderModel);
                         extractor.ExtractRenderModel();
                         extractor.ExportCollada(modelFile);
                         break;
