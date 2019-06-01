@@ -55,9 +55,6 @@ namespace TagTool.Geometry
 
         public bool ExportCollada(FileInfo file)
         {
-            // temp hack to allow export to collada: add a single unused bone. Once skeletons are added remove hack.
-            Scene.Meshes[0].Bones.Add(new Bone("test", new Matrix3x3(), new VertexWeight[Scene.Meshes[0].VertexCount]));
-
             using (var exporter = new AssimpContext())
             {
                 return exporter.ExportFile(Scene, file.FullName, "collada", PostProcessSteps.ValidateDataStructure);    //collada or obj
@@ -79,7 +76,6 @@ namespace TagTool.Geometry
         public void ExtractRenderModel()
         {
             Scene.RootNode = new Node(CacheContext.GetString(RenderModel.Name));
-
             // Pass 1 create bones and assimp nodes as enumerated in render model nodes
             foreach (var node in RenderModel.Nodes)
             {
@@ -116,124 +112,38 @@ namespace TagTool.Geometry
                         var meshName = $"mesh_{i}";
                         var meshIndex = i + permutation.MeshIndex;
                         var mesh = RenderModel.Geometry.Meshes[meshIndex];
+
                         for (int j = 0; j < mesh.Parts.Count; j++)
                         {
                             var partName = $"part_{j}";
                             int absSubMeshIndex = GetAbsoluteIndexSubMesh(meshIndex) + j;
+                            int sceneMeshIndex;
+
                             if (!MeshMapping.ContainsKey(absSubMeshIndex))
                             {
-                                int sceneMeshIndex = ExtractMeshPart(meshIndex, j);
+                                sceneMeshIndex = ExtractMeshPart(meshIndex, j);
                                 MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
-                                Node node = new Node();
-                                node.Name = $"{regionName}:{permutationName}:{meshName}:{partName}";
-                                node.MeshIndices.Add(sceneMeshIndex);
-                                Scene.RootNode.Children.Add(node);
                             }
+                            else
+                            {
+                                MeshMapping.TryGetValue(absSubMeshIndex, out sceneMeshIndex);
+                            }
+                            Node node = new Node
+                            {
+                                Name = $"{regionName}:{permutationName}:{meshName}:{partName}"
+                            };
+                            node.MeshIndices.Add(sceneMeshIndex);
+                            Scene.RootNode.Children.Add(node);
                         }
                     }
                 }
             }
 
-
-            /*
-            foreach (var region in RenderModel.Regions)
-            {
-                Scene.RootNode.Children.Add(ExtractRegion(region));
-            }
-            */
-            // add empty materials
             for (int i = 0; i < RenderModel.Materials.Count(); i++)
             {
                 Scene.Materials.Add(new Material());
             }
 
-        }
-
-        /// <summary>
-        /// Build a node structure from a single region of the render model
-        /// </summary>
-        /// <param name="region"></param>
-        /// <returns></returns>
-        private Node ExtractRegion(RenderModel.Region region)
-        {
-            Node node = new Node(CacheContext.GetString(region.Name));
-            foreach (var permutation in region.Permutations)
-            {
-                node.Children.Add(ExtractPermutation(permutation));
-            }
-            return node;
-        }
-
-        /// <summary>
-        /// Build a node/add mesh from a single permutation of the render model.
-        /// </summary>
-        /// <param name="permutation"></param>
-        /// <returns></returns>
-        private Node ExtractPermutation(RenderModel.Region.Permutation permutation)
-        {
-            Node node = new Node(CacheContext.GetString(permutation.Name));
-
-            /* Disabled until assimpNet / assimp is fixed 
-            // No need to add another layer of nodes since there is only one mesh
-            if(permutation.MeshCount == 1)
-            {
-                var mesh = RenderModel.Geometry.Meshes[permutation.MeshIndex];
-                for(int i =0; i< mesh.Parts.Count; i++)
-                {
-                    int absSubMeshIndex = GetAbsoluteIndexSubMesh(permutation.MeshIndex) + i;
-                    if (MeshMapping.ContainsKey(absSubMeshIndex))
-                    {
-                        MeshMapping.TryGetValue(absSubMeshIndex, out int mesh_index);
-                        node.MeshIndices.Add(mesh_index);
-                    }
-                    else
-                    {
-                        int value = ExtractMeshPart(permutation.MeshIndex, i);
-                        MeshMapping.Add(absSubMeshIndex, value);
-                        node.MeshIndices.Add(value);
-                    }
-                }
-            }
-            // build a layer of nodes for each mesh
-            else
-            {
-                
-            }*/
-
-            for (int i = 0; i < permutation.MeshCount; i++)
-            {
-                node.Children.Add(ExtractMesh(i + permutation.MeshIndex));
-            }
-            return node;
-        }
-
-        /// <summary>
-        /// Create a node for multi mesh permutation
-        /// </summary>
-        /// <param name="mesh_index"></param>
-        /// <returns></returns>
-        private Node ExtractMesh(int mesh_index)
-        {
-            Node node = new Node($"mesh_{mesh_index}");
-            var mesh = RenderModel.Geometry.Meshes[mesh_index];
-            for (int i = 0; i < mesh.Parts.Count; i++)
-            {
-                Node newNode = new Node($"part_{i}");
-                int absSubMeshIndex = GetAbsoluteIndexSubMesh(mesh_index) + i;
-                if (MeshMapping.ContainsKey(absSubMeshIndex))
-                {
-                    MeshMapping.TryGetValue(absSubMeshIndex, out int sceneMeshIndex);
-                    newNode.MeshIndices.Add(sceneMeshIndex);
-                }
-                else
-                {
-                    int sceneMeshIndex = ExtractMeshPart(mesh_index, i);
-                    MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
-                    newNode.MeshIndices.Add(sceneMeshIndex);
-                }
-                node.Children.Add(newNode);
-            }
-            return node;
         }
 
         /// <summary>
@@ -350,13 +260,14 @@ namespace TagTool.Geometry
             }
 
             // create faces
+            mesh.Faces.Clear();
 
-            mesh.Faces.AddRange(GenerateFaces(int_indices, vertexOffset));
+            GenerateFaces(int_indices, vertexOffset, mesh.Faces);
 
             return mesh;
         }
 
-        private List<Face> GenerateFaces(int[] indices, int vertexOffset)
+        private void GenerateFaces(int[] indices, int vertexOffset, List<Face> meshFaces)
         {
             List<Face> faces = new List<Face>();
             for (int i = 0; i < indices.Length; i += 3)
@@ -364,12 +275,9 @@ namespace TagTool.Geometry
                 var a = indices[i] - vertexOffset;
                 var b = indices[i + 1] - vertexOffset;
                 var c = indices[i + 2] - vertexOffset;
-                if (a == b || b == c || a == c) // remove 2 vertex faces
-                    continue;
-                else
-                    faces.Add(new Face(new int[] { a, b, c }));
+                if (!(a == b || b == c || a == c))
+                    meshFaces.Add(new Face(new int[] { a, b, c }));
             }
-            return faces;
         }
 
         private int GetPartVertexOffset(int meshIndex, int partIndex)
