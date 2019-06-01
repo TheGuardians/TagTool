@@ -23,6 +23,8 @@ namespace TagTool.Geometry
         private readonly CollisionModel CollisionModel;
         private readonly PhysicsModel PhysicsModel;
 
+        private List<Node> BoneNodes;
+
         private readonly RenderGeometryApiResourceDefinition RenderModelResourceDefinition;
         private Stream RenderModelResourceStream;
 
@@ -35,6 +37,8 @@ namespace TagTool.Geometry
             ModelAnimationGraph = animationGraph;
             CollisionModel = collisionModel;
             PhysicsModel = physicsModel;
+
+            BoneNodes = new List<Node>();
 
             // Deserialize the render_model resource
             var resourceContext = new ResourceSerializationContext(CacheContext, RenderModel.Geometry.Resource);
@@ -75,16 +79,74 @@ namespace TagTool.Geometry
         public void ExtractRenderModel()
         {
             Scene.RootNode = new Node(CacheContext.GetString(RenderModel.Name));
+
+            // Pass 1 create bones and assimp nodes as enumerated in render model nodes
+            foreach (var node in RenderModel.Nodes)
+            {
+                Node newNode = new Node(CacheContext.GetString(node.Name));
+                //compute transform
+
+                newNode.Transform = ComputeTransform(node);
+                BoneNodes.Add(newNode);
+
+            }
+            // Pass 2 create node structure from render model node indices
+            for (int i = 0; i < RenderModel.Nodes.Count; i++)
+            {
+                var node = RenderModel.Nodes[i];
+                var boneNode = BoneNodes[i];
+                var parentIndex = node.ParentNode;
+
+                if (parentIndex == -1)
+                    Scene.RootNode.Children.Add(boneNode);
+                else
+                {
+                    BoneNodes[parentIndex].Children.Add(boneNode);
+                }
+            }
+
+            foreach (var region in RenderModel.Regions)
+            {
+                var regionName = CacheContext.GetString(region.Name);
+                foreach (var permutation in region.Permutations)
+                {
+                    var permutationName = CacheContext.GetString(permutation.Name);
+                    for (int i = 0; i < permutation.MeshCount; i++)
+                    {
+                        var meshName = $"mesh_{i}";
+                        var meshIndex = i + permutation.MeshIndex;
+                        var mesh = RenderModel.Geometry.Meshes[meshIndex];
+                        for (int j = 0; j < mesh.Parts.Count; j++)
+                        {
+                            var partName = $"part_{j}";
+                            int absSubMeshIndex = GetAbsoluteIndexSubMesh(meshIndex) + j;
+                            if (!MeshMapping.ContainsKey(absSubMeshIndex))
+                            {
+                                int sceneMeshIndex = ExtractMeshPart(meshIndex, j);
+                                MeshMapping.Add(absSubMeshIndex, sceneMeshIndex);
+                                Node node = new Node();
+                                node.Name = $"{regionName}:{permutationName}:{meshName}:{partName}";
+                                node.MeshIndices.Add(sceneMeshIndex);
+                                Scene.RootNode.Children.Add(node);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            /*
             foreach (var region in RenderModel.Regions)
             {
                 Scene.RootNode.Children.Add(ExtractRegion(region));
             }
-
+            */
             // add empty materials
             for (int i = 0; i < RenderModel.Materials.Count(); i++)
             {
                 Scene.Materials.Add(new Material());
             }
+
         }
 
         /// <summary>
@@ -95,7 +157,7 @@ namespace TagTool.Geometry
         private Node ExtractRegion(RenderModel.Region region)
         {
             Node node = new Node(CacheContext.GetString(region.Name));
-            foreach(var permutation in region.Permutations)
+            foreach (var permutation in region.Permutations)
             {
                 node.Children.Add(ExtractPermutation(permutation));
             }
@@ -199,7 +261,7 @@ namespace TagTool.Geometry
             // Add support for multiple UV layers
             var textureCoordinateIndex = 0;
             mesh.UVComponentCount[textureCoordinateIndex] = 2;
-           
+
             // prepare vertex extraction
             var meshReader = new MeshReader(CacheContext.Version, RenderModel.Geometry.Meshes[meshIndex], RenderModelResourceDefinition);
             var vertexCompressor = new VertexCompressor(RenderModel.Geometry.Compression[0]);
@@ -230,10 +292,22 @@ namespace TagTool.Geometry
             }
 
             // set index list, maybe require adjustment for vertex buffer offset
-            
+
             mesh.SetIndices(int_indices, 3);
 
-            for(int i = vertexOffset; i<vertexOffset + geometryPart.VertexCount; i++)
+            // build skeleton for each mesh (meh)
+
+            // create a list of all the mesh bones available in the scene
+            foreach (var node in RenderModel.Nodes)
+            {
+                Bone bone = new Bone();
+                bone.Name = CacheContext.GetString(node.Name);
+                bone.OffsetMatrix = new Matrix4x4();
+                mesh.Bones.Add(bone);
+
+            }
+
+            for (int i = vertexOffset; i < vertexOffset + geometryPart.VertexCount; i++)
             {
                 var vertex = vertices[i];
                 mesh.Vertices.Add(vertex.Position);
@@ -250,9 +324,31 @@ namespace TagTool.Geometry
                 if (vertex.Binormals != null)
                     mesh.BiTangents.Add(vertex.Binormals);
 
+                if (vertex.Indices != null)
+                {
+                    for (int j = 0; j < vertex.Indices.Length; j++)
+                    {
+                        var index = vertex.Indices[j];
+                        var bone = mesh.Bones[index];
+                        Matrix4x4 inverseTransform = new Matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+
+                        var currentNode = BoneNodes[index];
+                        while (currentNode!=null)
+                        {
+                            Matrix4x4 inverse = (currentNode.Transform.DeepClone());
+                            inverse.Inverse();
+                            inverseTransform = inverse * inverseTransform;
+                            currentNode = currentNode.Parent;
+                        }
+                        bone.OffsetMatrix = inverseTransform;
+                        bone.VertexWeights.Add(new VertexWeight(i - vertexOffset, vertex.Weights[j]));
+                    }
+                }
+
                 // Add skinned mesh support and more
             }
-            
+
             // create faces
 
             mesh.Faces.AddRange(GenerateFaces(int_indices, vertexOffset));
@@ -265,7 +361,7 @@ namespace TagTool.Geometry
             List<Face> faces = new List<Face>();
             for (int i = 0; i < indices.Length; i += 3)
             {
-                var a = indices[i]  - vertexOffset;
+                var a = indices[i] - vertexOffset;
                 var b = indices[i + 1] - vertexOffset;
                 var c = indices[i + 2] - vertexOffset;
                 if (a == b || b == c || a == c) // remove 2 vertex faces
@@ -280,7 +376,7 @@ namespace TagTool.Geometry
         {
             var mesh = RenderModel.Geometry.Meshes[meshIndex];
             int vertexOffset = 0;
-            for(int i =0; i< partIndex; i++)
+            for (int i = 0; i < partIndex; i++)
             {
                 vertexOffset += mesh.Parts[i].VertexCount;
             }
@@ -500,5 +596,56 @@ namespace TagTool.Geometry
             public byte[] Indices { get; set; }
             public float[] Weights { get; set; }
         }
+
+        private Matrix4x4 ComputeTransform(RenderModel.Node node)
+        {
+            Matrix4x4 matrix_translation = new Matrix4x4();
+
+            matrix_translation.A4 = node.DefaultTranslation.X;
+            matrix_translation.B4 = node.DefaultTranslation.Y;
+            matrix_translation.C4 = node.DefaultTranslation.Z;
+
+            matrix_translation.A1 = 1;
+            matrix_translation.B2 = 1;
+            matrix_translation.C3 = 1;
+            matrix_translation.D4 = 1;
+
+            Matrix4x4 matrix = ComputeRotation(node) * matrix_translation;
+
+            return matrix;
+        }
+
+        private Matrix4x4 ComputeRotation(RenderModel.Node node)
+        {
+            Matrix4x4 rot = new Matrix4x4();
+            rot.D4 = 1;
+            var quat = node.DefaultRotation.Normalize();
+
+            float sqw = quat.W * quat.W;
+            float sqx = quat.I * quat.I;
+            float sqy = quat.J * quat.J;
+            float sqz = quat.K * quat.K;
+
+            
+            rot.A1 = (sqx - sqy - sqz + sqw);
+            rot.B2 = (-sqx + sqy - sqz + sqw);
+            rot.C3 = (-sqx - sqy + sqz + sqw);
+
+            float tmp1 = quat.I * quat.J;
+            float tmp2 = quat.K * quat.W;
+            rot.B1 = 2.0f * (tmp1 + tmp2);
+            rot.A2 = 2.0f * (tmp1 - tmp2);
+
+            tmp1 = quat.I * quat.K;
+            tmp2 = quat.J * quat.W;
+            rot.C1 = 2.0f * (tmp1 - tmp2);
+            rot.A3 = 2.0f * (tmp1 + tmp2);
+            tmp1 = quat.J * quat.K;
+            tmp2 = quat.I * quat.W;
+            rot.C2 = 2.0f * (tmp1 + tmp2);
+            rot.B3 = 2.0f * (tmp1 - tmp2);
+            return rot;
+        }
+
     }
 }
