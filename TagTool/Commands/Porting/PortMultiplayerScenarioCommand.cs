@@ -22,10 +22,18 @@ namespace TagTool.Commands.Porting
         public enum MultiplayerScenarioConversionFlags
         {
             None,
+            // port scenario objects
             Objects,
+            // port audio
             Audio,
+            // use ms30 shaders
+            Ms30,
+            // attempt to add an invisible point
+            SpawnPoint,
+            // keep path finding data
+            PathFinding,
 
-            Default = Objects | Audio
+            Default = Objects | Audio | Ms30 | SpawnPoint
         }
 
         public PortMultiplayerScenarioCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache, PortTagCommand portTag) :
@@ -194,9 +202,12 @@ namespace TagTool.Commands.Porting
                 var defaultPortingFlags = PortingFlags.Default;
                 if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Audio))
                     defaultPortingFlags &= ~PortingFlags.Audio;
+                if (!conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.Ms30))
+                    defaultPortingFlags &= ~PortingFlags.Ms30;
 
                 if (blamScnr.Lightmap != null)
                 {
+                    PortTag.RemoveFlags(~defaultPortingFlags);
                     PortTag.SetFlags(defaultPortingFlags);
                     ConvertLightmap(cacheStream, resourceStreams,
                         blamCache.GetIndexItemFromID(blamScnr.Lightmap.Index), zoneSetIndex, bspMask);
@@ -205,11 +216,13 @@ namespace TagTool.Commands.Porting
                 var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, zoneSetIndex, bspMask, conversionFlags);
                 tagCollector.Collect();
 
+                PortTag.RemoveFlags(~defaultPortingFlags);
                 PortTag.SetFlags(defaultPortingFlags);
+
                 foreach (var tag in tagCollector.Tags)
                     PortTag.ConvertTag(cacheStream, resourceStreams, tag);
 
-                PortTag.RemoveFlags(defaultPortingFlags);
+                PortTag.RemoveFlags(PortingFlags.Recursive);
                 var scnrTag = PortTag.ConvertTag(cacheStream, resourceStreams, blamScnrTag);
 
                 new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
@@ -319,8 +332,10 @@ namespace TagTool.Commands.Porting
                 Scnr.CampaignId = -1;
 
                 FixupStructureBspReferences();
+                FixupSkies();
                 FixupZoneSets();
                 FixupAllScenarioObjects();
+                FixupScenarioClusterData();
 
                 Scnr.BspAtlas.Clear();
                 Scnr.CampaignPlayers.Clear();
@@ -343,9 +358,16 @@ namespace TagTool.Commands.Porting
                 Scnr.MissionScenes.Clear();
                 Scnr.CharacterPalette.Clear();
                 Scnr.Scripts.Clear();
+                Scnr.ScriptingData.Clear();
+                Scnr.ScriptStrings = null;
+                Scnr.ScriptSourceFileReferences.Clear();
+                Scnr.ScriptExternalFileReferences.Clear();
+                Scnr.Scripts.Clear();
                 Scnr.Globals.Clear();
                 Scnr.CutsceneFlags.Clear();
                 Scnr.CutsceneCameraPoints.Clear();
+                Scnr.Cinematics.Clear();
+                Scnr.CinematicLighting.Clear();
                 Scnr.CutsceneTitles.Clear();
                 Scnr.CustomObjectNameStrings = null;
                 Scnr.ChapterTitleStrings = null;
@@ -363,6 +385,25 @@ namespace TagTool.Commands.Porting
                 Scnr.DesignerZoneSets.Clear();
                 Scnr.Unknown135.Clear();
                 Scnr.ScenarioMetagame.Clear();
+                Scnr.EditorFolders.Clear();
+
+                if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.PathFinding))
+                    Scnr.AiPathfindingData.Clear();
+
+                ScenarioInstance targetInstance = Scnr.Scenery.FirstOrDefault();
+                if (targetInstance == null)
+                    targetInstance = Scnr.Crates.FirstOrDefault();
+
+                if (targetInstance != null)
+                {
+                    var position = targetInstance.Position;
+                    position.Z += 0.5f;
+
+                    if (ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.SpawnPoint))
+                        AddRespawnPoint(position, targetInstance.Rotation);
+
+                    AddPrematchCamera(position, targetInstance.Rotation);
+                }
 
                 Scnr.PlayerStartingProfile = new List<PlayerStartingProfileBlock>
                 {
@@ -380,6 +421,27 @@ namespace TagTool.Commands.Porting
                 CacheContext.Serialize(CacheStream, ScnrTag, Scnr);
 
                 FixupInstancedGeometry();
+            }
+
+            private void FixupSkies()
+            {
+                BspShortFlags bspMask = 0;
+                for(int i = 0, j =0; i < 32; i++)
+                {
+                    if ((DesiredBsps & (BspFlags)(1 << i)) != 0)
+                    {
+                        bspMask |= (BspShortFlags)(1u << j);
+                        j++;
+                    }
+                }
+
+                foreach(var sky in Scnr.SkyReferences)
+                {
+                    if (sky.SkyObject != null)
+                        sky.ActiveBsps = bspMask;
+                    else
+                        sky.ActiveBsps = BspShortFlags.None;
+                }
             }
 
             private void FixupStructureBspReferences()
@@ -422,6 +484,7 @@ namespace TagTool.Commands.Porting
                 {
                     new ZoneSet()
                     {
+                        Name = zoneSet.Name,
                         BspAtlasIndex = -1,
                         PotentiallyVisibleSetIndex = 0,
                         LoadedBsps = (BspFlags)newBspZoneFlags
@@ -432,8 +495,12 @@ namespace TagTool.Commands.Porting
                 Scnr.ZoneSetPvs = new List<ZoneSetPvsBlock>() { zoneSetPvs };
                 Scnr.ZoneSetAudibility = new List<ZoneSetAudibilityBlock>() { zoneSetAudibility };
 
+                ClearBspPvsBlockElements(zoneSetAudibility.BspClusterToRoomBoundsMappings, (ulong)DesiredBsps);
+                ClearBspPvsBlockElements(zoneSetAudibility.GamePortalToDoorOccluderMappings, (ulong)DesiredBsps);
+
                 ClearBspPvsBlockElements(zoneSetPvs.BspChecksums, desiredBspPvsFlags);
                 ClearBspPvsBlockElements(zoneSetPvs.StructureBspPotentiallyVisibleSets, desiredBspPvsFlags);
+                ClearBspPvsBlockElements(zoneSetPvs.PortalToDeviceMappings, (ulong)DesiredBsps);
 
                 for (int i = 0; i < zoneSetPvs.StructureBspPotentiallyVisibleSets.Count; i++)
                 {
@@ -446,8 +513,6 @@ namespace TagTool.Commands.Porting
                         ClearBspPvsBlockElements(pvs.ClusterMappings[clusterIndex].Clusters, desiredBspPvsFlags);
                     }
                 }
-
-                CacheContext.Serialize(CacheStream, ScnrTag, Scnr);
             }
 
             private void FixupLightmap()
@@ -479,6 +544,17 @@ namespace TagTool.Commands.Porting
 
                 lightmap.LightmapDataReferences = newLightmapDataReference;
                 CacheContext.Serialize(CacheStream, lightmapTag, lightmap);
+            }
+
+            void FixupScenarioClusterData()
+            {
+                var newClusterData = new List<ScenarioClusterDatum>();
+                for (int bspIndex = 0; bspIndex < Scnr.StructureBsps.Count; bspIndex++)
+                {
+                    if (DesiredBsps.HasFlag((BspFlags)(1 << bspIndex)))
+                        newClusterData.Add(Scnr.ScenarioClusterData[bspIndex]);
+                }
+                Scnr.ScenarioClusterData = newClusterData;
             }
 
             private void FixupInstancedGeometry()
@@ -595,6 +671,38 @@ namespace TagTool.Commands.Porting
                 objects.Clear();
                 objects.AddRange(newObjects);
             }
+
+            private void AddPrematchCamera(RealPoint3d position, RealEulerAngles3d rotation)
+            {
+                Scnr.CutsceneCameraPoints.Add(new CutsceneCameraPoint()
+                {
+                    Position = position,
+                    Orientation = rotation,
+                    Flags = CutsceneCameraPointFlags.PrematchCameraHack,
+                    Name = "prematch_camera",
+                });
+            }
+
+            private void AddRespawnPoint(RealPoint3d position, RealEulerAngles3d rotation)
+            {
+                var instance = new SceneryInstance();
+                instance.PaletteIndex = (short)Scnr.SceneryPalette.Count;
+                instance.NameIndex = -1;
+                instance.Position = position;
+                instance.Rotation = rotation;
+                instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
+                instance.Source = ScenarioInstance.SourceValue.Editor;
+                instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
+                instance.OriginBspIndex = 0;
+                instance.AllowedZoneSets = (1 << 0);
+                instance.Team = SceneryInstance.TeamValue.Neutral;
+                Scnr.Scenery.Add(instance);
+
+                Scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
+                {
+                    Object = CacheContext.GetTag(@"objects\multi\spawning\respawn_point_invisible.scenery")
+                });
+            }
         }
 
         class MultiplayerScenarioTagCollector
@@ -639,6 +747,7 @@ namespace TagTool.Commands.Porting
                 CollectSkies();
                 CollectAllScenarioObjects();
                 CollectFlocks();
+                CollectDecals();
 
                 Add(BlamScnr.DefaultScreenFx);
                 Add(BlamScnr.DefaultCameraFx);
@@ -711,6 +820,39 @@ namespace TagTool.Commands.Porting
                         var creatureTag = BlamScnr.CreaturePalette[flock.CreaturePaletteIndex];
                         if (creatureTag != null && creatureTag.Object != null)
                             Add(creatureTag.Object);
+                    }
+                }
+            }
+
+            private void CollectDecals()
+            {
+                var visitedPaletteEntries = new HashSet<int>();
+                for (int i = 0; i < BlamScnr.StructureBsps.Count; i++)
+                {
+                    var sbspRef = BlamScnr.StructureBsps[i];
+                    if (((BspFlags)(1 << i) & DesiredBsps) == 0)
+                        continue;
+
+                    CacheFile blamCache = BlamCache;
+                    var sbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(
+                        new CacheSerializationContext(ref blamCache, BlamCache.GetIndexItemFromID(sbspRef.StructureBsp.Index)));
+       
+                    for (int j = 0; j < BlamScnr.Decals.Count; j++)
+                    {
+                        var decal = BlamScnr.Decals[j];
+                        if (decal.DecalPaletteIndex == -1)
+                            continue;
+
+                        if (visitedPaletteEntries.Contains(decal.DecalPaletteIndex))
+                            continue;
+
+                        if (decal.Position.X >= sbsp.WorldBoundsX.Lower && decal.Position.X <= sbsp.WorldBoundsX.Upper &&
+                            decal.Position.Y >= sbsp.WorldBoundsY.Lower && decal.Position.Y <= sbsp.WorldBoundsY.Upper &&
+                            decal.Position.Z >= sbsp.WorldBoundsZ.Lower && decal.Position.Z <= sbsp.WorldBoundsZ.Upper)
+                        {
+                            Add(BlamScnr.DecalPalette[decal.DecalPaletteIndex].Instance);
+                            visitedPaletteEntries.Add(decal.DecalPaletteIndex);
+                        }
                     }
                 }
             }
