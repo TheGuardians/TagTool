@@ -296,22 +296,23 @@ namespace TagTool.Geometry
         {
             var DHenN3 = Reader.ReadUInt32();
 
-            uint[] SignExtendX = { 0x00000000, 0xFFFFFC00 };
-            uint[] SignExtendYZ = { 0x00000000, 0xFFFFF800 };
-            uint temp;
-
-            temp = DHenN3 & 0x3FF;
-            var a = (short)(temp | SignExtendX[temp >> 9]) / (float)0x1FF;
-
-            temp = (DHenN3 >> 10) & 0x7FF;
-            var b = (short)(temp | SignExtendYZ[temp >> 10]) / (float)0x3FF;
-
-            temp = (DHenN3 >> 21) & 0x7FF;
-            var c = (short)(temp | SignExtendYZ[temp >> 10]) / (float)0x3FF;
-
-            return new RealVector3d(a, b, c);
+            var x = ((DHenN3 >> 0 ) & 0x3FF) / 1023.0f;
+            var y = ((DHenN3 >> 10) & 0x7FF) / 2047.0f;
+            var z = ((DHenN3 >> 21) & 0x7FF) / 2047.0f;
+           
+            return new RealVector3d(x, y, z);
         }
-        
+
+        public RealVector3d ReadDHen3()
+        {
+            var DHenN3 = Reader.ReadUInt32();
+
+            var x = (DHenN3 & 0x3FF);
+            var y = ((DHenN3 >> 10) & 0x7FF);
+            var z = ((DHenN3 >> 21) & 0x7FF);
+            return new RealVector3d(x, y, z);
+        }
+
         public float ReadFloat8_1()
         {
             return DenormalizeUnsigned(Reader.ReadByte());

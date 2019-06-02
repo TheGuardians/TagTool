@@ -444,6 +444,10 @@ namespace TagTool.Bitmaps.Converter
                 default:
                     throw new Exception($"Unsupported format {image.Format} flipping");
             }
+
+            if (bitmap.Format == BitmapFormat.Dxn)
+                bitmap.Data = BitmapDecoder.SwapXYDxn(bitmap.Data, bitmap.Width, bitmap.Height);
+
         }
 
         private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)

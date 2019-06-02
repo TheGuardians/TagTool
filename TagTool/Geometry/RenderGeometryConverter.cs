@@ -387,7 +387,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                     ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteWorldVertex(v);
                     });
                     break;
@@ -395,7 +397,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Rigid:
                     ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteRigidVertex(v);
                     });
                     break;
@@ -403,7 +407,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Skinned:
                     ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteSkinnedVertex(v);
                     });
                     break;
@@ -445,7 +451,11 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.Decorator:
-                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) => outVertexStream.WriteDecoratorVertex(v));
+                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) =>
+                    {
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        outVertexStream.WriteDecoratorVertex(v);
+                    });
                     break;
 
                 case VertexBufferFormat.World2:
@@ -551,7 +561,11 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.ParticleModel:
-                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) => outVertexStream.WriteParticleModelVertex(v));
+                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) =>
+                    {
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        outVertexStream.WriteParticleModelVertex(v);
+                    });
                     break;
 
                 case VertexBufferFormat.TinyPosition:
@@ -717,6 +731,21 @@ namespace TagTool.Geometry
                 value = VertexElementStream.Clamp(value);
             }
             return value;
+        }
+
+        private static float ConvertVectorSpace(float value)
+        {
+            return value <= 0.5? 2.0f * value : (value - 1.0f) * 2.0f;
+        }
+
+        private static RealVector3d ConvertVectorSpace(RealVector3d vector)
+        {
+            return new RealVector3d(ConvertVectorSpace(vector.I), ConvertVectorSpace(vector.J), ConvertVectorSpace(vector.K));
+        }
+
+        private static RealQuaternion ConvertVectorSpace(RealQuaternion vector)
+        {
+            return new RealQuaternion(ConvertVectorSpace(vector.I), ConvertVectorSpace(vector.J), ConvertVectorSpace(vector.K), vector.W);
         }
 
         /// <summary>
