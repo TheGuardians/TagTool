@@ -28,9 +28,6 @@ namespace TagTool.Audio
             ClearFiles();
             BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
 
-            if (blamSound.Compression == Compression.UnknownWTF)
-                throw new Exception("Unknown compression");
-
             var loop = sound.Flags.HasFlag(Sound.FlagsValue.LoopingSound);
             var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
             var sampleRate = blamSound.SampleRate.GetSampleRateHz();

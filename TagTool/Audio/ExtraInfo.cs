@@ -2,16 +2,49 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline106708)]
     public class ExtraInfo : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public int Unknown5;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public int Unknown6;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public DatumIndex BlockOffset;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public int BlockSize;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public uint SectionDataSize;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public uint ResourceDataSize;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public List<TagResourceGen2> Resources;
+
+        [TagField(Flags = Short, MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance Original;
+
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public short OwnerTagSectionOffset;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public byte RuntimeLinked;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public byte RuntimeLoaded;
+
+        [TagField(Flags = Short, MaxVersion = CacheVersion.Halo2Vista)]
+        public CachedTagInstance Runtime;
+
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<LanguagePermutation> LanguagePermutations;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<EncodedPermutationSection> EncodedPermutationSections;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]

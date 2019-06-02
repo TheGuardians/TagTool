@@ -24,6 +24,7 @@ namespace TagTool.Animations
             ModelAnimationGraph = modelAnimationGraph;
             CacheContext = cacheContext;
             Scene = new Scene();
+            Nodes = new List<Node>();
             for(int i = 0; i< ModelAnimationGraph.SkeletonNodes.Count; i++)
             {
                 Nodes.Add(new Node(CacheContext.GetString(ModelAnimationGraph.SkeletonNodes[i].Name)));
@@ -32,6 +33,8 @@ namespace TagTool.Animations
 
         public void ExtractAnimations(string animationName="*")
         {
+
+
 
             for(int i = 0; i< ModelAnimationGraph.Animations.Count; i++)
             {

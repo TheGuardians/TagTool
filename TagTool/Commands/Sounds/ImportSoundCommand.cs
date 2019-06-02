@@ -61,8 +61,7 @@ namespace TagTool.Commands.Sounds
             Definition.SampleRate.value = GetSoundSampleRateUser();
 
             Definition.PlatformCodec.Compression = GetSoundCompressionUser();
-            if (Definition.PlatformCodec.Compression == Compression.UnknownWTF)
-                return false;
+            
             Definition.PlatformCodec.Encoding = GetSoundEncodingUser();
 
             Definition.PitchRanges = new List<PitchRange>();
@@ -269,7 +268,7 @@ namespace TagTool.Commands.Sounds
                     return Compression.FSB4;
                 default:
                     Console.WriteLine("Invalid compression.");
-                    return Compression.UnknownWTF;
+                    return 0;
             }
         }
 

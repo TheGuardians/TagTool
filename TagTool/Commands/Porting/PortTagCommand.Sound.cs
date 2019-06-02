@@ -186,7 +186,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            sound.Promotion.LongestPermutationDuration = (uint)sound.SoundReference.LongestPermutationDurationMs;
+            sound.Promotion.LongestPermutationDuration = (uint)sound.SoundReference.MaximumPlayTime;
             sound.Promotion.TotalSampleSize = totalSampleCount;
 
             //

@@ -20,15 +20,23 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public Bounds<float> SkipFraction;
 
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public sbyte GainH2;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public sbyte PermutationInfoIndex;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public short LanguageNeutralTime;
+
         public uint SampleSize;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public int FirstPermutationChunkIndex;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short PermutationChunkCount;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
         public sbyte Gain;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
         public sbyte OverallPermutationIndex;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]

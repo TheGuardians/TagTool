@@ -1,16 +1,24 @@
 ﻿using System;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x44)]
+    [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x44,  MinVersion = CacheVersion.Halo3Retail)]
     public class PlaybackParameter : TagStructure
 	{
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public FieldDisableFlagsValue FieldDisableFlags;
+
         public float DistanceA;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float DistanceB;
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float DistanceC;
+
         public float DistanceD;
         public float SkipFraction;
         public float MaximumBendPerSecond;
