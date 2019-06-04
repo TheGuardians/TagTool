@@ -1,0 +1,493 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9DDEFBC0-A331-4C50-B5FA-6BB69A992D5F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Sentinel</RootNamespace>
+    <AssemblyName>Sentinel</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>IDE1006</NoWarn>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>IDE1006</NoWarn>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>IDE1006</NoWarn>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <NoWarn>IDE1006</NoWarn>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.Direct3D.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.DirectX.Direct3DX, Version=1.0.2911.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2911.0\Microsoft.DirectX.Direct3DX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.DirectX.DirectInput, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualC" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ArgbColorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ArgbColorControl.Designer.cs">
+      <DependentUpon>ArgbColorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BitmapControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\BitmapControl.Designer.cs">
+      <DependentUpon>BitmapControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BlockControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\BlockControl.Designer.cs">
+      <DependentUpon>BlockControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BoundsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\BoundsControl.Designer.cs">
+      <DependentUpon>BoundsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EnumControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EnumControl.Designer.cs">
+      <DependentUpon>EnumControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FlagsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FlagsControl.Designer.cs">
+      <DependentUpon>FlagsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IFieldControl.cs" />
+    <Compile Include="Controls\Point2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Point2dControl.Designer.cs">
+      <DependentUpon>Point2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealArgbColorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealArgbColorControl.Designer.cs">
+      <DependentUpon>RealArgbColorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealEulerAngles2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealEulerAngles2dControl.Designer.cs">
+      <DependentUpon>RealEulerAngles2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealEulerAngles3dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealEulerAngles3dControl.Designer.cs">
+      <DependentUpon>RealEulerAngles3dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealPlane2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealPlane2dControl.Designer.cs">
+      <DependentUpon>RealPlane2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealPlane3dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealPlane3dControl.Designer.cs">
+      <DependentUpon>RealPlane3dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealPoint2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealPoint2dControl.Designer.cs">
+      <DependentUpon>RealPoint2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealPoint3dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealPoint3dControl.Designer.cs">
+      <DependentUpon>RealPoint3dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealQuaternionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealQuaternionControl.Designer.cs">
+      <DependentUpon>RealQuaternionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealRgbColorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealRgbColorControl.Designer.cs">
+      <DependentUpon>RealRgbColorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealVector2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealVector2dControl.Designer.cs">
+      <DependentUpon>RealVector2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RealVector3dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RealVector3dControl.Designer.cs">
+      <DependentUpon>RealVector3dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Rectangle2dControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Rectangle2dControl.Designer.cs">
+      <DependentUpon>Rectangle2dControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ObjectControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ObjectControl.Designer.cs">
+      <DependentUpon>ObjectControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ScenarioControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ScenarioControl.Designer.cs">
+      <DependentUpon>ScenarioControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\StructMultiControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\StructMultiControl.Designer.cs">
+      <DependentUpon>StructMultiControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SoundControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SoundControl.Designer.cs">
+      <DependentUpon>SoundControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\StringIdControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\StringIdControl.Designer.cs">
+      <DependentUpon>StringIdControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\StructControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\StructControl.Designer.cs">
+      <DependentUpon>StructControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TagReferenceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TagReferenceControl.Designer.cs">
+      <DependentUpon>TagReferenceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ValueControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ValueControl.Designer.cs">
+      <DependentUpon>ValueControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DevIL.cs" />
+    <Compile Include="Forms\CacheForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CacheForm.Designer.cs">
+      <DependentUpon>CacheForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\RenameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\RenameDialog.Designer.cs">
+      <DependentUpon>RenameDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SelectMapForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SelectMapForm.Designer.cs">
+      <DependentUpon>SelectMapForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\StringIdDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StringIdDialog.Designer.cs">
+      <DependentUpon>StringIdDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TagDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TagDialog.Designer.cs">
+      <DependentUpon>TagDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Render\VertexDefinitions\BeamVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ChudVertexFancyDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ChudVertexSimpleDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ContrailVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\DebugVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\DecoratorVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\DefaultDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\DualQuatVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\FlatRigidVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\FlatSkinnedVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\FlatWorldVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ImplicitVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\LightVolumeVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ParticleModelVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ParticleVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\PatchyFogVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\RigidVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\RippleVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\ScreenVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\SkinnedVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPerPixelDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPerVertexColorDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPerVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPrtAmbientDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPrtLinearDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticPrtQuadraticDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\StaticShDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\TinyPositionVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\TransparentVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\VertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\WaterVertexDefinition.cs" />
+    <Compile Include="Render\VertexDefinitions\WorldVertexDefinition.cs" />
+    <Compile Include="Render\RenderCamera.cs" />
+    <Compile Include="Render\RenderMaterial.cs" />
+    <Compile Include="Render\RenderObject.cs" />
+    <Compile Include="Render\RenderTexture.cs" />
+    <EmbeddedResource Include="Controls\ArgbColorControl.resx">
+      <DependentUpon>ArgbColorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\BitmapControl.resx">
+      <DependentUpon>BitmapControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\BlockControl.resx">
+      <DependentUpon>BlockControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\BoundsControl.resx">
+      <DependentUpon>BoundsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\EnumControl.resx">
+      <DependentUpon>EnumControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FlagsControl.resx">
+      <DependentUpon>FlagsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ObjectControl.resx">
+      <DependentUpon>ObjectControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Point2dControl.resx">
+      <DependentUpon>Point2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealArgbColorControl.resx">
+      <DependentUpon>RealArgbColorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealEulerAngles2dControl.resx">
+      <DependentUpon>RealEulerAngles2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealEulerAngles3dControl.resx">
+      <DependentUpon>RealEulerAngles3dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealPlane2dControl.resx">
+      <DependentUpon>RealPlane2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealPlane3dControl.resx">
+      <DependentUpon>RealPlane3dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealPoint2dControl.resx">
+      <DependentUpon>RealPoint2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealPoint3dControl.resx">
+      <DependentUpon>RealPoint3dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealQuaternionControl.resx">
+      <DependentUpon>RealQuaternionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealRgbColorControl.resx">
+      <DependentUpon>RealRgbColorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealVector2dControl.resx">
+      <DependentUpon>RealVector2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RealVector3dControl.resx">
+      <DependentUpon>RealVector3dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Rectangle2dControl.resx">
+      <DependentUpon>Rectangle2dControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ScenarioControl.resx">
+      <DependentUpon>ScenarioControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\StructMultiControl.resx">
+      <DependentUpon>StructMultiControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SoundControl.resx">
+      <DependentUpon>SoundControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\StringIdControl.resx">
+      <DependentUpon>StringIdControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\StructControl.resx">
+      <DependentUpon>StructControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TagReferenceControl.resx">
+      <DependentUpon>TagReferenceControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ValueControl.resx">
+      <DependentUpon>ValueControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CacheForm.resx">
+      <DependentUpon>CacheForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\RenameDialog.resx">
+      <DependentUpon>RenameDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SelectMapForm.resx">
+      <DependentUpon>SelectMapForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StringIdDialog.resx">
+      <DependentUpon>StringIdDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TagDialog.resx">
+      <DependentUpon>TagDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Content Include="Resources\file.ico" />
+    <Content Include="Resources\file_animation.ico" />
+    <Content Include="Resources\file_bitmap.ico" />
+    <Content Include="Resources\file_settings.ico" />
+    <Content Include="Resources\file_sound.ico" />
+    <Content Include="Resources\file_ui.ico" />
+    <Content Include="Resources\file_video.ico" />
+    <Content Include="Resources\folder.ico" />
+    <Content Include="Resources\folder_flat.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DevIL.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WMPLib">
+      <Guid>{6BF52A50-394A-11D3-B153-00C04F79FAA6}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TagTool\TagTool.csproj">
+      <Project>{42814dee-5a94-4901-bda9-28afd2d4f5ac}</Project>
+      <Name>TagTool</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

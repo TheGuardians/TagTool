@@ -14,12 +14,18 @@ namespace TagTool.Common
         /// </summary>
         public T Upper { get; set; }
 
-		/// <summary>
-		/// Creates a new range from a lowerimum and a upperimum value.
-		/// </summary>
-		/// <param name="lower">The lowerimum value of the range.</param>
-		/// <param name="upper">The upperimum value of the range.</param>
-		public Bounds(T lower, T upper)
+        /// <summary>
+        /// Gets the length of the bounds.
+        /// </summary>
+        public T Length => (T)Convert.ChangeType(Convert.ToDouble(Upper) - Convert.ToDouble(Lower), typeof(T));
+
+
+        /// <summary>
+        /// Creates a new range from a lowerimum and a upperimum value.
+        /// </summary>
+        /// <param name="lower">The lowerimum value of the range.</param>
+        /// <param name="upper">The upperimum value of the range.</param>
+        public Bounds(T lower, T upper)
         {
             Lower = lower;
             Upper = upper;

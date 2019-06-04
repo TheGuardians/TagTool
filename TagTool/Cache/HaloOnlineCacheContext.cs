@@ -523,6 +523,54 @@ namespace TagTool.Cache
         /// <param name="index">The index of the string.</param>
         /// <returns></returns>
         public StringId GetStringId(int index) => StringIdCache.GetStringId(index);
+
+
+        public bool TryGetStringId(string value, out StringId result)
+        {
+            if (!StringIdCache.Strings.Contains(value))
+            {
+                result = StringId.Invalid;
+                return false;
+            }
+
+            var index = StringIdCache.Strings.IndexOf(value);
+
+            var setMin = StringIdCache.Resolver.GetMinSetStringIndex();
+            var setMax = StringIdCache.Resolver.GetMaxSetStringIndex();
+            var setOffsets = StringIdCache.Resolver.GetSetOffsets();
+
+            if (index < setMin || index > setMax)
+            {
+                result = new StringId(0, index);
+                return true;
+            }
+
+            var set = 0;
+            var minDistance = int.MaxValue;
+
+            for (var i = 0; i < setOffsets.Length; i++)
+            {
+                if (index < setOffsets[i])
+                    continue;
+
+                var distance = index - setOffsets[i];
+
+                if (distance >= minDistance)
+                    continue;
+
+                set = i;
+                minDistance = distance;
+            }
+
+            var idIndex = index - setOffsets[set];
+
+            if (set == 0)
+                idIndex += setMin;
+
+            result = new StringId(set, idIndex, Version);
+            return true;
+        }
+
         #endregion
 
         #region Resource Cache Functionality
