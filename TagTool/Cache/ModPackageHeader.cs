@@ -7,8 +7,8 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x40)]
     public class ModPackageHeader
     {
-        public Tag Signature;
-        public uint Version;
+        public Tag Signature = new Tag("mod!");
+        public uint Version = ModPackage.FormatVersion;
 
         [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused = new byte[12];

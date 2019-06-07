@@ -78,18 +78,24 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            var contentItem = new ContentItemMetadata();
+            var modPackage = new ModPackage();
+
+            CacheContext.CreateTagCache(modPackage.TagsStream);
+            modPackage.Tags = new TagCache(modPackage.TagsStream, new Dictionary<int, string>());
+
+            CacheContext.CreateResourceCache(modPackage.ResourcesStream);
+            modPackage.Resources = new ResourceCache(modPackage.ResourcesStream);
 
             Console.WriteLine("Enter the name of the mod package:");
-            contentItem.Name = Console.ReadLine().Trim();
+            modPackage.Metadata.Name = Console.ReadLine().Trim();
 
             Console.WriteLine();
             Console.WriteLine("Enter the description of the mod package:");
-            contentItem.Description = Console.ReadLine().Trim();
+            modPackage.Metadata.Description = Console.ReadLine().Trim();
 
             Console.WriteLine();
             Console.WriteLine("Enter the author of the mod package:");
-            contentItem.Author = Console.ReadLine().Trim();
+            modPackage.Metadata.Author = Console.ReadLine().Trim();
 
             if (!promptTags && !promptMaps && !fromIndex.HasValue && !toIndex.HasValue)
             {
@@ -133,13 +139,21 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            using (var srcTagStream = CacheContext.OpenTagCacheRead())
-            using (var destTagsStream = new MemoryStream())
-            using (var destResourceStream = new MemoryStream())
+            foreach (var entry in mapFiles)
             {
-                var destTagCache = CacheContext.CreateTagCache(destTagsStream);
-                var destResourceCache = CacheContext.CreateResourceCache(destResourceStream);
+                var mapFile = new FileInfo(entry);
 
+                using (var mapFileStream = mapFile.OpenRead())
+                {
+                    var cacheStream = new MemoryStream();
+                    mapFileStream.CopyTo(cacheStream);
+
+                    modPackage.CacheStreams.Add(cacheStream);
+                }
+            }
+
+            using (var srcTagStream = CacheContext.OpenTagCacheRead())
+            {
                 var resourceIndices = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>
                 {
                     [ResourceLocation.Audio] = new Dictionary<int, PageableResource>(),
@@ -180,16 +194,16 @@ namespace TagTool.Commands.Modding
                 {
                     if (!tagIndices.Contains(tagIndex))
                     {
-                        destTagCache.AllocateTag();
+                        modPackage.Tags.AllocateTag();
                         continue;
                     }
 
                     var srcTag = CacheContext.GetTag(tagIndex);
-                    var destTag = destTagCache.AllocateTag(srcTag.Group, srcTag.Name);
+                    var destTag = modPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
 
                     using (var tagDataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(srcTagStream, srcTag)))
-                    using (var tagDataReader = new EndianReader(tagDataStream))
-                    using (var tagDataWriter = new EndianWriter(tagDataStream))
+                    using (var tagDataReader = new EndianReader(tagDataStream, leaveOpen: true))
+                    using (var tagDataWriter = new EndianWriter(tagDataStream, leaveOpen: true))
                     {
                         var resourcePointerOffsets = new HashSet<uint>();
 
@@ -239,8 +253,8 @@ namespace TagTool.Commands.Modding
                             }
                             else
                             {
-                                var newResourceIndex = destResourceCache.AddRaw(
-                                    destResourceStream,
+                                var newResourceIndex = modPackage.Resources.AddRaw(
+                                    modPackage.ResourcesStream,
                                     srcResourceCaches[resourceLocation].ExtractRaw(
                                         srcResourceStreams[resourceLocation],
                                         resourceIndex,
@@ -263,181 +277,13 @@ namespace TagTool.Commands.Modding
                             tagDataWriter.Write(pageable.Page.Index);
                         }
 
-                        destTagCache.SetTagDataRaw(destTagsStream, destTag, tagDataStream.ToArray());
+                        modPackage.Tags.SetTagDataRaw(modPackage.TagsStream, destTag, tagDataStream.ToArray());
                     }
                 }
 
-                destTagCache.UpdateTagOffsets(new BinaryWriter(destTagsStream, Encoding.Default, true));
+                modPackage.Tags.UpdateTagOffsets(new BinaryWriter(modPackage.TagsStream, Encoding.Default, true));
 
-                if (!packageFile.Directory.Exists)
-                    packageFile.Directory.Create();
-
-                using (var packageStream = packageFile.Create())
-                using (var writer = new EndianWriter(packageStream))
-                {
-                    //
-                    // reserve header space
-                    //
-
-                    writer.Write(new byte[64]);
-
-                    //
-                    // write content item metadata
-                    //
-
-                    CacheContext.Serialize(new DataSerializationContext(writer), contentItem);
-
-                    //
-                    // write tag cache
-                    //
-
-                    var tagCacheOffset = (uint)packageStream.Position;
-
-                    destTagsStream.Position = 0;
-                    StreamUtil.Copy(destTagsStream, packageStream, (int)destTagsStream.Length);
-                    StreamUtil.Align(packageStream, 4);
-
-                    //
-                    // write tag names table
-                    //
-
-                    var names = new Dictionary<int, string>();
-
-                    foreach (var entry in destTagCache.Index)
-                        if (entry != null && entry.Name != null)
-                            names[entry.Index] = entry.Name;
-
-                    var tagNamesTableOffset = (uint)packageStream.Position;
-                    var tagNamesTableCount = names.Count;
-
-                    foreach (var entry in names)
-                    {
-                        writer.Write(entry.Key);
-
-                        var chars = new char[256];
-
-                        for (var i = 0; i < entry.Value.Length; i++)
-                            chars[i] = entry.Value[i];
-
-                        writer.Write(chars);
-                    }
-
-                    //
-                    // write resource cache
-                    //
-
-                    var resourceCacheOffset = (uint)packageStream.Position;
-
-                    destResourceStream.Position = 0;
-                    StreamUtil.Copy(destResourceStream, packageStream, (int)destResourceStream.Length);
-                    StreamUtil.Align(packageStream, 4);
-
-                    //
-                    // write map file table
-                    //
-
-                    var mapFileTableOffset = (uint)packageStream.Position;
-                    var mapFileTableCount = mapFiles.Count;
-
-                    var mapFileInfo = new List<(uint, uint)>();
-                    writer.Write(new byte[8 * mapFileTableCount]);
-
-                    foreach (var entry in mapFiles)
-                    {
-                        var mapFile = new FileInfo(entry);
-
-                        using (var mapFileStream = mapFile.OpenRead())
-                        {
-                            mapFileInfo.Add(((uint)packageStream.Position, (uint)mapFileStream.Length));
-                            StreamUtil.Copy(mapFileStream, packageStream, (int)mapFileStream.Length);
-                            StreamUtil.Align(packageStream, 4);
-                        }
-                    }
-
-                    packageStream.Position = mapFileTableOffset;
-
-                    foreach (var entry in mapFileInfo)
-                    {
-                        writer.Write(entry.Item1);
-                        writer.Write(entry.Item2);
-                    }
-
-                    //
-                    // calculate package sha1
-                    //
-
-                    packageStream.Position = 64;
-                    var packageSha1 = new SHA1Managed().ComputeHash(packageStream);
-
-                    //
-                    // update package header
-                    //
-
-                    packageStream.Position = 0;
-
-                    writer.Write(new Tag("mod!"));
-                    writer.Write(Version);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(packageSha1);
-                    writer.Write(tagCacheOffset);
-                    writer.Write(tagNamesTableCount == 0 ? 0 : tagNamesTableOffset);
-                    writer.Write(tagNamesTableCount);
-                    writer.Write(resourceCacheOffset);
-                    writer.Write(mapFileTableCount == 0 ? 0 : mapFileTableOffset);
-                    writer.Write(mapFileTableCount);
-                }
-            }
-
-            return true;
-        }
-
-        private bool ExportForCache(string cachePath, string packagePath)
-        {
-            var srcCacheContext = new HaloOnlineCacheContext(new DirectoryInfo(cachePath));
-            var changedTags = new Dictionary<int, bool>();
-
-            using (var srcTagStream = srcCacheContext.OpenTagCacheRead())
-            using (var srcReader = new BinaryReader(srcTagStream))
-            using (var destTagStream = CacheContext.OpenTagCacheRead())
-            using (var destReader = new BinaryReader(destTagStream))
-            {
-                var tagCount = Math.Max(srcCacheContext.TagCache.Index.Count, CacheContext.TagCache.Index.Count);
-                var crc = new Crc32();
-
-                for (var i = 0; i < tagCount; i++)
-                {
-                    if (!srcCacheContext.TryGetTag(i, out var srcTag))
-                        srcTag = null;
-
-                    if (!CacheContext.TryGetTag(i, out var destTag))
-                        destTag = null;
-
-                    if (srcTag == null && destTag == null)
-                    {
-                        changedTags[i] = false;
-                        continue;
-                    }
-
-                    if (srcTag.TotalSize != destTag.TotalSize)
-                    {
-                        changedTags[i] = true;
-                        continue;
-                    }
-
-                    srcReader.BaseStream.Position = srcTag.HeaderOffset + 4;
-                    var srcCrc = crc.ComputeHash(srcReader.ReadBytes((int)srcTag.TotalSize - 4));
-
-                    destReader.BaseStream.Position = destTag.HeaderOffset + 4;
-                    var destCrc = crc.ComputeHash(destReader.ReadBytes((int)destTag.TotalSize - 4));
-
-                    if (srcCrc != destCrc)
-                    {
-                        changedTags[i] = true;
-                        continue;
-                    }
-                }
+                modPackage.Save(packageFile);
             }
 
             return true;

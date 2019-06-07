@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
 using TagTool.IO;
 using TagTool.Serialization;
 
@@ -13,23 +11,26 @@ namespace TagTool.Cache
     {
         public const int FormatVersion = 1;
 
-        public FileInfo File { get; set; }
-        public CacheVersion Version { get; set; }
+        public CacheVersion Version { get; set; } = CacheVersion.Unknown;
 
-        public ModPackageHeader Header { get; set; }
-        public ContentItemMetadata Metadata { get; set; }
+        public ModPackageHeader Header { get; set; } = new ModPackageHeader();
+        public ContentItemMetadata Metadata { get; set; } = new ContentItemMetadata();
 
-        public TagCache Tags { get; set; }
-        public MemoryStream TagStream { get; set; }
+        public TagCache Tags { get; set; } = null;
+        public MemoryStream TagsStream { get; set; } = new MemoryStream();
 
-        public Dictionary<int, string> TagNames { get; set; }
+        public Dictionary<int, string> TagNames { get; set; } = new Dictionary<int, string>();
 
-        public ResourceCache Resources { get; set; }
-        public MemoryStream ResourceStream { get; set; }
+        public ResourceCache Resources { get; set; } = null;
+        public MemoryStream ResourcesStream { get; set; } = new MemoryStream();
 
-        public List<MemoryStream> CacheStreams { get; set; }
+        public List<MemoryStream> CacheStreams { get; set; } = new List<MemoryStream>();
 
-        public ModPackage(FileInfo file)
+        public ModPackage()
+        {
+        }
+
+        public void Load(FileInfo file)
         {
             if (!file.Exists)
                 throw new FileNotFoundException(file.FullName);
@@ -37,10 +38,8 @@ namespace TagTool.Cache
             if (file.Length < typeof(ModPackageHeader).GetSize())
                 throw new FormatException(file.FullName);
 
-            File = file;
-
-            using (var stream = File.OpenRead())
-            using (var reader = new EndianReader(stream))
+            using (var stream = file.OpenRead())
+            using (var reader = new EndianReader(stream, leaveOpen: true))
             {
                 var dataContext = new DataSerializationContext(reader);
 
@@ -53,10 +52,10 @@ namespace TagTool.Cache
 
                 Metadata = deserializer.Deserialize<ContentItemMetadata>(dataContext);
 
-                TagStream = new MemoryStream();
+                TagsStream = new MemoryStream();
                 stream.Position = Header.TagCacheOffset;
-                stream.CopyTo(TagStream, (int)(Header.TagNamesTableOffset - Header.TagCacheOffset));
-                TagStream.Position = 0;
+                stream.CopyTo(TagsStream, (int)(Header.TagNamesTableOffset - Header.TagCacheOffset));
+                TagsStream.Position = 0;
 
                 TagNames = new Dictionary<int, string>();
                 stream.Position = Header.TagNamesTableOffset;
@@ -64,10 +63,10 @@ namespace TagTool.Cache
                 for (var i = 0; i < Header.TagNamesTableCount; i++)
                     TagNames[reader.ReadInt32()] = new string(reader.ReadChars(256)).TrimStart().TrimEnd();
 
-                ResourceStream = new MemoryStream();
+                ResourcesStream = new MemoryStream();
                 stream.Position = Header.ResourceCacheOffset;
-                stream.CopyTo(ResourceStream, (int)(Header.MapFileTableOffset - Header.ResourceCacheOffset));
-                ResourceStream.Position = 0;
+                stream.CopyTo(ResourcesStream, (int)(Header.MapFileTableOffset - Header.ResourceCacheOffset));
+                ResourcesStream.Position = 0;
 
                 CacheStreams = new List<MemoryStream>();
                 stream.Position = Header.MapFileTableOffset;
@@ -88,8 +87,120 @@ namespace TagTool.Cache
                     CacheStreams.Add(cacheStream);
                 }
 
-                Tags = new TagCache(TagStream, TagNames);
-                Resources = new ResourceCache(ResourceStream);
+                Tags = new TagCache(TagsStream, TagNames);
+                Resources = new ResourceCache(ResourcesStream);
+            }
+        }
+
+        public void Save(FileInfo file)
+        {
+            if (!file.Directory.Exists)
+                file.Directory.Create();
+
+            using (var packageStream = file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (var writer = new EndianWriter(packageStream, leaveOpen: true))
+            {
+                var serializer = new TagSerializer(Version);
+                var dataContext = new DataSerializationContext(writer);
+
+                packageStream.SetLength(0);
+
+                //
+                // reserve header space
+                //
+
+                writer.Write(new byte[64]);
+
+                //
+                // write content item metadata
+                //
+
+                serializer.Serialize(dataContext, Metadata);
+
+                //
+                // write tag cache
+                //
+
+                Header.TagCacheOffset = (uint)packageStream.Position;
+
+                TagsStream.Position = 0;
+                StreamUtil.Copy(TagsStream, packageStream, (int)TagsStream.Length);
+                StreamUtil.Align(packageStream, 4);
+
+                //
+                // write tag names table
+                //
+
+                var names = new Dictionary<int, string>();
+
+                foreach (var entry in Tags.Index)
+                    if (entry != null && entry.Name != null)
+                        names[entry.Index] = entry.Name;
+
+                Header.TagNamesTableOffset = (uint)packageStream.Position;
+                Header.TagNamesTableCount = names.Count;
+
+                foreach (var entry in names)
+                {
+                    writer.Write(entry.Key);
+
+                    var chars = new char[256];
+
+                    for (var i = 0; i < entry.Value.Length; i++)
+                        chars[i] = entry.Value[i];
+
+                    writer.Write(chars);
+                }
+
+                //
+                // write resource cache
+                //
+
+                Header.ResourceCacheOffset = (uint)packageStream.Position;
+
+                ResourcesStream.Position = 0;
+                StreamUtil.Copy(ResourcesStream, packageStream, (int)ResourcesStream.Length);
+                StreamUtil.Align(packageStream, 4);
+
+                //
+                // write map file table
+                //
+
+                Header.MapFileTableOffset = (uint)packageStream.Position;
+                Header.MapFileTableCount = CacheStreams.Count;
+
+                var mapFileInfo = new List<(uint, uint)>();
+                writer.Write(new byte[8 * Header.MapFileTableCount]);
+
+                foreach (var mapFileStream in CacheStreams)
+                {
+                    mapFileStream.Position = 0;
+                    mapFileInfo.Add(((uint)packageStream.Position, (uint)mapFileStream.Length));
+                    StreamUtil.Copy(mapFileStream, packageStream, (int)mapFileStream.Length);
+                    StreamUtil.Align(packageStream, 4);
+                }
+
+                packageStream.Position = Header.MapFileTableOffset;
+
+                foreach (var entry in mapFileInfo)
+                {
+                    writer.Write(entry.Item1);
+                    writer.Write(entry.Item2);
+                }
+
+                //
+                // calculate package sha1
+                //
+
+                packageStream.Position = 64;
+                Header.SHA1 = new SHA1Managed().ComputeHash(packageStream);
+
+                //
+                // update package header
+                //
+
+                packageStream.Position = 0;
+                serializer.Serialize(dataContext, Header);
             }
         }
     }

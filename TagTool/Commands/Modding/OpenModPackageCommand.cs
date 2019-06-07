@@ -30,7 +30,8 @@ namespace TagTool.Commands.Modding
             if (args.Count != 1)
                 return false;
 
-            var modPackage = new ModPackage(new FileInfo(args[0]));
+            var modPackage = new ModPackage();
+            modPackage.Load(new FileInfo(args[0]));
 
             return true;
         }
