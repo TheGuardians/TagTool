@@ -95,10 +95,10 @@ namespace TagTool.Animations
 
             List<VectorKey> positions = new List<VectorKey>();
 
-            for(int i = 0; i< data.Translations.Count; i++)
+            /*for(int i = 0; i< data.Translations.Count; i++)
             {
 
-            }
+            }*/
             
             return null;
         }

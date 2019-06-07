@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using TagTool.Animations;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -175,14 +175,6 @@ namespace TagTool.Tags.Definitions
             Overlay,
             Replacement
         }
-
-        public enum FrameMovementDataType : sbyte
-        {
-            None,
-            DxDy,
-            DxDyDyaw,
-            DxDyDzDyaw
-        }
         
         [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
@@ -216,7 +208,7 @@ namespace TagTool.Tags.Definitions
             public sbyte BlendScreenNew;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public FrameMovementDataType FrameInfoTypeOld;
+            public AnimationMovementDataType FrameInfoTypeOld;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public CompressionValue DesiredCompressionNew;
@@ -235,7 +227,7 @@ namespace TagTool.Tags.Definitions
             public FrameType TypeNew;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public FrameMovementDataType FrameInfoTypeNew;
+            public AnimationMovementDataType FrameInfoTypeNew;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public ProductionFlagsNewValue ProductionFlagsNew;

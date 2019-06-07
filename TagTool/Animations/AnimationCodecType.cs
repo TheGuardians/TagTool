@@ -5,11 +5,14 @@
         NoCompression,
         UncompressedStatic,
         UncompressedAnimated,
-        QuantizedRotationOnly,
+        _8ByteQuantizedRotationOnly,
         ByteKeyframeLightlyQuantized,
         WordKeyframeLightlyQuantized,
         ReverseByteKeyframeLightlyQuantized,
         ReverseWordKeyframeLightlyQuantized,
         BlendScreen,
+        Curve,
+        RevisedCurve,
+        SharedStatic
     }
 }

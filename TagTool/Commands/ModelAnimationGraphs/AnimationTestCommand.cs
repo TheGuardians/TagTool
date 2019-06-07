@@ -58,14 +58,14 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     {
                         reader.BaseStream.Position = groupMember.AnimationData.Address.Offset;
 
-                        var header = CacheContext.Deserialize<AnimationCodecHeader>(
+                        var header = CacheContext.Deserialize<AnimationCodecData>(
                             new DataSerializationContext(reader));
 
                         if (header.CodecType == AnimationCodecType.UncompressedStatic)
                             continue;
 
-                        var data = new AnimationData(groupMember, header);
-                        data.Read(reader);
+                        //var data = new AnimationData(groupMember, header);
+                        //data.Read(reader);
                     }
                 }
             }
