@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Modding
 {
@@ -50,6 +51,9 @@ namespace TagTool.Commands.Modding
             int lastTagIndexPak1 = modPackage1.Tags.Index.Last().Index;
             int lastTagIndexPak2 = modPackage2.Tags.Index.Last().Index;
 
+            //
+            // Merge tags that overwrite 0.7 tags
+            //
 
             for(int i = 0; i < lastTagIndex; i++)
             {
@@ -80,7 +84,9 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-
+            //
+            // Merge new tags
+            //
 
             //
             // Step 2: Merge and fixup map files (very hard)
@@ -88,5 +94,41 @@ namespace TagTool.Commands.Modding
 
             return true;
         }
+
+        private CachedTagInstance UpdateTag(TagCache sourceCache, TagCache destCache, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, CachedTagInstance tag)
+        {
+            var newTag = destCache.AllocateTag(tag.Group, tag.Name);
+
+            //deserialize tag from it's source cache
+            var definition = (TagStructure)CacheContext.Deserialize(sourceStream, tag);
+            // deserialization will update indices so deserialize any tag in the tree of this.
+            definition = ConvertStructure(sourceCache, destCache, sourceStream, destStream, sourceResourceCache, destResourceCache, definition, definition);
+            CacheContext.Serialize(destStream, newTag, definition);
+
+            foreach(var resourcePointerOffset in tag.ResourcePointerOffsets)
+            {
+                if (resourcePointerOffset == 0 || newTag.ResourcePointerOffsets.Contains(resourcePointerOffset))
+                    continue;
+
+                // add resources somehow?
+            }
+
+            return newTag;
+        }
+        
+        private T ConvertStructure<T>(TagCache sourceCache, TagCache destCache, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, T data, object definition) where T : TagStructure
+        {
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+            {
+                if(tagFieldInfo.FieldType == typeof(CachedTagInstance))
+                {
+                    var newValue = UpdateTag(sourceCache, destCache, sourceStream, destStream, sourceResourceCache, destResourceCache, (CachedTagInstance)tagFieldInfo.GetValue(data));
+                    tagFieldInfo.SetValue(data, newValue);
+                }
+            }
+
+            return data;
+        }
+
     }
 }
