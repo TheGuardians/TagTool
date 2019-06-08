@@ -52,7 +52,7 @@ namespace TagTool.Commands.Modding
             int lastTagIndexPak2 = modPackage2.Tags.Index.Last().Index;
 
             //
-            // Merge tags that overwrite 0.7 tags
+            // Merge tags that overwrite existing tags
             //
 
             for(int i = 0; i < lastTagIndex; i++)
