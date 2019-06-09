@@ -2010,13 +2010,12 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public short InitialEquipmentIndexOld;
 
-                [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3ODST)]
                 public byte[] Unused4 = new byte[2];
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public StringId ActivityName;
 
-                [TagField(Flags = Padding, Length = 4)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte[] Unused5 = new byte[4];
 
                 public short PointSetIndex;
