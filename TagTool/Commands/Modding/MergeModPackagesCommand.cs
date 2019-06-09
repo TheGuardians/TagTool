@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -136,40 +137,72 @@ namespace TagTool.Commands.Modding
             return true;
         }
 
-        private CachedTagInstance UpdateTag(TagCache sourceCache, TagCache destCache, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, CachedTagInstance tag)
+        private CachedTagInstance ConvertCachedTagInstance(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceResourceCacheStream, Stream destResourceCacheStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, CachedTagInstance tag)
         {
             var newTag = destCache.AllocateTag(tag.Group, tag.Name);
-
-            //deserialize tag from it's source cache
-            var definition = (TagStructure)CacheContext.Deserialize(sourceStream, tag);
-            // deserialization will update indices so deserialize any tag in the tree of this.
-            definition = ConvertStructure(sourceCache, destCache, sourceStream, destStream, sourceResourceCache, destResourceCache, definition, definition);
-            CacheContext.Serialize(destStream, newTag, definition);
-
-            foreach(var resourcePointerOffset in tag.ResourcePointerOffsets)
-            {
-                if (resourcePointerOffset == 0 || newTag.ResourcePointerOffsets.Contains(resourcePointerOffset))
-                    continue;
-
-                // add resources somehow?
-            }
+            var tagDefinition = CacheContext.Deserialize(sourceTagCacheStream, tag);
+            tagDefinition = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, tagDefinition);
+            CacheContext.Serialize(destTagCacheStream, newTag, tagDefinition);
 
             return newTag;
         }
-        
-        private T ConvertStructure<T>(TagCache sourceCache, TagCache destCache, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, T data, object definition) where T : TagStructure
+
+        private object ConvertData(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceResourceCacheStream, Stream destResourceCacheStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, object data)
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+
+            var type = data.GetType();
+            
+            switch (data)
             {
-                if(tagFieldInfo.FieldType == typeof(CachedTagInstance))
-                {
-                    var newValue = UpdateTag(sourceCache, destCache, sourceStream, destStream, sourceResourceCache, destResourceCache, (CachedTagInstance)tagFieldInfo.GetValue(data));
-                    tagFieldInfo.SetValue(data, newValue);
-                }
+                case null:
+                case string _:
+                case ValueType _:
+                    return data;
+                case PageableResource resource:
+                    return ConvertPageableResource(destCache, sourceResourceCacheStream, destResourceCacheStream, resource, sourceResourceCache, destResourceCache);
+                case TagStructure structure:
+                    return ConvertStructure(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, structure);
+                case IList collection:
+                    return ConvertCollection(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, collection);
+                case CachedTagInstance tag:
+                    return ConvertCachedTagInstance(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, tag);
             }
 
             return data;
         }
 
+        private PageableResource ConvertPageableResource(TagCache destCache, Stream sourceStream, Stream destStream, PageableResource resource, ResourceCache sourceResourceCache, ResourceCache destResourceCache)
+        {
+            var resourceData = sourceResourceCache.ExtractRaw(sourceStream, resource.Page.Index, resource.Page.CompressedBlockSize);
+            resource.Page.Index = destResourceCache.AddRaw(destStream, resourceData);
+            return resource;
+        }
+
+        private IList ConvertCollection(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, IList collection)
+        {
+            if (collection.GetType().GetElementType().IsPrimitive)
+                return collection;
+
+            for (var i = 0; i < collection.Count; i++)
+            {
+                var oldValue = collection[i];
+                var newValue = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceStream, destStream, sourceResourceCache, destResourceCache, destStream);
+                collection[i] = newValue;
+            }
+
+            return collection;
+        }
+
+        private T ConvertStructure<T>(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, T data) where T : TagStructure
+        {
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
+            {
+                var oldValue = tagFieldInfo.GetValue(data);
+                var newValue = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceStream, destStream, sourceResourceCache, destResourceCache, oldValue);
+                tagFieldInfo.SetValue(data, newValue);
+            }
+
+            return data;
+        }
     }
 }
