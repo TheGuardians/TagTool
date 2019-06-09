@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Common;
+using TagTool.IO;
+using TagTool.Serialization;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Modding
@@ -54,8 +57,6 @@ namespace TagTool.Commands.Modding
                     modPackage2.TagNames[i] :
                     $"0x{i:X4}";
 
-                CachedTagInstance tag = null;
-
                 if (useTag1 && useTag2)
                 {
                     var tag1 = modPackage1.Tags.Index[i];
@@ -65,40 +66,68 @@ namespace TagTool.Commands.Modding
                         throw new FormatException();
 
                     if (tag1 != null)
-                    {
-                        tag = resultPackage.Tags.AllocateTag(tag1.Group, tag1.Name);
                         useTag2 = false;
-                    }
-                    else
-                    {
-                        tag = resultPackage.Tags.AllocateTag(tag2.Group, tag2.Name);
+                    else if (tag2 != null)
                         useTag1 = false;
+                    else
+                        useTag1 = useTag2 = false;
+                }
+
+                if (useTag1 && modPackage1.Tags.Index[i] != null)
+                {
+                    var srcTag = modPackage1.Tags.Index[i];
+                    var destTag = resultPackage.Tags.AllocateTag(srcTag.Group, name1);
+
+                    using (var tagStream = new MemoryStream(modPackage1.Tags.ExtractTagRaw(modPackage1.TagsStream, destTag)))
+                    using (var tagReader = new EndianReader(tagStream))
+                    {
+                        var dataContext = new DataSerializationContext(tagReader);
+
+                        foreach (var offset in srcTag.ResourcePointerOffsets)
+                        {
+                            tagStream.Position = offset;
+                            tagStream.Position = srcTag.PointerToOffset(tagReader.ReadUInt32());
+
+                            var pageable = modPackage1.Deserializer.Deserialize<PageableResource>(dataContext);
+
+                            //
+                            // TODO: extract and update resource data from pageable, add to resultPackage
+                            //
+                        }
+
+                        tagStream.Position = 0;
+                        resultPackage.Tags.SetTagDataRaw(resultPackage.TagsStream, destTag, tagStream.ToArray());
                     }
                 }
-
-                if (tag == null)
-                    tag = resultPackage.Tags.AllocateTag();
-
-                if (useTag1)
+                else if (useTag2 && modPackage2.Tags.Index[i] != null)
                 {
-                    resultPackage.Tags.SetTagData(resultPackage.TagsStream, tag,
-                        modPackage1.Tags.ExtractTag(modPackage1.TagsStream, tag));
+                    var srcTag = modPackage2.Tags.Index[i];
+                    var destTag = resultPackage.Tags.AllocateTag(srcTag.Group, name2);
 
-                    //
-                    // TODO: extract and update any resources from modPackage1 here
-                    //
-                }
-                else if (useTag2)
-                {
-                    resultPackage.Tags.SetTagData(resultPackage.TagsStream, tag,
-                        modPackage2.Tags.ExtractTag(modPackage1.TagsStream, tag));
+                    using (var tagStream = new MemoryStream(modPackage2.Tags.ExtractTagRaw(modPackage2.TagsStream, destTag)))
+                    using (var tagReader = new EndianReader(tagStream))
+                    {
+                        var dataContext = new DataSerializationContext(tagReader);
 
-                    //
-                    // TODO: extract and update any resources from modPackage2 here
-                    //
+                        foreach (var offset in srcTag.ResourcePointerOffsets)
+                        {
+                            tagStream.Position = offset;
+                            tagStream.Position = srcTag.PointerToOffset(tagReader.ReadUInt32());
+
+                            var pageable = modPackage2.Deserializer.Deserialize<PageableResource>(dataContext);
+
+                            //
+                            // TODO: extract and update resource data from pageable, add to resultPackage
+                            //
+                        }
+
+                        tagStream.Position = 0;
+                        resultPackage.Tags.SetTagDataRaw(resultPackage.TagsStream, destTag, tagStream.ToArray());
+                    }
                 }
                 else
                 {
+                    resultPackage.Tags.AllocateTag();
                     resultPackage.Tags.UpdateTagOffsets(
                         new BinaryWriter(resultPackage.TagsStream, default, true));
                 }

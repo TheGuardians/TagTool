@@ -11,7 +11,20 @@ namespace TagTool.Cache
     {
         public const int FormatVersion = 1;
 
-        public CacheVersion Version { get; set; } = CacheVersion.Unknown;
+        public TagDeserializer Deserializer { get; private set; }
+        public TagSerializer Serializer { get; private set; }
+
+        private CacheVersion _version = CacheVersion.Unknown;
+        public CacheVersion Version
+        {
+            get => _version;
+            set
+            {
+                _version = value;
+                Deserializer = new TagDeserializer(value);
+                Serializer = new TagSerializer(value);
+            }
+        }
 
         public ModPackageHeader Header { get; set; } = new ModPackageHeader();
         public ContentItemMetadata Metadata { get; set; } = new ContentItemMetadata();
