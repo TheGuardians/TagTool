@@ -26,8 +26,10 @@ namespace TagTool.Cache
 
         public List<MemoryStream> CacheStreams { get; set; } = new List<MemoryStream>();
 
-        public ModPackage()
+        public ModPackage(FileInfo file = null)
         {
+            if (file != null)
+                Load(file);
         }
 
         public void Load(FileInfo file)

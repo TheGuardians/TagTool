@@ -31,66 +31,78 @@ namespace TagTool.Commands.Modding
             if (args.Count != 2)
                 return false;
 
-            var modPackage1 = new ModPackage();
-            var modPackage2 = new ModPackage();
+            var modPackage1 = new ModPackage(new FileInfo(args[0]));
+            var modPackage2 = new ModPackage(new FileInfo(args[1]));
 
-            modPackage1.Load(new FileInfo(args[0]));
-            modPackage2.Load(new FileInfo(args[1]));
-
-
-            ModPackage resultPackage = new ModPackage();
-
-
-            //
-            // Step 1: Copy over tags, names and resources
-            //
-
-            // Assume current cache is not modded.
-            int lastTagIndex = CacheContext.TagCache.Index.Last().Index;
-
-            int lastTagIndexPak1 = modPackage1.Tags.Index.Last().Index;
-            int lastTagIndexPak2 = modPackage2.Tags.Index.Last().Index;
+            var resultPackage = new ModPackage();
 
             //
             // Merge tags that overwrite existing tags
             //
 
-            for(int i = 0; i < lastTagIndex; i++)
+            var tagCount = Math.Max(modPackage1.Tags.Index.Count, modPackage2.Tags.Index.Count);
+
+            for (var i = 0; i < tagCount; i++)
             {
-                if (modPackage1.Tags.Index.Contains(i))
+                var useTag1 = i < modPackage1.Tags.Index.Count;
+                var name1 = modPackage1.TagNames.ContainsKey(i) ?
+                    modPackage1.TagNames[i] :
+                    $"0x{i:X4}";
+
+                var useTag2 = i < modPackage2.Tags.Index.Count;
+                var name2 = modPackage2.TagNames.ContainsKey(i) ?
+                    modPackage2.TagNames[i] :
+                    $"0x{i:X4}";
+
+                CachedTagInstance tag = null;
+
+                if (useTag1 && useTag2)
                 {
-                    // TODO: apply package 1 tag
-                    var newTag = resultPackage.Tags.AllocateTag();
-                    // Add the tag name to the new mod package
-                    if (modPackage1.TagNames.ContainsKey(i))
+                    var tag1 = modPackage1.Tags.Index[i];
+                    var tag2 = modPackage2.Tags.Index[i];
+
+                    if (tag1 != null && tag2 != null && !tag2.IsInGroup(tag1.Group) || name1 != name2)
+                        throw new FormatException();
+
+                    if (tag1 != null)
                     {
-                        resultPackage.TagNames.Add(newTag.Index, modPackage1.TagNames[i]);
+                        tag = resultPackage.Tags.AllocateTag(tag1.Group, tag1.Name);
+                        useTag2 = false;
+                    }
+                    else
+                    {
+                        tag = resultPackage.Tags.AllocateTag(tag2.Group, tag2.Name);
+                        useTag1 = false;
                     }
                 }
-                else if (modPackage2.Tags.Index.Contains(i))
+
+                if (tag == null)
+                    tag = resultPackage.Tags.AllocateTag();
+
+                if (useTag1)
                 {
-                    // TODO: apply package 2 tag
-                    var newTag = resultPackage.Tags.AllocateTag();
-                    // Add the tag name to the new mod package
-                    if (modPackage2.TagNames.ContainsKey(i))
-                    {
-                        resultPackage.TagNames.Add(newTag.Index, modPackage2.TagNames[i]);
-                    }
+                    resultPackage.Tags.SetTagData(resultPackage.TagsStream, tag,
+                        modPackage1.Tags.ExtractTag(modPackage1.TagsStream, tag));
+
+                    //
+                    // TODO: extract and update any resources from modPackage1 here
+                    //
+                }
+                else if (useTag2)
+                {
+                    resultPackage.Tags.SetTagData(resultPackage.TagsStream, tag,
+                        modPackage2.Tags.ExtractTag(modPackage1.TagsStream, tag));
+
+                    //
+                    // TODO: extract and update any resources from modPackage2 here
+                    //
                 }
                 else
                 {
-                    resultPackage.Tags.AllocateTag();
-                    continue;
+                    resultPackage.Tags.UpdateTagOffsets(
+                        new BinaryWriter(resultPackage.TagsStream, default, true));
                 }
             }
-
-            //
-            // Merge new tags
-            //
-
-            //
-            // Step 2: Merge and fixup map files (very hard)
-            //
 
             return true;
         }
