@@ -43,6 +43,11 @@ namespace TagTool.Cache
         {
             if (file != null)
                 Load(file);
+            else
+            {
+                Tags = new TagCache(TagsStream, new Dictionary<int, string>());
+                Resources = new ResourceCache(ResourcesStream);
+            }
         }
 
         public void Load(FileInfo file)
@@ -80,7 +85,8 @@ namespace TagTool.Cache
 
                 ResourcesStream = new MemoryStream();
                 stream.Position = Header.ResourceCacheOffset;
-                stream.CopyTo(ResourcesStream, (int)(Header.MapFileTableOffset - Header.ResourceCacheOffset));
+                int resourceSize = (int)(Header.MapFileTableCount == 0 ? (stream.Length - Header.ResourceCacheOffset) : (int)(Header.MapFileTableOffset - Header.ResourceCacheOffset));
+                stream.CopyTo(ResourcesStream, resourceSize);
                 ResourcesStream.Position = 0;
 
                 CacheStreams = new List<MemoryStream>();

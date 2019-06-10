@@ -44,6 +44,62 @@ namespace TagTool.Commands.Modding
             // Merge tags that overwrite existing tags
             //
 
+            // Assume current cache has no mods
+            for(int i = 0; i < CacheContext.TagCache.Index.Count; i++)
+            {
+                var tag1 = modPackage1.Tags.Index[i];
+                var tag2 = modPackage1.Tags.Index[i];
+
+                var name1 = modPackage1.TagNames.ContainsKey(i) ? modPackage1.TagNames[i] : $"0x{i:X4}";
+                var name2 = modPackage2.TagNames.ContainsKey(i) ? modPackage2.TagNames[i] : $"0x{i:X4}";
+
+                if(tag1 != null)
+                {
+                    ConvertCachedTagInstance(modPackage1, resultPackage, tag1);
+                }
+                else if(tag2 != null)
+                {
+                    ConvertCachedTagInstance(modPackage2, resultPackage, tag2);
+                }
+                else
+                {
+                    resultPackage.Tags.AllocateTag();
+                    continue;
+                }
+
+            }
+
+            //
+            // Merge each mod packages new tags. If tag names compete, package 1 has priority
+            //
+
+            for(int i = CacheContext.TagCache.Index.Count; i < modPackage1.Tags.Index.Count; i++)
+            {
+                var tag1 = modPackage1.Tags.Index[i];
+                if (tag1 != null)
+                {
+                    ConvertCachedTagInstance(modPackage1, resultPackage, tag1);
+                }
+            }
+
+            for (int i = CacheContext.TagCache.Index.Count; i < modPackage2.Tags.Index.Count; i++)
+            {
+                var tag2 = modPackage2.Tags.Index[i];
+                if (tag2 != null)
+                {
+                    ConvertCachedTagInstance(modPackage2, resultPackage, tag2);
+                }
+            }
+
+            //
+            // Create resulting mod package header and info
+            //
+
+            resultPackage.Header = modPackage1.Header;
+
+            resultPackage.Save(new FileInfo($"merge_test_{args[0]}"));
+
+            /*
             var tagCount = Math.Max(modPackage1.Tags.Index.Count, modPackage2.Tags.Index.Count);
 
             for (var i = 0; i < tagCount; i++)
@@ -134,20 +190,34 @@ namespace TagTool.Commands.Modding
                 }
             }
 
+
+            */
+
+
             return true;
         }
 
-        private CachedTagInstance ConvertCachedTagInstance(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceResourceCacheStream, Stream destResourceCacheStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, CachedTagInstance tag)
-        {
-            var newTag = destCache.AllocateTag(tag.Group, tag.Name);
-            var tagDefinition = CacheContext.Deserialize(sourceTagCacheStream, tag);
-            tagDefinition = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, tagDefinition);
-            CacheContext.Serialize(destTagCacheStream, newTag, tagDefinition);
 
-            return newTag;
+        private CachedTagInstance ConvertCachedTagInstance(ModPackage sourceModPack, ModPackage destModPack, CachedTagInstance tag)
+        {
+            var name = sourceModPack.TagNames.ContainsKey(tag.Index) ? sourceModPack.TagNames[tag.Index] : $"0x{tag.Index:X4}";
+            // tag has already been converted
+            if ( destModPack.TagNames.ContainsValue(name))
+            {
+                return destModPack.Tags.Index[destModPack.TagNames.FirstOrDefault(x => x.Value == name).Key];       // Very slow, create reverse dictionary or another structure
+            }
+            else
+            {
+                var newTag = destModPack.Tags.AllocateTag(tag.Group, tag.Name);
+                var tagDefinition = CacheContext.Deserialize(sourceModPack.TagsStream, tag);
+                tagDefinition = ConvertData(sourceModPack, destModPack, tagDefinition);
+                CacheContext.Serialize(destModPack.TagsStream, newTag, tagDefinition);
+                destModPack.TagNames.Add(newTag.Index, name);
+                return newTag;
+            }
         }
 
-        private object ConvertData(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceResourceCacheStream, Stream destResourceCacheStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, object data)
+        private object ConvertData(ModPackage sourceModPack, ModPackage destModPack, object data)
         {
 
             var type = data.GetType();
@@ -159,26 +229,26 @@ namespace TagTool.Commands.Modding
                 case ValueType _:
                     return data;
                 case PageableResource resource:
-                    return ConvertPageableResource(destCache, sourceResourceCacheStream, destResourceCacheStream, resource, sourceResourceCache, destResourceCache);
+                    return ConvertPageableResource(sourceModPack, destModPack, resource);
                 case TagStructure structure:
-                    return ConvertStructure(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, structure);
+                    return ConvertStructure(sourceModPack, destModPack, structure);
                 case IList collection:
-                    return ConvertCollection(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, collection);
+                    return ConvertCollection(sourceModPack, destModPack, collection);
                 case CachedTagInstance tag:
-                    return ConvertCachedTagInstance(destCache, sourceTagCacheStream, destTagCacheStream, sourceResourceCacheStream, destResourceCacheStream, sourceResourceCache, destResourceCache, tag);
+                    return ConvertCachedTagInstance(sourceModPack, destModPack, tag);
             }
 
             return data;
         }
 
-        private PageableResource ConvertPageableResource(TagCache destCache, Stream sourceStream, Stream destStream, PageableResource resource, ResourceCache sourceResourceCache, ResourceCache destResourceCache)
+        private PageableResource ConvertPageableResource(ModPackage sourceModPack, ModPackage destModPack, PageableResource resource)
         {
-            var resourceData = sourceResourceCache.ExtractRaw(sourceStream, resource.Page.Index, resource.Page.CompressedBlockSize);
-            resource.Page.Index = destResourceCache.AddRaw(destStream, resourceData);
+            var resourceData = sourceModPack.Resources.ExtractRaw(sourceModPack.TagsStream, resource.Page.Index, resource.Page.CompressedBlockSize);
+            resource.Page.Index = destModPack.Resources.AddRaw(destModPack.TagsStream, resourceData);
             return resource;
         }
 
-        private IList ConvertCollection(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, IList collection)
+        private IList ConvertCollection(ModPackage sourceModPack, ModPackage destModPack, IList collection)
         {
             if (collection.GetType().GetElementType().IsPrimitive)
                 return collection;
@@ -186,19 +256,19 @@ namespace TagTool.Commands.Modding
             for (var i = 0; i < collection.Count; i++)
             {
                 var oldValue = collection[i];
-                var newValue = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceStream, destStream, sourceResourceCache, destResourceCache, destStream);
+                var newValue = ConvertData(sourceModPack, destModPack, destModPack.TagsStream);
                 collection[i] = newValue;
             }
 
             return collection;
         }
 
-        private T ConvertStructure<T>(TagCache destCache, Stream sourceTagCacheStream, Stream destTagCacheStream, Stream sourceStream, Stream destStream, ResourceCache sourceResourceCache, ResourceCache destResourceCache, T data) where T : TagStructure
+        private T ConvertStructure<T>(ModPackage sourceModPack, ModPackage destModPack, T data) where T : TagStructure
         {
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
-                var newValue = ConvertData(destCache, sourceTagCacheStream, destTagCacheStream, sourceStream, destStream, sourceResourceCache, destResourceCache, oldValue);
+                var newValue = ConvertData(sourceModPack, destModPack, oldValue);
                 tagFieldInfo.SetValue(data, newValue);
             }
 
