@@ -1331,6 +1331,475 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[2475].Opcode = 0x00C;
                 scnr.ScriptExpressions[2475].Data[0] = 21;
             }
+
+            if (mapName == "030_outskirts")
+            {
+                scnr.ScriptExpressions[5127].Opcode = 0x116;
+                scnr.ScriptExpressions[5128].Opcode = 0x116;
+                scnr.ScriptExpressions[5132].Opcode = 0x00C;
+                scnr.ScriptExpressions[5132].Data[0] = 21;
+
+                scnr.ScriptExpressions[5135].Opcode = 0x116;
+                scnr.ScriptExpressions[5136].Opcode = 0x116;
+                scnr.ScriptExpressions[5140].Opcode = 0x00C;
+                scnr.ScriptExpressions[5140].Data[0] = 21;
+
+                scnr.ScriptExpressions[5143].Opcode = 0x116;
+                scnr.ScriptExpressions[5144].Opcode = 0x116;
+                scnr.ScriptExpressions[5148].Opcode = 0x00C;
+                scnr.ScriptExpressions[5148].Data[0] = 21;
+
+                scnr.ScriptExpressions[5151].Opcode = 0x116;
+                scnr.ScriptExpressions[5152].Opcode = 0x116;
+                scnr.ScriptExpressions[5156].Opcode = 0x00C;
+                scnr.ScriptExpressions[5156].Data[0] = 21;
+
+                scnr.ScriptExpressions[5159].Opcode = 0x116;
+                scnr.ScriptExpressions[5160].Opcode = 0x116;
+                scnr.ScriptExpressions[5164].Opcode = 0x00C;
+                scnr.ScriptExpressions[5164].Data[0] = 21;
+
+                scnr.ScriptExpressions[5167].Opcode = 0x116;
+                scnr.ScriptExpressions[5168].Opcode = 0x116;
+                scnr.ScriptExpressions[5172].Opcode = 0x00C;
+                scnr.ScriptExpressions[5172].Data[0] = 21;
+
+                scnr.ScriptExpressions[5175].Opcode = 0x116;
+                scnr.ScriptExpressions[5176].Opcode = 0x116;
+                scnr.ScriptExpressions[5180].Opcode = 0x00C;
+                scnr.ScriptExpressions[5180].Data[0] = 21;
+
+                scnr.ScriptExpressions[5183].Opcode = 0x116;
+                scnr.ScriptExpressions[5184].Opcode = 0x116;
+                scnr.ScriptExpressions[5188].Opcode = 0x00C;
+                scnr.ScriptExpressions[5188].Data[0] = 21;
+
+                scnr.ScriptExpressions[5191].Opcode = 0x116;
+                scnr.ScriptExpressions[5192].Opcode = 0x116;
+                scnr.ScriptExpressions[5196].Opcode = 0x00C;
+                scnr.ScriptExpressions[5196].Data[0] = 21;
+
+                scnr.ScriptExpressions[5199].Opcode = 0x116;
+                scnr.ScriptExpressions[5200].Opcode = 0x116;
+                scnr.ScriptExpressions[5204].Opcode = 0x00C;
+                scnr.ScriptExpressions[5204].Data[0] = 21;
+
+                scnr.ScriptExpressions[5207].Opcode = 0x116;
+                scnr.ScriptExpressions[5208].Opcode = 0x116;
+                scnr.ScriptExpressions[5212].Opcode = 0x00C;
+                scnr.ScriptExpressions[5212].Data[0] = 21;
+
+                scnr.ScriptExpressions[5215].Opcode = 0x116;
+                scnr.ScriptExpressions[5216].Opcode = 0x116;
+                scnr.ScriptExpressions[5220].Opcode = 0x00C;
+                scnr.ScriptExpressions[5220].Data[0] = 21;
+
+                scnr.ScriptExpressions[5223].Opcode = 0x116;
+                scnr.ScriptExpressions[5224].Opcode = 0x116;
+                scnr.ScriptExpressions[5228].Opcode = 0x00C;
+                scnr.ScriptExpressions[5228].Data[0] = 41;
+
+                scnr.ScriptExpressions[5231].Opcode = 0x116;
+                scnr.ScriptExpressions[5232].Opcode = 0x116;
+                scnr.ScriptExpressions[5236].Opcode = 0x00C;
+                scnr.ScriptExpressions[5236].Data[0] = 41;
+
+                scnr.ScriptExpressions[5239].Opcode = 0x116;
+                scnr.ScriptExpressions[5240].Opcode = 0x116;
+                scnr.ScriptExpressions[5244].Opcode = 0x00C;
+                scnr.ScriptExpressions[5244].Data[0] = 41;
+
+                scnr.ScriptExpressions[5247].Opcode = 0x116;
+                scnr.ScriptExpressions[5248].Opcode = 0x116;
+                scnr.ScriptExpressions[5252].Opcode = 0x00C;
+                scnr.ScriptExpressions[5252].Data[0] = 41;
+
+                scnr.ScriptExpressions[5255].Opcode = 0x116;
+                scnr.ScriptExpressions[5256].Opcode = 0x116;
+                scnr.ScriptExpressions[5260].Opcode = 0x00C;
+                scnr.ScriptExpressions[5260].Data[0] = 41;
+
+                scnr.ScriptExpressions[5263].Opcode = 0x116;
+                scnr.ScriptExpressions[5264].Opcode = 0x116;
+                scnr.ScriptExpressions[5268].Opcode = 0x00C;
+                scnr.ScriptExpressions[5268].Data[0] = 41;
+
+                scnr.ScriptExpressions[5271].Opcode = 0x116;
+                scnr.ScriptExpressions[5272].Opcode = 0x116;
+                scnr.ScriptExpressions[5276].Opcode = 0x00C;
+                scnr.ScriptExpressions[5276].Data[0] = 41;
+
+                scnr.ScriptExpressions[5279].Opcode = 0x116;
+                scnr.ScriptExpressions[5280].Opcode = 0x116;
+                scnr.ScriptExpressions[5284].Opcode = 0x00C;
+                scnr.ScriptExpressions[5284].Data[0] = 41;
+
+                scnr.ScriptExpressions[5287].Opcode = 0x116;
+                scnr.ScriptExpressions[5288].Opcode = 0x116;
+                scnr.ScriptExpressions[5292].Opcode = 0x00C;
+                scnr.ScriptExpressions[5292].Data[0] = 41;
+
+                scnr.ScriptExpressions[5295].Opcode = 0x116;
+                scnr.ScriptExpressions[5296].Opcode = 0x116;
+                scnr.ScriptExpressions[5300].Opcode = 0x00C;
+                scnr.ScriptExpressions[5300].Data[0] = 41;
+
+                scnr.ScriptExpressions[5303].Opcode = 0x116;
+                scnr.ScriptExpressions[5304].Opcode = 0x116;
+                scnr.ScriptExpressions[5308].Opcode = 0x00C;
+                scnr.ScriptExpressions[5308].Data[0] = 41;
+
+                scnr.ScriptExpressions[5311].Opcode = 0x116;
+                scnr.ScriptExpressions[5312].Opcode = 0x116;
+                scnr.ScriptExpressions[5316].Opcode = 0x00C;
+                scnr.ScriptExpressions[5316].Data[0] = 41;
+
+                scnr.ScriptExpressions[5319].Opcode = 0x116;
+                scnr.ScriptExpressions[5320].Opcode = 0x116;
+                scnr.ScriptExpressions[5324].Opcode = 0x00C;
+                scnr.ScriptExpressions[5324].Data[0] = 46;
+
+                scnr.ScriptExpressions[5327].Opcode = 0x116;
+                scnr.ScriptExpressions[5328].Opcode = 0x116;
+                scnr.ScriptExpressions[5332].Opcode = 0x00C;
+                scnr.ScriptExpressions[5332].Data[0] = 46;
+
+                scnr.ScriptExpressions[5335].Opcode = 0x116;
+                scnr.ScriptExpressions[5336].Opcode = 0x116;
+                scnr.ScriptExpressions[5340].Opcode = 0x00C;
+                scnr.ScriptExpressions[5340].Data[0] = 46;
+
+                scnr.ScriptExpressions[5343].Opcode = 0x116;
+                scnr.ScriptExpressions[5344].Opcode = 0x116;
+                scnr.ScriptExpressions[5348].Opcode = 0x00C;
+                scnr.ScriptExpressions[5348].Data[0] = 46;
+
+                scnr.ScriptExpressions[5351].Opcode = 0x116;
+                scnr.ScriptExpressions[5352].Opcode = 0x116;
+                scnr.ScriptExpressions[5356].Opcode = 0x00C;
+                scnr.ScriptExpressions[5356].Data[0] = 46;
+
+                scnr.ScriptExpressions[5359].Opcode = 0x116;
+                scnr.ScriptExpressions[5360].Opcode = 0x116;
+                scnr.ScriptExpressions[5364].Opcode = 0x00C;
+                scnr.ScriptExpressions[5364].Data[0] = 46;
+
+                scnr.ScriptExpressions[5367].Opcode = 0x116;
+                scnr.ScriptExpressions[5368].Opcode = 0x116;
+                scnr.ScriptExpressions[5372].Opcode = 0x00C;
+                scnr.ScriptExpressions[5372].Data[0] = 46;
+
+                scnr.ScriptExpressions[5375].Opcode = 0x116;
+                scnr.ScriptExpressions[5376].Opcode = 0x116;
+                scnr.ScriptExpressions[5380].Opcode = 0x00C;
+                scnr.ScriptExpressions[5380].Data[0] = 46;
+
+                scnr.ScriptExpressions[5503].Opcode = 0x116;
+                scnr.ScriptExpressions[5504].Opcode = 0x116;
+                scnr.ScriptExpressions[5508].Opcode = 0x00C;
+                scnr.ScriptExpressions[5508].Data[0] = 21;
+
+                scnr.ScriptExpressions[5511].Opcode = 0x116;
+                scnr.ScriptExpressions[5512].Opcode = 0x116;
+                scnr.ScriptExpressions[5516].Opcode = 0x00C;
+                scnr.ScriptExpressions[5516].Data[0] = 41;
+
+                scnr.ScriptExpressions[5519].Opcode = 0x116;
+                scnr.ScriptExpressions[5520].Opcode = 0x116;
+                scnr.ScriptExpressions[5524].Opcode = 0x00C;
+                scnr.ScriptExpressions[5524].Data[0] = 46;
+
+                scnr.ScriptExpressions[5527].Opcode = 0x116;
+                scnr.ScriptExpressions[5528].Opcode = 0x116;
+                scnr.ScriptExpressions[5532].Opcode = 0x00C;
+                scnr.ScriptExpressions[5532].Data[0] = 21;
+
+                scnr.ScriptExpressions[5535].Opcode = 0x116;
+                scnr.ScriptExpressions[5536].Opcode = 0x116;
+                scnr.ScriptExpressions[5540].Opcode = 0x00C;
+                scnr.ScriptExpressions[5540].Data[0] = 41;
+
+                scnr.ScriptExpressions[5543].Opcode = 0x116;
+                scnr.ScriptExpressions[5544].Opcode = 0x116;
+                scnr.ScriptExpressions[5548].Opcode = 0x00C;
+                scnr.ScriptExpressions[5548].Data[0] = 46;
+
+                scnr.ScriptExpressions[5551].Opcode = 0x116;
+                scnr.ScriptExpressions[5552].Opcode = 0x116;
+                scnr.ScriptExpressions[5556].Opcode = 0x00C;
+                scnr.ScriptExpressions[5556].Data[0] = 21;
+
+                scnr.ScriptExpressions[5559].Opcode = 0x116;
+                scnr.ScriptExpressions[5560].Opcode = 0x116;
+                scnr.ScriptExpressions[5564].Opcode = 0x00C;
+                scnr.ScriptExpressions[5564].Data[0] = 41;
+
+                scnr.ScriptExpressions[5567].Opcode = 0x116;
+                scnr.ScriptExpressions[5568].Opcode = 0x116;
+                scnr.ScriptExpressions[5572].Opcode = 0x00C;
+                scnr.ScriptExpressions[5572].Data[0] = 46;
+
+                scnr.ScriptExpressions[5575].Opcode = 0x116;
+                scnr.ScriptExpressions[5576].Opcode = 0x116;
+                scnr.ScriptExpressions[5580].Opcode = 0x00C;
+                scnr.ScriptExpressions[5580].Data[0] = 21;
+
+                scnr.ScriptExpressions[5583].Opcode = 0x116;
+                scnr.ScriptExpressions[5584].Opcode = 0x116;
+                scnr.ScriptExpressions[5588].Opcode = 0x00C;
+                scnr.ScriptExpressions[5588].Data[0] = 41;
+
+                scnr.ScriptExpressions[5591].Opcode = 0x116;
+                scnr.ScriptExpressions[5592].Opcode = 0x116;
+                scnr.ScriptExpressions[5596].Opcode = 0x00C;
+                scnr.ScriptExpressions[5596].Data[0] = 46;
+
+                scnr.ScriptExpressions[5599].Opcode = 0x116;
+                scnr.ScriptExpressions[5600].Opcode = 0x116;
+                scnr.ScriptExpressions[5604].Opcode = 0x00C;
+                scnr.ScriptExpressions[5604].Data[0] = 21;
+
+                scnr.ScriptExpressions[5607].Opcode = 0x116;
+                scnr.ScriptExpressions[5608].Opcode = 0x116;
+                scnr.ScriptExpressions[5612].Opcode = 0x00C;
+                scnr.ScriptExpressions[5612].Data[0] = 41;
+
+                scnr.ScriptExpressions[5615].Opcode = 0x116;
+                scnr.ScriptExpressions[5616].Opcode = 0x116;
+                scnr.ScriptExpressions[5620].Opcode = 0x00C;
+                scnr.ScriptExpressions[5620].Data[0] = 46;
+
+                scnr.ScriptExpressions[5623].Opcode = 0x116;
+                scnr.ScriptExpressions[5624].Opcode = 0x116;
+                scnr.ScriptExpressions[5628].Opcode = 0x00C;
+                scnr.ScriptExpressions[5628].Data[0] = 21;
+
+                scnr.ScriptExpressions[5631].Opcode = 0x116;
+                scnr.ScriptExpressions[5632].Opcode = 0x116;
+                scnr.ScriptExpressions[5636].Opcode = 0x00C;
+                scnr.ScriptExpressions[5636].Data[0] = 41;
+
+                scnr.ScriptExpressions[5639].Opcode = 0x116;
+                scnr.ScriptExpressions[5640].Opcode = 0x116;
+                scnr.ScriptExpressions[5644].Opcode = 0x00C;
+                scnr.ScriptExpressions[5644].Data[0] = 46;
+
+                scnr.ScriptExpressions[5647].Opcode = 0x116;
+                scnr.ScriptExpressions[5648].Opcode = 0x116;
+                scnr.ScriptExpressions[5652].Opcode = 0x00C;
+                scnr.ScriptExpressions[5652].Data[0] = 21;
+
+                scnr.ScriptExpressions[5655].Opcode = 0x116;
+                scnr.ScriptExpressions[5656].Opcode = 0x116;
+                scnr.ScriptExpressions[5660].Opcode = 0x00C;
+                scnr.ScriptExpressions[5660].Data[0] = 41;
+
+                scnr.ScriptExpressions[5663].Opcode = 0x116;
+                scnr.ScriptExpressions[5664].Opcode = 0x116;
+                scnr.ScriptExpressions[5668].Opcode = 0x00C;
+                scnr.ScriptExpressions[5668].Data[0] = 46;
+
+                scnr.ScriptExpressions[5671].Opcode = 0x116;
+                scnr.ScriptExpressions[5672].Opcode = 0x116;
+                scnr.ScriptExpressions[5676].Opcode = 0x00C;
+                scnr.ScriptExpressions[5676].Data[0] = 21;
+
+                scnr.ScriptExpressions[5679].Opcode = 0x116;
+                scnr.ScriptExpressions[5680].Opcode = 0x116;
+                scnr.ScriptExpressions[5684].Opcode = 0x00C;
+                scnr.ScriptExpressions[5684].Data[0] = 41;
+
+                scnr.ScriptExpressions[5687].Opcode = 0x116;
+                scnr.ScriptExpressions[5688].Opcode = 0x116;
+                scnr.ScriptExpressions[5692].Opcode = 0x00C;
+                scnr.ScriptExpressions[5692].Data[0] = 46;
+
+                scnr.ScriptExpressions[5695].Opcode = 0x116;
+                scnr.ScriptExpressions[5696].Opcode = 0x116;
+                scnr.ScriptExpressions[5700].Opcode = 0x00C;
+                scnr.ScriptExpressions[5700].Data[0] = 21;
+
+                scnr.ScriptExpressions[5703].Opcode = 0x116;
+                scnr.ScriptExpressions[5704].Opcode = 0x116;
+                scnr.ScriptExpressions[5708].Opcode = 0x00C;
+                scnr.ScriptExpressions[5708].Data[0] = 41;
+
+                scnr.ScriptExpressions[5711].Opcode = 0x116;
+                scnr.ScriptExpressions[5712].Opcode = 0x116;
+                scnr.ScriptExpressions[5716].Opcode = 0x00C;
+                scnr.ScriptExpressions[5716].Data[0] = 46;
+
+                scnr.ScriptExpressions[5719].Opcode = 0x116;
+                scnr.ScriptExpressions[5720].Opcode = 0x116;
+                scnr.ScriptExpressions[5724].Opcode = 0x00C;
+                scnr.ScriptExpressions[5724].Data[0] = 21;
+
+                scnr.ScriptExpressions[5727].Opcode = 0x116;
+                scnr.ScriptExpressions[5728].Opcode = 0x116;
+                scnr.ScriptExpressions[5732].Opcode = 0x00C;
+                scnr.ScriptExpressions[5732].Data[0] = 41;
+
+                scnr.ScriptExpressions[5735].Opcode = 0x116;
+                scnr.ScriptExpressions[5736].Opcode = 0x116;
+                scnr.ScriptExpressions[5740].Opcode = 0x00C;
+                scnr.ScriptExpressions[5740].Data[0] = 46;
+
+                scnr.ScriptExpressions[5743].Opcode = 0x116;
+                scnr.ScriptExpressions[5744].Opcode = 0x116;
+                scnr.ScriptExpressions[5748].Opcode = 0x00C;
+                scnr.ScriptExpressions[5748].Data[0] = 21;
+
+                scnr.ScriptExpressions[5751].Opcode = 0x116;
+                scnr.ScriptExpressions[5752].Opcode = 0x116;
+                scnr.ScriptExpressions[5756].Opcode = 0x00C;
+                scnr.ScriptExpressions[5756].Data[0] = 41;
+
+                scnr.ScriptExpressions[5759].Opcode = 0x116;
+                scnr.ScriptExpressions[5760].Opcode = 0x116;
+                scnr.ScriptExpressions[5764].Opcode = 0x00C;
+                scnr.ScriptExpressions[5764].Data[0] = 46;
+
+                scnr.ScriptExpressions[5767].Opcode = 0x116;
+                scnr.ScriptExpressions[5768].Opcode = 0x116;
+                scnr.ScriptExpressions[5772].Opcode = 0x00C;
+                scnr.ScriptExpressions[5772].Data[0] = 21;
+
+                scnr.ScriptExpressions[5775].Opcode = 0x116;
+                scnr.ScriptExpressions[5776].Opcode = 0x116;
+                scnr.ScriptExpressions[5780].Opcode = 0x00C;
+                scnr.ScriptExpressions[5780].Data[0] = 41;
+
+                scnr.ScriptExpressions[5783].Opcode = 0x116;
+                scnr.ScriptExpressions[5784].Opcode = 0x116;
+                scnr.ScriptExpressions[5788].Opcode = 0x00C;
+                scnr.ScriptExpressions[5788].Data[0] = 46;
+
+                scnr.ScriptExpressions[5826].Opcode = 0x116;
+                scnr.ScriptExpressions[5827].Opcode = 0x116;
+                scnr.ScriptExpressions[5831].Opcode = 0x00C;
+                scnr.ScriptExpressions[5831].Data[0] = 41;
+
+                scnr.ScriptExpressions[5834].Opcode = 0x116;
+                scnr.ScriptExpressions[5835].Opcode = 0x116;
+                scnr.ScriptExpressions[5839].Opcode = 0x00C;
+                scnr.ScriptExpressions[5839].Data[0] = 41;
+
+                scnr.ScriptExpressions[5842].Opcode = 0x116;
+                scnr.ScriptExpressions[5843].Opcode = 0x116;
+                scnr.ScriptExpressions[5847].Opcode = 0x00C;
+                scnr.ScriptExpressions[5847].Data[0] = 46;
+
+                scnr.ScriptExpressions[5850].Opcode = 0x116;
+                scnr.ScriptExpressions[5851].Opcode = 0x116;
+                scnr.ScriptExpressions[5855].Opcode = 0x00C;
+                scnr.ScriptExpressions[5855].Data[0] = 41;
+
+                scnr.ScriptExpressions[5858].Opcode = 0x116;
+                scnr.ScriptExpressions[5859].Opcode = 0x116;
+                scnr.ScriptExpressions[5863].Opcode = 0x00C;
+                scnr.ScriptExpressions[5863].Data[0] = 46;
+
+                scnr.ScriptExpressions[5866].Opcode = 0x116;
+                scnr.ScriptExpressions[5867].Opcode = 0x116;
+                scnr.ScriptExpressions[5871].Opcode = 0x00C;
+                scnr.ScriptExpressions[5871].Data[0] = 41;
+
+                scnr.ScriptExpressions[5874].Opcode = 0x116;
+                scnr.ScriptExpressions[5875].Opcode = 0x116;
+                scnr.ScriptExpressions[5879].Opcode = 0x00C;
+                scnr.ScriptExpressions[5879].Data[0] = 46;
+
+                scnr.ScriptExpressions[5882].Opcode = 0x116;
+                scnr.ScriptExpressions[5883].Opcode = 0x116;
+                scnr.ScriptExpressions[5887].Opcode = 0x00C;
+                scnr.ScriptExpressions[5887].Data[0] = 41;
+
+                scnr.ScriptExpressions[5890].Opcode = 0x116;
+                scnr.ScriptExpressions[5891].Opcode = 0x116;
+                scnr.ScriptExpressions[5895].Opcode = 0x00C;
+                scnr.ScriptExpressions[5895].Data[0] = 46;
+
+                scnr.ScriptExpressions[5898].Opcode = 0x116;
+                scnr.ScriptExpressions[5899].Opcode = 0x116;
+                scnr.ScriptExpressions[5903].Opcode = 0x00C;
+                scnr.ScriptExpressions[5903].Data[0] = 41;
+
+                scnr.ScriptExpressions[5906].Opcode = 0x116;
+                scnr.ScriptExpressions[5907].Opcode = 0x116;
+                scnr.ScriptExpressions[5911].Opcode = 0x00C;
+                scnr.ScriptExpressions[5911].Data[0] = 46;
+
+                scnr.ScriptExpressions[5914].Opcode = 0x116;
+                scnr.ScriptExpressions[5915].Opcode = 0x116;
+                scnr.ScriptExpressions[5919].Opcode = 0x00C;
+                scnr.ScriptExpressions[5919].Data[0] = 41;
+
+                scnr.ScriptExpressions[5922].Opcode = 0x116;
+                scnr.ScriptExpressions[5923].Opcode = 0x116;
+                scnr.ScriptExpressions[5927].Opcode = 0x00C;
+                scnr.ScriptExpressions[5927].Data[0] = 46;
+
+                scnr.ScriptExpressions[5930].Opcode = 0x116;
+                scnr.ScriptExpressions[5931].Opcode = 0x116;
+                scnr.ScriptExpressions[5935].Opcode = 0x00C;
+                scnr.ScriptExpressions[5935].Data[0] = 41;
+
+                scnr.ScriptExpressions[5938].Opcode = 0x116;
+                scnr.ScriptExpressions[5939].Opcode = 0x116;
+                scnr.ScriptExpressions[5943].Opcode = 0x00C;
+                scnr.ScriptExpressions[5943].Data[0] = 46;
+
+                scnr.ScriptExpressions[5946].Opcode = 0x116;
+                scnr.ScriptExpressions[5947].Opcode = 0x116;
+                scnr.ScriptExpressions[5951].Opcode = 0x00C;
+                scnr.ScriptExpressions[5951].Data[0] = 41;
+
+                scnr.ScriptExpressions[5954].Opcode = 0x116;
+                scnr.ScriptExpressions[5955].Opcode = 0x116;
+                scnr.ScriptExpressions[5959].Opcode = 0x00C;
+                scnr.ScriptExpressions[5959].Data[0] = 46;
+
+                scnr.ScriptExpressions[11501].Opcode = 0x116;
+                scnr.ScriptExpressions[11502].Opcode = 0x116;
+                scnr.ScriptExpressions[11506].Opcode = 0x00C;
+                scnr.ScriptExpressions[11506].Data[0] = 46;
+
+                scnr.ScriptExpressions[11509].Opcode = 0x116;
+                scnr.ScriptExpressions[11510].Opcode = 0x116;
+                scnr.ScriptExpressions[11514].Opcode = 0x00C;
+                scnr.ScriptExpressions[11514].Data[0] = 41;
+
+                scnr.ScriptExpressions[11517].Opcode = 0x116;
+                scnr.ScriptExpressions[11518].Opcode = 0x116;
+                scnr.ScriptExpressions[11522].Opcode = 0x00C;
+                scnr.ScriptExpressions[11522].Data[0] = 46;
+
+                scnr.ScriptExpressions[11525].Opcode = 0x116;
+                scnr.ScriptExpressions[11526].Opcode = 0x116;
+                scnr.ScriptExpressions[11530].Opcode = 0x00C;
+                scnr.ScriptExpressions[11530].Data[0] = 41;
+
+                //cs_exit_exit_vehicle extra few expressions ahead on the index
+                scnr.ScriptExpressions[14964].Opcode = 0x116;
+                scnr.ScriptExpressions[14965].Opcode = 0x116;
+                scnr.ScriptExpressions[14972].Opcode = 0x00C;
+                scnr.ScriptExpressions[14972].Data[0] = 21;
+
+                scnr.ScriptExpressions[14978].Opcode = 0x116;
+                scnr.ScriptExpressions[14979].Opcode = 0x116;
+                scnr.ScriptExpressions[14986].Opcode = 0x00C;
+                scnr.ScriptExpressions[14986].Data[0] = 21;
+
+                scnr.ScriptExpressions[14992].Opcode = 0x116;
+                scnr.ScriptExpressions[14993].Opcode = 0x116;
+                scnr.ScriptExpressions[15000].Opcode = 0x00C;
+                scnr.ScriptExpressions[15000].Data[0] = 21;
+
+                scnr.ScriptExpressions[15006].Opcode = 0x116;
+                scnr.ScriptExpressions[15007].Opcode = 0x116;
+                scnr.ScriptExpressions[15014].Opcode = 0x00C;
+                scnr.ScriptExpressions[15014].Data[0] = 21;
+            }
         }
 
         private static Dictionary<CacheVersion, Dictionary<int, string>> GlobalOpcodes = new Dictionary<CacheVersion, Dictionary<int, string>>
