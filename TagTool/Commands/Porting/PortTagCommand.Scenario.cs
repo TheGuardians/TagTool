@@ -1799,15 +1799,7 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[15007].Opcode = 0x116;
                 scnr.ScriptExpressions[15014].Opcode = 0x00C;
                 scnr.ScriptExpressions[15014].Data[0] = 21;
-            }
-
-            if (mapName == "120_halo")
-            {
-                scnr.ScriptExpressions[16694].NextExpressionHandle = 0x4154;
-                scnr.ScriptExpressions[16807].NextExpressionHandle = 0x41B2;
-                scnr.ScriptExpressions[16818].NextExpressionHandle = 0x41C6;
-                scnr.ScriptExpressions[16865].NextExpressionHandle = 0xFFFF;
-            }
+            } 
         }
 
         private static Dictionary<CacheVersion, Dictionary<int, string>> GlobalOpcodes = new Dictionary<CacheVersion, Dictionary<int, string>>
