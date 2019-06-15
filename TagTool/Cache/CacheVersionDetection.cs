@@ -68,8 +68,8 @@ namespace TagTool.Cache
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
                     return CacheVersion.Halo2Vista;
-                case "09699.07.05.01.1534.delta":
-                    return CacheVersion.Halo3Beta;
+                //case "09699.07.05.01.1534.delta":
+                //    return CacheVersion.Halo3Beta;
                 case "11855.07.08.20.2317.halo3_ship":
                 case "12065.08.08.26.0819.halo3_ship":
                     return CacheVersion.Halo3Retail;
@@ -266,7 +266,7 @@ namespace TagTool.Cache
         HaloPC,
         Halo2Xbox,
         Halo2Vista,
-        Halo3Beta,
+        //Halo3Beta,
         Halo3Retail,
         Halo3ODST,
         HaloOnline106708,
