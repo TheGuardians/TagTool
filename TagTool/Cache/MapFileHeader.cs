@@ -4,7 +4,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x800, MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x800, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public sealed class MapFileHeader : TagStructure, IMapFileHeader
@@ -22,8 +22,8 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint TagIndexAddress;
 
-        [TagField(MaxVersion = CacheVersion.HaloPC)]
-        public int TagIndexLength;
+        //[TagField(MaxVersion = CacheVersion.HaloPC)]
+        //public int TagIndexLength;
 
         public int MemoryBufferOffset;
         public int MemoryBufferSize;
@@ -40,8 +40,8 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public uint TagDependencyGraphSize;
 
-        [TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
-        public string HaloName;
+        //[TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
+        //public string HaloName;
 
         [TagField(Length = 256, MinVersion = CacheVersion.Halo2Xbox)]
         public string SourceFile;
@@ -51,14 +51,14 @@ namespace TagTool.Cache
 
         public CacheFileType CacheType;
 
-        [TagField(MaxVersion = CacheVersion.HaloPC)]
-        public int UnknownHalo;
+        //[TagField(MaxVersion = CacheVersion.HaloPC)]
+        //public int UnknownHalo;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public CacheFileSharedType SharedType;
 
-        [TagField(MaxVersion = CacheVersion.HaloPC, Length = 0x794)]
-        public byte[] Padding;
+        //[TagField(MaxVersion = CacheVersion.HaloPC, Length = 0x794)]
+        //public byte[] Padding;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
         public uint CacheResourceCRC;
