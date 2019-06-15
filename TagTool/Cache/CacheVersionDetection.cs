@@ -59,10 +59,17 @@ namespace TagTool.Cache
         {
             switch (buildName)
             {
+                case "01.09.25.2247":
+                case "01.10.12.2276":
+                    return CacheVersion.HaloXbox;
+                case "01.00.00.0564":
+                    return CacheVersion.HaloPC;
                 case "02.09.27.09809":
                     return CacheVersion.Halo2Xbox;
                 case "11081.07.04.30.0934.main":
                     return CacheVersion.Halo2Vista;
+                case "09699.07.05.01.1534.delta":
+                    return CacheVersion.Halo3Beta;
                 case "11855.07.08.20.2317.halo3_ship":
                 case "12065.08.08.26.0819.halo3_ship":
                     return CacheVersion.Halo3Retail;
@@ -255,8 +262,11 @@ namespace TagTool.Cache
     public enum CacheVersion : int
     {
         Unknown = -1,
+        HaloXbox,
+        HaloPC,
         Halo2Xbox,
         Halo2Vista,
+        Halo3Beta,
         Halo3Retail,
         Halo3ODST,
         HaloOnline106708,

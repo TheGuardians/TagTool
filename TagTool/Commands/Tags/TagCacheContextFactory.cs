@@ -69,6 +69,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ExportTagDefinitionsCommand(cacheContext));
             context.AddCommand(new ModelAnimationGraphs.ApplySprintFixupsCommand(cacheContext));
             context.AddCommand(new ListMultiMeshModelsCommand(cacheContext));
+            context.AddCommand(new OpenMapFileCommand(cacheContext));
 
             //
             // Modding commands

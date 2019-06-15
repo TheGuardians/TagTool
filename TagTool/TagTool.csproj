@@ -236,6 +236,8 @@
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
+    <Compile Include="Cache\MapFile.cs" />
+    <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
     <Compile Include="Cache\ModPackage.cs" />
     <Compile Include="Cache\ModPackageHeader.cs" />
@@ -253,6 +255,7 @@
     <Compile Include="Cache\TagCacheIndex.cs" />
     <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
+    <Compile Include="Commands\Files\OpenMapFileCommand.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
     <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />
