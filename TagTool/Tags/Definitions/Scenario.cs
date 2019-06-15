@@ -2120,7 +2120,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public short ManualReferenceFrameNew;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short AreaTypeNew;
+                public short BSPIndex;
 
                 [TagField(Length = 8)]
                 public int[] ClusterOccupancyBitVector = new int[8];
@@ -2128,7 +2128,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public short ManualReferenceFrameOld;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short AreaTypeOld;
+                public short BSPIndexOld;
 
                 public List<FlightHint> FlightHints;
 
@@ -2184,7 +2184,8 @@ namespace TagTool.Tags.Definitions
 				{
                     public short FlightHintIndex;
                     public short PointIndex;
-                    public uint Unknown;
+                    public short BSPIndex;
+                    public short Unknown2;
                 }
 
                 [TagStructure(Size = 0x18)]

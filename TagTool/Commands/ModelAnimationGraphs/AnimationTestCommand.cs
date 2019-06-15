@@ -58,7 +58,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     {
                         reader.BaseStream.Position = groupMember.AnimationData.Address.Offset;
 
-                        var header = CacheContext.Deserialize<AnimationCodecData>(
+                        var header = CacheContext.Deserialize<AnimatedCodecHeader>(
                             new DataSerializationContext(reader));
 
                         if (header.CodecType == AnimationCodecType.UncompressedStatic)

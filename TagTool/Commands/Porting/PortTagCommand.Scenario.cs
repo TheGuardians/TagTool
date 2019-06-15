@@ -376,7 +376,7 @@ namespace TagTool.Commands.Porting
 
                         area.ManualReferenceFrameNew = area.ManualReferenceFrameOld;
                         //This is definitely a bsp index, not an area type
-                        area.AreaTypeNew = zone.ManualBspIndex;
+                        area.BSPIndex = zone.ManualBspIndex;
                         area.Points = new List<Scenario.Zone.Area.Point>();
                         /*{
                             new Scenario.Zone.Area.Point
