@@ -61,7 +61,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         var header = CacheContext.Deserialize<AnimatedCodecHeader>(
                             new DataSerializationContext(reader));
 
-                        if (header.CodecType == AnimationCodecType.UncompressedStatic)
+
+                        if (header.Type == AnimationCodecType.UncompressedStatic)
                             continue;
 
                         //var data = new AnimationData(groupMember, header);
