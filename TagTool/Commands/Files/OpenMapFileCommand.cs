@@ -29,12 +29,9 @@ namespace TagTool.Commands.Porting
 
             var path = args[0];
             var file = new FileInfo(path);
-            MapFile map;
-            using (EndianReader reader = new EndianReader(file.OpenRead()))
-            {
-                 map = new MapFile(reader);
-
-            }
+            IGameCacheContext map;
+            map = new GameCacheContextNew(file);
+            
 
             return true;
         }

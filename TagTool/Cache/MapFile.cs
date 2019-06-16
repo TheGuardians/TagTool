@@ -112,14 +112,89 @@ namespace TagTool.Cache
             var buildDate = GetBuildDate(reader, version);
             return CacheVersionDetection.GetFromBuildName(buildDate);
         }
+
+        //
+        // Interface methods
+        //
+
+        public CacheFileInterop GetInterop() => Header.GetInterop();
+
+        public CacheFilePartition[] GetPartitions() => Header.GetPartitions();
+
+        public int GetMemoryBufferSize() => Header.GetMemoryBufferSize();
+
+        public int GetHeaderSize(CacheVersion version) => Header.GetHeaderSize(version);
+
+        public void ApplyMagic(int magic) => Header.ApplyMagic(magic);
+
+        public uint GetTagIndexAddress() => Header.GetTagIndexAddress();
+
+        public void SetTagIndexAddress(uint newAddress) => Header.SetTagIndexAddress(newAddress);
+
+        public int GetStringIDsIndicesOffset() => Header.GetStringIDsIndicesOffset();
+
+        public CacheIndexHeader GetIndexHeader(EndianReader reader, int magic)
+        {
+            switch (Version)
+            {
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloReach:
+                    reader.SeekTo(GetTagIndexAddress());
+                    return new CacheIndexHeader
+                    {
+                        TagGroupCount = reader.ReadInt32(),
+                        TagGroupsOffset = reader.ReadInt32() - magic,
+                        TagCount = reader.ReadInt32(),
+                        TagsOffset = reader.ReadInt32() - magic,
+                        TagInfoHeaderCount = reader.ReadInt32(),
+                        TagInfoHeaderOffset = reader.ReadInt32() - magic,
+                        TagInfoHeaderCount2 = reader.ReadInt32(),
+                        TagInfoHeaderOffset2 = reader.ReadInt32() - magic
+                    };
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public int GetTagNamesIndicesOffset() => Header.GetTagNamesIndicesOffset();
+
+        public int GetTagNamesBufferOffset() => Header.GetTagNamesBufferOffset();
+
+        public int GetTagNamesBufferSize() => Header.GetTagNamesBufferSize();
+
+        public int GetStringIDsBufferOffset() => Header.GetStringIDsBufferOffset();
+
+        public int GetStringIDsBufferSize() => Header.GetStringIDsBufferSize();
+
+        public int GetStringIDsCount() => Header.GetStringIDsCount();
     }
 
-    public interface IMapFile
+    public interface IMapFile : IMapFileHeader
     {
+        CacheIndexHeader GetIndexHeader(EndianReader reader, int magic);
     }
 
     public interface IMapFileHeader
     {
+        CacheFileInterop GetInterop();
+        CacheFilePartition[] GetPartitions();
+        int GetMemoryBufferSize();
+        int GetHeaderSize(CacheVersion version);
+        void ApplyMagic(int magic);
+
+        uint GetTagIndexAddress();
+        void SetTagIndexAddress(uint newAddress);
+        
+        int GetTagNamesIndicesOffset();
+        int GetTagNamesBufferOffset();
+        int GetTagNamesBufferSize();
+
+        int GetStringIDsIndicesOffset();
+        int GetStringIDsBufferOffset();
+        int GetStringIDsBufferSize();
+        int GetStringIDsCount();
     }
 
 }

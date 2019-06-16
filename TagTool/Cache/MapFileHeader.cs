@@ -241,5 +241,48 @@ namespace TagTool.Cache
         public uint Unknown115;
 
         public Tag FootTag;
+
+        //
+        // Interface methods
+        //
+
+        public void ApplyMagic(int magic)
+        {
+            Magic = magic;
+            TagNamesBufferOffset -= Magic;
+            TagNamesIndicesOffset -= Magic;
+            StringIDsIndicesOffset -= Magic;
+            StringIDsBufferOffset -= Magic;
+        }
+
+        public int GetHeaderSize(CacheVersion version) => (int)GetTagStructureInfo(typeof(MapFileHeader), version).TotalSize;
+
+        public CacheFileInterop GetInterop() => Interop;
+
+        public int GetMemoryBufferSize() => MemoryBufferSize;
+
+        public CacheFilePartition[] GetPartitions() => Partitions;
+
+        public int GetStringIDsIndicesOffset() => StringIDsIndicesOffset;
+
+        public uint GetTagIndexAddress() => TagIndexAddress;
+
+        public int GetTagNamesBufferOffset() => TagNamesBufferOffset;
+
+        public int GetTagNamesBufferSize() => TagNamesBufferSize;
+
+        public int GetTagNamesIndicesOffset() => TagNamesIndicesOffset;
+
+        public void SetTagIndexAddress(uint newAddress)
+        {
+            TagIndexAddress = newAddress;
+        }
+
+        public int GetStringIDsBufferOffset() => StringIDsBufferOffset;
+
+        public int GetStringIDsBufferSize() => StringIDsBufferSize;
+
+        public int GetStringIDsCount() => StringIDsCount;
+
     }
 }
