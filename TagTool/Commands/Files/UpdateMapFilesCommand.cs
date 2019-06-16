@@ -36,8 +36,10 @@ namespace TagTool.Commands.Files
         
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1)
+            if(args.Count != 1)
+            {
                 return false;
+            }
             
             var scenarioIndices = new Dictionary<int, (ScenarioMapType, int)>();
 
