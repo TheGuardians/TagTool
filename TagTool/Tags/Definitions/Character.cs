@@ -52,7 +52,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<CharacterEngineerProperties> EngineerProperties;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<CharacterInspectProperties> InspectProperties;
 
         public List<CharacterScarabProperties> ScarabProperties;
