@@ -152,7 +152,8 @@
     <Compile Include="Ai\CharacterSearchProperties.cs" />
     <Compile Include="Ai\CharacterSwarmProperties.cs" />
     <Compile Include="Ai\CharacterUnitDialogue.cs" />
-    <Compile Include="Ai\CharacterUnknownProperties.cs" />
+    <Compile Include="Ai\CharacterScarabProperties.cs" />
+    <Compile Include="Ai\CharacterGuardianProperties.cs" />
     <Compile Include="Ai\CharacterVariant.cs" />
     <Compile Include="Ai\CharacterVehicleProperties.cs" />
     <Compile Include="Ai\CharacterVitalityFlags.cs" />

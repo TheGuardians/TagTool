@@ -4,12 +4,14 @@ using TagTool.Tags;
 
 namespace TagTool.Ai
 {
-    [TagStructure(Size = 0x14)]
+    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
     public class CharacterInspectProperties : TagStructure
 	{
         /// <summary>
         /// World Units; Distance from object at which to stop and turn on the inspection light.
         /// </summary>
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float StopDistance;
 
         /// <summary>
@@ -20,6 +22,7 @@ namespace TagTool.Ai
         /// <summary>
         /// World Units; Range in which we should search for objects to inspect
         /// </summary>
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public Bounds<float> SearchRange;
     }
 }
