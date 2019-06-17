@@ -135,7 +135,7 @@ namespace TagTool.Commands.Porting
             try
             {
 #endif
-                if (PortedTags.ContainsKey(blamTag.ID))
+                if (PortedTags.ContainsKey(blamTag.ID) && !FlagIsSet(PortingFlags.Replace))
                     return PortedTags[blamTag.ID];
 
                 var oldFlags = Flags;
@@ -314,7 +314,7 @@ namespace TagTool.Commands.Porting
                         continue;
                 }
 
-                if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))
+                if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name) && !FlagIsSet(PortingFlags.Replace))
                 {
                     if (instance.Group.Tag == groupTag)
                         return instance;
