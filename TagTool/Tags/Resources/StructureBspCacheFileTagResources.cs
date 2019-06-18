@@ -10,7 +10,7 @@ namespace TagTool.Tags.Resources
 	{
         public TagBlock<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
         public TagBlock<ScenarioStructureBsp.Plane> Planes;
-        public TagBlock<ScenarioStructureBsp.UnknownRaw7th> UnknownRaw7ths;
+        public TagBlock<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeams;
         public List<PathfindingDatum> PathfindingData;
 
         [TagStructure(Size = 0x94)]

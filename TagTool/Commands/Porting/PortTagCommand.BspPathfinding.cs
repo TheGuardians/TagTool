@@ -100,7 +100,7 @@ namespace TagTool.Commands.Porting
                 {
                     SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(bsp.SurfacePlanes.Count, new CacheAddress()),
                     Planes = new TagBlock<ScenarioStructureBsp.Plane>(bsp.Planes.Count, new CacheAddress()),
-                    UnknownRaw7ths = new TagBlock<ScenarioStructureBsp.UnknownRaw7th>(bsp.UnknownRaw7ths.Count, new CacheAddress()),
+                    EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(bsp.EdgeToSeams.Count, new CacheAddress()),
                     PathfindingData = new List<StructureBspCacheFileTagResources.PathfindingDatum>() // TODO: copy from bsp.PathfindingData...
                 };
             }
@@ -173,17 +173,17 @@ namespace TagTool.Commands.Porting
                 StreamUtil.Align(dataStream, 0x4);
 
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                    blamResourceStream.Position = resourceDefinition.UnknownRaw7ths.Address.Offset;
+                    blamResourceStream.Position = resourceDefinition.EdgeToSeams.Address.Offset;
 
-                resourceDefinition.UnknownRaw7ths = new TagBlock<ScenarioStructureBsp.UnknownRaw7th>(
-                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.UnknownRaw7ths.Count : resourceDefinition.UnknownRaw7ths.Count),
+                resourceDefinition.EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(
+                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.EdgeToSeams.Count : resourceDefinition.EdgeToSeams.Count),
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
-                for (var i = 0; i < resourceDefinition.UnknownRaw7ths.Count; i++)
+                for (var i = 0; i < resourceDefinition.EdgeToSeams.Count; i++)
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
-                        bsp.UnknownRaw7ths[i] :
-                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(dataContext);
+                        bsp.EdgeToSeams[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.EdgeToSeamMapping>(dataContext);
 
                     CacheContext.Serializer.Serialize(dataContext, element);
                 }
@@ -458,7 +458,7 @@ namespace TagTool.Commands.Porting
             {
                 bsp.SurfacePlanes.Clear();
                 bsp.Planes.Clear();
-                bsp.UnknownRaw7ths.Clear();
+                bsp.EdgeToSeams.Clear();
                 bsp.PathfindingData.Clear();
             }
 

@@ -39,7 +39,7 @@ namespace TagTool.Tags.Definitions
         public List<SeamIdentifier> SeamIdentifiers;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<UnknownRaw7th> UnknownRaw7ths;
+        public List<EdgeToSeamMapping> EdgeToSeams;
 
         public List<CollisionMaterial> CollisionMaterials;
 
@@ -246,10 +246,10 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4)]
-        public class UnknownRaw7th : TagStructure
+        public class EdgeToSeamMapping : TagStructure
         {
-            public short UnknownIndex;  //used in the structure seam global
-            public short SeamIdentifierIndex;
+            public short SeamIndex;  //used in the structure seam global
+            public short SeamIdentifierIndexEdgeMappingIndex;
         }
 
         [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo2Vista)]

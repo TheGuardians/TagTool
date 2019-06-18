@@ -84,11 +84,11 @@ namespace TagTool.Commands.Porting
                                 pathfindingBsp.Planes.Add(Plane);
                             }
 
-                            resourceStream.Position = pathfindingBsp.UnknownRaw7ths.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.UnknownRaw7ths.Count; i++)
+                            resourceStream.Position = pathfindingBsp.EdgeToSeams.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.EdgeToSeams.Count; i++)
                             {
-                                var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.UnknownRaw7th>(resourceDataContext);
-                                pathfindingBsp.UnknownRaw7ths.Add(UnknownRaw7th);
+                                var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.EdgeToSeamMapping>(resourceDataContext);
+                                pathfindingBsp.EdgeToSeams.Add(UnknownRaw7th);
                             }
 
                             foreach (var pathfinding in pathfindingBsp.PathfindingData)
