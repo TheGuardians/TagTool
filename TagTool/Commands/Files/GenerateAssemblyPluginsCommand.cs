@@ -720,6 +720,22 @@ namespace TagTool.Commands.Files
                         assemblyPluginFields.AddRange(CommonFieldTypes.Rectangle2d(fieldName, ref offset));
                     else if (fieldType == typeof(RealMatrix4x3))
                         assemblyPluginFields.AddRange(CommonFieldTypes.RealMatrix4x3(fieldName, ref offset));
+                    // Handles datum indices
+                    else if (fieldType == typeof(DatumIndex))
+                    {
+                        assemblyPluginFields.AddRange(
+                            cacheVersion > CacheVersion.Halo2Vista && cacheVersion < CacheVersion.HaloOnline106708 ?
+                            new[]
+                            {
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Identifier", ref offset),
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Index", ref offset)
+                            } :
+                            new[]
+                            {
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Index", ref offset),
+                                new AssemblyPluginField(AssemblyPluginFieldTypes.uint16, fieldName + " Identifier", ref offset)
+                            });
+                    }
                     //Handles resource pointers
                     else if (fieldType == typeof(PageableResource))
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName, ref offset));
