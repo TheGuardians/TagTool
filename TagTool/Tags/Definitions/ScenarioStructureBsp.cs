@@ -17,8 +17,17 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
         public byte[] Unused1 = new byte[12];
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StructureBuildIdentifier BuildIdentifier;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StructureBuildIdentifier ParentBuildIdentifier;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public uint BspChecksum;
+        public int ImportInfoChecksum;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int ImportVersion;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public FlagsValue Flags;
@@ -195,6 +204,15 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003)]
         public uint Unknown90;
+
+        [TagStructure(Size = 0x18)]
+        public class StructureBuildIdentifier : TagStructure
+        {
+            [TagField(Length = 4)]
+            public int[] ManifestId = new int[4];
+            public int BuildIndex;
+            public int StructureImporterVersion;
+        }
 
         [Flags]
         public enum FlagsValue : ushort
@@ -1038,10 +1056,12 @@ namespace TagTool.Tags.Definitions
             public Scenery.LightmappingPolicyValue LightmappingPolicy;
             public float LightmapResolutionScale;
             public List<CollisionDefinition> CollisionDefinitions;
-            public short Unknown4;
-            public short Unknown5;
-            public short Unknown6;
+            public short GroupIndex;
+            public short GroupListIndex;
+            public MeshFlags MeshOverrideFlags;
+
             public short Unknown7;
+
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public uint Unknown8;
 

@@ -3223,27 +3223,22 @@ namespace TagTool.Tags.Definitions
                 InvertFilterLogic = 1 << 14
             }
 
-            [Flags]
-            public enum TaskInhibitGroups : ushort
-            {
-                None = 0,
-                Cover = 1 << 0,
-                Retreat = 1 << 1,
-                VehiclesAll = 1 << 2,
-                Grenades = 1 << 3,
-                Berserk = 1 << 4,
-                Equipment = 1 << 5,
-                ObjectInteraction = 1 << 6,
-                Turrets = 1 << 7,
-                VehiclesNonTurrets = 1 << 8
-            }
-
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST)]
             public class Task : TagStructure
 			{
                 public TaskFlags Flags;
-                public AiConditions PlaceOn;
+
+                public TaskInhibitGroups InhibitGroups;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public uint Unknown1;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public uint Unknown2;
+
+                public SquadDifficultyFlags InhibitOnDifficulty;
+
                 public MovementValue Movement;
                 public FollowValue Follow;
                 public short FollowSquadIndex;
@@ -3269,7 +3264,7 @@ namespace TagTool.Tags.Definitions
                 public short CommandScriptIndex;
                 public short ExhaustionScriptIndex;
 
-                public TaskInhibitGroups InhibitGroups;
+                public short SquadGroupFilter;
 
                 /// <summary>
                 /// When someone enters this task for the first time, they play this type of dialogue.
@@ -3321,6 +3316,21 @@ namespace TagTool.Tags.Definitions
 
                 public List<Area> Areas;
                 public List<DirectionBlock> Direction;
+
+                [Flags]
+                public enum TaskInhibitGroups : ushort
+                {
+                    None = 0,
+                    Cover = 1 << 0,
+                    Retreat = 1 << 1,
+                    VehiclesAll = 1 << 2,
+                    Grenades = 1 << 3,
+                    Berserk = 1 << 4,
+                    Equipment = 1 << 5,
+                    ObjectInteraction = 1 << 6,
+                    Turrets = 1 << 7,
+                    VehiclesNonTurrets = 1 << 8
+                }
 
                 public enum MovementValue : short
                 {
