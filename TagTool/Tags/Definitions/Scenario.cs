@@ -3245,13 +3245,13 @@ namespace TagTool.Tags.Definitions
                 public float FollowRadius;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public FollowPlayerFlags FollowPlayers;
-
-                [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3ODST)]
-                public byte[] Unused1 = new byte[2];
-
+                public float Unknown3;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public List<FollowFiringPointQueryBlock> FollowFiringPointQuery;
+                public float Unknown4;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float Unknown5;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float Unknown6;
 
                 [TagField(Length = 32)]
                 public string EntryScriptName;
