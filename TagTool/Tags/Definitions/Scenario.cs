@@ -3245,13 +3245,25 @@ namespace TagTool.Tags.Definitions
                 public float FollowRadius;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public float Unknown3;
+                public float FollowZClamp;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public float Unknown4;
+                public FollowPlayerFlags FollowPlayers;
+
+                [TagField(Length = 2, MinVersion = CacheVersion.Halo3ODST)]
+                public byte[] Unused = new byte[2];
+
+                /// <summary>
+                /// Exhaust this task after it has been active for this long.
+                /// </summary>
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public float Unknown5;
+                public float MaximumDuration;
+
+                /// <summary>
+                /// When a task exhausts, hold actors in the task for this long before releasing them.
+                /// </summary>
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public float Unknown6;
+                public float ExhaustionDelay;
 
                 [TagField(Length = 32)]
                 public string EntryScriptName;
