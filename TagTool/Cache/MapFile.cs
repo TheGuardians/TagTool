@@ -33,7 +33,7 @@ namespace TagTool.Cache
         public readonly MapFileVersion MapVersion;
         public readonly EndianFormat EndianFormat;
 
-        private IMapFileHeader Header;
+        public IMapFileHeader Header;
 
         public MapFile(EndianReader reader)
         {
@@ -91,6 +91,7 @@ namespace TagTool.Cache
                 case MapFileVersion.Halo3Beta:
                 case MapFileVersion.Halo3:
                 case MapFileVersion.HaloReach:
+                case MapFileVersion.HaloOnline:
                     reader.SeekTo(0x11C);
                     break;
 
@@ -117,22 +118,6 @@ namespace TagTool.Cache
         // Interface methods
         //
 
-        public CacheFileInterop GetInterop() => Header.GetInterop();
-
-        public CacheFilePartition[] GetPartitions() => Header.GetPartitions();
-
-        public int GetMemoryBufferSize() => Header.GetMemoryBufferSize();
-
-        public int GetHeaderSize(CacheVersion version) => Header.GetHeaderSize(version);
-
-        public void ApplyMagic(int magic) => Header.ApplyMagic(magic);
-
-        public uint GetTagIndexAddress() => Header.GetTagIndexAddress();
-
-        public void SetTagIndexAddress(uint newAddress) => Header.SetTagIndexAddress(newAddress);
-
-        public int GetStringIDsIndicesOffset() => Header.GetStringIDsIndicesOffset();
-
         public CacheIndexHeader GetIndexHeader(EndianReader reader, int magic)
         {
             switch (Version)
@@ -140,7 +125,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
-                    reader.SeekTo(GetTagIndexAddress());
+                    reader.SeekTo(Header.GetTagIndexAddress());
                     return new CacheIndexHeader
                     {
                         TagGroupCount = reader.ReadInt32(),
@@ -157,21 +142,9 @@ namespace TagTool.Cache
                     throw new NotImplementedException();
             }
         }
-
-        public int GetTagNamesIndicesOffset() => Header.GetTagNamesIndicesOffset();
-
-        public int GetTagNamesBufferOffset() => Header.GetTagNamesBufferOffset();
-
-        public int GetTagNamesBufferSize() => Header.GetTagNamesBufferSize();
-
-        public int GetStringIDsBufferOffset() => Header.GetStringIDsBufferOffset();
-
-        public int GetStringIDsBufferSize() => Header.GetStringIDsBufferSize();
-
-        public int GetStringIDsCount() => Header.GetStringIDsCount();
     }
 
-    public interface IMapFile : IMapFileHeader
+    public interface IMapFile
     {
         CacheIndexHeader GetIndexHeader(EndianReader reader, int magic);
     }

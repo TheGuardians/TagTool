@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Cache
 {
@@ -56,6 +57,6 @@ namespace TagTool.Cache
             Stream.Dispose();
         }
 
-
+        public ISerializationContext CreateSerializationContext(object tag) => CacheContext.CreateSerializationContext(tag);
     }
 }

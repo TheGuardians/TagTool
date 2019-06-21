@@ -1,4 +1,5 @@
 using System;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -203,6 +204,36 @@ namespace TagTool.Cache
 			}
 		}
 
+        /// <summary>
+        /// Determines whether a field exists in the given CacheVersion. Defines a priority : Version, Gen, Min/Max.
+        /// </summary>
+        /// <param name="attr"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public static bool AttributeInCacheVersion(TagFieldAttribute attr, CacheVersion compare)
+        {
+            if(attr.Version != CacheVersion.Unknown)
+            {
+                // has a specific version specified.
+                return attr.Version == compare;
+            }
+            else if(attr.Gen != CacheGeneration.Unknown)
+            {
+                // Has a generation specified
+                return IsInGen(attr.Gen, compare);
+            }
+            else if(attr.MinVersion != CacheVersion.Unknown || attr.MaxVersion != CacheVersion.Unknown)
+            {
+                // Has a min or a max or both specified.
+                return IsBetween(compare, attr.MinVersion, attr.MaxVersion);
+            }
+            else
+            {
+                // has no version attribute therefore it's valid in all cache versions
+                return true;
+            }
+        }
+
 		/// <summary>
 		/// Compares two version numbers.
 		/// </summary>
@@ -229,6 +260,66 @@ namespace TagTool.Cache
             if (min != CacheVersion.Unknown && Compare(compare, min) < 0)
                 return false;
             return (max == CacheVersion.Unknown || Compare(compare, max) <= 0);
+        }
+
+        /// <summary>
+        /// Determine whether a CacheVersion belongs to a CacheGeneration
+        /// </summary>
+        /// <param name="gen"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public static bool IsInGen(CacheGeneration gen, CacheVersion compare)
+        {
+            if (gen == CacheGeneration.Unknown)
+                return true;
+            else
+            {
+                if (GetGeneration(compare) == gen)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Get CacheGeneration from CacheVersion
+        /// </summary>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        public static CacheGeneration GetGeneration(CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.HaloXbox:
+                case CacheVersion.HaloPC:
+                    return CacheGeneration.First;
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo2Xbox:
+                    return CacheGeneration.Second;
+                case CacheVersion.Halo3Beta:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloReach:
+                    return CacheGeneration.Third;
+                case CacheVersion.HaloOnline106708:
+                case CacheVersion.HaloOnline235640:
+                case CacheVersion.HaloOnline301003:
+                case CacheVersion.HaloOnline327043:
+                case CacheVersion.HaloOnline372731:
+                case CacheVersion.HaloOnline416097:
+                case CacheVersion.HaloOnline430475:
+                case CacheVersion.HaloOnline454665:
+                case CacheVersion.HaloOnline449175:
+                case CacheVersion.HaloOnline498295:
+                case CacheVersion.HaloOnline530605:
+                case CacheVersion.HaloOnline532911:
+                case CacheVersion.HaloOnline554482:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline700123:
+                    return CacheGeneration.HaloOnline;
+                default:
+                    return CacheGeneration.Unknown;
+            }
         }
 
         /// <summary>
@@ -289,5 +380,14 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach
+    }
+
+    public enum CacheGeneration : int
+    {
+        Unknown = -1,
+        First = 1,
+        Second = 2,
+        Third = 3,
+        HaloOnline = 4
     }
 }

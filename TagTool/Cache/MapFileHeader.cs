@@ -4,8 +4,9 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x800, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x800, MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x3390, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public sealed class MapFileHeader : TagStructure, IMapFileHeader
     {
@@ -22,8 +23,8 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint TagIndexAddress;
 
-        //[TagField(MaxVersion = CacheVersion.HaloPC)]
-        //public int TagIndexLength;
+        [TagField(MaxVersion = CacheVersion.HaloPC)]
+        public int TagIndexLength;
 
         public int MemoryBufferOffset;
         public int MemoryBufferSize;
@@ -40,8 +41,8 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public uint TagDependencyGraphSize;
 
-        //[TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
-        //public string HaloName;
+        [TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
+        public string HaloName;
 
         [TagField(Length = 256, MinVersion = CacheVersion.Halo2Xbox)]
         public string SourceFile;
@@ -49,16 +50,15 @@ namespace TagTool.Cache
         [TagField(Length = 32)]
         public string Build;
 
-        public CacheFileType CacheType;
+        public CacheFileType CacheType; 
 
-        //[TagField(MaxVersion = CacheVersion.HaloPC)]
-        //public int UnknownHalo;
+        [TagField(MaxVersion = CacheVersion.HaloPC)]
+        public int UnknownHalo;
 
-        [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public CacheFileSharedType SharedType;
 
-        //[TagField(MaxVersion = CacheVersion.HaloPC, Length = 0x794)]
-        //public byte[] Padding;
+        [TagField(MaxVersion = CacheVersion.HaloPC, Length = 0x794)]
+        public byte[] Padding;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
         public uint CacheResourceCRC;
@@ -114,7 +114,21 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
         public int CampaignLowDateTime;
 
-        [TagField(Length = 32, MinVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown1HighDateTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown1LowDateTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown2HighDateTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown2LowDateTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown3HighDateTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown3LowDateTime;
+
+
+        [TagField(Length = 0x20, MinVersion = CacheVersion.Halo2Xbox)]
         public string Name;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
@@ -151,7 +165,7 @@ namespace TagTool.Cache
         public uint FastLoadGeometryBlockSize = 0;
 
         [TagField(MinVersion = CacheVersion.Halo2Xbox)]
-        public uint Checksum;
+        public uint Checksum; //ok HO field 2DC
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
         public uint MoppCodesChecksum;
@@ -166,6 +180,10 @@ namespace TagTool.Cache
         public int Unknown14;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int Unknown15;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x20)] // should be 0x20 but they are unused and it matches better with the current def
+        public byte[] UnknownHO1;
+
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int Unknown16;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -179,42 +197,51 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int Unknown21;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public uint BaseAddress;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int XDKVersion;
 
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x14)]
+        public byte[] Hash;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x100)]
+        public byte[] RSASignature;
+             
         [TagField(Length = (int)CacheFilePartitionType.Count, MinVersion = CacheVersion.Halo3Retail)]
         public CacheFilePartition[] Partitions = new CacheFilePartition[(int)CacheFilePartitionType.Count];
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int CountUnknown1;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int Unknown22;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int Unknown23;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int Unknown24;
 
-        [TagField(Length = 5, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 5, Gen = CacheGeneration.Third)]
         public int[] SHA1_A;
 
-        [TagField(Length = 5, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 5, Gen = CacheGeneration.Third)]
         public int[] SHA1_B;
 
-        [TagField(Length = 5, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 5, Gen = CacheGeneration.Third)]
         public int[] SHA1_C;
 
-        [TagField(Length = 64, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 64, Gen = CacheGeneration.Third)]
         public int[] RSA;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public CacheFileInterop Interop;
 
-        [TagField(Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 4, Gen = CacheGeneration.Third)]
         public int[] GUID;
+
+        [TagField( Gen = CacheGeneration.HaloOnline)]
+        public int Unknown107;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown108;
@@ -225,20 +252,62 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public int Unknown109;
 
-        [TagField(Length = 4, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 4, Gen = CacheGeneration.Third)]
         public int[] CompressionGUID;
 
         [TagField(Length = 0x2300, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] Elements1;
 
-        [TagField(Length = 0x708, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x708, Gen = CacheGeneration.Third)]
         public byte[] Elements2;
 
-        [TagField(Length = 0x12C, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x12C, Gen = CacheGeneration.Third)]
         public byte[] Unknown114;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Gen = CacheGeneration.Third)]
         public uint Unknown115;
+        
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown116;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown117;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown118;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown119;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown120;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown121;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown122;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown123;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int Unknown124;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x168)]
+        public byte[] Unknown125;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x4F0)]
+        public byte[] Unknown126;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int MapId;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public int ScenarioTagIndex;
+
+        [TagField(Gen = CacheGeneration.HaloOnline, Length = 0x598)]
+        public byte[] Unknown127;
 
         public Tag FootTag;
 

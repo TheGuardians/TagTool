@@ -34,6 +34,11 @@ namespace TagTool.Tags
         public CacheVersion Version { get; set; } = CacheVersion.Unknown;
 
         /// <summary>
+        /// The game generation of the tag field. (1 = Halo, 2 = Halo 2, 3 = Halo 3, ODST, Reach, 4 = Halo Online)
+        /// </summary>
+        public CacheGeneration Gen { get; set; } = CacheGeneration.Unknown;
+
+        /// <summary>
         /// The name of the field to upgrade to (if any).
         /// </summary>
         public string Upgrade { get; set; } = string.Empty;

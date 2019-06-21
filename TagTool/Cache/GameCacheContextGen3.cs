@@ -60,22 +60,22 @@ namespace TagTool.Cache
             LocaleGlobalsOffset = SetLocaleGlobalsOffset();
 
 
-            var interop = mapFile.GetInterop();
+            var interop = mapFile.Header.GetInterop();
 
             if (interop.ResourceBaseAddress == 0)
-                Magic = (int)(interop.RuntimeBaseAddress - mapFile.GetMemoryBufferSize());
+                Magic = (int)(interop.RuntimeBaseAddress - mapFile.Header.GetMemoryBufferSize());
             else
             {
-                mapFile.ApplyMagic(mapFile.GetStringIDsIndicesOffset() - mapFile.GetHeaderSize(mapFile.Version));
-                var resourcePartition = mapFile.GetPartitions()[(int)CacheFilePartitionType.Resources];
+                mapFile.Header.ApplyMagic(mapFile.Header.GetStringIDsIndicesOffset() - mapFile.Header.GetHeaderSize(mapFile.Version));
+                var resourcePartition = mapFile.Header.GetPartitions()[(int)CacheFilePartitionType.Resources];
                 var resourceSection = interop.Sections[(int)CacheFileSectionType.Resource];
                 Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (interop.DebugSectionSize + resourceSection.Size);
             }
 
-            if (mapFile.GetTagIndexAddress() == 0)
+            if (mapFile.Header.GetTagIndexAddress() == 0)
                 return;
 
-            mapFile.SetTagIndexAddress(BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.GetTagIndexAddress() - Magic), 0));
+            mapFile.Header.SetTagIndexAddress(BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.GetTagIndexAddress() - Magic), 0));
 
             IndexHeader = mapFile.GetIndexHeader(reader, Magic);
             Strings = CreateStringTable(reader);
@@ -138,25 +138,25 @@ namespace TagTool.Cache
             #endregion
 
             #region Read Indices
-            reader.SeekTo(BaseMapFile.GetTagNamesIndicesOffset());
+            reader.SeekTo(BaseMapFile.Header.GetTagNamesIndicesOffset());
             int[] indices = new int[IndexHeader.TagCount];
             for (int i = 0; i < IndexHeader.TagCount; i++)
                 indices[i] = reader.ReadInt32();
             #endregion
 
             #region Read Names
-            reader.SeekTo(BaseMapFile.GetTagNamesBufferOffset());
+            reader.SeekTo(BaseMapFile.Header.GetTagNamesBufferOffset());
 
             EndianReader newReader = null;
 
             if (TagsKey == "" || TagsKey == null)
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.GetTagNamesBufferSize())), EndianFormat.BigEndian);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
             }
             else
             {
-                reader.BaseStream.Position = BaseMapFile.GetTagNamesBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
+                reader.BaseStream.Position = BaseMapFile.Header.GetTagNamesBufferOffset();
+                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
             }
 
             for (int i = 0; i < indices.Length; i++)
@@ -171,7 +171,7 @@ namespace TagTool.Cache
 
                 int length;
                 if (i == indices.Length - 1)
-                    length = BaseMapFile.GetTagNamesBufferSize() - indices[i];
+                    length = BaseMapFile.Header.GetTagNamesBufferSize() - indices[i];
                 else
                 {
                     if (indices[i + 1] == -1)
@@ -187,7 +187,7 @@ namespace TagTool.Cache
                             }
                         }
 
-                        length = (index == -1) ? BaseMapFile.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
+                        length = (index == -1) ? BaseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
                     }
                     else
                         length = indices[i + 1] - indices[i];
@@ -221,26 +221,26 @@ namespace TagTool.Cache
         {
             CacheStringTable table = new CacheStringTable();
             table.StringMods = StringMods;
-            reader.SeekTo(BaseMapFile.GetStringIDsIndicesOffset());
-            int[] indices = new int[BaseMapFile.GetStringIDsCount()];
-            for (var i = 0; i < BaseMapFile.GetStringIDsCount(); i++)
+            reader.SeekTo(BaseMapFile.Header.GetStringIDsIndicesOffset());
+            int[] indices = new int[BaseMapFile.Header.GetStringIDsCount()];
+            for (var i = 0; i < BaseMapFile.Header.GetStringIDsCount(); i++)
             {
                 indices[i] = reader.ReadInt32();
                 table.Add("");
             }
 
-            reader.SeekTo(BaseMapFile.GetStringIDsBufferOffset());
+            reader.SeekTo(BaseMapFile.Header.GetStringIDsBufferOffset());
 
             EndianReader newReader = null;
 
             if (StringsKey == "" || StringsKey == null)
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.GetStringIDsBufferSize())), reader.Format);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetStringIDsBufferSize())), reader.Format);
             }
             else
             {
-                reader.BaseStream.Position = BaseMapFile.GetStringIDsBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.GetStringIDsBufferSize(), StringsKey), reader.Format);
+                reader.BaseStream.Position = BaseMapFile.Header.GetStringIDsBufferOffset();
+                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetStringIDsBufferSize(), StringsKey), reader.Format);
             }
 
             for (var i = 0; i < indices.Length; i++)
@@ -255,7 +255,7 @@ namespace TagTool.Cache
 
                 int length;
                 if (i == indices.Length - 1)
-                    length = BaseMapFile.GetStringIDsBufferSize() - indices[i];
+                    length = BaseMapFile.Header.GetStringIDsBufferSize() - indices[i];
                 else
                     length = (indices[i + 1] != -1)
                         ? indices[i + 1] - indices[i]
@@ -279,7 +279,7 @@ namespace TagTool.Cache
             CacheLocaleTable table = new CacheLocaleTable();
 
             int matgOffset = -1;
-            var interop = BaseMapFile.GetInterop();
+            var interop = BaseMapFile.Header.GetInterop();
 
             foreach (var item in IndexItems)
             {
@@ -473,5 +473,10 @@ namespace TagTool.Cache
         //
         // Interface methods
         //
+
+        public ISerializationContext CreateSerializationContext(object tag)
+        {
+            return null;// new CacheSerializationContext(this, (CacheIndexItem)tag);
+        }
     }
 }
