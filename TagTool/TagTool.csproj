@@ -234,10 +234,11 @@
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
     <Compile Include="Cache\GameCacheContextGen3.cs" />
-    <Compile Include="Cache\GameCacheContextNew.cs" />
+    <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
     <Compile Include="Cache\HaloOnlineMapFile.cs" />
     <Compile Include="Cache\IGameCacheContext.cs" />
+    <Compile Include="Cache\MapBlfInformation.cs" />
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />

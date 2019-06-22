@@ -5,10 +5,11 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0xE090, MinVersion = CacheVersion.HaloOnline106708)]
-    public class MapVariant : TagStructure
+    [TagStructure(Size = 0xE094, MinVersion = CacheVersion.HaloOnline106708)]
+    public class MapVariant
 	{
-        public ulong ID; // not sure about this
+        [TagField(Length = 0xC)]
+        public byte[] Unknown;
 
         [TagField(Length = 16, CharSet = CharSet.Unicode)]
         public string Name;

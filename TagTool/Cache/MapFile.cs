@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
@@ -35,6 +36,16 @@ namespace TagTool.Cache
 
         public IMapFileHeader Header;
 
+        // upgrade this once new map files are made.
+        public BlfChunkHeader BlfStartHeader;
+        public BlfStartOfFile BlfStartOfFile;
+        public BlfChunkHeader BlfMapInfoHeader;
+        public MapBlfInformation BlfInformation;
+        public BlfChunkHeader VariantHeader;
+        public MapVariant Variant;
+        public BlfChunkHeader EndOfFileHeader;
+        public BlfEndOfFile EndOfFile;
+
         public MapFile(EndianReader reader)
         {
             EndianFormat = DetectEndianFormat(reader);
@@ -44,6 +55,29 @@ namespace TagTool.Cache
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
             Header = (MapFileHeader)deserializer.Deserialize(dataContext, typeof(MapFileHeader));
+
+            // temporary code until map file format cleanup
+            if(MapVersion == MapFileVersion.HaloOnline)
+            {
+                reader.SeekTo((int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize);
+                reader.Format = EndianFormat.BigEndian;
+                BlfStartHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                reader.Format = EndianFormat.LittleEndian;
+                BlfStartOfFile = (BlfStartOfFile)deserializer.Deserialize(dataContext, typeof(BlfStartOfFile));
+                reader.Format = EndianFormat.BigEndian;
+                BlfMapInfoHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                reader.Format = EndianFormat.LittleEndian;
+                BlfInformation = (MapBlfInformation)deserializer.Deserialize(dataContext, typeof(MapBlfInformation));
+                reader.Format = EndianFormat.BigEndian;
+                VariantHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                reader.Format = EndianFormat.LittleEndian;
+                Variant = (MapVariant)deserializer.Deserialize(dataContext, typeof(MapVariant));
+                reader.Format = EndianFormat.BigEndian;
+                EndOfFileHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                reader.Format = EndianFormat.LittleEndian;
+                EndOfFile = (BlfEndOfFile)deserializer.Deserialize(dataContext, typeof(BlfEndOfFile));
+            }
+
         }
 
         private static EndianFormat DetectEndianFormat(EndianReader reader)
