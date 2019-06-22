@@ -101,9 +101,7 @@ namespace TagTool.Serialization
                     BindingFlags.Instance | BindingFlags.Public);
 
                 var attr2 = TagStructure.GetTagFieldAttribute(type, field);
-
-                if ((attr2.Version != CacheVersion.Unknown && attr2.Version == Version) ||
-                    (attr2.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Version, attr2.MinVersion, attr2.MaxVersion)))
+                if(CacheVersionDetection.AttributeInCacheVersion(attr2, Version))
                 {
                     attr.Length = (int)Convert.ChangeType(field.GetValue(instance), typeof(int));
                 }
@@ -116,8 +114,7 @@ namespace TagTool.Serialization
             }
             else
             {
-                if ((attr.Version != CacheVersion.Unknown && attr.Version == Version) ||
-                    (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(Version, attr.MinVersion, attr.MaxVersion)))
+                if(CacheVersionDetection.AttributeInCacheVersion(attr, Version))
                 {
                     var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
                     tagFieldInfo.SetValue(instance, value);
