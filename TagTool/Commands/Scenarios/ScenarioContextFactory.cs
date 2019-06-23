@@ -23,6 +23,7 @@ namespace TagTool.Commands.Scenarios
             context.AddCommand(new ExtractScriptsCommand(cacheContext, tag, scenario));
             context.AddCommand(new DumpScriptsCommand(cacheContext, scenario));
             context.AddCommand(new CompileScriptsCommand(cacheContext, scenario));
+            context.AddCommand(new ExtractZonesAreasModelCommand(cacheContext, scenario));
         }
     }
 }
