@@ -16,6 +16,11 @@ namespace TagTool.Commands.Modding
     class MergeModPackagesCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
+        private Dictionary<int, int> TagMapping = new Dictionary<int, int>();
+
+        private int NextTagIndex = 0;
+
+        private readonly  int HOTagCount;
 
         public MergeModPackagesCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
@@ -28,6 +33,8 @@ namespace TagTool.Commands.Modding
                 "Merge 2 mod packages (.pak) files. File 1 has priority over File2. \n")
         {
             CacheContext = cacheContext;
+            HOTagCount = CacheContext.TagCache.Index.Count;
+            NextTagIndex = HOTagCount;
         }
 
         public override object Execute(List<string> args)
@@ -40,12 +47,17 @@ namespace TagTool.Commands.Modding
 
             var resultPackage = new ModPackage();
 
+            // allocate all tags for mod package
+            int maxTagCount = Math.Max(modPackage1.Tags.Index.Count, modPackage2.Tags.Index.Count);
+            for(int i = 0; i < maxTagCount; i++)
+                resultPackage.Tags.AllocateTag();
+
             //
             // Merge tags that overwrite existing tags
             //
 
             // Assume current cache has no mods
-            for(int i = 0; i < CacheContext.TagCache.Index.Count; i++)
+            for (int i = 0; i < CacheContext.TagCache.Index.Count; i++)
             {
                 var tag1 = modPackage1.Tags.Index[i];
                 var tag2 = modPackage1.Tags.Index[i];
@@ -99,121 +111,50 @@ namespace TagTool.Commands.Modding
 
             resultPackage.Save(new FileInfo($"merge_test_{args[0]}"));
 
-            /*
-            var tagCount = Math.Max(modPackage1.Tags.Index.Count, modPackage2.Tags.Index.Count);
-
-            for (var i = 0; i < tagCount; i++)
-            {
-                var useTag1 = i < modPackage1.Tags.Index.Count;
-                var name1 = modPackage1.TagNames.ContainsKey(i) ?
-                    modPackage1.TagNames[i] :
-                    $"0x{i:X4}";
-
-                var useTag2 = i < modPackage2.Tags.Index.Count;
-                var name2 = modPackage2.TagNames.ContainsKey(i) ?
-                    modPackage2.TagNames[i] :
-                    $"0x{i:X4}";
-
-                if (useTag1 && useTag2)
-                {
-                    var tag1 = modPackage1.Tags.Index[i];
-                    var tag2 = modPackage2.Tags.Index[i];
-
-                    if (tag1 != null && tag2 != null && !tag2.IsInGroup(tag1.Group) || name1 != name2)
-                        throw new FormatException();
-
-                    if (tag1 != null)
-                        useTag2 = false;
-                    else if (tag2 != null)
-                        useTag1 = false;
-                    else
-                        useTag1 = useTag2 = false;
-                }
-
-                if (useTag1 && modPackage1.Tags.Index[i] != null)
-                {
-                    var srcTag = modPackage1.Tags.Index[i];
-                    var destTag = resultPackage.Tags.AllocateTag(srcTag.Group, name1);
-
-                    using (var tagStream = new MemoryStream(modPackage1.Tags.ExtractTagRaw(modPackage1.TagsStream, destTag)))
-                    using (var tagReader = new EndianReader(tagStream))
-                    {
-                        var dataContext = new DataSerializationContext(tagReader);
-
-                        foreach (var offset in srcTag.ResourcePointerOffsets)
-                        {
-                            tagStream.Position = offset;
-                            tagStream.Position = srcTag.PointerToOffset(tagReader.ReadUInt32());
-
-                            var pageable = modPackage1.Deserializer.Deserialize<PageableResource>(dataContext);
-
-                            //
-                            // TODO: extract and update resource data from pageable, add to resultPackage
-                            //
-                        }
-
-                        tagStream.Position = 0;
-                        resultPackage.Tags.SetTagDataRaw(resultPackage.TagsStream, destTag, tagStream.ToArray());
-                    }
-                }
-                else if (useTag2 && modPackage2.Tags.Index[i] != null)
-                {
-                    var srcTag = modPackage2.Tags.Index[i];
-                    var destTag = resultPackage.Tags.AllocateTag(srcTag.Group, name2);
-
-                    using (var tagStream = new MemoryStream(modPackage2.Tags.ExtractTagRaw(modPackage2.TagsStream, destTag)))
-                    using (var tagReader = new EndianReader(tagStream))
-                    {
-                        var dataContext = new DataSerializationContext(tagReader);
-
-                        foreach (var offset in srcTag.ResourcePointerOffsets)
-                        {
-                            tagStream.Position = offset;
-                            tagStream.Position = srcTag.PointerToOffset(tagReader.ReadUInt32());
-
-                            var pageable = modPackage2.Deserializer.Deserialize<PageableResource>(dataContext);
-
-                            //
-                            // TODO: extract and update resource data from pageable, add to resultPackage
-                            //
-                        }
-
-                        tagStream.Position = 0;
-                        resultPackage.Tags.SetTagDataRaw(resultPackage.TagsStream, destTag, tagStream.ToArray());
-                    }
-                }
-                else
-                {
-                    resultPackage.Tags.AllocateTag();
-                    resultPackage.Tags.UpdateTagOffsets(
-                        new BinaryWriter(resultPackage.TagsStream, default, true));
-                }
-            }
-
-
-            */
-
-
             return true;
         }
 
 
         private CachedTagInstance ConvertCachedTagInstance(ModPackage sourceModPack, ModPackage destModPack, CachedTagInstance tag)
         {
-            var name = sourceModPack.TagNames.ContainsKey(tag.Index) ? sourceModPack.TagNames[tag.Index] : $"0x{tag.Index:X4}";
-            // tag has already been converted
-            if ( destModPack.TagNames.ContainsValue(name))
-            {
-                return destModPack.Tags.Index[destModPack.TagNames.FirstOrDefault(x => x.Value == name).Key];       // Very slow, create reverse dictionary or another structure
-            }
+            // Determine if tag requires conversion
+
+            // if tag is in the sourceModPack
+            if (sourceModPack.Tags.Index[tag.Index] == null)
+                return tag;
             else
             {
-                var newTag = destModPack.Tags.AllocateTag(tag.Group, tag.Name);
-                var tagDefinition = CacheContext.Deserialize(sourceModPack.TagsStream, tag);
-                tagDefinition = ConvertData(sourceModPack, destModPack, tagDefinition);
-                CacheContext.Serialize(destModPack.TagsStream, newTag, tagDefinition);
-                destModPack.TagNames.Add(newTag.Index, name);
-                return newTag;
+                var name = sourceModPack.TagNames.ContainsKey(tag.Index) ? sourceModPack.TagNames[tag.Index] : $"0x{tag.Index:X4}";
+                // tag has already been converted
+                if (TagMapping.ContainsKey(tag.Index))
+                {
+                    return destModPack.Tags.Index[TagMapping[tag.Index]];   // get the matching tag in the destination package
+                }
+                else
+                {
+                    // mimic the tag allocation process 
+                    CachedTagInstance newTag;
+                    if(tag.Index < HOTagCount)
+                    {
+                        newTag = destModPack.Tags.Index[tag.Index];
+                    }
+                    else
+                    {
+                        newTag = destModPack.Tags.Index[NextTagIndex];
+                        NextTagIndex++;
+                    }
+
+                    var tagDefinition = CacheContext.Deserialize(sourceModPack.TagsStream, tag);
+                    tagDefinition = ConvertData(sourceModPack, destModPack, tagDefinition);
+                    CacheContext.Serialize(destModPack.TagsStream, newTag, tagDefinition);
+
+                    if(sourceModPack.TagNames.ContainsKey(tag.Index))
+                        destModPack.TagNames.Add(newTag.Index, sourceModPack.TagNames[tag.Index]);
+
+                    TagMapping.Add(tag.Index, newTag.Index);
+
+                    return newTag;
+                }
             }
         }
 
@@ -243,20 +184,24 @@ namespace TagTool.Commands.Modding
 
         private PageableResource ConvertPageableResource(ModPackage sourceModPack, ModPackage destModPack, PageableResource resource)
         {
+            if (resource.Page.Index == -1)
+                return resource;
+
             var resourceData = sourceModPack.Resources.ExtractRaw(sourceModPack.TagsStream, resource.Page.Index, resource.Page.CompressedBlockSize);
-            resource.Page.Index = destModPack.Resources.AddRaw(destModPack.TagsStream, resourceData);
+            resource.Page.Index = destModPack.Resources.Add(destModPack.TagsStream, resourceData, out uint compressedSize);
             return resource;
         }
 
         private IList ConvertCollection(ModPackage sourceModPack, ModPackage destModPack, IList collection)
         {
-            if (collection.GetType().GetElementType().IsPrimitive)
+            // return early where possible
+            if (collection is null || collection.Count == 0)
                 return collection;
 
             for (var i = 0; i < collection.Count; i++)
             {
                 var oldValue = collection[i];
-                var newValue = ConvertData(sourceModPack, destModPack, destModPack.TagsStream);
+                var newValue = ConvertData(sourceModPack, destModPack, oldValue);
                 collection[i] = newValue;
             }
 
@@ -265,9 +210,13 @@ namespace TagTool.Commands.Modding
 
         private T ConvertStructure<T>(ModPackage sourceModPack, ModPackage destModPack, T data) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(typeof(T), CacheContext.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
+
+                if (oldValue is null)
+                    continue;
+
                 var newValue = ConvertData(sourceModPack, destModPack, oldValue);
                 tagFieldInfo.SetValue(data, newValue);
             }
