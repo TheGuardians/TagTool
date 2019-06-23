@@ -1,35 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Common;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    public interface IGameCacheContext
+    public interface IGameCacheContext : ITagNames, ITagCache, IStringIDCache, IResourceCache
     {
-        ISerializationContext CreateSerializationContext(object tag);
+        CacheVersion GetVersion();
     }
 
     public interface ITagCache
     {
-        byte[] GetTagRaw(int tagIndex);
-        byte[] GetTagRaw(string tagName);
     }
 
     public interface IResourceCache
     {
-
     }
 
     public interface IStringIDCache
     {
-
     }
 
     public interface ILocaleCache
     {
 
+    }
+
+    public interface ITagNames
+    {
     }
 }

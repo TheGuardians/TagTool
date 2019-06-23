@@ -231,11 +231,13 @@
     <Compile Include="Cache\CacheLocalTable.cs" />
     <Compile Include="Cache\CacheStringTable.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
+    <Compile Include="Cache\HaloOnlineGameCacheContext.cs" />
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
     <Compile Include="Cache\GameCacheContextGen3.cs" />
     <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
+    <Compile Include="Cache\HaloOnlineDatFiles.cs" />
     <Compile Include="Cache\HaloOnlineMapFile.cs" />
     <Compile Include="Cache\IGameCacheContext.cs" />
     <Compile Include="Cache\MapBlfInformation.cs" />

@@ -70,7 +70,5 @@ namespace TagTool.Cache
             Stream.Close();
             Stream.Dispose();
         }
-
-        public ISerializationContext CreateSerializationContext(object tag) => CacheContext.CreateSerializationContext(tag);
     }
 }

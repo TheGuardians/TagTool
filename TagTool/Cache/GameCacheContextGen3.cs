@@ -474,9 +474,12 @@ namespace TagTool.Cache
         // Interface methods
         //
 
-        public ISerializationContext CreateSerializationContext(object tag)
-        {
-            return null;// new CacheSerializationContext(this, (CacheIndexItem)tag);
-        }
+        public CacheVersion GetVersion() => Version;
+
+        //
+        // Helpers
+        //
+
+        public static int GetCacheIndex(int index) => index & 0xFFFF;
     }
 }
