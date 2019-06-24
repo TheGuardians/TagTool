@@ -187,8 +187,8 @@ namespace TagTool.Commands.Modding
             if (resource.Page.Index == -1)
                 return resource;
 
-            var resourceData = sourceModPack.Resources.ExtractRaw(sourceModPack.TagsStream, resource.Page.Index, resource.Page.CompressedBlockSize);
-            resource.Page.Index = destModPack.Resources.Add(destModPack.TagsStream, resourceData, out uint compressedSize);
+            var resourceData = sourceModPack.Resources.ExtractRaw(sourceModPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize);
+            resource.Page.Index = destModPack.Resources.Add(destModPack.ResourcesStream, resourceData, out resource.Page.CompressedBlockSize);
             return resource;
         }
 

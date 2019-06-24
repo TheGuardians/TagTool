@@ -798,11 +798,8 @@ namespace TagTool.Tags.Definitions
             public class PathfindingHint : TagStructure
             {
                 public HintTypeValue HintType;
-                public short SquadGroupFilter; // block index
-                public int HintData0;
-                public short HintData1;
-                public byte HintData3;
-                public byte Unused;
+                public short NextHintIndex;
+
                 public FlagsValue Flags;
                 public short GeometryIndex; // block index
                 public short ForceJumpHoistHeight; // different enum values for each hint type
@@ -815,15 +812,23 @@ namespace TagTool.Tags.Definitions
                     VaultLink,
                     MountLink,
                     HoistLink,
-                    WallJumpLink
+                    WallJumpLink,
+                    Unknown6,
+                    Unknown7
                 }
 
                 [Flags]
-                public enum FlagsValue : short
+                public enum FlagsValue : byte
                 {
                     None = 0,
                     Bidirectional = 1 << 0,
-                    Closed = 1 << 1
+                    Closed = 1 << 1,
+                    Unknown2 = 1 << 2,
+                    Unknown3 = 1 << 3,
+                    Unknown4 = 1 << 4,
+                    Unknown5 = 1 << 5,
+                    Unknown6 = 1 << 6,
+                    Unknown7 = 1 << 7
                 }
 
                 [Flags]

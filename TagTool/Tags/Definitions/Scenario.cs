@@ -3622,8 +3622,12 @@ namespace TagTool.Tags.Definitions
 				{
                     public AreaType Type;
 
+                    [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3Retail)]
+                    public byte[] Unused = new byte[1];
+
                     public AreaFlags Flags;
 
+                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
                     public byte CharacterFlags;
 
                     [TagField(MaxVersion = CacheVersion.Halo3Retail)]
