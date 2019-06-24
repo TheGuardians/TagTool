@@ -47,6 +47,12 @@ namespace TagTool.Commands.Modding
 
             var resultPackage = new ModPackage();
 
+            CacheContext.CreateTagCache(resultPackage.TagsStream);
+            resultPackage.Tags = new TagCache(resultPackage.TagsStream, new Dictionary<int, string>());
+
+            CacheContext.CreateResourceCache(resultPackage.ResourcesStream);
+            resultPackage.Resources = new ResourceCache(resultPackage.ResourcesStream);
+
             // allocate all tags for mod package
             int maxTagCount = Math.Max(modPackage1.Tags.Index.Count, modPackage2.Tags.Index.Count);
             for(int i = 0; i < maxTagCount; i++)
@@ -108,7 +114,7 @@ namespace TagTool.Commands.Modding
             //
 
             resultPackage.Header = modPackage1.Header;
-
+            resultPackage.Metadata = modPackage1.Metadata;
             resultPackage.Save(new FileInfo($"merge_test_{args[0]}"));
 
             return true;
