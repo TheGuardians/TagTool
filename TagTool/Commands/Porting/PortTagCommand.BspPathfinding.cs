@@ -343,14 +343,28 @@ namespace TagTool.Commands.Porting
 
                         switch (hint.HintType)
                         {
-                            //
-                            // TODO: add conversions for specific hint types here
-                            //
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown0:
+                                Array.Reverse(hint.Data, 0, 4);
+                                for (var j = 4; j < 8; j++)
+                                    Array.Reverse(hint.Data, j * 2, 2);
+                                break;
 
-                            default:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown1:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown2:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown3:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown4:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown5:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown6:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown7:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown8:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown9:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.UnknownA:
                                 for (var j = 0; j < 8; j++)
                                     Array.Reverse(hint.Data, j * 2, 2);
                                 break;
+
+                            default:
+                                throw new NotSupportedException(hint.HintType.ToString());
                         }
 
                         CacheContext.Serializer.Serialize(dataContext, hint);

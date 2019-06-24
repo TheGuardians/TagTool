@@ -805,6 +805,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum HintTypeValue : short
                 {
+                    Unknown0,
                     Unknown1,
                     Unknown2,
                     Unknown3,
