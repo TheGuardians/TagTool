@@ -800,21 +800,22 @@ namespace TagTool.Tags.Definitions
                 public HintTypeValue HintType;
                 public short NextHintIndex;
 
-                public FlagsValue Flags;
-                public short GeometryIndex; // block index
-                public short ForceJumpHoistHeight; // different enum values for each hint type
-                public ControlFlagsValue ControlFlags;
+                [TagField(Length = 16)]
+                public byte[] Data = new byte[16];
 
                 public enum HintTypeValue : short
                 {
-                    JumpLink,
-                    ClimbLink,
-                    VaultLink,
-                    MountLink,
-                    HoistLink,
-                    WallJumpLink,
+                    Unknown1,
+                    Unknown2,
+                    Unknown3,
+                    Unknown4,
+                    Unknown5,
                     Unknown6,
-                    Unknown7
+                    Unknown7,
+                    Unknown8,
+                    Unknown9,
+                    UnknownA,
+                    // TODO: Add more?
                 }
 
                 [Flags]

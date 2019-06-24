@@ -336,10 +336,25 @@ namespace TagTool.Commands.Porting
                         (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].PathfindingHints.Count : pathfindingDatum.PathfindingHints.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
-                        CacheContext.Serializer.Serialize(dataContext,
-                            BlamCache.Version < CacheVersion.Halo3ODST ?
+                    {
+                        var hint = BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].PathfindingHints[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext);
+
+                        switch (hint.HintType)
+                        {
+                            //
+                            // TODO: add conversions for specific hint types here
+                            //
+
+                            default:
+                                for (var j = 0; j < 8; j++)
+                                    Array.Reverse(hint.Data, j * 2, 2);
+                                break;
+                        }
+
+                        CacheContext.Serializer.Serialize(dataContext, hint);
+                    }
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
