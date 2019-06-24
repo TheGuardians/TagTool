@@ -345,22 +345,33 @@ namespace TagTool.Commands.Porting
                         {
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown0:
                                 Array.Reverse(hint.Data, 0, 4);
-                                for (var j = 4; j < 8; j++)
-                                    Array.Reverse(hint.Data, j * 2, 2);
+                                Array.Reverse(hint.Data, 4, 2);
+                                Array.Reverse(hint.Data, 6, 2);
+                                Array.Reverse(hint.Data, 8, 2);
+                                Array.Reverse(hint.Data, 10, 2);
+                                Array.Reverse(hint.Data, 12, 2);
+                                Array.Reverse(hint.Data, 14, 2);
                                 break;
 
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown1:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown6:
+                                Array.Reverse(hint.Data, 0, 2);
+                                Array.Reverse(hint.Data, 2, 2);
+                                Array.Reverse(hint.Data, 4, 2);
+                                Array.Reverse(hint.Data, 6, 2);
+                                Array.Reverse(hint.Data, 8, 4);
+                                Array.Reverse(hint.Data, 12, 4);
+                                break;
+
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown2:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown3:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown4:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown5:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown6:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown7:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown8:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown9:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.UnknownA:
-                                for (var j = 0; j < 8; j++)
-                                    Array.Reverse(hint.Data, j * 2, 2);
+                                for (var j = 0; j < 16; j += 2)
+                                    Array.Reverse(hint.Data, j, 2);
                                 break;
 
                             default:
