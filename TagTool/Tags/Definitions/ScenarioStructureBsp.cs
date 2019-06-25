@@ -805,14 +805,14 @@ namespace TagTool.Tags.Definitions
 
                 public enum HintTypeValue : short
                 {
-                    Unknown0,
-                    Unknown1,
-                    Unknown2,
-                    Unknown3,
-                    Unknown4,
-                    Unknown5,
-                    Unknown6,
-                    Unknown7,
+                    IntersectionLink,
+                    JumpLink,
+                    ClimbLink,
+                    VaultLink,
+                    MountLink,
+                    HoistLink,
+                    WallJumpLink,
+                    BreakableFloor,
                     Unknown8,
                     Unknown9,
                     UnknownA,

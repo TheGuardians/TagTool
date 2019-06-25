@@ -952,6 +952,12 @@ namespace TagTool.Commands.Porting
 
             var blamScript = ScriptInfo.Scripts[BlamCache.Version][expr.Opcode];
 
+            if (blamScript.Name == "vs_play_line")
+            {
+                ConvertScriptExpressionUnsupportedOpcode(expr);
+                return;
+            }
+
             bool match;
 
             foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
