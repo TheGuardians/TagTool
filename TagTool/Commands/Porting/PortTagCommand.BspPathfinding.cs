@@ -369,6 +369,7 @@ namespace TagTool.Commands.Porting
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown5:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown7:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown8:
+                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown9:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.UnknownA:
                                 for (var j = 0; j < 16; j += 2)
                                     Array.Reverse(hint.Data, j, 2);
