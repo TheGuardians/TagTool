@@ -2015,8 +2015,8 @@ namespace TagTool.Tags.Definitions
 
                 public StringId ActivityName;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 4, MaxVersion = CacheVersion.Halo3Retail)]
-                public byte[] Unused5 = new byte[4];
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public int Unknown; // ???
 
                 public short PointSetIndex;
                 public SquadPatrolMode PatrolMode;

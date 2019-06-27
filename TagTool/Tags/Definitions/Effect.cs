@@ -201,10 +201,7 @@ namespace TagTool.Tags.Definitions
                     public StringId Name;
                     public byte Version;
                     public EmissionShapeValue EmissionShape;
-
-                    [TagField(Flags = Padding, Length = 1)]
-                    public byte[] Unused;
-
+                    public byte Unknown1; // ???
                     public FlagsValue EmitterFlags;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]

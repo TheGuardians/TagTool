@@ -231,16 +231,13 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public sbyte RenderModelPermutationIndex;
 
-                    [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-                    public byte[] Unused1 = new byte[2];
-
                     public FlagsValue Flags;
 
-                    [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.HaloOnline106708)]
-                    public byte[] Unused2 = new byte[2];
+                    public byte Unknown1;
+                    public byte Unknown2;
 
-                    [TagField(Flags = Padding, Length = 3, MaxVersion = CacheVersion.Halo2Vista)]
-                    public byte[] Unused3 = new byte[3];
+                    [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+                    public byte Unknown3;
 
                     public float Probability;
                     public List<State> States;
@@ -587,8 +584,8 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public short SecondaryRuntimeRegionIndex;
 
-                    [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
-                    public byte[] Unused = new byte[2];
+                    [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                    public short Unknown; // ???
 
                     [TagField(MinVersion = CacheVersion.Halo3Retail)]
                     public UnknownSpecialDamageValue UnknownSpecialDamage;
