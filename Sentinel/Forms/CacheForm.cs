@@ -322,6 +322,8 @@ namespace Sentinel.Forms
                         LoadRenderModelResource(mode);
                     else if (definition is ScenarioStructureBsp sbsp)
                         LoadScenarioStructureBspResources(sbsp);
+                    else if (definition is ScenarioLightmapBspData Lbsp)
+                        LoadScenarioLightmapBspDataResources(Lbsp);
                     else if (definition is Sound snd)
                         LoadSoundResource(snd);
 
@@ -504,6 +506,11 @@ namespace Sentinel.Forms
                     edResourceStream.Read(definition.IndexBuffers[i].Definition.Data.Data, 0, definition.IndexBuffers[i].Definition.Data.Size);
                 }
             }
+        }
+
+        private void LoadScenarioLightmapBspDataResources(ScenarioLightmapBspData Lbsp)
+        {
+            LoadRenderGeometryResource(Lbsp.Geometry);
         }
 
         private void LoadStructureBspTagResources(ScenarioStructureBsp sbsp)
@@ -912,8 +919,6 @@ namespace Sentinel.Forms
 
         private void LoadScenarioStructureBspResources(ScenarioStructureBsp sbsp)
         {
-            LoadRenderGeometryResource(sbsp.Geometry);
-            LoadRenderGeometryResource(sbsp.Geometry2);
             LoadStructureBspTagResources(sbsp);
             LoadStructureBspCacheFileTagResources(sbsp);
         }
