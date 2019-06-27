@@ -919,6 +919,8 @@ namespace Sentinel.Forms
 
         private void LoadScenarioStructureBspResources(ScenarioStructureBsp sbsp)
         {
+            LoadRenderGeometryResource(sbsp.Geometry);
+            LoadRenderGeometryResource(sbsp.Geometry2);
             LoadStructureBspTagResources(sbsp);
             LoadStructureBspCacheFileTagResources(sbsp);
         }
