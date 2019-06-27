@@ -37,70 +37,52 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (args.Count != 1)
                 return false;
 
-            if (Definition.CacheFileTagResources == null)
+            if (Definition.PathfindingResource == null)
             {
                 Console.WriteLine("ERROR: Pathfinding geometry does not have a resource associated with it.");
                 return true;
             }
 
-            var definition = CacheContext.Deserialize<StructureBspCacheFileTagResources>(Definition.CacheFileTagResources);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.PathfindingResource);
+            var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
-            using (var resourceReader = new EndianReader(resourceStream))
+            using (var reader = new EndianReader(resourceStream))
             {
-                CacheContext.ExtractResource(Definition.CacheFileTagResources, resourceStream);
+                CacheContext.ExtractResource(Definition.PathfindingResource, resourceStream);
+                var dataContext = new DataSerializationContext(reader);
 
-                var dataContext = new DataSerializationContext(resourceReader);
-
-                resourceStream.Position = definition.SurfacePlanes.Address.Offset;
-
-                for (var i = 0; i < definition.SurfacePlanes.Count; i++)
-                    definition.SurfacePlanes.Add(
-                        CacheContext.Deserialize<ScenarioStructureBsp.SurfacePlane>(dataContext));
-
-                resourceStream.Position = definition.Planes.Address.Offset;
-
-                for (var i = 0; i < definition.Planes.Count; i++)
-                    definition.Planes.Add(
-                        CacheContext.Deserialize<ScenarioStructureBsp.Plane>(dataContext));
-
-                resourceStream.Position = definition.EdgeToSeams.Address.Offset;
-
-                for (var i = 0; i < definition.EdgeToSeams.Count; i++)
-                    definition.EdgeToSeams.Add(
-                        CacheContext.Deserialize<ScenarioStructureBsp.EdgeToSeamMapping>(dataContext));
-
-                foreach (var pathfindingDatum in definition.PathfindingData)
+                foreach (var pathfindingDatum in resourceDefinition.PathfindingData)
                 {
                     resourceStream.Position = pathfindingDatum.Sectors.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.Sectors.Count; i++)
                         pathfindingDatum.Sectors.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.Links.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.Links.Count; i++)
                         pathfindingDatum.Links.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.References.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.References.Count; i++)
                         pathfindingDatum.References.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.Bsp2dNodes.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.Bsp2dNodes.Count; i++)
                         pathfindingDatum.Bsp2dNodes.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.Vertices.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.Vertices.Count; i++)
                         pathfindingDatum.Vertices.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
 
                     for (var objRefIdx = 0; objRefIdx < pathfindingDatum.ObjectReferences.Count; objRefIdx++)
                     {
@@ -112,57 +94,27 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                             for (var bsp2dRefIdx = 0; bsp2dRefIdx < bspRef.Bsp2dRefs.Count; bsp2dRefIdx++)
                                 bspRef.Bsp2dRefs.Add(
-                                    CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
+                                    CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
                         }
                     }
-
-                    resourceStream.Position = pathfindingDatum.PathfindingHints.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
-                        pathfindingDatum.PathfindingHints.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.InstancedGeometryReferences.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.InstancedGeometryReferences.Count; i++)
                         pathfindingDatum.InstancedGeometryReferences.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.GiantPathfinding.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.GiantPathfinding.Count; i++)
-                        pathfindingDatum.GiantPathfinding.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(dataContext));
-
-                    foreach (var seam in pathfindingDatum.Seams)
-                    {
-                        resourceStream.Position = seam.LinkIndices.Address.Offset;
-
-                        for (var i = 0; i < seam.LinkIndices.Count; i++)
-                            seam.LinkIndices.Add(
-                                CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(dataContext));
-                    }
-
-                    foreach (var jumpSeam in pathfindingDatum.JumpSeams)
-                    {
-                        resourceStream.Position = jumpSeam.JumpIndices.Address.Offset;
-
-                        for (var i = 0; i < jumpSeam.JumpIndices.Count; i++)
-                            jumpSeam.JumpIndices.Add(
-                                CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(dataContext));
-                    }
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
 
                     resourceStream.Position = pathfindingDatum.Doors.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.Doors.Count; i++)
                         pathfindingDatum.Doors.Add(
-                            CacheContext.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
+                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
                 }
             }
 
             using (var writer = File.CreateText(args[0]))
             {
-                foreach (var pathfinding in definition.PathfindingData)
+                foreach (var pathfinding in resourceDefinition.PathfindingData)
                 {
                     foreach (ScenarioStructureBsp.PathfindingDatum.Vertex vertex in pathfinding.Vertices)
                     {

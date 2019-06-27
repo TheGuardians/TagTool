@@ -314,7 +314,7 @@ namespace TagTool.Commands.Porting
             sound.Unused = new byte[] { 0, 0, 0, 0 };
             sound.Unknown12 = 0;
 
-            sound.Resource = new PageableResource<SoundResourceDefinition>
+            sound.Resource = new PageableResource
             {
                 Page = new RawPage
                 {

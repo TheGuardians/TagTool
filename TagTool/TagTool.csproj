@@ -231,7 +231,6 @@
     <Compile Include="Cache\CacheLocalTable.cs" />
     <Compile Include="Cache\CacheStringTable.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
-    <Compile Include="Serialization\ExternalAddressException.cs" />
     <Compile Include="Cache\HaloOnlineGameCacheContext.cs" />
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />

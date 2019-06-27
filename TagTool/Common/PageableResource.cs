@@ -2,12 +2,12 @@ using System;
 using TagTool.Cache;
 using TagTool.Tags;
 using TagTool.Tags.Resources;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Common
 {
     /// <summary>
     /// A reference to a resource used by a tag.
+    /// This is treated by the serialization system as a special type of tag element.
     /// </summary>
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline106708)]
@@ -123,18 +123,8 @@ namespace TagTool.Common
         /// Gets the location of the resource by checking its location flags.
         /// </summary>
         /// <returns>The resource's location.</returns>
-        public ResourceLocation GetLocation()
-        {
-            TryGetLocation(out var location);
-            return location;
-        }
-
-        /// <summary>
-        /// Tries to get the location of the resource by checking its location flags.
-        /// </summary>
-        /// <returns>The resource's location.</returns>
         /// <exception cref="InvalidOperationException">The resource does not have a location flag set</exception>
-        public bool TryGetLocation(out ResourceLocation location)
+        public bool GetLocation(out ResourceLocation location)
         {
             if (Page.OldFlags != 0)
             {
@@ -262,35 +252,9 @@ namespace TagTool.Common
             Page.NewFlags &= ~NewRawPageFlags.UseChecksum;
         }
     }
-
+    
     /// <summary>
-    /// A reference to a resource used by a tag.
-    /// </summary>
-    /// <typeparam name="T">The type of the <see cref="PageableResource"/>'s <see cref="TagStructure"/>.</typeparam>
-    [TagStructure]
-    public class PageableResource<T> : PageableResource
-        where T: TagStructure
-    {
-        [TagField(Flags = Runtime)]
-        public T Definition = null;
-
-        public PageableResource()
-        {
-        }
-
-        public PageableResource(TagResourceTypeGen3 type, CacheVersion version) :
-            base(type, version)
-        {
-        }
-
-        public PageableResource(TagResourceTypeGen3 type, CacheVersion version, ResourceLocation location) :
-            base(type, version, location)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Resource location constants used by <see cref="PageableResource.TryGetLocation"/>.
+    /// Resource location constants used by <see cref="PageableResource.GetLocation"/>.
     /// </summary>
     public enum ResourceLocation
     {

@@ -297,7 +297,7 @@ namespace TagTool.Commands.Tags
 
         private PageableResource ConvertResource(PageableResource resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
-            if (resource == null || resource.Page.Index < 0 || !resource.TryGetLocation(out var location))
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
 
             Console.WriteLine("- Copying resource {0} in {1}...", resource.Page.Index, location);
@@ -327,7 +327,7 @@ namespace TagTool.Commands.Tags
 
         private RenderGeometry ConvertGeometry(RenderGeometry geometry, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
-            if (geometry == null || geometry.Resource == null || geometry.Resource.Page.Index < 0 || !geometry.Resource.TryGetLocation(out var location))
+            if (geometry == null || geometry.Resource == null || geometry.Resource.Page.Index < 0 || !geometry.Resource.GetLocation(out var location))
                 return geometry;
 
             // The format changed starting with version 1.235640, so if both versions are on the same side then they can be converted normally
@@ -335,7 +335,7 @@ namespace TagTool.Commands.Tags
             var destCompare = CacheVersionDetection.Compare(destCacheContext.Version, CacheVersion.HaloOnline235640);
             if ((srcCompare < 0 && destCompare < 0) || (srcCompare >= 0 && destCompare >= 0))
             {
-                geometry.Resource = (PageableResource<RenderGeometryApiResourceDefinition>)ConvertResource(geometry.Resource, srcCacheContext, destCacheContext);
+                geometry.Resource = ConvertResource(geometry.Resource, srcCacheContext, destCacheContext);
                 return geometry;
             }
 

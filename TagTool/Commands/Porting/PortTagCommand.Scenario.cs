@@ -42,15 +42,15 @@ namespace TagTool.Commands.Porting
 
                     StructureBspCacheFileTagResources pathfindingBsp = null;
 
-                    if (sbsp.CacheFileTagResources != null)
+                    if (sbsp.PathfindingResource != null)
                     {
                         pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
-                            new ResourceSerializationContext(CacheContext, sbsp.CacheFileTagResources));
+                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource));
 
                         using (var resourceStream = new MemoryStream())
                         using (var resourceReader = new EndianReader(resourceStream))
                         {
-                            if (!sbsp.CacheFileTagResources.TryGetLocation(out var location))
+                            if (!sbsp.PathfindingResource.GetLocation(out var location))
                                 throw new NullReferenceException();
 
                             var resourceCache = CacheContext.GetResourceCache(location);
@@ -66,14 +66,14 @@ namespace TagTool.Commands.Porting
                                         stream.CopyTo(resourceStreams[location]);
                             }
 
-                            CacheContext.ExtractResource(resourceStreams[location], sbsp.CacheFileTagResources, resourceStream);
+                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource, resourceStream);
 
                             var resourceDataContext = new DataSerializationContext(resourceReader);
 
                             resourceStream.Position = pathfindingBsp.SurfacePlanes.Address.Offset;
                             for (var i = 0; i < pathfindingBsp.SurfacePlanes.Count; i++)
                             {
-                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacePlane>(resourceDataContext);
+                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(resourceDataContext);
                                 pathfindingBsp.SurfacePlanes.Add(surfacePlanes);
                             }
 

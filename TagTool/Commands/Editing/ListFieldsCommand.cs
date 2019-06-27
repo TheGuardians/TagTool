@@ -83,7 +83,7 @@ namespace TagTool.Commands.Editing
 				else if (fieldType == typeof(PageableResource))
 				{
 					var pageable = (PageableResource)fieldValue;
-					pageable.TryGetLocation(out var location);
+					pageable.GetLocation(out var location);
 					valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
 				}
                 else if (tagFieldInfo.FieldType.IsArray && tagFieldInfo.Attribute.Length != 0)

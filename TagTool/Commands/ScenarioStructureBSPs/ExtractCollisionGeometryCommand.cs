@@ -39,18 +39,18 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (args.Count != 1)
                 return false;
 
-            if (Definition.TagResources == null)
+            if (Definition.CollisionBspResource == null)
             {
                 Console.WriteLine("ERROR: Collision geometry does not have a resource associated with it.");
                 return true;
             }
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.TagResources);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.CollisionBspResource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
             {
-                CacheContext.ExtractResource(Definition.TagResources, resourceStream);
+                CacheContext.ExtractResource(Definition.CollisionBspResource, resourceStream);
 
                 using (var reader = new EndianReader(resourceStream))
                 {

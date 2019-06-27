@@ -480,7 +480,6 @@ namespace TagTool.Bitmaps.Converter
             int resourceIndex = 0;
 
             List<Bitmap.BitmapResource> resources = null;
-            List<Bitmap.BitmapInterleavedResource> interleavedResources = null;
 
             if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
             {
@@ -489,10 +488,10 @@ namespace TagTool.Bitmaps.Converter
                 {
                     case CacheVersion.Halo3Retail:
                     case CacheVersion.Halo3ODST:
-                        interleavedResources = bitmap.InterleavedResourcesOld;
+                        resources = bitmap.InterleavedResourcesOld;
                         break;
                     case CacheVersion.HaloReach:
-                        interleavedResources = bitmap.InterleavedResourcesNew;
+                        resources = bitmap.InterleavedResourcesNew;
                         break;
                 }
             }
@@ -506,10 +505,10 @@ namespace TagTool.Bitmaps.Converter
             {
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
-                    handle = interleavedResources?[resourceIndex].ZoneAssetHandleOld ?? resources[resourceIndex].ZoneAssetHandleOld;
+                    handle = resources[resourceIndex].ZoneAssetHandleOld;
                     break;
                 case CacheVersion.HaloReach:
-                    handle = interleavedResources?[resourceIndex].ZoneAssetHandleNew ?? resources[resourceIndex].ZoneAssetHandleNew;
+                    handle = resources[resourceIndex].ZoneAssetHandleNew;
                     break;
 
                 default:

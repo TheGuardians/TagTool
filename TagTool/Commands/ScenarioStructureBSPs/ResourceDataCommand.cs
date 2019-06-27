@@ -77,11 +77,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     break;
 
                 case "collisionbspresource":
-                    resource = Definition.TagResources;
+                    resource = Definition.CollisionBspResource;
                     break;
 
                 case "pathfindingresource":
-                    resource = Definition.CacheFileTagResources;
+                    resource = Definition.PathfindingResource;
                     break;
 
                 default:
@@ -89,7 +89,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     return false;
             }
 
-            if (resource == null || resource.Page.Index < 0 || !resource.TryGetLocation(out var location))
+            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
             {
                 Console.WriteLine("Resource is null.");
                 return false;
@@ -169,14 +169,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         Console.WriteLine($"New Geometry2 resource index = {Definition.Geometry2.Resource.Page.Index:X4}; {Definition.Geometry2.Resource.Page.Index:D4}");
                         break;
                     case "collisionbspresource":
-                        Definition.TagResources.ChangeLocation(resourceLocation);
-                        CacheContext.AddResource(Definition.TagResources, stream);
-                        Console.WriteLine($"New CollisionBspResource resource index = {Definition.TagResources.Page.Index:X4}; {Definition.TagResources.Page.Index:D4}");
+                        Definition.CollisionBspResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.CollisionBspResource, stream);
+                        Console.WriteLine($"New CollisionBspResource resource index = {Definition.CollisionBspResource.Page.Index:X4}; {Definition.CollisionBspResource.Page.Index:D4}");
                         break;
                     case "pathfindingresource":
-                        Definition.CacheFileTagResources.ChangeLocation(resourceLocation);
-                        CacheContext.AddResource(Definition.CacheFileTagResources, stream);
-                        Console.WriteLine($"New PathfindingResource resource index = {Definition.CacheFileTagResources.Page.Index:X4}; {Definition.CacheFileTagResources.Page.Index:D4}");
+                        Definition.PathfindingResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.PathfindingResource, stream);
+                        Console.WriteLine($"New PathfindingResource resource index = {Definition.PathfindingResource.Page.Index:X4}; {Definition.PathfindingResource.Page.Index:D4}");
                         break;
                     default:
                         Console.WriteLine("ERROR: Unrecognized resource type");

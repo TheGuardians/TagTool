@@ -74,7 +74,7 @@ namespace TagTool.Tags.Definitions
         public List<SurfaceReference> SurfaceReferences;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<SurfacePlane> SurfacePlanes;
+        public List<SurfacesPlanes> SurfacePlanes;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<Plane> Planes;
@@ -173,13 +173,12 @@ namespace TagTool.Tags.Definitions
         public uint Unknown73;
         public RenderGeometry Geometry2;
         public List<LeafSystem> LeafSystems;
-        public List<TagResourcesBlock> TagResourcesOld;
+        public List<TagResourcesBlock> TagResources;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex3;
-
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource<StructureBspTagResources> TagResources;
+        public PageableResource CollisionBspResource;
 
         public int UselessPadding3;
 
@@ -188,10 +187,8 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex4;
-
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource<StructureBspCacheFileTagResources> CacheFileTagResources;
-
+        public PageableResource PathfindingResource;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public int UselessPadding4;
 
@@ -335,7 +332,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
-        public class SurfacePlane : TagStructure
+        public class SurfacesPlanes : TagStructure
         {
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ushort PlaneIndexOld;

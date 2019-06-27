@@ -126,7 +126,7 @@ namespace TagTool.Commands.Editing
                     switch (fieldValue)
                     {
                         case FileInfo file:
-                            if (!pageable.TryGetLocation(out newLocation))
+                            if (!pageable.GetLocation(out newLocation))
                                 newLocation = ResourceLocation.ResourcesB;
                             resourceFile = file;
                             break;
@@ -142,7 +142,7 @@ namespace TagTool.Commands.Editing
 
                     ResourceCache oldCache = null;
 
-                    if (pageable.TryGetLocation(out var oldLocation))
+                    if (pageable.GetLocation(out var oldLocation))
                         oldCache = CacheContext.GetResourceCache(oldLocation);
 
                     var newCache = CacheContext.GetResourceCache(newLocation);
@@ -211,7 +211,7 @@ namespace TagTool.Commands.Editing
                 else if (fieldType == typeof(PageableResource))
                 {
                     var pageable = (PageableResource)fieldValue;
-                    pageable.TryGetLocation(out var location);
+                    pageable.GetLocation(out var location);
                     valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
                 }
                 else if (fieldInfo.FieldType.IsArray && fieldInfo.Attribute.Length != 0)

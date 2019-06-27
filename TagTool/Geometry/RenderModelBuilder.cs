@@ -481,7 +481,7 @@ namespace TagTool.Geometry
 
         private void SerializeDefinitionData(TagSerializer serializer, RenderGeometryApiResourceDefinition definition)
         {
-            _model.Geometry.Resource = new PageableResource<RenderGeometryApiResourceDefinition>
+            _model.Geometry.Resource = new PageableResource
             {
                 Page = new RawPage(),
                 Resource = new TagResourceGen3

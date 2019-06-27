@@ -14,13 +14,13 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private PageableResource<StructureBspCacheFileTagResources> ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private PageableResource ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.CacheFileTagResources = new PageableResource<StructureBspCacheFileTagResources>
+            bsp.PathfindingResource = new PageableResource
             {
                 Page = new RawPage
                 {
@@ -48,7 +48,7 @@ namespace TagTool.Commands.Porting
             if (resourceData == null)
             {
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                    return bsp.CacheFileTagResources;
+                    return bsp.PathfindingResource;
 
                 resourceData = new byte[0x30];
             }
@@ -63,10 +63,10 @@ namespace TagTool.Commands.Porting
             {
                 var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex4.Index];
 
-                bsp.CacheFileTagResources.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
-                bsp.CacheFileTagResources.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+                bsp.PathfindingResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
+                bsp.PathfindingResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
-                using (var definitionStream = new MemoryStream(bsp.CacheFileTagResources.Resource.DefinitionData, true))
+                using (var definitionStream = new MemoryStream(bsp.PathfindingResource.Resource.DefinitionData, true))
                 using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                 using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                 {
@@ -85,12 +85,12 @@ namespace TagTool.Commands.Porting
                         definitionStream.Position = newFixup.BlockOffset;
                         definitionWriter.Write(newFixup.Address.Value);
 
-                        bsp.CacheFileTagResources.Resource.ResourceFixups.Add(newFixup);
+                        bsp.PathfindingResource.Resource.ResourceFixups.Add(newFixup);
                     }
 
                     var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
 
-                    definitionStream.Position = bsp.CacheFileTagResources.Resource.DefinitionAddress.Offset;
+                    definitionStream.Position = bsp.PathfindingResource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspCacheFileTagResources>(dataContext);
                 }
             }
@@ -98,7 +98,7 @@ namespace TagTool.Commands.Porting
             {
                 resourceDefinition = new StructureBspCacheFileTagResources()
                 {
-                    SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacePlane>(bsp.SurfacePlanes.Count, new CacheAddress()),
+                    SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(bsp.SurfacePlanes.Count, new CacheAddress()),
                     Planes = new TagBlock<ScenarioStructureBsp.Plane>(bsp.Planes.Count, new CacheAddress()),
                     EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(bsp.EdgeToSeams.Count, new CacheAddress()),
                     PathfindingData = new List<StructureBspCacheFileTagResources.PathfindingDatum>() // TODO: copy from bsp.PathfindingData...
@@ -125,7 +125,7 @@ namespace TagTool.Commands.Porting
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
                     blamResourceStream.Position = resourceDefinition.SurfacePlanes.Address.Offset;
 
-                resourceDefinition.SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacePlane>(
+                resourceDefinition.SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(
                     (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.SurfacePlanes.Count : resourceDefinition.SurfacePlanes.Count),
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
@@ -133,7 +133,7 @@ namespace TagTool.Commands.Porting
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.SurfacePlanes[i] :
-                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.SurfacePlane>(dataContext);
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(dataContext);
 
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
@@ -145,7 +145,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 //
-                // Planes
+                // UnknownRaw1sts
                 //
 
                 StreamUtil.Align(dataStream, 0x4);
@@ -167,7 +167,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 //
-                // Edge-to-Seam Mappings
+                // UnknownRaw7ths
                 //
 
                 StreamUtil.Align(dataStream, 0x4);
@@ -187,10 +187,6 @@ namespace TagTool.Commands.Porting
 
                     CacheContext.Serializer.Serialize(dataContext, element);
                 }
-
-                //
-                // Pathfinding Data
-                //
 
                 if (BlamCache.Version < CacheVersion.Halo3ODST && bsp.PathfindingData.Count != 0)
                 {
@@ -475,12 +471,12 @@ namespace TagTool.Commands.Porting
                             BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
                 }
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CacheFileTagResources), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.PathfindingResource), resourceDefinition);
                 resourceWriter.BaseStream.Position = 0;
                 dataStream.Position = 0;
 
-                bsp.CacheFileTagResources.ChangeLocation(ResourceLocation.ResourcesB);
-                var resource = bsp.CacheFileTagResources;
+                bsp.PathfindingResource.ChangeLocation(ResourceLocation.ResourcesB);
+                var resource = bsp.PathfindingResource;
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");
@@ -519,7 +515,7 @@ namespace TagTool.Commands.Porting
                 bsp.PathfindingData.Clear();
             }
 
-            return bsp.CacheFileTagResources;
+            return bsp.PathfindingResource;
         }
     }
 }

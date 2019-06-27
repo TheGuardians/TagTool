@@ -166,7 +166,7 @@ namespace TagTool.Commands.Tags
 
                     FileInfo ExportResource(PageableResource pageable, string resourceGroup, string suffix = "")
                     {
-                        if (!pageable.TryGetLocation(out var location))
+                        if (!pageable.GetLocation(out var location))
                             return null;
 
                         var outFile = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}{suffix}.{resourceGroup}"));
@@ -304,7 +304,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField Geometry2.Resource ResourcesB \"tags\\{tagName}_bsp_geometry.render_geometry_api_resource_definition\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.TagResources, "structure_bsp_tag_resources", "_collision");
+                                resourceFile = ExportResource(sbsp.CollisionBspResource, "structure_bsp_tag_resources", "_collision");
 
                                 if (resourceFile == null)
                                 {
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField CollisionBspResource ResourcesB \"tags\\{tagName}_collision.structure_bsp_tag_resources\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.CacheFileTagResources, "structure_bsp_cache_file_tag_resources", "_pathfinding");
+                                resourceFile = ExportResource(sbsp.PathfindingResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
 
                                 if (resourceFile == null)
                                 {

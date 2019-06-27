@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TagTool.Animations;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags.Resources;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -858,7 +857,7 @@ namespace TagTool.Tags.Definitions
             public DatumIndex ZoneAssetHandle;
 
             [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-            public PageableResource<ModelAnimationTagResource> Resource;
+            public PageableResource Resource;
 
             [TagField(Flags = Padding, Length = 4)]
             public byte[] Unused = new byte[4];

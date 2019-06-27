@@ -343,7 +343,7 @@ namespace TagTool.Commands.Files
 
         private PageableResource CopyResource(PageableResource pageable, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
-            if (pageable == null || pageable.Page.Index < 0 || !pageable.TryGetLocation(out var location))
+            if (pageable == null || pageable.Page.Index < 0 || !pageable.GetLocation(out var location))
                 return null;
 
             ResourceLocation newLocation;
