@@ -407,7 +407,7 @@ namespace TagTool.Commands.Porting
 
                 Console.Write("Writing resource data...");
 
-                edModeDefinition.Geometry.Resource = new PageableResource
+                edModeDefinition.Geometry.Resource = new PageableResource<RenderGeometryApiResourceDefinition>
                 {
                     Page = new RawPage(),
                     Resource = new TagResourceGen3

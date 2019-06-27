@@ -15,8 +15,8 @@ namespace TagTool.Commands.Porting
     {
         private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTagInstance instance, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, resourceStreams);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, resourceStreams);
+            sbsp.TagResources = ConvertStructureBspTagResources(sbsp, resourceStreams);
+            sbsp.CacheFileTagResources = ConvertStructureBspCacheFileTagResources(sbsp, resourceStreams);
 
             sbsp.Unknown86 = 1;
 
@@ -35,7 +35,7 @@ namespace TagTool.Commands.Porting
 
             var resource = sbsp.Geometry.Resource;
 
-            if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
+            if (resource != null && resource.Page.Index >= 0 && resource.TryGetLocation(out var location))
             {
                 var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource);
                 var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
@@ -51,7 +51,7 @@ namespace TagTool.Commands.Porting
                     if (!edResourceStream.CanWrite)
                         throw new ArgumentException("The output stream is not open for writing", "outStream");
                     
-                    pageable.GetLocation(out var resourceLocation);
+                    pageable.TryGetLocation(out var resourceLocation);
 
                     var cache = CacheContext.GetResourceCache(resourceLocation);
 

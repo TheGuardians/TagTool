@@ -33,7 +33,7 @@ namespace TagTool.Commands.RenderModels
 
             var resource = Definition.Geometry.Resource;
 
-            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
+            if (resource == null || resource.Page.Index < 0 || !resource.TryGetLocation(out var location))
                 return true;
 
             Console.WriteLine();

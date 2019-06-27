@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Geometry
 {
@@ -60,7 +61,7 @@ namespace TagTool.Geometry
         /// The resource containing the raw geometry data.
         /// </summary>
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource Resource;
+        public PageableResource<RenderGeometryApiResourceDefinition> Resource;
 
         /// <summary>
         /// The index of the resource entry in the cache_file_resource_gestalt tag.

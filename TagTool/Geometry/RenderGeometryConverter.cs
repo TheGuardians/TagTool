@@ -41,7 +41,7 @@ namespace TagTool.Geometry
             // Set up ElDorado resource reference
             //
 
-            geometry.Resource = new PageableResource(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
+            geometry.Resource = new PageableResource<RenderGeometryApiResourceDefinition>(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
 
             //
             // Convert byte[] of UnknownBlock

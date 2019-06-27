@@ -58,7 +58,7 @@ namespace TagTool.Commands.Sounds
 
             var resource = Definition.Resource;
 
-            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
+            if (resource == null || resource.Page.Index < 0 || !resource.TryGetLocation(out var location))
             {
                 Console.WriteLine("Resource is null.");
                 return false;

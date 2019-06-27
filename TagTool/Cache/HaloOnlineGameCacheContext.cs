@@ -871,7 +871,7 @@ namespace TagTool.Cache
 
         private LoadedResourceCache GetResourceCache(PageableResource resource)
         {
-            if (!resource.GetLocation(out var location))
+            if (!resource.TryGetLocation(out var location))
                 return null;
 
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))

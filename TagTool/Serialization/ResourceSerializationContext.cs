@@ -79,8 +79,10 @@ namespace TagTool.Serialization
         public uint AddressToOffset(uint currentOffset, uint address)
         {
             var resourceAddress = new CacheAddress(address);
+
             if (resourceAddress.Type != CacheAddressType.Definition)
-                throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
+                throw new ExternalAddressException(resourceAddress);
+
             return (uint)resourceAddress.Offset;
         }
 

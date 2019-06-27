@@ -33,12 +33,12 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             // Deserialize the definition data
-            var resourceContext = new ResourceSerializationContext(CacheContext, BSP.CollisionBspResource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, BSP.TagResources);
             var definition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
 
             // Extract the resource data
             var resourceDataStream = new MemoryStream();
-            CacheContext.ExtractResource(BSP.CollisionBspResource, resourceDataStream);
+            CacheContext.ExtractResource(BSP.TagResources, resourceDataStream);
 
             using (var reader = new EndianReader(resourceDataStream))
             {

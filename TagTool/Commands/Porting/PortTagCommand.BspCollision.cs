@@ -317,13 +317,13 @@ namespace TagTool.Commands.Porting
             return moppData;
         }
 
-        private PageableResource ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private PageableResource<StructureBspTagResources> ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.CollisionBspResource = new PageableResource
+            bsp.TagResources = new PageableResource<StructureBspTagResources>
             {
                 Page = new RawPage
                 {
@@ -346,12 +346,12 @@ namespace TagTool.Commands.Porting
             
             var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3.Index];
 
-            bsp.CollisionBspResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
-            bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+            bsp.TagResources.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
+            bsp.TagResources.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             StructureBspTagResources resourceDefinition = null;
 
-            using (var definitionStream = new MemoryStream(bsp.CollisionBspResource.Resource.DefinitionData, true))
+            using (var definitionStream = new MemoryStream(bsp.TagResources.Resource.DefinitionData, true))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
             {
@@ -370,12 +370,12 @@ namespace TagTool.Commands.Porting
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
 
-                    bsp.CollisionBspResource.Resource.ResourceFixups.Add(newFixup);
+                    bsp.TagResources.Resource.ResourceFixups.Add(newFixup);
                 }
 
                 var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
 
-                definitionStream.Position = bsp.CollisionBspResource.Resource.DefinitionAddress.Offset;
+                definitionStream.Position = bsp.TagResources.Resource.DefinitionAddress.Offset;
                 resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspTagResources>(dataContext);
 
                 //
@@ -403,8 +403,8 @@ namespace TagTool.Commands.Porting
 
             if (resourceData == null)
             {
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
-                return bsp.CollisionBspResource;
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.TagResources), resourceDefinition);
+                return bsp.TagResources;
             }
 
             //
@@ -677,10 +677,10 @@ namespace TagTool.Commands.Porting
 
                 dataStream.Position = 0;
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.TagResources), resourceDefinition);
 
-                bsp.CollisionBspResource.ChangeLocation(ResourceLocation.ResourcesB);
-                var resource = bsp.CollisionBspResource;
+                bsp.TagResources.ChangeLocation(ResourceLocation.ResourcesB);
+                var resource = bsp.TagResources;
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");
@@ -711,7 +711,7 @@ namespace TagTool.Commands.Porting
                 resource.DisableChecksum();
             }
             
-            return bsp.CollisionBspResource;
+            return bsp.TagResources;
         }
     }
 }
