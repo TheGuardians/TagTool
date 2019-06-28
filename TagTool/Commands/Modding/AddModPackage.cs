@@ -10,6 +10,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Modding
 {
@@ -65,10 +66,11 @@ namespace TagTool.Commands.Modding
                 }
             }
 
+            CacheContext.TagCache.UpdateTagOffsets(new BinaryWriter(CacheStream, Encoding.Default, true));
 
             // fixup map files
 
-            foreach(var mapFile in modPackage.CacheStreams)
+            foreach (var mapFile in modPackage.CacheStreams)
             {
                 using (var reader = new EndianReader(mapFile))
                 {
@@ -162,14 +164,52 @@ namespace TagTool.Commands.Modding
             if (resource.Page.Index == -1)
                 return resource;
 
-            TagMapping.TryGetValue(resource.Resource.ParentTag.Index, out int newOwner);
-
-            resource.Resource.ParentTag = CacheContext.TagCache.Index[newOwner];
-            resource.Page.OldFlags = OldRawPageFlags.InResourcesB;
+            TagMapping.TryGetValue(resource.Resource.ParentTag.Index, out int newOwner); 
             var resourceData = modPack.Resources.ExtractRaw(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize);
+            var resourceStream = new MemoryStream(resourceData) { Position = 0};
+            resource.ChangeLocation(ResourceLocation.ResourcesB);
+            resource.Page.OldFlags &= ~OldRawPageFlags.InMods;
+            CacheContext.AddResource(resource, resourceStream);
 
-            CacheContext.AddRawResource(resource, resourceData);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource);
 
+            Type resourceType = null;
+            switch(resource.Resource.ResourceType)
+            {
+                case TagResourceTypeGen3.Collision:
+                    resourceType = typeof(StructureBspTagResources);
+                    break;
+
+                case TagResourceTypeGen3.Bitmap:
+                    resourceType = typeof(BitmapTextureInteropResource);
+                    break;
+
+                case TagResourceTypeGen3.BitmapInterleaved:
+                    resourceType = typeof(BitmapTextureInterleavedInteropResource);
+                    break;
+                case TagResourceTypeGen3.Sound:
+                    resourceType = typeof(SoundResourceDefinition);
+                    break;
+
+                case TagResourceTypeGen3.Animation:
+                    resourceType = typeof(ModelAnimationTagResource);
+                    break;
+
+                case TagResourceTypeGen3.RenderGeometry:
+                    resourceType = typeof(RenderGeometryApiResourceDefinition);
+                    break;
+
+                case TagResourceTypeGen3.Bink:
+                    resourceType = typeof(BinkResource);
+                    break;
+
+                case TagResourceTypeGen3.Pathfinding:
+                    resourceType = typeof(StructureBspCacheFileTagResources);
+                    break;
+            }
+
+            var resourceDefinition = modPack.Deserializer.Deserialize(resourceContext, resourceType);
+            CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             return resource;
         }
 
