@@ -78,7 +78,8 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ExportModPackageCommand(cacheContext));
             context.AddCommand(new CreateCharacterType(cacheContext));
             context.AddCommand(new OpenModPackageCommand(cacheContext));
-            context.AddCommand(new MergeModPackagesCommand(cacheContext));
+            //context.AddCommand(new MergeModPackagesCommand(cacheContext));
+            context.AddCommand(new AddModPackageCommand(cacheContext));
             return context;
         }
     }

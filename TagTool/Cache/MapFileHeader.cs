@@ -353,5 +353,11 @@ namespace TagTool.Cache
 
         public int GetStringIDsCount() => StringIDsCount;
 
+        public void SetScenarioTagIndex(int index) => ScenarioTagIndex = index;
+
+        public int GetScenarioTagIndex() => ScenarioTagIndex;
+
+        public string GetName() => Name;
+
     }
 }

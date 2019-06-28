@@ -80,6 +80,34 @@ namespace TagTool.Cache
 
         }
 
+        public void Write(EndianWriter writer)
+        {
+            var dataContext = new DataSerializationContext(writer);
+            var serializer = new TagSerializer(Version);
+            serializer.Serialize(dataContext, Header);
+
+            if(Version == CacheVersion.HaloOnline106708)
+            {
+                writer.Format = EndianFormat.BigEndian;
+                serializer.Serialize(dataContext, BlfStartHeader);
+                writer.Format = EndianFormat.LittleEndian;
+                serializer.Serialize(dataContext, BlfStartOfFile);
+                writer.Format = EndianFormat.BigEndian;
+                serializer.Serialize(dataContext, BlfMapInfoHeader);
+                writer.Format = EndianFormat.LittleEndian;
+                serializer.Serialize(dataContext, BlfInformation);
+                writer.Format = EndianFormat.BigEndian;
+                serializer.Serialize(dataContext, VariantHeader);
+                writer.Format = EndianFormat.LittleEndian;
+                serializer.Serialize(dataContext, Variant);
+                writer.Format = EndianFormat.BigEndian;
+                serializer.Serialize(dataContext, EndOfFileHeader);
+                writer.Format = EndianFormat.LittleEndian;
+                serializer.Serialize(dataContext, EndOfFile);
+            }
+            
+        }
+
         private static EndianFormat DetectEndianFormat(EndianReader reader)
         {
             reader.SeekTo(0);
@@ -176,6 +204,11 @@ namespace TagTool.Cache
                     throw new NotImplementedException();
             }
         }
+
+        public void UpdateScenarioIndices(int newIndex)
+        {
+
+        }
     }
 
     public interface IMapFile
@@ -202,6 +235,10 @@ namespace TagTool.Cache
         int GetStringIDsBufferOffset();
         int GetStringIDsBufferSize();
         int GetStringIDsCount();
+
+        void SetScenarioTagIndex(int index);
+        int GetScenarioTagIndex();
+        string GetName();
     }
 
 }
