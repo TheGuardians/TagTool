@@ -155,7 +155,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
                 case CacheVersion.HaloReachMCCInsiderM35:
-                    return "Jun 24 2019 00:36:05";
+                    return "Jun 24 2019 00:36:03";
                 default:
                     return version.ToString();
             }
@@ -197,6 +197,43 @@ namespace TagTool.Cache
 					throw new NotImplementedException(version.ToString());
 			}
 		}
+
+        /// <summary>
+        /// Checks if a <see cref="CacheVersion"/> is for a 64-bit (true) or 32-bit (false) game;
+        /// </summary>
+        /// <param name="version">The <see cref="CacheVersion"/> to check the address size of.</param>
+        /// <returns>True if the <see cref="CacheVersion"/> is for a 64-bit game; false otherwise.</returns>
+        public static bool Is64Bit(CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Vista:
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloOnline106708:
+                case CacheVersion.HaloOnline235640:
+                case CacheVersion.HaloOnline301003:
+                case CacheVersion.HaloOnline327043:
+                case CacheVersion.HaloOnline372731:
+                case CacheVersion.HaloOnline416097:
+                case CacheVersion.HaloOnline430475:
+                case CacheVersion.HaloOnline454665:
+                case CacheVersion.HaloOnline449175:
+                case CacheVersion.HaloOnline498295:
+                case CacheVersion.HaloOnline530605:
+                case CacheVersion.HaloOnline532911:
+                case CacheVersion.HaloOnline554482:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline700123:
+                case CacheVersion.HaloReach:
+                    return false;
+                case CacheVersion.HaloReachMCCInsiderM35:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
 		/// <summary>
 		/// Compares two version numbers.

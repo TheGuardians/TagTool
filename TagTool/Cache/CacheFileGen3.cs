@@ -23,6 +23,7 @@ namespace TagTool.Cache
                         return "";
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return "BungieHaloReach!";
 
                     default:
@@ -42,6 +43,7 @@ namespace TagTool.Cache
                         return "";
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return "ILikeSafeStrings";
 
                     default:
@@ -61,6 +63,7 @@ namespace TagTool.Cache
                         return "";
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return "LetsAllPlayNice!";
 
                     default:
@@ -80,6 +83,7 @@ namespace TagTool.Cache
                         return "";
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return "SneakerNetReigns";
 
                     default:
@@ -101,6 +105,7 @@ namespace TagTool.Cache
                         return "+258846,-258846;+64231,-64231;+1304,+2098";
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return "+1174139,-1174139;+129874,-129874;+1123,+4604";
 
                     default:
@@ -122,6 +127,7 @@ namespace TagTool.Cache
                         return 508;
 
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return 656;
 
                     default:
@@ -139,6 +145,7 @@ namespace TagTool.Cache
                     case CacheVersion.Halo3Retail:
                     case CacheVersion.Halo3ODST:
                     case CacheVersion.HaloReach:
+                    case CacheVersion.HaloReachMCCInsiderM35: // TODO: verify return
                         return 68;
 
                     default:
