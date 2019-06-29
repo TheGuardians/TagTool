@@ -20,8 +20,7 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<int, int> TagMapping = new Dictionary<int, int>();
 
-
-        private int MagicNumber = 0x5AF8;
+        private int MagicNumber = 0x5AF7;
 
         private Stream CacheStream;
 
@@ -164,52 +163,14 @@ namespace TagTool.Commands.Modding
             if (resource.Page.Index == -1)
                 return resource;
 
-            TagMapping.TryGetValue(resource.Resource.ParentTag.Index, out int newOwner); 
-            var resourceData = modPack.Resources.ExtractRaw(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize);
-            var resourceStream = new MemoryStream(resourceData) { Position = 0};
+            TagMapping.TryGetValue(resource.Resource.ParentTag.Index, out int newOwner);
+            var resourceStream = new MemoryStream();
+            modPack.Resources.Decompress(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize, resourceStream);
+            resourceStream.Position = 0;
             resource.ChangeLocation(ResourceLocation.ResourcesB);
             resource.Page.OldFlags &= ~OldRawPageFlags.InMods;
             CacheContext.AddResource(resource, resourceStream);
-
-            var resourceContext = new ResourceSerializationContext(CacheContext, resource);
-
-            Type resourceType = null;
-            switch(resource.Resource.ResourceType)
-            {
-                case TagResourceTypeGen3.Collision:
-                    resourceType = typeof(StructureBspTagResources);
-                    break;
-
-                case TagResourceTypeGen3.Bitmap:
-                    resourceType = typeof(BitmapTextureInteropResource);
-                    break;
-
-                case TagResourceTypeGen3.BitmapInterleaved:
-                    resourceType = typeof(BitmapTextureInterleavedInteropResource);
-                    break;
-                case TagResourceTypeGen3.Sound:
-                    resourceType = typeof(SoundResourceDefinition);
-                    break;
-
-                case TagResourceTypeGen3.Animation:
-                    resourceType = typeof(ModelAnimationTagResource);
-                    break;
-
-                case TagResourceTypeGen3.RenderGeometry:
-                    resourceType = typeof(RenderGeometryApiResourceDefinition);
-                    break;
-
-                case TagResourceTypeGen3.Bink:
-                    resourceType = typeof(BinkResource);
-                    break;
-
-                case TagResourceTypeGen3.Pathfinding:
-                    resourceType = typeof(StructureBspCacheFileTagResources);
-                    break;
-            }
-
-            var resourceDefinition = modPack.Deserializer.Deserialize(resourceContext, resourceType);
-            CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
+            
             return resource;
         }
 
