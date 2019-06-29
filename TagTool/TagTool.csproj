@@ -284,6 +284,7 @@
     <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ExtractZonesAreasModelCommand.cs" />
     <Compile Include="Commands\Tags\ClearMultiplayerCustomizationCommand.cs" />
+    <Compile Include="Commands\Tags\SaveModdedTagsCommand.cs" />
     <Compile Include="Common\Crc32.cs" />
     <Compile Include="Common\DatumIndex.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />

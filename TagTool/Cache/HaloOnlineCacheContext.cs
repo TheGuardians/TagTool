@@ -66,6 +66,34 @@ namespace TagTool.Cache
             }
         }
 
+        private List<int> ModifiedTags = new List<int>();
+
+        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
+
+        public void SaveModifiedTagNames(string path = null)
+        {
+            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "modified_tags.csv"));
+
+            if (!csvFile.Directory.Exists)
+                csvFile.Directory.Create();
+
+            using (var csvWriter = new StreamWriter(csvFile.Create()))
+            {
+                foreach (var instance in ModifiedTags)
+                {
+                    var tag = TagCache.Index[instance];
+                    string name;
+                    if (tag.Name == null)
+                        name = $"0x{tag.Index:X8}";
+                    else
+                        name = tag.Name;
+
+                    csvWriter.WriteLine($"{name}.{tag.Group.ToString()}");
+                }
+                
+            }
+        }
+
         /// <summary>
         /// The tag cache.
         /// </summary>
@@ -348,8 +376,13 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagInstance instance) =>
             Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
 
-        public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
+        public void Serialize(Stream stream, CachedTagInstance instance, object definition)
+        {
+            if(!ModifiedTags.Contains(instance.Index))
+                SignalModifiedTag(instance.Index);
             Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
+        }
+            
 
         /// <summary>
         /// Attempts to parse a group tag or name.
