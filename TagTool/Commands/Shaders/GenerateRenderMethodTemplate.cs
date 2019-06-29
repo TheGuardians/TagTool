@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HaloShaderGeneratorLib;
+using HaloShaderGeneratorLib.Enums;
 
 namespace TagTool.Commands.Shaders
 {
@@ -75,22 +77,22 @@ namespace TagTool.Commands.Shaders
                     {
                         ResetRMT2(Definition);
 
-                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Default))
+                        if (HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Default))
                         {
-                            var result = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
-                                HaloShaderGenerator.Enums.ShaderStage.Albedo,
-                                HaloShaderGenerator.Enums.Albedo.Default,
-                                HaloShaderGenerator.Enums.Bump_Mapping.Off,
-                                HaloShaderGenerator.Enums.Alpha_Test.None,
-                                HaloShaderGenerator.Enums.Specular_Mask.No_Specular_Mask,
-                                HaloShaderGenerator.Enums.Material_Model.None,
-                                HaloShaderGenerator.Enums.Environment_Mapping.None,
-                                HaloShaderGenerator.Enums.Self_Illumination.Off,
-                                HaloShaderGenerator.Enums.Blend_Mode.Opaque,
-                                HaloShaderGenerator.Enums.Parallax.Off,
-                                HaloShaderGenerator.Enums.Misc.First_Person_Always,
-                                HaloShaderGenerator.Enums.Distortion.Off,
-                                HaloShaderGenerator.Enums.Soft_fade.Off
+                            var result = HaloShaderGenerator.GenerateShader(
+                                ShaderStage.Albedo,
+                                Albedo.Default,
+                                Bump_Mapping.Off,
+                                Alpha_Test.None,
+                                Specular_Mask.No_Specular_Mask,
+                                Material_Model.None,
+                                Environment_Mapping.None,
+                                Self_Illumination.Off,
+                                Blend_Mode.Opaque,
+                                Parallax.Off,
+                                Misc.First_Person_Always,
+                                Distortion.Off,
+                                Soft_fade.Off
                             );
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");
@@ -104,22 +106,22 @@ namespace TagTool.Commands.Shaders
                     {
                         ResetRMT2(Definition);
 
-                        if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Beam, HaloShaderGenerator.Enums.ShaderStage.Default))
+                        if (HaloShaderGenerator.IsShaderSuppored(ShaderType.Beam, ShaderStage.Default))
                         {
-                            var result = HaloShaderGenerator.HaloShaderGenerator.GenerateShader(
-                                HaloShaderGenerator.Enums.ShaderStage.Albedo,
-                                HaloShaderGenerator.Enums.Albedo.Two_Change_Color,
-                                HaloShaderGenerator.Enums.Bump_Mapping.Off,
-                                HaloShaderGenerator.Enums.Alpha_Test.None,
-                                HaloShaderGenerator.Enums.Specular_Mask.No_Specular_Mask,
-                                HaloShaderGenerator.Enums.Material_Model.None,
-                                HaloShaderGenerator.Enums.Environment_Mapping.None,
-                                HaloShaderGenerator.Enums.Self_Illumination.Off,
-                                HaloShaderGenerator.Enums.Blend_Mode.Opaque,
-                                HaloShaderGenerator.Enums.Parallax.Off,
-                                HaloShaderGenerator.Enums.Misc.First_Person_Always,
-                                HaloShaderGenerator.Enums.Distortion.Off,
-                                HaloShaderGenerator.Enums.Soft_fade.Off
+                            var result = HaloShaderGenerator.GenerateShader(
+                                ShaderStage.Albedo,
+                                Albedo.Two_Change_Color,
+                                Bump_Mapping.Off,
+                                Alpha_Test.None,
+                                Specular_Mask.No_Specular_Mask,
+                                Material_Model.None,
+                                Environment_Mapping.None,
+                                Self_Illumination.Off,
+                                Blend_Mode.Opaque,
+                                Parallax.Off,
+                                Misc.First_Person_Always,
+                                Distortion.Off,
+                                Soft_fade.Off
                             );
 
                             Console.WriteLine($"Generated Shader : {result?.Bytecode?.Length ?? 0} bytes");

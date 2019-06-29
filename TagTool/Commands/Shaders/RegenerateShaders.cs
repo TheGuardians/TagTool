@@ -5,7 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HaloShaderGenerator.Enums;
+using HaloShaderGeneratorLib;
+using HaloShaderGeneratorLib.Enums;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
@@ -366,10 +367,10 @@ namespace TagTool.Commands.Shaders
             switch(type)
             {
                 case ShaderType.Shader:
-                    method = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
+                    method = typeof(HaloShaderGenerator).GetMethod("GenerateShader");
                     break;
                 case ShaderType.Cortana:
-                    method = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShaderCortana");
+                    method = typeof(HaloShaderGenerator).GetMethod("GenerateShaderCortana");
                     break;
                 default:
                     return false;
@@ -379,7 +380,7 @@ namespace TagTool.Commands.Shaders
             //TODO: Rewrite this crazyness
             if ((rmt2.DrawModeBitmask | bit) != 0)
             {
-                if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(type, shaderstage))
+                if (HaloShaderGenerator.IsShaderSuppored(type, shaderstage))
                 {
                     var GenerateShaderArgs = CreateArguments(method, shaderstage, shader_args);
 
@@ -394,7 +395,7 @@ namespace TagTool.Commands.Shaders
                             break;
                     }
 
-                    var shaderGeneratorResult = method.Invoke(null, GenerateShaderArgs) as HaloShaderGenerator.ShaderGeneratorResult;
+                    var shaderGeneratorResult = method.Invoke(null, GenerateShaderArgs) as ShaderGeneratorResult;
 
                     if (shaderGeneratorResult?.Bytecode == null) return false;
 

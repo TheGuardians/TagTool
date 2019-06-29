@@ -13,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
+using HaloShaderGeneratorLib;
 
 namespace TagTool.Commands.Porting
 {
@@ -201,17 +202,21 @@ namespace TagTool.Commands.Porting
 					return CacheContext.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
 					return CacheContext.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
-				case "rmct":
-					if (!HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
+                case "rmtr":
+                case "rmct":
+					if (!HaloShaderGenerator.LibraryLoaded)
 					{
 						return CacheContext.GetTag<Shader>(@"shaders\invalid");
 					}
 					break;
 				case "rmt2":
-					if (HaloShaderGenerator.HaloShaderGenerator.LibraryLoaded)
+					if (HaloShaderGenerator.LibraryLoaded)
 					{
-						// discard cortana shaders
-						if (blamTag.Name.ToLower().Contains("cortana_template"))
+                        bool hsgSupportsShader = false;
+                        hsgSupportsShader |= blamTag.Name.ToLower().Contains("cortana_template"); // discard cortana shaders
+                        hsgSupportsShader |= blamTag.Name.ToLower().Contains("terrain_template"); // discard terrain shaders
+
+                        if (hsgSupportsShader)
 						{
 							if (CacheContext.TryGetTag<RenderMethodTemplate>(blamTag.Name, out var rmt2Instance))
 								return rmt2Instance;
@@ -433,11 +438,11 @@ namespace TagTool.Commands.Porting
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
 
-			//
-			// Perform automatic conversion on the Blam tag definition
-			//
+            //
+            // Perform automatic conversion on the Blam tag definition
+            //
 
-			blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Name);
+            blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Name);
 
             //
             // Perform post-conversion fixups to Blam data
@@ -627,11 +632,13 @@ namespace TagTool.Commands.Porting
 
                 case ShaderBlack rmbk:
                     rmbk.Material = ConvertStringId(rmbk.Material);
+                    ConvertShader(rmbk, cacheStream, resourceStreams);
                     break;
 
                 case ShaderTerrain rmtr:
                     for (var i = 0; i < rmtr.MaterialNames.Length; i++)
                         rmtr.MaterialNames[i] = ConvertStringId(rmtr.MaterialNames[i]);
+                    ConvertShader(rmtr, cacheStream, resourceStreams);
                     break;
 
                 case ShaderCustom rmcs:
@@ -640,7 +647,7 @@ namespace TagTool.Commands.Porting
 
                 case ShaderCortana rmct:
                     rmct.Material = ConvertStringId(rmct.Material);
-                    ConvertShaderCortana(rmct, cacheStream, resourceStreams);
+                    ConvertShader(rmct, cacheStream, resourceStreams);
                     break;
                     
                 case UserInterfaceSharedGlobalsDefinition wigl:
@@ -707,7 +714,18 @@ namespace TagTool.Commands.Porting
 
         public object ConvertData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
 		{
-			switch (data)
+            bool allowShaderMatching = true;
+            if (HaloShaderGenerator.LibraryLoaded)
+            {
+                switch (definition)
+                {
+                    case ShaderTerrain rmtr:
+                    case ShaderCortana rmct:
+                        allowShaderMatching = false;
+                        break;
+                }
+            }
+            switch (data)
 			{
 				case StringId stringId:
 					stringId = ConvertStringId(stringId);
@@ -781,7 +799,7 @@ namespace TagTool.Commands.Porting
 						throw new NotSupportedException(propertyType.Halo2.ToString());
 					return propertyType;
 
-				case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders):
+				case RenderMethod renderMethod when FlagIsSet(PortingFlags.MatchShaders) && allowShaderMatching:
 					ConvertCollection(cacheStream, resourceStreams, renderMethod.ShaderProperties[0].ShaderMaps, renderMethod.ShaderProperties[0].ShaderMaps, blamTagName);
 					return ConvertRenderMethod(cacheStream, resourceStreams, renderMethod, blamTagName);
 

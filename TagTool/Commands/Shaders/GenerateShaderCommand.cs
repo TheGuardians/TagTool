@@ -5,7 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HaloShaderGenerator.Enums;
+using HaloShaderGeneratorLib;
+using HaloShaderGeneratorLib.Enums;
 using System.Reflection;
 
 namespace TagTool.Commands.Shaders
@@ -106,9 +107,9 @@ namespace TagTool.Commands.Shaders
                 case "shader_template":
 
 
-                    if (HaloShaderGenerator.HaloShaderGenerator.IsShaderSuppored(HaloShaderGenerator.Enums.ShaderType.Shader, HaloShaderGenerator.Enums.ShaderStage.Albedo))
+                    if (HaloShaderGenerator.IsShaderSuppored(ShaderType.Shader, ShaderStage.Albedo))
                     {
-                        var GenerateShader = typeof(HaloShaderGenerator.HaloShaderGenerator).GetMethod("GenerateShader");
+                        var GenerateShader = typeof(HaloShaderGenerator).GetMethod("GenerateShader");
                         var GenerateShaderArgs = CreateArguments(GenerateShader, shader_stage, shader_args);
                         bytecode = GenerateShader.Invoke(null, GenerateShaderArgs) as byte[];
 
