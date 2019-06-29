@@ -300,6 +300,7 @@
     <Compile Include="Scripting\Compiler\ScriptReal.cs" />
     <Compile Include="Scripting\Compiler\ScriptString.cs" />
     <Compile Include="Scripting\Compiler\ScriptSymbol.cs" />
+    <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />

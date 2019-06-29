@@ -120,7 +120,7 @@ namespace TagTool.Commands.Modding
                     }
 
                     TagMapping.Add(modTag.Index, newTag.Index);
-                    var tagDefinition = CacheContext.Deserialize(modPack.TagsStream, modTag);
+                    var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), TagDefinition.Find(modTag.Group.Tag));
                     tagDefinition = ConvertData(modPack, tagDefinition);
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
 

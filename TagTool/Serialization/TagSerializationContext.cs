@@ -18,7 +18,7 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 4;
 
         private Stream Stream { get; }
-        private HaloOnlineCacheContext Context { get; }
+        protected HaloOnlineCacheContext Context { get; }
         private CachedTagData Data { get; set; }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace TagTool.Serialization
             return Tag.PointerToOffset(address);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public virtual CachedTagInstance GetTagByIndex(int index)
         {
             return (index >= 0 && index < Context.TagCache.Index.Count) ? Context.TagCache.Index[index] : null;
         }
