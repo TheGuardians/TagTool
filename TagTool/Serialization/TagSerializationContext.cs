@@ -83,7 +83,7 @@ namespace TagTool.Serialization
             return (index >= 0 && index < Context.TagCache.Index.Count) ? Context.TagCache.Index[index] : null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public virtual CachedTagInstance GetTagByName(TagGroup group, string name)
         {
             if (group != TagGroup.None)
                 foreach (var instance in Context.TagCache.Index)

@@ -110,13 +110,10 @@ namespace TagTool.Commands.Modding
                 else
                 {
                     CachedTagInstance newTag;
-                    if(modTag.Index <= MagicNumber)
-                    {
-                        newTag = CacheContext.TagCache.Index[modTag.Index];
-                    }
-                    else
-                    {
+                    if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
+                    {                     
                         newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
+                        newTag.Name = modTag.Name;
                     }
 
                     TagMapping.Add(modTag.Index, newTag.Index);
@@ -124,8 +121,6 @@ namespace TagTool.Commands.Modding
                     tagDefinition = ConvertData(modPack, tagDefinition);
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
 
-                    if (modPack.TagNames.ContainsKey(modTag.Index))
-                        newTag.Name = modPack.TagNames[modTag.Index].Trim(new char[] { '\0' });
 
                     return newTag;
                 }

@@ -313,7 +313,7 @@ namespace TagTool.Cache
                 return true;
             }
 
-            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[1], out var groupTag))
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
                 throw new Exception($"Invalid tag name: {name}");
 
             var tagName = namePieces[0];

@@ -81,7 +81,7 @@ namespace TagTool.Cache
                 stream.Position = Header.TagNamesTableOffset;
 
                 for (var i = 0; i < Header.TagNamesTableCount; i++)
-                    TagNames[reader.ReadInt32()] = new string(reader.ReadChars(256)).TrimStart().TrimEnd();
+                    TagNames[reader.ReadInt32()] = reader.ReadString(256);
 
                 ResourcesStream = new MemoryStream();
                 stream.Position = Header.ResourceCacheOffset;
