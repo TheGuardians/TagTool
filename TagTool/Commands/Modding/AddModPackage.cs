@@ -65,8 +65,6 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            CacheContext.TagCache.UpdateTagOffsets(new BinaryWriter(CacheStream, Encoding.Default, true));
-
             // fixup map files
 
             foreach (var mapFile in modPackage.CacheStreams)
@@ -101,7 +99,7 @@ namespace TagTool.Commands.Modding
         {
             // Determine if tag requires conversion
             if (modPack.Tags.Index[modTag.Index] == null)
-                return modTag;
+                return CacheContext.TagCache.Index[modTag.Index];   // references an HO tag
             else
             {
                 // tag has already been converted
@@ -127,7 +125,7 @@ namespace TagTool.Commands.Modding
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
 
                     if (modPack.TagNames.ContainsKey(modTag.Index))
-                        newTag.Name = modPack.TagNames[modTag.Index].Replace(Environment.NewLine, "");
+                        newTag.Name = modPack.TagNames[modTag.Index].Trim(new char[] { '\0' });
 
                     return newTag;
                 }
@@ -163,7 +161,6 @@ namespace TagTool.Commands.Modding
             if (resource.Page.Index == -1)
                 return resource;
 
-            TagMapping.TryGetValue(resource.Resource.ParentTag.Index, out int newOwner);
             var resourceStream = new MemoryStream();
             modPack.Resources.Decompress(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize, resourceStream);
             resourceStream.Position = 0;
