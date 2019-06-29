@@ -154,6 +154,8 @@ namespace TagTool.Cache
                     return "12.1.700123 cert_ms30_oct19";
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
+                case CacheVersion.HaloReachMCCInsiderM35:
+                    return "Jun 24 2019 00:36:05";
                 default:
                     return version.ToString();
             }
@@ -189,6 +191,7 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline554482:
 				case CacheVersion.HaloOnline571627:
 				case CacheVersion.HaloOnline700123:
+                case CacheVersion.HaloReachMCCInsiderM35:
 					return true;
 				default:
 					throw new NotImplementedException(version.ToString());
@@ -249,6 +252,7 @@ namespace TagTool.Cache
             130881889330693956, // HaloOnline571627
             130930071628935939, // HaloOnline700123
             -1, // HaloReach
+            -1, // HaloReachMCCInsiderM35
         };
     }
 
@@ -274,6 +278,7 @@ namespace TagTool.Cache
         HaloOnline554482,
         HaloOnline571627,
         HaloOnline700123,
-        HaloReach
+        HaloReach,
+        HaloReachMCCInsiderM35,
     }
 }
