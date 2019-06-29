@@ -110,8 +110,10 @@ namespace TagTool.Commands.Modding
                 else
                 {
                     CachedTagInstance newTag;
-                    if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
-                    {                     
+                    if (modTag.Index <= MagicNumber)
+                        newTag = CacheContext.GetTag(modTag.Index);
+                    else
+                    {
                         newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
                         newTag.Name = modTag.Name;
                     }
