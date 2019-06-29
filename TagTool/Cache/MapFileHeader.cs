@@ -44,6 +44,9 @@ namespace TagTool.Cache
         [TagField(Length = 32, MaxVersion = CacheVersion.HaloPC)]
         public string HaloName;
 
+        [TagField(MinVersion = CacheVersion.HaloReachMCCInsiderM35)]
+        public int Unknown;
+
         [TagField(Length = 256, MinVersion = CacheVersion.Halo2Xbox)]
         public string SourceFile;
 

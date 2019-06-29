@@ -30,7 +30,7 @@ namespace TagTool.Commands.Porting
             var path = args[0];
             var file = new FileInfo(path);
 
-            
+            /*
             MapFile map;
 
             using(var stream = new FileStream(path, FileMode.Open))
@@ -38,11 +38,11 @@ namespace TagTool.Commands.Porting
             {
                 map = new MapFile(reader);
             }
+            */
             
-            /*
             GameCache cache;
             cache = new GameCache(file);
-            */
+            
 
 
             return true;

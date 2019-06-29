@@ -134,6 +134,16 @@ namespace TagTool.Cache
                 return false;
         }
 
+        private static bool IsModifiedReachFormat(EndianReader reader)
+        {
+            reader.SeekTo(0x120);
+            var version = CacheVersionDetection.GetFromBuildName(reader.ReadString(0x20));
+            if (version == CacheVersion.Unknown)
+                return false;
+            else
+                return true;
+        }
+
         private static string GetBuildDate(EndianReader reader, MapFileVersion version)
         {
             var buildDataLength = 0x20;
@@ -152,10 +162,16 @@ namespace TagTool.Cache
 
                 case MapFileVersion.Halo3Beta:
                 case MapFileVersion.Halo3:
-                case MapFileVersion.HaloReach:
                 case MapFileVersion.HaloOnline:
                     reader.SeekTo(0x11C);
                     break;
+
+                case MapFileVersion.HaloReach:
+                    if (IsModifiedReachFormat(reader))
+                        reader.SeekTo(0x120);
+                    else
+                        reader.SeekTo(0x11C);
+                    break; 
 
                 default:
                     throw new Exception("Map file version not supported (build date)!");
