@@ -362,5 +362,6 @@ namespace TagTool.Cache
 
         public string GetName() => Name;
 
+        public CacheFileType GetCacheType() => CacheType;
     }
 }

@@ -60,21 +60,13 @@ namespace TagTool.Cache
             if(MapVersion == MapFileVersion.HaloOnline)
             {
                 reader.SeekTo((int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize);
-                reader.Format = EndianFormat.BigEndian;
                 BlfStartHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                reader.Format = EndianFormat.LittleEndian;
                 BlfStartOfFile = (BlfStartOfFile)deserializer.Deserialize(dataContext, typeof(BlfStartOfFile));
-                reader.Format = EndianFormat.BigEndian;
                 BlfMapInfoHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                reader.Format = EndianFormat.LittleEndian;
                 BlfInformation = (MapBlfInformation)deserializer.Deserialize(dataContext, typeof(MapBlfInformation));
-                reader.Format = EndianFormat.BigEndian;
                 VariantHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                reader.Format = EndianFormat.LittleEndian;
                 Variant = (MapVariant)deserializer.Deserialize(dataContext, typeof(MapVariant));
-                reader.Format = EndianFormat.BigEndian;
                 EndOfFileHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                reader.Format = EndianFormat.LittleEndian;
                 EndOfFile = (BlfEndOfFile)deserializer.Deserialize(dataContext, typeof(BlfEndOfFile));
             }
 
@@ -88,21 +80,13 @@ namespace TagTool.Cache
 
             if(Version == CacheVersion.HaloOnline106708)
             {
-                writer.Format = EndianFormat.BigEndian;
                 serializer.Serialize(dataContext, BlfStartHeader);
-                writer.Format = EndianFormat.LittleEndian;
                 serializer.Serialize(dataContext, BlfStartOfFile);
-                writer.Format = EndianFormat.BigEndian;
                 serializer.Serialize(dataContext, BlfMapInfoHeader);
-                writer.Format = EndianFormat.LittleEndian;
                 serializer.Serialize(dataContext, BlfInformation);
-                writer.Format = EndianFormat.BigEndian;
                 serializer.Serialize(dataContext, VariantHeader);
-                writer.Format = EndianFormat.LittleEndian;
                 serializer.Serialize(dataContext, Variant);
-                writer.Format = EndianFormat.BigEndian;
                 serializer.Serialize(dataContext, EndOfFileHeader);
-                writer.Format = EndianFormat.LittleEndian;
                 serializer.Serialize(dataContext, EndOfFile);
             }
             
@@ -255,6 +239,7 @@ namespace TagTool.Cache
         void SetScenarioTagIndex(int index);
         int GetScenarioTagIndex();
         string GetName();
+        CacheFileType GetCacheType();
     }
 
 }

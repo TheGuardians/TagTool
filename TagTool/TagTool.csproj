@@ -244,8 +244,10 @@
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
+    <Compile Include="Cache\ModPackageExtended.cs" />
     <Compile Include="Cache\ModPackage.cs" />
     <Compile Include="Cache\ModPackageHeader.cs" />
+    <Compile Include="Cache\ModPackageHeaderExtended.cs" />
     <Compile Include="Cache\RawPage.cs" />
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringIdCache.cs" />
