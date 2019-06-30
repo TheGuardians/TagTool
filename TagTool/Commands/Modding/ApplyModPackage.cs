@@ -14,7 +14,7 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Modding
 {
-    class AddModPackageCommand : Command
+    class ApplyModPackageCommand : Command
     {
         private HaloOnlineCacheContext CacheContext { get; }
 
@@ -24,15 +24,15 @@ namespace TagTool.Commands.Modding
 
         private Stream CacheStream;
 
-        public AddModPackageCommand(HaloOnlineCacheContext cacheContext) :
+        public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
 
-                "AddModPackage",
-                "Add a mod package to the current cache. \n",
+                "ApplyModPackage",
+                "Apply a mod package to the current cache. \n",
 
-                "AddModPackage <File>",
+                "ApplyModPackage <File>",
 
-                "Add a mod package to the current cache. \n")
+                "Apply a mod package to the current cache. \n")
         {
             CacheContext = cacheContext;
         }
