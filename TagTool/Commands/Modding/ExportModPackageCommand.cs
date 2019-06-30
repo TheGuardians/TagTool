@@ -24,7 +24,7 @@ namespace TagTool.Commands.Modding
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] [ForCache: <Directory>] <Package File>",
+                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] [ForCache: <Directory>] [TagList <file>] <Package File>",
 
                 "")
         {
@@ -33,11 +33,13 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count > 5)
+            if (args.Count < 1 || args.Count > 11)
                 return false;
 
             bool promptTags = false;
             bool promptMaps = false;
+            bool tagList = false;
+            string tagListFile = "";
             int? fromIndex = null;
             int? toIndex = null;
             string forCache = null;
@@ -73,6 +75,19 @@ namespace TagTool.Commands.Modding
                         args.RemoveRange(0, 2);
                         break;
 
+
+                    case "taglist":
+                        tagList = true;
+                        tagListFile = args[1];
+                        args.RemoveRange(0, 2);
+
+                        if (!File.Exists(tagListFile))
+                        {
+                            Console.Write("Tag list not found!");
+                            tagList = false;
+                        }
+                            
+                        break;
                     default:
                         throw new ArgumentException(args[0]);
                 }
@@ -136,6 +151,23 @@ namespace TagTool.Commands.Modding
 
                     if (mapFile.Exists && mapFile.Extension == ".map" && !mapFiles.Contains(mapFile.FullName))
                         mapFiles.Add(mapFile.FullName);
+                }
+            }
+
+            if (tagList)
+            {
+                using (var tagListStream = File.Open(tagListFile, FileMode.Open, FileAccess.Read))
+                {
+                    var reader = new StreamReader(tagListStream);
+
+                    while (!reader.EndOfStream)
+                    {
+                        var tagName = reader.ReadLine();
+                        if (CacheContext.TryGetTag(tagName, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                            tagIndices.Add(instance.Index);
+                    }
+
+                    reader.Close();
                 }
             }
 
