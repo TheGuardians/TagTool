@@ -10,6 +10,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Modding
@@ -112,15 +113,22 @@ namespace TagTool.Commands.Modding
                     CachedTagInstance newTag;
                     if (modTag.Index <= MagicNumber)
                         newTag = CacheContext.GetTag(modTag.Index);
-                    else
+                    else if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
                     {
                         newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
                         newTag.Name = modTag.Name;
                     }
 
                     TagMapping.Add(modTag.Index, newTag.Index);
-                    var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), TagDefinition.Find(modTag.Group.Tag));
+                    var definitionType = TagDefinition.Find(modTag.Group.Tag);
+                    var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
                     tagDefinition = ConvertData(modPack, tagDefinition);
+                    
+                    if(definitionType == typeof(ForgeGlobalsDefinition))
+                    {
+                        tagDefinition = ConvertForgeGlobals((ForgeGlobalsDefinition)tagDefinition);
+                    }
+
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
 
 
@@ -198,6 +206,49 @@ namespace TagTool.Commands.Modding
             }
 
             return data;
+        }
+
+        private ForgeGlobalsDefinition ConvertForgeGlobals(ForgeGlobalsDefinition forg)
+        {
+            var currentForgTag = CacheContext.GetTag<ForgeGlobalsDefinition>("multiplayer\\forge_globals");
+            var currentForg = (ForgeGlobalsDefinition)CacheContext.Deserialize(CacheStream, currentForgTag);
+
+            // hardcoded base indices:
+            int[] baseBlockCounts = new int[] {0, 15, 173, 6, 81, 468, 9, 12 };
+
+            for (int i = baseBlockCounts[0]; i < forg.ReForgeMaterialTypes.Count; i++)
+                currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);
+
+            for (int i = baseBlockCounts[1]; i < forg.ReForgeMaterialTypes.Count; i++)
+                currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);
+
+            for (int i = baseBlockCounts[2]; i < forg.ReForgeObjects.Count; i++)
+                currentForg.ReForgeObjects.Add(forg.ReForgeObjects[i]);
+
+            for (int i = baseBlockCounts[3]; i < forg.Descriptions.Count; i++)
+                currentForg.Descriptions.Add(forg.Descriptions[i]);
+
+            for (int i = baseBlockCounts[4]; i < forg.PaletteCategories.Count; i++)
+                currentForg.PaletteCategories.Add(forg.PaletteCategories[i]);
+
+            for (int i = baseBlockCounts[5]; i < forg.Palette.Count; i++)
+                currentForg.Palette.Add(forg.Palette[i]);
+
+            for (int i = baseBlockCounts[6]; i < forg.WeatherEffects.Count; i++)
+                currentForg.WeatherEffects.Add(forg.WeatherEffects[i]);
+
+            for (int i = baseBlockCounts[7]; i < forg.Skies.Count; i++)
+                currentForg.Skies.Add(forg.Skies[i]);
+
+            // move over the rest of the definition
+            currentForg.InvisibleRenderMethod = forg.InvisibleRenderMethod;
+            currentForg.DefaultRenderMethod = forg.DefaultRenderMethod;
+            currentForg.PrematchCameraObject = forg.PrematchCameraObject;
+            currentForg.ModifierObject = forg.ModifierObject;
+            currentForg.KillVolumeObject = forg.KillVolumeObject;
+            currentForg.GarbageVolumeObject = forg.GarbageVolumeObject;
+
+            return currentForg;
         }
     }
 }
