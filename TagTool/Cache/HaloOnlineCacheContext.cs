@@ -422,6 +422,14 @@ namespace TagTool.Cache
             if (name == "****" || name == "null")
                 return Tag.Null;
 
+            if(name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
+
             if (TryParseGroupTag(name, out var result))
                 return result;
 
