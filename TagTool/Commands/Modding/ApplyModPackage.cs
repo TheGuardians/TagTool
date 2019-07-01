@@ -53,7 +53,7 @@ namespace TagTool.Commands.Modding
 
             CacheStream = CacheContext.OpenTagCacheReadWrite();
 
-            var modPackage = new ModPackage(new FileInfo(filePath));
+            var modPackage = new ModPackageSimplified(new FileInfo(filePath));
 
             for (int i = 0; i < modPackage.Tags.Index.Count; i++)
             {
@@ -96,7 +96,7 @@ namespace TagTool.Commands.Modding
         }
 
 
-        private CachedTagInstance ConvertCachedTagInstance(ModPackage modPack, CachedTagInstance modTag)
+        private CachedTagInstance ConvertCachedTagInstance(ModPackageSimplified modPack, CachedTagInstance modTag)
         {
             // Determine if tag requires conversion
             if (modPack.Tags.Index[modTag.Index] == null)
@@ -137,7 +137,7 @@ namespace TagTool.Commands.Modding
             }
         }
 
-        private object ConvertData(ModPackage modPack, object data)
+        private object ConvertData(ModPackageSimplified modPack, object data)
         {
 
             var type = data.GetType();
@@ -161,7 +161,7 @@ namespace TagTool.Commands.Modding
             return data;
         }
 
-        private PageableResource ConvertPageableResource(ModPackage modPack, PageableResource resource)
+        private PageableResource ConvertPageableResource(ModPackageSimplified modPack, PageableResource resource)
         {
             if (resource.Page.Index == -1)
                 return resource;
@@ -176,7 +176,7 @@ namespace TagTool.Commands.Modding
             return resource;
         }
 
-        private IList ConvertCollection(ModPackage modPack, IList collection)
+        private IList ConvertCollection(ModPackageSimplified modPack, IList collection)
         {
             // return early where possible
             if (collection is null || collection.Count == 0)
@@ -192,7 +192,7 @@ namespace TagTool.Commands.Modding
             return collection;
         }
 
-        private T ConvertStructure<T>(ModPackage modPack, T data) where T : TagStructure
+        private T ConvertStructure<T>(ModPackageSimplified modPack, T data) where T : TagStructure
         {
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {

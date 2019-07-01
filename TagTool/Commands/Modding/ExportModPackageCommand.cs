@@ -93,7 +93,7 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            var modPackage = new ModPackage();
+            var modPackage = new ModPackageSimplified();
 
             CacheContext.CreateTagCache(modPackage.TagsStream);
             modPackage.Tags = new TagCache(modPackage.TagsStream, new Dictionary<int, string>());

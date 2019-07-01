@@ -36,6 +36,7 @@ namespace TagTool.Cache
             {
                 Tags = new TagCache(TagsStream, new Dictionary<int, string>());
                 Resources = new ResourceCache(ResourcesStream);
+                Header.SectionTable = new ModPackageSectionTable();
             }
         }
 
@@ -79,7 +80,7 @@ namespace TagTool.Cache
             {
                 var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
                 var dataContext = new DataSerializationContext(writer);
-
+                
                 packageStream.SetLength(0);
 
                 //
@@ -176,8 +177,11 @@ namespace TagTool.Cache
                 // update package header
                 //
 
+                Header.FileSize = packageStream.Length;
+
                 packageStream.Position = 0;
                 serializer.Serialize(dataContext, Header);
+
             }
         }
 

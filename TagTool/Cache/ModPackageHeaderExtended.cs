@@ -2,7 +2,6 @@
 using TagTool.Common;
 using TagTool.Tags;
 using static System.Runtime.InteropServices.CharSet;
-using System.Runtime.InteropServices.ComTypes;
 using TagTool.IO;
 
 namespace TagTool.Cache
@@ -41,7 +40,7 @@ namespace TagTool.Cache
         [TagField(CharSet = Ansi, Length = 128)]
         public string Description;
 
-        public FILETIME BuildDate;
+        public long BuildDate;
     }
 
     public enum ModPackageSection : int

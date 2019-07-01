@@ -42,10 +42,10 @@ namespace TagTool.Commands.Modding
             if (args.Count != 2)
                 return false;
 
-            var modPackage1 = new ModPackage(new FileInfo(args[0]));
-            var modPackage2 = new ModPackage(new FileInfo(args[1]));
+            var modPackage1 = new ModPackageSimplified(new FileInfo(args[0]));
+            var modPackage2 = new ModPackageSimplified(new FileInfo(args[1]));
 
-            var resultPackage = new ModPackage();
+            var resultPackage = new ModPackageSimplified();
 
             CacheContext.CreateTagCache(resultPackage.TagsStream);
             resultPackage.Tags = new TagCache(resultPackage.TagsStream, new Dictionary<int, string>());
@@ -121,7 +121,7 @@ namespace TagTool.Commands.Modding
         }
 
 
-        private CachedTagInstance ConvertCachedTagInstance(ModPackage sourceModPack, ModPackage destModPack, CachedTagInstance tag)
+        private CachedTagInstance ConvertCachedTagInstance(ModPackageSimplified sourceModPack, ModPackageSimplified destModPack, CachedTagInstance tag)
         {
             // Determine if tag requires conversion
 
@@ -164,7 +164,7 @@ namespace TagTool.Commands.Modding
             }
         }
 
-        private object ConvertData(ModPackage sourceModPack, ModPackage destModPack, object data)
+        private object ConvertData(ModPackageSimplified sourceModPack, ModPackageSimplified destModPack, object data)
         {
 
             var type = data.GetType();
@@ -188,7 +188,7 @@ namespace TagTool.Commands.Modding
             return data;
         }
 
-        private PageableResource ConvertPageableResource(ModPackage sourceModPack, ModPackage destModPack, PageableResource resource)
+        private PageableResource ConvertPageableResource(ModPackageSimplified sourceModPack, ModPackageSimplified destModPack, PageableResource resource)
         {
             if (resource.Page.Index == -1)
                 return resource;
@@ -198,7 +198,7 @@ namespace TagTool.Commands.Modding
             return resource;
         }
 
-        private IList ConvertCollection(ModPackage sourceModPack, ModPackage destModPack, IList collection)
+        private IList ConvertCollection(ModPackageSimplified sourceModPack, ModPackageSimplified destModPack, IList collection)
         {
             // return early where possible
             if (collection is null || collection.Count == 0)
@@ -214,7 +214,7 @@ namespace TagTool.Commands.Modding
             return collection;
         }
 
-        private T ConvertStructure<T>(ModPackage sourceModPack, ModPackage destModPack, T data) where T : TagStructure
+        private T ConvertStructure<T>(ModPackageSimplified sourceModPack, ModPackageSimplified destModPack, T data) where T : TagStructure
         {
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {
