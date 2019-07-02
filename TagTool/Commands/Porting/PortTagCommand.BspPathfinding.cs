@@ -344,37 +344,16 @@ namespace TagTool.Commands.Porting
                         switch (hint.HintType)
                         {
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.IntersectionLink:
-                                Array.Reverse(hint.Data, 0, 4);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 2);
-                                Array.Reverse(hint.Data, 10, 2);
-                                Array.Reverse(hint.Data, 12, 2);
-                                Array.Reverse(hint.Data, 14, 2);
-                                break;
-
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink:
-                                Array.Reverse(hint.Data, 0, 2);
-                                Array.Reverse(hint.Data, 2, 2);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 2);
-                                break;
-
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.HoistLink:
-                                Array.Reverse(hint.Data, 0, 2);
-                                Array.Reverse(hint.Data, 2, 2);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 4);
-                                break;
-
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown9:
                                 Array.Reverse(hint.Data, 0, 4);
                                 Array.Reverse(hint.Data, 4, 4);
                                 Array.Reverse(hint.Data, 8, 4);
+                                Array.Reverse(hint.Data, 12, 4);
                                 break;
+
 
                             // TODO: verify these:
                             case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.ClimbLink:

@@ -1787,8 +1787,8 @@ namespace TagTool.Commands.Porting
                 // modified:
                 "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
 
-                // Makes wake 010tr_jump go bye bye
-                "00017281,A6F54381,A70D4399,0017,8243F6A6,Group,Void,wake,",
+                // Makes wake 010tr_jump go bye bye - Removed for now might be needed later we'll see.
+                /*"00017281,A6F54381,A70D4399,0017,8243F6A6,Group,Void,wake,",*/
              },
 
             ["030_outskirts"] = new List<string>
