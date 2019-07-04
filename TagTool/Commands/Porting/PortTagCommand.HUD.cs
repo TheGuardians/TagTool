@@ -137,14 +137,21 @@ namespace TagTool.Commands.Porting
                     List<string> bitmappatchlist = new List<string>(){
                         "vitality_meter", "compass", "in_helmet" };
 
+                    //crosshair widget names
+                    List<string> crosshairlist = new List<string>(){
+                        "crosshair_fullscreen", "turret_crosshair", "crosshair_halfscreen", "crosshair", "unarmed_crosshair", "crosshair_default", "default_crosshair", "crosshair_active", "active_crosshairv", "crosshair_holding", "holding_crosshair", "crosshair_no", "no_crosshair", "crosshair_center", "ar_crosshair", "l_crosshair", "r_crosshair", "b_crosshair", "t_crosshair", "br_crosshair", "bs_crosshair", "crosshair_split", "scope_crosshair1", "scope_crosshair2", "crosshair_left_right", "crosshair_up_down", "scope_crosshairs1", "scope_crosshairs2", "scope_crosshairs3", "scope_crosshairs4", "horizontal_crosshairs", "vertical_crosshairs", "pr_crosshair", "shotty_crosshair", "h_crosshairs", "v_crosshair", "excavator_crosshair", "needler_crosshair", "crosshair_red", "crosshair_locked_flash", "fr_crosshair", "beam_crosshair", "unzoomed_crosshair", "zoomed_crosshair", "outer_crosshair", "flame_crosshair", "flamethrower_crosshair" };
+
                     //fixup for widgets without global placement data and those that need extra scaling
                     if (chudDefinition.HudWidgets[hudWidgetIndex].PlacementData.Count == 0
                         || bitmappatchlist.Contains(widgetname))
                     {
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
-                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                        if (!crosshairlist.Contains(widgetname))
+                        {
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.X *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                        }
                     }
                 }
 
@@ -174,6 +181,12 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Offset.Y *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
+                    }
+
+                    //fixup for black infinite ammo counters
+                    if ((textwidgetname == "ammo_count") || (textwidgetname == "battery_life"))
+                    {
+                        chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[0].ShaderIndex = ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Crosshair;
                     }
                 }
 
