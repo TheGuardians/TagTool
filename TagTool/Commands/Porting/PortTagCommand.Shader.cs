@@ -284,6 +284,21 @@ namespace TagTool.Commands.Porting
                 case @"objects\weapons\rifle\sniper_rifle\shaders\scope_alpha" when finalRm is ShaderHalogram:
                     finalRm.InputVariable = TagTool.Tags.TagMapping.VariableTypeValue.ParticleRandom1;
                     finalRm.RangeVariable = TagTool.Tags.TagMapping.VariableTypeValue.ParticleAge;
+
+                    for (var i = 0; i < edRmt2.VectorArguments.Count; i++)
+                    {
+                        if (CacheContext.GetString(edRmt2.VectorArguments[i].Name) == "self_illum_map")
+                        {
+                            if (blamTagName.Equals(@"objects\vehicles\ghost\shaders\ghost_dash_zcam"))
+                            {
+                                finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.9f, 1.6f, 0f, -0.3f };
+                                break;
+                            } else {
+                                finalRm.ShaderProperties[0].Arguments[i].Values = new float[] { 0.6f, 0.6f, 0.2f, 0.2f };
+                                break;
+                            }
+                        }
+                    }
                     break;
 
                 case @"levels\dlc\armory\shaders\concrete_floor_smooth" when finalRm is Shader:
