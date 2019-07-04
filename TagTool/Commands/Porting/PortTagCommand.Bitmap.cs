@@ -60,6 +60,12 @@ namespace TagTool.Commands.Porting
                 bitmap.Sequences.Add(bitmap.Sequences[3]);
             }
 
+            //fixup for BR ammo counter bitmap
+            if (tagName == "ui\\chud\\bitmaps\\ballistic_meters")
+            {
+                bitmap.Sequences[7].Sprites[0].Top = 0.276f;
+            }
+
             return bitmap;
         }
         
