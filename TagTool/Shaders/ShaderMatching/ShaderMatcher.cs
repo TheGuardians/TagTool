@@ -722,6 +722,14 @@ namespace TagTool.Shaders.ShaderMatching
                     catch { }
                     break;
 
+                case @"objects\vehicles\warthog\turrets\gauss\shaders\gauss_alpha":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_11_0_1_0_2_0");
+                    }
+                    catch { }
+                    break;
+
                 case @"fx\particles\energy\electric_arcs_blue":
                     try
                     {
@@ -805,6 +813,22 @@ namespace TagTool.Shaders.ShaderMatching
                         }
                         catch { }
                     }
+                    break;
+
+                case @"objects\levels\solo\030_outskirts\shield_tunnel\shaders\shield_tunnel":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\halogram_templates\_0_3_1_0_1_2_0");
+                    }
+                    catch { }
+                    break;
+
+                case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_1_2_2_0_0_0_0_0");
+                    }
+                    catch { }
                     break;
 
                 case @"levels\solo\020_base\lights\light_volume_hatlight":
@@ -1010,6 +1034,15 @@ namespace TagTool.Shaders.ShaderMatching
                     try
                     {
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_3_2_0_1_1_0_0_0_0_0_0");
+                    }
+                    catch { }
+                    break;
+
+                //masterchief\shaders\lights.rmsh
+                case @"objects\characters\masterchief\shaders\lights":
+                    try
+                    {
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_10_3_0_1_1_2_9_0_0_1_0");
                     }
                     catch { }
                     break;
