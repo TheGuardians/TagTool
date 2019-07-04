@@ -96,10 +96,15 @@ namespace TagTool.Commands.RenderModels
 
 					var permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
 
-					if (permMeshes.Count == 0)
-						throw new Exception($"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+                    if (permMeshes.Count == 0)
+                    {
+                        meshName = $"{regionName}_{permName}Mesh";
+                        permMeshes = scene.Meshes.Where(i => i.Name == meshName).ToList();
+                        if (permMeshes.Count == 0)
+                            throw new Exception($"No mesh(es) found for region '{regionName}' permutation '{permName}'!");
+                    }
 
-					permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
+                    permMeshes.Sort((a, b) => a.MaterialIndex.CompareTo(b.MaterialIndex));
 
 					// Build a multipart mesh from the model data,
 					// with each model mesh mapping to a part of one large mesh and having its own material
