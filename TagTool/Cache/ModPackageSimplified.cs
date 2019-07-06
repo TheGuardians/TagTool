@@ -50,6 +50,20 @@ namespace TagTool.Cache
             }
         }
 
+        ~ModPackageSimplified()
+        {
+            TagsStream.Close();
+            TagsStream.Dispose();
+            ResourcesStream.Close();
+            ResourcesStream.Dispose();
+
+            foreach(var cache in CacheStreams)
+            {
+                cache.Close();
+                cache.Dispose();
+            }
+        }
+
         public void Load(FileInfo file)
         {
             if (!file.Exists)
@@ -70,11 +84,15 @@ namespace TagTool.Cache
 
                 var deserializer = new TagDeserializer(Version);
 
+                stream.Position = typeof(ModPackageHeader).GetSize();
                 Metadata = deserializer.Deserialize<ContentItemMetadata>(dataContext);
 
                 TagsStream = new MemoryStream();
                 stream.Position = Header.TagCacheOffset;
-                stream.CopyTo(TagsStream, (int)(Header.TagNamesTableOffset - Header.TagCacheOffset));
+                var tagStreamLength = (int)(Header.TagNamesTableOffset - Header.TagCacheOffset);
+                byte[] tagData = new byte[tagStreamLength];
+                stream.Read(tagData, 0, tagStreamLength);
+                TagsStream.Write(tagData, 0, tagStreamLength);
                 TagsStream.Position = 0;
 
                 TagNames = new Dictionary<int, string>();
@@ -86,7 +104,9 @@ namespace TagTool.Cache
                 ResourcesStream = new MemoryStream();
                 stream.Position = Header.ResourceCacheOffset;
                 int resourceSize = (int)(Header.MapFileTableCount == 0 ? (stream.Length - Header.ResourceCacheOffset) : (int)(Header.MapFileTableOffset - Header.ResourceCacheOffset));
-                stream.CopyTo(ResourcesStream, resourceSize);
+                byte[] resourceData = new byte[resourceSize];
+                stream.Read(resourceData, 0, resourceSize);
+                ResourcesStream.Write(resourceData, 0, resourceSize);
                 ResourcesStream.Position = 0;
 
                 CacheStreams = new List<MemoryStream>();

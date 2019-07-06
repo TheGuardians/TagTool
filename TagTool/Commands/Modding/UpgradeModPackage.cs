@@ -42,7 +42,7 @@ namespace TagTool.Commands.Modding
             else
             {
                 sourcePackagePath = args[0];
-                destPackagePath = args[0];
+                destPackagePath = args[1];
             }
 
             if (!File.Exists(sourcePackagePath))
@@ -60,7 +60,8 @@ namespace TagTool.Commands.Modding
             metadata.Author = sourcePackage.Metadata.Author;
             metadata.Description = sourcePackage.Metadata.Description;
             metadata.Name = sourcePackage.Metadata.Name;
-            metadata.BuildDate = DateTime.Now.ToFileTime();
+            metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
+            metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
 
             destPackage.Tags = sourcePackage.Tags;
             destPackage.TagsStream = sourcePackage.TagsStream;
@@ -71,8 +72,11 @@ namespace TagTool.Commands.Modding
 
             destPackage.MapFileStreams = sourcePackage.CacheStreams;
 
+            destPackage.DetermineMapFlags();
+
             destPackage.Save(new FileInfo(destPackagePath));
             Console.WriteLine("Done!");
+
             return true;
         }
     }

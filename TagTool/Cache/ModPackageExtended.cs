@@ -40,7 +40,22 @@ namespace TagTool.Cache
             }
         }
 
-        // TODO add flags for campaign mainmenu, mp and firefight map types
+        ~ModPackageExtended()
+        {
+            TagsStream.Close();
+            TagsStream.Dispose();
+            ResourcesStream.Close();
+            ResourcesStream.Dispose();
+
+            foreach (var map in MapFileStreams)
+            {
+                map.Close();
+                map.Dispose();
+            }
+
+            CampaignFileStream.Close();
+            CampaignFileStream.Dispose();
+        }
 
         public void Load(FileInfo file)
         {
@@ -87,54 +102,54 @@ namespace TagTool.Cache
                 // reserve header space
                 //
 
-                writer.Write(new byte[0x3C]);
+                writer.Write(new byte[typeof(ModPackageHeaderExtended).GetSize()]);
 
                 //
                 // build section table
                 //
 
-                Header.SectionTable.Count = (long)ModPackageSection.SectionCount;
-                Header.SectionTable.Offset = writer.BaseStream.Position;
+                Header.SectionTable.Count = (int)ModPackageSection.SectionCount;
+                Header.SectionTable.Offset = (int)writer.BaseStream.Position;
 
-                writer.Write(new byte[0x10 * (int)ModPackageSection.SectionCount]);
+                writer.Write(new byte[typeof(ModPackageSectionHeader).GetSize() * (int)ModPackageSection.SectionCount]);
 
 
-                long size, offset;
+                int size, offset;
 
                 //
                 // Write metadata
                 //
 
-                offset = writer.BaseStream.Position;
+                offset = (int)writer.BaseStream.Position;
                 WriteMetadataSection(dataContext, serializer);
-                size = writer.BaseStream.Position - offset;
+                size = (int)writer.BaseStream.Position - offset;
                 WriteSectionEntry((int)ModPackageSection.Metadata, writer, size, offset);
 
                 //
                 // Write tag cache
                 //
 
-                offset = writer.BaseStream.Position;
+                offset = (int)writer.BaseStream.Position;
                 WriteTagsSection(writer);
-                size = writer.BaseStream.Position - offset;
+                size = (int)writer.BaseStream.Position - offset;
                 WriteSectionEntry((int)ModPackageSection.Tags, writer, size, offset);
 
                 // 
                 // Write tag names table
                 //
 
-                offset = writer.BaseStream.Position;
+                offset = (int)writer.BaseStream.Position;
                 WriteTagNamesSection(writer, dataContext, serializer);
-                size = writer.BaseStream.Position - offset;
+                size = (int)writer.BaseStream.Position - offset;
                 WriteSectionEntry((int)ModPackageSection.TagNames, writer, size, offset);
 
                 //
                 // write resource cache
                 //
 
-                offset = writer.BaseStream.Position;
+                offset = (int)writer.BaseStream.Position;
                 WriteResourcesSection(writer);
-                size = writer.BaseStream.Position - offset;
+                size = (int)writer.BaseStream.Position - offset;
                 WriteSectionEntry((int)ModPackageSection.Resources, writer, size, offset);
 
                 //
@@ -143,9 +158,9 @@ namespace TagTool.Cache
 
                 if(MapFileStreams.Count > 0)
                 {
-                    offset = writer.BaseStream.Position;
+                    offset = (int)writer.BaseStream.Position;
                     WriteMapsSection(writer);
-                    size = writer.BaseStream.Position - offset;
+                    size = (int)writer.BaseStream.Position - offset;
                     WriteSectionEntry((int)ModPackageSection.MapFiles, writer, size, offset);
 
                     DetermineMapFlags();
@@ -156,9 +171,9 @@ namespace TagTool.Cache
                 // 
                 if(CampaignFileStream != null && CampaignFileStream.Length > 0)
                 {
-                    offset = writer.BaseStream.Position;
+                    offset = (int)writer.BaseStream.Position;
                     WriteCampaignFileSection(writer);
-                    size = writer.BaseStream.Position - offset;
+                    size = (int)writer.BaseStream.Position - offset;
                     WriteSectionEntry((int)ModPackageSection.CampaignFiles, writer, size, offset);
                 }
                 
@@ -170,14 +185,14 @@ namespace TagTool.Cache
                 // calculate package sha1
                 //
 
-                packageStream.Position = 0x3C;
+                packageStream.Position = typeof(ModPackageHeaderExtended).GetSize();
                 Header.SHA1 = new SHA1Managed().ComputeHash(packageStream);
 
                 //
                 // update package header
                 //
 
-                Header.FileSize = packageStream.Length;
+                Header.FileSize = (int)packageStream.Length;
 
                 packageStream.Position = 0;
                 serializer.Serialize(dataContext, Header);
@@ -185,10 +200,10 @@ namespace TagTool.Cache
             }
         }
 
-        private void WriteSectionEntry(int index, EndianWriter writer, long size, long offset)
+        private void WriteSectionEntry(int index, EndianWriter writer, int size, int offset)
         {
             // seek to the table and update size and offset
-            writer.BaseStream.Seek(Header.SectionTable.Offset + 0x10 * index, SeekOrigin.Begin);
+            writer.BaseStream.Seek(Header.SectionTable.Offset + typeof(ModPackageSectionHeader).GetSize() * index, SeekOrigin.Begin);
             var tableEntry = new ModPackageSectionHeader(size, offset);
             tableEntry.Write(writer);
             writer.BaseStream.Seek(0, SeekOrigin.End);
@@ -196,23 +211,23 @@ namespace TagTool.Cache
 
         private void WriteMapsSection(EndianWriter writer)
         {
-            GenericEntry mapEntry = new GenericEntry(MapFileStreams.Count, writer.BaseStream.Position + 0x10);
+            GenericSectionEntry mapEntry = new GenericSectionEntry(MapFileStreams.Count, (int)writer.BaseStream.Position + 0x8);
             mapEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x10 * mapEntry.Count]);
+            writer.Write(new byte[0x8 * mapEntry.Count]);
 
             for(int i = 0; i < MapFileStreams.Count; i++)
             {
                 var mapFileStream = MapFileStreams[i];
                 mapFileStream.Position = 0;
-                long offset = writer.BaseStream.Position;
-                long size = mapFileStream.Length;
+                int offset = (int)writer.BaseStream.Position;
+                int size = (int)mapFileStream.Length;
                 StreamUtil.Copy(mapFileStream, writer.BaseStream, (int)mapFileStream.Length);
                 StreamUtil.Align(writer.BaseStream, 4);
 
                 // seek to the table and update size and offset
-                writer.BaseStream.Seek(mapEntry.TableOffset + 0x10 * i, SeekOrigin.Begin);
+                writer.BaseStream.Seek(mapEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
                 var tableEntry = new GenericTableEntry(size, offset);
                 tableEntry.Write(writer);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
@@ -238,7 +253,7 @@ namespace TagTool.Cache
                     names[entry.Index] = entry.Name;
 
             // create entry and immediatly write the tag names table
-            GenericEntry mapEntry = new GenericEntry(names.Count, writer.BaseStream.Position + 0x10);
+            GenericSectionEntry mapEntry = new GenericSectionEntry(names.Count, (int)writer.BaseStream.Position + 0x8);
             mapEntry.Write(writer);
 
             foreach (var entry in names)
@@ -269,7 +284,7 @@ namespace TagTool.Cache
 
         private ModPackageSectionHeader GetSectionHeader(EndianReader reader, ModPackageSection section)
         {
-            reader.SeekTo(Header.SectionTable.Offset + 0x10 * (int)section);
+            reader.SeekTo(Header.SectionTable.Offset + 0x8 * (int)section);
             return new ModPackageSectionHeader(reader);
         }
 
@@ -289,7 +304,9 @@ namespace TagTool.Cache
                 return;
 
             TagsStream = new MemoryStream();
-            reader.BaseStream.CopyTo(TagsStream, (int)section.Size);
+            byte[] data = new byte[section.Size];
+            reader.Read(data, 0, section.Size);
+            TagsStream.Write(data, 0, section.Size);
             TagsStream.Position = 0;
         }
 
@@ -301,7 +318,9 @@ namespace TagTool.Cache
 
             ResourcesStream = new MemoryStream();
             int resourceSize = (int)section.Size;
-            reader.BaseStream.CopyTo(ResourcesStream, resourceSize);
+            byte[] data = new byte[resourceSize];
+            reader.Read(data, 0, resourceSize);
+            ResourcesStream.Write(data, 0, resourceSize);
             ResourcesStream.Position = 0;
         }
 
@@ -311,7 +330,7 @@ namespace TagTool.Cache
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
 
-            var tagNamesHeader = new GenericEntry(reader);
+            var tagNamesHeader = new GenericSectionEntry(reader);
             reader.BaseStream.Position = tagNamesHeader.TableOffset;
 
             for(int i = 0; i< tagNamesHeader.Count; i++)
@@ -328,8 +347,9 @@ namespace TagTool.Cache
                 return;
 
             CampaignFileStream = new MemoryStream();
-
-            reader.BaseStream.CopyTo(CampaignFileStream, (int)section.Size);
+            byte[] data = new byte[section.Size];
+            reader.Read(data, 0, section.Size);
+            CampaignFileStream.Write(data, 0, section.Size);
             CampaignFileStream.Position = 0;
         }
 
@@ -339,22 +359,22 @@ namespace TagTool.Cache
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
 
-            var entry = new GenericEntry(reader);
+            var entry = new GenericSectionEntry(reader);
             var mapCount = entry.Count;
 
             MapFileStreams = new List<MemoryStream>();
 
             for(int i = 0; i < mapCount; i++)
             {
-                reader.BaseStream.Position = entry.TableOffset + 0x10 * i;
+                reader.BaseStream.Position = entry.TableOffset + 0x8 * i;
                 var tableEntry = new GenericTableEntry(reader);
 
                 reader.BaseStream.Position = tableEntry.Offset;
 
                 var stream = new MemoryStream();
-
-                reader.BaseStream.CopyTo(stream, (int)tableEntry.Size);
-                stream.Position = 0;
+                byte[] data = new byte[section.Size];
+                reader.Read(data, 0, section.Size);
+                stream.Write(data, 0, section.Size);
                 MapFileStreams.Add(stream);
 
             }
@@ -371,21 +391,21 @@ namespace TagTool.Cache
             }  
         }
 
-        private void DetermineMapFlags()
+        public void DetermineMapFlags()
         {
             foreach (var mapFile in MapFileStreams)
             {
-                using (var reader = new EndianReader(mapFile))
-                {
-                    MapFile map = new MapFile(reader);
-                    var type = map.Header.GetCacheType();
-                    if (type == CacheFileType.Campaign)
-                        Header.MapFlags |= MapFlags.CampaignMaps;
-                    else if (type == CacheFileType.MainMenu)
-                        Header.MapFlags |= MapFlags.MainmenuMaps;
-                    else if (type == CacheFileType.Multiplayer)
-                        Header.MapFlags |= MapFlags.MultiplayerMaps;
-                }
+                var reader = new EndianReader(mapFile);
+                MapFile map = new MapFile(reader);
+
+                var type = map.Header.GetCacheType();
+
+                if (type == CacheFileType.Campaign)
+                    Header.MapFlags |= MapFlags.CampaignMaps;
+                else if (type == CacheFileType.MainMenu)
+                    Header.MapFlags |= MapFlags.MainmenuMaps;
+                else if (type == CacheFileType.Multiplayer)
+                    Header.MapFlags |= MapFlags.MultiplayerMaps;
             }
         }
     }
