@@ -188,6 +188,53 @@ namespace TagTool.Commands.Porting
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].RenderData[0].ShaderIndex = ChudDefinition.HudWidget.RenderDatum.ShaderIndexValue.Crosshair;
                     }
+
+                    //Upscale chdt fonts
+                    var FontName = chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex];
+
+                    switch (FontName.Font)
+                    {
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Conduit14:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.4375f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.4375f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Conduit16:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.5f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Conduit18:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.5625f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.5625f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Conduit18_2:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.5625f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.5625f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Conduit23:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.71875f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.71875f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Agency16:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Agency32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.5f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.5f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Agency18:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Agency32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.5625f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.5625f;
+                            break;
+                        case ChudDefinition.HudWidget.TextWidget.FontValue.Agency23:
+                            FontName.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Agency32;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.X *= 0.71875f;
+                            chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets[textWidgetIndex].PlacementData[0].Scale.Y *= 0.71875f;
+                            break;
+                    }
                 }
 
                 //scale all widget groups by 1.5 to match 720p > 1080p conversion
