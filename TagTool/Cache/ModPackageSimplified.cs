@@ -50,20 +50,6 @@ namespace TagTool.Cache
             }
         }
 
-        ~ModPackageSimplified()
-        {
-            TagsStream.Close();
-            TagsStream.Dispose();
-            ResourcesStream.Close();
-            ResourcesStream.Dispose();
-
-            foreach(var cache in CacheStreams)
-            {
-                cache.Close();
-                cache.Dispose();
-            }
-        }
-
         public void Load(FileInfo file)
         {
             if (!file.Exists)

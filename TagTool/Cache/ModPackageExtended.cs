@@ -40,23 +40,6 @@ namespace TagTool.Cache
             }
         }
 
-        ~ModPackageExtended()
-        {
-            TagsStream.Close();
-            TagsStream.Dispose();
-            ResourcesStream.Close();
-            ResourcesStream.Dispose();
-
-            foreach (var map in MapFileStreams)
-            {
-                map.Close();
-                map.Dispose();
-            }
-
-            CampaignFileStream.Close();
-            CampaignFileStream.Dispose();
-        }
-
         public void Load(FileInfo file)
         {
             if (!file.Exists)
