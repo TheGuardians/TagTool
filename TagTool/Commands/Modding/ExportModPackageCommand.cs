@@ -93,7 +93,7 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            var modPackage = new ModPackageSimplified();
+            var modPackage = new ModPackageExtended();
 
             CacheContext.CreateTagCache(modPackage.TagsStream);
             modPackage.Tags = new TagCache(modPackage.TagsStream, new Dictionary<int, string>());
@@ -180,7 +180,7 @@ namespace TagTool.Commands.Modding
                     var cacheStream = new MemoryStream();
                     mapFileStream.CopyTo(cacheStream);
 
-                    modPackage.CacheStreams.Add(cacheStream);
+                    modPackage.MapFileStreams.Add(cacheStream);
                 }
             }
 
