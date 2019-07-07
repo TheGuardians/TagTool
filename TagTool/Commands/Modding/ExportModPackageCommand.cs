@@ -134,7 +134,7 @@ namespace TagTool.Commands.Modding
 
             if (Options.HasFlag(ExportOptions.TagFile))
             {
-                Console.WriteLine("Enter the name of the tag file: ");
+                Console.WriteLine("Enter the name of the tag list file (csv): ");
                 string tagFile = Console.ReadLine().Trim();
 
                 using (var tagListStream = File.Open(tagFile, FileMode.Open, FileAccess.Read))
@@ -199,12 +199,12 @@ namespace TagTool.Commands.Modding
         [Flags]
         private enum ExportOptions
         {
-            None,
-            TagFile,
-            TagList,
-            TagBounds,
-            MapFiles,
-            CampaignFile,
+            None = 0,
+            TagFile = 1 << 0,
+            TagList = 1 << 1,
+            TagBounds = 1 << 2,
+            MapFiles = 1 << 3,
+            CampaignFile = 1 << 4,
         }
 
         private void CreateDescription()
