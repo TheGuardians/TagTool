@@ -826,7 +826,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"levels\solo\100_citadel\shaders\panel_wall_alcove":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_1_2_2_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_2_0_0_0_0_0");
                     }
                     catch { }
                     break;
