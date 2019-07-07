@@ -233,7 +233,7 @@ namespace TagTool.Cache
 
             foreach (var entry in Tags.Index)
                 if (entry != null && entry.Name != null)
-                    names[entry.Index] = entry.Name;
+                    names.Add(entry.Index, entry.Name);
 
             // create entry and immediatly write the tag names table
             GenericSectionEntry mapEntry = new GenericSectionEntry(names.Count, (int)writer.BaseStream.Position + 0x8);
@@ -309,7 +309,7 @@ namespace TagTool.Cache
 
         private void ReadTagNamesSection(EndianReader reader, DataSerializationContext context, TagDeserializer deserializer)
         {
-            var section = GetSectionHeader(reader, ModPackageSection.Resources);
+            var section = GetSectionHeader(reader, ModPackageSection.TagNames);
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
 

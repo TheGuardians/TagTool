@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -48,6 +43,7 @@ namespace TagTool.Cache
         public BlfEndOfFile EndOfFile;
 
         public BlfEndOfFileSP BlfEndOfFileSP;
+        public UnknownSP UnknownSP;
 
         public MapFile(EndianReader reader)
         {
@@ -72,7 +68,7 @@ namespace TagTool.Cache
                 if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
                 {
                     BlfEndOfFileSP = (BlfEndOfFileSP)deserializer.Deserialize(dataContext, typeof(BlfEndOfFileSP));
-                    // unknown data afterwards
+                    UnknownSP = (UnknownSP)deserializer.Deserialize(dataContext, typeof(UnknownSP));
                 }
                 else
                 {
@@ -101,7 +97,7 @@ namespace TagTool.Cache
                 if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
                 {
                     serializer.Serialize(dataContext, BlfEndOfFileSP);
-                    // unknown data afterwards
+                    serializer.Serialize(dataContext, UnknownSP);
                 }
                 else
                 {

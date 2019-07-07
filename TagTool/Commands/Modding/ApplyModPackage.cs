@@ -89,6 +89,15 @@ namespace TagTool.Commands.Modding
                 }
             }
 
+            // apply .campaign file
+
+            var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
+            var campaignFile = new FileInfo(campaignFilepath);
+            var campaignFileStream = campaignFile.OpenWrite();
+            modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+            campaignFileStream.Close();
+
+
             CacheStream.Close();
             CacheStream.Dispose();
             CacheContext.SaveTagNames();

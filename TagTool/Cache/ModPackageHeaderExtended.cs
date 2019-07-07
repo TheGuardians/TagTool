@@ -137,6 +137,8 @@ namespace TagTool.Cache
             TagIndex = index;
             Name = name;
         }
+
+        public ModPackageTagNamesEntry() { }
     }
 
     [TagStructure(Size = 0x8)]

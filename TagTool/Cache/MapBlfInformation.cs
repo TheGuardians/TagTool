@@ -40,6 +40,13 @@ namespace TagTool.Cache
         public Tag Signature;
     }
 
+    [TagStructure(Size = 0x10D)]
+    public class UnknownSP
+    {
+        [TagField(Length = 0x10D)]
+        public byte[] Unknown;
+    }
+
     // different than actual size, (problems with header sizes and endianness)
     [TagStructure(Size = 0x89A4, MinVersion = CacheVersion.HaloOnline106708)]
     public class MapBlfInformation
