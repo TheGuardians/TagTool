@@ -41,10 +41,13 @@ namespace TagTool.Cache
         public BlfStartOfFile BlfStartOfFile;
         public BlfChunkHeader BlfMapInfoHeader;
         public MapBlfInformation BlfInformation;
+
         public BlfChunkHeader VariantHeader;
         public MapVariant Variant;
         public BlfChunkHeader EndOfFileHeader;
         public BlfEndOfFile EndOfFile;
+
+        public BlfEndOfFileSP BlfEndOfFileSP;
 
         public MapFile(EndianReader reader)
         {
@@ -60,14 +63,24 @@ namespace TagTool.Cache
             if(MapVersion == MapFileVersion.HaloOnline)
             {
                 reader.SeekTo((int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize);
+
                 BlfStartHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
                 BlfStartOfFile = (BlfStartOfFile)deserializer.Deserialize(dataContext, typeof(BlfStartOfFile));
                 BlfMapInfoHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
                 BlfInformation = (MapBlfInformation)deserializer.Deserialize(dataContext, typeof(MapBlfInformation));
-                VariantHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                Variant = (MapVariant)deserializer.Deserialize(dataContext, typeof(MapVariant));
-                EndOfFileHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                EndOfFile = (BlfEndOfFile)deserializer.Deserialize(dataContext, typeof(BlfEndOfFile));
+
+                if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
+                {
+                    BlfEndOfFileSP = (BlfEndOfFileSP)deserializer.Deserialize(dataContext, typeof(BlfEndOfFileSP));
+                    // unknown data afterwards
+                }
+                else
+                {
+                    VariantHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                    Variant = (MapVariant)deserializer.Deserialize(dataContext, typeof(MapVariant));
+                    EndOfFileHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
+                    EndOfFile = (BlfEndOfFile)deserializer.Deserialize(dataContext, typeof(BlfEndOfFile));
+                }
             }
 
         }
@@ -84,10 +97,19 @@ namespace TagTool.Cache
                 serializer.Serialize(dataContext, BlfStartOfFile);
                 serializer.Serialize(dataContext, BlfMapInfoHeader);
                 serializer.Serialize(dataContext, BlfInformation);
-                serializer.Serialize(dataContext, VariantHeader);
-                serializer.Serialize(dataContext, Variant);
-                serializer.Serialize(dataContext, EndOfFileHeader);
-                serializer.Serialize(dataContext, EndOfFile);
+
+                if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
+                {
+                    serializer.Serialize(dataContext, BlfEndOfFileSP);
+                    // unknown data afterwards
+                }
+                else
+                {
+                    serializer.Serialize(dataContext, VariantHeader);
+                    serializer.Serialize(dataContext, Variant);
+                    serializer.Serialize(dataContext, EndOfFileHeader);
+                    serializer.Serialize(dataContext, EndOfFile);
+                }   
             }
             
         }

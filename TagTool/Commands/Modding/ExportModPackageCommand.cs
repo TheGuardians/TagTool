@@ -14,9 +14,11 @@ namespace TagTool.Commands.Modding
 {
     class ExportModPackageCommand : Command
     {
-        public const uint Version = 1;
-
         private HaloOnlineCacheContext CacheContext { get; }
+
+        private ExportOptions Options = ExportOptions.None;
+
+        private ModPackageExtended ModPackage = null;
 
         public ExportModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
@@ -24,7 +26,7 @@ namespace TagTool.Commands.Modding
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage [PromptTags] [PromptMaps] [From: <Index>] [To: <Index>] [ForCache: <Directory>] [TagList <file>] <Package File>",
+                "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] <Package File>",
 
                 "")
         {
@@ -33,130 +35,109 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count > 11)
+            if (args.Count < 1 || args.Count > 7)
                 return false;
 
-            bool promptTags = false;
-            bool promptMaps = false;
-            bool tagList = false;
-            string tagListFile = "";
-            int? fromIndex = null;
-            int? toIndex = null;
-            string forCache = null;
-
-            while (args.Count != 1)
-            {
-                switch (args[0].ToLower())
-                {
-                    case "prompttags":
-                        promptTags = true;
-                        args.RemoveRange(0, 1);
-                        break;
-
-                    case "promptmaps":
-                        promptMaps = true;
-                        args.RemoveRange(0, 1);
-                        break;
-
-                    case "from:":
-                        if (CacheContext.TryGetTag(args[1], out var fromInstance) && fromInstance != null)
-                            fromIndex = fromInstance.Index;
-                        args.RemoveRange(0, 2);
-                        break;
-
-                    case "to:":
-                        if (CacheContext.TryGetTag(args[1], out var toInstance) && toInstance != null)
-                            toIndex = toInstance.Index;
-                        args.RemoveRange(0, 2);
-                        break;
-
-                    case "forCache:":
-                        forCache = args[1];
-                        args.RemoveRange(0, 2);
-                        break;
-
-
-                    case "taglist":
-                        tagList = true;
-                        tagListFile = args[1];
-                        args.RemoveRange(0, 2);
-
-                        if (!File.Exists(tagListFile))
-                        {
-                            Console.Write("Tag list not found!");
-                            tagList = false;
-                        }
-                            
-                        break;
-                    default:
-                        throw new ArgumentException(args[0]);
-                }
-            }
-
-            var modPackage = new ModPackageExtended();
-
-            CacheContext.CreateTagCache(modPackage.TagsStream);
-            modPackage.Tags = new TagCache(modPackage.TagsStream, new Dictionary<int, string>());
-
-            CacheContext.CreateResourceCache(modPackage.ResourcesStream);
-            modPackage.Resources = new ResourceCache(modPackage.ResourcesStream);
-
-            Console.WriteLine("Enter the name of the mod package:");
-            modPackage.Metadata.Name = Console.ReadLine().Trim();
-
-            Console.WriteLine();
-            Console.WriteLine("Enter the description of the mod package:");
-            modPackage.Metadata.Description = Console.ReadLine().Trim();
-
-            Console.WriteLine();
-            Console.WriteLine("Enter the author of the mod package:");
-            modPackage.Metadata.Author = Console.ReadLine().Trim();
-
-            if (!promptTags && !promptMaps && !fromIndex.HasValue && !toIndex.HasValue)
-            {
-                promptTags = true;
-                promptMaps = true;
-            }
-
-            if (fromIndex.HasValue && !toIndex.HasValue)
-                toIndex = CacheContext.TagCache.Index.NonNull().Last().Index;
-
-            var packageFile = new FileInfo(args[0]);
-
-            var tagIndices = new HashSet<int>();
-            var mapFiles = new HashSet<string>();
+            string packageName;
             string line = null;
 
-            if (fromIndex.HasValue && toIndex.HasValue)
+            //
+            // Parse input options
+            //
+            while (args.Count != 1)
+            {
+                var arg = args[0].ToLower();
+                switch (arg)
+                {
+                    case "tagfile":
+                        Options |= ExportOptions.TagFile;
+                        break;
+
+                    case "taglist":
+                        Options |= ExportOptions.TagList;
+                        break;
+
+                    case "tagbounds":
+                        Options |= ExportOptions.TagBounds;
+                        break;
+
+                    case "mapfiles":
+                        Options |= ExportOptions.MapFiles;
+                        break;
+
+                    case "campaignfile":
+                        Options |= ExportOptions.CampaignFile;
+                        break;
+
+                    default:
+                        Console.WriteLine($"Invalid argument: {arg}");
+                        break;
+                }
+                args.RemoveAt(0);
+            }
+
+            packageName = args[0];
+
+            ModPackage = new ModPackageExtended();
+
+            //
+            // Process options and create mod package
+            //
+
+            CacheContext.CreateTagCache(ModPackage.TagsStream);
+            ModPackage.Tags = new TagCache(ModPackage.TagsStream, new Dictionary<int, string>());
+
+            CacheContext.CreateResourceCache(ModPackage.ResourcesStream);
+            ModPackage.Resources = new ResourceCache(ModPackage.ResourcesStream);
+
+            CreateDescription();
+
+            var tagIndices = new HashSet<int>();
+
+            if (Options.HasFlag(ExportOptions.TagBounds))
+            {
+                int? fromIndex = -1;
+                int? toIndex = CacheContext.TagCache.Index.NonNull().Last().Index;
+
+                Console.WriteLine("Please specify the start index to be used:");
+                string input = line = Console.ReadLine().TrimStart().TrimEnd();
+                if (CacheContext.TryGetTag(input, out var fromInstance) && fromInstance != null)
+                    fromIndex = fromInstance.Index;
+
+                if (fromIndex != -1)
+                {
+                    Console.WriteLine("Please specify the end index to be used (press enter to skip):");
+                    input = Console.ReadLine().TrimStart().TrimEnd();
+                    if(input != "")
+                    {
+                        if (CacheContext.TryGetTag(input, out var toInstance) && fromInstance != null)
+                            toIndex = toInstance.Index;
+                        else
+                        {
+                            Console.WriteLine($"Invalid end index");
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid start index");
+                    return false;
+                }
+
+                // add tags to list
                 foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value + 1))
                     if (!tagIndices.Contains(entry) && CacheContext.GetTag(entry) != null)
                         tagIndices.Add(entry);
 
-            if (promptTags)
-            {
-                Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
-
-                while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                    if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
-                        tagIndices.Add(instance.Index);
             }
 
-            if (promptMaps)
+            if (Options.HasFlag(ExportOptions.TagFile))
             {
-                Console.WriteLine("Please specify the .map files to be used (enter an empty line to finish):");
+                Console.WriteLine("Enter the name of the tag file: ");
+                string tagFile = Console.ReadLine().Trim();
 
-                while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                {
-                    var mapFile = new FileInfo(line);
-
-                    if (mapFile.Exists && mapFile.Extension == ".map" && !mapFiles.Contains(mapFile.FullName))
-                        mapFiles.Add(mapFile.FullName);
-                }
-            }
-
-            if (tagList)
-            {
-                using (var tagListStream = File.Open(tagListFile, FileMode.Open, FileAccess.Read))
+                using (var tagListStream = File.Open(tagFile, FileMode.Open, FileAccess.Read))
                 {
                     var reader = new StreamReader(tagListStream);
 
@@ -171,19 +152,80 @@ namespace TagTool.Commands.Modding
                 }
             }
 
-            foreach (var entry in mapFiles)
-            {
-                var mapFile = new FileInfo(entry);
+            if (Options.HasFlag(ExportOptions.TagList)){
+                Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
 
-                using (var mapFileStream = mapFile.OpenRead())
-                {
-                    var cacheStream = new MemoryStream();
-                    mapFileStream.CopyTo(cacheStream);
-
-                    modPackage.MapFileStreams.Add(cacheStream);
-                }
+                while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
+                    if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                        tagIndices.Add(instance.Index);
             }
 
+            if (Options.HasFlag(ExportOptions.MapFiles))
+            {
+                var mapFileNames = new HashSet<string>();
+
+                Console.WriteLine("Please specify the .map files to be used (enter an empty line to finish):");
+
+                while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
+                {
+                    var mapFile = new FileInfo(line);
+
+                    if (mapFile.Exists && mapFile.Extension == ".map" && !mapFileNames.Contains(mapFile.FullName))
+                        mapFileNames.Add(mapFile.FullName);
+                }
+                AddMaps(mapFileNames);
+            }
+
+            if (Options.HasFlag(ExportOptions.CampaignFile))
+            {
+                Console.WriteLine("Please specify the .campaign files to be used:");
+                string campaignFileName = Console.ReadLine().TrimStart().TrimEnd();
+                AddCampaignMap(campaignFileName);
+            }
+
+            //
+            // Use the tag list collected to create new mod package
+            //
+
+            AddTags(tagIndices);
+
+            ModPackage.Save(new FileInfo(packageName));
+
+            Console.WriteLine("Done!");
+
+            return true;
+        }
+
+        [Flags]
+        private enum ExportOptions
+        {
+            None,
+            TagFile,
+            TagList,
+            TagBounds,
+            MapFiles,
+            CampaignFile,
+        }
+
+        private void CreateDescription()
+        {
+            Console.WriteLine("Enter the name of the mod package:");
+            ModPackage.Metadata.Name = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the description of the mod package:");
+            ModPackage.Metadata.Description = Console.ReadLine().Trim();
+
+            Console.WriteLine();
+            Console.WriteLine("Enter the author of the mod package:");
+            ModPackage.Metadata.Author = Console.ReadLine().Trim();
+
+            ModPackage.Metadata.BuildDateLow = (int)DateTime.Now.ToFileTime() & 0x7FFFFFFF;
+            ModPackage.Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
+        }
+
+        private void AddTags(HashSet<int> tagIndices)
+        {
             using (var srcTagStream = CacheContext.OpenTagCacheRead())
             {
                 var resourceIndices = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>
@@ -226,12 +268,12 @@ namespace TagTool.Commands.Modding
                 {
                     if (!tagIndices.Contains(tagIndex))
                     {
-                        modPackage.Tags.AllocateTag();
+                        ModPackage.Tags.AllocateTag();
                         continue;
                     }
 
                     var srcTag = CacheContext.GetTag(tagIndex);
-                    var destTag = modPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
+                    var destTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
 
                     using (var tagDataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(srcTagStream, srcTag)))
                     using (var tagDataReader = new EndianReader(tagDataStream, leaveOpen: true))
@@ -285,8 +327,8 @@ namespace TagTool.Commands.Modding
                             }
                             else
                             {
-                                var newResourceIndex = modPackage.Resources.AddRaw(
-                                    modPackage.ResourcesStream,
+                                var newResourceIndex = ModPackage.Resources.AddRaw(
+                                    ModPackage.ResourcesStream,
                                     srcResourceCaches[resourceLocation].ExtractRaw(
                                         srcResourceStreams[resourceLocation],
                                         resourceIndex,
@@ -309,16 +351,48 @@ namespace TagTool.Commands.Modding
                             tagDataWriter.Write(pageable.Page.Index);
                         }
 
-                        modPackage.Tags.SetTagDataRaw(modPackage.TagsStream, destTag, tagDataStream.ToArray());
+                        ModPackage.Tags.SetTagDataRaw(ModPackage.TagsStream, destTag, tagDataStream.ToArray());
                     }
                 }
 
-                modPackage.Tags.UpdateTagOffsets(new BinaryWriter(modPackage.TagsStream, Encoding.Default, true));
-
-                modPackage.Save(packageFile);
+                ModPackage.Tags.UpdateTagOffsets(new BinaryWriter(ModPackage.TagsStream, Encoding.Default, true));
             }
+        }
 
-            return true;
+        private void AddMaps(HashSet<string> mapFileNames)
+        {
+            foreach (var entry in mapFileNames)
+            {
+                if (!File.Exists(entry))
+                {
+                    Console.WriteLine("$Map file {entry} not found.");
+                    continue;
+                }
+
+                var mapFile = new FileInfo(entry);
+
+                using (var mapFileStream = mapFile.OpenRead())
+                {
+                    var cacheStream = new MemoryStream();
+                    mapFileStream.CopyTo(cacheStream);
+
+                    ModPackage.MapFileStreams.Add(cacheStream);
+                }
+            }
+        }
+
+        private void AddCampaignMap(string campaignFileName)
+        {
+            if (!File.Exists(campaignFileName))
+                Console.WriteLine("$Campaign file {entry} not found.");
+
+            var file = new FileInfo(campaignFileName);
+
+            using (var mapFileStream = file.OpenRead())
+            {
+                ModPackage.CampaignFileStream = new MemoryStream();
+                mapFileStream.CopyTo(ModPackage.CampaignFileStream);
+            }
         }
     }
 }

@@ -32,6 +32,14 @@ namespace TagTool.Cache
         public int Unknown;
     }
 
+    [TagStructure(Size = 0x14)]
+    public class BlfEndOfFileSP
+    {
+        [TagField(Length = 0x10)]
+        public byte[] Unused;
+        public Tag Signature;
+    }
+
     // different than actual size, (problems with header sizes and endianness)
     [TagStructure(Size = 0x89A4, MinVersion = CacheVersion.HaloOnline106708)]
     public class MapBlfInformation
