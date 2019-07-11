@@ -75,11 +75,11 @@ namespace TagTool.Tags
 				{
 					var attr = TagStructure.GetTagFieldAttribute(type, field);
 
-                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version))
-                    {
-                        CreateTagFieldInfo(field, attr, Info.Version, ref offset);
-                    }
-				}
+                    if (!CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version))
+                        continue;
+
+                    CreateTagFieldInfo(field, attr, Info.Version, ref offset);
+                }
 			}
 		}
 

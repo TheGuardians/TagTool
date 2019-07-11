@@ -149,6 +149,9 @@ namespace TagTool.Tags
 		/// <returns></returns>
 		public static uint GetFieldSize(Type type, TagFieldAttribute attr, CacheVersion targetVersion)
 		{
+            if (attr.Flags.HasFlag(TagFieldFlags.Runtime))
+                return 0;
+
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:

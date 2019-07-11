@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting
             return bitmap;
         }
         
-        private PageableResource ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
+        private PageableResource<BitmapTextureInteropResource> ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
             var image = bitmap.Images[imageIndex];
             BaseBitmap baseBitmap = BitmapConverter.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex, BlamCache.Version);
@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
             SetTagData(baseBitmap, image);
             var dataSize = baseBitmap.Data.Length;
 
-            var resource = new PageableResource
+            var resource = new PageableResource<BitmapTextureInteropResource>
             {
                 Page = new RawPage(),
                 Resource = new TagResourceGen3

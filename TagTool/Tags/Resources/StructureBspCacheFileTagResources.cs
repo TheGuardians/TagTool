@@ -8,9 +8,9 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "structure_bsp_cache_file_tag_resources", Size = 0x30)]
     public class StructureBspCacheFileTagResources : TagStructure
 	{
-        public TagBlock<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
+        public TagBlock<ScenarioStructureBsp.SurfacePlane> SurfacePlanes;
         public TagBlock<ScenarioStructureBsp.Plane> Planes;
-        public TagBlock<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeams;
+        public TagBlock<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeamMappings;
         public List<PathfindingDatum> PathfindingData;
 
         [TagStructure(Size = 0x94)]

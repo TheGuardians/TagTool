@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting
             {
                 var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetHandle.Index];
 
-                group.Resource = new PageableResource
+                group.Resource = new PageableResource<ModelAnimationTagResource>
                 {
                     Page = new RawPage
                     {

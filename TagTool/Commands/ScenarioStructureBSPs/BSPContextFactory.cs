@@ -30,6 +30,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             commandContext.AddCommand(new DumpMoppCommand(cacheContext, bsp));
             commandContext.AddCommand(new MoppDataCommand(cacheContext, bsp));
             commandContext.AddCommand(new LocalizeTagResourcesCommand(cacheContext, bsp, tag));
+            commandContext.AddCommand(new PathfindingTestCommand(cacheContext, tag, bsp));
         }
     }
 }
