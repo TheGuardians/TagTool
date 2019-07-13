@@ -73,7 +73,7 @@ namespace TagTool.Commands.Porting
                             resourceStream.Position = pathfindingBsp.SurfacePlanes.Address.Offset;
                             for (var i = 0; i < pathfindingBsp.SurfacePlanes.Count; i++)
                             {
-                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacePlane>(resourceDataContext);
+                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(resourceDataContext);
                                 pathfindingBsp.SurfacePlanes.Add(surfacePlanes);
                             }
 
@@ -84,11 +84,11 @@ namespace TagTool.Commands.Porting
                                 pathfindingBsp.Planes.Add(Plane);
                             }
 
-                            resourceStream.Position = pathfindingBsp.EdgeToSeamMappings.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.EdgeToSeamMappings.Count; i++)
+                            resourceStream.Position = pathfindingBsp.EdgeToSeams.Address.Offset;
+                            for (var i = 0; i < pathfindingBsp.EdgeToSeams.Count; i++)
                             {
                                 var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.EdgeToSeamMapping>(resourceDataContext);
-                                pathfindingBsp.EdgeToSeamMappings.Add(UnknownRaw7th);
+                                pathfindingBsp.EdgeToSeams.Add(UnknownRaw7th);
                             }
 
                             foreach (var pathfinding in pathfindingBsp.PathfindingData)

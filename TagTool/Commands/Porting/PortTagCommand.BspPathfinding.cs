@@ -14,13 +14,13 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private PageableResource<StructureBspCacheFileTagResources> ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private PageableResource ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.PathfindingResource = new PageableResource<StructureBspCacheFileTagResources>
+            bsp.PathfindingResource = new PageableResource
             {
                 Page = new RawPage
                 {
@@ -98,9 +98,9 @@ namespace TagTool.Commands.Porting
             {
                 resourceDefinition = new StructureBspCacheFileTagResources()
                 {
-                    SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacePlane>(bsp.SurfacePlanes.Count, new CacheAddress()),
+                    SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(bsp.SurfacePlanes.Count, new CacheAddress()),
                     Planes = new TagBlock<ScenarioStructureBsp.Plane>(bsp.Planes.Count, new CacheAddress()),
-                    EdgeToSeamMappings = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(bsp.EdgeToSeams.Count, new CacheAddress()),
+                    EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(bsp.EdgeToSeams.Count, new CacheAddress()),
                     PathfindingData = new List<StructureBspCacheFileTagResources.PathfindingDatum>() // TODO: copy from bsp.PathfindingData...
                 };
             }
@@ -125,7 +125,7 @@ namespace TagTool.Commands.Porting
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
                     blamResourceStream.Position = resourceDefinition.SurfacePlanes.Address.Offset;
 
-                resourceDefinition.SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacePlane>(
+                resourceDefinition.SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(
                     (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.SurfacePlanes.Count : resourceDefinition.SurfacePlanes.Count),
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
@@ -133,7 +133,7 @@ namespace TagTool.Commands.Porting
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.SurfacePlanes[i] :
-                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.SurfacePlane>(dataContext);
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(dataContext);
 
                     if (BlamCache.Version < CacheVersion.Halo3ODST)
                     {
@@ -173,13 +173,13 @@ namespace TagTool.Commands.Porting
                 StreamUtil.Align(dataStream, 0x4);
 
                 if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                    blamResourceStream.Position = resourceDefinition.EdgeToSeamMappings.Address.Offset;
+                    blamResourceStream.Position = resourceDefinition.EdgeToSeams.Address.Offset;
 
-                resourceDefinition.EdgeToSeamMappings = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(
-                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.EdgeToSeams.Count : resourceDefinition.EdgeToSeamMappings.Count),
+                resourceDefinition.EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(
+                    (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.EdgeToSeams.Count : resourceDefinition.EdgeToSeams.Count),
                     new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
 
-                for (var i = 0; i < resourceDefinition.EdgeToSeamMappings.Count; i++)
+                for (var i = 0; i < resourceDefinition.EdgeToSeams.Count; i++)
                 {
                     var element = BlamCache.Version < CacheVersion.Halo3ODST ?
                         bsp.EdgeToSeams[i] :

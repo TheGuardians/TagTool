@@ -3,7 +3,6 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Tags.Definitions
 {
@@ -105,9 +104,9 @@ namespace TagTool.Tags.Definitions
         public List<BitmapResource> Resources;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline106708)]
-        public List<BitmapInterleavedResource> InterleavedResourcesOld;
+        public List<BitmapResource> InterleavedResourcesOld;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<BitmapInterleavedResource> InterleavedResourcesNew;
+        public List<BitmapResource> InterleavedResourcesNew;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int UnknownB4;
@@ -259,27 +258,12 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x8)]
         public class BitmapResource : TagStructure
-        {
+		{
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public DatumIndex ZoneAssetHandleOld;
 
             [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public PageableResource<BitmapTextureInteropResource> Resource;
-
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public DatumIndex ZoneAssetHandleNew;
-
-            public int Unknown4;
-        }
-
-        [TagStructure(Size = 0x8)]
-        public class BitmapInterleavedResource : TagStructure
-        {
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public DatumIndex ZoneAssetHandleOld;
-
-            [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public PageableResource<BitmapTextureInterleavedInteropResource> Resource;
+            public PageableResource Resource;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public DatumIndex ZoneAssetHandleNew;

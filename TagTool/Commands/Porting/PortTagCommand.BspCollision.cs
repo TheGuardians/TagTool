@@ -317,13 +317,13 @@ namespace TagTool.Commands.Porting
             return moppData;
         }
 
-        private PageableResource<StructureBspTagResources> ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private PageableResource ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.CollisionBspResource = new PageableResource<StructureBspTagResources>
+            bsp.CollisionBspResource = new PageableResource
             {
                 Page = new RawPage
                 {

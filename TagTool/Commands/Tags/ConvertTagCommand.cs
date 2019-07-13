@@ -295,10 +295,6 @@ namespace TagTool.Commands.Tags
             return destStringID;
         }
 
-        private PageableResource<T> ConvertResource<T>(PageableResource<T> resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
-            where T : TagStructure =>
-                (PageableResource<T>)ConvertResource((PageableResource)resource, srcCacheContext, destCacheContext);
-
         private PageableResource ConvertResource(PageableResource resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
             if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))

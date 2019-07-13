@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags.Resources;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -64,7 +63,7 @@ namespace TagTool.Tags.Definitions
         public List<LanguageBlock> Languages;
 
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource<SoundResourceDefinition> Resource;
+        public PageableResource Resource;
         
         [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;

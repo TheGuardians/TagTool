@@ -110,12 +110,6 @@
     <Compile Include="Controls\BitmapControl.Designer.cs">
       <DependentUpon>BitmapControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ArrayControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\ArrayControl.Designer.cs">
-      <DependentUpon>ArrayControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\BlockControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -347,9 +341,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\BitmapControl.resx">
       <DependentUpon>BitmapControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\ArrayControl.resx">
-      <DependentUpon>ArrayControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\BlockControl.resx">
       <DependentUpon>BlockControl.cs</DependentUpon>

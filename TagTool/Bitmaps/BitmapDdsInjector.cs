@@ -28,7 +28,7 @@ namespace TagTool.Bitmaps
             if (newResource)
             {
                 // Create a new resource reference
-                resource = new PageableResource<BitmapTextureInteropResource>
+                resource = new PageableResource
                 {
                     Page = new RawPage(),
                     Resource = new TagResourceGen3

@@ -253,24 +253,6 @@ namespace TagTool.Common
         }
     }
     
-    [TagStructure]
-    public class PageableResource<T> : PageableResource
-        where T: TagStructure
-    {
-        [TagField(Flags = TagFieldFlags.Runtime)]
-        public T Instance;
-
-        public PageableResource() :
-            base()
-        {
-        }
-
-        public PageableResource(CacheVersion version) :
-            base(typeof(T).GetTagResourceTypeGen3(), version)
-        {
-        }
-    }
-
     /// <summary>
     /// Resource location constants used by <see cref="PageableResource.GetLocation"/>.
     /// </summary>

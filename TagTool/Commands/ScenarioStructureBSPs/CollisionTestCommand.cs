@@ -34,17 +34,17 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         {
             // Deserialize the definition data
             var resourceContext = new ResourceSerializationContext(CacheContext, BSP.CollisionBspResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
+            var definition = CacheContext.Deserializer.Deserialize<StructureBspTagResources>(resourceContext);
 
             // Extract the resource data
-            using (var resourceDataStream = new MemoryStream())
+            var resourceDataStream = new MemoryStream();
+            CacheContext.ExtractResource(BSP.CollisionBspResource, resourceDataStream);
+
             using (var reader = new EndianReader(resourceDataStream))
             {
-                CacheContext.ExtractResource(BSP.CollisionBspResource, resourceDataStream);
-
                 #region collision bsps
 
-                foreach (var cbsp in resourceDefinition.CollisionBsps)
+                foreach (var cbsp in definition.CollisionBsps)
                 {
                     reader.BaseStream.Position = cbsp.Bsp3dNodes.Address.Offset;
                     for (var i = 0; i < cbsp.Bsp3dNodes.Count; i++)
@@ -107,7 +107,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 #region large collision bsps
 
-                foreach (var cbsp in resourceDefinition.LargeCollisionBsps)
+                foreach (var cbsp in definition.LargeCollisionBsps)
                 {
                     reader.BaseStream.Position = cbsp.Bsp3dNodes.Address.Offset;
                     for (var i = 0; i < cbsp.Bsp3dNodes.Count; i++)
@@ -170,7 +170,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 #region compressions
 
-                foreach (var instance in resourceDefinition.InstancedGeometry)
+                foreach (var instance in definition.InstancedGeometry)
                 {
                     #region compression's resource data
 

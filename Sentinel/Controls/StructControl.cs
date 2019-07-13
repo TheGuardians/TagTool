@@ -115,10 +115,6 @@ namespace Sentinel.Controls
                         control = new EnumControl(fieldInfo.FieldInfo);
                     }
                 }
-                else if (fieldType.IsArray && fieldInfo.Attribute.Length != 0 && !fieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
-                {
-                    control = new ArrayControl(form, CacheContext, fieldType, fieldInfo.FieldInfo);
-                }
                 else if (fieldType == typeof(Point2d))
                 {
                     control = new Point2dControl(CacheContext, fieldInfo.FieldInfo);

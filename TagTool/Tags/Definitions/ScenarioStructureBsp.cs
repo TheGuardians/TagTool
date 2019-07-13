@@ -74,7 +74,7 @@ namespace TagTool.Tags.Definitions
         public List<SurfaceReference> SurfaceReferences;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<SurfacePlane> SurfacePlanes;
+        public List<SurfacesPlanes> SurfacePlanes;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<Plane> Planes;
@@ -178,7 +178,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex3;
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource<StructureBspTagResources> CollisionBspResource;
+        public PageableResource CollisionBspResource;
 
         public int UselessPadding3;
 
@@ -188,7 +188,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public DatumIndex ZoneAssetIndex4;
         [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource<StructureBspCacheFileTagResources> PathfindingResource;
+        public PageableResource PathfindingResource;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public int UselessPadding4;
 
@@ -332,7 +332,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
-        public class SurfacePlane : TagStructure
+        public class SurfacesPlanes : TagStructure
         {
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public ushort PlaneIndexOld;
@@ -846,9 +846,6 @@ namespace TagTool.Tags.Definitions
                     StopAutodown = 1 << 6,
                     ForceWalk = 1 << 7
                 }
-
-                public override string ToString() =>
-                    $"{{ Type: {HintType}, NextHintIndex: {NextHintIndex}, Data: {Data} }}";
             }
 
             [TagStructure(Size = 0x4)]

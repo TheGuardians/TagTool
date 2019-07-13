@@ -163,7 +163,7 @@ namespace TagTool.Commands.Sounds
                         Data = new TagData(fileSize, new CacheAddress(CacheAddressType.Resource, 0))
                     });
 
-                Definition.Resource = new PageableResource<SoundResourceDefinition>
+                Definition.Resource = new PageableResource
                 {
                     Page = new RawPage
                     {
