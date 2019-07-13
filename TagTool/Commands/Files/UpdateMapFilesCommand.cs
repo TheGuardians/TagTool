@@ -27,7 +27,7 @@ namespace TagTool.Commands.Files
                   "UpdateMapFiles",
                   "Updates the game's .map files to contain valid scenario indices.",
 
-                  "UpdateMapFiles [MapInfo Directory]",
+                  "UpdateMapFiles <MapInfo Directory>",
 
                   "Updates the game's .map files to contain valid scenario indices.")
         {

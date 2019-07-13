@@ -62,6 +62,7 @@ namespace TagTool.Commands.Modding
                         break;
 
                     case "mapfiles":
+                    case "mapfile":
                         Options |= ExportOptions.MapFiles;
                         break;
 
@@ -144,8 +145,11 @@ namespace TagTool.Commands.Modding
                     while (!reader.EndOfStream)
                     {
                         var tagName = reader.ReadLine();
-                        if (CacheContext.TryGetTag(tagName, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
-                            tagIndices.Add(instance.Index);
+                        if (CacheContext.TryGetTag(tagName, out var instance) && instance != null)
+                            if(!tagIndices.Contains(instance.Index))
+                                tagIndices.Add(instance.Index);
+                        else
+                            Console.WriteLine($"Falied to find  tag {tagName}");
                     }
 
                     reader.Close();
@@ -168,24 +172,57 @@ namespace TagTool.Commands.Modding
 
                 while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
                 {
-                    var mapFile = new FileInfo(line);
-
-                    if (mapFile.Exists && mapFile.Extension == ".map" && !mapFileNames.Contains(mapFile.FullName))
-                        mapFileNames.Add(mapFile.FullName);
+                    if (!File.Exists(line))
+                    {
+                        Console.WriteLine($"File {line} does not exist. Please enter a valid map file");
+                        continue;
+                    }
+                    else
+                    {
+                        var mapFile = new FileInfo(line);
+                        if (mapFile.Extension != ".map")
+                        {
+                            Console.WriteLine($"File {line} is not a map file.");
+                            continue;
+                        }
+                            
+                        if(!mapFileNames.Contains(mapFile.FullName))
+                            mapFileNames.Add(mapFile.FullName);
+                    }
                 }
                 AddMaps(mapFileNames);
             }
 
             if (Options.HasFlag(ExportOptions.CampaignFile))
             {
-                Console.WriteLine("Please specify the .campaign files to be used:");
-                string campaignFileName = Console.ReadLine().TrimStart().TrimEnd();
-                AddCampaignMap(campaignFileName);
+                Console.WriteLine("Please specify the .campaign file to be used:");
+                while (true)
+                {
+                    string campaignFileName = Console.ReadLine().TrimStart().TrimEnd();
+                    if (!File.Exists(campaignFileName))
+                        Console.WriteLine($"File {line} does not exist.");
+                    else
+                    {
+                        var file = new FileInfo(campaignFileName);
+                        if (file.Extension != ".campaign")
+                        {
+                            Console.WriteLine($"File {line} is not a campaign file.");
+                            continue;
+                        }
+                        else
+                        {
+                            AddCampaignMap(file);
+                            break;
+                        }
+                    }
+                }
             }
 
             //
             // Use the tag list collected to create new mod package
             //
+
+            Console.WriteLine("Building...");
 
             AddTags(tagIndices);
 
@@ -381,14 +418,9 @@ namespace TagTool.Commands.Modding
             }
         }
 
-        private void AddCampaignMap(string campaignFileName)
+        private void AddCampaignMap(FileInfo campaignFile)
         {
-            if (!File.Exists(campaignFileName))
-                Console.WriteLine("$Campaign file {entry} not found.");
-
-            var file = new FileInfo(campaignFileName);
-
-            using (var mapFileStream = file.OpenRead())
+            using (var mapFileStream = campaignFile.OpenRead())
             {
                 ModPackage.CampaignFileStream = new MemoryStream();
                 mapFileStream.CopyTo(ModPackage.CampaignFileStream);

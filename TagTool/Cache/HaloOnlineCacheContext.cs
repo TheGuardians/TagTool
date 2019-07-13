@@ -344,7 +344,9 @@ namespace TagTool.Cache
             if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
                 throw new Exception($"Invalid tag name: {name}");
 
-            var tagName = namePieces[0];
+            //var tagName = namePieces[0];
+
+            var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
 
             foreach (var instance in TagCache.Index)
             {

@@ -97,7 +97,6 @@ namespace TagTool.Commands.Modding
             modPackage.CampaignFileStream.CopyTo(campaignFileStream);
             campaignFileStream.Close();
 
-
             CacheStream.Close();
             CacheStream.Dispose();
             CacheContext.SaveTagNames();
@@ -137,8 +136,14 @@ namespace TagTool.Commands.Modding
                     {
                         tagDefinition = ConvertForgeGlobals((ForgeGlobalsDefinition)tagDefinition);
                     }
-
+                    
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
+                    
+                    foreach(var resourcePointer in modTag.ResourcePointerOffsets)
+                    {
+                        newTag.AddResourceOffset(resourcePointer);
+                    }
+                    
 
 
                     return newTag;
@@ -181,7 +186,7 @@ namespace TagTool.Commands.Modding
             resource.ChangeLocation(ResourceLocation.ResourcesB);
             resource.Page.OldFlags &= ~OldRawPageFlags.InMods;
             CacheContext.AddResource(resource, resourceStream);
-            
+
             return resource;
         }
 

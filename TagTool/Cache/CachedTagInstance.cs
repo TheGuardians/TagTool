@@ -144,6 +144,11 @@ namespace TagTool.Cache
 
         public override string ToString() => $"0x{Index:X8}";
 
+        public void AddResourceOffset(uint offset)
+        {
+            _resourceOffsets.Add(offset);
+        }
+
         /// <summary>
         /// Reads the header for the tag instance from a stream.
         /// </summary>

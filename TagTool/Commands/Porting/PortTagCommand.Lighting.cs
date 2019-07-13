@@ -135,14 +135,16 @@ namespace TagTool.Commands.Porting
 
             scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
 
-            foreach (var entry in scenarioLightmap.Lightmaps)
+            for(int i = 0; i< scenarioLightmap.Lightmaps.Count; i++)
             {
+                var entry = scenarioLightmap.Lightmaps[i];
+
                 var wasReplacing = FlagIsSet(PortingFlags.Replace);
 
-				RemoveFlags(PortingFlags.Replace);
-				var Lbsp = ConvertStructure(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
-				if (wasReplacing)
-					SetFlags(PortingFlags.Replace);
+                RemoveFlags(PortingFlags.Replace);
+                var Lbsp = ConvertStructure(cacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
+                if (wasReplacing)
+                    SetFlags(PortingFlags.Replace);
 
                 Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
                 Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
@@ -162,7 +164,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
-                edTag.Name = blamTagName + "_data";
+                edTag.Name = $"blamTagName_{i}_data";
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
@@ -171,6 +173,7 @@ namespace TagTool.Commands.Porting
                     LightmapData = edTag
                 });
             }
+            
 
             scenarioLightmap.Airprobes.Clear();
 

@@ -262,7 +262,7 @@ namespace TagTool.Commands.Porting
                     Lbsp.Airprobes.AddRange(blamLightmap.Airprobes);
                     Lbsp.BspIndex = (short)j++;
 
-                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>(blamLightmapTag.Name + "_data");
+                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>($"{blamLightmapTag.Name}_{i}_data");
                     CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
 
                     lightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
