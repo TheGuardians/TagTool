@@ -341,55 +341,9 @@ namespace TagTool.Commands.Porting
                             bsp.PathfindingData[0].PathfindingHints[i] :
                             BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext);
 
-                        switch (hint.HintType)
-                        {
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.IntersectionLink:
-                                Array.Reverse(hint.Data, 0, 4);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 2);
-                                Array.Reverse(hint.Data, 10, 2);
-                                Array.Reverse(hint.Data, 12, 2);
-                                Array.Reverse(hint.Data, 14, 2);
-                                break;
-
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink:
-                                Array.Reverse(hint.Data, 0, 2);
-                                Array.Reverse(hint.Data, 2, 2);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 2);
-                                break;
-
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.HoistLink:
-                                Array.Reverse(hint.Data, 0, 2);
-                                Array.Reverse(hint.Data, 2, 2);
-                                Array.Reverse(hint.Data, 4, 2);
-                                Array.Reverse(hint.Data, 6, 2);
-                                Array.Reverse(hint.Data, 8, 4);
-                                break;
-
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown9:
-                                Array.Reverse(hint.Data, 0, 4);
-                                Array.Reverse(hint.Data, 4, 4);
-                                Array.Reverse(hint.Data, 8, 4);
-                                break;
-
-                            // TODO: verify these:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.ClimbLink:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.VaultLink:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.MountLink:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.BreakableFloor:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.Unknown8:
-                            case ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.UnknownA:
-                                for (var j = 0; j < 16; j += 2)
-                                    Array.Reverse(hint.Data, j, 2);
-                                break;
-
-                            default:
-                                throw new NotSupportedException(hint.HintType.ToString());
-                        }
+                        //convert as four int32's. This works ingame.
+                        for (var j = 0; j < 16; j += 4)
+                            Array.Reverse(hint.Data, j, 4);
 
                         CacheContext.Serializer.Serialize(dataContext, hint);
                     }
