@@ -115,7 +115,7 @@ namespace TagTool.Commands.Porting
             Merge = 1 << 15,
 
 			// No [PortingFlagDescription] here means we'll flag names as the description.
-			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print
+			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print | Merge
 		}
 
 		/// <summary>
