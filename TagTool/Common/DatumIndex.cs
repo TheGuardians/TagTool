@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -62,5 +64,32 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Salt: 0x{Salt:X4}, Index: {Index} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+
+            if (args.Count != 2)
+            {
+                error = $"{args.Count} arguments supplied; should be 4";
+                return false;
+            }
+            else if (!ushort.TryParse(args[0], out ushort salt))
+            {
+                error = $"Unable to parse \"{args[0]}\" (salt) as `ushort`.";
+                return false;
+            }
+            else if (!ushort.TryParse(args[1], out ushort index))
+            {
+                error = $"Unable to parse \"{args[1]}\" (index) as `ushort`.";
+                return false;
+            }
+            else
+            {
+                result = new DatumIndex(salt, index);
+                error = null;
+                return true;
+            }
+        }
     }
 }

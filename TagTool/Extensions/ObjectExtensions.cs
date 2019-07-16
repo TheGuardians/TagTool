@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using TagTool.Common;
 
 namespace System
 {
@@ -41,5 +42,7 @@ namespace System
 
             return (T)result;
         }
+
+        public static bool IsBlamType(this Type type) => typeof(IBlamType).IsAssignableFrom(type);
     }
 }

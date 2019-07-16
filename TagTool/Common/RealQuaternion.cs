@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -262,5 +263,41 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ {I}, {J}, {K}, {W} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 4)
+            {
+                error = $"{args.Count} arguments supplied; should be 4";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float i))
+            {
+                error = $"Unable to parse \"{args[0]}\" (i) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float j))
+            {
+                error = $"Unable to parse \"{args[1]}\" (j) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[2], out float k))
+            {
+                error = $"Unable to parse \"{args[2]}\" (k) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[3], out float w))
+            {
+                error = $"Unable to parse \"{args[3]}\" (w) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealQuaternion(i, j, k, w);
+                error = null;
+                return true;
+            }
+        }
     }
 }

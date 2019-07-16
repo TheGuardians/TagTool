@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -78,6 +80,27 @@ namespace TagTool.Common
                 val >>= 8;
             }
             return (i < 4) ? new string(chars, i, chars.Length - i) : "";
+        }
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 1)
+            {
+                error = $"{args.Count} arguments supplied; should be 1";
+                return false;
+            }
+            else if (!cacheContext.TryParseGroupTag(args[0], out Tag groupTag))
+            {
+                error = $"Invalid tag group specifier: {args[0]}";
+                return false;
+            }
+            else
+            {
+                result = groupTag;
+                error = null;
+                return true;
+            }
         }
 
         public override bool Equals(object obj)

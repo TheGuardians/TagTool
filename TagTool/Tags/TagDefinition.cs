@@ -243,6 +243,7 @@ namespace TagTool.Tags
             { new Tag("styl"), typeof(Style) },
             { new Tag("sus!"), typeof(SoundUiSounds) },
             { new Tag("term"), typeof(Terminal) },
+            { new Tag("test"), typeof(TestDefinition) },
             { new Tag("trak"), typeof(CameraTrack) },
             { new Tag("trdf"), typeof(TextureRenderList) },
             { new Tag("txt3"), typeof(GuiTextWidgetDefinition) },

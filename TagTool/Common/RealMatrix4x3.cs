@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -119,6 +121,94 @@ namespace TagTool.Common
                 0.0f, bbYLength != 0.0f ? bbYLength : 1.0f, 0.0f,
                 0.0f, 0.0f, bbZLength != 0.0f ? bbZLength : 1.0f,
                 bbXLength, bbYLength, bbZLength);
+        }
+
+        public override string ToString() => $"{{ " +
+            $"{m11}, {m12}, {m13} |" +
+            $"{m21}, {m22}, {m23} |" +
+            $"{m31}, {m32}, {m33} |" +
+            $"{m41}, {m42}, {m43} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+
+            if (args.Count != 12)
+            {
+                error = $"{args.Count} arguments supplied; should be 12";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float M11))
+            {
+                error = $"Unable to parse \"{args[0]}\" (M11) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float M12))
+            {
+                error = $"Unable to parse \"{args[1]}\" (M12) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[2], out float M13))
+            {
+                error = $"Unable to parse \"{args[2]}\" (M13) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[3], out float M21))
+            {
+                error = $"Unable to parse \"{args[3]}\" (M21) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[4], out float M22))
+            {
+                error = $"Unable to parse \"{args[4]}\" (M22) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[5], out float M23))
+            {
+                error = $"Unable to parse \"{args[5]}\" (M23) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[6], out float M31))
+            {
+                error = $"Unable to parse \"{args[6]}\" (M31) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[7], out float M32))
+            {
+                error = $"Unable to parse \"{args[7]}\" (M32) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[8], out float M33))
+            {
+                error = $"Unable to parse \"{args[8]}\" (M33) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[9], out float M41))
+            {
+                error = $"Unable to parse \"{args[9]}\" (M41) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[10], out float M42))
+            {
+                error = $"Unable to parse \"{args[10]}\" (M42) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[11], out float M43))
+            {
+                error = $"Unable to parse \"{args[11]}\" (M43) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealMatrix4x3(
+                    M11, M12, M13,
+                    M21, M22, M23,
+                    M31, M32, M33,
+                    M41, M42, M43);
+
+                error = null;
+                return true;
+            }
         }
     }
 }

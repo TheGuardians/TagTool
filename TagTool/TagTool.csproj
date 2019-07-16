@@ -307,6 +307,7 @@
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
+    <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -67,5 +69,26 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Degrees: {Degrees}, Radians: {Radians} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 1)
+            {
+                error = $"{args.Count} arguments supplied; should be 1";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float _value))
+            {
+                error = $"Unable to parse \"{args[0]}\" as `float`.";
+                return false;
+            }
+            else
+            {
+                result = Angle.FromDegrees(_value);
+                error = null;
+                return true;
+            }
+        }
     }
 }

@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using TagTool.Cache;
+using TagTool.Commands.Editing;
 
 namespace TagTool.Common
 {
@@ -49,6 +53,37 @@ namespace TagTool.Common
         public override int GetHashCode() => 13 * 17 + Lower.GetHashCode() * 17 + Upper.GetHashCode();
 
         public override string ToString() => $"{{ Lower: {Lower}, Upper: {Upper} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            var argType = this.GetType().GenericTypeArguments[0];
+            var argCount = SetFieldCommand.RangeArgCount(argType);
+
+            if (argCount * 2 != args.Count)
+            {
+                error = $"{args.Count} arguments supplied; should be {argCount * 2}";
+                return false;
+            }
+
+            var min = SetFieldCommand.ParseArgs(cacheContext, argType, null, args.Take(argCount).ToList());
+            if (min.Equals(false))
+            {
+                error = $"{min} (min) is `false`";
+                return false;
+            }
+
+            var max = SetFieldCommand.ParseArgs(cacheContext, argType, null, args.Skip(argCount).Take(argCount).ToList());
+            if (max.Equals(false))
+            {
+                error = $"{max} (max) is `false`";
+                return false;
+            }
+
+            result = Activator.CreateInstance(this.GetType(), new object[] { min, max }) as IBlamType;
+            error = null;
+            return true;
+        }
     }
 
 	public interface IBounds { }

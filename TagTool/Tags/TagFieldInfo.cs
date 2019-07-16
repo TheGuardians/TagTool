@@ -149,6 +149,9 @@ namespace TagTool.Tags
 		/// <returns></returns>
 		public static uint GetFieldSize(Type type, TagFieldAttribute attr, CacheVersion targetVersion)
 		{
+            if (attr.Flags.HasFlag(Runtime))
+                return 0;
+
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
@@ -209,6 +212,9 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(byte[]) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 					return 0x14;
 
+                case TypeCode.Object when type == typeof(RealBoundingBox):
+                    return 0x18;
+
 				case TypeCode.Object when type == typeof(RealMatrix4x3):
 					return 0x30;
 
@@ -225,8 +231,10 @@ namespace TagTool.Tags
 				case TypeCode.Object when type.IsEnum:
 					return TagFieldInfo.GetFieldSize(type.GetEnumUnderlyingType(), attr, targetVersion);
 
-				// Assume the field is a structure
-				default:
+                case TypeCode.Object when type.IsSubclassOf(typeof(TagStructure)):
+                    return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
+
+                default:
 					return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
 			}
 		}

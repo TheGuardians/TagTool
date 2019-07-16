@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 
 namespace TagTool.Common
@@ -211,6 +212,19 @@ namespace TagTool.Common
         public override string ToString()
         {
             return "0x" + Value.ToString("X8");
+        }
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 1)
+            {
+                error = $"{args.Count} arguments supplied; should be 1";
+                return false;
+            }
+            result = cacheContext.GetStringId(args[0]);
+            error = null;
+            return true;
         }
 
         public int CompareTo(StringId other)
