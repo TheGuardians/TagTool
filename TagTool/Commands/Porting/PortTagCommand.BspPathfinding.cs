@@ -336,17 +336,10 @@ namespace TagTool.Commands.Porting
                         (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].PathfindingHints.Count : pathfindingDatum.PathfindingHints.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
-                    {
-                        var hint = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        CacheContext.Serializer.Serialize(dataContext,
+                            BlamCache.Version < CacheVersion.Halo3ODST ?
                             bsp.PathfindingData[0].PathfindingHints[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext);
-
-                        //convert as four int32's. This works ingame.
-                        for (var j = 0; j < 16; j += 4)
-                            Array.Reverse(hint.Data, j, 4);
-
-                        CacheContext.Serializer.Serialize(dataContext, hint);
-                    }
+                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
