@@ -799,9 +799,10 @@ namespace TagTool.Tags.Definitions
             {
                 public HintTypeValue HintType;
                 public short NextHintIndex;
-
-                [TagField(Length = 16)]
-                public byte[] Data = new byte[16];
+                public int data0;
+                public int data1;
+                public int data2;
+                public int data3;
 
                 public enum HintTypeValue : short
                 {
