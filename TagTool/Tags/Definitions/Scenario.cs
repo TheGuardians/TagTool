@@ -316,10 +316,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTagInstance MissionVisionModeEffect;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTagInstance MissionVisionModeTheaterEffect;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]     
         public CachedTagInstance MissionVisionMode;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
