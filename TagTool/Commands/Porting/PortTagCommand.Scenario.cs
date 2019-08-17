@@ -10,6 +10,7 @@ using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Porting
 {
@@ -1309,6 +1310,7 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
+                scnr.ScriptExpressions[scriptIndex].ExpressionType = (ScriptExpressionType)Enum.Parse(typeof(ScriptExpressionType), items[5]);
             }
 
             if (mapName == "010_jungle")
@@ -1559,6 +1561,7 @@ namespace TagTool.Commands.Porting
                 "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
                 "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
                 "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
+                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish"
             },
 
             ["h100"] = new List<string>
