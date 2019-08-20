@@ -249,7 +249,7 @@ namespace TagTool.Tags.Definitions
         {
             NoTracking = 0,
             HumanTracking = 1,
-            CovenantTracking =2,
+            CovenantTracking = 2,
         }
 
         [TagStructure(Size = 0x20)]

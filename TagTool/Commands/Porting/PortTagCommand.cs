@@ -509,6 +509,16 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertLensFlare(lens);
 					break;
 
+                case Model hlmt:
+                    foreach (var target in hlmt.Targets)
+                    {
+                        if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByHumanTracking))
+                            target.TargetFilter = CacheContext.GetStringId("flying_vehicles");
+                        else if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByPlasmaTracking))
+                            target.TargetFilter = CacheContext.GetStringId("bipeds");
+                    }
+                    break;
+              
 				case ModelAnimationGraph jmad:
 					blamDefinition = ConvertModelAnimationGraph(cacheStream, resourceStreams, jmad);
 					break;
@@ -597,6 +607,43 @@ namespace TagTool.Commands.Porting
                     foreach (var attach in weapon.Attachments)
                         if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                    if (weapon.Tracking == Weapon.TrackingType.HumanTracking)
+                    {
+                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
+                        var trackblock = new Weapon.TargetTrackingBlock();
+                        trackblock.AcquireTime = 1.0f;
+                        trackblock.GraceTime = 0.1f;
+                        trackblock.DecayTime = 0.2f;
+                        trackblock.TrackingSound = CacheContext.GetTag<SoundLooping>(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking");
+                        trackblock.LockedSound = CacheContext.GetTag<SoundLooping>(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked");
+                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
+                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        weapon.TargetTracking.Add(trackblock);
+                    }
+                    if (weapon.Tracking == Weapon.TrackingType.CovenantTracking)
+                    {
+                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
+                        var trackblock = new Weapon.TargetTrackingBlock();
+                        trackblock.AcquireTime = 0.0f;
+                        trackblock.GraceTime = 0.1f;
+                        trackblock.DecayTime = 0.2f;
+                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
+                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("bipeds");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        weapon.TargetTracking.Add(trackblock);
+                    }
                     break;
 
                 case Shader rmsh:
