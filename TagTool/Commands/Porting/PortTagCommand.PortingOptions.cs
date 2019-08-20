@@ -114,8 +114,14 @@ namespace TagTool.Commands.Porting
             [PortingFlagDescription("Merges new data if tags exist.")]
             Merge = 1 << 15,
 
-			// No [PortingFlagDescription] here means we'll flag names as the description.
-			Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print | Merge
+            /// <summary>
+            /// Merges new data if tags exist.
+            /// </summary>
+            [PortingFlagDescription("Use a regular expression to determine target tags")]
+            Regex = 1 << 16,
+
+            // No [PortingFlagDescription] here means we'll flag names as the description.
+            Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print | Merge
 		}
 
 		/// <summary>

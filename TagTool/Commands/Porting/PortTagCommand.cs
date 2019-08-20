@@ -13,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Porting
 {
@@ -1370,6 +1371,20 @@ namespace TagTool.Commands.Porting
 
         private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
         {
+            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
+
+            if (FlagIsSet(PortingFlags.Regex))
+            {
+                var regex = new Regex(tagSpecifier);
+                result = BlamCache.IndexItems.FindAll(item => item != null && regex.IsMatch(item.ToString()));
+                if (result.Count == 0)
+                {
+                    Console.WriteLine($"ERROR: Invalid regex: {tagSpecifier}");
+                    return new List<CacheFile.IndexItem>();
+                }
+                return result;
+            }
+
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
             {
                 Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
@@ -1385,8 +1400,6 @@ namespace TagTool.Commands.Porting
             }
 
             var tagName = tagIdentifiers[0];
-
-            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
 
             // find the CacheFile.IndexItem(s)
             if (tagName == "*") result = BlamCache.IndexItems.FindAll(
