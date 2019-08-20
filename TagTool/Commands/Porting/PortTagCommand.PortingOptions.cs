@@ -115,7 +115,7 @@ namespace TagTool.Commands.Porting
             Merge = 1 << 15,
 
             /// <summary>
-            /// Merges new data if tags exist.
+            /// Use a regular expression to determine target tags.
             /// </summary>
             [PortingFlagDescription("Use a regular expression to determine target tags")]
             Regex = 1 << 16,
