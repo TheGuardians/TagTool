@@ -1376,7 +1376,7 @@ namespace TagTool.Commands.Porting
             if (FlagIsSet(PortingFlags.Regex))
             {
                 var regex = new Regex(tagSpecifier);
-                result = BlamCache.IndexItems.FindAll(item => item != null && regex.IsMatch(item.ToString()));
+                result = BlamCache.IndexItems.FindAll(item => item != null && regex.IsMatch(item.ToString() + "." + item.GroupTag));
                 if (result.Count == 0)
                 {
                     Console.WriteLine($"ERROR: Invalid regex: {tagSpecifier}");
