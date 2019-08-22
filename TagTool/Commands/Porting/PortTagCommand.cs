@@ -615,8 +615,8 @@ namespace TagTool.Commands.Porting
                         trackblock.AcquireTime = 1.0f;
                         trackblock.GraceTime = 0.1f;
                         trackblock.DecayTime = 0.2f;
-                        trackblock.TrackingSound = CacheContext.GetTag<SoundLooping>(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking");
-                        trackblock.LockedSound = CacheContext.GetTag<SoundLooping>(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked");
+                        trackblock.TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
+                        trackblock.LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);
                         trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
                         var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
                         tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
