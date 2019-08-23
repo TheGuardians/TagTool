@@ -167,8 +167,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x3C)]
         public class HealthPackBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
+            public float Unknown;
+            public float Unknown2;
             public float ShieldsGiven;
             public CachedTagInstance Unknown3;
             public CachedTagInstance Unknown4;
