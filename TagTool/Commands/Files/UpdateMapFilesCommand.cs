@@ -34,6 +34,43 @@ namespace TagTool.Commands.Files
             CacheContext = cacheContext;
         }
 
+        private void UpdateNames_Descriptions(BinaryReader infoReader, BinaryWriter writer)
+        {
+            var mapNames = new byte[12][];
+            var mapDescriptions = new byte[12][];
+
+            for (var i = 0; i < 12; i++)
+                mapNames[i] = infoReader.ReadBytes(0x40);
+            foreach (var mapNameUnicode in mapNames)
+            {
+                for (var c = 0; c < mapNameUnicode.Length; c += 2)
+                {
+                    var temp = mapNameUnicode[c];
+                    mapNameUnicode[c] = mapNameUnicode[c + 1];
+                    mapNameUnicode[c + 1] = temp;
+                }
+
+                writer.Write(mapNameUnicode);
+            }
+
+            for (var i = 0; i < 12; i++)
+            {
+                mapDescriptions[i] = infoReader.ReadBytes(0x100);
+            }
+            foreach (var mapDescription in mapDescriptions)
+            {
+                for (var c = 0; c < mapDescription.Length; c += 2)
+                {
+                    var temp = mapDescription[c];
+                    mapDescription[c] = mapDescription[c + 1];
+                    mapDescription[c + 1] = temp;
+                }
+
+                writer.Write(mapDescription);
+            }
+            return;
+        }
+
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
@@ -136,8 +173,11 @@ namespace TagTool.Commands.Files
                                     infoStream.Position = 0x0;
                                     stream.Position = 0x3390;
                                     writer.Write(infoReader.ReadBytes(0x3C)); //mapinfo header
-                                    //stream.Position = 0x33cc;
 
+                                    stream.Position = 0x33c6; //all .map files need the string "MP" here to load
+                                    writer.Write((short)0x504d); //"MP"
+
+                                    stream.Position = 0x33cc; //advance to map id
                                     writer.Write(entry.Key); //scenario map id
                                     infoStream.Position = 0x40; //advance infostream past map id
                                     var zone = infoReader.ReadBytes(4);
@@ -151,43 +191,14 @@ namespace TagTool.Commands.Files
 
                                     //each content entry is 0xF10 in ODST, 0xF08 in H3
                                     //There are 9 content entries in ODST and 3 in H3
-                                    var contentnames = new byte[12][];
-                                    var contentdescs = new byte[12][];
                                     if (isodstmap)
                                     {
                                         while (contententry < 9)
                                         {
                                             infoStream.Position = (infocontentbase + contententry * 0xf10);
-                                            writer.Write(infoReader.ReadBytes(0x10));
+                                            writer.Write(infoReader.ReadBytes(0x10)); //write header
 
-                                            for (var i = 0; i < 12; i++)
-                                                contentnames[i] = infoReader.ReadBytes(0x40);
-                                            foreach (var contentnameUnicode in contentnames)
-                                            {
-                                                for (var c = 0; c < contentnameUnicode.Length; c += 2)
-                                                {
-                                                    var temp = contentnameUnicode[c];
-                                                    contentnameUnicode[c] = contentnameUnicode[c + 1];
-                                                    contentnameUnicode[c + 1] = temp;
-                                                }
-                                                writer.Write(contentnameUnicode);
-                                            }
-
-                                            for (var i = 0; i < 12; i++)
-                                            {
-                                                contentdescs[i] = infoReader.ReadBytes(0x100);
-                                            }
-                                            foreach (var contentdesc in contentdescs)
-                                            {
-                                                for (var c = 0; c < contentdesc.Length; c += 2)
-                                                {
-                                                    var temp = contentdesc[c];
-                                                    contentdesc[c] = contentdesc[c + 1];
-                                                    contentdesc[c + 1] = temp;
-                                                }
-
-                                                writer.Write(contentdesc);
-                                            }
+                                            UpdateNames_Descriptions(infoReader, writer);
                                             contententry += 1;
                                         }
                                     }
@@ -196,114 +207,40 @@ namespace TagTool.Commands.Files
                                         while (contententry < 3)
                                         {
                                             infoStream.Position = (infocontentbase + contententry * 0xf08);
-                                            writer.Write(infoReader.ReadBytes(0x8));
+                                            writer.Write(infoReader.ReadBytes(0x8)); //write header
                                             writer.Write(0); //padding
                                             writer.Write(0); //padding
-                                            for (var i = 0; i < 12; i++)
-                                                contentnames[i] = infoReader.ReadBytes(0x40);
-                                            foreach (var contentnameUnicode in contentnames)
-                                            {
-                                                for (var c = 0; c < contentnameUnicode.Length; c += 2)
-                                                {
-                                                    var temp = contentnameUnicode[c];
-                                                    contentnameUnicode[c] = contentnameUnicode[c + 1];
-                                                    contentnameUnicode[c + 1] = temp;
-                                                }
-                                                writer.Write(contentnameUnicode);
-                                            }
 
-                                            for (var i = 0; i < 12; i++)
-                                            {
-                                                contentdescs[i] = infoReader.ReadBytes(0x100);
-                                            }
-                                            foreach (var contentdesc in contentdescs)
-                                            {
-                                                for (var c = 0; c < contentdesc.Length; c += 2)
-                                                {
-                                                    var temp = contentdesc[c];
-                                                    contentdesc[c] = contentdesc[c + 1];
-                                                    contentdesc[c + 1] = temp;
-                                                }
-
-                                                writer.Write(contentdesc);
-                                            }
+                                            UpdateNames_Descriptions(infoReader, writer);
                                             contententry += 1;
                                         }
                                     }
                                 }
-                                var mapNames = new byte[12][];
 
-                                infoStream.Position = 0x44;
-                                for (var i = 0; i < 12; i++)
-                                    mapNames[i] = infoReader.ReadBytes(0x40);
-
+                                //this is for the primary map name and description
                                 stream.Position = 0x33D4;
-                                foreach (var mapNameUnicode in mapNames)
-                                {
-                                    for (var c = 0; c < mapNameUnicode.Length; c += 2)
-                                    {
-                                        var temp = mapNameUnicode[c];
-                                        mapNameUnicode[c] = mapNameUnicode[c + 1];
-                                        mapNameUnicode[c + 1] = temp;
-                                    }
-
-                                    writer.Write(mapNameUnicode);
-                                }
-
-                                var mapDescriptions = new byte[12][];
-
-                                infoStream.Position = 0x344;
-                                for (var i = 0; i < 12; i++)
-                                {
-                                    mapDescriptions[i] = infoReader.ReadBytes(0x100);
-                                }
-
-                                stream.Position = 0x36D4;
-                                foreach (var mapDescription in mapDescriptions)
-                                {
-                                    for (var c = 0; c < mapDescription.Length; c += 2)
-                                    {
-                                        var temp = mapDescription[c];
-                                        mapDescription[c] = mapDescription[c + 1];
-                                        mapDescription[c + 1] = temp;
-                                    }
-
-                                    writer.Write(mapDescription);
-                                }
-
-                                stream.Position = 0xBD88;
-                                writer.Write(mapNames[0], 0, 32);
-
-                                var description = new string(mapDescriptions[0].Select(i => Convert.ToChar(i)).ToArray()).Replace("\0", "");
-
-                                stream.Position = 0xBDA8;
-                                writer.Write(description.ToArray());
-
-                                for (var i = 0; i < (0x80 - description.Length); i++)
-                                    writer.Write('\0');
+                                infoStream.Position = 0x44;
+                                UpdateNames_Descriptions(infoReader, writer);
                             }
                         }
                     }
 
-                    if (entry.Value.Item1 == ScenarioMapType.Multiplayer)
+                    var contentName = scenarioPath.StartsWith("levels\\dlc\\") ?
+                        $"dlc_{mapName}" :
+                        $"m_{mapName}";
+
+                    stream.Position = ContentNameOffset;
+                    for (var i = 0; i < 256; i++)
+                        writer.Write(i < contentName.Length ? contentName[i] : '\0');
+
+                    stream.Position = ContentMapNameOffset;
+                    for (var i = 0; i < 256; i++)
+                        writer.Write(i < mapName.Length ? mapName[i] : '\0');
+
+                    foreach (var offset in ContentMapIdOffsets)
                     {
-                        var contentName = scenarioPath.StartsWith("levels\\dlc\\") ?
-                            $"dlc_{mapName}" :
-                            $"m_{mapName}";
-
-                        stream.Position = ContentNameOffset;
-                        for (var i = 0; i < 256; i++)
-                            writer.Write(i < contentName.Length ? contentName[i] : '\0');
-
-                        stream.Position = ContentMapNameOffset;
-                        for (var i = 0; i < 256; i++)
-                            writer.Write(i < mapName.Length ? mapName[i] : '\0');
-
-                        foreach (var offset in ContentMapIdOffsets)
-                        {
-                            stream.Position = offset;
-                            writer.Write(entry.Key);
-                        }
+                        stream.Position = offset;
+                        writer.Write(entry.Key);
                     }
 
                     if (using_mapinfo)
