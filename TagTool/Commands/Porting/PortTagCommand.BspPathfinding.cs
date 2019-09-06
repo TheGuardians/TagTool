@@ -336,10 +336,99 @@ namespace TagTool.Commands.Porting
                         (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].PathfindingHints.Count : pathfindingDatum.PathfindingHints.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
+                    {
+                        var hint = bsp.PathfindingData[0].PathfindingHints[i];
+
+                        if (BlamCache.Version == CacheVersion.Halo3Retail &&
+                            (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink
+                            || hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink))
+                        {
+                            var hintverts = new HashSet<short>();
+                            var success = false;
+
+                            hintverts.Add((short)(hint.data0 & ushort.MaxValue));
+                            hintverts.Add((short)((hint.data0 >> 16) & ushort.MaxValue));
+                            hintverts.Add((short)(hint.data1 & ushort.MaxValue));
+                            hintverts.Add((short)((hint.data1 >> 16) & ushort.MaxValue));
+
+                            var maxvert = hintverts.Max();
+                            float hint_x = bsp.PathfindingData[0].Vertices[maxvert].Position.X;
+                            float hint_y = bsp.PathfindingData[0].Vertices[maxvert].Position.Y;
+                            float hint_z = bsp.PathfindingData[0].Vertices[maxvert].Position.Z;
+
+                            var sectorlist = new List<int>();
+                            var zavelist = new List<float>();
+
+                            for (var s = 0; s < bsp.PathfindingData[0].Sectors.Count; s++)
+                            {
+                                var sector = bsp.PathfindingData[0].Sectors[s];
+                                var vertices = new HashSet<short>();
+                                var link = bsp.PathfindingData[0].Links[sector.FirstLink];
+
+                                while (true)
+                                {
+                                    if (link.LeftSector == s)
+                                    {
+                                        vertices.Add(link.Vertex1);
+                                        vertices.Add(link.Vertex2);
+                                        if (link.ForwardLink == sector.FirstLink)
+                                            break;
+                                        else
+                                            link = bsp.PathfindingData[0].Links[link.ForwardLink];
+                                    }
+                                    else if (link.RightSector == s)
+                                    {
+                                        vertices.Add(link.Vertex1);
+                                        vertices.Add(link.Vertex2);
+                                        if (link.ReverseLink == sector.FirstLink)
+                                            break;
+                                        else
+                                            link = bsp.PathfindingData[0].Links[link.ReverseLink];
+                                    }
+                                }
+                                var xlist = new HashSet<float>();
+                                var ylist = new HashSet<float>();
+                                var zlist = new HashSet<float>();
+                                foreach (var vert in vertices)
+                                {
+                                    xlist.Add(bsp.PathfindingData[0].Vertices[vert].Position.X);
+                                    ylist.Add(bsp.PathfindingData[0].Vertices[vert].Position.Y);
+                                    zlist.Add(bsp.PathfindingData[0].Vertices[vert].Position.Z);
+                                }
+
+                                float xmin = xlist.Min();
+                                float xmax = xlist.Max();
+                                float ymin = ylist.Min();
+                                float ymax = ylist.Max();
+                                float zmin = zlist.Min();
+                                float zmax = zlist.Max();
+                                float zave = zlist.Average();
+
+                                if (xmin <= hint_x && xmax >= hint_x &&
+                                    ymin <= hint_y && ymax >= hint_y)               
+                                {
+                                    sectorlist.Add(s);
+                                    zavelist.Add(zave);
+                                }
+                            }
+
+                            for (i = 0; i < sectorlist.Count; i++)
+                            {
+                                var hiword = (short)(hint.data3 >> 16);
+                                hint.data3 = hiword << 16 | s;
+                                success = true;
+                            }
+
+                            if (!success)
+                            {
+                                Console.WriteLine("Pathfinding Jump Hint sector not found!");
+                            }
+                        }
                         CacheContext.Serializer.Serialize(dataContext,
-                            BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.PathfindingData[0].PathfindingHints[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
+                        BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.PathfindingData[0].PathfindingHints[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
+                    }
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
