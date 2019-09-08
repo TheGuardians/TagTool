@@ -502,10 +502,6 @@ namespace TagTool.Commands.Porting
                     blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
                     break;
 
-                case Equipment eqip:
-                    eqip.HealthPack = null;
-                    break;
-
 				case Globals matg:
 					blamDefinition = ConvertGlobals(matg, cacheStream);
 					break;
