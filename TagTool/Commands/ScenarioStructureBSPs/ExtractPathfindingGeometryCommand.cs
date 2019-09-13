@@ -122,8 +122,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             {
                 foreach (var pathfinding in resourceDefinition.PathfindingData)
                 {
-                    writer.WriteLine("newmtl Blue");
-                    writer.WriteLine("Ka 0.0 0.0 1.0");
+                    writer.WriteLine("mtllib Blue.mtl");
 
                     foreach (ScenarioStructureBsp.PathfindingDatum.Vertex vertex in pathfinding.Vertices)
                     {
@@ -131,23 +130,25 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     }
 
                     writer.WriteLine("usemtl Blue");
-                    writer.WriteLine("o JumpHints");
+                    writer.WriteLine("g JumpHints");                  
 
                     for (var i = 0; i < pathfinding.PathfindingHints.Count; i++)
                     {
                         var hint = pathfinding.PathfindingHints[i];
                         if (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink)
                         {
-                            int v1 = hint.data0 >> 16;
-                            int v2 = hint.data0 & 0xFFFF;
-                            int v3 = hint.data1 >> 16;
-                            int v4 = hint.data1 & 0xFFFF;
-                            writer.WriteLine($"g JumpHint {i}");
-                            writer.WriteLine($"f {v1} {v2} {v3} {v4}");
+                            int v2 = (hint.data0 >> 16) + 1;
+                            int v1 = (hint.data0 & 0xFFFF) + 1;
+                            int v4 = (hint.data1 >> 16) + 1;
+                            int v3 = (hint.data1 & 0xFFFF) + 1;
+                            int landing = hint.data3 & 0xFFFF;
+                            writer.WriteLine($"o JumpHint {i}, Landing Sector {landing}");
+                            writer.WriteLine($"f {v1} {v2} {v4} {v3}");
                         }
                     }
 
-                    writer.WriteLine("o Sectors");
+                    writer.WriteLine("usemtl White");
+                    writer.WriteLine("g Sectors");
 
                     for (var i = 0; i < pathfinding.Sectors.Count; i++)
                     {
@@ -155,7 +156,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         var vertices = new HashSet<short>();
                         var link = pathfinding.Links[sector.FirstLink];
 
-                        writer.WriteLine($"g Sector {i}");
+                        writer.WriteLine($"o Sector {i}");
                         writer.Write("f");
 
                         while (true)
