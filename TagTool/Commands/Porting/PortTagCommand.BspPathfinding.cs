@@ -343,18 +343,17 @@ namespace TagTool.Commands.Porting
                             (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink
                             || hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink))
                         {
-                            var hintverts = new HashSet<short>();
+                            var hintverts = new List<short>();
                             var success = false;
 
-                            hintverts.Add((short)(hint.data0 & ushort.MaxValue));
-                            hintverts.Add((short)((hint.data0 >> 16) & ushort.MaxValue));
+                            //hintverts.Add((short)(hint.data0 & ushort.MaxValue));
+                            //hintverts.Add((short)((hint.data0 >> 16) & ushort.MaxValue));
                             hintverts.Add((short)(hint.data1 & ushort.MaxValue));
                             hintverts.Add((short)((hint.data1 >> 16) & ushort.MaxValue));
 
-                            var maxvert = hintverts.Max();
-                            float hint_x = bsp.PathfindingData[0].Vertices[maxvert].Position.X;
-                            float hint_y = bsp.PathfindingData[0].Vertices[maxvert].Position.Y;
-                            float hint_z = bsp.PathfindingData[0].Vertices[maxvert].Position.Z;
+                            float hint_x = (bsp.PathfindingData[0].Vertices[hintverts[0]].Position.X + bsp.PathfindingData[0].Vertices[hintverts[1]].Position.X) / 2;
+                            float hint_y = (bsp.PathfindingData[0].Vertices[hintverts[0]].Position.Y + bsp.PathfindingData[0].Vertices[hintverts[1]].Position.Y) / 2;
+                            float hint_z = (bsp.PathfindingData[0].Vertices[hintverts[0]].Position.Z + bsp.PathfindingData[0].Vertices[hintverts[1]].Position.Z) / 2;
 
                             var sectorlist = new List<int>();
                             var zavelist = new List<float>();
@@ -386,9 +385,9 @@ namespace TagTool.Commands.Porting
                                             link = bsp.PathfindingData[0].Links[link.ReverseLink];
                                     }
                                 }
-                                var xlist = new HashSet<float>();
-                                var ylist = new HashSet<float>();
-                                var zlist = new HashSet<float>();
+                                var xlist = new List<float>();
+                                var ylist = new List<float>();
+                                var zlist = new List<float>();
                                 foreach (var vert in vertices)
                                 {
                                     xlist.Add(bsp.PathfindingData[0].Vertices[vert].Position.X);
@@ -404,16 +403,31 @@ namespace TagTool.Commands.Porting
                                 float zmax = zlist.Max();
                                 float zave = zlist.Average();
 
-                                if (xmin <= hint_x && xmax >= hint_x &&
-                                    ymin <= hint_y && ymax >= hint_y)               
+                                int pnpoly(int nvert, List<float> vertx, List<float> verty, float testx, float testy)
+                                {
+                                    int q, j, c = 0;
+                                    for (q = 0, j = nvert - 1; q < nvert; j = q++)
+                                    {
+                                        if (((verty[q] > testy) != (verty[j] > testy)) &&
+                                         (testx < (vertx[j] - vertx[q]) * (testy - verty[q]) / (verty[j] - verty[q]) + vertx[q]))
+                                            if (c == 0)
+                                                c = 1;
+                                            else
+                                                c = 0;
+                                    }
+                                    return c;
+                                }
+
+                                if (pnpoly(xlist.Count, xlist, ylist, hint_x, hint_y) == 1)              
                                 {
                                     sectorlist.Add(s);
-                                    zavelist.Add(zave);
+                                    zavelist.Add(Math.Abs(hint_z - zave));
                                 }
                             }
 
-                            for (i = 0; i < sectorlist.Count; i++)
+                            if (sectorlist.Count > 0)
                             {
+                                var s = sectorlist[zavelist.IndexOf(zavelist.Min())];
                                 var hiword = (short)(hint.data3 >> 16);
                                 hint.data3 = hiword << 16 | s;
                                 success = true;
