@@ -62,18 +62,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         pathfindingDatum.Links.Add(
                             CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(dataContext));
 
-                    resourceStream.Position = pathfindingDatum.References.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.References.Count; i++)
-                        pathfindingDatum.References.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Bsp2dNodes.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Bsp2dNodes.Count; i++)
-                        pathfindingDatum.Bsp2dNodes.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(dataContext));
-
                     resourceStream.Position = pathfindingDatum.PathfindingHints.Address.Offset;
 
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
@@ -86,37 +74,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         pathfindingDatum.Vertices.Add(
                             CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(dataContext));
 
-                    for (var objRefIdx = 0; objRefIdx < pathfindingDatum.ObjectReferences.Count; objRefIdx++)
-                    {
-                        for (var bspRefIdx = 0; bspRefIdx < pathfindingDatum.ObjectReferences[objRefIdx].Bsps.Count; bspRefIdx++)
-                        {
-                            var bspRef = pathfindingDatum.ObjectReferences[objRefIdx].Bsps[bspRefIdx];
-
-                            resourceStream.Position = bspRef.Bsp2dRefs.Address.Offset;
-
-                            for (var bsp2dRefIdx = 0; bsp2dRefIdx < bspRef.Bsp2dRefs.Count; bsp2dRefIdx++)
-                                bspRef.Bsp2dRefs.Add(
-                                    CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
-                        }
-                    }
-
-                    resourceStream.Position = pathfindingDatum.InstancedGeometryReferences.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.InstancedGeometryReferences.Count; i++)
-                        pathfindingDatum.InstancedGeometryReferences.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(dataContext));
-
-                    resourceStream.Position = pathfindingDatum.Doors.Address.Offset;
-
-                    for (var i = 0; i < pathfindingDatum.Doors.Count; i++)
-                        pathfindingDatum.Doors.Add(
-                            CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
-
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
                     {
                         var hint = pathfindingDatum.PathfindingHints[i];
 
-                        if (hint.HintType != JumpLink || hint.HintType != WallJumpLink)
+                        if (hint.HintType != JumpLink && hint.HintType != WallJumpLink)
                             continue;
 
                         var hintverts = new List<short>();
@@ -182,22 +144,20 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                             float zmax = zlist.Max();
                             float zave = zlist.Average();
 
-                            int pnpoly(int nvert, List<float> vertx, List<float> verty, float testx, float testy)
+                            bool pnpoly(int nvert, List<float> vertx, List<float> verty, float testx, float testy)
                             {
-                                int q, j, c = 0;
+                                bool c = false;
+                                int q, j = 0;
                                 for (q = 0, j = nvert - 1; q < nvert; j = q++)
                                 {
                                     if (((verty[q] > testy) != (verty[j] > testy)) &&
                                      (testx < (vertx[j] - vertx[q]) * (testy - verty[q]) / (verty[j] - verty[q]) + vertx[q]))
-                                        if (c == 0)
-                                            c = 1;
-                                        else
-                                            c = 0;
+                                        c = !c;
                                 }
                                 return c;
                             }
 
-                            if (pnpoly(xlist.Count, xlist, ylist, hint_x, hint_y) == 1)
+                            if (pnpoly(xlist.Count, xlist, ylist, hint_x, hint_y))
                             {
                                 sectorlist.Add(s);
                                 zavelist.Add(Math.Abs(hint_z - zave));
@@ -213,7 +173,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         }
 
                         if (!success)
-                            Console.WriteLine("Pathfinding Jump Hint sector not found!");
+                            Console.WriteLine($"Pathfinding Jump Hint {i} sector not found!");
                     }
 
                     resourceStream.Position = pathfindingDatum.PathfindingHints.Address.Offset;
