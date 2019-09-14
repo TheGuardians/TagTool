@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -128,12 +129,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                 }
                             }
 
+                            var points = new List<RealPoint3d>();
                             var xlist = new List<float>();
                             var ylist = new List<float>();
                             var zlist = new List<float>();
 
                             foreach (var vert in vertices)
                             {
+                                points.Add(pathfindingDatum.Vertices[vert].Position);
                                 xlist.Add(pathfindingDatum.Vertices[vert].Position.X);
                                 ylist.Add(pathfindingDatum.Vertices[vert].Position.Y);
                                 zlist.Add(pathfindingDatum.Vertices[vert].Position.Z);
@@ -147,20 +150,21 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                             float zmax = zlist.Max();
                             float zave = zlist.Average();
 
-                            bool pnpoly(int nvert, List<float> vertx, List<float> verty, float testx, float testy)
+                            bool pnpoly(List<RealPoint3d> polygon, RealPoint3d testPoint)
                             {
-                                bool c = false;
-                                int q, j = 0;
-                                for (q = 0, j = nvert - 1; q < nvert; j = q++)
-                                {
-                                    if (((verty[q] > testy) != (verty[j] > testy)) &&
-                                     (testx < (vertx[j] - vertx[q]) * (testy - verty[q]) / (verty[j] - verty[q]) + vertx[q]))
-                                        c = !c;
-                                }
-                                return c;
+                                var result = false;
+
+                                for (int p = 0, j = polygon.Count - 1; p < polygon.Count(); j = p++)
+                                    if (polygon[p].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[p].Y >= testPoint.Y)
+                                        if (polygon[p].X + (testPoint.Y - polygon[p].Y) / (polygon[j].Y - polygon[p].Y) * (polygon[j].X - polygon[p].X) < testPoint.X)
+                                            result = !result;
+
+                                // TODO: maybe check Z?
+
+                                return result;
                             }
 
-                            if (pnpoly(xlist.Count, xlist, ylist, hint_x, hint_y))
+                            if (pnpoly(points, new RealPoint3d(hint_x, hint_y, hint_z)))
                             {
                                 sectorlist.Add(s);
                                 zavelist.Add(Math.Abs(hint_z - zave));
