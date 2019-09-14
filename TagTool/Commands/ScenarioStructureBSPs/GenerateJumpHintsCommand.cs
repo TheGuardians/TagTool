@@ -81,6 +81,9 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         if (hint.HintType != JumpLink && hint.HintType != WallJumpLink)
                             continue;
 
+                        //hintdata[2] needs to be swapped back for H3
+                        hint.Data[2] = BitConverter.ToInt32(BitConverter.GetBytes(hint.Data[2]).Reverse().ToArray(), 0);
+
                         var hintverts = new List<short>();
                         var success = false;
 
