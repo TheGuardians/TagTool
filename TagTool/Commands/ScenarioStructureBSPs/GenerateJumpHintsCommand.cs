@@ -221,6 +221,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
                         CacheContext.Serializer.Serialize(dataContext, pathfindingDatum.PathfindingHints[i]);
 
+                    resourceStream.Position = 0;
                     CacheContext.ReplaceResource(Definition.PathfindingResource, resourceStream);
                 }
             }
