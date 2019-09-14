@@ -272,6 +272,7 @@
     <Compile Include="Commands\Modding\UpgradeModPackage.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
+    <Compile Include="Commands\ScenarioLightmaps\ExtractRenderGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\GenerateJumpHintsCommand.cs" />
     <Compile Include="Commands\Porting\CopyBlockElementsCommand.cs" />
     <Compile Include="Commands\Porting\PortMultiplayerScenarioCommand.cs" />

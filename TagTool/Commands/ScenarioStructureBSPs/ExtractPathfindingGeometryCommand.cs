@@ -137,11 +137,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         var hint = pathfinding.PathfindingHints[i];
                         if (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink)
                         {
-                            int v2 = (hint.data0 >> 16) + 1;
-                            int v1 = (hint.data0 & 0xFFFF) + 1;
-                            int v4 = (hint.data1 >> 16) + 1;
-                            int v3 = (hint.data1 & 0xFFFF) + 1;
-                            int landing = hint.data3 & 0xFFFF;
+                            int v2 = (hint.Data[0] >> 16) + 1;
+                            int v1 = (hint.Data[0] & 0xFFFF) + 1;
+                            int v4 = (hint.Data[1] >> 16) + 1;
+                            int v3 = (hint.Data[1] & 0xFFFF) + 1;
+                            int landing = hint.Data[3] & 0xFFFF;
                             writer.WriteLine($"o JumpHint {i}, Landing Sector {landing}");
                             writer.WriteLine($"f {v1} {v2} {v4} {v3}");
                         }

@@ -21,6 +21,7 @@ namespace TagTool.Commands.ScenarioLightmaps
         public static void Populate(CommandContext commandContext, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, ScenarioLightmapBspData Lbsp)
         {
             commandContext.AddCommand(new DumpRenderGeometryCommand(cacheContext, Lbsp.Geometry, "Lightmap"));
+            commandContext.AddCommand(new ExtractRenderGeometryCommand(cacheContext, Lbsp));
         }
     }
 }
