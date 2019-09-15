@@ -336,10 +336,20 @@ namespace TagTool.Commands.Porting
                         (BlamCache.Version < CacheVersion.Halo3ODST ? bsp.PathfindingData[0].PathfindingHints.Count : pathfindingDatum.PathfindingHints.Count),
                         new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position));
                     for (var i = 0; i < pathfindingDatum.PathfindingHints.Count; i++)
-                        CacheContext.Serializer.Serialize(dataContext,
-                            BlamCache.Version < CacheVersion.Halo3ODST ?
-                            bsp.PathfindingData[0].PathfindingHints[i] :
-                            BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext));
+                    {
+                        var hint = BlamCache.Version < CacheVersion.Halo3ODST ?
+                        bsp.PathfindingData[0].PathfindingHints[i] :
+                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext);
+
+                        if (BlamCache.Version < CacheVersion.Halo3ODST && 
+                            (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink 
+                            || hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink))
+                        {
+                            hint.Data[2] = BitConverter.ToInt32(BitConverter.GetBytes(hint.Data[2]).Reverse().ToArray(), 0);
+                        }
+
+                        CacheContext.Serializer.Serialize(dataContext, hint);
+                    }                                      
 
                     StreamUtil.Align(dataStream, 0x4);
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
