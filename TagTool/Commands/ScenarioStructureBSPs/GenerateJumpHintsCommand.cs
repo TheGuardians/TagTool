@@ -96,7 +96,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         float hint_z = (pathfindingDatum.Vertices[hintverts[0]].Position.Z + pathfindingDatum.Vertices[hintverts[1]].Position.Z) / 2.0f;
 
                         var sectorlist = new List<int>();
+                        var backupsectorlist = new List<int>();
+                        
                         var zavelist = new List<float>();
+                        var backupzavelist = new List<float>();
 
                         for (var s = 0; s < pathfindingDatum.Sectors.Count; s++)
                         {
@@ -168,11 +171,23 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                 sectorlist.Add(s);
                                 zavelist.Add(Math.Abs(hint_z - zave));
                             }
+                            else if (xmin < hint_x && xmax > hint_x && ymin < hint_y && ymax > hint_y)
+                            {
+                                backupsectorlist.Add(s);
+                                backupzavelist.Add(Math.Abs(hint_z - zave));
+                            }                          
                         }
 
                         if (sectorlist.Count > 0)
                         {
                             var s = sectorlist[zavelist.IndexOf(zavelist.Min())];
+                            var hiword = (short)(hint.Data[3] >> 16);
+                            hint.Data[3] = hiword << 16 | s;
+                            success = true;
+                        }
+                        else if (backupsectorlist.Count > 0)
+                        {
+                            var s = backupsectorlist[backupzavelist.IndexOf(backupzavelist.Min())];
                             var hiword = (short)(hint.Data[3] >> 16);
                             hint.Data[3] = hiword << 16 | s;
                             success = true;
