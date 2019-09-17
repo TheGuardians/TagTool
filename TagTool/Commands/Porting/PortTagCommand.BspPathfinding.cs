@@ -345,9 +345,8 @@ namespace TagTool.Commands.Porting
                         if (BlamCache.Version < CacheVersion.Halo3ODST && 
                             (hint.HintType == JumpLink || hint.HintType == WallJumpLink))
                         {
-                            hint.Data[2] = BitConverter.ToInt32(BitConverter.GetBytes(hint.Data[2]).Reverse().ToArray(), 0);
-                            hint.Data[3] = (hint.Data[2] & ushort.MaxValue) | (hint.Data[3] & ~ushort.MaxValue);
-                            hint.Data[2] = (hint.Data[2] & ~ushort.MaxValue) >> 8;
+                            hint.Data[3] = (hint.Data[3] & ~ushort.MaxValue) | ((hint.Data[2] >> 16) & ushort.MaxValue);
+                            hint.Data[2] &= ~(ushort.MaxValue << 16);
                         }
 
                         CacheContext.Serializer.Serialize(dataContext, hint);
