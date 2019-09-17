@@ -9,6 +9,7 @@ using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
+using static TagTool.Tags.Definitions.ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue;
 
 namespace TagTool.Commands.Porting
 {
@@ -342,10 +343,11 @@ namespace TagTool.Commands.Porting
                         BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(dataContext);
 
                         if (BlamCache.Version < CacheVersion.Halo3ODST && 
-                            (hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.JumpLink 
-                            || hint.HintType == ScenarioStructureBsp.PathfindingDatum.PathfindingHint.HintTypeValue.WallJumpLink))
+                            (hint.HintType == JumpLink || hint.HintType == WallJumpLink))
                         {
                             hint.Data[2] = BitConverter.ToInt32(BitConverter.GetBytes(hint.Data[2]).Reverse().ToArray(), 0);
+                            hint.Data[3] = (hint.Data[2] & ushort.MaxValue) | (hint.Data[3] & ~ushort.MaxValue);
+                            hint.Data[2] = (hint.Data[2] & ~ushort.MaxValue) >> 8;
                         }
 
                         CacheContext.Serializer.Serialize(dataContext, hint);

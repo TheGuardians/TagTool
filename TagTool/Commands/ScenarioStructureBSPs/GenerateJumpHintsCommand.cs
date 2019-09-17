@@ -181,15 +181,13 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         if (sectorlist.Count > 0)
                         {
                             var s = sectorlist[zavelist.IndexOf(zavelist.Min())];
-                            var hiword = (short)(hint.Data[3] >> 16);
-                            hint.Data[3] = hiword << 16 | s;
+                            hint.Data[3] = s | (hint.Data[3] & ~ushort.MaxValue);
                             success = true;
                         }
                         else if (backupsectorlist.Count > 0)
                         {
                             var s = backupsectorlist[backupzavelist.IndexOf(backupzavelist.Min())];
-                            var hiword = (short)(hint.Data[3] >> 16);
-                            hint.Data[3] = hiword << 16 | s;
+                            hint.Data[3] = s | (hint.Data[3] & ~ushort.MaxValue);
                             success = true;
                         }
 
