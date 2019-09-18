@@ -346,7 +346,7 @@ namespace TagTool.Commands.Porting
                             (hint.HintType == JumpLink || hint.HintType == WallJumpLink))
                         {
                             hint.Data[3] = (hint.Data[3] & ~ushort.MaxValue) | ((hint.Data[2] >> 16) & ushort.MaxValue);
-                            hint.Data[2] &= ~(ushort.MaxValue << 16);
+                            hint.Data[2] = (hint.Data[2] & ~(ushort.MaxValue << 16)) << 8;
                         }
 
                         CacheContext.Serializer.Serialize(dataContext, hint);
