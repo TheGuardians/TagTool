@@ -814,7 +814,7 @@ namespace TagTool.Commands.Porting
                 case ScriptExpressionType.ParameterReference:
                     if (ScriptExpressionIsValue(expr))
                         ConvertScriptValueOpcode(expr);
-                    else if (!ConvertScriptUsingPresets(scnr, expr))
+                    else if (!ConvertScriptUsingPresets(cacheStream, scnr, expr))
                         ConvertScriptExpressionOpcode(scnr, expr);
                     break;
 
@@ -1190,7 +1190,7 @@ namespace TagTool.Commands.Porting
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
 
-        public bool ConvertScriptUsingPresets(Scenario scnr, ScriptExpression expr)
+        public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, ScriptExpression expr)
         {
             // Return false to convert normally.
 
@@ -1219,23 +1219,7 @@ namespace TagTool.Commands.Porting
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
-                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
-                            for (var n = 1; n < 3; n++)
-                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-
-                            var expr2 = scnr.ScriptExpressions[exprIndex];
-
-                            var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
-                            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
-                            var seatMappingIndex = (int)-1;
-
-                            //
-                            // TODO: look up `seatMappingIndex` from `seatMappingString` here.
-                            //
-
-                            expr2.Opcode = 0x00C; // -> unit_seat_mapping
-                            expr2.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
-                            expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
                         }
                         return true;
 
@@ -1244,23 +1228,7 @@ namespace TagTool.Commands.Porting
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
-                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
-                            for (var n = 1; n < 3; n++)
-                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-
-                            var expr2 = scnr.ScriptExpressions[exprIndex];
-
-                            var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
-                            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
-                            var seatMappingIndex = (int)-1;
-
-                            //
-                            // TODO: look up `seatMappingIndex` from `seatMappingString` here.
-                            //
-
-                            expr2.Opcode = 0x00C; // -> unit_seat_mapping
-                            expr2.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
-                            expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
                         }
                         return true;
 
@@ -1338,6 +1306,89 @@ namespace TagTool.Commands.Porting
             }
             else
                 return false;
+        }
+
+        private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, ScriptExpression expr)
+        {
+            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+            for (var n = 1; n < 2; n++)
+                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+            var vehicleExpr = scnr.ScriptExpressions[exprIndex]; // <vehicle> parameter
+            var seatMappingExpr = scnr.ScriptExpressions[vehicleExpr.NextExpressionHandle.Index]; // <string_id> parameter
+
+            var seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
+            var seatMappingIndex = (int)-1;
+
+            if (vehicleExpr.ExpressionType == ScriptExpressionType.Group &&
+                seatMappingStringId != StringId.Invalid)
+            {
+                if (vehicleExpr.Opcode == 0x193) // ai_vehicle_get_from_starting_location
+                {
+                    var expr3 = scnr.ScriptExpressions[++exprIndex]; // function name
+                    var expr4 = scnr.ScriptExpressions[expr3.NextExpressionHandle.Index]; // <ai> parameter
+
+                    var value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
+
+                    if (value != uint.MaxValue)
+                    {
+                        var squadIndex = (value >> 16) & 0x1FFF;
+                        var fireTeamIndex = (value >> 8) & 0xFF;
+                        var spawnPointIndex = value & 0xFF;
+
+                        var vehicleIndex = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex].VehicleTypeIndex;
+
+                        var vehicleInstance = scnr.VehiclePalette[vehicleIndex].Object;
+                        var vehicleDefinition = CacheContext.Deserialize<Vehicle>(cacheStream, vehicleInstance);
+
+                        var seats1 = (Scenario.UnitSeatFlags)(0);
+                        var seats2 = (Scenario.UnitSeatFlags)(0);
+
+                        for (var seatIndex = 0; seatIndex < vehicleDefinition.Seats.Count; seatIndex++)
+                        {
+                            var seat = vehicleDefinition.Seats[seatIndex];
+                            var seatName = CacheContext.GetString(seat.SeatAnimation);
+
+                            if (seatMappingString == seatName)
+                            {
+                                if (seatIndex < 32)
+                                    seats1 = (Scenario.UnitSeatFlags)(1 << seatIndex);
+                                else
+                                    seats2 = (Scenario.UnitSeatFlags)(1 << (seatIndex - 32));
+                                break;
+                            }
+                        }
+
+                        for (var mappingIndex = 0; mappingIndex < scnr.UnitSeatsMapping.Count; mappingIndex++)
+                        {
+                            var mapping = scnr.UnitSeatsMapping[mappingIndex];
+
+                            if (mapping.Unit == vehicleInstance && mapping.Seats1 == seats1 && mapping.Seats2 == seats2)
+                            {
+                                seatMappingIndex = mappingIndex;
+                                break;
+                            }
+                        }
+
+                        if (seatMappingIndex == -1 && seats1 != Scenario.UnitSeatFlags.None && seats2 != Scenario.UnitSeatFlags.None)
+                        {
+                            seatMappingIndex = scnr.UnitSeatsMapping.Count;
+
+                            scnr.UnitSeatsMapping.Add(new Scenario.UnitSeatsMappingBlock
+                            {
+                                Unit = vehicleInstance,
+                                Seats1 = seats1,
+                                Seats2 = seats2
+                            });
+                        }
+                    }
+                }
+            }
+
+            seatMappingExpr.Opcode = 0x00C; // -> unit_seat_mapping
+            seatMappingExpr.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
+            seatMappingExpr.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
         }
 
         public void AdjustScripts(Scenario scnr, string tagName)
