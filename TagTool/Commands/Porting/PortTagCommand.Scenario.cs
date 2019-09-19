@@ -1205,7 +1205,12 @@ namespace TagTool.Commands.Porting
                             expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 2];
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+
+                            for (var n = 1; n < 2; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
                             expr2.Data = BitConverter.GetBytes(1.777f).Reverse().ToArray();
                         }
                         return true;
@@ -1215,7 +1220,11 @@ namespace TagTool.Commands.Porting
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 3];
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                            for (var n = 1; n < 3; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
 
                             var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
                             var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
@@ -1225,6 +1234,7 @@ namespace TagTool.Commands.Porting
                             // TODO: look up `seatMappingIndex` from `seatMappingString` here.
                             //
 
+                            expr2.Opcode = 0x00C; // -> unit_seat_mapping
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
@@ -1234,7 +1244,11 @@ namespace TagTool.Commands.Porting
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 3];
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                            for (var n = 1; n < 3; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
 
                             var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
                             var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
@@ -1244,6 +1258,7 @@ namespace TagTool.Commands.Porting
                             // TODO: look up `seatMappingIndex` from `seatMappingString` here.
                             //
 
+                            expr2.Opcode = 0x00C; // -> unit_seat_mapping
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
@@ -1276,8 +1291,14 @@ namespace TagTool.Commands.Porting
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 4];
-                            expr2.NextExpressionHandle = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 5].NextExpressionHandle;
+                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                            for (var n = 1; n < 4; n++)
+                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+
+                            var expr2 = scnr.ScriptExpressions[exprIndex];
+                            var expr3 = scnr.ScriptExpressions[expr2.NextExpressionHandle.Index];
+
+                            expr2.NextExpressionHandle = expr3.NextExpressionHandle;
                         }
                         return true;
 
