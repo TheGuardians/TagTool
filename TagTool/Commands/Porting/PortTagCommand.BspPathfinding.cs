@@ -323,10 +323,13 @@ namespace TagTool.Commands.Porting
                             bspRef.Bsp2dRefs.Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position);
 
                             for (var bsp2dRefIdx = 0; bsp2dRefIdx < bspRef.Bsp2dRefs.Count; bsp2dRefIdx++)
-                                CacheContext.Serializer.Serialize(dataContext,
-                                    BlamCache.Version < CacheVersion.Halo3ODST ?
-                                        bsp.PathfindingData[0].ObjectReferences[objRefIdx].Bsps[bspRefIdx].Bsp2dRefs[bsp2dRefIdx] :
-                                        BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext));
+                            {
+                                var bsp2dRef = BlamCache.Version < CacheVersion.Halo3ODST ?
+                                    bsp.PathfindingData[0].ObjectReferences[objRefIdx].Bsps[bspRefIdx].Bsp2dRefs[bsp2dRefIdx] :
+                                    BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(dataContext);
+
+                                CacheContext.Serializer.Serialize(dataContext, bsp2dRef);
+                            }
                         }
                     }
 

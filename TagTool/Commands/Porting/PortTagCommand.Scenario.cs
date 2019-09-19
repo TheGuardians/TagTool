@@ -814,11 +814,8 @@ namespace TagTool.Commands.Porting
                 case ScriptExpressionType.ParameterReference:
                     if (ScriptExpressionIsValue(expr))
                         ConvertScriptValueOpcode(expr);
-                    else
-                    {
-                        if (!ConvertScriptUsingPresets(scnr, expr))
-                            ConvertScriptExpressionOpcode(scnr, expr);
-                    }
+                    else if (!ConvertScriptUsingPresets(scnr, expr))
+                        ConvertScriptExpressionOpcode(scnr, expr);
                     break;
 
                 case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
@@ -1201,8 +1198,9 @@ namespace TagTool.Commands.Porting
             {
                 switch (expr.Opcode)
                 {
-                    case 0x0B3:
-                        expr.Opcode = 0x0B9; // Change the player appearance aspect ratio
+                    case 0x0B3: // texture_camera_set_aspect_ratio
+                        expr.Opcode = 0x0B9;
+                        // Change the player appearance aspect ratio
                         if (scnr.MapId == 0x10231971 && // mainmenu map id
                             expr.ExpressionType == ScriptExpressionType.Group &&
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
@@ -1212,35 +1210,42 @@ namespace TagTool.Commands.Porting
                         }
                         return true;
 
-                    case 0x353:
-                        expr.Opcode = 0x3A6; // Remove the additional H3 argument
+                    case 0x0F9: // vehicle_test_seat_list
+                        expr.Opcode = 0x114;
                         if (expr.ExpressionType == ScriptExpressionType.Group &&
-                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
-                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 4];
-                            expr2.NextExpressionHandle = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 5].NextExpressionHandle;
+                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 3];
+
+                            var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
+                            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
+                            var seatMappingIndex = (int)-1;
+
+                            //
+                            // TODO: look up `seatMappingIndex` from `seatMappingString` here.
+                            //
+
+                            expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
 
-                    case 0x2D2: // player_action_test_cinematic_skip
-                        expr.Opcode = 0x2F5; // player_action_test_jump
-                        return true;
+                    case 0x0FA: // vehicle_test_seat
+                        expr.Opcode = 0x115; // -> vehicle_test_seat_unit
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
+                        {
+                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 3];
 
-                    case 0x3CD: // chud_show_weapon_stats
-                        expr.Opcode = 0x423; // chud_show_crosshair
-                        return true;
+                            var seatMappingStringId = new StringId(BitConverter.ToUInt32(expr2.Data.Reverse().ToArray(), 0));
+                            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
+                            var seatMappingIndex = (int)-1;
 
-                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
-                        expr.Opcode = 0x3A0;
-                        return true;
+                            //
+                            // TODO: look up `seatMappingIndex` from `seatMappingString` here.
+                            //
 
-                    case 0x44D: // objectives_secondary_show (Doesn't exist in H3)
-                        expr.Opcode = 0x4AE; // objectives_show
-                        return true;
-
-                    case 0x44F: // objectives_secondary_unavailable (Doesn't exist in H3)
-                    case 0x44E: // objectives_primary_unavailable ""
-                        expr.Opcode = 0x4B2; // objectives_show
+                            expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
+                        }
                         return true;
 
                     case 0x1B7: // campaign_metagame_award_primary_skull
@@ -1251,14 +1256,46 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x1E6; // ^
                         return true;
 
+                    case 0x2D2: // player_action_test_cinematic_skip
+                        expr.Opcode = 0x2F5; // player_action_test_jump
+                        return true;
+
                     case 0x33C: // cinematic_object_get_unit
                     case 0x33D: // cinematic_object_get_scenery
                     case 0x33E: // cinematic_object_get_effect_scenery
-                        expr.Opcode = 0x391; // cinematic_object_get
+                        expr.Opcode = 0x391; // -> cinematic_object_get
+                        return true;
+
+                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
+                        expr.Opcode = 0x3A0;
+                        return true;
+
+                    case 0x353: // cinematic_scripting_create_and_animate_cinematic_object
+                        expr.Opcode = 0x3A6;
+                        // Remove the additional H3 argument
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
+                        {
+                            var expr2 = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 4];
+                            expr2.NextExpressionHandle = scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) + 5].NextExpressionHandle;
+                        }
                         return true;
 
                     case 0x354: //cinematic_scripting_create_and_animate_object_no_animation
                         expr.Opcode = 0x3A7; // ^
+                        return true;
+
+                    case 0x3CD: // chud_show_weapon_stats
+                        expr.Opcode = 0x423; // -> chud_show_crosshair
+                        return true;
+
+                    case 0x44D: // objectives_secondary_show
+                        expr.Opcode = 0x4AE; // -> objectives_show
+                        return true;
+
+                    case 0x44F: // objectives_secondary_unavailable
+                    case 0x44E: // objectives_primary_unavailable
+                        expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
 
                     default:
@@ -1311,33 +1348,6 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
                 scnr.ScriptExpressions[scriptIndex].ExpressionType = (ScriptExpressionType)Enum.Parse(typeof(ScriptExpressionType), items[5]);
-            }
-
-            if (mapName == "010_jungle")
-            {
-                // player0 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2448].Opcode = 0x115;
-                scnr.ScriptExpressions[2449].Opcode = 0x115;
-                scnr.ScriptExpressions[2451].Opcode = 0x00C;
-                scnr.ScriptExpressions[2451].Data[0] = 21;
-
-                // player1 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2456].Opcode = 0x115;
-                scnr.ScriptExpressions[2457].Opcode = 0x115;
-                scnr.ScriptExpressions[2459].Opcode = 0x00C;
-                scnr.ScriptExpressions[2459].Data[0] = 21;
-
-                // player2 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2464].Opcode = 0x115;
-                scnr.ScriptExpressions[2465].Opcode = 0x115;
-                scnr.ScriptExpressions[2467].Opcode = 0x00C;
-                scnr.ScriptExpressions[2467].Data[0] = 21;
-
-                // player3 dam_pelican vehicle_test_seat
-                scnr.ScriptExpressions[2472].Opcode = 0x115;
-                scnr.ScriptExpressions[2473].Opcode = 0x115;
-                scnr.ScriptExpressions[2475].Opcode = 0x00C;
-                scnr.ScriptExpressions[2475].Data[0] = 21;
             }
         }
 
