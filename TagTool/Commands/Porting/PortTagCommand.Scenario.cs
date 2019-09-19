@@ -1234,7 +1234,7 @@ namespace TagTool.Commands.Porting
                             //
 
                             expr2.Opcode = 0x00C; // -> unit_seat_mapping
-                            expr2.ValueType.HaloOnline = ScriptValueType.HaloOnlineValue.UnitSeatMapping;
+                            expr2.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
@@ -1259,7 +1259,7 @@ namespace TagTool.Commands.Porting
                             //
 
                             expr2.Opcode = 0x00C; // -> unit_seat_mapping
-                            expr2.ValueType.HaloOnline = ScriptValueType.HaloOnlineValue.UnitSeatMapping;
+                            expr2.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
