@@ -1206,7 +1206,6 @@ namespace TagTool.Commands.Porting
                             expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
                             var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
-
                             for (var n = 1; n < 2; n++)
                                 exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
 
@@ -1235,6 +1234,7 @@ namespace TagTool.Commands.Porting
                             //
 
                             expr2.Opcode = 0x00C; // -> unit_seat_mapping
+                            expr2.ValueType.HaloOnline = ScriptValueType.HaloOnlineValue.UnitSeatMapping;
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
@@ -1259,6 +1259,7 @@ namespace TagTool.Commands.Porting
                             //
 
                             expr2.Opcode = 0x00C; // -> unit_seat_mapping
+                            expr2.ValueType.HaloOnline = ScriptValueType.HaloOnlineValue.UnitSeatMapping;
                             expr2.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
                         }
                         return true;
