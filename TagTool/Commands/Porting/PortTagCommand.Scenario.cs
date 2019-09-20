@@ -1335,19 +1335,35 @@ namespace TagTool.Commands.Porting
                     {
                         var squadIndex = (value >> 16) & 0x1FFF;
                         var fireTeamIndex = (value >> 8) & 0xFF;
-                        var spawnPointIndex = value & 0xFF;
 
-                        var vehicleIndex = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex].VehicleTypeIndex;
+                        var fireTeam = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex];
 
-                        var vehicleInstance = scnr.VehiclePalette[vehicleIndex].Object;
-                        var vehicleDefinition = CacheContext.Deserialize<Vehicle>(cacheStream, vehicleInstance);
+                        var unitInstance = scnr.VehiclePalette[fireTeam.VehicleTypeIndex].Object;
+                        var unitDefinition = (Unit)CacheContext.Deserialize<Vehicle>(cacheStream, unitInstance);
+
+                        var variantName = CacheContext.GetString(unitDefinition.DefaultModelVariant);
+
+                        if (fireTeam.VehicleVariant != StringId.Invalid)
+                            variantName = CacheContext.GetString(fireTeam.VehicleVariant);
+
+                        var modelDefinition = CacheContext.Deserialize<Model>(cacheStream, unitDefinition.Model);
+                        var modelVariant = default(Model.Variant);
+
+                        foreach (var variant in modelDefinition.Variants)
+                        {
+                            if (variantName == CacheContext.GetString(variant.Name))
+                            {
+                                modelVariant = variant;
+                                break;
+                            }
+                        }
 
                         var seats1 = (Scenario.UnitSeatFlags)(0);
                         var seats2 = (Scenario.UnitSeatFlags)(0);
 
-                        for (var seatIndex = 0; seatIndex < vehicleDefinition.Seats.Count; seatIndex++)
+                        for (var seatIndex = 0; seatIndex < unitDefinition.Seats.Count; seatIndex++)
                         {
-                            var seat = vehicleDefinition.Seats[seatIndex];
+                            var seat = unitDefinition.Seats[seatIndex];
                             var seatName = CacheContext.GetString(seat.SeatAnimation);
 
                             if (seatMappingString == seatName)
@@ -1360,24 +1376,68 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
+                        if (seats1 == Scenario.UnitSeatFlags.None && seats2 == Scenario.UnitSeatFlags.None)
+                        {
+                            foreach (var obj in modelVariant.Objects)
+                            {
+                                if (obj.ChildObject == null || !obj.ChildObject.IsInGroup<Unit>())
+                                    continue;
+
+                                var definition = (Unit)CacheContext.Deserialize(cacheStream, obj.ChildObject);
+
+                                for (var seatIndex = 0; seatIndex < definition.Seats.Count; seatIndex++)
+                                {
+                                    var seat = definition.Seats[seatIndex];
+                                    var seatName = CacheContext.GetString(seat.SeatAnimation);
+
+                                    if (seatMappingString == seatName)
+                                    {
+                                        if (seatIndex < 32)
+                                            seats1 = (Scenario.UnitSeatFlags)(1 << seatIndex);
+                                        else
+                                            seats2 = (Scenario.UnitSeatFlags)(1 << (seatIndex - 32));
+                                        break;
+                                    }
+                                }
+
+                                if (seats1 != Scenario.UnitSeatFlags.None || seats2 != Scenario.UnitSeatFlags.None)
+                                {
+                                    unitInstance = obj.ChildObject;
+                                    unitDefinition = definition;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (seats1 == Scenario.UnitSeatFlags.None && seats2 == Scenario.UnitSeatFlags.None)
+                        {
+                            for (var i = 0; i < unitDefinition.Seats.Count; i++)
+                            {
+                                if (i < 32)
+                                    seats1 |= (Scenario.UnitSeatFlags)(1 << i);
+                                else
+                                    seats2 |= (Scenario.UnitSeatFlags)(1 << (i - 32));
+                            }
+                        }
+
                         for (var mappingIndex = 0; mappingIndex < scnr.UnitSeatsMapping.Count; mappingIndex++)
                         {
                             var mapping = scnr.UnitSeatsMapping[mappingIndex];
 
-                            if (mapping.Unit == vehicleInstance && mapping.Seats1 == seats1 && mapping.Seats2 == seats2)
+                            if (mapping.Unit == unitInstance && mapping.Seats1 == seats1 && mapping.Seats2 == seats2)
                             {
                                 seatMappingIndex = mappingIndex;
                                 break;
                             }
                         }
 
-                        if (seatMappingIndex == -1 && seats1 != Scenario.UnitSeatFlags.None && seats2 != Scenario.UnitSeatFlags.None)
+                        if (seatMappingIndex == -1)
                         {
                             seatMappingIndex = scnr.UnitSeatsMapping.Count;
 
                             scnr.UnitSeatsMapping.Add(new Scenario.UnitSeatsMappingBlock
                             {
-                                Unit = vehicleInstance,
+                                Unit = unitInstance,
                                 Seats1 = seats1,
                                 Seats2 = seats2
                             });
