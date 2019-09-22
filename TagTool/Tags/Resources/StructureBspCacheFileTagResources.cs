@@ -40,7 +40,7 @@ namespace TagTool.Tags.Resources
 
                 public List<BspReference> Bsps;
 
-                public DatumIndex ObjectHandle;
+                public int ObjectUniqueID;
                 public short OriginBspIndex;
                 public ScenarioObjectType ObjectType;
                 public Scenario.ScenarioInstance.SourceValue Source;
@@ -48,7 +48,7 @@ namespace TagTool.Tags.Resources
                 [TagStructure(Size = 0x18)]
                 public class BspReference : TagStructure
                 {
-                    public DatumIndex BspHandle;
+                    public int BspIndex;
                     public short NodeIndex;
 
                     [TagField(Flags = Padding, Length = 2)]

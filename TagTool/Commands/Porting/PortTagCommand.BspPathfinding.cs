@@ -205,7 +205,7 @@ namespace TagTool.Commands.Porting
                         {
                             Flags = oldObjectReference.Flags,
                             Bsps = new List<StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference>(),
-                            ObjectHandle = oldObjectReference.ObjectHandle,
+                            ObjectUniqueID = oldObjectReference.ObjectUniqueID,
                             OriginBspIndex = oldObjectReference.OriginBspIndex,
                             ObjectType = oldObjectReference.ObjectType.DeepClone(),
                             Source = oldObjectReference.Source
@@ -215,7 +215,7 @@ namespace TagTool.Commands.Porting
                         {
                             objectReference.Bsps.Add(new StructureBspCacheFileTagResources.PathfindingDatum.ObjectReference.BspReference
                             {
-                                BspHandle = bspRef.BspHandle,
+                                BspIndex = bspRef.BspIndex,
                                 NodeIndex = bspRef.NodeIndex,
                                 Bsp2dRefs = new TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(bspRef.Bsp2dRefs.Count, new CacheAddress()),
                                 VertexOffset = bspRef.VertexOffset

@@ -768,7 +768,7 @@ namespace TagTool.Tags.Definitions
 
                 public List<BspReference> Bsps;
 
-                public DatumIndex ObjectHandle;
+                public int ObjectUniqueID;
                 public short OriginBspIndex;
                 public ScenarioObjectType ObjectType;
                 public Scenario.ScenarioInstance.SourceValue Source;
@@ -776,7 +776,7 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x18)]
                 public class BspReference : TagStructure
                 {
-                    public DatumIndex BspHandle;
+                    public int BspIndex;
                     public short NodeIndex;
 
                     [TagField(Flags = Padding, Length = 2)]
@@ -789,7 +789,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x4)]
                     public class Bsp2dRef : TagStructure
                     {
-                        public int Index;
+                        public DatumIndex Index;
                     }
                 }
             }
