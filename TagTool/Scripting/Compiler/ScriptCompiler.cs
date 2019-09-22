@@ -13,7 +13,7 @@ namespace TagTool.Scripting.Compiler
 {
     public class ScriptCompiler
     {
-        public GameCacheContext CacheContext { get; }
+        public HaloOnlineCacheContext CacheContext { get; }
         public Scenario Definition { get; }
 
         private List<Script> Scripts;
@@ -23,7 +23,7 @@ namespace TagTool.Scripting.Compiler
         private BinaryWriter StringWriter;
         private Dictionary<string, uint> StringOffsets;
 
-        public ScriptCompiler(GameCacheContext cacheContext, Scenario definition)
+        public ScriptCompiler(HaloOnlineCacheContext cacheContext, Scenario definition)
         {
             CacheContext = cacheContext;
             Definition = definition;
@@ -869,7 +869,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(triggerVolumeSymbol.Value);
-                Array.Copy(BitConverter.GetBytes(triggerVolumeIndex), expr.Data, 4);
+                Array.Copy(BitConverter.GetBytes((short)triggerVolumeIndex), expr.Data, 2);
             }
 
             return handle;
@@ -885,7 +885,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneFlagSymbol.Value);
-                Array.Copy(BitConverter.GetBytes(cutsceneFlagIndex), expr.Data, 4);
+                Array.Copy(BitConverter.GetBytes((short)cutsceneFlagIndex), expr.Data, 2);
             }
 
             return handle;
@@ -901,7 +901,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneCameraPointSymbol.Value);
-                Array.Copy(BitConverter.GetBytes(cutsceneCameraPointIndex), expr.Data, 4);
+                Array.Copy(BitConverter.GetBytes((short)cutsceneCameraPointIndex), expr.Data, 2);
             }
 
             return handle;
@@ -917,7 +917,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneTitleSymbol.Value);
-                Array.Copy(BitConverter.GetBytes(cutsceneTitleIndex), expr.Data, 4);
+                Array.Copy(BitConverter.GetBytes((short)cutsceneTitleIndex), expr.Data, 2);
             }
 
             return handle;
@@ -926,8 +926,21 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileCutsceneRecordingExpression(ScriptString cutsceneRecordingString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileDeviceGroupExpression(ScriptString deviceGroupString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileDeviceGroupExpression(ScriptString deviceGroupString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.DeviceGroup, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var deviceGroupIndex = Definition.DeviceGroups.FindIndex(dg => dg.Name == deviceGroupString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(deviceGroupString.Value);
+                Array.Copy(BitConverter.GetBytes(deviceGroupIndex), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileAiExpression(ScriptString aiString) =>
             throw new NotImplementedException();
@@ -947,8 +960,21 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileAiLineExpression(ScriptString aiLineString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileStartingProfileExpression(ScriptString startingProfileString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileStartingProfileExpression(ScriptString startingProfileString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.StartingProfile, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var startingProfileIndex = Definition.PlayerStartingProfile.FindIndex(sp => sp.Name == startingProfileString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(startingProfileString.Value);
+                Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileConversationExpression(ScriptString conversationString) =>
             throw new NotImplementedException();
@@ -968,59 +994,338 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileObjectListExpression(ScriptString objectListString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileFolderExpression(ScriptString folderString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileFolderExpression(ScriptString folderString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Folder, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileSoundExpression(ScriptString soundString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                var folderIndex = Definition.EditorFolders.FindIndex(ef => ef.Name == folderString.Value);
 
-        private DatumIndex CompileEffectExpression(ScriptString effectString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(folderString.Value);
+                Array.Copy(BitConverter.GetBytes(folderIndex), expr.Data, 4);
+            }
 
-        private DatumIndex CompileDamageExpression(ScriptString damageString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileLoopingSoundExpression(ScriptString loopingSoundString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileSoundExpression(ScriptString soundString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Sound, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileAnimationGraphExpression(ScriptString animationGraphString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(soundString.Value, out var instance) ||
+                    !instance.IsInGroup<Sound>())
+                {
+                    throw new FormatException(soundString.Value);
+                }
 
-        private DatumIndex CompileDamageEffectExpression(ScriptString damageEffectString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(soundString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
 
-        private DatumIndex CompileObjectDefinitionExpression(ScriptString objectDefinitionString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileBitmapExpression(ScriptString bitmapString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileEffectExpression(ScriptString effectString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Effect, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileShaderExpression(ScriptString shaderString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(effectString.Value, out var instance) ||
+                    !instance.IsInGroup<Effect>())
+                {
+                    throw new FormatException(effectString.Value);
+                }
 
-        private DatumIndex CompileRenderModelExpression(ScriptString renderModelString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(effectString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
 
-        private DatumIndex CompileStructureDefinitionExpression(ScriptString structureDefinitionString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
+
+        private DatumIndex CompileDamageExpression(ScriptString damageString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Damage, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(damageString.Value, out var instance) ||
+                    !instance.IsInGroup<DamageEffect>())
+                {
+                    throw new FormatException(damageString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(damageString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileLoopingSoundExpression(ScriptString loopingSoundString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.LoopingSound, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(loopingSoundString.Value, out var instance) ||
+                    !instance.IsInGroup<SoundLooping>())
+                {
+                    throw new FormatException(loopingSoundString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(loopingSoundString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileAnimationGraphExpression(ScriptString animationGraphString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.AnimationGraph, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(animationGraphString.Value, out var instance) ||
+                    !instance.IsInGroup<ModelAnimationGraph>())
+                {
+                    throw new FormatException(animationGraphString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(animationGraphString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileDamageEffectExpression(ScriptString damageEffectString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.DamageEffect, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(damageEffectString.Value, out var instance) ||
+                    !instance.IsInGroup<DamageEffect>())
+                {
+                    throw new FormatException(damageEffectString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(damageEffectString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileObjectDefinitionExpression(ScriptString objectDefinitionString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ObjectDefinition, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(objectDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup<GameObject>())
+                {
+                    throw new FormatException(objectDefinitionString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectDefinitionString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileBitmapExpression(ScriptString bitmapString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Bitmap, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(bitmapString.Value, out var instance) ||
+                    !instance.IsInGroup<Bitmap>())
+                {
+                    throw new FormatException(bitmapString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(bitmapString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileShaderExpression(ScriptString shaderString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Shader, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(shaderString.Value, out var instance) ||
+                    !instance.IsInGroup<RenderMethod>())
+                {
+                    throw new FormatException(shaderString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(shaderString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileRenderModelExpression(ScriptString renderModelString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.RenderModel, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(renderModelString.Value, out var instance) ||
+                    !instance.IsInGroup<RenderModel>())
+                {
+                    throw new FormatException(renderModelString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(renderModelString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileStructureDefinitionExpression(ScriptString structureDefinitionString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.StructureDefinition, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(structureDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup<ScenarioStructureBsp>())
+                {
+                    throw new FormatException(structureDefinitionString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(structureDefinitionString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileLightmapDefinitionExpression(ScriptString lightmapDefinitionString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CinematicDefinition, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(cinematicDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup<Cinematic>())
+                {
+                    throw new FormatException(cinematicDefinitionString.Value);
+                }
 
-        private DatumIndex CompileBinkDefinitionExpression(ScriptString binkDefinitionString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cinematicDefinitionString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
 
-        private DatumIndex CompileAnyTagExpression(ScriptString anyTagString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CinematicSceneDefinition, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(cinematicSceneDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup<CinematicScene>())
+                {
+                    throw new FormatException(cinematicSceneDefinitionString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cinematicSceneDefinitionString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileBinkDefinitionExpression(ScriptString binkDefinitionString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.BinkDefinition, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(binkDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup<Bink>())
+                {
+                    throw new FormatException(binkDefinitionString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(binkDefinitionString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileAnyTagExpression(ScriptString anyTagString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.AnyTag, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(anyTagString.Value, out var instance))
+                    throw new FormatException(anyTagString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(anyTagString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.AnyTagNotResolving, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!CacheContext.TryGetTag(anyTagNotResolvingString.Value, out var instance))
+                    throw new FormatException(anyTagNotResolvingString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(anyTagNotResolvingString.Value);
+                Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol) =>
             throw new NotImplementedException();
