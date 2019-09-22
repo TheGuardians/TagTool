@@ -1622,26 +1622,6 @@ namespace TagTool.Tags.Definitions
             SquadIsMusketeer = 1 << 9
         }
 
-        public enum SquadTeam : short
-        {
-            Default,
-            Player,
-            Human,
-            Covenant,
-            Flood,
-            Sentinel,
-            Heretic,
-            Prophet,
-            Guilty,
-            Unused9,
-            Unused10,
-            Unused11,
-            Unused12,
-            Unused13,
-            Unused14,
-            Unused15,
-        }
-
         [Flags]
         public enum SquadDifficultyFlags : ushort
         {
@@ -1788,7 +1768,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// The team the squad is on.
             /// </summary>
-            public SquadTeam Team;
+            public GameTeam Team;
 
             /// <summary>
             /// The index of the parent group of the squad.

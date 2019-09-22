@@ -291,6 +291,12 @@
     <Compile Include="Commands\Tags\SaveModdedTagsCommand.cs" />
     <Compile Include="Common\Crc32.cs" />
     <Compile Include="Common\DatumIndex.cs" />
+    <Compile Include="Common\GameController.cs" />
+    <Compile Include="Common\GameControllerButtonPreset.cs" />
+    <Compile Include="Common\GameControllerJoystickPreset.cs" />
+    <Compile Include="Common\GameDifficulty.cs" />
+    <Compile Include="Common\GameMultiplayerTeam.cs" />
+    <Compile Include="Common\GameTeam.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\ModelExtractor.cs" />
     <Compile Include="GlobalSuppressions.cs" />

@@ -569,8 +569,8 @@ namespace TagTool.Scripting.Compiler
                     else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.Controller:
-                    if (node is ScriptInteger controllerInteger)
-                        return CompileControllerExpression(controllerInteger);
+                    if (node is ScriptSymbol controllerSymbol)
+                        return CompileControllerExpression(controllerSymbol);
                     else throw new FormatException(node.ToString());
 
                 case ScriptValueType.Halo3ODSTValue.ButtonPreset:
@@ -1327,23 +1327,107 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.GameDifficulty, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileTeamExpression(ScriptSymbol teamSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameDifficulty>(gameDifficultySymbol.Value, true, out var difficulty))
+                    throw new FormatException(gameDifficultySymbol.Value);
 
-        private DatumIndex CompileMpTeamExpression(ScriptSymbol mpTeamSymbol) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(gameDifficultySymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)difficulty), expr.Data, 2);
+            }
 
-        private DatumIndex CompileControllerExpression(ScriptInteger controllerInteger) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileTeamExpression(ScriptSymbol teamSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Team, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameTeam>(teamSymbol.Value, true, out var team))
+                    throw new FormatException(teamSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(teamSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)team), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileMpTeamExpression(ScriptSymbol mpTeamSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.MpTeam, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameMultiplayerTeam>(mpTeamSymbol.Value, true, out var mpTeam))
+                    throw new FormatException(mpTeamSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(mpTeamSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)mpTeam), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileControllerExpression(ScriptSymbol controllerSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Controller, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameController>(controllerSymbol.Value, true, out var controller))
+                    throw new FormatException(controllerSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(controllerSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)controller), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ButtonPreset, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameControllerButtonPreset>(buttonPresetSymbol.Value, true, out var buttonPreset))
+                    throw new FormatException(buttonPresetSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(buttonPresetSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)buttonPreset), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.JoystickPreset, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameControllerJoystickPreset>(joystickPresetSymbol.Value, true, out var joystickPreset))
+                    throw new FormatException(joystickPresetSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(joystickPresetSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)joystickPreset), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompilePlayerColorExpression(ScriptSymbol playerColorSymbol) =>
             throw new NotImplementedException();
