@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Scripting.Compiler;
@@ -979,14 +980,59 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileConversationExpression(ScriptString conversationString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileZoneSetExpression(ScriptString zoneSetString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileZoneSetExpression(ScriptString zoneSetString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ZoneSet, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileDesignerZoneExpression(ScriptString designerZoneString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                var zoneSetIndex = Definition.ZoneSets.FindIndex(zs => zoneSetString.Value == CacheContext.GetString(zs.Name));
 
-        private DatumIndex CompilePointReferenceExpression(ScriptString pointReferenceString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(zoneSetString.Value);
+                Array.Copy(BitConverter.GetBytes((short)zoneSetIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileDesignerZoneExpression(ScriptString designerZoneString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ZoneSet, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var designerZoneIndex = Definition.DesignerZoneSets.FindIndex(dz => designerZoneString.Value == CacheContext.GetString(dz.Name));
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(designerZoneString.Value);
+                Array.Copy(BitConverter.GetBytes((short)designerZoneIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompilePointReferenceExpression(ScriptString pointReferenceString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.PointReference, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var names = pointReferenceString.Value.Split('/');
+
+                if (names.Length != 2)
+                    throw new FormatException(pointReferenceString.Value);
+
+                var pointSetIndex = Definition.ScriptingData[0].PointSets.FindIndex(ps => ps.Name == names[0]);
+                var pointIndex = Definition.ScriptingData[0].PointSets[pointSetIndex].Points.FindIndex(p => p.Name == names[1]);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(pointReferenceString.Value);
+                Array.Copy(BitConverter.GetBytes((int)((ushort)pointIndex | (ushort)(pointSetIndex << 16))), expr.Data, 4);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileStyleExpression(ScriptString styleString) =>
             throw new NotImplementedException();
@@ -1432,35 +1478,175 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompilePlayerColorExpression(ScriptSymbol playerColorSymbol) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.PlayerCharacterType, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GamePlayerCharacterType>(playerCharacterTypeSymbol.Value, true, out var playerCharacterType))
+                    throw new FormatException(playerCharacterTypeSymbol.Value);
 
-        private DatumIndex CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(playerCharacterTypeSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)playerCharacterType), expr.Data, 2);
+            }
 
-        private DatumIndex CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileActorTypeExpression(ScriptSymbol actorTypeSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.VoiceOutputSetting, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileModelStateExpression(ScriptSymbol modelStateSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameVoiceOutputSetting>(voiceOutputSettingSymbol.Value, true, out var voiceOutputSetting))
+                    throw new FormatException(voiceOutputSettingSymbol.Value);
 
-        private DatumIndex CompileEventExpression(ScriptSymbol eventSymbol) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(voiceOutputSettingSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)voiceOutputSetting), expr.Data, 2);
+            }
 
-        private DatumIndex CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.VoiceMask, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameVoiceMask>(voiceMaskSymbol.Value, true, out var voiceMask))
+                    throw new FormatException(voiceMaskSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(voiceMaskSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)voiceMask), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.SubtitleSetting, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameSubtitleSetting>(subtitleSettingSymbol.Value, true, out var subtitleSetting))
+                    throw new FormatException(subtitleSettingSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(subtitleSettingSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)subtitleSetting), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileActorTypeExpression(ScriptSymbol actorTypeSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ActorType, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<AiActorType>(actorTypeSymbol.Value, true, out var actorType))
+                    throw new FormatException(actorTypeSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(actorTypeSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)actorType), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileModelStateExpression(ScriptSymbol modelStateSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ModelState, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameModelState>(modelStateSymbol.Value, true, out var modelState))
+                    throw new FormatException(modelStateSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(modelStateSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)modelState), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileEventExpression(ScriptSymbol eventSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Event, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameEventType>(eventSymbol.Value, true, out var eventType))
+                    throw new FormatException(eventSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(eventSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)eventType), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.CharacterPhysics, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameCharacterPhysics>(characterPhysicsSymbol.Value, true, out var characterPhysics))
+                    throw new FormatException(characterPhysicsSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(characterPhysicsSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)characterPhysics), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.PrimarySkull, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GamePrimarySkull>(primarySkullSymbol.Value, true, out var primarySkull))
+                    throw new FormatException(primarySkullSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(primarySkullSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)primarySkull), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.SecondarySkull, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                if (!Enum.TryParse<GameSecondarySkull>(secondarySkullSymbol.Value, true, out var secondarySkull))
+                    throw new FormatException(secondarySkullSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(secondarySkullSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)secondarySkull), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileObjectExpression(ScriptString objectString) =>
             throw new NotImplementedException();
@@ -1483,26 +1669,143 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileEffectSceneryExpression(ScriptString effectSceneryString) =>
             throw new NotImplementedException();
 
-        private DatumIndex CompileObjectNameExpression(ScriptString objectNameString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileObjectNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.ObjectName, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileUnitNameExpression(ScriptString unitNameString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
-        private DatumIndex CompileVehicleNameExpression(ScriptString vehicleNameString) =>
-            throw new NotImplementedException();
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
 
-        private DatumIndex CompileWeaponNameExpression(ScriptString weaponNameString) =>
-            throw new NotImplementedException();
+            return handle;
+        }
 
-        private DatumIndex CompileDeviceNameExpression(ScriptString deviceNameString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileUnitNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.UnitName, ScriptExpressionType.Expression);
 
-        private DatumIndex CompileSceneryNameExpression(ScriptString sceneryNameString) =>
-            throw new NotImplementedException();
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
-        private DatumIndex CompileEffectSceneryNameExpression(ScriptString effectSceneryNameString) =>
-            throw new NotImplementedException();
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Biped ||
+                    Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Giant ||
+                    Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Vehicle)
+                {
+                    throw new FormatException(objectNameString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileVehicleNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.VehicleName, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Vehicle)
+                    throw new FormatException(objectNameString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileWeaponNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.WeaponName, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Weapon)
+                    throw new FormatException(objectNameString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileDeviceNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.DeviceName, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.AlternateRealityDevice ||
+                    Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Control ||
+                    Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Machine)
+                {
+                    throw new FormatException(objectNameString.Value);
+                }
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileSceneryNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.SceneryName, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Scenery)
+                    throw new FormatException(objectNameString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
+
+        private DatumIndex CompileEffectSceneryNameExpression(ScriptString objectNameString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.EffectSceneryName, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.EffectScenery)
+                    throw new FormatException(objectNameString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectNameString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileCinematicLightprobeExpression(ScriptString cinematicLightprobeString) =>
             throw new NotImplementedException();
