@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Ai;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Scripting.Compiler;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Scripting.Compiler
@@ -814,13 +811,14 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(scriptSymbol.Value);
-                
-                //
-                // TODO: Compile script data here
-                //
+                var scriptIndex = Scripts.FindIndex(s => s.ScriptName == scriptSymbol.Value);
 
-                throw new NotImplementedException(ScriptValueType.Halo3ODSTValue.Script.ToString());
+                if (scriptIndex == -1)
+                    throw new FormatException(scriptSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(scriptSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)scriptIndex), expr.Data, 2);
             }
 
             return handle;
@@ -868,6 +866,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeSymbol.Value == CacheContext.GetString(tv.Name));
 
+                if (triggerVolumeIndex == -1)
+                    throw new FormatException(triggerVolumeSymbol.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(triggerVolumeSymbol.Value);
                 Array.Copy(BitConverter.GetBytes((short)triggerVolumeIndex), expr.Data, 2);
@@ -883,6 +884,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagSymbol.Value == CacheContext.GetString(cf.Name));
+
+                if (cutsceneFlagIndex == -1)
+                    throw new FormatException(cutsceneFlagSymbol.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneFlagSymbol.Value);
@@ -900,6 +904,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var cutsceneCameraPointIndex = Definition.CutsceneCameraPoints.FindIndex(ccp => cutsceneCameraPointSymbol.Value == ccp.Name);
 
+                if (cutsceneCameraPointIndex == -1)
+                    throw new FormatException(cutsceneCameraPointSymbol.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneCameraPointSymbol.Value);
                 Array.Copy(BitConverter.GetBytes((short)cutsceneCameraPointIndex), expr.Data, 2);
@@ -915,6 +922,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var cutsceneTitleIndex = Definition.CutsceneTitles.FindIndex(ct => cutsceneTitleSymbol.Value == CacheContext.GetString(ct.Name));
+
+                if (cutsceneTitleIndex == -1)
+                    throw new FormatException(cutsceneTitleSymbol.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cutsceneTitleSymbol.Value);
@@ -935,6 +945,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var deviceGroupIndex = Definition.DeviceGroups.FindIndex(dg => dg.Name == deviceGroupString.Value);
 
+                if (deviceGroupIndex == -1)
+                    throw new FormatException(deviceGroupString.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(deviceGroupString.Value);
                 Array.Copy(BitConverter.GetBytes(deviceGroupIndex), expr.Data, 4);
@@ -943,8 +956,50 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileAiExpression(ScriptString aiString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileAiExpression(ScriptString aiString)
+        {
+            var handle = AllocateExpression(ScriptValueType.Halo3ODSTValue.Ai, ScriptExpressionType.Expression);
+
+            if (handle != DatumIndex.None)
+            {
+                var tokens = aiString.Value.Split('/');
+                var value = 0;
+
+                switch (tokens.Length)
+                {
+                    case 1:
+                        var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
+
+                        if (squadIndex != -1)
+                        {
+                            value = 0x20000000 | (squadIndex & 0xFFFF);
+                            break;
+                        }
+
+                        var squadGroupIndex = Definition.SquadGroups.FindIndex(sg => sg.Name == tokens[0]);
+
+                        if (squadGroupIndex != -1)
+                        {
+                            value = 0x40000000 | (squadGroupIndex & 0xFFFF);
+                            break;
+                        }
+
+                        //
+                        // TODO: type 2, actor datum index?
+                        //
+
+                        goto default;
+
+                    case 2:
+                        break;
+
+                    default:
+                        throw new FormatException(aiString.Value);
+                }
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileAiCommandListExpression(ScriptString aiCommandListString) =>
             throw new NotImplementedException();
@@ -969,6 +1024,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var startingProfileIndex = Definition.PlayerStartingProfile.FindIndex(sp => sp.Name == startingProfileString.Value);
 
+                if (startingProfileIndex == -1)
+                    throw new FormatException(startingProfileString.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(startingProfileString.Value);
                 Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
@@ -988,6 +1046,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var zoneSetIndex = Definition.ZoneSets.FindIndex(zs => zoneSetString.Value == CacheContext.GetString(zs.Name));
 
+                if (zoneSetIndex == -1)
+                    throw new FormatException(zoneSetString.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(zoneSetString.Value);
                 Array.Copy(BitConverter.GetBytes((short)zoneSetIndex), expr.Data, 2);
@@ -1004,6 +1065,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var designerZoneIndex = Definition.DesignerZoneSets.FindIndex(dz => designerZoneString.Value == CacheContext.GetString(dz.Name));
 
+                if (designerZoneIndex == -1)
+                    throw new FormatException(designerZoneString.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(designerZoneString.Value);
                 Array.Copy(BitConverter.GetBytes((short)designerZoneIndex), expr.Data, 2);
@@ -1018,13 +1082,20 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var names = pointReferenceString.Value.Split('/');
+                var tokens = pointReferenceString.Value.Split('/');
 
-                if (names.Length != 2)
+                if (tokens.Length != 2)
                     throw new FormatException(pointReferenceString.Value);
 
-                var pointSetIndex = Definition.ScriptingData[0].PointSets.FindIndex(ps => ps.Name == names[0]);
-                var pointIndex = Definition.ScriptingData[0].PointSets[pointSetIndex].Points.FindIndex(p => p.Name == names[1]);
+                var pointSetIndex = Definition.ScriptingData[0].PointSets.FindIndex(ps => ps.Name == tokens[0]);
+
+                if (pointSetIndex == -1)
+                    throw new FormatException(pointReferenceString.Value);
+
+                var pointIndex = Definition.ScriptingData[0].PointSets[pointSetIndex].Points.FindIndex(p => p.Name == tokens[1]);
+
+                if (pointIndex == -1)
+                    throw new FormatException(pointReferenceString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(pointReferenceString.Value);
@@ -1047,6 +1118,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var folderIndex = Definition.EditorFolders.FindIndex(ef => ef.Name == folderString.Value);
+
+                if (folderIndex == -1)
+                    throw new FormatException(folderString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(folderString.Value);
@@ -1677,6 +1751,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(objectNameString.Value);
                 Array.Copy(BitConverter.GetBytes((short)objectNameIndex), expr.Data, 2);
@@ -1692,6 +1769,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
 
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Biped ||
                     Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Giant ||
@@ -1716,6 +1796,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
+
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Vehicle)
                     throw new FormatException(objectNameString.Value);
 
@@ -1735,6 +1818,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
+
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Weapon)
                     throw new FormatException(objectNameString.Value);
 
@@ -1753,6 +1839,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
 
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.AlternateRealityDevice ||
                     Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Control ||
@@ -1777,6 +1866,9 @@ namespace TagTool.Scripting.Compiler
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
 
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
+
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.Scenery)
                     throw new FormatException(objectNameString.Value);
 
@@ -1795,6 +1887,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumIndex.None)
             {
                 var objectNameIndex = Definition.ObjectNames.FindIndex(on => on.Name == objectNameString.Value);
+
+                if (objectNameIndex == -1)
+                    throw new FormatException(objectNameString.Value);
 
                 if (Definition.ObjectNames[objectNameIndex].ObjectType.Halo3ODST != GameObjectTypeHalo3ODST.EffectScenery)
                     throw new FormatException(objectNameString.Value);
