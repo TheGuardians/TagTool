@@ -965,14 +965,14 @@ namespace TagTool.Scripting.Compiler
                 var tokens = aiString.Value.Split('/');
                 var value = 0;
 
+                var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
+
                 switch (tokens.Length)
                 {
                     case 1:
-                        var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
-
                         if (squadIndex != -1)
                         {
-                            value = 0x20000000 | (squadIndex & 0xFFFF);
+                            value = (1 << 29) | (squadIndex & 0xFFFF);
                             break;
                         }
 
@@ -980,7 +980,7 @@ namespace TagTool.Scripting.Compiler
 
                         if (squadGroupIndex != -1)
                         {
-                            value = 0x40000000 | (squadGroupIndex & 0xFFFF);
+                            value = (2 << 29) | (squadGroupIndex & 0xFFFF);
                             break;
                         }
 
@@ -991,7 +991,12 @@ namespace TagTool.Scripting.Compiler
                         goto default;
 
                     case 2:
-                        break;
+                        if (squadIndex == -1)
+                            throw new FormatException(aiString.Value);
+
+                        var squad = Definition.Squads[squadIndex];
+
+                        goto default;
 
                     default:
                         throw new FormatException(aiString.Value);
