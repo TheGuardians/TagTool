@@ -965,38 +965,108 @@ namespace TagTool.Scripting.Compiler
                 var tokens = aiString.Value.Split('/');
                 var value = 0;
 
-                var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
-
                 switch (tokens.Length)
                 {
                     case 1:
-                        if (squadIndex != -1)
                         {
-                            value = (1 << 29) | (squadIndex & 0xFFFF);
-                            break;
+                            //
+                            // type 1: squad
+                            //
+
+                            var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
+
+                            if (squadIndex != -1)
+                            {
+                                value = (1 << 29) | (squadIndex & 0xFFFF);
+                                break;
+                            }
+
+                            //
+                            // type 2: squad group
+                            //
+
+                            var squadGroupIndex = Definition.SquadGroups.FindIndex(sg => sg.Name == tokens[0]);
+
+                            if (squadGroupIndex != -1)
+                            {
+                                value = (2 << 29) | (squadGroupIndex & 0xFFFF);
+                                break;
+                            }
+
+                            //
+                            // type 2: actor datum index
+                            //  TODO?
+                            //
+
+                            //
+                            // type 6: objective (without task)
+                            //
+
+                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == CacheContext.GetString(o.Name));
+
+                            if (objectiveIndex != -1)
+                            {
+                                value = (6 << 29) | (0x1FFF << 16) | (objectiveIndex & 0xFFFF);
+                                break;
+                            }
+
+                            goto default;
                         }
-
-                        var squadGroupIndex = Definition.SquadGroups.FindIndex(sg => sg.Name == tokens[0]);
-
-                        if (squadGroupIndex != -1)
-                        {
-                            value = (2 << 29) | (squadGroupIndex & 0xFFFF);
-                            break;
-                        }
-
-                        //
-                        // TODO: type 2, actor datum index?
-                        //
-
-                        goto default;
 
                     case 2:
-                        if (squadIndex == -1)
-                            throw new FormatException(aiString.Value);
+                        {
+                            var squadIndex = Definition.Squads.FindIndex(s => s.Name == tokens[0]);
 
-                        var squad = Definition.Squads[squadIndex];
+                            if (squadIndex != -1)
+                            {
+                                var squad = Definition.Squads[squadIndex];
 
-                        goto default;
+                                //
+                                // type 4: spawn point
+                                //
+
+                                var spawnPointIndex = squad.SpawnPoints.FindIndex(sp => tokens[1] == CacheContext.GetString(sp.Name));
+
+                                if (spawnPointIndex != -1)
+                                {
+                                    value = (4 << 29) | ((squadIndex & 0x1FFF) << 16) | (spawnPointIndex & 0xFF);
+                                    break;
+                                }
+
+                                //
+                                // type 5: spawn formation
+                                //
+
+                                var spawnFormationIndex = squad.SpawnFormations.FindIndex(sf => tokens[1] == CacheContext.GetString(sf.Name));
+
+                                if (spawnFormationIndex != -1)
+                                {
+                                    value = (5 << 29);
+                                    break;
+                                }
+
+                                goto default;
+                            }
+
+                            //
+                            // type 6: objective task
+                            //
+
+                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == CacheContext.GetString(o.Name));
+
+                            if (objectiveIndex != -1)
+                            {
+                                var taskIndex = Definition.AiObjectives[objectiveIndex].Tasks.FindIndex(t => tokens[1] == CacheContext.GetString(t.Name));
+
+                                if (taskIndex != -1)
+                                {
+                                    value = (6 << 29) | ((taskIndex & 0x1FFF) << 16) | (objectiveIndex & 0xFFFF);
+                                    break;
+                                }
+                            }
+
+                            goto default;
+                        }
 
                     default:
                         throw new FormatException(aiString.Value);
