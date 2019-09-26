@@ -960,14 +960,14 @@ namespace TagTool.Commands.Porting
                 if (newScript.Name != blamScript.Name)
                     continue;
 
-                if (newScript.Arguments.Count != blamScript.Arguments.Count)
+                if (newScript.Parameters.Count != blamScript.Parameters.Count)
                     continue;
 
                 match = true;
 
-                for (var k = 0; k < newScript.Arguments.Count; k++)
+                for (var k = 0; k < newScript.Parameters.Count; k++)
                 {
-                    if (newScript.Arguments[k].Type != blamScript.Arguments[k].Type)
+                    if (newScript.Parameters[k].Type != blamScript.Parameters[k].Type)
                     {
                         match = false;
                         break;

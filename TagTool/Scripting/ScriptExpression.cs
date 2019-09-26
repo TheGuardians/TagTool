@@ -6,10 +6,10 @@ namespace TagTool.Scripting
     [TagStructure(Size = 0x18)]
     public class ScriptExpression : TagStructure
 	{
-        public ushort Salt;
+        public ushort Identifier;
         public ushort Opcode;
-        public ScriptValueType ValueType; // 30 max length
-        public ScriptExpressionType ExpressionType; // 18 max length
+        public ScriptValueType ValueType;
+        public ScriptExpressionType ExpressionType;
         public DatumIndex NextExpressionHandle;
         public uint StringAddress;
 

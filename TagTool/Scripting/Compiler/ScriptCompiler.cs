@@ -322,7 +322,7 @@ namespace TagTool.Scripting.Compiler
         private DatumIndex CompileExpression(ScriptValueType type, IScriptSyntax node)
         {
             if (node is ScriptGroup group)
-                return CompileGroupExpression(type, group);
+                return CompileGroupExpression(type.Halo3ODST, group);
 
             switch (type.Halo3ODST)
             {
@@ -737,7 +737,7 @@ namespace TagTool.Scripting.Compiler
 
             var expression = new ScriptExpression
             {
-                Salt = salt,
+                Identifier = salt,
                 Opcode = opcode ?? (ushort)valueType,
                 ValueType = new ScriptValueType { Halo3ODST = valueType },
                 ExpressionType = expressionType,
@@ -752,8 +752,62 @@ namespace TagTool.Scripting.Compiler
             return new DatumIndex(salt, (ushort)ScriptExpressions.IndexOf(expression));
         }
 
-        private DatumIndex CompileGroupExpression(ScriptValueType type, ScriptGroup group) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileGroupExpression(ScriptValueType.Halo3ODSTValue type, ScriptGroup group)
+        {
+            var handle = AllocateExpression(type, ScriptExpressionType.Group);
+
+            if (!(group.Head is ScriptSymbol _))
+                throw new FormatException(group.Head.ToString());
+
+            //
+            // Allocate the function name expression
+            //
+
+            var functionNameSymbol = group.Head as ScriptSymbol;
+            var functionNameHandle = AllocateExpression(ScriptValueType.Halo3ODSTValue.FunctionName, ScriptExpressionType.Expression);
+            var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+            functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+            //
+            // Check if function name is a built-in function
+            //
+
+            (ushort Opcode, ScriptInfo Info)? functionInfo = null;
+
+            foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
+            {
+                if (functionNameSymbol.Value == entry.Value.Name)
+                {
+                    functionInfo = ((ushort)entry.Key, entry.Value);
+                    break;
+                }
+            }
+
+            if (functionInfo.HasValue)
+            {
+                functionNameExpr.Opcode = functionInfo.Value.Opcode;
+
+                //
+                // Verify supplied parameter expressions
+                //
+
+                foreach (var param in functionInfo.Value.Info.Parameters)
+                {
+                    //
+                    // TODO: check if parameter is a symbol and make either
+                    //       a global reference or a parameter reference
+                    //
+                }
+
+                return handle;
+            }
+
+            //
+            // TODO: Check if function name is a script
+            //
+
+            return handle;
+        }
 
         private DatumIndex CompileBooleanExpression(ScriptBoolean boolValue)
         {
@@ -1041,7 +1095,7 @@ namespace TagTool.Scripting.Compiler
 
                                 if (spawnFormationIndex != -1)
                                 {
-                                    value = (5 << 29);
+                                    value = (5 << 29) | ((squadIndex & 0x1FFF) << 16) | (spawnFormationIndex & 0xFF);
                                     break;
                                 }
 

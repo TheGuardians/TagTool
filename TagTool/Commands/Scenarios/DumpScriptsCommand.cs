@@ -106,12 +106,12 @@ namespace TagTool.Commands.Scenarios
                     expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
                     expr.Opcode == 0x0)
                 {
-                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Salt);
+                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Identifier);
                     if (ScriptGroupName != null)
                         scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
                 }
 
-                var ExpressionHandle = new DatumIndex((uint)((expr.Salt << 16) + i));
+                var ExpressionHandle = new DatumIndex((uint)((expr.Identifier << 16) + i));
 
                 if (globals.ContainsKey(ExpressionHandle))
                     scriptGroupName = $"G:{globals[ExpressionHandle]}";
@@ -141,7 +141,7 @@ namespace TagTool.Commands.Scenarios
 
                 CsvAdd(
                     $"{i:D8}," +
-                    $"{expr.Salt:X4}{i:X4}," +
+                    $"{expr.Identifier:X4}{i:X4}," +
                     $"{expr.NextExpressionHandle:X8}," +
                     $"{expr.Opcode:X4}," +
                     $"{expr.Data[0]:X2}" +
