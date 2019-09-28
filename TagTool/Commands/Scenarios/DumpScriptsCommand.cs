@@ -103,7 +103,7 @@ namespace TagTool.Commands.Scenarios
 
                 var scriptGroupName = "";
                 if (expr.NextExpressionHandle == DatumIndex.None &&
-                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Flags == Scripting.HsSyntaxNodeFlags.Group &&
                     expr.Opcode == 0x0)
                 {
                     var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Identifier);
@@ -129,10 +129,10 @@ namespace TagTool.Commands.Scenarios
                         opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
                 }
 
-                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (expr.Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
-                if (Definition.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (Definition.ScriptExpressions[i - 1].Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
                 var ValueType = "";
@@ -148,7 +148,7 @@ namespace TagTool.Commands.Scenarios
                     $"{expr.Data[1]:X2}" +
                     $"{expr.Data[2]:X2}" +
                     $"{expr.Data[3]:X2}," +
-                    $"{expr.ExpressionType}," +
+                    $"{expr.Flags}," +
                     $"{ValueType}," +
                     $"{opcodeName}," +
                     $"{scriptGroupName}" +

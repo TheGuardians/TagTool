@@ -67,7 +67,7 @@ namespace TagTool.Commands.Porting
 			Squads = 1 << 7,
 
 			/// <summary>
-			/// Include <see cref="Scripting.Script"/> tag-blocks.
+			/// Include <see cref="Scripting.HsScript"/> tag-blocks.
 			/// </summary>
 			[PortingFlagDescription("Include 'Scripting.Script' tag-blocks.")]
 			Scripts = 1 << 8,
