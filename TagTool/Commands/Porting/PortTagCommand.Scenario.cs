@@ -739,15 +739,15 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var global in scnr.Globals)
                 {
-                    ConvertHsType(global.Type);
+                    ConvertScriptValueType(global.Type);
                 }
 
                 foreach (var script in scnr.Scripts)
                 {
-                    ConvertHsType(script.ReturnType);
+                    ConvertScriptValueType(script.ReturnType);
 
                     foreach (var parameter in script.Parameters)
-                        ConvertHsType(parameter.Type);
+                        ConvertScriptValueType(parameter.Type);
                 }
 
                 foreach (var expr in scnr.ScriptExpressions)
@@ -759,9 +759,9 @@ namespace TagTool.Commands.Porting
             }
             else
             {
-                scnr.Globals = new List<HsGlobal>();
-                scnr.Scripts = new List<HsScript>();
-                scnr.ScriptExpressions = new List<HsSyntaxNode>();
+                scnr.Globals = new List<ScriptGlobal>();
+                scnr.Scripts = new List<Script>();
+                scnr.ScriptExpressions = new List<ScriptExpression>();
             }
 
             return scnr;
@@ -799,26 +799,26 @@ namespace TagTool.Commands.Porting
             return new RealEulerAngles3d(Angle.FromRadians(x2), Angle.FromRadians(y2), Angle.FromRadians(z2));
         }
 
-        public void ConvertScriptExpression(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, HsSyntaxNode expr)
+        public void ConvertScriptExpression(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, ScriptExpression expr)
         {
             if (expr.Opcode == 0xBABA)
                 return;
 
-            ConvertHsType(expr.ValueType);
+            ConvertScriptValueType(expr.ValueType);
 
-            switch (expr.Flags)
+            switch (expr.ExpressionType)
             {
-                case HsSyntaxNodeFlags.Expression:
-                case HsSyntaxNodeFlags.Group:
-                case HsSyntaxNodeFlags.GlobalsReference:
-                case HsSyntaxNodeFlags.ParameterReference:
+                case ScriptExpressionType.Expression:
+                case ScriptExpressionType.Group:
+                case ScriptExpressionType.GlobalsReference:
+                case ScriptExpressionType.ParameterReference:
                     if (ScriptExpressionIsValue(expr))
                         ConvertScriptValueOpcode(expr);
                     else if (!ConvertScriptUsingPresets(cacheStream, scnr, expr))
                         ConvertScriptExpressionOpcode(scnr, expr);
                     break;
 
-                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
                     break;
 
                 default:
@@ -828,22 +828,22 @@ namespace TagTool.Commands.Porting
             ConvertScriptExpressionData(cacheStream, resourceStreams, expr);
         }
 
-        public bool ScriptExpressionIsValue(HsSyntaxNode expr)
+        public bool ScriptExpressionIsValue(ScriptExpression expr)
         {
-            switch (expr.Flags)
+            switch (expr.ExpressionType)
             {
-                case HsSyntaxNodeFlags.ParameterReference:
-                case HsSyntaxNodeFlags.GlobalsReference:
+                case ScriptExpressionType.ParameterReference:
+                case ScriptExpressionType.GlobalsReference:
                     return true;
 
-                case HsSyntaxNodeFlags.Expression:
+                case ScriptExpressionType.Expression:
                     if ((int)expr.ValueType.HaloOnline > 0x4)
                         return true;
                     else
                         return false;
 
-                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
-                case HsSyntaxNodeFlags.Group:
+                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
+                case ScriptExpressionType.Group:
                     return false;
 
                 default:
@@ -851,7 +851,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public void ConvertHsType(HsType type)
+        public void ConvertScriptValueType(ScriptValueType type)
         {
             if (!Enum.TryParse(
                 BlamCache.Version == CacheVersion.Halo3Retail ?
@@ -866,23 +866,23 @@ namespace TagTool.Commands.Porting
             }
 
             if ((int)type.HaloOnline == 255)
-                type.HaloOnline = HsType.HaloOnlineValue.Invalid;
+                type.HaloOnline = ScriptValueType.HaloOnlineValue.Invalid;
         }
 
-        public void ConvertScriptValueOpcode(HsSyntaxNode expr)
+        public void ConvertScriptValueOpcode(ScriptExpression expr)
         {
             if (expr.Opcode == 0xFFFF || expr.Opcode == 0xBABA || expr.Opcode == 0x0000)
                 return;
 
-            switch (expr.Flags)
+            switch (expr.ExpressionType)
             {
-                case HsSyntaxNodeFlags.Expression:
-                case HsSyntaxNodeFlags.Group:
-                case HsSyntaxNodeFlags.GlobalsReference:
-                case HsSyntaxNodeFlags.ParameterReference:
+                case ScriptExpressionType.Expression:
+                case ScriptExpressionType.Group:
+                case ScriptExpressionType.GlobalsReference:
+                case ScriptExpressionType.ParameterReference:
                     break;
 
-                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
                     return;
 
                 default:
@@ -908,7 +908,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public void ConvertScriptExpressionUnsupportedOpcode(HsSyntaxNode expr)
+        public void ConvertScriptExpressionUnsupportedOpcode(ScriptExpression expr)
         {
             if (expr.Opcode == 0xBABA || expr.Opcode == 0xCDCD)
                 return;
@@ -916,26 +916,26 @@ namespace TagTool.Commands.Porting
             expr.Opcode = 0x000; // begin
         }
 
-        public void ConvertScriptExpressionOpcode(Scenario scnr, HsSyntaxNode expr)
+        public void ConvertScriptExpressionOpcode(Scenario scnr, ScriptExpression expr)
         {
-            switch (expr.Flags)
+            switch (expr.ExpressionType)
             {
-                case HsSyntaxNodeFlags.Expression:
-                    if (expr.Flags == HsSyntaxNodeFlags.ScriptReference)
+                case ScriptExpressionType.Expression:
+                    if (expr.ExpressionType == ScriptExpressionType.ScriptReference)
                         return;
 
                     // If the previous scriptExpr is a scriptRef, don't convert. The opcode is the script reference. They always come in pairs.
-                    if (scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) - 1].Flags == HsSyntaxNodeFlags.ScriptReference)
+                    if (scnr.ScriptExpressions[scnr.ScriptExpressions.IndexOf(expr) - 1].ExpressionType == ScriptExpressionType.ScriptReference)
                         return;
 
                     break;
 
-                case HsSyntaxNodeFlags.Group:
+                case ScriptExpressionType.Group:
                     break;
 
-                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
-                case HsSyntaxNodeFlags.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
-                case HsSyntaxNodeFlags.ParameterReference: // Probably as above
+                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses. Don't convert opcode
+                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses. Don't convert opcode
+                case ScriptExpressionType.ParameterReference: // Probably as above
                     return;
 
                 default:
@@ -990,33 +990,33 @@ namespace TagTool.Commands.Porting
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
 
-        public void ConvertScriptExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
-            if (expr.Flags == HsSyntaxNodeFlags.Expression)
+            if (expr.ExpressionType == ScriptExpressionType.Expression)
                 switch (expr.ValueType.HaloOnline)
                 {
-                    case HsType.HaloOnlineValue.Sound:
-                    case HsType.HaloOnlineValue.Effect:
-                    case HsType.HaloOnlineValue.Damage:
-                    case HsType.HaloOnlineValue.LoopingSound:
-                    case HsType.HaloOnlineValue.AnimationGraph:
-                    case HsType.HaloOnlineValue.DamageEffect:
-                    case HsType.HaloOnlineValue.ObjectDefinition:
-                    case HsType.HaloOnlineValue.Bitmap:
-                    case HsType.HaloOnlineValue.Shader:
-                    case HsType.HaloOnlineValue.RenderModel:
-                    case HsType.HaloOnlineValue.StructureDefinition:
-                    case HsType.HaloOnlineValue.LightmapDefinition:
-                    case HsType.HaloOnlineValue.CinematicDefinition:
-                    case HsType.HaloOnlineValue.CinematicSceneDefinition:
-                    case HsType.HaloOnlineValue.BinkDefinition:
-                    case HsType.HaloOnlineValue.AnyTag:
-                    case HsType.HaloOnlineValue.AnyTagNotResolving:
+                    case ScriptValueType.HaloOnlineValue.Sound:
+                    case ScriptValueType.HaloOnlineValue.Effect:
+                    case ScriptValueType.HaloOnlineValue.Damage:
+                    case ScriptValueType.HaloOnlineValue.LoopingSound:
+                    case ScriptValueType.HaloOnlineValue.AnimationGraph:
+                    case ScriptValueType.HaloOnlineValue.DamageEffect:
+                    case ScriptValueType.HaloOnlineValue.ObjectDefinition:
+                    case ScriptValueType.HaloOnlineValue.Bitmap:
+                    case ScriptValueType.HaloOnlineValue.Shader:
+                    case ScriptValueType.HaloOnlineValue.RenderModel:
+                    case ScriptValueType.HaloOnlineValue.StructureDefinition:
+                    case ScriptValueType.HaloOnlineValue.LightmapDefinition:
+                    case ScriptValueType.HaloOnlineValue.CinematicDefinition:
+                    case ScriptValueType.HaloOnlineValue.CinematicSceneDefinition:
+                    case ScriptValueType.HaloOnlineValue.BinkDefinition:
+                    case ScriptValueType.HaloOnlineValue.AnyTag:
+                    case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
                         ConvertScriptTagReferenceExpressionData(cacheStream, resourceStreams, expr);
                         return;
 
-                    case HsType.HaloOnlineValue.AiLine:
-                    case HsType.HaloOnlineValue.StringId:
+                    case ScriptValueType.HaloOnlineValue.AiLine:
+                    case ScriptValueType.HaloOnlineValue.StringId:
                         ConvertScriptStringIdExpressionData(cacheStream, resourceStreams, expr);
                         return;
 
@@ -1026,22 +1026,22 @@ namespace TagTool.Commands.Porting
 
             var dataSize = 4;
 
-            switch (expr.Flags)
+            switch (expr.ExpressionType)
             {
-                case HsSyntaxNodeFlags.Expression:
+                case ScriptExpressionType.Expression:
                     switch (expr.ValueType.HaloOnline)
                     {
-                        case HsType.HaloOnlineValue.Object:
-                        case HsType.HaloOnlineValue.Unit:
-                        case HsType.HaloOnlineValue.Vehicle:
-                        case HsType.HaloOnlineValue.Weapon:
-                        case HsType.HaloOnlineValue.Device:
-                        case HsType.HaloOnlineValue.Scenery:
-                        case HsType.HaloOnlineValue.EffectScenery:
+                        case ScriptValueType.HaloOnlineValue.Object:
+                        case ScriptValueType.HaloOnlineValue.Unit:
+                        case ScriptValueType.HaloOnlineValue.Vehicle:
+                        case ScriptValueType.HaloOnlineValue.Weapon:
+                        case ScriptValueType.HaloOnlineValue.Device:
+                        case ScriptValueType.HaloOnlineValue.Scenery:
+                        case ScriptValueType.HaloOnlineValue.EffectScenery:
                             dataSize = 2; // definitely not 4
                             break;
 
-                        case HsType.HaloOnlineValue.Ai: // int
+                        case ScriptValueType.HaloOnlineValue.Ai: // int
                             break;
 
                         default:
@@ -1050,7 +1050,7 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-                case HsSyntaxNodeFlags.GlobalsReference:
+                case ScriptExpressionType.GlobalsReference:
                     if (BlamCache.Version == CacheVersion.Halo3Retail)
                     {
                         dataSize = ScriptInfo.GetScriptExpressionDataLength(expr);
@@ -1059,7 +1059,7 @@ namespace TagTool.Commands.Porting
                     {
                         switch (expr.ValueType.HaloOnline)
                         {
-                            case HsType.HaloOnlineValue.Long:
+                            case ScriptValueType.HaloOnlineValue.Long:
                                 dataSize = 2; // definitely not 4
                                 break;
                             default:
@@ -1075,7 +1075,7 @@ namespace TagTool.Commands.Porting
             }
 
 #if DEBUG
-            if (expr.Flags == HsSyntaxNodeFlags.Expression && BitConverter.ToInt32(expr.Data, 0) != -1)
+            if (expr.ExpressionType == ScriptExpressionType.Expression && BitConverter.ToInt32(expr.Data, 0) != -1)
             {
                 //
                 // Breakpoint any case statement below to examine different types of "object" expression data
@@ -1083,20 +1083,20 @@ namespace TagTool.Commands.Porting
 
                 switch (expr.ValueType.HaloOnline)
                 {
-                    case HsType.HaloOnlineValue.Object: break;
-                    case HsType.HaloOnlineValue.Unit: break;
-                    case HsType.HaloOnlineValue.Vehicle: break;
-                    case HsType.HaloOnlineValue.Weapon: break;
-                    case HsType.HaloOnlineValue.Device: break;
-                    case HsType.HaloOnlineValue.Scenery: break;
-                    case HsType.HaloOnlineValue.EffectScenery: break;
+                    case ScriptValueType.HaloOnlineValue.Object: break;
+                    case ScriptValueType.HaloOnlineValue.Unit: break;
+                    case ScriptValueType.HaloOnlineValue.Vehicle: break;
+                    case ScriptValueType.HaloOnlineValue.Weapon: break;
+                    case ScriptValueType.HaloOnlineValue.Device: break;
+                    case ScriptValueType.HaloOnlineValue.Scenery: break;
+                    case ScriptValueType.HaloOnlineValue.EffectScenery: break;
                 }
             }
 #endif
 
             Array.Reverse(expr.Data, 0, dataSize);
 
-            if (expr.Flags == HsSyntaxNodeFlags.GlobalsReference)
+            if (expr.ExpressionType == ScriptExpressionType.GlobalsReference)
             {
                 if (expr.Data[2] == 0xFF && expr.Data[3] == 0xFF)
                 {
@@ -1108,7 +1108,7 @@ namespace TagTool.Commands.Porting
                     expr.Data[1] = bytes[1];
                 }
             }
-            else if (expr.Flags == HsSyntaxNodeFlags.Expression && expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Ai)
+            else if (expr.ExpressionType == ScriptExpressionType.Expression && expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Ai)
             {
                 var value = BitConverter.ToUInt32(expr.Data, 0);
 
@@ -1156,7 +1156,7 @@ namespace TagTool.Commands.Porting
             return (uint)(prevSpawnPoints + spawnPointIndex);
         }
 
-        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
@@ -1169,7 +1169,7 @@ namespace TagTool.Commands.Porting
             expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();
         }
 
-        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, ScriptExpression expr)
         {
             int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
             var value = BlamCache.Strings.GetItemByID(blamStringId);
@@ -1184,7 +1184,7 @@ namespace TagTool.Commands.Porting
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
 
-        public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, ScriptExpression expr)
         {
             // Return false to convert normally.
 
@@ -1196,8 +1196,8 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x0B9;
                         // Change the player appearance aspect ratio
                         if (scnr.MapId == 0x10231971 && // mainmenu map id
-                            expr.Flags == HsSyntaxNodeFlags.Group &&
-                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
+                            expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
                             var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
                             for (var n = 1; n < 2; n++)
@@ -1210,8 +1210,8 @@ namespace TagTool.Commands.Porting
 
                     case 0x0F9: // vehicle_test_seat_list
                         expr.Opcode = 0x114;
-                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
-                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
                             UpdateAiTestSeat(cacheStream, scnr, expr);
                         }
@@ -1219,8 +1219,8 @@ namespace TagTool.Commands.Porting
 
                     case 0x0FA: // vehicle_test_seat
                         expr.Opcode = 0x115; // -> vehicle_test_seat_unit
-                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
-                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Boolean)
                         {
                             UpdateAiTestSeat(cacheStream, scnr, expr);
                         }
@@ -1251,8 +1251,8 @@ namespace TagTool.Commands.Porting
                     case 0x353: // cinematic_scripting_create_and_animate_cinematic_object
                         expr.Opcode = 0x3A6;
                         // Remove the additional H3 argument
-                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
-                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
+                        if (expr.ExpressionType == ScriptExpressionType.Group &&
+                            expr.ValueType.HaloOnline == ScriptValueType.HaloOnlineValue.Void)
                         {
                             var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
                             for (var n = 1; n < 4; n++)
@@ -1302,7 +1302,7 @@ namespace TagTool.Commands.Porting
                 return false;
         }
 
-        private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, ScriptExpression expr)
         {
             var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
             for (var n = 1; n < 2; n++)
@@ -1315,7 +1315,7 @@ namespace TagTool.Commands.Porting
             var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
             var seatMappingIndex = (int)-1;
 
-            if (vehicleExpr.Flags == HsSyntaxNodeFlags.Group &&
+            if (vehicleExpr.ExpressionType == ScriptExpressionType.Group &&
                 seatMappingStringId != StringId.Invalid)
             {
                 if (vehicleExpr.Opcode == 0x193) // ai_vehicle_get_from_starting_location
@@ -1441,7 +1441,7 @@ namespace TagTool.Commands.Porting
             }
 
             seatMappingExpr.Opcode = 0x00C; // -> unit_seat_mapping
-            seatMappingExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.UnitSeatMapping;
+            seatMappingExpr.ValueType.Halo3Retail = ScriptValueType.Halo3RetailValue.UnitSeatMapping;
             seatMappingExpr.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
         }
 
@@ -1474,7 +1474,7 @@ namespace TagTool.Commands.Porting
                 scnr.ScriptExpressions[scriptIndex].Data[1] = data1;
                 scnr.ScriptExpressions[scriptIndex].Data[2] = data2;
                 scnr.ScriptExpressions[scriptIndex].Data[3] = data3;
-                scnr.ScriptExpressions[scriptIndex].Flags = (HsSyntaxNodeFlags)Enum.Parse(typeof(HsSyntaxNodeFlags), items[5]);
+                scnr.ScriptExpressions[scriptIndex].ExpressionType = (ScriptExpressionType)Enum.Parse(typeof(ScriptExpressionType), items[5]);
             }
         }
 

@@ -321,9 +321,6 @@
     <Compile Include="Scripting\Compiler\ScriptReal.cs" />
     <Compile Include="Scripting\Compiler\ScriptString.cs" />
     <Compile Include="Scripting\Compiler\ScriptSymbol.cs" />
-    <Compile Include="Scripting\HsScriptParameter.cs" />
-    <Compile Include="Scripting\HsScriptType.cs" />
-    <Compile Include="Scripting\HsType.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
@@ -636,10 +633,13 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Serialization\RuntimeSerializationContext.cs" />
-    <Compile Include="Scripting\HsScript.cs" />
-    <Compile Include="Scripting\HsSyntaxNode.cs" />
-    <Compile Include="Scripting\HsGlobal.cs" />
+    <Compile Include="Scripting\Script.cs" />
+    <Compile Include="Scripting\ScriptExpression.cs" />
+    <Compile Include="Scripting\ScriptGlobal.cs" />
     <Compile Include="Scripting\ScriptInfo.cs" />
+    <Compile Include="Scripting\ScriptParameter.cs" />
+    <Compile Include="Scripting\ScriptType.cs" />
+    <Compile Include="Scripting\ScriptValueType.cs" />
     <Compile Include="Serialization\CacheSerializationContext.cs" />
     <Compile Include="Serialization\DataSerializationContext.cs" />
     <Compile Include="Serialization\IDataBlock.cs" />

@@ -189,8 +189,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown93;
 
         public byte[] ScriptStrings;
-        public List<HsScript> Scripts;
-        public List<HsGlobal> Globals;
+        public List<Script> Scripts;
+        public List<ScriptGlobal> Globals;
         public List<TagReferenceBlock> ScriptSourceFileReferences;
         public List<TagReferenceBlock> ScriptExternalFileReferences;
         public List<ScriptingDatum> ScriptingData;
@@ -207,7 +207,7 @@ namespace TagTool.Tags.Definitions
         public List<UnitSeatsMappingBlock> UnitSeatsMapping;
         public List<ScenarioKillTrigger> ScenarioKillTriggers;
         public List<ScenarioSafeTrigger> ScenarioSafeTriggers;
-        public List<HsSyntaxNode> ScriptExpressions;
+        public List<ScriptExpression> ScriptExpressions;
 
         public uint Unknown97;
         public uint Unknown98;
