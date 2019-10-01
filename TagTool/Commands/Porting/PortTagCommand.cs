@@ -183,10 +183,14 @@ namespace TagTool.Commands.Porting
                         return null;
                     break;
 
-				case "shit": // use the global shit tag until shit tags are port-able
-					return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
+                case "shit": // use the global shit tag until shit tags are port-able
+                    if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance))
+                        return shitInstance;
+                    if (BlamCache.Version < CacheVersion.HaloReach)
+                        return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
+                    break;
 
-				case "sncl": // always use the default sncl tag
+                case "sncl": // always use the default sncl tag
 					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
 				case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
