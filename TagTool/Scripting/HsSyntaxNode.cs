@@ -36,6 +36,6 @@ namespace TagTool.Scripting
         Expression = Primitive | DoNotGC,
         ScriptReference = ScriptIndex | DoNotGC,
         GlobalsReference = Primitive | GlobalIndex | DoNotGC,
-        ParameterReference = Primitive | ParameterIndex | DoNotGC
+        ParameterReference = Primitive | GlobalIndex | ParameterIndex | DoNotGC
     }
 }

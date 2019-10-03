@@ -21,6 +21,9 @@ namespace TagTool.Scripting.Compiler
         private BinaryWriter StringWriter;
         private Dictionary<string, uint> StringOffsets;
 
+        private ushort NextIdentifier = 0xE37F;
+        private HsScript CurrentScript = null;
+
         public ScriptCompiler(HaloOnlineCacheContext cacheContext, Scenario definition)
         {
             CacheContext = cacheContext;
@@ -57,6 +60,7 @@ namespace TagTool.Scripting.Compiler
                 CompileToplevel(node);
             }
 
+            Definition.Scripts = Scripts;
             Definition.Globals = Globals;
             Definition.ScriptExpressions = ScriptExpressions;
             Definition.ScriptStrings = (StringWriter.BaseStream as MemoryStream).ToArray();
@@ -77,7 +81,7 @@ namespace TagTool.Scripting.Compiler
                                     break;
 
                                 case "script":
-                                    //CompileScript(group);
+                                    CompileScript(group);
                                     break;
                             }
                             break;
@@ -193,12 +197,14 @@ namespace TagTool.Scripting.Compiler
             // Verify the input syntax node is in the right format
             //
 
-            if (!(node is ScriptGroup group) ||
-                !(group.Head is ScriptSymbol symbol && symbol.Value == "script") ||
-                !(group.Tail is ScriptGroup declGroup))
-            {
+            if (!(node is ScriptGroup group))
                 throw new FormatException(node.ToString());
-            }
+            
+            if (!(group.Head is ScriptSymbol symbol && symbol.Value == "script"))
+                throw new FormatException(node.ToString());
+
+            if (!(group.Tail is ScriptGroup declGroup))
+                throw new FormatException(node.ToString());
 
             //
             // Compile the script type
@@ -214,6 +220,9 @@ namespace TagTool.Scripting.Compiler
                 throw new FormatException(declGroup.Tail.ToString());
 
             var scriptReturnType = ParseHsType(declTailGroup.Head);
+
+            if (scriptReturnType.Halo3ODST == HsType.Halo3ODSTValue.Invalid)
+                throw new FormatException(declTailGroup.Head.ToString());
 
             //
             // Compile the script name and parameters (if any)
@@ -307,10 +316,27 @@ namespace TagTool.Scripting.Compiler
             }
 
             //
+            // Add an entry to the scripts block in the scenario definition
+            //
+
+            var script = new HsScript
+            {
+                ScriptName = scriptName,
+                Type = scriptType,
+                ReturnType = scriptReturnType,
+                RootExpressionHandle = DatumIndex.None,
+                Parameters = scriptParams
+            };
+
+            Scripts.Add(script);
+
+            //
             // Compile the script expressions
             //
 
-            var scriptInit = CompileExpression(
+            CurrentScript = script;
+
+            script.RootExpressionHandle = CompileExpression(
                 scriptReturnType.Halo3ODST,
                 new ScriptGroup
                 {
@@ -318,24 +344,36 @@ namespace TagTool.Scripting.Compiler
                     Tail = declTailTailGroup.Tail
                 });
 
-            //
-            // Add an entry to the scripts block in the scenario definition
-            //
-
-            Scripts.Add(new HsScript
-            {
-                ScriptName = scriptName,
-                Type = scriptType,
-                ReturnType = scriptReturnType,
-                RootExpressionHandle = scriptInit,
-                Parameters = scriptParams
-            });
+            CurrentScript = null;
         }
 
         private DatumIndex CompileExpression(HsType.Halo3ODSTValue type, IScriptSyntax node)
         {
             if (node is ScriptGroup group)
                 return CompileGroupExpression(type, group);
+
+            if (node is ScriptSymbol symbol)
+            {
+                //
+                // Check if the symbol is a reference to a parameter
+                //
+
+                foreach (var parameter in CurrentScript?.Parameters)
+                    if (parameter.Name == symbol.Value)
+                        return CompileParameterReference(parameter);
+
+                //
+                // Check if the symbol is a reference to a global
+                //
+
+                foreach (var global in Globals)
+                    if (global.Name == symbol.Value)
+                        return CompileGlobalReference(global);
+
+                foreach (var global in ScriptInfo.Globals[CacheContext.Version])
+                    if (global.Value == symbol.Value)
+                        return CompileGlobalReference(type, global.Value, (ushort)(global.Key | 0x8000));
+            }
 
             switch (type)
             {
@@ -797,12 +835,18 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex AllocateExpression(HsType.Halo3ODSTValue valueType, HsSyntaxNodeFlags expressionType, ushort? opcode = null)
         {
-            ushort salt = 0; // TODO?
+            ushort identifier = NextIdentifier;
+
+            if (identifier == ushort.MaxValue)
+                identifier = 0xE37F;
+
+            NextIdentifier = (ushort)(identifier + 1);
+
             uint stringAddress = 0; // TODO?
 
             var expression = new HsSyntaxNode
             {
-                Identifier = salt,
+                Identifier = identifier,
                 Opcode = opcode ?? (ushort)valueType,
                 ValueType = new HsType { Halo3ODST = valueType },
                 Flags = expressionType,
@@ -820,17 +864,18 @@ namespace TagTool.Scripting.Compiler
 
             ScriptExpressions.Add(expression);
 
-            return new DatumIndex(salt, (ushort)ScriptExpressions.IndexOf(expression));
+            return new DatumIndex(identifier, (ushort)ScriptExpressions.IndexOf(expression));
         }
 
         private DatumIndex CompileGroupExpression(HsType.Halo3ODSTValue type, ScriptGroup group)
         {
-            var handle = AllocateExpression(type, HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group);
+            var expr = ScriptExpressions[handle.Index];
 
             if (!(group.Head is ScriptSymbol functionNameSymbol))
                 throw new FormatException(group.Head.ToString());
 
-            if (!(group.Tail is ScriptGroup parametersGroup))
+            if (!(group.Tail is ScriptGroup))
                 throw new FormatException(group.Tail.ToString());
 
             //
@@ -841,6 +886,8 @@ namespace TagTool.Scripting.Compiler
             var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
             functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
 
+            Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+
             //
             // Handle passthrough functions
             //
@@ -849,9 +896,13 @@ namespace TagTool.Scripting.Compiler
             {
                 case "begin":
                     {
+                        var entry = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == "begin");
+                        expr.Opcode = (ushort)entry.Key;
+                        functionNameExpr.Opcode = (ushort)entry.Key;
+
                         var prevExpr = functionNameExpr;
 
-                        for (IScriptSyntax current = parametersGroup;
+                        for (IScriptSyntax current = group.Tail;
                             current is ScriptGroup currentGroup;
                             current = currentGroup.Tail)
                         {
@@ -859,7 +910,7 @@ namespace TagTool.Scripting.Compiler
                             prevExpr = ScriptExpressions[prevExpr.NextExpressionHandle.Index];
                         }
 
-                        break;
+                        return handle;
                     }
 
                 case "begin_random":
@@ -879,40 +930,79 @@ namespace TagTool.Scripting.Compiler
             // Check if function name is a built-in function
             //
 
-            var functions = new List<(ushort Opcode, ScriptInfo Info)>();
-
             foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
             {
                 if (functionNameSymbol.Value == entry.Value.Name)
                 {
-                    functions.Add(((ushort)entry.Key, entry.Value));
-                    break;
-                }
-            }
+                    functionNameExpr.Opcode = (ushort)entry.Key;
 
-            if (functions.Count > 0)
-            {
-                //
-                // Verify supplied parameter expressions
-                //
+                    var typeString = entry.Value.Type.ToString();
 
-                foreach (var function in functions)
-                {
-                    foreach (var param in function.Info.Parameters)
+                    if (!Enum.TryParse(typeString, true, out expr.ValueType.Halo3Retail))
+                        expr.ValueType.Halo3Retail = HsType.Halo3RetailValue.Invalid;
+
+                    if (!Enum.TryParse(typeString, true, out expr.ValueType.Halo3ODST))
+                        expr.ValueType.Halo3ODST = HsType.Halo3ODSTValue.Invalid;
+
+                    if (!Enum.TryParse(typeString, true, out expr.ValueType.HaloOnline))
+                        expr.ValueType.HaloOnline = HsType.HaloOnlineValue.Invalid;
+
+                    expr.Opcode = functionNameExpr.Opcode;
+                    
+                    IScriptSyntax parameters = group.Tail;
+                    var prevExpr = functionNameExpr; 
+
+                    foreach (var parameter in entry.Value.Parameters)
                     {
-                        //
-                        // TODO: check if parameter is a symbol and make either
-                        //       a global reference or a parameter reference
-                        //
-                    }
-                }
+                        if (!(parameters is ScriptGroup parametersGroup))
+                            throw new FormatException(group.ToString());
 
-                return handle;
+                        prevExpr.NextExpressionHandle = CompileExpression(parameter.Type, parametersGroup.Head);
+                        prevExpr = ScriptExpressions[prevExpr.NextExpressionHandle.Index];
+
+                        parameters = parametersGroup.Tail;
+                    }
+
+                    return handle;
+                }
             }
 
             //
             // TODO: Check if function name is a script
             //
+
+            throw new KeyNotFoundException(functionNameSymbol.Value);
+        }
+
+        private DatumIndex CompileGlobalReference(HsGlobal global)
+        {
+            var handle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.GlobalsReference);
+
+            var expr = ScriptExpressions[handle.Index];
+            expr.StringAddress = CompileStringAddress(global.Name);
+            Array.Copy(BitConverter.GetBytes(Globals.IndexOf(global)), expr.Data, 4);
+
+            return handle;
+        }
+
+        private DatumIndex CompileGlobalReference(HsType.Halo3ODSTValue type, string name, ushort opcode)
+        {
+            var handle = AllocateExpression(type, HsSyntaxNodeFlags.GlobalsReference);
+
+            var expr = ScriptExpressions[handle.Index];
+            expr.StringAddress = CompileStringAddress(name);
+            Array.Copy(BitConverter.GetBytes(opcode), expr.Data, 2);
+
+            return handle;
+        }
+
+        private DatumIndex CompileParameterReference(HsScriptParameter parameter)
+        {
+            var handle = AllocateExpression(parameter.Type.Halo3ODST, HsSyntaxNodeFlags.ParameterReference);
+
+            var expr = ScriptExpressions[handle.Index];
+            expr.StringAddress = CompileStringAddress(parameter.Name);
+            Array.Copy(BitConverter.GetBytes(CurrentScript.Parameters.IndexOf(parameter)), expr.Data, 4);
 
             return handle;
         }
@@ -966,7 +1056,11 @@ namespace TagTool.Scripting.Compiler
             var handle = AllocateExpression(HsType.Halo3ODSTValue.String, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
 
             if (handle != DatumIndex.None)
-                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(stringValue.Value);
+            {
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(stringValue.Value);
+                Array.Copy(BitConverter.GetBytes(expr.StringAddress), expr.Data, 4);
+            }
 
             return handle;
         }
