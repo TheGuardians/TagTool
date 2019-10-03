@@ -42,8 +42,6 @@ namespace TagTool.Commands.HUD
                 foreach (var textwidget in hudwidget.TextWidgets)
                 {
                     float widgetMultiplier = 1.0f;
-                    bool IsConduit = false;
-                    bool IsAgency = false;
 
                     switch (textwidget.Font)
                     {
@@ -69,17 +67,12 @@ namespace TagTool.Commands.HUD
                     }
 
                     if (textwidget.Font.ToString().Contains("Conduit"))
-                        IsConduit = true;
-                    else if (textwidget.Font.ToString().Contains("Agency"))
-                        IsAgency = true;
-
-                    if (IsConduit)
                     {
                         textwidget.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Conduit32;
                         widgetsUpdated++;
                     }
 
-                    else if (IsAgency)
+                    else if (textwidget.Font.ToString().Contains("Agency"))
                     {
                         textwidget.Font = ChudDefinition.HudWidget.TextWidget.FontValue.Agency32;
                         widgetsUpdated++;
