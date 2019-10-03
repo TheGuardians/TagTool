@@ -869,24 +869,11 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileGroupExpression(HsType.Halo3ODSTValue type, ScriptGroup group)
         {
-            var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group);
-            var expr = ScriptExpressions[handle.Index];
-
             if (!(group.Head is ScriptSymbol functionNameSymbol))
                 throw new FormatException(group.Head.ToString());
 
-            if (!(group.Tail is ScriptGroup))
+            if (!(group.Tail is ScriptGroup) && !(group.Tail is ScriptInvalid))
                 throw new FormatException(group.Tail.ToString());
-
-            //
-            // Allocate the function name expression
-            //
-
-            var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
-            var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
-            functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
-
-            Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
 
             //
             // Handle passthrough functions
@@ -897,20 +884,41 @@ namespace TagTool.Scripting.Compiler
                 case "begin":
                     {
                         var entry = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == "begin");
-                        expr.Opcode = (ushort)entry.Key;
-                        functionNameExpr.Opcode = (ushort)entry.Key;
 
-                        var prevExpr = functionNameExpr;
+                        var firstHandle = DatumIndex.None;
+                        HsSyntaxNode prevExpr = null;
 
                         for (IScriptSyntax current = group.Tail;
                             current is ScriptGroup currentGroup;
                             current = currentGroup.Tail)
                         {
-                            prevExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, currentGroup.Head);
-                            prevExpr = ScriptExpressions[prevExpr.NextExpressionHandle.Index];
+                            var currentHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, currentGroup.Head);
+
+                            if (firstHandle == DatumIndex.None)
+                                firstHandle = currentHandle;
+
+                            if (prevExpr != null)
+                                prevExpr.NextExpressionHandle = currentHandle;
+
+                            prevExpr = ScriptExpressions[currentHandle.Index];
                         }
 
-                        return handle;
+                        //
+                        // Allocate the function name expression
+                        //
+
+                        var beginHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)entry.Key);
+                        var beginExpr = ScriptExpressions[beginHandle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)entry.Key);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.NextExpressionHandle = firstHandle;
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), beginExpr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        return beginHandle;
                     }
 
                 case "begin_random":
@@ -934,21 +942,16 @@ namespace TagTool.Scripting.Compiler
             {
                 if (functionNameSymbol.Value == entry.Value.Name)
                 {
-                    functionNameExpr.Opcode = (ushort)entry.Key;
+                    var handle = AllocateExpression(entry.Value.Type, HsSyntaxNodeFlags.Group, (ushort)entry.Key);
+                    var expr = ScriptExpressions[handle.Index];
 
-                    var typeString = entry.Value.Type.ToString();
+                    var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Expression, (ushort)entry.Key);
+                    var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                    functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
 
-                    if (!Enum.TryParse(typeString, true, out expr.ValueType.Halo3Retail))
-                        expr.ValueType.Halo3Retail = HsType.Halo3RetailValue.Invalid;
+                    Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                    Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
 
-                    if (!Enum.TryParse(typeString, true, out expr.ValueType.Halo3ODST))
-                        expr.ValueType.Halo3ODST = HsType.Halo3ODSTValue.Invalid;
-
-                    if (!Enum.TryParse(typeString, true, out expr.ValueType.HaloOnline))
-                        expr.ValueType.HaloOnline = HsType.HaloOnlineValue.Invalid;
-
-                    expr.Opcode = functionNameExpr.Opcode;
-                    
                     IScriptSyntax parameters = group.Tail;
                     var prevExpr = functionNameExpr; 
 

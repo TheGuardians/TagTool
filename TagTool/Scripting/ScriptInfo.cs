@@ -565,7 +565,10 @@ namespace TagTool.Scripting
                 [0x015] = new ScriptInfo(HsType.Halo3ODSTValue.Boolean, "sleep_until"),
                 [0x016] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "wake"),
                 [0x017] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "inspect"),
-                [0x018] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit"),
+                [0x018] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Object),
+                },
                 [0x019] = new ScriptInfo(HsType.Halo3ODSTValue.Boolean, "not")
                 {
                     new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Boolean),
@@ -4941,7 +4944,10 @@ namespace TagTool.Scripting
                 [0x015] = new ScriptInfo(HsType.Halo3ODSTValue.Boolean, "sleep_until"),
                 [0x016] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "wake"),
                 [0x017] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "inspect"),
-                [0x018] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit"),
+                [0x018] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Object),
+                },
                 [0x019] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "evaluate")
                 {
                     new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Script),
@@ -9915,7 +9921,10 @@ namespace TagTool.Scripting
                 [0x016] = new ScriptInfo(HsType.Halo3ODSTValue.Boolean, "sleep_until"),
                 [0x017] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "wake"),
                 [0x018] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "inspect"),
-                [0x019] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit"),
+                [0x019] = new ScriptInfo(HsType.Halo3ODSTValue.Unit, "unit")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Object),
+                },
                 [0x01A] = new ScriptInfo(HsType.Halo3ODSTValue.Void, "evaluate")
                 {
                     new ScriptInfo.ParameterInfo(HsType.Halo3ODSTValue.Script),

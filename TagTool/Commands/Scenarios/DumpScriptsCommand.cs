@@ -132,7 +132,7 @@ namespace TagTool.Commands.Scenarios
                 if (expr.Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
-                if (Definition.ScriptExpressions[i - 1].Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
+                if (i > 0 && Definition.ScriptExpressions[i - 1].Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
                 var ValueType = "";
