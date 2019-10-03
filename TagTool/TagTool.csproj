@@ -263,6 +263,8 @@
     <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\OpenMapFileCommand.cs" />
+    <Compile Include="Commands\HUD\ChudContextFactory.cs" />
+    <Compile Include="Commands\HUD\UpdateChudTextCommand.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
     <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />

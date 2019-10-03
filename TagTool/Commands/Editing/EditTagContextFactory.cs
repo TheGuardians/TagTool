@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using TagTool.Commands.Video;
 using TagTool.Commands.Bitmaps;
+using TagTool.Commands.HUD;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Models;
 using TagTool.Commands.ModelAnimationGraphs;
@@ -50,6 +51,10 @@ namespace TagTool.Commands.Editing
 
                 case "bitm": // bitmap
                     BitmapContextFactory.Populate(commandContext, cacheContext, tag, (Bitmap)definition);
+                    break;
+
+                case "chdt":
+                    ChudContextFactory.Populate(commandContext, cacheContext, tag, (ChudDefinition)definition);
                     break;
 
                 case "coll":
