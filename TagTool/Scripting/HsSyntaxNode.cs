@@ -24,6 +24,8 @@ namespace TagTool.Scripting
     [Flags]
     public enum HsSyntaxNodeFlags : ushort
     {
+        Invalid = 0xBABA,
+
         Primitive = 1 << 0,
         ScriptIndex = 1 << 1,
         GlobalIndex = 1 << 2,
@@ -33,8 +35,7 @@ namespace TagTool.Scripting
         Group = DoNotGC,
         Expression = Primitive | DoNotGC,
         ScriptReference = ScriptIndex | DoNotGC,
-        GlobalsReference = GlobalIndex | DoNotGC,
-        ParameterReference = ParameterIndex | DoNotGC,
-        Invalid = 0x3ABB // ushort 0xBABA
+        GlobalsReference = Primitive | GlobalIndex | DoNotGC,
+        ParameterReference = Primitive | ParameterIndex | DoNotGC
     }
 }
