@@ -359,7 +359,7 @@ namespace TagTool.Scripting.Compiler
                 //
 
                 foreach (var parameter in CurrentScript?.Parameters)
-                    if (parameter.Name == symbol.Value && parameter.Type.Halo3ODST == type)
+                    if (parameter.Name == symbol.Value)
                         return CompileParameterReference(symbol, parameter);
 
                 //
@@ -367,7 +367,7 @@ namespace TagTool.Scripting.Compiler
                 //
 
                 foreach (var global in Globals)
-                    if (global.Name == symbol.Value && global.Type.Halo3ODST == type)
+                    if (global.Name == symbol.Value)
                         return CompileGlobalReference(symbol, global);
 
                 foreach (var global in ScriptInfo.Globals[CacheContext.Version])
@@ -882,6 +882,7 @@ namespace TagTool.Scripting.Compiler
             switch (functionNameSymbol.Value)
             {
                 case "begin":
+                case "begin_random":
                     {
                         var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
@@ -907,10 +908,10 @@ namespace TagTool.Scripting.Compiler
                         // Allocate the function name expression
                         //
 
-                        var beginHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, 0);
+                        var beginHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var beginExpr = ScriptExpressions[beginHandle.Index];
 
-                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, 0);
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
                         var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
                         functionNameExpr.NextExpressionHandle = firstHandle;
                         functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
@@ -921,38 +922,35 @@ namespace TagTool.Scripting.Compiler
                         return beginHandle;
                     }
 
-                case "begin_random":
-                    throw new NotImplementedException("begin_random");
-
                 case "if":
                     {
                         var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
-                        var ifHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Tail.Line);
+                        var ifHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var ifExpr = ScriptExpressions[ifHandle.Index];
 
-                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)group.Tail.Line);
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
                         var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
                         functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
 
                         Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), ifExpr.Data, 4);
                         Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
 
-                        if (!(group.Tail is ScriptGroup condGroup))
+                        if (!(group.Tail is ScriptGroup booleanGroup))
                             throw new FormatException(group.ToString());
 
-                        var condHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, condGroup.Head);
-                        var condExpr = ScriptExpressions[condHandle.Index];
+                        var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, booleanGroup.Head);
+                        var booleanExpr = ScriptExpressions[booleanHandle.Index];
 
-                        functionNameExpr.NextExpressionHandle = condHandle;
+                        functionNameExpr.NextExpressionHandle = booleanHandle;
 
-                        if (!(condGroup.Tail is ScriptGroup thenGroup))
+                        if (!(booleanGroup.Tail is ScriptGroup thenGroup))
                             throw new FormatException(group.ToString());
 
                         var thenHandle = CompileExpression(type, thenGroup.Head);
                         var thenExpr = ScriptExpressions[thenHandle.Index];
 
-                        condExpr.NextExpressionHandle = thenHandle;
+                        booleanExpr.NextExpressionHandle = thenHandle;
 
                         if (thenGroup.Tail is ScriptGroup elseGroup)
                         {
@@ -970,10 +968,96 @@ namespace TagTool.Scripting.Compiler
                     }
 
                 case "cond":
-                    throw new NotImplementedException("cond");
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var condHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var condExpr = ScriptExpressions[condHandle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), condExpr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        var current = group.Tail;
+
+                        if (!(current is ScriptGroup) && !(current is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        var prevExpr = functionNameExpr;
+
+                        while (current is ScriptGroup currentGroup)
+                        {
+                            if (!(currentGroup.Head is ScriptGroup condGroup))
+                                throw new FormatException(group.ToString());
+
+                            if (!(condGroup.Tail is ScriptGroup thenGroup))
+                                throw new FormatException(group.ToString());
+
+                            var booleanGroupHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, line: (short)condGroup.Line);
+                            var booleanGroupExpr = ScriptExpressions[booleanGroupHandle.Index];
+
+                            var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, condGroup.Head);
+                            var booleanExpr = ScriptExpressions[booleanHandle.Index];
+                            booleanExpr.NextExpressionHandle = CompileExpression(type,
+                                new ScriptGroup
+                                {
+                                    Head = new ScriptSymbol { Value = "begin" },
+                                    Tail = thenGroup
+                                });
+
+                            Array.Copy(BitConverter.GetBytes(booleanHandle.Value), booleanGroupExpr.Data, 4);
+
+                            prevExpr.NextExpressionHandle = booleanGroupHandle;
+                            prevExpr = booleanGroupExpr;
+
+                            current = currentGroup.Tail;
+                        }
+
+                        return condHandle;
+                    }
 
                 case "set":
-                    throw new NotImplementedException("set");
+                    {
+                        if (!(group.Tail is ScriptGroup setGroup))
+                            throw new FormatException(group.ToString());
+
+                        if (!(setGroup.Head is ScriptSymbol globalName))
+                            throw new FormatException(group.ToString());
+
+                        if (!(setGroup.Tail is ScriptGroup setValueGroup) || !(setValueGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        foreach (var global in Globals)
+                        {
+                            if (global.Name != globalName.Value)
+                                continue;
+
+                            var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                            var setHandle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                            var setExpr = ScriptExpressions[setHandle.Index];
+
+                            var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                            var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                            functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                            Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), setExpr.Data, 4);
+                            Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                            var globalHandle = CompileGlobalReference(globalName, global);
+                            functionNameExpr.NextExpressionHandle = globalHandle;
+
+                            var globalExpr = ScriptExpressions[globalHandle.Index];
+                            globalExpr.NextExpressionHandle = CompileExpression(global.Type.Halo3ODST, setValueGroup.Head);
+
+                            return setHandle;
+                        }
+
+                        throw new KeyNotFoundException(globalName.Value);
+                    }
             }
 
             //
