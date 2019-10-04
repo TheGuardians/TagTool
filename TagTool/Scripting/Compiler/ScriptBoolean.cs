@@ -3,5 +3,7 @@
     public class ScriptBoolean : IScriptSyntax
     {
         public bool Value;
+
+        public int Line { get; set; }
     }
 }

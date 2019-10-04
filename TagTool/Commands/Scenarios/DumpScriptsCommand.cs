@@ -141,8 +141,8 @@ namespace TagTool.Commands.Scenarios
 
                 CsvAdd(
                     $"{i:D8}," +
-                    $"{expr.Identifier:X4}{i:X4}," +
-                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{((expr.Identifier << 16) | i):X8}," +
+                    $"{expr.NextExpressionHandle.Value:X8}," +
                     $"{expr.Opcode:X4}," +
                     $"{expr.Data[0]:X2}" +
                     $"{expr.Data[1]:X2}" +

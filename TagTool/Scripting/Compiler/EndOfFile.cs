@@ -2,5 +2,6 @@
 {
     public class EndOfFile : IScriptSyntax
     {
+        public int Line { get; set; }
     }
 }

@@ -360,7 +360,7 @@ namespace TagTool.Scripting.Compiler
 
                 foreach (var parameter in CurrentScript?.Parameters)
                     if (parameter.Name == symbol.Value)
-                        return CompileParameterReference(parameter);
+                        return CompileParameterReference(symbol, parameter);
 
                 //
                 // Check if the symbol is a reference to a global
@@ -368,11 +368,11 @@ namespace TagTool.Scripting.Compiler
 
                 foreach (var global in Globals)
                     if (global.Name == symbol.Value)
-                        return CompileGlobalReference(global);
+                        return CompileGlobalReference(symbol, global);
 
                 foreach (var global in ScriptInfo.Globals[CacheContext.Version])
                     if (global.Value == symbol.Value)
-                        return CompileGlobalReference(type, global.Value, (ushort)(global.Key | 0x8000));
+                        return CompileGlobalReference(symbol, type, global.Value, (ushort)(global.Key | 0x8000));
             }
 
             switch (type)
@@ -833,7 +833,7 @@ namespace TagTool.Scripting.Compiler
             throw new NotImplementedException(type.ToString());
         }
 
-        private DatumIndex AllocateExpression(HsType.Halo3ODSTValue valueType, HsSyntaxNodeFlags expressionType, ushort? opcode = null)
+        private DatumIndex AllocateExpression(HsType.Halo3ODSTValue valueType, HsSyntaxNodeFlags expressionType, ushort? opcode = null, short? line = null)
         {
             ushort identifier = NextIdentifier;
 
@@ -853,7 +853,7 @@ namespace TagTool.Scripting.Compiler
                 NextExpressionHandle = DatumIndex.None,
                 StringAddress = stringAddress,
                 Data = BitConverter.GetBytes(-1),
-                LineNumber = -1,
+                LineNumber = line.HasValue ? line.Value : (short)-1
             };
 
             if (!Enum.TryParse(valueType.ToString(), out expression.ValueType.Halo3Retail))
@@ -907,10 +907,10 @@ namespace TagTool.Scripting.Compiler
                         // Allocate the function name expression
                         //
 
-                        var beginHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)entry.Key);
+                        var beginHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)entry.Key, 0);
                         var beginExpr = ScriptExpressions[beginHandle.Index];
 
-                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)entry.Key);
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)entry.Key, 0);
                         var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
                         functionNameExpr.NextExpressionHandle = firstHandle;
                         functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
@@ -942,10 +942,10 @@ namespace TagTool.Scripting.Compiler
             {
                 if (functionNameSymbol.Value == entry.Value.Name)
                 {
-                    var handle = AllocateExpression(entry.Value.Type, HsSyntaxNodeFlags.Group, (ushort)entry.Key);
+                    var handle = AllocateExpression(entry.Value.Type, HsSyntaxNodeFlags.Group, (ushort)entry.Key, (short)functionNameSymbol.Line);
                     var expr = ScriptExpressions[handle.Index];
 
-                    var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Expression, (ushort)entry.Key);
+                    var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Expression, (ushort)entry.Key, (short)functionNameSymbol.Line);
                     var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
                     functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
 
@@ -977,9 +977,9 @@ namespace TagTool.Scripting.Compiler
             throw new KeyNotFoundException(functionNameSymbol.Value);
         }
 
-        private DatumIndex CompileGlobalReference(HsGlobal global)
+        private DatumIndex CompileGlobalReference(ScriptSymbol symbol, HsGlobal global)
         {
-            var handle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.GlobalsReference);
+            var handle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.GlobalsReference, line: (short)symbol.Line);
 
             var expr = ScriptExpressions[handle.Index];
             expr.StringAddress = CompileStringAddress(global.Name);
@@ -988,9 +988,9 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileGlobalReference(HsType.Halo3ODSTValue type, string name, ushort opcode)
+        private DatumIndex CompileGlobalReference(ScriptSymbol symbol, HsType.Halo3ODSTValue type, string name, ushort opcode)
         {
-            var handle = AllocateExpression(type, HsSyntaxNodeFlags.GlobalsReference);
+            var handle = AllocateExpression(type, HsSyntaxNodeFlags.GlobalsReference, line: (short)symbol.Line);
 
             var expr = ScriptExpressions[handle.Index];
             expr.StringAddress = CompileStringAddress(name);
@@ -999,9 +999,9 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileParameterReference(HsScriptParameter parameter)
+        private DatumIndex CompileParameterReference(ScriptSymbol symbol, HsScriptParameter parameter)
         {
-            var handle = AllocateExpression(parameter.Type.Halo3ODST, HsSyntaxNodeFlags.ParameterReference);
+            var handle = AllocateExpression(parameter.Type.Halo3ODST, HsSyntaxNodeFlags.ParameterReference, line: (short)symbol.Line);
 
             var expr = ScriptExpressions[handle.Index];
             expr.StringAddress = CompileStringAddress(parameter.Name);
@@ -1012,7 +1012,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileBooleanExpression(ScriptBoolean boolValue)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Boolean, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Boolean, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)boolValue.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1026,7 +1026,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileRealExpression(ScriptReal realValue)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Real, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Real, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)realValue.Line);
 
             if (handle != DatumIndex.None)
                 Array.Copy(BitConverter.GetBytes((float)realValue.Value), ScriptExpressions[handle.Index].Data, 4);
@@ -1036,7 +1036,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileShortExpression(ScriptInteger shortValue)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Short, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Short, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)shortValue.Line);
 
             if (handle != DatumIndex.None)
                 Array.Copy(BitConverter.GetBytes((short)shortValue.Value), ScriptExpressions[handle.Index].Data, 2);
@@ -1046,7 +1046,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileLongExpression(ScriptInteger longValue)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Long, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Long, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)longValue.Line);
 
             if (handle != DatumIndex.None)
                 Array.Copy(BitConverter.GetBytes((int)longValue.Value), ScriptExpressions[handle.Index].Data, 4);
@@ -1056,7 +1056,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileStringExpression(ScriptString stringValue)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.String, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.String, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)stringValue.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1070,7 +1070,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileScriptExpression(ScriptSymbol scriptSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Script, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Script, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)scriptSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1089,7 +1089,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileStringIdExpression(ScriptString stringIdString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.StringId, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.StringId, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)stringIdString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1105,7 +1105,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitSeatMapping, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitSeatMapping, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitSeatMappingSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1123,7 +1123,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.TriggerVolume, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.TriggerVolume, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)triggerVolumeSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1142,7 +1142,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneFlag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneFlag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneFlagSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1161,7 +1161,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneCameraPoint, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneCameraPoint, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneCameraPointSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1180,7 +1180,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCutsceneTitleExpression(ScriptSymbol cutsceneTitleSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneTitle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneTitle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneTitleSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1202,7 +1202,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDeviceGroupExpression(ScriptString deviceGroupString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceGroup, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceGroup, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceGroupString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1221,7 +1221,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileAiExpression(ScriptString aiString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Ai, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Ai, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)aiString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1362,7 +1362,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileStartingProfileExpression(ScriptString startingProfileString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.StartingProfile, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.StartingProfile, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)startingProfileString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1384,7 +1384,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileZoneSetExpression(ScriptString zoneSetString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)zoneSetString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1403,7 +1403,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDesignerZoneExpression(ScriptString designerZoneString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ZoneSet, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)designerZoneString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1422,7 +1422,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompilePointReferenceExpression(ScriptString pointReferenceString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.PointReference, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.PointReference, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)pointReferenceString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1457,7 +1457,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileFolderExpression(ScriptString folderString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Folder, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Folder, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)folderString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1476,7 +1476,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileSoundExpression(ScriptString soundString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Sound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Sound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)soundString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1496,7 +1496,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileEffectExpression(ScriptString effectString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Effect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Effect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)effectString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1516,7 +1516,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDamageExpression(ScriptString damageString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Damage, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Damage, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)damageString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1536,7 +1536,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileLoopingSoundExpression(ScriptString loopingSoundString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.LoopingSound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.LoopingSound, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)loopingSoundString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1556,7 +1556,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileAnimationGraphExpression(ScriptString animationGraphString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnimationGraph, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnimationGraph, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)animationGraphString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1576,7 +1576,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDamageEffectExpression(ScriptString damageEffectString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.DamageEffect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.DamageEffect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)damageEffectString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1596,7 +1596,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileObjectDefinitionExpression(ScriptString objectDefinitionString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectDefinitionString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1616,7 +1616,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileBitmapExpression(ScriptString bitmapString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Bitmap, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Bitmap, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)bitmapString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1636,7 +1636,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileShaderExpression(ScriptString shaderString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Shader, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Shader, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)shaderString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1656,7 +1656,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileRenderModelExpression(ScriptString renderModelString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.RenderModel, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.RenderModel, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)renderModelString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1676,7 +1676,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileStructureDefinitionExpression(ScriptString structureDefinitionString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.StructureDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.StructureDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)structureDefinitionString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1699,7 +1699,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCinematicDefinitionExpression(ScriptString cinematicDefinitionString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicDefinitionString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1719,7 +1719,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCinematicSceneDefinitionExpression(ScriptString cinematicSceneDefinitionString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicSceneDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicSceneDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicSceneDefinitionString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1739,7 +1739,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileBinkDefinitionExpression(ScriptString binkDefinitionString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.BinkDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.BinkDefinition, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)binkDefinitionString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1759,7 +1759,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileAnyTagExpression(ScriptString anyTagString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)anyTagString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1776,7 +1776,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileAnyTagNotResolvingExpression(ScriptString anyTagNotResolvingString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTagNotResolving, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.AnyTagNotResolving, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)anyTagNotResolvingString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1793,7 +1793,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileGameDifficultyExpression(ScriptSymbol gameDifficultySymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.GameDifficulty, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.GameDifficulty, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)gameDifficultySymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1810,7 +1810,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileTeamExpression(ScriptSymbol teamSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Team, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Team, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)teamSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1827,7 +1827,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileMpTeamExpression(ScriptSymbol mpTeamSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.MpTeam, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.MpTeam, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)mpTeamSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1844,7 +1844,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileControllerExpression(ScriptSymbol controllerSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Controller, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Controller, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)controllerSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1861,7 +1861,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileButtonPresetExpression(ScriptSymbol buttonPresetSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ButtonPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ButtonPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)buttonPresetSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1878,7 +1878,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileJoystickPresetExpression(ScriptSymbol joystickPresetSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.JoystickPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.JoystickPreset, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)joystickPresetSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1898,7 +1898,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompilePlayerCharacterTypeExpression(ScriptSymbol playerCharacterTypeSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.PlayerCharacterType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.PlayerCharacterType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)playerCharacterTypeSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1915,7 +1915,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileVoiceOutputSettingExpression(ScriptSymbol voiceOutputSettingSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceOutputSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceOutputSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)voiceOutputSettingSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1932,7 +1932,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileVoiceMaskExpression(ScriptSymbol voiceMaskSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceMask, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.VoiceMask, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)voiceMaskSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1949,7 +1949,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileSubtitleSettingExpression(ScriptSymbol subtitleSettingSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.SubtitleSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.SubtitleSetting, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)subtitleSettingSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1966,7 +1966,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileActorTypeExpression(ScriptSymbol actorTypeSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ActorType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ActorType, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)actorTypeSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -1983,7 +1983,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileModelStateExpression(ScriptSymbol modelStateSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ModelState, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ModelState, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)modelStateSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2000,7 +2000,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileEventExpression(ScriptSymbol eventSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Event, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Event, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)eventSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2017,7 +2017,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileCharacterPhysicsExpression(ScriptSymbol characterPhysicsSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CharacterPhysics, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CharacterPhysics, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)characterPhysicsSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2034,7 +2034,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompilePrimarySkullExpression(ScriptSymbol primarySkullSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.PrimarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.PrimarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)primarySkullSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2051,7 +2051,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileSecondarySkullExpression(ScriptSymbol secondarySkullSymbol)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.SecondarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.SecondarySkull, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)secondarySkullSymbol.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2068,7 +2068,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileObjectExpression(ScriptString objectString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Object, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Object, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2087,7 +2087,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileUnitExpression(ScriptString unitString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Unit, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Unit, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2106,7 +2106,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileVehicleExpression(ScriptString vehicleString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Vehicle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Vehicle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)vehicleString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2125,7 +2125,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileWeaponExpression(ScriptString weaponString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Weapon, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Weapon, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)weaponString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2144,7 +2144,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDeviceExpression(ScriptString deviceString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Device, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)deviceString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2163,7 +2163,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileSceneryExpression(ScriptString sceneryString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.Scenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)sceneryString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2182,7 +2182,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileEffectSceneryExpression(ScriptString effectSceneryString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectScenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectScenery, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)effectSceneryString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2201,7 +2201,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileObjectNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.ObjectName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2220,7 +2220,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileUnitNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2246,7 +2246,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileVehicleNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.VehicleName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.VehicleName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2268,7 +2268,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileWeaponNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.WeaponName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.WeaponName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2290,7 +2290,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileDeviceNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.DeviceName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2316,7 +2316,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileSceneryNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.SceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.SceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {
@@ -2338,7 +2338,7 @@ namespace TagTool.Scripting.Compiler
 
         private DatumIndex CompileEffectSceneryNameExpression(ScriptString objectNameString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectSceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.EffectSceneryName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)objectNameString.Line);
 
             if (handle != DatumIndex.None)
             {

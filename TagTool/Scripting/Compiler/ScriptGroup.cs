@@ -4,5 +4,7 @@
     {
         public IScriptSyntax Head;
         public IScriptSyntax Tail;
+
+        public int Line { get; set; }
     }
 }

@@ -2,5 +2,6 @@
 {
     public class ScriptInvalid : IScriptSyntax
     {
+        public int Line { get; set; }
     }
 }
