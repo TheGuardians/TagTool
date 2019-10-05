@@ -1442,7 +1442,7 @@ namespace TagTool.Commands.Porting
 
             seatMappingExpr.Opcode = 0x00C; // -> unit_seat_mapping
             seatMappingExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.UnitSeatMapping;
-            seatMappingExpr.Data = BitConverter.GetBytes(seatMappingIndex).Reverse().ToArray();
+            seatMappingExpr.Data = BitConverter.GetBytes((seatMappingIndex & ushort.MaxValue) | (1 << 16)).Reverse().ToArray();
         }
 
         public void AdjustScripts(Scenario scnr, string tagName)
