@@ -385,6 +385,12 @@ namespace TagTool.Scripting.Compiler
                 case HsType.Halo3ODSTValue.Real:
                     if (node is ScriptReal realValue)
                         return CompileRealExpression(realValue);
+                    else if (node is ScriptInteger realIntegerValue)
+                        return CompileRealExpression(new ScriptReal
+                        {
+                            Value = (double)realIntegerValue.Value,
+                            Line = realIntegerValue.Line
+                        });
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.Short:
@@ -418,8 +424,8 @@ namespace TagTool.Scripting.Compiler
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.TriggerVolume:
-                    if (node is ScriptSymbol triggerVolumeSymbol)
-                        return CompileTriggerVolumeExpression(triggerVolumeSymbol);
+                    if (node is ScriptString triggerVolumeString)
+                        return CompileTriggerVolumeExpression(triggerVolumeString);
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.CutsceneFlag:
@@ -1322,19 +1328,19 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileTriggerVolumeExpression(ScriptSymbol triggerVolumeSymbol)
+        private DatumIndex CompileTriggerVolumeExpression(ScriptString triggerVolumeString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.TriggerVolume, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)triggerVolumeSymbol.Line);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.TriggerVolume, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)triggerVolumeString.Line);
 
             if (handle != DatumIndex.None)
             {
-                var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeSymbol.Value == CacheContext.GetString(tv.Name));
+                var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeString.Value == CacheContext.GetString(tv.Name));
 
                 if (triggerVolumeIndex == -1)
-                    throw new FormatException(triggerVolumeSymbol.Value);
+                    throw new FormatException(triggerVolumeString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
-                expr.StringAddress = CompileStringAddress(triggerVolumeSymbol.Value);
+                expr.StringAddress = CompileStringAddress(triggerVolumeString.Value);
                 Array.Copy(BitConverter.GetBytes((short)triggerVolumeIndex), expr.Data, 2);
             }
 
@@ -2311,7 +2317,9 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var vehicleIndex = vehicleString.Value == "none" ? -1 : throw new NotImplementedException();
+                
+                var vehicleIndex = vehicleString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == vehicleString.Value).PlacementIndex;
 
                 if (vehicleString.Value != "none" && vehicleIndex == -1)
                     throw new FormatException(vehicleString.Value);
