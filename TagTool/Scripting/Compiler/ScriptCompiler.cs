@@ -932,7 +932,6 @@ namespace TagTool.Scripting.Compiler
 
                         var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
                         var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
-                        functionNameExpr.NextExpressionHandle = firstHandle;
                         functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
 
                         Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
