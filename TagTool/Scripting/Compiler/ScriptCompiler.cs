@@ -882,7 +882,7 @@ namespace TagTool.Scripting.Compiler
                 throw new FormatException(group.Tail.ToString());
 
             //
-            // Handle passthrough functions
+            // Handle special builtin functions
             //
 
             switch (functionNameSymbol.Value)
@@ -926,39 +926,6 @@ namespace TagTool.Scripting.Compiler
                         Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
 
                         return beginHandle;
-                    }
-
-                case "and":
-                case "or":
-                    {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
-
-                        var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
-                        var expr = ScriptExpressions[handle.Index];
-
-                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
-                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
-                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
-
-                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
-                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
-
-                        var prevExpr = functionNameExpr;
-
-                        for (IScriptSyntax current = group.Tail;
-                            current is ScriptGroup currentGroup;
-                            current = currentGroup.Tail)
-                        {
-                            if (!(currentGroup.Tail is ScriptGroup) && !(currentGroup.Tail is ScriptInvalid))
-                                throw new FormatException(group.ToString());
-
-                            var currentHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, currentGroup.Head);
-
-                            prevExpr.NextExpressionHandle = currentHandle;
-                            prevExpr = ScriptExpressions[currentHandle.Index];
-                        }
-
-                        return handle;
                     }
 
                 case "if":
@@ -1096,6 +1063,90 @@ namespace TagTool.Scripting.Compiler
                         }
 
                         throw new KeyNotFoundException(globalName.Value);
+                    }
+
+                case "and":
+                case "or":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        var prevExpr = functionNameExpr;
+
+                        for (IScriptSyntax current = group.Tail;
+                            current is ScriptGroup currentGroup;
+                            current = currentGroup.Tail)
+                        {
+                            if (!(currentGroup.Tail is ScriptGroup) && !(currentGroup.Tail is ScriptInvalid))
+                                throw new FormatException(group.ToString());
+
+                            var currentHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, currentGroup.Head);
+
+                            prevExpr.NextExpressionHandle = currentHandle;
+                            prevExpr = ScriptExpressions[currentHandle.Index];
+                        }
+
+                        return handle;
+                    }
+
+                case "+":
+                case "-":
+                case "*":
+                case "/":
+                case "min":
+                case "max":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        var prevExpr = functionNameExpr;
+
+                        for (IScriptSyntax current = group.Tail;
+                            current is ScriptGroup currentGroup;
+                            current = currentGroup.Tail)
+                        {
+                            if (!(currentGroup.Tail is ScriptGroup) && !(currentGroup.Tail is ScriptInvalid))
+                                throw new FormatException(group.ToString());
+
+                            var currentHandle = DatumIndex.None;
+
+                            switch (currentGroup.Head)
+                            {
+                                case ScriptInteger _:
+                                case ScriptReal _:
+                                    currentHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
+                                        CompileExpression(HsType.Halo3ODSTValue.Real, currentGroup.Head) :
+                                        CompileExpression(type, currentGroup.Head);
+                                    break;
+
+                                default:
+                                    currentHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, currentGroup.Head);
+                                    break;
+                            }
+
+                            prevExpr.NextExpressionHandle = currentHandle;
+                            prevExpr = ScriptExpressions[currentHandle.Index];
+                        }
+
+                        return handle;
                     }
             }
 
