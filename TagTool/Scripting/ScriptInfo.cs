@@ -9907,7 +9907,7 @@ namespace TagTool.Scripting
                 [0x008] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "-"),
                 [0x009] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "*"),
                 [0x00A] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "/"),
-                [0x00B] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "inc?"),
+                [0x00B] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "%"),
                 [0x00C] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "min"),
                 [0x00D] = new ScriptInfo(HsType.Halo3ODSTValue.Real, "max"),
                 [0x00E] = new ScriptInfo(HsType.Halo3ODSTValue.Boolean, "="),

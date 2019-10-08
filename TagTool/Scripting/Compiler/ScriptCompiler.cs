@@ -945,7 +945,7 @@ namespace TagTool.Scripting.Compiler
                         if (!(group.Tail is ScriptGroup booleanGroup))
                             throw new FormatException(group.ToString());
 
-                        var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, booleanGroup.Head);
+                        var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, booleanGroup.Head);
                         var booleanExpr = ScriptExpressions[booleanHandle.Index];
 
                         functionNameExpr.NextExpressionHandle = booleanHandle;
@@ -1070,7 +1070,7 @@ namespace TagTool.Scripting.Compiler
                     {
                         var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
-                        var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
 
                         var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
@@ -1102,6 +1102,7 @@ namespace TagTool.Scripting.Compiler
                 case "-":
                 case "*":
                 case "/":
+                case "%":
                 case "min":
                 case "max":
                     {
@@ -1145,6 +1146,184 @@ namespace TagTool.Scripting.Compiler
                             prevExpr.NextExpressionHandle = currentHandle;
                             prevExpr = ScriptExpressions[currentHandle.Index];
                         }
+
+                        return handle;
+                    }
+
+                case "=":
+                case "!=":
+                case "<":
+                case ">":
+                case "<=":
+                case ">=":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        if (!(group.Tail is ScriptGroup tailGroup))
+                            throw new FormatException(group.ToString());
+
+                        switch (tailGroup.Head)
+                        {
+                            case ScriptInteger _:
+                            case ScriptReal _:
+                                functionNameExpr.NextExpressionHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
+                                    CompileExpression(HsType.Halo3ODSTValue.Real, tailGroup.Head) :
+                                    CompileExpression(type, tailGroup.Head);
+                                break;
+
+                            default:
+                                functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, tailGroup.Head);
+                                break;
+                        }
+
+                        var firstExpr = ScriptExpressions[functionNameExpr.NextExpressionHandle.Index];
+
+                        if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        switch (tailTailGroup.Head)
+                        {
+                            case ScriptInteger _:
+                            case ScriptReal _:
+                                firstExpr.NextExpressionHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
+                                    CompileExpression(HsType.Halo3ODSTValue.Real, tailTailGroup.Head) :
+                                    CompileExpression(type, tailTailGroup.Head);
+                                break;
+
+                            default:
+                                firstExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, tailTailGroup.Head);
+                                break;
+                        }
+
+                        return handle;
+                    }
+
+                case "sleep":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        if (!(group.Tail is ScriptGroup tailGroup))
+                            throw new FormatException(group.ToString());
+
+                        switch (tailGroup.Head)
+                        {
+                            case ScriptInteger _:
+                                functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Short, tailGroup.Head);
+                                break;
+
+                            default:
+                                functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, tailGroup.Head);
+                                break;
+                        }
+
+                        if (tailGroup.Tail is ScriptInvalid)
+                            return handle;
+
+                        var lengthExpr = ScriptExpressions[functionNameExpr.NextExpressionHandle.Index];
+
+                        if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        lengthExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Script, tailTailGroup.Head);
+
+                        return handle;
+                    }
+
+                case "sleep_forever":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        if (group.Tail is ScriptInvalid)
+                            return handle;
+
+                        if (!(group.Tail is ScriptGroup tailGroup) || !(tailGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Script, tailGroup.Head);
+
+                        return handle;
+                    }
+
+                case "sleep_until":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        if (!(group.Tail is ScriptGroup tailGroup))
+                            throw new FormatException(group.ToString());
+
+                        functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, tailGroup.Head);
+
+                        if (tailGroup.Tail is ScriptInvalid)
+                            return handle;
+
+                        var booleanExpr = ScriptExpressions[functionNameExpr.NextExpressionHandle.Index];
+
+                        if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        booleanExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Short, tailTailGroup.Head);
+
+                        return handle;
+                    }
+
+                case "wake":
+                    {
+                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var expr = ScriptExpressions[handle.Index];
+
+                        var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
+                        var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+                        functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+                        Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+                        Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+                        if (!(group.Tail is ScriptGroup tailGroup) || !(tailGroup.Tail is ScriptInvalid))
+                            throw new FormatException(group.ToString());
+
+                        functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Script, tailGroup.Head);
 
                         return handle;
                     }
