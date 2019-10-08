@@ -2509,7 +2509,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var objectIndex = objectString.Value == "none" ? -1 : throw new NotImplementedException();
+                var objectIndex = objectString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == objectString.Value).PlacementIndex;
 
                 if (objectString.Value != "none" && objectIndex == -1)
                     throw new FormatException(objectString.Value);
@@ -2528,7 +2529,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var unitIndex = unitString.Value == "none" ? -1 : throw new NotImplementedException();
+                var unitIndex = unitString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == unitString.Value).PlacementIndex;
 
                 if (unitString.Value != "none" && unitIndex == -1)
                     throw new FormatException(unitString.Value);
@@ -2568,7 +2570,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var weaponIndex = weaponString.Value == "none" ? -1 : throw new NotImplementedException();
+                var weaponIndex = weaponString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == weaponString.Value).PlacementIndex;
 
                 if (weaponString.Value != "none" && weaponIndex == -1)
                     throw new FormatException(weaponString.Value);
@@ -2587,7 +2590,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var deviceIndex = deviceString.Value == "none" ? -1 : throw new NotImplementedException();
+                var deviceIndex = deviceString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == deviceString.Value).PlacementIndex;
 
                 if (deviceString.Value != "none" && deviceIndex == -1)
                     throw new FormatException(deviceString.Value);
@@ -2606,7 +2610,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var sceneryIndex = sceneryString.Value == "none" ? -1 : throw new NotImplementedException();
+                var sceneryIndex = sceneryString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == sceneryString.Value).PlacementIndex;
 
                 if (sceneryString.Value != "none" && sceneryIndex == -1)
                     throw new FormatException(sceneryString.Value);
@@ -2625,7 +2630,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var effectSceneryIndex = effectSceneryString.Value == "none" ? -1 : throw new NotImplementedException();
+                var effectSceneryIndex = effectSceneryString.Value == "none" ? -1 :
+                    Definition.ObjectNames.Find(on => on.Name == effectSceneryString.Value).PlacementIndex;
 
                 if (effectSceneryString.Value != "none" && effectSceneryIndex == -1)
                     throw new FormatException(effectSceneryString.Value);
