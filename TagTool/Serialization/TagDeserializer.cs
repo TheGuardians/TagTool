@@ -110,7 +110,14 @@ namespace TagTool.Serialization
 
             if (attr.Flags.HasFlag(Padding))
             {
-                reader.BaseStream.Position += attr.Length;
+                foreach (var b in reader.ReadBytes(attr.Length))
+                {
+                    if (b != 0)
+                    {
+                        Console.WriteLine("WARNING: non-zero padding found");
+                        break;
+                    }
+                }
             }
             else
             {

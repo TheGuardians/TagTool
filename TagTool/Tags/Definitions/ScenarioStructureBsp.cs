@@ -1025,17 +1025,24 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Length = 32)]
             public string Name;
+            
             public RealQuaternion Rotation;
             public RealPoint3d Position;
             public float Scale;
+            
             public short PaletteIndex;
+            
             public FlagsValue Flags;
+            
             [TagField(Flags = Padding, Length = 1)]
             public byte[] Unused = new byte[1];
+            
             public int UniqueId;
+
+            public Tag ExportedObjectType;
+
             [TagField(Length = 32)]
             public string ScenarioObjectName;
-            public StringId VariantName;
 
             [Flags]
             public enum FlagsValue : byte
