@@ -198,7 +198,7 @@ namespace TagTool.Tags.Definitions
                 AccelerateAlongInputDirection = 1u << 28,
                 Unknown1 = 1u << 29,
                 Unknown2 = 1u << 30,
-                Unknown3 = 1u << 31
+                InstantCoverUnknown = 1u << 31
             }
 
             [Flags]
@@ -236,7 +236,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresForgeEditor = 1u << 28,
                 AccelerateAlongInputDirection = 1u << 29,
                 Unknown1 = 1u << 30,
-                Unknown2 = 1u << 31
+                InstantCoverUnknown = 1u << 31
             }
 
             [Flags]
@@ -274,7 +274,7 @@ namespace TagTool.Tags.Definitions
                 ActivateRagdolls = 1u << 28,
                 IgnoresForgeEditor = 1u << 29,
                 AccelerateAlongInputDirection = 1u << 30,
-                Unknown1 = 1u << 31
+                InstantCoverUnknown = 1u << 31
             }
         }
 

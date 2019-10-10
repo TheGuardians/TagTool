@@ -110,6 +110,7 @@ namespace TagTool.Serialization
 
             if (attr.Flags.HasFlag(Padding))
             {
+#if DEBUG
                 foreach (var b in reader.ReadBytes(attr.Length))
                 {
                     if (b != 0)
@@ -118,6 +119,9 @@ namespace TagTool.Serialization
                         break;
                     }
                 }
+#else
+                reader.BaseStream.Position += attr.Length;
+#endif
             }
             else if (CacheVersionDetection.AttributeInCacheVersion(attr, Version))
             {
