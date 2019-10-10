@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
             public Angle                Angle; // 44
             public ArgbColor            ArgbColor; // 48
             public CachedTagInstance    CachedTagInstance; // 64
-            public CacheAddress         CacheAddress; // 68
+            public CacheResourceAddress         CacheAddress; // 68
             public DatumIndex           DatumIndex; // 72
             public PageableResource     PageableResource; // 180
             public Point2d              Point2d; // 184

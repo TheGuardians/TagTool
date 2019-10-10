@@ -110,7 +110,7 @@ namespace TagTool.Cache
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
                 case "Jun 24 2019 00:36:03":
-                    return CacheVersion.HaloReachMCCInsiderM35;
+                    return CacheVersion.HaloReachMCC824;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -165,8 +165,12 @@ namespace TagTool.Cache
                     return "12.1.700123 cert_ms30_oct19";
                 case CacheVersion.HaloReach:
                     return "11860.10.07.24.0147.omaha_relea";
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
+                    return "May 29 2019 00:44:52";
+                case CacheVersion.HaloReachMCC887:
                     return "Jun 24 2019 00:36:03";
+                case CacheVersion.HaloReachMCC1035:
+                    return "Jul 30 2019 14:17:16";
                 default:
                     return version.ToString();
             }
@@ -202,7 +206,7 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline554482:
 				case CacheVersion.HaloOnline571627:
 				case CacheVersion.HaloOnline700123:
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return true;
 				default:
 					throw new NotImplementedException(version.ToString());
@@ -323,7 +327,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline700123:
                     return CacheGeneration.HaloOnline;
 
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return CacheGeneration.MCC;
 
                 default:
@@ -360,7 +364,9 @@ namespace TagTool.Cache
             130881889330693956, // HaloOnline571627
             130930071628935939, // HaloOnline700123
             -1, // HaloReach
-            -1, // HaloReachMCCInsiderM35
+            -1, // HaloReachMCC824
+            -1, // HaloReachMCC887
+            -1, // HaloReachMCC1035
         };
     }
 
@@ -390,7 +396,9 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach,
-        HaloReachMCCInsiderM35
+        HaloReachMCC824,
+        HaloReachMCC887,
+        HaloReachMCC1035,
     }
 
     public enum CacheGeneration : int

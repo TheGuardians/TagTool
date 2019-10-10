@@ -186,7 +186,7 @@ namespace TagTool.Geometry
                         geometry.Resource.Resource.ResourceDefinitionFixups.Add(newDefinitionFixup);
                     }
 
-                    var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                    var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
                     definitionStream.Position = geometry.Resource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(dataContext);
@@ -269,7 +269,7 @@ namespace TagTool.Geometry
                                 Size = 32,
                                 Unused4 = 0,
                                 Unused8 = 0,
-                                Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position),
+                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)dataStream.Position),
                                 Unused10 = 0
                             }
                         }
@@ -375,7 +375,7 @@ namespace TagTool.Geometry
             var count = vertexBuffer.Count;
 
             var startPos = (int)outputStream.Position;
-            vertexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, startPos);
+            vertexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, startPos);
 
             var inVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
             var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, outputStream);
@@ -622,7 +622,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.WriteIndex(inIndexStream.ReadIndex());
@@ -643,7 +643,7 @@ namespace TagTool.Geometry
                         Size = count * 2,
                         Unused4 = 0,
                         Unused8 = 0,
-                        Address = new CacheAddress(),
+                        Address = new CacheResourceAddress(),
                         Unused10 = 0
                     }
                 }
@@ -658,7 +658,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)j);
@@ -678,7 +678,7 @@ namespace TagTool.Geometry
                         Size = buffer.Count() * 2,
                         Unused4 = 0,
                         Unused8 = 0,
-                        Address = new CacheAddress(),
+                        Address = new CacheResourceAddress(),
                         Unused10 = 0
                     }
                 }
@@ -693,7 +693,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)buffer[j]);

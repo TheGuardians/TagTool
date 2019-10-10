@@ -67,6 +67,6 @@ namespace TagTool.Serialization
         /// <returns>The created block.</returns>
         IDataBlock CreateBlock();
 
-        void AddResourceBlock(int count, CacheAddress address, IList block);
+        void AddResourceBlock(int count, CacheResourceAddress address, IList block);
     }
 }

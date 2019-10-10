@@ -192,8 +192,8 @@ namespace TagTool.Serialization
                 SerializeTag(block, (Tag)value);
             else if (valueType == typeof(CachedTagInstance))
                 SerializeTagReference(context, block.Writer, (CachedTagInstance)value, valueInfo);
-            else if (valueType == typeof(CacheAddress))
-                block.Writer.Write(((CacheAddress)value).Value);
+            else if (valueType == typeof(CacheResourceAddress))
+                block.Writer.Write(((CacheResourceAddress)value).Value);
             else if (valueType == typeof(byte[]))
             {
                 if (valueInfo.Flags.HasFlag(Padding) || (value == null && valueInfo.Length > 0))

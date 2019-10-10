@@ -46,7 +46,7 @@ namespace TagTool.Bitmaps
         private void ExtractResourceData(BitmapTextureInteropResource definition, Bitmap.BitmapResource resource, Stream outStream)
         {
             var dataReference = definition.Texture.Definition.Data;
-            if (dataReference.Address.Type != CacheAddressType.Resource)
+            if (dataReference.Address.Type != CacheResourceAddressType.Resource)
                 throw new InvalidOperationException("Invalid resource data address");
 
             var resourceDataStream = new MemoryStream();

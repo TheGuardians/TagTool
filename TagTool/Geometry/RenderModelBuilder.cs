@@ -455,7 +455,7 @@ namespace TagTool.Geometry
                         Count = vertexCount,
                         Format = mesh.VertexFormat,
                         VertexSize = VertexSizes[mesh.VertexFormat],
-                        Data = new TagData(vertexBufferEnd - vertexBufferStart, new CacheAddress(CacheAddressType.Resource, vertexBufferStart)),
+                        Data = new TagData(vertexBufferEnd - vertexBufferStart, new CacheResourceAddress(CacheResourceAddressType.Resource, vertexBufferStart)),
                     },
                 });
 
@@ -471,7 +471,7 @@ namespace TagTool.Geometry
                     Definition = new IndexBufferDefinition
                     {
                         Format = (IndexBufferFormat)Enum.Parse(typeof(IndexBufferFormat), mesh.Mesh.IndexBufferType.ToString()),
-                        Data = new TagData(indexBufferEnd - indexBufferStart, new CacheAddress(CacheAddressType.Resource, indexBufferStart)),
+                        Data = new TagData(indexBufferEnd - indexBufferStart, new CacheResourceAddress(CacheResourceAddressType.Resource, indexBufferStart)),
                     },
                 });
             }

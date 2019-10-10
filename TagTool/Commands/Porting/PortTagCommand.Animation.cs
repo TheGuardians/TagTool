@@ -56,7 +56,7 @@ namespace TagTool.Commands.Porting
                             var newFixup = new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = (uint)fixup.BlockOffset,
-                                Address = new CacheAddress(CacheAddressType.Resource, fixup.Offset)
+                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, fixup.Offset)
                             };
 
                             definitionStream.Position = newFixup.BlockOffset;
@@ -65,7 +65,7 @@ namespace TagTool.Commands.Porting
                             group.Resource.Resource.ResourceFixups.Add(newFixup);
                         }
 
-                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
                         definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset + 0x4;
                         definitionWriter.Write(0x20000000);

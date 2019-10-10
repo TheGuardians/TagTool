@@ -16,7 +16,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The address of the referenced block.
         /// </summary>
-        public CacheAddress Address;
+        public CacheResourceAddress Address;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused = new byte[4];
@@ -24,9 +24,9 @@ namespace TagTool.Tags
         [TagField(Flags = TagFieldFlags.Runtime)]
         public List<T> Elements;
 
-        public TagBlock() : this(0, new CacheAddress()) { }
+        public TagBlock() : this(0, new CacheResourceAddress()) { }
 
-        public TagBlock(int count, CacheAddress address)
+        public TagBlock(int count, CacheResourceAddress address)
         {
             Count = count;
             Address = address;

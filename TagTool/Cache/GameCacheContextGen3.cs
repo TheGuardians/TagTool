@@ -367,7 +367,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return "BungieHaloReach!";
 
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return "";
 
                 default:
@@ -386,7 +386,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return "ILikeSafeStrings";
 
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return "";
 
                 default:
@@ -405,7 +405,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return "LetsAllPlayNice!";
 
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return "";
 
                 default:
@@ -424,7 +424,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                     return "SneakerNetReigns";
 
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     return "";
 
                 default:
@@ -443,7 +443,7 @@ namespace TagTool.Cache
                     return "+258846,-258846;+64231,-64231;+1304,+2098";
 
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCCInsiderM35:   // verify
+                case CacheVersion.HaloReachMCC824:   // verify
                     return "+1174139,-1174139;+129874,-129874;+1123,+4604";
 
 
@@ -463,7 +463,7 @@ namespace TagTool.Cache
                     return 508;
 
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCCInsiderM35:   // verify
+                case CacheVersion.HaloReachMCC824:   // verify
                     return 656;
 
                 default:
@@ -478,7 +478,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCCInsiderM35:   // verify
+                case CacheVersion.HaloReachMCC824:   // verify
                     return 68;
 
                 default:

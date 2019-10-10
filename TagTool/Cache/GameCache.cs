@@ -41,7 +41,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCCInsiderM35:
+                case CacheVersion.HaloReachMCC824:
                     CacheContext = new GameCacheContextGen3(mapFile, Reader);
                     break;
 

@@ -219,8 +219,8 @@ namespace TagTool.Serialization
                 return DeserializeTagReference(reader, context, valueInfo);
 
             // ResourceAddress = Resource address
-            if (valueType == typeof(CacheAddress))
-                return new CacheAddress(reader.ReadUInt32());
+            if (valueType == typeof(CacheResourceAddress))
+                return new CacheResourceAddress(reader.ReadUInt32());
 
             // Byte array = Data reference
             // TODO: Allow other types to be in data references, since sometimes they can point to a structure
@@ -342,7 +342,7 @@ namespace TagTool.Serialization
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
             
-            var pointer = new CacheAddress(reader.ReadUInt32());
+            var pointer = new CacheResourceAddress(reader.ReadUInt32());
             if (count == 0 || pointer.Value == 0)
             {
                 // Null tag block

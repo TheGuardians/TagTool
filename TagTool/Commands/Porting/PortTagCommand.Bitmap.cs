@@ -177,7 +177,7 @@ namespace TagTool.Commands.Porting
 
         private void SetResourceDefinitionData(BaseBitmap bitmap, Bitmap.Image image, BitmapTextureInteropResource.BitmapDefinition definition)
         {
-            definition.Data = new TagData(bitmap.Data.Length, new CacheAddress(CacheAddressType.Resource, 0));
+            definition.Data = new TagData(bitmap.Data.Length, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
             definition.Width = (short)bitmap.Width;
             definition.Height = (short)bitmap.Height;
             definition.Depth = (sbyte)bitmap.Depth;

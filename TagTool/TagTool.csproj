@@ -214,8 +214,9 @@
     <Compile Include="Bitmaps\DDS\Header.cs" />
     <Compile Include="Bitmaps\BitmapDecoder.cs" />
     <Compile Include="Bitmaps\MipMapGenerator.cs" />
-    <Compile Include="Cache\CacheAddress.cs" />
-    <Compile Include="Cache\CacheAddressType.cs" />
+    <Compile Include="Cache\CacheFileAddress.cs" />
+    <Compile Include="Cache\CacheResourceAddress.cs" />
+    <Compile Include="Cache\CacheResourceAddressType.cs" />
     <Compile Include="Cache\CachedTagData.cs" />
     <Compile Include="Cache\CachedTagInstance.cs" />
     <Compile Include="Cache\CacheFileHeader.cs" />

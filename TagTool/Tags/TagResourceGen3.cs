@@ -36,7 +36,7 @@ namespace TagTool.Tags
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] DefinitionData;
 
-        public CacheAddress DefinitionAddress;
+        public CacheResourceAddress DefinitionAddress;
 
         public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
         public List<ResourceDefinitionFixup> ResourceDefinitionFixups = new List<ResourceDefinitionFixup>();
@@ -48,7 +48,7 @@ namespace TagTool.Tags
         public class ResourceFixup : TagStructure
 		{
             public uint BlockOffset;
-            public CacheAddress Address;
+            public CacheResourceAddress Address;
 
             [TagField(Flags = Runtime)]
             public int Type;
@@ -61,7 +61,7 @@ namespace TagTool.Tags
         [TagStructure(Size = 0x8)]
         public class ResourceDefinitionFixup : TagStructure
 		{
-            public CacheAddress Address;
+            public CacheResourceAddress Address;
             public int ResourceStructureTypeIndex;
         }
 

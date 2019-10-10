@@ -798,7 +798,7 @@ namespace TagTool.Commands.Porting
 					return collisionMopp;
 
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
-                    return ConvertPhantomTypeFlags(phantomTypeFlags);
+                    return ConvertPhantomTypeFlags(blamTagName, phantomTypeFlags);
 
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
@@ -1195,17 +1195,35 @@ namespace TagTool.Commands.Porting
             return barrelflags;
         }
 
-        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
+        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(string tagName, PhysicsModel.PhantomTypeFlags flags)
         {
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
+                    if (flags.Halo2.ToString().Contains("Unknown"))
+                    {
+                        Console.WriteLine($"WARNING: Disabling unknown phantom type flags ({flags.Halo2.ToString()})");
+                        Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
+
+                        foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo2Bits)))
+                            if (flag.ToString().StartsWith("Unknown") && flags.Halo2.HasFlag((PhysicsModel.PhantomTypeFlags.Halo2Bits)flag))
+                                flags.Halo2 &= ~(PhysicsModel.PhantomTypeFlags.Halo2Bits)flag;
+                    }
                     if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
 
                 case CacheVersion.Halo3Retail:
+                    if (flags.Halo3Retail.ToString().Contains("Unknown"))
+                    {
+                        Console.WriteLine($"WARNING: Disabling unknown phantom type flags ({flags.Halo3Retail.ToString()})");
+                        Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
+
+                        foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)))
+                            if (flag.ToString().StartsWith("Unknown") && flags.Halo3Retail.HasFlag((PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag))
+                                flags.Halo3Retail &= ~(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag;
+                    }
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
