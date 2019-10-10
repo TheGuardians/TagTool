@@ -151,7 +151,16 @@ namespace TagTool.Tags.Definitions
                 LocalizesPhysics = 1 << 19,
                 DisableLinearDamping = 1 << 20,
                 DisableAngularDamping = 1 << 21,
-                IgnoresDeadBipeds = 1 << 22
+                IgnoresDeadBipeds = 1 << 22,
+                Unknown1 = 1 << 23,
+                Unknown2 = 1 << 24,
+                Unknown3 = 1 << 25,
+                Unknown4 = 1 << 26,
+                Unknown5 = 1 << 27,
+                Unknown6 = 1 << 28,
+                Unknown7 = 1 << 29,
+                Unknown8 = 1 << 30,
+                Unknown9 = 1 << 31
             }
 
             [Flags]
@@ -180,7 +189,16 @@ namespace TagTool.Tags.Definitions
                 LocalizesPhysics = 1 << 19,
                 DisableLinearDamping = 1 << 20,
                 DisableAngularDamping = 1 << 21,
-                IgnoresDeadBipeds = 1 << 22
+                IgnoresDeadBipeds = 1 << 22,
+                Unknown1 = 1 << 23,
+                Unknown2 = 1 << 24,
+                Unknown3 = 1 << 25,
+                Unknown4 = 1 << 26,
+                Unknown5 = 1 << 27,
+                Unknown6 = 1 << 28,
+                Unknown7 = 1 << 29,
+                Unknown8 = 1 << 30,
+                Unknown9 = 1 << 31
             }
 
             [Flags]
@@ -210,7 +228,15 @@ namespace TagTool.Tags.Definitions
                 LocalizesPhysics = 1 << 20,
                 DisableLinearDamping = 1 << 21,
                 DisableAngularDamping = 1 << 22,
-                IgnoresDeadBipeds = 1 << 23
+                IgnoresDeadBipeds = 1 << 23,
+                Unknown1 = 1 << 24,
+                Unknown2 = 1 << 25,
+                Unknown3 = 1 << 26,
+                Unknown4 = 1 << 27,
+                Unknown5 = 1 << 28,
+                Unknown6 = 1 << 29,
+                Unknown7 = 1 << 30,
+                Unknown8 = 1 << 31
             }
 
             [Flags]
@@ -241,7 +267,14 @@ namespace TagTool.Tags.Definitions
                 LocalizesPhysics = 1 << 21,
                 DisableLinearDamping = 1 << 22,
                 DisableAngularDamping = 1 << 23,
-                IgnoresDeadBipeds = 1 << 24
+                IgnoresDeadBipeds = 1 << 24,
+                Unknown1 = 1 << 25,
+                Unknown2 = 1 << 26,
+                Unknown3 = 1 << 27,
+                Unknown4 = 1 << 28,
+                Unknown5 = 1 << 29,
+                Unknown6 = 1 << 30,
+                Unknown7 = 1 << 31
             }
         }
 

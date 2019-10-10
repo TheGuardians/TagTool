@@ -114,18 +114,15 @@ namespace TagTool.Serialization
                 {
                     if (b != 0)
                     {
-                        Console.WriteLine("WARNING: non-zero padding found");
+                        Console.WriteLine($"WARNING: non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name}");
                         break;
                     }
                 }
             }
-            else
+            else if (CacheVersionDetection.AttributeInCacheVersion(attr, Version))
             {
-                if(CacheVersionDetection.AttributeInCacheVersion(attr, Version))
-                {
-                    var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
-                    tagFieldInfo.SetValue(instance, value);
-                }
+                var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
+                tagFieldInfo.SetValue(instance, value);
             }
         }
 
