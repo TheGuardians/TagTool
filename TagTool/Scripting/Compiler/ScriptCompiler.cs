@@ -358,9 +358,10 @@ namespace TagTool.Scripting.Compiler
                 // Check if the symbol is a reference to a parameter
                 //
 
-                foreach (var parameter in CurrentScript?.Parameters)
-                    if (parameter.Name == symbol.Value)
-                        return CompileParameterReference(symbol, parameter);
+                if (CurrentScript != null)
+                    foreach (var parameter in CurrentScript?.Parameters)
+                        if (parameter.Name == symbol.Value)
+                            return CompileParameterReference(symbol, parameter);
 
                 //
                 // Check if the symbol is a reference to a global
