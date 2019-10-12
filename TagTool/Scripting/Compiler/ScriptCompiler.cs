@@ -378,6 +378,22 @@ namespace TagTool.Scripting.Compiler
 
             switch (type)
             {
+                case HsType.Halo3ODSTValue.Unparsed:
+                    switch (node)
+                    {
+                        case ScriptBoolean unparsedBoolean:
+                            return CompileBooleanExpression(unparsedBoolean);
+                        case ScriptReal unparsedReal:
+                            return CompileRealExpression(unparsedReal);
+                        case ScriptInteger unparsedInteger:
+                            if (unparsedInteger.Value < short.MinValue || unparsedInteger.Value > short.MaxValue)
+                                return CompileLongExpression(unparsedInteger);
+                            return CompileShortExpression(unparsedInteger);
+                        case ScriptString unparsedString:
+                            return CompileStringExpression(unparsedString);
+                    }
+                    break;
+
                 case HsType.Halo3ODSTValue.Boolean:
                     if (node is ScriptBoolean boolValue)
                         return CompileBooleanExpression(boolValue);
