@@ -948,7 +948,7 @@ namespace TagTool.Scripting.Compiler
                         if (!(group.Tail is ScriptGroup booleanGroup))
                             throw new FormatException(group.ToString());
 
-                        var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, booleanGroup.Head);
+                        var booleanHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, booleanGroup.Head);
                         var booleanExpr = ScriptExpressions[booleanHandle.Index];
 
                         functionNameExpr.NextExpressionHandle = booleanHandle;
