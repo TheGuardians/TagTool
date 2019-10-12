@@ -420,8 +420,10 @@ namespace TagTool.Scripting.Compiler
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.UnitSeatMapping:
-                    if (node is ScriptSymbol unitSeatMappingSymbol)
-                        return CompileUnitSeatMappingExpression(unitSeatMappingSymbol);
+                    if (node is ScriptSymbol unitSeatMappingSymbol && unitSeatMappingSymbol.Value == "none")
+                        return CompileUnitSeatMappingExpression(new ScriptString { Value = "none" });
+                    else if (node is ScriptString unitSeatMappingString)
+                        return CompileUnitSeatMappingExpression(unitSeatMappingString);
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.TriggerVolume:
@@ -1192,19 +1194,9 @@ namespace TagTool.Scripting.Compiler
                         if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
                             throw new FormatException(group.ToString());
 
-                        switch (tailTailGroup.Head)
-                        {
-                            case ScriptInteger _:
-                            case ScriptReal _:
-                                firstExpr.NextExpressionHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
-                                    CompileExpression(HsType.Halo3ODSTValue.Real, tailTailGroup.Head) :
-                                    CompileExpression(type, tailTailGroup.Head);
-                                break;
-
-                            default:
-                                firstExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Unparsed, tailTailGroup.Head);
-                                break;
-                        }
+                        firstExpr.NextExpressionHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
+                            CompileExpression(firstExpr.ValueType.Halo3ODST, tailTailGroup.Head) :
+                            CompileExpression(type, tailTailGroup.Head);
 
                         return handle;
                     }
@@ -1541,13 +1533,13 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileUnitSeatMappingExpression(ScriptSymbol unitSeatMappingSymbol)
+        private DatumIndex CompileUnitSeatMappingExpression(ScriptString unitSeatMappingString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitSeatMapping, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitSeatMappingSymbol.Line);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.UnitSeatMapping, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)unitSeatMappingString.Line);
 
             if (handle != DatumIndex.None)
             {
-                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(unitSeatMappingSymbol.Value);
+                ScriptExpressions[handle.Index].StringAddress = CompileStringAddress(unitSeatMappingString.Value);
 
                 //
                 // TODO: Compile unit_seat_mapping data here
