@@ -260,6 +260,12 @@ namespace TagTool.Cache
         /// <returns>True if the tag was found, false otherwise.</returns>
         public bool TryGetTag<T>(string name, out CachedTagInstance result) where T : TagStructure
         {
+            if (name == "none" || name == "null")
+            {
+                result = null;
+                return true;
+            }
+
             if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
             {
                 var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;

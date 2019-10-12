@@ -56,14 +56,44 @@ namespace TagTool.Scripting.Compiler
             //
 
             foreach (var node in nodes)
-            {
+                PrecompileToplevel(node);
+
+            foreach (var node in nodes)
                 CompileToplevel(node);
-            }
 
             Definition.Scripts = Scripts;
             Definition.Globals = Globals;
             Definition.ScriptExpressions = ScriptExpressions;
             Definition.ScriptStrings = (StringWriter.BaseStream as MemoryStream).ToArray();
+        }
+
+        private void PrecompileToplevel(IScriptSyntax node)
+        {
+            switch (node)
+            {
+                case ScriptGroup group:
+                    switch (group.Head)
+                    {
+                        case ScriptSymbol symbol:
+                            switch (symbol.Value)
+                            {
+                                case "global":
+                                    break;
+
+                                case "script":
+                                    PrecompileScript(group);
+                                    break;
+                            }
+                            break;
+
+                        default:
+                            throw new FormatException(group.ToString());
+                    }
+                    break;
+
+                default:
+                    throw new FormatException(node.ToString());
+            }
         }
 
         private void CompileToplevel(IScriptSyntax node)
@@ -191,7 +221,7 @@ namespace TagTool.Scripting.Compiler
             });
         }
 
-        private void CompileScript(IScriptSyntax node)
+        private void PrecompileScript(IScriptSyntax node)
         {
             //
             // Verify the input syntax node is in the right format
@@ -199,7 +229,7 @@ namespace TagTool.Scripting.Compiler
 
             if (!(node is ScriptGroup group))
                 throw new FormatException(node.ToString());
-            
+
             if (!(group.Head is ScriptSymbol symbol && symbol.Value == "script"))
                 throw new FormatException(node.ToString());
 
@@ -328,11 +358,182 @@ namespace TagTool.Scripting.Compiler
                 Parameters = scriptParams
             };
 
+            var exists = false;
+
+            foreach (var s in Scripts)
+            {
+                if (s.ScriptName != scriptName || s.Parameters.Count != scriptParams.Count)
+                    continue;
+
+                exists = true;
+
+                for (var i = 0; i < scriptParams.Count; i++)
+                {
+                    if (s.Parameters[i].Type.Halo3ODST != scriptParams[i].Type.Halo3ODST)
+                    {
+                        exists = false;
+                        break;
+                    }
+                }
+
+                if (exists)
+                    break;
+            }
+
+            if (exists)
+                throw new Exception($"Script {scriptName} already defined.");
+
             Scripts.Add(script);
+        }
+
+        private void CompileScript(IScriptSyntax node)
+        {
+            //
+            // Verify the input syntax node is in the right format
+            //
+
+            if (!(node is ScriptGroup group))
+                throw new FormatException(node.ToString());
+
+            if (!(group.Head is ScriptSymbol symbol && symbol.Value == "script"))
+                throw new FormatException(node.ToString());
+
+            if (!(group.Tail is ScriptGroup declGroup))
+                throw new FormatException(node.ToString());
 
             //
-            // Compile the script expressions
+            // Compile the script type
             //
+
+            var scriptType = ParseScriptType(declGroup.Head);
+
+            //
+            // Compile the script return type
+            //
+
+            if (!(declGroup.Tail is ScriptGroup declTailGroup))
+                throw new FormatException(declGroup.Tail.ToString());
+
+            var scriptReturnType = ParseHsType(declTailGroup.Head);
+
+            if (scriptReturnType.Halo3ODST == HsType.Halo3ODSTValue.Invalid)
+                throw new FormatException(declTailGroup.Head.ToString());
+
+            //
+            // Compile the script name and parameters (if any)
+            //
+
+            if (!(declTailGroup.Tail is ScriptGroup declTailTailGroup))
+                throw new FormatException(declTailGroup.Tail.ToString());
+
+            string scriptName;
+            var scriptParams = new List<HsScriptParameter>();
+
+            switch (declTailTailGroup.Head)
+            {
+                // (script static boolean do_stuff ...)
+                case ScriptSymbol declName:
+                    scriptName = declName.Value;
+                    break;
+
+                // (script static boolean (do_stuff (real a) (real b)) ...)
+                case ScriptGroup declNameGroup:
+                    {
+                        //
+                        // Get the name of the script
+                        //
+
+                        if (!(declNameGroup.Head is ScriptSymbol declGroupName))
+                            throw new FormatException(declNameGroup.Head.ToString());
+
+                        scriptName = declGroupName.Value;
+
+                        //
+                        // Get a list of script parameters
+                        //
+
+                        if (!(declNameGroup.Tail is ScriptGroup tailGroup))
+                            throw new FormatException(declNameGroup.Tail.ToString());
+
+                        if (!(tailGroup is ScriptGroup declParamGroup))
+                            throw new FormatException(tailGroup.ToString());
+
+                        for (IScriptSyntax param = declParamGroup;
+                            param is ScriptGroup paramGroup;
+                            param = paramGroup.Tail)
+                        {
+                            //
+                            // Verify the input parameter syntax is correct: (type name)
+                            //
+
+                            if (!(paramGroup.Head is ScriptGroup paramDeclGroup))
+                                throw new FormatException(paramGroup.Head.ToString());
+
+                            //
+                            // Get the parameter type
+                            //
+
+                            if (!(paramDeclGroup.Head is ScriptSymbol paramDeclType))
+                                throw new FormatException(paramDeclGroup.Head.ToString());
+
+                            var paramType = ParseHsType(paramDeclType);
+
+                            //
+                            // Get the parameter name
+                            //
+
+                            if (!(paramDeclGroup.Tail is ScriptGroup paramDeclTailGroup))
+                                throw new FormatException(paramDeclGroup.Tail.ToString());
+
+                            if (!(paramDeclTailGroup.Head is ScriptSymbol paramDeclName))
+                                throw new FormatException(paramDeclTailGroup.Head.ToString());
+
+                            var paramName = paramDeclName.Value;
+
+                            if (!(paramDeclTailGroup.Tail is ScriptInvalid))
+                                throw new FormatException(paramDeclTailGroup.Tail.ToString());
+
+                            //
+                            // Add an entry to the script parameters list
+                            //
+
+                            scriptParams.Add(new HsScriptParameter
+                            {
+                                Name = paramName,
+                                Type = paramType
+                            });
+                        }
+                    }
+                    break;
+
+                default:
+                    throw new FormatException(declTailGroup.Head.ToString());
+            }
+
+            HsScript script = null;
+
+            foreach (var s in Scripts)
+            {
+                if (s.ScriptName != scriptName || s.Parameters.Count != scriptParams.Count)
+                    continue;
+
+                script = s;
+
+                for (var i = 0; i < scriptParams.Count; i++)
+                {
+                    if (s.Parameters[i].Type.Halo3ODST != scriptParams[i].Type.Halo3ODST)
+                    {
+                        script = null;
+                        break;
+                    }
+                }
+
+                if (script != null)
+                    break;
+            }
+
+            if (script == null)
+                throw new Exception($"Script {scriptName} not defined.");
 
             CurrentScript = script;
 
@@ -448,13 +649,13 @@ namespace TagTool.Scripting.Compiler
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.CutsceneFlag:
-                    if (node is ScriptSymbol cutsceneFlagSymbol)
-                        return CompileCutsceneFlagExpression(cutsceneFlagSymbol);
+                    if (node is ScriptString cutsceneFlagString)
+                        return CompileCutsceneFlagExpression(cutsceneFlagString);
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.CutsceneCameraPoint:
-                    if (node is ScriptSymbol cutsceneCameraPointSymbol)
-                        return CompileCutsceneCameraPointExpression(cutsceneCameraPointSymbol);
+                    if (node is ScriptString cutsceneCameraPointString)
+                        return CompileCutsceneCameraPointExpression(cutsceneCameraPointString);
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.CutsceneTitle:
@@ -835,8 +1036,8 @@ namespace TagTool.Scripting.Compiler
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.CinematicLightprobe:
-                    if (node is ScriptString cinematicLightprobeString)
-                        return CompileCinematicLightprobeExpression(cinematicLightprobeString);
+                    if (node is ScriptSymbol cinematicLightprobeSymbol)
+                        return CompileCinematicLightprobeExpression(cinematicLightprobeSymbol);
                     else throw new FormatException(node.ToString());
 
                 case HsType.Halo3ODSTValue.AnimationBudgetReference:
@@ -1303,15 +1504,28 @@ namespace TagTool.Scripting.Compiler
 
                         functionNameExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Boolean, tailGroup.Head);
 
-                        if (tailGroup.Tail is ScriptInvalid)
-                            return handle;
+                        if (tailGroup.Tail is ScriptGroup tailTailGroup)
+                        {
+                            var booleanExpr = ScriptExpressions[functionNameExpr.NextExpressionHandle.Index];
+                            booleanExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Short, tailTailGroup.Head);
 
-                        var booleanExpr = ScriptExpressions[functionNameExpr.NextExpressionHandle.Index];
+                            if (tailTailGroup.Tail is ScriptGroup tailTailTailGroup)
+                            {
+                                if (!(tailTailTailGroup.Tail is ScriptInvalid))
+                                    throw new FormatException(group.ToString());
 
-                        if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
+                                var tickExpr = ScriptExpressions[booleanExpr.NextExpressionHandle.Index];
+                                tickExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Short, tailTailTailGroup.Head);
+                            }
+                            else if (!(tailTailGroup.Tail is ScriptInvalid))
+                            {
+                                throw new FormatException(group.ToString());
+                            }
+                        }
+                        else if (!(tailGroup.Tail is ScriptInvalid))
+                        {
                             throw new FormatException(group.ToString());
-
-                        booleanExpr.NextExpressionHandle = CompileExpression(HsType.Halo3ODSTValue.Short, tailTailGroup.Head);
+                        }
 
                         return handle;
                     }
@@ -1524,7 +1738,7 @@ namespace TagTool.Scripting.Compiler
                 var scriptIndex = Scripts.FindIndex(s => s.ScriptName == scriptSymbol.Value);
 
                 if (scriptIndex == -1)
-                    throw new FormatException(scriptSymbol.Value);
+                    throw new KeyNotFoundException(scriptSymbol.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(scriptSymbol.Value);
@@ -1587,38 +1801,38 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCutsceneFlagExpression(ScriptSymbol cutsceneFlagSymbol)
+        private DatumIndex CompileCutsceneFlagExpression(ScriptString cutsceneFlagString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneFlag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneFlagSymbol.Line);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneFlag, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneFlagString.Line);
 
             if (handle != DatumIndex.None)
             {
-                var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagSymbol.Value == CacheContext.GetString(cf.Name));
+                var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagString.Value == CacheContext.GetString(cf.Name));
 
                 if (cutsceneFlagIndex == -1)
-                    throw new FormatException(cutsceneFlagSymbol.Value);
+                    throw new FormatException(cutsceneFlagString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
-                expr.StringAddress = CompileStringAddress(cutsceneFlagSymbol.Value);
+                expr.StringAddress = CompileStringAddress(cutsceneFlagString.Value);
                 Array.Copy(BitConverter.GetBytes((short)cutsceneFlagIndex), expr.Data, 2);
             }
 
             return handle;
         }
 
-        private DatumIndex CompileCutsceneCameraPointExpression(ScriptSymbol cutsceneCameraPointSymbol)
+        private DatumIndex CompileCutsceneCameraPointExpression(ScriptString cutsceneCameraPointString)
         {
-            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneCameraPoint, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneCameraPointSymbol.Line);
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CutsceneCameraPoint, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cutsceneCameraPointString.Line);
 
             if (handle != DatumIndex.None)
             {
-                var cutsceneCameraPointIndex = Definition.CutsceneCameraPoints.FindIndex(ccp => cutsceneCameraPointSymbol.Value == ccp.Name);
+                var cutsceneCameraPointIndex = Definition.CutsceneCameraPoints.FindIndex(ccp => cutsceneCameraPointString.Value == ccp.Name);
 
                 if (cutsceneCameraPointIndex == -1)
-                    throw new FormatException(cutsceneCameraPointSymbol.Value);
+                    throw new FormatException(cutsceneCameraPointString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
-                expr.StringAddress = CompileStringAddress(cutsceneCameraPointSymbol.Value);
+                expr.StringAddress = CompileStringAddress(cutsceneCameraPointString.Value);
                 Array.Copy(BitConverter.GetBytes((short)cutsceneCameraPointIndex), expr.Data, 2);
             }
 
@@ -1927,11 +2141,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(soundString.Value, out var instance) ||
-                    !instance.IsInGroup<Sound>())
-                {
+                if (!CacheContext.TryGetTag<Sound>(soundString.Value, out var instance))
                     throw new FormatException(soundString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(soundString.Value);
@@ -1947,11 +2158,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(effectString.Value, out var instance) ||
-                    !instance.IsInGroup<Effect>())
-                {
+                if (!CacheContext.TryGetTag<Effect>(effectString.Value, out var instance))
                     throw new FormatException(effectString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(effectString.Value);
@@ -1967,11 +2175,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(damageString.Value, out var instance) ||
-                    !instance.IsInGroup<DamageEffect>())
-                {
+                if (!CacheContext.TryGetTag<DamageEffect>(damageString.Value, out var instance))
                     throw new FormatException(damageString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(damageString.Value);
@@ -1987,11 +2192,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(loopingSoundString.Value, out var instance) ||
-                    !instance.IsInGroup<SoundLooping>())
-                {
+                if (!CacheContext.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
                     throw new FormatException(loopingSoundString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(loopingSoundString.Value);
@@ -2007,11 +2209,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(animationGraphString.Value, out var instance) ||
-                    !instance.IsInGroup<ModelAnimationGraph>())
-                {
+                if (!CacheContext.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
                     throw new FormatException(animationGraphString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(animationGraphString.Value);
@@ -2027,11 +2226,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(damageEffectString.Value, out var instance) ||
-                    !instance.IsInGroup<DamageEffect>())
-                {
+                if (!CacheContext.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
                     throw new FormatException(damageEffectString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(damageEffectString.Value);
@@ -2067,11 +2263,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(bitmapString.Value, out var instance) ||
-                    !instance.IsInGroup<Bitmap>())
-                {
+                if (!CacheContext.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
                     throw new FormatException(bitmapString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(bitmapString.Value);
@@ -2087,11 +2280,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(shaderString.Value, out var instance) ||
-                    !instance.IsInGroup<RenderMethod>())
-                {
+                if (!CacheContext.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
                     throw new FormatException(shaderString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(shaderString.Value);
@@ -2107,8 +2297,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(renderModelString.Value, out var instance) ||
-                    !instance.IsInGroup<RenderModel>())
+                if (!CacheContext.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
                 {
                     throw new FormatException(renderModelString.Value);
                 }
@@ -2127,11 +2316,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(structureDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup<ScenarioStructureBsp>())
-                {
+                if (!CacheContext.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
                     throw new FormatException(structureDefinitionString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(structureDefinitionString.Value);
@@ -2150,11 +2336,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(cinematicDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup<Cinematic>())
-                {
+                if (!CacheContext.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicDefinitionString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicDefinitionString.Value);
@@ -2170,11 +2353,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(cinematicSceneDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup<CinematicScene>())
-                {
+                if (!CacheContext.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicSceneDefinitionString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicSceneDefinitionString.Value);
@@ -2190,11 +2370,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(binkDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup<Bink>())
-                {
+                if (!CacheContext.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
                     throw new FormatException(binkDefinitionString.Value);
-                }
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(binkDefinitionString.Value);
@@ -2813,8 +2990,24 @@ namespace TagTool.Scripting.Compiler
             return handle;
         }
 
-        private DatumIndex CompileCinematicLightprobeExpression(ScriptString cinematicLightprobeString) =>
-            throw new NotImplementedException();
+        private DatumIndex CompileCinematicLightprobeExpression(ScriptSymbol cinematicLightprobeSymbol)
+        {
+            var handle = AllocateExpression(HsType.Halo3ODSTValue.CinematicLightprobe, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)cinematicLightprobeSymbol.Line);
+
+            if (handle != DatumIndex.None)
+            {
+                var cinematicLightprobeIndex = Definition.CinematicLighting.FindIndex(cl => cinematicLightprobeSymbol.Value == CacheContext.GetString(cl.Name));
+
+                if (cinematicLightprobeIndex == -1)
+                    throw new FormatException(cinematicLightprobeSymbol.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(cinematicLightprobeSymbol.Value);
+                Array.Copy(BitConverter.GetBytes((short)cinematicLightprobeIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumIndex CompileAnimationBudgetReferenceExpression(ScriptString animationBudgetReferenceString) =>
             throw new NotImplementedException();
