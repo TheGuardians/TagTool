@@ -1111,7 +1111,7 @@ namespace TagTool.Scripting.Compiler
                     {
                         var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
-                        var handle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
+                        var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
 
                         var functionNameHandle = AllocateExpression(HsType.Halo3ODSTValue.FunctionName, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, (ushort)builtin.Key, (short)functionNameSymbol.Line);
@@ -1136,9 +1136,7 @@ namespace TagTool.Scripting.Compiler
                             {
                                 case ScriptInteger _:
                                 case ScriptReal _:
-                                    currentHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
-                                        CompileExpression(HsType.Halo3ODSTValue.Real, currentGroup.Head) :
-                                        CompileExpression(type, currentGroup.Head);
+                                    currentHandle = CompileExpression(HsType.Halo3ODSTValue.Real, currentGroup.Head);
                                     break;
 
                                 default:
