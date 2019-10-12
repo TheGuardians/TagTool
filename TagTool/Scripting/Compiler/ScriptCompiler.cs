@@ -959,6 +959,9 @@ namespace TagTool.Scripting.Compiler
                         var thenHandle = CompileExpression(type, thenGroup.Head);
                         var thenExpr = ScriptExpressions[thenHandle.Index];
 
+                        if (type == HsType.Halo3ODSTValue.Unparsed)
+                            ifExpr.ValueType = thenExpr.ValueType.DeepClone();
+
                         booleanExpr.NextExpressionHandle = thenHandle;
 
                         if (thenGroup.Tail is ScriptGroup elseGroup)
@@ -1192,9 +1195,9 @@ namespace TagTool.Scripting.Compiler
                         if (!(tailGroup.Tail is ScriptGroup tailTailGroup) || !(tailTailGroup.Tail is ScriptInvalid))
                             throw new FormatException(group.ToString());
 
-                        firstExpr.NextExpressionHandle = (type == HsType.Halo3ODSTValue.Unparsed) ?
-                            CompileExpression(firstExpr.ValueType.Halo3ODST, tailTailGroup.Head) :
-                            CompileExpression(type, tailTailGroup.Head);
+                        firstExpr.NextExpressionHandle = (tailTailGroup.Head is ScriptGroup) ?
+                            CompileExpression(HsType.Halo3ODSTValue.Unparsed, tailTailGroup.Head) :
+                            CompileExpression(firstExpr.ValueType.Halo3ODST, tailTailGroup.Head);
 
                         return handle;
                     }
