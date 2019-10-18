@@ -1,4 +1,5 @@
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -13,6 +14,10 @@ namespace TagTool.Ai
         public AiSize ObstacleLeapMaximumSize;
         public AiSize ObstacleIgnoreSize;
         public AiSize ObstaceSmashableSize;
+
+        [TagField(Flags = Padding, Length = 2)]
+        public byte[] Unused = new byte[2];
+
         public CharacterJumpHeight JumpHeight;
         public CharacterMovementHintFlags HintFlags;
         public float Unknown1;
