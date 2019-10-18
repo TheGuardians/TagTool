@@ -287,7 +287,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance GlobalLighting;
         public CachedTagInstance Lightmap;
         public CachedTagInstance PerformanceThrottles;
-        public List<AiObjectId> AiObjectIds;
+        public List<ReferenceFrame> ObjectReferenceFrames;
         public List<AiObjective> AiObjectives;
         public List<DesignerZoneSet> DesignerZoneSets;
 
@@ -3130,7 +3130,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class AiObjectId : TagStructure
+        public class ReferenceFrame : TagStructure
 		{
             public DatumIndex ObjectHandle;
             public short OriginBspIndex;

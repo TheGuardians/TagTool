@@ -380,7 +380,7 @@ namespace TagTool.Commands.Porting
                 Scnr.ObjectiveStrings = null;
                 Scnr.Interpolators.Clear();
                 Scnr.SimulationDefinitionTable.Clear();
-                Scnr.AiObjectIds.Clear();
+                Scnr.ObjectReferenceFrames.Clear();
                 Scnr.AiObjectives.Clear();
                 Scnr.DesignerZoneSets.Clear();
                 Scnr.Unknown135.Clear();
