@@ -612,18 +612,16 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x4)]
             public class ObjectPlacement : TagStructure
             {
-                public short Unknown;
-                public short Unknown2;
+                public GameObjectType ObjectType;
+                public short PlacementIndex;
             }
 
             [TagStructure(Size = 0x10)]
             public class UnknownBlock2 : TagStructure
             {
-                public float Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public short Unknown4;
-                public short Unknown5;
+                public RealPoint3d ObjectLocation;
+                public short PlacementIndex;
+                public short ObjectType;
             }
         }
 
