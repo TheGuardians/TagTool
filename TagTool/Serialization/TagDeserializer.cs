@@ -69,10 +69,10 @@ namespace TagTool.Serialization
             var instance = Activator.CreateInstance(info.Types[0]);
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version))
-				DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
+                DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
 
 			if (info.TotalSize > 0)
-					reader.BaseStream.Position = baseOffset + info.TotalSize;
+                reader.BaseStream.Position = baseOffset + info.TotalSize;
 
             return instance;
         }

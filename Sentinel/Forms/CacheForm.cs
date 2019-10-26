@@ -575,7 +575,7 @@ namespace Sentinel.Forms
 
                     foreach (var entry in CacheContext.TagCache.Index)
                     {
-                        if (entry.Name == null || !entry.Name.StartsWith(path))
+                        if (entry == null || entry.Name == null || !entry.Name.StartsWith(path))
                             continue;
                         
                         entry.Name = $"{rd.Value}{entry.Name.Substring(path.Length, entry.Name.Length - path.Length)}";

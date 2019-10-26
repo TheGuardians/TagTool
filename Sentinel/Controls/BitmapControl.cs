@@ -39,7 +39,9 @@ namespace Sentinel.Controls
                 ddsStream.Position = 0;
 
                 // Create a DevIL image "name" (which is actually a number)
-                DevIL.ilGenImages(1, out int img_name);
+                int img_name;
+                try { DevIL.ilGenImages(1, out img_name); } catch { return; }
+
                 DevIL.ilBindImage(img_name);
 
                 var ddsData = ddsStream.ToArray();
@@ -91,7 +93,7 @@ namespace Sentinel.Controls
                         format == TagTool.Bitmaps.BitmapFormat.A32B32G32R32F ||
                         format == TagTool.Bitmaps.BitmapFormat.A4R4G4B4 ||
                         format == TagTool.Bitmaps.BitmapFormat.A4R4G4B4Font;
-            }
+                }
 
             pictureBox1.Image = result;
         }
