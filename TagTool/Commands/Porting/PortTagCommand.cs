@@ -472,7 +472,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case Character character:
-					blamDefinition = ConvertCharacter(character);
+                    blamDefinition = ConvertCharacter(cacheStream, character);
 					break;
 
 				case ChudDefinition chdt:

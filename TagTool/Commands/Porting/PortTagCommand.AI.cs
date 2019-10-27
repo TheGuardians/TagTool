@@ -155,14 +155,15 @@ namespace TagTool.Commands.Porting
                 CacheContext.Serialize(cacheStream, edTag, edDef);
         }
 
-        private Character ConvertCharacter(Character character)
+        private Character ConvertCharacter(Stream cacheStream, Character character)
         {
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            if (character.Style == null && character.ParentCharacter != null)
             {
-                character.InspectProperties = new List<CharacterInspectProperties>();
-                character.EngineerProperties = new List<CharacterEngineerProperties>();
-            }
+                var parent = CacheContext.Deserialize<Character>(cacheStream, character.ParentCharacter);
 
+                if(parent.Style != null)
+                    character.Style = parent.Style;
+            }           
             return character;
         }
     }
