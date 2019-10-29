@@ -230,6 +230,10 @@ namespace TagTool.Serialization
                     ResourceStructureTypeIndex = fixup.ResourceStructureTypeIndex
                 };
             }
+
+            public void AddTagReference(CachedTagInstance referencedTag)
+            {
+            }
         }
     }
 }

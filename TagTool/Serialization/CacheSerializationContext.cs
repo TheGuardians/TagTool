@@ -124,5 +124,10 @@ namespace TagTool.Serialization
         {
             throw new NotImplementedException();
         }
+
+        public void AddTagReference(CachedTagInstance referencedTag)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

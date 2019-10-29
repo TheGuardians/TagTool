@@ -255,9 +255,14 @@ namespace TagTool.Cache
                 fixup.WriteOffset -= startOffset;
                 fixup.TargetOffset -= startOffset;
             }
+
             data.ResourcePointerOffsets.AddRange(tag.ResourcePointerOffsets.Select(offset => offset - startOffset));
+
+            data.TagReferenceOffsets.AddRange(tag.TagReferenceOffsets.Select(offset => offset - startOffset));
+
             data.MainStructOffset -= startOffset;
             dataOffset = startOffset;
+
             return data;
         }
 

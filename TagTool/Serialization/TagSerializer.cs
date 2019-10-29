@@ -191,7 +191,7 @@ namespace TagTool.Serialization
             else if (valueType == typeof(Tag))
                 SerializeTag(block, (Tag)value);
             else if (valueType == typeof(CachedTagInstance))
-                SerializeTagReference(context, block.Writer, (CachedTagInstance)value, valueInfo);
+                SerializeTagReference(context, block, (CachedTagInstance)value, valueInfo);
             else if (valueType == typeof(CacheResourceAddress))
                 block.Writer.Write(((CacheResourceAddress)value).Value);
             else if (valueType == typeof(byte[]))
@@ -316,10 +316,10 @@ namespace TagTool.Serialization
         /// Serializes a tag reference.
         /// </summary>
         /// <param name="context">The serialization context to use.</param>
-        /// <param name="writer">The writer to write to.</param>
+        /// <param name="block">The block to write to.</param>
         /// <param name="referencedTag">The referenced tag.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
-        private void SerializeTagReference(ISerializationContext context, BinaryWriter writer, CachedTagInstance referencedTag, TagFieldAttribute valueInfo)
+        private void SerializeTagReference(ISerializationContext context, IDataBlock block, CachedTagInstance referencedTag, TagFieldAttribute valueInfo)
         {
             if ((referencedTag?.Index ?? 0) == -1)
                 referencedTag = context.GetTagByName(referencedTag.Group, referencedTag.Name);
@@ -328,14 +328,17 @@ namespace TagTool.Serialization
                 foreach (string tag in valueInfo.ValidTags)
                     if (!referencedTag.IsInGroup(tag))
                        throw new Exception($"Invalid group for tag reference: {referencedTag.Group.Tag}");
-            
+
+            block.AddTagReference(referencedTag);
+
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
             {
-                writer.Write((referencedTag != null) ? referencedTag.Group.Tag.Value : -1);
-                writer.Write(0);
-                writer.Write(0);
+                block.Writer.Write((referencedTag != null) ? referencedTag.Group.Tag.Value : -1);
+                block.Writer.Write(0);
+                block.Writer.Write(0);
             }
-            writer.Write((referencedTag != null) ? referencedTag.Index : -1);
+            
+            block.Writer.Write((referencedTag != null) ? referencedTag.Index : -1);
         }
 
         /// <summary>

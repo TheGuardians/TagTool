@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using TagTool.Cache;
 using TagTool.Tags;
 
 namespace TagTool.Serialization
@@ -25,6 +26,8 @@ namespace TagTool.Serialization
         /// <param name="targetOffset">The target offset.</param>
         /// <param name="type">The type of object that the pointer will point to.</param>
         void WritePointer(uint targetOffset, Type type);
+
+        void AddTagReference(CachedTagInstance referencedTag);
 
         /// <summary>
         /// Called before an object is serialized into the block.
