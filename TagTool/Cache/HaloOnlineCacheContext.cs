@@ -418,7 +418,7 @@ namespace TagTool.Cache
             }
 
             result = Tag.Null;
-            return false;
+            return name == "none" || name == "null";
         }
 
         /// <summary>

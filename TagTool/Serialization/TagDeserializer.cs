@@ -90,7 +90,7 @@ namespace TagTool.Serialization
         {
             var attr = tagFieldInfo.Attribute;
 
-            if (attr.Flags.HasFlag(Runtime))
+            if (attr.Flags.HasFlag(Runtime) || !CacheVersionDetection.AttributeInCacheVersion(attr, Version))
                 return;
 
             if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
@@ -111,7 +111,9 @@ namespace TagTool.Serialization
             if (attr.Flags.HasFlag(Padding))
             {
 #if DEBUG
-                foreach (var b in reader.ReadBytes(attr.Length))
+                var unused = reader.ReadBytes(attr.Length);
+
+                foreach (var b in unused)
                 {
                     if (b != 0)
                     {
@@ -123,7 +125,7 @@ namespace TagTool.Serialization
                 reader.BaseStream.Position += attr.Length;
 #endif
             }
-            else if (CacheVersionDetection.AttributeInCacheVersion(attr, Version))
+            else
             {
                 var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
                 tagFieldInfo.SetValue(instance, value);

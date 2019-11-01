@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using TagTool.Cache;
 using TagTool.Commands.Editing;
+using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Tags
@@ -103,13 +104,12 @@ namespace TagTool.Commands.Tags
             }
 
             var rootContext = ContextStack.Context;
-            var groupName = CacheContext.GetString(TagGroup.Instances[groupTag].Name);
 
             using (var stream = CacheContext.OpenTagCacheReadWrite())
             {
                 foreach (var instance in CacheContext.TagCache.Index)
                 {
-                    if (instance == null || !instance.IsInGroup(groupTag))
+                    if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
@@ -131,7 +131,7 @@ namespace TagTool.Commands.Tags
                     ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
 
                     Console.WriteLine();
-                    Console.WriteLine($"{tagName}.{groupName}:");
+                    Console.WriteLine($"{tagName}.{CacheContext.GetString(instance.Group.Name)}:");
                     ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
 
                     while (ContextStack.Context != rootContext) ContextStack.Pop();
