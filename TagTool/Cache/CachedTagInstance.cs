@@ -84,7 +84,7 @@ namespace TagTool.Cache
         /// </summary>
         public IReadOnlyList<uint> TagReferenceOffsets => _tagReferenceOffsets;
 
-        public CachedTagInstance() { }
+        //public CachedTagInstance() { }
 
         public CachedTagInstance(int index, string name = null) :
             this(index, TagGroup.None, name)
