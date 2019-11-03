@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
+using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -59,9 +60,9 @@ namespace TagTool.Commands.Modding
             {
                 var modTag = modPackage.Tags.Index[i];
 
-                if(modTag != null)
+                if (modTag != null)
                 {
-                    if(!TagMapping.ContainsKey(modTag.Index))
+                    if (!TagMapping.ContainsKey(modTag.Index))
                         ConvertCachedTagInstance(modPackage, modTag);
                 }
             }
@@ -82,7 +83,7 @@ namespace TagTool.Commands.Modding
                     var mapPath = $"{CacheContext.Directory.FullName}\\{mapName}.map";
                     var file = new FileInfo(mapPath);
                     var fileStream = file.OpenWrite();
-                    using(var writer = new EndianWriter(fileStream, map.EndianFormat))
+                    using (var writer = new EndianWriter(fileStream, map.EndianFormat))
                     {
                         map.Write(writer);
                     }
@@ -131,21 +132,21 @@ namespace TagTool.Commands.Modding
                     var definitionType = TagDefinition.Find(modTag.Group.Tag);
                     var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
                     tagDefinition = ConvertData(modPack, tagDefinition);
-                    
-                    if(definitionType == typeof(ForgeGlobalsDefinition))
+
+                    if (definitionType == typeof(ForgeGlobalsDefinition))
                     {
                         tagDefinition = ConvertForgeGlobals((ForgeGlobalsDefinition)tagDefinition);
                     }
-                    
+                    else if (definitionType == typeof(Scenario))
+                    {
+                        tagDefinition = ConvertScenario(modPack, (Scenario)tagDefinition);
+                    }
                     CacheContext.Serialize(CacheStream, newTag, tagDefinition);
-                    
-                    foreach(var resourcePointer in modTag.ResourcePointerOffsets)
+
+                    foreach (var resourcePointer in modTag.ResourcePointerOffsets)
                     {
                         newTag.AddResourceOffset(resourcePointer);
                     }
-                    
-
-
                     return newTag;
                 }
             }
@@ -155,7 +156,7 @@ namespace TagTool.Commands.Modding
         {
 
             var type = data.GetType();
-            
+
             switch (data)
             {
                 case null:
@@ -228,7 +229,7 @@ namespace TagTool.Commands.Modding
             var currentForg = (ForgeGlobalsDefinition)CacheContext.Deserialize(CacheStream, currentForgTag);
 
             // hardcoded base indices:
-            int[] baseBlockCounts = new int[] {0, 15, 173, 6, 81, 468, 9, 12 };
+            int[] baseBlockCounts = new int[] { 0, 15, 173, 6, 81, 468, 9, 12 };
 
             for (int i = baseBlockCounts[0]; i < forg.ReForgeMaterialTypes.Count; i++)
                 currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);
@@ -263,6 +264,68 @@ namespace TagTool.Commands.Modding
             currentForg.GarbageVolumeObject = forg.GarbageVolumeObject;
 
             return currentForg;
+        }
+
+        private Scenario ConvertScenario(ModPackageExtended modPack, Scenario scnr)
+        {
+
+            foreach (var expr in scnr.ScriptExpressions)
+            {
+                ConvertScriptExpression(modPack, expr);
+            }
+
+            return scnr;
+        }
+
+        public void ConvertScriptExpression(ModPackageExtended modPack, HsSyntaxNode expr)
+        {
+            ConvertScriptExpressionData(modPack, expr);
+        }
+
+        public void ConvertScriptExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
+        {
+            if (expr.Flags == HsSyntaxNodeFlags.Expression)
+                switch (expr.ValueType.HaloOnline)
+                {
+                    case HsType.HaloOnlineValue.Sound:
+                    case HsType.HaloOnlineValue.Effect:
+                    case HsType.HaloOnlineValue.Damage:
+                    case HsType.HaloOnlineValue.LoopingSound:
+                    case HsType.HaloOnlineValue.AnimationGraph:
+                    case HsType.HaloOnlineValue.DamageEffect:
+                    case HsType.HaloOnlineValue.ObjectDefinition:
+                    case HsType.HaloOnlineValue.Bitmap:
+                    case HsType.HaloOnlineValue.Shader:
+                    case HsType.HaloOnlineValue.RenderModel:
+                    case HsType.HaloOnlineValue.StructureDefinition:
+                    case HsType.HaloOnlineValue.LightmapDefinition:
+                    case HsType.HaloOnlineValue.CinematicDefinition:
+                    case HsType.HaloOnlineValue.CinematicSceneDefinition:
+                    case HsType.HaloOnlineValue.BinkDefinition:
+                    case HsType.HaloOnlineValue.AnyTag:
+                    case HsType.HaloOnlineValue.AnyTagNotResolving:
+                        ConvertScriptTagReferenceExpressionData(modPack, expr);
+                        return;
+                    default:
+                        break;
+                }
+
+        }
+
+        public void ConvertScriptTagReferenceExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
+        {
+            var tagIndex = BitConverter.ToInt32(expr.Data.ToArray(), 0);
+            CachedTagInstance tag = null;
+
+            if (modPack.Tags.Index[tagIndex] == null)
+                return;  // references an HO tag
+
+            if (TagMapping.ContainsKey(tagIndex))
+            {
+                tag = CacheContext.TagCache.Index[TagMapping[tagIndex]];
+            }
+
+            expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();  // apply proper tag index or set to -1
         }
     }
 }
