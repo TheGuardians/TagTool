@@ -164,7 +164,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
-                edTag.Name = $"blamTagName_{i}_data";
+                edTag.Name = $"{blamTagName}_{i}_data";
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 

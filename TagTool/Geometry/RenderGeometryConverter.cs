@@ -421,11 +421,11 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.StaticPerVertex:
                     ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
                     {
-                        v.Texcoord1 = ConvertNormal(v.Texcoord1);
-                        v.Texcoord2 = ConvertNormal(v.Texcoord2);
-                        v.Texcoord3 = ConvertNormal(v.Texcoord3);
-                        v.Texcoord4 = ConvertNormal(v.Texcoord4);
-                        v.Texcoord5 = ConvertNormal(v.Texcoord5);
+                        v.Color1 = ConvertColorSpace(v.Color1);
+                        v.Color2 = ConvertColorSpace(v.Color2);
+                        v.Color3 = ConvertColorSpace(v.Color3);
+                        v.Color4 = ConvertColorSpace(v.Color4);
+                        v.Color5 = ConvertColorSpace(v.Color5);
                         outVertexStream.WriteStaticPerVertexData(v);
                     });
                     break;
@@ -731,6 +731,20 @@ namespace TagTool.Geometry
                 value = VertexElementStream.Clamp(value);
             }
             return value;
+        }
+
+        private static uint ConvertColorSpace(uint color)
+        {
+            uint c1 = color & 0xFF;
+            uint c2 = (color >> 8) & 0xFF;
+            uint c3 = (color >> 16) & 0xFF;
+            uint c4 = (color >> 24) & 0xFF;
+            c1 = (c1 + 0x7F) & 0xFF;
+            c2 = (c2 + 0x7F) & 0xFF;
+            c3 = (c3 + 0x7F) & 0xFF;
+            c4 = (c4 + 0x7F) & 0xFF;
+
+            return c1 | (c2 << 8) | (c3 << 16) | (c4 << 24);
         }
 
         private static float ConvertVectorSpace(float value)

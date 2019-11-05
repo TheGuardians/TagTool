@@ -213,13 +213,16 @@ namespace TagTool.Geometry
         public RealVector2d Texcoord { get; set; }
     }
 
+    /// <summary>
+    /// Each color is some form of RGBE, engine converts it to rgb. Color 4,5 seem unused
+    /// </summary>
     public class StaticPerVertexData
     {
-        public RealQuaternion Texcoord1 { get; set; }
-        public RealQuaternion Texcoord2 { get; set; }
-        public RealQuaternion Texcoord3 { get; set; }
-        public RealQuaternion Texcoord4 { get; set; }
-        public RealQuaternion Texcoord5 { get; set; }
+        public uint Color1 { get; set; }
+        public uint Color2 { get; set; }
+        public uint Color3 { get; set; }
+        public uint Color4 { get; set; }
+        public uint Color5 { get; set; }
     }
 
     public class AmbientPrtData

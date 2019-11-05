@@ -241,12 +241,11 @@ namespace TagTool.Geometry
         {
             return new StaticPerVertexData
             {
-                
-                Texcoord1 = Stream.ReadSByte4N(),
-                Texcoord2 = Stream.ReadSByte4N(),
-                Texcoord3 = Stream.ReadSByte4N(),
-                Texcoord4 = Stream.ReadSByte4N(),
-                Texcoord5 = Stream.ReadSByte4N()
+                Color1 = Stream.ReadColor(),
+                Color2 = Stream.ReadColor(),
+                Color3 = Stream.ReadColor(),
+                Color4 = Stream.ReadColor(),
+                Color5 = Stream.ReadColor()
             };
         }
 
