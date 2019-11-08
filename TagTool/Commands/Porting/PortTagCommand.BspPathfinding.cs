@@ -349,7 +349,9 @@ namespace TagTool.Commands.Porting
                             (hint.HintType == JumpLink || hint.HintType == WallJumpLink))
                         {
                             hint.Data[3] = (hint.Data[3] & ~ushort.MaxValue) | ((hint.Data[2] >> 16) & ushort.MaxValue);
-                            hint.Data[2] = (hint.Data[2] & ~(ushort.MaxValue << 16)) << 8;
+                            hint.Data[2] = (hint.Data[2] & ~(ushort.MaxValue << 16)); //remove old landing sector
+                            hint.Data[2] = (hint.Data[2] | ((hint.Data[2] & (byte.MaxValue << 8)) << 8)); //move jump height flags
+                            hint.Data[2] = (hint.Data[2] & ~(byte.MaxValue << 8)); //remove old flags
                         }
 
                         CacheContext.Serializer.Serialize(dataContext, hint);
