@@ -860,29 +860,6 @@ namespace TagTool.Tags.Definitions
             public float Bottom;
             public uint Unknown18;
 
-            public enum PathfindingPolicyValue : short
-            {
-                TagDefault,
-                Dynamic,
-                CutOut,
-                Standard,
-                None,
-            }
-
-            public enum LightmappingPolicyValue : short
-            {
-                TagDefault,
-                Dynamic,
-                PerVertex,
-            }
-
-            [TagStructure]
-            public class PathfindingReference : TagStructure
-			{
-                public short BspIndex;
-                public short PathfindingObjectIndex;
-            }
-
             public enum SymmetryValue : int
             {
                 Both,
@@ -974,6 +951,29 @@ namespace TagTool.Tags.Definitions
                 Cylinder,
                 Box,
             }
+        }
+
+        public enum PathfindingPolicyValue : short
+        {
+            TagDefault,
+            Dynamic,
+            CutOut,
+            Standard,
+            None,
+        }
+
+        public enum LightmappingPolicyValue : short
+        {
+            TagDefault,
+            Dynamic,
+            PerVertex,
+        }
+
+        [TagStructure]
+        public class PathfindingReference : TagStructure
+        {
+            public short BspIndex;
+            public short PathfindingObjectIndex;
         }
 
         [TagStructure(Size = 0x38)]
@@ -2994,8 +2994,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x44)]
         public class CrateInstance : PermutationInstance
         {
-            public uint Unknown11;
-            public List<UnknownBlock2> Unknown12;
+            public PathfindingPolicyValue PathfindingPolicy;
+            public LightmappingPolicyValue LightmappingPolicy;
+            public List<PathfindingReference> PathfindingReferences;
             public SymmetryValue Symmetry;
             public ushort EngineFlags;
             public TeamValue Team;
