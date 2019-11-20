@@ -30,6 +30,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ImportTagCommand(cacheContext));
             context.AddCommand(new GetTagInfoCommand(cacheContext));
             context.AddCommand(new ListTagsCommand(cacheContext));
+            context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new GetMapInfoCommand());
             context.AddCommand(new DuplicateTagCommand(cacheContext));
             context.AddCommand(new GetTagAddressCommand());
