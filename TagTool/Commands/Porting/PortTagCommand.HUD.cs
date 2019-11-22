@@ -307,7 +307,6 @@ namespace TagTool.Commands.Porting
             }
 
             //additional values
-            H3Definition.Unknown5 = 1.8f;
             H3Definition.ShieldMinorThreshold = 1.0f;
             H3Definition.ShieldMajorThreshold = 0.5f;
             H3Definition.ShieldCriticalThreshold = 0.25f;
@@ -318,10 +317,6 @@ namespace TagTool.Commands.Porting
             //metagame values
             H3Definition.CampaignMedalScale = 1.5f;
             H3Definition.CampaignMedalSpacing = 60.0f;
-            H3Definition.CampaignMedalOffsetX = 0.0f;
-            H3Definition.CampaignMedalOffsetY = 157.5f;
-            H3Definition.MetagameScoreboardSpacing *= 1.5f;
-            H3Definition.MetagameScoreboardTopY *= 1.5f;
 
             //upscale blip bitmap sizes
             H3Definition.LargeSensorBlipScale *= 1.5f;

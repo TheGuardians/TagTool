@@ -14,15 +14,15 @@ namespace TagTool.Tags.Definitions
         public List<HudGlobal> HudGlobals;
         public List<HudShader> HudShaders;
         public List<UnusedCortanaEffectBlock> UnusedCortanaEffect;
-        public List<UnknownBlock2> Unknown2;
+        public List<ObjectLoopingSoundsBlock> ObjectLoopingSounds;
         public List<PlayerTrainingDatum> PlayerTrainingData;
         public CachedTagInstance StartMenuEmblems;
         public CachedTagInstance CampaignMedals;
         public CachedTagInstance CampaignMedalHudAnimation;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public short Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public short Unknown4;
+        public ChudDefinition.HudWidget.PlacementDatum.AnchorValue CampaignMedalChudAnchor;
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 2, Flags = Padding)]
+        public byte[] PostAnchorPadding;
         public float CampaignMedalScale;
         public float CampaignMedalSpacing;
         public float CampaignMedalOffsetX;
@@ -42,7 +42,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance CampaignFloodMask;
         public CachedTagInstance CampaignFloodMaskTile;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public float Unknown5;
+        public float MotionSensorBlipHeightModifier;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float ShieldMinorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -392,14 +392,15 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public CachedTagInstance PinkGradient = null;
 
+            //these are damage effect multipliers, to set how long the damage microtexture, damage noise, and damage directional arrow remain and how large and bright they are
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown7;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown8;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown9;
+            public float DamageEffectDuration;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown10;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float DirectionalArrowSize;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float DirectionalArrowDuration;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown11;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -428,16 +429,14 @@ namespace TagTool.Tags.Definitions
             public CachedTagInstance JammerResponse;
             public CachedTagInstance JammerShieldHit;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown24;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown25;
+            public RealPoint2d GrenadeSchematicsOffset;
             public float GrenadeScematicsSpacing;
             public float EquipmentScematicOffsetY;
             public float DualEquipmentScematicOffsetY;
-            public float Unknown26;
-            public float Unknown27;
+            public float UnknownScematicOffsetY;
+            public float UnknownScematicOffsetY_2;
             public float ScoreboardLeaderOffsetY;
-            public float Unknown28;
+            public float WaypointScaleUnknown;
             public float WaypointScale;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float Unknown29;
@@ -587,7 +586,7 @@ namespace TagTool.Tags.Definitions
                 public float NotificationScale;
                 public float NotificationLineSpacing;
 
-                public int Unknown35; //present in all games, sometimes -2 in H3?
+                public int Unknown35; //present in all games, related to resolution bitflags
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float NotificationOffsetX_HO;
@@ -820,7 +819,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class UnknownBlock2 : TagStructure
+        public class ObjectLoopingSoundsBlock : TagStructure
         {
             public uint Unknown;
             public List<UnknownBlock> Unknown2;
