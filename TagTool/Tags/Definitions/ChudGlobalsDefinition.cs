@@ -535,6 +535,8 @@ namespace TagTool.Tags.Definitions
                 public float VerticalScale;
                 public float HorizontalStretch;
                 public float VerticalStretch;
+
+                //these four tagrefs have no function in HO
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public CachedTagInstance Unknown = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -543,20 +545,21 @@ namespace TagTool.Tags.Definitions
                 public CachedTagInstance FirstPersonDamageBorder = null;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public CachedTagInstance ThirdPersonDamageBorder = null;
+
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float PickupDialogScale;
+                public float StateScale_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public RealPoint2d PickupDialogOffset;
+                public RealPoint2d StateLeftRightOffset_HO;
 
                 //these only exist in HO
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown23;
+                public float ScaleUnknown1; //related to state scale (alternate version?)
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown24;
+                public float SpacingUnknown1;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown25;
+                public float ScaleUnknown2;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown26;
+                public float SpacingUnknown2;
 
                 //From here, fields have been moved around a bit.
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -567,47 +570,45 @@ namespace TagTool.Tags.Definitions
                 public float StateLeftRightOffsetY_H3;
 
                 public float StateCenterOffsetY;
-                public float Unknown28;
-                public float Unknown29;
-                public float Unknown30;
+                public float StateCenterOffsetY_2;
+                public float MedalScale;
+                public float MedalSpacing;
+
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public float StateScale;
 
-                //HO ONLY
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public RealPoint2d MedalsOffset;
+                public RealPoint2d SurvivalMedalsOffset; //referenced by chud anchors
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown33;
+                public float Unknown32;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown34;
+                public RealPoint2d MultiplayerMedalsOffset; //referenced by chud anchors
 
                 public float NotificationScale;
                 public float NotificationLineSpacing;
 
-                public float Unknown35;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public float PromptOffsetY;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public float PromptOffsetX;
+                public int Unknown35; //present in all games, sometimes -2 in H3?
 
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float NotificationOffsetX_HO;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float NotificationOffsetY_HO;
+
+                //This group of 5 floats is all part of the same system
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown36;
+                public float ScaleUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown37;
+                public float SpacingUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown38;
+                public float NullUnknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown39;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown40;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown41;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public float Unknown42;
+                public RealPoint2d UnknownOffset3; //referenced by chud anchors
+
+                //this is present in HO, it is still used in chud anchors
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float PromptOffsetY;
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float PromptOffsetX;
 
                 [Flags]
                 public enum ResolutionFlagValue : int
@@ -615,11 +616,11 @@ namespace TagTool.Tags.Definitions
                     None,
                     WideFull = 1 << 0,
                     WideHalf = 1 << 1,
-                    Bit2 = 1 << 2,
+                    NativeFull = 1 << 2,
                     StandardFull = 1 << 3,
                     WideQuarter = 1 << 4,
                     StandardHalf = 1 << 5,
-                    Bit6 = 1 << 6,
+                    NativeQuarter = 1 << 6,
                     StandardQuarter = 1 << 7,
                     Bit8 = 1 << 8,
                     Bit9 = 1 << 9,

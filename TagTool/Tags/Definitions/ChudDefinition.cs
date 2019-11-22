@@ -783,22 +783,22 @@ namespace TagTool.Tags.Definitions
                     ScoreboardFriendly,
                     ScoreboardEnemy,
                     HealthAndShield,
-                    BottomEdge,
-                    Unknown,
-                    Equipment,
-                    Unknown2,
+                    BottomEdge, //same as center
+                    EquipmentXY, //uses both x and y offsets
+                    EquipmentY, //x offset always 0
+                    Unknown2, //same as center
                     Depreciated,
                     Depreciated2,
                     Depreciated3,
                     Depreciated4,
                     Depreciated5,
-                    Unknown3,
-                    Gametype,
+                    Notification, //uses notification offset in chgd
+                    Gametype, //bottom center
                     Unknown4,
                     StateRight,
                     StateLeft,
                     StateCenter,
-                    Unknown5,
+                    StateCenter2, //separate float for this in chgd
                     GametypeFriendly,
                     GametypeEnemy,
                     MetagameTop,
@@ -807,7 +807,12 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer3,
                     MetagamePlayer4,
                     Theater,
-                    Unknown6 //ODST
+                    Prompt, //ODST, corresponds to prompt offset in chgd
+                    HologramTarget, 
+                    Medals, //uses medal offset in chgd
+                    SurvivalMedals, //has values in chgd
+                    UnknownHO_Offset3, //has values in chgd
+                    MotionSensor
                 }
             }
 

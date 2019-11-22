@@ -249,8 +249,8 @@ namespace TagTool.Commands.Porting
                     H3att.MotionSensorScale *= 1.5f;
                     H3att.HorizontalScale = 1.0f;
                     H3att.VerticalScale = 1.0f;
-                    H3att.PickupDialogOffset.Y = 0.3f;
-                    H3att.PickupDialogScale = 1.5f;
+                    H3att.StateLeftRightOffset_HO.Y = H3att.StateLeftRightOffsetY_H3;
+                    H3att.StateScale_HO = H3att.StateScale;
                     H3att.NotificationOffsetY_HO = H3att.NotificationOffsetY_H3;
                     H3att.NotificationOffsetX_HO = H3att.NotificationOffsetX_H3;
                     H3att.NotificationScale *= 1.5f;
@@ -314,6 +314,14 @@ namespace TagTool.Commands.Porting
             H3Definition.HealthMinorThreshold = 0.9f;
             H3Definition.HealthMajorThreshold = 0.75f;
             H3Definition.HealthCriticalThreshold = 0.5f;
+
+            //metagame values
+            H3Definition.CampaignMedalScale = 1.5f;
+            H3Definition.CampaignMedalSpacing = 60.0f;
+            H3Definition.CampaignMedalOffsetX = 0.0f;
+            H3Definition.CampaignMedalOffsetY = 157.5f;
+            H3Definition.MetagameScoreboardSpacing *= 1.5f;
+            H3Definition.MetagameScoreboardTopY *= 1.5f;
 
             //upscale blip bitmap sizes
             H3Definition.LargeSensorBlipScale *= 1.5f;
