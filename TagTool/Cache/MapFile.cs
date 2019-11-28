@@ -31,19 +31,7 @@ namespace TagTool.Cache
 
         public IMapFileHeader Header;
 
-        // upgrade this once new map files are made.
-        public BlfChunkHeader BlfStartHeader;
-        public BlfStartOfFile BlfStartOfFile;
-        public BlfChunkHeader BlfMapInfoHeader;
-        public MapBlfInformation BlfInformation;
-
-        public BlfChunkHeader VariantHeader;
-        public MapVariant Variant;
-        public BlfChunkHeader EndOfFileHeader;
-        public BlfEndOfFile EndOfFile;
-
-        public BlfEndOfFileSP BlfEndOfFileSP;
-        public UnknownSP UnknownSP;
+        public Blf MapFileBlf;
 
         public MapFile(EndianReader reader)
         {
@@ -58,54 +46,27 @@ namespace TagTool.Cache
             // temporary code until map file format cleanup
             if(MapVersion == MapFileVersion.HaloOnline)
             {
-                reader.SeekTo((int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize);
+                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize;
 
-                BlfStartHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                BlfStartOfFile = (BlfStartOfFile)deserializer.Deserialize(dataContext, typeof(BlfStartOfFile));
-                BlfMapInfoHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                BlfInformation = (MapBlfInformation)deserializer.Deserialize(dataContext, typeof(MapBlfInformation));
-
-                if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
-                {
-                    BlfEndOfFileSP = (BlfEndOfFileSP)deserializer.Deserialize(dataContext, typeof(BlfEndOfFileSP));
-                    UnknownSP = (UnknownSP)deserializer.Deserialize(dataContext, typeof(UnknownSP));
-                }
-                else
-                {
-                    VariantHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                    Variant = (MapVariant)deserializer.Deserialize(dataContext, typeof(MapVariant));
-                    EndOfFileHeader = (BlfChunkHeader)deserializer.Deserialize(dataContext, typeof(BlfChunkHeader));
-                    EndOfFile = (BlfEndOfFile)deserializer.Deserialize(dataContext, typeof(BlfEndOfFile));
-                }
+                // Seek to the blf
+                reader.SeekTo(mapFileHeaderSize);
+                // Read blf
+                MapFileBlf = new Blf(Version);
+                if (MapFileBlf.Read(reader))
+                    MapFileBlf = null;
             }
-
         }
 
         public void Write(EndianWriter writer)
         {
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(Version);
+            var serializer = new TagSerializer(Version, EndianFormat);
             serializer.Serialize(dataContext, Header);
 
             if(Version == CacheVersion.HaloOnline106708)
             {
-                serializer.Serialize(dataContext, BlfStartHeader);
-                serializer.Serialize(dataContext, BlfStartOfFile);
-                serializer.Serialize(dataContext, BlfMapInfoHeader);
-                serializer.Serialize(dataContext, BlfInformation);
-
-                if (Header.GetCacheType() == CacheFileType.Campaign || Header.GetCacheType() == CacheFileType.MainMenu)
-                {
-                    serializer.Serialize(dataContext, BlfEndOfFileSP);
-                    serializer.Serialize(dataContext, UnknownSP);
-                }
-                else
-                {
-                    serializer.Serialize(dataContext, VariantHeader);
-                    serializer.Serialize(dataContext, Variant);
-                    serializer.Serialize(dataContext, EndOfFileHeader);
-                    serializer.Serialize(dataContext, EndOfFile);
-                }   
+                if(MapFileBlf != null)
+                    MapFileBlf.Write(writer);
             }
             
         }

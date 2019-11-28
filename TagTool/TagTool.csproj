@@ -214,6 +214,7 @@
     <Compile Include="Bitmaps\DDS\Header.cs" />
     <Compile Include="Bitmaps\BitmapDecoder.cs" />
     <Compile Include="Bitmaps\MipMapGenerator.cs" />
+    <Compile Include="Cache\Blf.cs" />
     <Compile Include="Cache\CacheFileAddress.cs" />
     <Compile Include="Cache\CacheResourceAddress.cs" />
     <Compile Include="Cache\CacheResourceAddressType.cs" />
@@ -241,7 +242,6 @@
     <Compile Include="Cache\HaloOnlineDatFiles.cs" />
     <Compile Include="Cache\HaloOnlineMapFile.cs" />
     <Compile Include="Cache\IGameCacheContext.cs" />
-    <Compile Include="Cache\MapBlfInformation.cs" />
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
@@ -310,6 +310,7 @@
     <Compile Include="Common\GameTeam.cs" />
     <Compile Include="Common\GameVoiceMask.cs" />
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
+    <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\ModelExtractor.cs" />
     <Compile Include="GlobalSuppressions.cs" />
