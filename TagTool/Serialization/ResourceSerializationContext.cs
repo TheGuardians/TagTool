@@ -121,12 +121,12 @@ namespace TagTool.Serialization
             {
                 _context = context;
                 Stream = new MemoryStream();
-                Writer = new BinaryWriter(Stream);
+                Writer = new EndianWriter(Stream);
             }
 
             public MemoryStream Stream { get; private set; }
 
-            public BinaryWriter Writer { get; private set; }
+            public EndianWriter Writer { get; private set; }
 
             public void WritePointer(uint targetOffset, Type type)
             {

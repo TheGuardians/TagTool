@@ -186,7 +186,8 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(CachedTagInstance) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
-				case TypeCode.Object when type == typeof(RealEulerAngles2d):
+                case TypeCode.Object when type == typeof(RealRectangle3d):
+                case TypeCode.Object when type == typeof(RealEulerAngles2d):
 				case TypeCode.Object when type == typeof(RealPoint2d):
 				case TypeCode.Object when type == typeof(RealVector2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):

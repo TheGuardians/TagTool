@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using TagTool.Cache;
+using TagTool.IO;
 using TagTool.Tags;
 
 namespace TagTool.Serialization
@@ -18,7 +19,7 @@ namespace TagTool.Serialization
         /// <summary>
         /// Gets the writer open on the data block's stream.
         /// </summary>
-        BinaryWriter Writer { get; }
+        EndianWriter Writer { get; }
 
         /// <summary>
         /// Writes a pointer to an object at the current position in the block.

@@ -65,12 +65,12 @@ namespace TagTool.Serialization
         private class DataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }
-            public BinaryWriter Writer { get; private set; }
+            public EndianWriter Writer { get; private set; }
 
             public DataBlock()
             {
                 Stream = new MemoryStream();
-                Writer = new BinaryWriter(Stream);
+                Writer = new EndianWriter(Stream);
             }
 
             public void WritePointer(uint targetOffset, Type type)

@@ -241,6 +241,8 @@ namespace TagTool.Serialization
                 return new Point2d(reader.ReadInt16(), reader.ReadInt16());
             if (valueType == typeof(Rectangle2d))
                 return new Rectangle2d(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16());
+            if (valueType == typeof(RealRectangle3d))
+                return new RealRectangle3d(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 
             if (valueType == typeof(RealBoundingBox))
                 return new RealBoundingBox(

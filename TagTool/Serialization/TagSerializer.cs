@@ -19,14 +19,16 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 4;
 
         public CacheVersion Version { get; }
+        public EndianFormat Format { get; }
 
         /// <summary>
         /// Constructs a tag serializer for a specific engine version.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
-        public TagSerializer(CacheVersion version)
+        public TagSerializer(CacheVersion version, EndianFormat format=EndianFormat.LittleEndian)
         {
             Version = version;
+            Format = format;
         }
 
         /// <summary>
@@ -42,6 +44,7 @@ namespace TagTool.Serialization
             context.BeginSerialize(info);
             var tagStream = new MemoryStream();
             var structBlock = context.CreateBlock();
+            structBlock.Writer.Format = Format;
             SerializeStruct(context, tagStream, structBlock, info, tagStructure);
 
             // Finalize the block and write all of the tag data out
@@ -128,7 +131,7 @@ namespace TagTool.Serialization
         /// <param name="writer">The writer to write to.</param>
         /// <param name="val">The value.</param>
         /// <param name="valueType">Type of the value.</param>
-        private void SerializePrimitiveValue(BinaryWriter writer, object val, Type valueType)
+        private void SerializePrimitiveValue(EndianWriter writer, object val, Type valueType)
         {
             switch (Type.GetTypeCode(valueType))
             {
@@ -224,7 +227,9 @@ namespace TagTool.Serialization
             else if (valueType == typeof(Point2d))
                 SerializePoint(block, (Point2d)value);
             else if (valueType == typeof(Rectangle2d))
-                SerializeRectangle(block, (Rectangle2d)value);
+                SerializeRectangle2d(block, (Rectangle2d)value);
+            else if (valueType == typeof(RealRectangle3d))
+                SerializeRealRectangle3d(block, (RealRectangle3d)value);
             else if (valueType == typeof(RealPoint2d))
                 SerializePoint(block, (RealPoint2d)value);
             else if (valueType == typeof(RealPoint3d))
@@ -272,7 +277,7 @@ namespace TagTool.Serialization
         /// <param name="writer">The writer to write to.</param>
         /// <param name="str">The string to serialize.</param>
         /// <param name="valueInfo">Information about the value.</param>
-        private void SerializeString(BinaryWriter writer, string str, TagFieldAttribute valueInfo)
+        private void SerializeString(EndianWriter writer, string str, TagFieldAttribute valueInfo)
         {
             if (valueInfo == null || valueInfo.Length == 0)
                 throw new ArgumentException("Cannot serialize a string with no length set");
@@ -292,7 +297,10 @@ namespace TagTool.Serialization
                         break;
 
                     case Unicode:
-                        bytes = Encoding.Unicode.GetBytes(str);
+                        if (Format == EndianFormat.LittleEndian)
+                            bytes = Encoding.Unicode.GetBytes(str);
+                        else
+                            bytes = Encoding.BigEndianUnicode.GetBytes(str);
                         break;
 
                     default:
@@ -521,12 +529,22 @@ namespace TagTool.Serialization
             block.Writer.Write(point.Y);
         }
 
-        private void SerializeRectangle(IDataBlock block, Rectangle2d rect)
+        private void SerializeRectangle2d(IDataBlock block, Rectangle2d rect)
         {
             block.Writer.Write(rect.Top);
             block.Writer.Write(rect.Left);
             block.Writer.Write(rect.Bottom);
             block.Writer.Write(rect.Right);
+        }
+
+        private void SerializeRealRectangle3d(IDataBlock block, RealRectangle3d rect)
+        {
+            block.Writer.Write(rect.X0);
+            block.Writer.Write(rect.X1);
+            block.Writer.Write(rect.Y0);
+            block.Writer.Write(rect.Y1);
+            block.Writer.Write(rect.Z0);
+            block.Writer.Write(rect.Z1);
         }
 
         private void SerializePoint(IDataBlock block, RealPoint2d point)
