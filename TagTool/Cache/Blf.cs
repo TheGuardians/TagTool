@@ -264,6 +264,8 @@ namespace TagTool.Cache
                         case CacheVersion.HaloOnline106708:
                             ConvertHalo3ToODSTScenarioChunk();
                             Version = targetVersion;
+                            if (targetVersion == CacheVersion.HaloOnline106708)
+                                Format = EndianFormat.LittleEndian;
                             break;
                         default:
                             throw new NotImplementedException($"Conversion from Halo 3 to {targetVersion.ToString()} not supported");
@@ -297,10 +299,7 @@ namespace TagTool.Cache
                 else
                 {
                     ins = new BlfScenarioInsertion();
-                    ins.ZoneSetIndex = -1;
                 }
-                ins.Unknown2 = -1;
-                ins.Unknown3 = -1;
                 Scenario.InsertionsODST[i] = ins;
             }
         }
