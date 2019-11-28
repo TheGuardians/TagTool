@@ -247,6 +247,63 @@ namespace TagTool.Cache
                 }
             }
         }
+
+        /// <summary>
+        /// Convert to specified Cache Version.
+        /// </summary>
+        /// <param name="targetVersion"></param>
+        public void ConvertBlf(CacheVersion targetVersion)
+        {
+            switch (Version)
+            {
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Beta:
+                    switch (targetVersion)
+                    {
+                        case CacheVersion.Halo3ODST:
+                        case CacheVersion.HaloOnline106708:
+                            ConvertHalo3ToODSTScenarioChunk();
+                            Version = targetVersion;
+                            break;
+                        default:
+                            throw new NotImplementedException($"Conversion from Halo 3 to {targetVersion.ToString()} not supported");
+                    }
+                    break;
+
+                case CacheVersion.Halo3ODST:
+                case CacheVersion.HaloOnline106708:
+                    return;
+
+                default:
+                    throw new NotImplementedException($"Conversion from {Version.ToString()} to {targetVersion.ToString()} not supported");
+            }
+        }
+
+        /// <summary>
+        /// Converts a Halo 3 Scenario chunk (levl) to ODST format (HO)
+        /// </summary>
+        private void ConvertHalo3ToODSTScenarioChunk()
+        {
+            if (!ContentFlags.HasFlag(BlfFileContentFlags.Scenario))
+                return;
+
+            Scenario.InsertionsODST = new BlfScenarioInsertion[9];
+
+            for(int i = 0; i < 9; i++)
+            {
+                BlfScenarioInsertion ins = null;
+                if( i < 4)
+                    ins = Scenario.InsertionsH3[i];
+                else
+                {
+                    ins = new BlfScenarioInsertion();
+                    ins.ZoneSetIndex = -1;
+                }
+                ins.Unknown2 = -1;
+                ins.Unknown3 = -1;
+                Scenario.InsertionsODST[i] = ins;
+            }
+        }
     }
 
     [Flags]
@@ -423,6 +480,9 @@ namespace TagTool.Cache
         [TagField(Length = 0xC)]
         public NameUnicode128[] Descriptions;
 
+        [TagField(Length = 0x40)]
+        public int[] MapIds;
+
         public uint unknown;
     }
 
@@ -446,7 +506,6 @@ namespace TagTool.Cache
         public uint BuildVersion;
         public ContentItemMetadata Metadata;
     }
-
 
     [TagStructure(Size = 0x100, Align = 0x1)]
     public class TagName
