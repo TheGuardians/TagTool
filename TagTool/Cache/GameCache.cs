@@ -27,7 +27,8 @@ namespace TagTool.Cache
             Stream = file.OpenRead();
             Reader = new EndianReader(Stream);
 
-            var mapFile = new MapFile(Reader);
+            var mapFile = new MapFile();
+            mapFile.Read(Reader);
 
             switch (mapFile.Version)
             {

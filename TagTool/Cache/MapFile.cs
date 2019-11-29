@@ -25,36 +25,16 @@ namespace TagTool.Cache
         private static readonly Tag Foot = new Tag("foot");
         private static readonly int MapFileVersionOffset = 0x4;
 
-        public readonly CacheVersion Version;
-        public readonly MapFileVersion MapVersion;
-        public readonly EndianFormat EndianFormat;
+        public CacheVersion Version { get; set; }
+        public MapFileVersion MapVersion { get; set; }
+        public EndianFormat EndianFormat { get; set; }
 
         public IMapFileHeader Header;
 
         public Blf MapFileBlf;
 
-        public MapFile(EndianReader reader)
+        public MapFile()
         {
-            EndianFormat = DetectEndianFormat(reader);
-            MapVersion = GetMapFileVersion(reader);
-            Version = DetectCacheVersion(reader);
-            var deserializer = new TagDeserializer(Version);
-            reader.SeekTo(0);
-            var dataContext = new DataSerializationContext(reader);
-            Header = (MapFileHeader)deserializer.Deserialize(dataContext, typeof(MapFileHeader));
-
-            // temporary code until map file format cleanup
-            if(MapVersion == MapFileVersion.HaloOnline)
-            {
-                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize;
-
-                // Seek to the blf
-                reader.SeekTo(mapFileHeaderSize);
-                // Read blf
-                MapFileBlf = new Blf(Version);
-                if (MapFileBlf.Read(reader))
-                    MapFileBlf = null;
-            }
         }
 
         public void Write(EndianWriter writer)
@@ -68,7 +48,30 @@ namespace TagTool.Cache
                 if(MapFileBlf != null)
                     MapFileBlf.Write(writer);
             }
-            
+        }
+
+        public void Read(EndianReader reader)
+        {
+            EndianFormat = DetectEndianFormat(reader);
+            MapVersion = GetMapFileVersion(reader);
+            Version = DetectCacheVersion(reader);
+            var deserializer = new TagDeserializer(Version);
+            reader.SeekTo(0);
+            var dataContext = new DataSerializationContext(reader);
+            Header = (MapFileHeader)deserializer.Deserialize(dataContext, typeof(MapFileHeader));
+
+            // temporary code until map file format cleanup
+            if (MapVersion == MapFileVersion.HaloOnline)
+            {
+                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(MapFileHeader), Version).TotalSize;
+
+                // Seek to the blf
+                reader.SeekTo(mapFileHeaderSize);
+                // Read blf
+                MapFileBlf = new Blf(Version);
+                if (MapFileBlf.Read(reader))
+                    MapFileBlf = null;
+            }
         }
 
         private static EndianFormat DetectEndianFormat(EndianReader reader)
@@ -186,7 +189,7 @@ namespace TagTool.Cache
 
         public void UpdateScenarioIndices(int newIndex)
         {
-
+            Header.SetScenarioTagIndex(newIndex);
         }
     }
 

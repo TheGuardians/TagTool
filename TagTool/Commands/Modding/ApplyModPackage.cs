@@ -73,7 +73,8 @@ namespace TagTool.Commands.Modding
             {
                 using (var reader = new EndianReader(mapFile))
                 {
-                    MapFile map = new MapFile(reader);
+                    MapFile map = new MapFile();
+                    map.Read(reader);
 
                     var modIndex = map.Header.GetScenarioTagIndex();
                     TagMapping.TryGetValue(modIndex, out int newScnrIndex);

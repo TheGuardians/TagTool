@@ -379,7 +379,8 @@ namespace TagTool.Cache
             foreach (var mapFile in MapFileStreams)
             {
                 var reader = new EndianReader(mapFile);
-                MapFile map = new MapFile(reader);
+                MapFile map = new MapFile();
+                map.Read(reader);
 
                 var type = map.Header.GetCacheType();
 

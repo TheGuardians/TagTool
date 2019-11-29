@@ -282,7 +282,8 @@ namespace TagTool.IO
                     str = Encoding.BigEndianUnicode.GetString(ReadBytes(MaxLength * 2));
             else
                 str = "";
-            return str.Substring(0, str.IndexOf('\0'));
+            var nullTermIndex = str.IndexOf('\0');
+            return nullTermIndex < 0 ? str : str.Substring(0, nullTermIndex);
         }
         #endregion
 

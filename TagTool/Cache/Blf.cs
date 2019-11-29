@@ -302,6 +302,7 @@ namespace TagTool.Cache
                 }
                 Scenario.InsertionsODST[i] = ins;
             }
+            Scenario.Length = 0x98C0; 
         }
     }
 
