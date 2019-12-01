@@ -908,59 +908,45 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.Halo3ODST)]
         public class BackgroundSoundEnvironmentPaletteBlock : TagStructure
         {
+            [TagField(Flags = Label)]
             public StringId Name;
             public CachedTagInstance SoundEnvironment;
-            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public float CutoffDistance;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public Bounds<float> CutoffRange;
-            public float InterpolationSpeed;
-            public CachedTagInstance BackgroundSound;
-            public CachedTagInstance InsideClusterSound;
-            public float CutoffDistance2;
-            public ScaleFlagsValue ScaleFlags;
-            public float InteriorScale;
-            public float PortalScale;
-            public float ExteriorScale;
-            public float InterpolationSpeed2;
+            public SoundEnvironmentType Type;
+            public float ReverbCutoffDistance;
+            public float ReverbInterpolationSpeed;
+            public CachedTagInstance AmbienceBackgroundSound;
+            public CachedTagInstance AmbienceInsideClusterSound;
+            public float AmbienceCutoffDistance;
+            public BackgroundSoundScaleFlags AmbienceScaleFlags;
+            public float AmbienceInteriorScale;
+            public float AmbiencePortalScale;
+            public float AmbienceExteriorScale;
+            public float AmbienceInterpolationSpeed;
+        }
 
-            [Flags]
-            public enum ScaleFlagsValue : int
-            {
-                None,
-                Bit0,
-                Bit1,
-                Bit2 = 4,
-                Bit3 = 8,
-                Bit4 = 16,
-                Bit5 = 32,
-                Bit6 = 64,
-                Bit7 = 128,
-                Bit8 = 256,
-                Bit9 = 512,
-                Bit10 = 1024,
-                Bit11 = 2048,
-                Bit12 = 4096,
-                Bit13 = 8192,
-                Bit14 = 16384,
-                Bit15 = 32768,
-                Bit16 = 65536,
-                Bit17 = 131072,
-                Bit18 = 262144,
-                Bit19 = 524288,
-                Bit20 = 1048576,
-                Bit21 = 2097152,
-                Bit22 = 4194304,
-                Bit23 = 8388608,
-                Bit24 = 16777216,
-                Bit25 = 33554432,
-                Bit26 = 67108864,
-                Bit27 = 134217728,
-                Bit28 = 268435456,
-                Bit29 = 536870912,
-                Bit30 = 1073741824,
-                Bit31 = -2147483648,
-            }
+        public enum SoundEnvironmentType : int
+        {
+            Default,
+            InteriorNarrow,
+            InteriorSmall,
+            InteriorMedium,
+            InteriorLarge,
+            ExteriorSmall,
+            ExteriorMedium,
+            ExteriorLarge,
+            ExteriorHalfOpen,
+            ExteriorOpen
+        }
+
+        [Flags]
+        public enum BackgroundSoundScaleFlags : int
+        {
+            None = 0,
+            OverrideDefaultScale = 1 << 0,
+            UseAdjacentClusterAsPortalScale = 1 << 1,
+            UseAdjacentClusterAsExteriorScale = 1 << 2,
+            ScaleWithWeatherIntensity = 1 << 3
         }
 
         [TagStructure(Size = 0x3C)]

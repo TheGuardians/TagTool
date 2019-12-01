@@ -217,7 +217,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown101;
         public uint Unknown102;
 
-        public List<BackgroundSoundEnvironmentPaletteBlock> BackgroundSoundEnvironmentPalette;
+        public List<ScenarioStructureBsp.BackgroundSoundEnvironmentPaletteBlock> BackgroundSoundEnvironmentPalette;
 
         public uint Unknown103;
         public uint Unknown104;
@@ -2754,51 +2754,6 @@ namespace TagTool.Tags.Definitions
             public short TriggerVolume;
         }
 
-        public enum SoundEnvironmentType : int
-        {
-            Default,
-            InteriorNarrow,
-            InteriorSmall,
-            InteriorMedium,
-            InteriorLarge,
-            ExteriorSmall,
-            ExteriorMedium,
-            ExteriorLarge,
-            ExteriorHalfOpen,
-            ExteriorOpen
-        }
-
-        [Flags]
-        public enum BackgroundSoundScaleFlags : int
-        {
-            None = 0,
-            OverrideDefaultScale = 1 << 0,
-            UseAdjacentClusterAsPortalScale = 1 << 1,
-            UseAdjacentClusterAsExteriorScale = 1 << 2,
-            ScaleWithWeatherIntensity = 1 << 3
-        }
-
-        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x58, MinVersion = CacheVersion.Halo3ODST)]
-        public class BackgroundSoundEnvironmentPaletteBlock : TagStructure
-		{
-            [TagField(Flags = Label)]
-            public StringId Name;
-            public CachedTagInstance SoundEnvironment;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public SoundEnvironmentType Type;
-            public float ReverbCutoffDistance;
-            public float ReverbInterpolationSpeed;
-            public CachedTagInstance AmbienceBackgroundSound;
-            public CachedTagInstance AmbienceInsideClusterSound;
-            public float AmbienceCutoffDistance;
-            public BackgroundSoundScaleFlags AmbienceScaleFlags;
-            public float AmbienceInteriorScale;
-            public float AmbiencePortalScale;
-            public float AmbienceExteriorScale;
-            public float AmbienceInterpolationSpeed;
-        }
-
         [TagStructure(Size = 0x78)]
         public class UnknownBlock3 : TagStructure
 		{
@@ -3744,7 +3699,7 @@ namespace TagTool.Tags.Definitions
         public class LightmapAirprobe : TagStructure
 		{
             public RealPoint3d Position;
-            public StringId Unknown4;
+            public StringId Name;
             public short Unknown5;
             public short Unknown6;
         }
