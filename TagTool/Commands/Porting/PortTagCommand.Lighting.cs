@@ -164,7 +164,11 @@ namespace TagTool.Commands.Porting
                 }
 
                 edTag = CacheContext.TagCache.AllocateTag(edGroup);
-                edTag.Name = $"{blamTagName}_{i}_data";
+
+                if(scenarioLightmap.Lightmaps.Count != 1)
+                    edTag.Name = $"{blamTagName}_{i}_data";
+                else
+                    edTag.Name = $"{blamTagName}_data";
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 

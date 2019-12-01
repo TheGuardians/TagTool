@@ -40,10 +40,7 @@ namespace TagTool.Tags.Definitions
             public List<WeaponSet> WeaponSets;
             public List<VehicleSet> VehicleSets;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
-            public List<PlayerCharacterType> PlayerCharacterTypes;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline235640)]
+            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public List<PodiumAnimation> PodiumAnimations;
 
             public CachedTagInstance EngineSettings;
