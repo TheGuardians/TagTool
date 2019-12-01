@@ -1217,12 +1217,13 @@ namespace TagTool.Commands.Porting
                 case CacheVersion.Halo3Retail:
                     if (flags.Halo3Retail.ToString().Contains("Unknown"))
                     {
-                        Console.WriteLine($"WARNING: Disabling unknown phantom type flags ({flags.Halo3Retail.ToString()})");
+                        Console.WriteLine($"WARNING: Found unknown phantom type flags ({flags.Halo3Retail.ToString()})");
                         Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
-
+                        /*
                         foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)))
                             if (flag.ToString().StartsWith("Unknown") && flags.Halo3Retail.HasFlag((PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag))
                                 flags.Halo3Retail &= ~(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag;
+                        */
                     }
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
