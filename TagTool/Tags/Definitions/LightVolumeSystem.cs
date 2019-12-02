@@ -44,8 +44,7 @@ namespace TagTool.Tags.Definitions
 
             public LightVolumeFlags Flags;
 
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
+            public short Unknown;
 
             /// <summary>
             /// Average brightness head-on/side-view.
