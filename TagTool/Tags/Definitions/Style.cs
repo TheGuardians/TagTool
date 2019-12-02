@@ -13,8 +13,8 @@ namespace TagTool.Tags.Definitions
 
         public CombatStatusDecayOptionsValue CombatStatusDecayOptions;
 
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused = new byte[2];
+        // check ODST ai\assaulting, ai\bunkering 
+        public short Unknown;
 
         public StyleControlFlags StyleControl;
 

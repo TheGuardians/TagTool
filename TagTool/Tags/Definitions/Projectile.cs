@@ -41,8 +41,9 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance DetonationSound;
         public DamageReportingType DamageReportingType;
 
-        [TagField(Flags = Padding, Length = 3)]
-        public byte[] Unused2;
+        public byte Unknown3;
+        public byte Unknown4;
+        public byte Unknown5;
 
         public CachedTagInstance AttachedSuperDetonationDamage;
         public float MaterialEffectRadius;

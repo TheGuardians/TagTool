@@ -440,8 +440,8 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
             public byte[] Unused3 = new byte[1];
 
-            [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
-            public byte[] Unused4 = new byte[2];
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public short Unknown4;
 
             [TagField(Flags = Padding, Length = 20)]
             public byte[] Unused5 = new byte[20];

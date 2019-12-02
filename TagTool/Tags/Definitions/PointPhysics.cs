@@ -11,7 +11,9 @@ namespace TagTool.Tags.Definitions
         public float RuntimeMassOverRadiusCubed;
         public float RuntimeInverseDensity;
 
-        [TagField(Flags = Padding, Length = 20)]
+        public float Unknown;
+
+        [TagField(Flags = Padding, Length = 16)]
         public byte[] Unused1;
 
         public float Density;

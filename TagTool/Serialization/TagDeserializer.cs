@@ -117,7 +117,7 @@ namespace TagTool.Serialization
                 {
                     if (b != 0)
                     {
-                        Console.WriteLine($"WARNING: non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name}");
+                        Console.WriteLine($"WARNING: non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name} = {b}");
                         break;
                     }
                 }

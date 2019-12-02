@@ -67,8 +67,7 @@ namespace TagTool.Tags.Definitions
 
         public short HudTextMessageIndex;
 
-        [TagField(Flags = Padding, Length = 2)]
-        public byte[] Unused1;
+        public short Unknown;
 
         public List<Attachment> Attachments;
         public List<TagReferenceBlock> Widgets;
