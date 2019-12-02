@@ -124,7 +124,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown5;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public CachedTagInstance Unknown7;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public RealArgbColor Unknown17;
@@ -140,9 +140,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown22;
 
-        //Missing ARG related tags in HO
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public uint Unknown23;
 
         [TagStructure(Size = 0x24)]
         public class ARGBlock : TagStructure
