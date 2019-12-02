@@ -814,6 +814,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0xE4)]
             public class LevelsBlock : TagStructure
             {
+                public float Scale;
                 //Section A
                 public float NoiseaVelocitymin;
                 public float NoiseaVelocitymax;
