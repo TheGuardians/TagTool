@@ -184,7 +184,7 @@ namespace TagTool.Commands.Porting
                     break;
 
 				case "shit": // use the global shit tag until shit tags are port-able
-					return CacheContext.GetTag<ShieldImpact>(@"globals\global_shield_impact_settings");
+					return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
 
 				case "sncl": // always use the default sncl tag
 					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");

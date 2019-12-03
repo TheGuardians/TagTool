@@ -129,7 +129,7 @@ namespace TagTool.Shaders.ShaderMatching
                     reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
                     var pixelShaderIndex = reader.ReadInt32();
 
-                    if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+                    if (!UseMS30 && instance.Name.StartsWith("ms30"))
                         continue;
 
                     var bitmaps = new List<string>();
@@ -284,12 +284,12 @@ namespace TagTool.Shaders.ShaderMatching
 
                 var edSplit = dInstance.Name.Split("\\".ToCharArray());
                 var edType = edSplit[1];
-                var edRmdfValues = edSplit[2].Split("_".ToCharArray()).ToList();
+                var edRmdfValues = edSplit.Last().Split("_".ToCharArray()).ToList();
                 edRmdfValues.RemoveAt(0);
 
                 var bmSplit = blamRmt2Tag.Name.Split("\\".ToCharArray());
                 var bmType = bmSplit[1];
-                var bmRmdfValues = bmSplit[2].Split("_".ToCharArray()).ToList();
+                var bmRmdfValues = bmSplit.Last().Split("_".ToCharArray()).ToList();
                 bmRmdfValues.RemoveAt(0);
 
                 int matchingValues = 0;
@@ -1032,7 +1032,13 @@ namespace TagTool.Shaders.ShaderMatching
                         reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
                         var pixelShaderIndex = reader.ReadInt32();
 
-                        if (!UseMS30 && (vertexShaderIndex >= 0x4455 || pixelShaderIndex >= 0x4455))
+
+                        var vertexShaderTag = CacheContext.GetTag(vertexShaderIndex);
+                        var pixelShaderTag = CacheContext.GetTag(pixelShaderIndex);
+
+                        if (!UseMS30 && (vertexShaderTag.Name.StartsWith("ms30")))
+                            continue;
+                        if (!UseMS30 && (pixelShaderTag.Name.StartsWith("ms30")))
                             continue;
 
                         return instance;
