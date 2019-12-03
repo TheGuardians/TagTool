@@ -14,6 +14,7 @@ namespace TagTool.Cache
     {
         private List<uint> _pointerOffsets = new List<uint>();
         private List<uint> _resourceOffsets = new List<uint>();
+        private List<uint> _tagReferenceOffsets = new List<uint>();
 
         // Magic constant (NOT a build-specific memory address) used for pointers in tag data
         private const uint FixupPointerBase = 0x40000000;
@@ -77,6 +78,16 @@ namespace TagTool.Cache
         /// See the remarks for <see cref="PointerOffsets"/>.
         /// </remarks>
         public IReadOnlyList<uint> ResourcePointerOffsets => _resourceOffsets;
+
+        /// <summary>
+        /// Gets a list of offsets to each tag reference in the tag, relative to the beginning of the tag's header.
+        /// </summary>
+        public IReadOnlyList<uint> TagReferenceOffsets => _tagReferenceOffsets;
+
+        public CachedTagInstance()
+        {
+            Group = TagGroup.None;
+        }
 
         public CachedTagInstance(int index, string name = null) :
             this(index, TagGroup.None, name)
@@ -144,6 +155,32 @@ namespace TagTool.Cache
 
         public override string ToString() => $"0x{Index:X8}";
 
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 1)
+            {
+                error = $"{args.Count} arguments supplied; should be 1";
+                return false;
+            }
+            else if (!cacheContext.TryGetTag(args[0], out var tag))
+            {
+                error = $"Unable to locate tag: {args[0]}";
+                return false;
+            }
+            else
+            {
+                result = tag;
+                error = null;
+                return true;
+            }
+        }
+
+        public void AddResourceOffset(uint offset)
+        {
+            _resourceOffsets.Add(offset);
+        }
+
         /// <summary>
         /// Reads the header for the tag instance from a stream.
         /// </summary>
@@ -155,7 +192,7 @@ namespace TagTool.Cache
             var numDependencies = reader.ReadInt16();              // 0x08 int16  dependencies count
             var numDataFixups = reader.ReadInt16();                // 0x0A int16  data fixup count
             var numResourceFixups = reader.ReadInt16();            // 0x0C int16  resource fixup count
-            reader.BaseStream.Position += 2;                       // 0x0E int16  (padding)
+            var numTagReferenceFixups = reader.ReadInt16();        // 0x0E int16  tag reference fixup count(was padding)
             DefinitionOffset = reader.ReadUInt32();                // 0x10 uint32 main struct offset
             var groupTag = new Tag(reader.ReadInt32());            // 0x14 int32  group tag
             var parentGroupTag = new Tag(reader.ReadInt32());      // 0x18 int32  parent group tag
@@ -176,6 +213,9 @@ namespace TagTool.Cache
             _resourceOffsets = new List<uint>(numResourceFixups);
             for (var j = 0; j < numResourceFixups; j++)
                 _resourceOffsets.Add(PointerToOffset(reader.ReadUInt32()));
+            _tagReferenceOffsets = new List<uint>(numTagReferenceFixups);
+            for (var i = 0; i < numTagReferenceFixups; i++)
+                _tagReferenceOffsets.Add(PointerToOffset(reader.ReadUInt32()));
         }
 
         /// <summary>
@@ -189,7 +229,7 @@ namespace TagTool.Cache
             writer.Write((short)Dependencies.Count);
             writer.Write((short)PointerOffsets.Count);
             writer.Write((short)ResourcePointerOffsets.Count);
-            writer.Write((short)0);
+            writer.Write((short)TagReferenceOffsets.Count);
             writer.Write(DefinitionOffset);
             writer.Write(Group.Tag.Value);
             writer.Write(Group.ParentTag.Value);
@@ -201,7 +241,7 @@ namespace TagTool.Cache
                 writer.Write(dependency);
 
             // Write offsets
-            foreach (var offset in _pointerOffsets.Concat(_resourceOffsets))
+            foreach (var offset in _pointerOffsets.Concat(_resourceOffsets).Concat(_tagReferenceOffsets))
                 writer.Write(OffsetToPointer(offset));
         }
 
@@ -211,7 +251,11 @@ namespace TagTool.Cache
         /// <param name="data">The descriptor to use.</param>
         /// <returns>The size of the tag's header.</returns>
         internal static uint CalculateHeaderSize(CachedTagData data) =>
-            (uint)(TagHeaderSize + data.Dependencies.Count * 4 + data.PointerFixups.Count * 4 + data.ResourcePointerOffsets.Count * 4);
+            (uint)(TagHeaderSize +
+                data.Dependencies.Count * 4 +
+                data.PointerFixups.Count * 4 +
+                data.ResourcePointerOffsets.Count * 4 +
+                data.TagReferenceOffsets.Count * 4);
 
         /// <summary>
         /// Updates the tag instance's state from a block of tag data.
@@ -225,6 +269,7 @@ namespace TagTool.Cache
             Dependencies = new ReadOnlySet<int>(new HashSet<int>(data.Dependencies));
             _pointerOffsets = data.PointerFixups.Select(fixup => fixup.WriteOffset + dataOffset).ToList();
             _resourceOffsets = data.ResourcePointerOffsets.Select(offset => offset + dataOffset).ToList();
+            _tagReferenceOffsets = data.TagReferenceOffsets.Select(offset => offset + dataOffset).ToList();
         }
     }
 }

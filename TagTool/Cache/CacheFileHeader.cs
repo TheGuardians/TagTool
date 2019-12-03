@@ -1,5 +1,6 @@
 ﻿using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Cache
 {
@@ -8,7 +9,7 @@ namespace TagTool.Cache
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public sealed class CacheFileHeader : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Runtime)]
+        [TagField(Flags = Runtime)]
         public int Magic;
 
         public Tag HeadTag;

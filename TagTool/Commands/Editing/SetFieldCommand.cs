@@ -99,7 +99,7 @@ namespace TagTool.Commands.Editing
             var fieldAttrs = field.GetCustomAttributes(typeof(TagFieldAttribute), false);
             var fieldAttr = fieldAttrs?.Length < 1 ? new TagFieldAttribute() : (TagFieldAttribute)fieldAttrs[0];
             var fieldInfo = new TagFieldInfo(field, fieldAttr, uint.MaxValue, uint.MaxValue);
-            var fieldValue = ParseArgs(field.FieldType, fieldInfo, args.Skip(1).ToList());
+            var fieldValue = ParseArgs(CacheContext, field.FieldType, fieldInfo, args.Skip(1).ToList());
 
             if (fieldValue != null && fieldValue.Equals(false))
             {
@@ -257,7 +257,7 @@ namespace TagTool.Commands.Editing
             return true;
         }
 
-        public object ParseArgs(Type type, TagFieldInfo info, List<string> args)
+        public static object ParseArgs(HaloOnlineCacheContext cacheContext, Type type, TagFieldInfo info, List<string> args)
         {
             var input = args[0];
             object output = null;
@@ -340,131 +340,6 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = input;
             }
-            else if (type == typeof(CachedTagInstance))
-            {
-                if (args.Count != 1 || !CacheContext.TryGetTag(input, out var tag))
-                    return false;
-                output = tag;
-            }
-            else if (type == typeof(Tag))
-            {
-                if (args.Count != 1)
-                    return false;
-                if (!CacheContext.TryParseGroupTag(args[0], out var result))
-                {
-                    Console.WriteLine($"Invalid tag group specifier: {args[0]}");
-                    return false;
-                }
-                output = result;
-            }
-            else if (type == typeof(StringId))
-            {
-                if (args.Count != 1)
-                    return false;
-                output = CacheContext.GetStringId(input);
-            }
-            else if (type == typeof(Angle))
-            {
-                if (args.Count != 1)
-                    return false;
-                if (!float.TryParse(input, out float value))
-                    return false;
-                output = Angle.FromDegrees(value);
-            }
-            else if (type == typeof(RealEulerAngles2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float yaw) ||
-                    !float.TryParse(args[1], out float pitch))
-                    return false;
-                output = new RealEulerAngles2d(
-                    Angle.FromDegrees(yaw),
-                    Angle.FromDegrees(pitch));
-            }
-            else if (type == typeof(RealEulerAngles3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float yaw) ||
-                    !float.TryParse(args[1], out float pitch) ||
-                    !float.TryParse(args[2], out float roll))
-                    return false;
-                output = new RealEulerAngles3d(
-                    Angle.FromDegrees(yaw),
-                    Angle.FromDegrees(pitch),
-                    Angle.FromDegrees(roll));
-            }
-            else if (type == typeof(RealPoint2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float x) ||
-                    !float.TryParse(args[1], out float y))
-                    return false;
-                output = new RealPoint2d(x, y);
-            }
-            else if (type == typeof(RealPoint3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float x) ||
-                    !float.TryParse(args[1], out float y) ||
-                    !float.TryParse(args[2], out float z))
-                    return false;
-                output = new RealPoint3d(x, y, z);
-            }
-            else if (type == typeof(RealVector2d))
-            {
-                if (args.Count != 2)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j))
-                    return false;
-                output = new RealVector2d(i, j);
-            }
-            else if (type == typeof(RealVector3d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k))
-                    return false;
-                output = new RealVector3d(i, j, k);
-            }
-            else if (type == typeof(RealQuaternion))
-            {
-                if (args.Count != 4)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k) ||
-                    !float.TryParse(args[3], out float w))
-                    return false;
-                output = new RealQuaternion(i, j, k, w);
-            }
-            else if (type == typeof(RealPlane2d))
-            {
-                if (args.Count != 3)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float d))
-                    return false;
-                output = new RealPlane2d(i, j, d);
-            }
-            else if (type == typeof(RealPlane3d))
-            {
-                if (args.Count != 4)
-                    return false;
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j) ||
-                    !float.TryParse(args[2], out float k) ||
-                    !float.TryParse(args[3], out float d))
-                    return false;
-                output = new RealPlane3d(i, j, k, d);
-            }
             else if (type.IsEnum)
             {
                 if (args.Count != 1)
@@ -531,23 +406,6 @@ namespace TagTool.Commands.Editing
 
                 output = found;
             }
-            else if (type == typeof(Bounds<>))
-            {
-                var rangeType = type.GenericTypeArguments[0];
-                var argCount = RangeArgCount(rangeType);
-
-                var min = ParseArgs(rangeType, null, args.Take(argCount).ToList());
-
-                if (min.Equals(false))
-                    return false;
-
-                var max = ParseArgs(rangeType, null, args.Skip(argCount).Take(argCount).ToList());
-
-                if (max.Equals(false))
-                    return false;
-
-                output = Activator.CreateInstance(type, new object[] { min, max });
-            }
             else if (type.IsArray)
             {
                 if (info?.FieldType == typeof(byte[]) && info?.Attribute.Length == 0)
@@ -559,7 +417,7 @@ namespace TagTool.Commands.Editing
 
                     List<byte> bytes = new List<byte>();
 
-                    for (int i = 0; i < input.Length; i = i + 2)
+                    for (int i = 0; i < input.Length; i += 2)
                         bytes.Add(Convert.ToByte(input.Substring(i, 2), 16));
 
                     output = bytes.ToArray();
@@ -573,42 +431,24 @@ namespace TagTool.Commands.Editing
                     var values = Array.CreateInstance(elementType, info.Attribute.Length);
 
                     for (var i = 0; i < info.Attribute.Length; i++)
-                        values.SetValue(Convert.ChangeType(ParseArgs(elementType, null, new List<string> { args[i] }), elementType), i);
+                        values.SetValue(Convert.ChangeType(ParseArgs(cacheContext, elementType, null, new List<string> { args[i] }), elementType), i);
 
                     return values;
                 }
             }
-			else if (type == typeof(RealRgbColor))
-			{
-				if (args.Count != 3)
-					return false;
-				if (!float.TryParse(args[0], out float i) ||
-					!float.TryParse(args[1], out float j) ||
-					!float.TryParse(args[2], out float k))
-					return false;
-				output = new RealRgbColor(i, j, k);
-			}
-			else if (type == typeof(ArgbColor))
-			{
-				if (args.Count != 4)
-					return false;
-				if (!byte.TryParse(args[0], out byte i) ||
-					!byte.TryParse(args[1], out byte j) ||
-					!byte.TryParse(args[2], out byte k) ||
-					!byte.TryParse(args[3], out byte w))
-					return false;
-				output = new ArgbColor(i, j, k, w);
-			}
-			else if (type == typeof(Bounds<Angle>))
+            else if (type.IsBlamType())
             {
-                if (args.Count != 2)
-                    return false;
+                if (type.IsGenericType)
+                {
+                    var tDefinition = type.GetGenericTypeDefinition();
+                    var tArguments = type.GetGenericArguments();
+                    type = tDefinition.MakeGenericType(tArguments);
+                }
 
-                if (!float.TryParse(args[0], out float i) ||
-                    !float.TryParse(args[1], out float j))
-                    return false;
-
-                output = new Bounds<Angle> { Lower = Angle.FromDegrees(i), Upper = Angle.FromDegrees(j) };
+                var blamType = Activator.CreateInstance(type) as IBlamType;
+                if (!blamType.TryParse(cacheContext, args, out blamType, out string error))
+                    Console.WriteLine(error);
+                return blamType;
             }
             else if (type == typeof(PageableResource))
             {
@@ -656,11 +496,11 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.ResourcesB;
                             break;
 
-                        case "render_models" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "render_models" when cacheContext.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.RenderModels;
                             break;
 
-                        case "lightmaps" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "lightmaps" when cacheContext.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.Lightmaps;
                             break;
 
@@ -687,7 +527,7 @@ namespace TagTool.Commands.Editing
             return output;
         }
         
-        private int RangeArgCount(Type type)
+        public static int RangeArgCount(Type type)
         {
             if (type.IsEnum ||
                 type == typeof(byte) ||

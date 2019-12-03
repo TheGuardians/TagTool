@@ -143,8 +143,8 @@ namespace TagTool.Commands.Porting
         {
             foreach (var h3Mode in h3Def.Modes)
             {
-                var modeLabel = BlamCache.Strings.GetString(h3Mode.Label);
-                var edMode = edModes.Find(m => modeLabel == CacheContext.GetString(m.Label));
+                var modeLabel = BlamCache.Strings.GetString(h3Mode.Name);
+                var edMode = edModes.Find(m => modeLabel == CacheContext.GetString(m.Name));
                 var edModeCreated = false;
 
                 if (edMode == null)
@@ -329,7 +329,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            edModes = edModes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+            edModes = edModes.OrderBy(a => a.Name.Set).ThenBy(a => a.Name.Index).ToList();
 
             foreach (var edMode in edModes)
             {

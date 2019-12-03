@@ -5,6 +5,7 @@ using System.Reflection;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
@@ -148,6 +149,9 @@ namespace TagTool.Tags
 		/// <returns></returns>
 		public static uint GetFieldSize(Type type, TagFieldAttribute attr, CacheVersion targetVersion)
 		{
+            if (attr.Flags.HasFlag(Runtime))
+                return 0;
+
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
@@ -165,8 +169,8 @@ namespace TagTool.Tags
 				case TypeCode.UInt32:
 				case TypeCode.Object when attr != null && attr.Flags.HasFlag(TagFieldFlags.Pointer):
 				case TypeCode.Object when type == typeof(Tag):
-				case TypeCode.Object when type == typeof(CacheAddress):
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(TagFieldFlags.Short):
+				case TypeCode.Object when type == typeof(CacheResourceAddress):
+				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(Short):
                 //case TypeCode.Object when type == typeof(RgbColor):
                 case TypeCode.Object when type == typeof(ArgbColor):
                 case TypeCode.Object when type == typeof(Point2d):
@@ -182,7 +186,8 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(CachedTagInstance) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
-				case TypeCode.Object when type == typeof(RealEulerAngles2d):
+                case TypeCode.Object when type == typeof(RealRectangle3d):
+                case TypeCode.Object when type == typeof(RealEulerAngles2d):
 				case TypeCode.Object when type == typeof(RealPoint2d):
 				case TypeCode.Object when type == typeof(RealVector2d):
 				case TypeCode.Object when type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
@@ -208,6 +213,9 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(byte[]) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 					return 0x14;
 
+                case TypeCode.Object when type == typeof(RealBoundingBox):
+                    return 0x18;
+
 				case TypeCode.Object when type == typeof(RealMatrix4x3):
 					return 0x30;
 
@@ -224,8 +232,10 @@ namespace TagTool.Tags
 				case TypeCode.Object when type.IsEnum:
 					return TagFieldInfo.GetFieldSize(type.GetEnumUnderlyingType(), attr, targetVersion);
 
-				// Assume the field is a structure
-				default:
+                case TypeCode.Object when type.IsSubclassOf(typeof(TagStructure)):
+                    return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
+
+                default:
 					return TagStructure.GetTagStructureInfo(type, targetVersion).TotalSize;
 			}
 		}

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -43,5 +45,31 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ I: {I}, J: {J} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 2)
+            {
+                error = $"{args.Count} arguments supplied; should be 2";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float i))
+            {
+                error = $"Unable to parse \"{args[0]}\" (i) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float j))
+            {
+                error = $"Unable to parse \"{args[1]}\" (j) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealVector2d(i, j);
+                error = null;
+                return true;
+            }
+        }
     }
 }

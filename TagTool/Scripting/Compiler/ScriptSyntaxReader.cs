@@ -12,6 +12,8 @@ namespace TagTool.Scripting.Compiler
         /// </summary>
         public BinaryReader Reader { get; }
 
+        public int Line = 1;
+
         public ScriptSyntaxReader(Stream stream)
         {
             Reader = new BinaryReader(stream);
@@ -49,7 +51,11 @@ namespace TagTool.Scripting.Compiler
                 return "eof";
 
             var c = '\0';
-            while ((Reader.BaseStream.Position < Reader.BaseStream.Length) && char.IsWhiteSpace(c = Reader.ReadChar())) ;
+            while ((Reader.BaseStream.Position < Reader.BaseStream.Length) && char.IsWhiteSpace(c = Reader.ReadChar()))
+            {
+                if (c == '\r' || c == '\n')
+                    Line++;
+            }
 
             if (Reader.BaseStream.Position >= Reader.BaseStream.Length)
                 return "eof";
@@ -62,6 +68,9 @@ namespace TagTool.Scripting.Compiler
             while (Reader.BaseStream.Position < Reader.BaseStream.Length)
             {
                 c = Reader.ReadChar();
+
+                if (c == '\r' || c == '\n')
+                    Line++;
 
                 if (Delimiters.Contains(c) || char.IsWhiteSpace(c))
                 {
@@ -82,10 +91,10 @@ namespace TagTool.Scripting.Compiler
             switch (token)
             {
                 case ")":
-                    return new ScriptInvalid();
+                    return new ScriptInvalid { Line = Line };
 
                 case "eof":
-                    return new EndOfFile();
+                    return new EndOfFile { Line = Line };
 
                 case ".":
                     {
@@ -106,7 +115,8 @@ namespace TagTool.Scripting.Compiler
             return new ScriptGroup
             {
                 Head = Read(),
-                Tail = ReadGroup()
+                Tail = ReadGroup(),
+                Line = Line
             };
         }
 
@@ -114,11 +124,16 @@ namespace TagTool.Scripting.Compiler
         {
             var result = "";
 
-            for (char c; (c = Reader.ReadChar()) != '"'; result += c) ;
+            for (char c; (c = Reader.ReadChar()) != '"'; result += c)
+            {
+                if (c == '\r' || c == '\n')
+                    Line++;
+            }
 
             return new ScriptString
             {
-                Value = result
+                Value = result,
+                Line = Line
             };
         }
 
@@ -126,11 +141,12 @@ namespace TagTool.Scripting.Compiler
         {
             return new ScriptGroup
             {
-                Head = new ScriptSymbol { Value = "quote" },
+                Head = new ScriptSymbol { Value = "quote", Line = Line },
                 Tail = new ScriptGroup
                 {
                     Head = Read(),
-                    Tail = new ScriptInvalid()
+                    Tail = new ScriptInvalid(),
+                    Line = Line
                 }
             };
         }
@@ -139,11 +155,12 @@ namespace TagTool.Scripting.Compiler
         {
             return new ScriptGroup
             {
-                Head = new ScriptSymbol { Value = "quasiquote" },
+                Head = new ScriptSymbol { Value = "quasiquote", Line = Line },
                 Tail = new ScriptGroup
                 {
                     Head = Read(),
-                    Tail = new ScriptInvalid()
+                    Tail = new ScriptInvalid(),
+                    Line = Line
                 }
             };
         }
@@ -152,11 +169,12 @@ namespace TagTool.Scripting.Compiler
         {
             return new ScriptGroup
             {
-                Head = new ScriptSymbol { Value = "unquote" },
+                Head = new ScriptSymbol { Value = "unquote", Line = Line },
                 Tail = new ScriptGroup
                 {
                     Head = Read(),
-                    Tail = new ScriptInvalid()
+                    Tail = new ScriptInvalid(),
+                    Line = Line
                 }
             };
         }
@@ -165,14 +183,14 @@ namespace TagTool.Scripting.Compiler
         {
         begin:
             if (Reader.BaseStream.Position >= Reader.BaseStream.Length)
-                return new EndOfFile();
+                return new EndOfFile { Line = Line };
 
             var token = ReadToken();
 
             switch (token)
             {
                 case "eof":
-                    return new EndOfFile(); //handle this in a way that does not suck. Ew.
+                    return new EndOfFile { Line = Line }; //handle this in a way that does not suck. Ew.
 
                 case "(":
                     return ReadGroup();
@@ -190,18 +208,22 @@ namespace TagTool.Scripting.Compiler
                     return ReadUnquote();
 
                 case ";":
-                    for (char c; (Reader.BaseStream.Position < Reader.BaseStream.Length) && ((c = Reader.ReadChar()) != '\r' && c != '\n');) ;
+                    for (char c; (Reader.BaseStream.Position < Reader.BaseStream.Length) && ((c = Reader.ReadChar()) != '\r' && c != '\n');)
+                    {
+                        if (c == '\r' || c == '\n')
+                            Line++;
+                    }
                     goto begin;
 
                 default:
                     if (bool.TryParse(token, out var boolean))
-                        return new ScriptBoolean { Value = boolean };
+                        return new ScriptBoolean { Value = boolean, Line = Line };
                     else if (long.TryParse(token, out var integer))
-                        return new ScriptInteger { Value = integer };
+                        return new ScriptInteger { Value = integer, Line = Line };
                     else if (double.TryParse(token, out var real))
-                        return new ScriptReal { Value = real };
+                        return new ScriptReal { Value = real, Line = Line };
                     else
-                        return new ScriptSymbol { Value = token };
+                        return new ScriptSymbol { Value = token, Line = Line };
             }
         }
 

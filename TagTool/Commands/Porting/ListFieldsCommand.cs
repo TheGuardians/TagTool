@@ -4,6 +4,7 @@ using System.Collections;
 using TagTool.Tags;
 using TagTool.Common;
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Porting
 {
@@ -38,7 +39,7 @@ namespace TagTool.Commands.Porting
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
-				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
+				if (tagFieldInfo.Attribute != null && tagFieldInfo.Attribute.Flags.HasFlag(Padding))
 					continue;
 
 				var nameString = tagFieldInfo.Name;

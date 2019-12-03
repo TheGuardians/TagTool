@@ -2,13 +2,14 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)] 
-    [TagStructure(Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnline106708)] 
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)] 
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnline106708)] 
     public abstract class Unit : GameObject
     {
         public UnitFlagBits UnitFlags; // int
@@ -303,7 +304,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public UnitCameraFlagBits CameraFlags;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.Halo3Retail)]
             public byte[] Unused = new byte[2];
 
             public StringId CameraMarkerName;

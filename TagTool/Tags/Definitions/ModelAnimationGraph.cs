@@ -1,7 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using TagTool.Animations;
+using TagTool.Cache;
+using TagTool.Common;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -173,14 +175,6 @@ namespace TagTool.Tags.Definitions
             Overlay,
             Replacement
         }
-
-        public enum FrameMovementDataType : sbyte
-        {
-            None,
-            DxDy,
-            DxDyDyaw,
-            DxDyDzDyaw
-        }
         
         [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x88, MinVersion = CacheVersion.Halo3Retail)]
@@ -214,7 +208,7 @@ namespace TagTool.Tags.Definitions
             public sbyte BlendScreenNew;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public FrameMovementDataType FrameInfoTypeOld;
+            public AnimationMovementDataType FrameInfoTypeOld;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public CompressionValue DesiredCompressionNew;
@@ -233,7 +227,7 @@ namespace TagTool.Tags.Definitions
             public FrameType TypeNew;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public FrameMovementDataType FrameInfoTypeNew;
+            public AnimationMovementDataType FrameInfoTypeNew;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public ProductionFlagsNewValue ProductionFlagsNew;
@@ -554,7 +548,7 @@ namespace TagTool.Tags.Definitions
         public class Mode : TagStructure
 		{
             [TagField(Flags = TagFieldFlags.Label)]
-            public StringId Label;
+            public StringId Name;
             public List<WeaponClassBlock> WeaponClass;
             public List<ModeIkBlock> ModeIk;
 
@@ -762,13 +756,13 @@ namespace TagTool.Tags.Definitions
             public short GraphIndex;
             public short Animation;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused1;
 
             public FunctionControlsValue FunctionControls;
             public StringId Function;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+            [TagField(Flags = Padding, Length = 4)]
             public byte[] Unused2;
 
             public enum FunctionControlsValue : short
@@ -831,7 +825,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class CacheBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Short)]
+            [TagField(Flags = Short)]
             public CachedTagInstance Owner;
 
             public int BlockSize;
@@ -862,11 +856,11 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
             public DatumIndex ZoneAssetHandle;
 
-            [TagField(Flags = TagFieldFlags.Pointer, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
             public PageableResource Resource;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
-            public byte[] Padding;
+            [TagField(Flags = Padding, Length = 4)]
+            public byte[] Unused = new byte[4];
         }
     }
 }

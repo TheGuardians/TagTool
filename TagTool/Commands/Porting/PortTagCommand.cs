@@ -13,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using TagTool.Serialization;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Porting
 {
@@ -431,17 +432,21 @@ namespace TagTool.Commands.Porting
 					break;
 			}
 
+            ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
+
 			//
 			// Perform automatic conversion on the Blam tag definition
 			//
 
 			blamDefinition = ConvertData(cacheStream, resourceStreams, blamDefinition, blamDefinition, blamTag.Name);
 
-			//
-			// Perform post-conversion fixups to Blam data
-			//
+            //
+            // Perform post-conversion fixups to Blam data
+            //
 
-			switch (blamDefinition)
+            ((TagStructure)blamDefinition).PostConvert(BlamCache.Version, CacheContext.Version);
+
+            switch (blamDefinition)
 			{
 				case AreaScreenEffect sefc:
 					if (BlamCache.Version < CacheVersion.Halo3ODST)
@@ -467,7 +472,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case Character character:
-					blamDefinition = ConvertCharacter(character);
+                    blamDefinition = ConvertCharacter(cacheStream, character);
 					break;
 
 				case ChudDefinition chdt:
@@ -505,6 +510,16 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertLensFlare(lens);
 					break;
 
+                case Model hlmt:
+                    foreach (var target in hlmt.Targets)
+                    {
+                        if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByHumanTracking))
+                            target.TargetFilter = CacheContext.GetStringId("flying_vehicles");
+                        else if (target.Flags.HasFlag(Model.Target.FlagsValue.LockedByPlasmaTracking))
+                            target.TargetFilter = CacheContext.GetStringId("bipeds");
+                    }
+                    break;
+              
 				case ModelAnimationGraph jmad:
 					blamDefinition = ConvertModelAnimationGraph(cacheStream, resourceStreams, jmad);
 					break;
@@ -589,13 +604,48 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case Weapon weapon:
-                    //fix warthog horn
-                    if (blamTag.Name.EndsWith("horn"))
-                    {
-                        foreach (var attach in weapon.Attachments)
+                    //fix weapon firing looping sounds
+                    foreach (var attach in weapon.Attachments)
+                        if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
                             attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                    if (weapon.Tracking == Weapon.TrackingType.HumanTracking)
+                    {
+                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
+                        var trackblock = new Weapon.TargetTrackingBlock();
+                        trackblock.AcquireTime = 1.0f;
+                        trackblock.GraceTime = 0.1f;
+                        trackblock.DecayTime = 0.2f;
+                        trackblock.TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
+                        trackblock.LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);
+                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
+                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        weapon.TargetTracking.Add(trackblock);
                     }
-					break;
+                    if (weapon.Tracking == Weapon.TrackingType.CovenantTracking)
+                    {
+                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
+                        var trackblock = new Weapon.TargetTrackingBlock();
+                        trackblock.AcquireTime = 0.0f;
+                        trackblock.GraceTime = 0.1f;
+                        trackblock.DecayTime = 0.2f;
+                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
+                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("bipeds");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
+                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
+                        trackblock.TrackingTypes.Add(tracktype);
+                        weapon.TargetTracking.Add(trackblock);
+                    }
+                    break;
 
                 case Shader rmsh:
                     rmsh.Material = ConvertStringId(rmsh.Material);
@@ -728,7 +778,7 @@ namespace TagTool.Commands.Porting
 								if (instance == null || instance.Name == null)
 									continue;
 
-								if (instance.Name == blamTagName)
+								if (instance.Name == tag.Name)
 									return instance;
 							}
 
@@ -748,7 +798,7 @@ namespace TagTool.Commands.Porting
 					return collisionMopp;
 
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
-                    return ConvertPhantomTypeFlags(phantomTypeFlags);
+                    return ConvertPhantomTypeFlags(blamTagName, phantomTypeFlags);
 
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
@@ -1059,18 +1109,24 @@ namespace TagTool.Commands.Porting
 		{
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {
-                // skip the field if no conversion is needed
-                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
+                var attr = tagFieldInfo.Attribute;
+
+                if ((attr.Version != CacheVersion.Unknown && attr.Version == BlamCache.Version) ||
+                    (attr.Version == CacheVersion.Unknown && CacheVersionDetection.IsBetween(BlamCache.Version, attr.MinVersion, attr.MaxVersion)))
+                {
+                    // skip the field if no conversion is needed
+                    if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) ||
                     tagFieldInfo.FieldType == typeof(string))
-                    continue;
+                        continue;
 
-                var oldValue = tagFieldInfo.GetValue(data);
-                if (oldValue is null)
-                    continue;
+                    var oldValue = tagFieldInfo.GetValue(data);
+                    if (oldValue is null)
+                        continue;
 
-                // convert the field
-                var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
-                tagFieldInfo.SetValue(data, newValue);
+                    // convert the field
+                    var newValue = ConvertData(cacheStream, resourceStreams, oldValue, definition, blamTagName);
+                    tagFieldInfo.SetValue(data, newValue);
+                }
             }
 
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
@@ -1139,17 +1195,36 @@ namespace TagTool.Commands.Porting
             return barrelflags;
         }
 
-        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(PhysicsModel.PhantomTypeFlags flags)
+        private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(string tagName, PhysicsModel.PhantomTypeFlags flags)
         {
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo2Vista:
                 case CacheVersion.Halo2Xbox:
+                    if (flags.Halo2.ToString().Contains("Unknown"))
+                    {
+                        Console.WriteLine($"WARNING: Disabling unknown phantom type flags ({flags.Halo2.ToString()})");
+                        Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
+
+                        foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo2Bits)))
+                            if (flag.ToString().StartsWith("Unknown") && flags.Halo2.HasFlag((PhysicsModel.PhantomTypeFlags.Halo2Bits)flag))
+                                flags.Halo2 &= ~(PhysicsModel.PhantomTypeFlags.Halo2Bits)flag;
+                    }
                     if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
 
                 case CacheVersion.Halo3Retail:
+                    if (flags.Halo3Retail.ToString().Contains("Unknown"))
+                    {
+                        Console.WriteLine($"WARNING: Found unknown phantom type flags ({flags.Halo3Retail.ToString()})");
+                        Console.WriteLine($"         in tag \"{tagName}.physics_model\"");
+                        /*
+                        foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)))
+                            if (flag.ToString().StartsWith("Unknown") && flags.Halo3Retail.HasFlag((PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag))
+                                flags.Halo3Retail &= ~(PhysicsModel.PhantomTypeFlags.Halo3RetailBits)flag;
+                        */
+                    }
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
@@ -1315,6 +1390,20 @@ namespace TagTool.Commands.Porting
 
         private List<CacheFile.IndexItem> ParseLegacyTag(string tagSpecifier)
         {
+            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
+
+            if (FlagIsSet(PortingFlags.Regex))
+            {
+                var regex = new Regex(tagSpecifier);
+                result = BlamCache.IndexItems.FindAll(item => item != null && regex.IsMatch(item.ToString() + "." + item.GroupTag));
+                if (result.Count == 0)
+                {
+                    Console.WriteLine($"ERROR: Invalid regex: {tagSpecifier}");
+                    return new List<CacheFile.IndexItem>();
+                }
+                return result;
+            }
+
             if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
             {
                 Console.WriteLine($"ERROR: Invalid tag name: {tagSpecifier}");
@@ -1330,8 +1419,6 @@ namespace TagTool.Commands.Porting
             }
 
             var tagName = tagIdentifiers[0];
-
-            List<CacheFile.IndexItem> result = new List<CacheFile.IndexItem>();
 
             // find the CacheFile.IndexItem(s)
             if (tagName == "*") result = BlamCache.IndexItems.FindAll(

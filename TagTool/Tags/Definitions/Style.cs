@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using System.Collections.Generic;
 using System;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -12,8 +13,8 @@ namespace TagTool.Tags.Definitions
 
         public CombatStatusDecayOptionsValue CombatStatusDecayOptions;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-        public byte[] Unused = new byte[2];
+        // check ODST ai\assaulting, ai\bunkering 
+        public short Unknown;
 
         public StyleControlFlags StyleControl;
 

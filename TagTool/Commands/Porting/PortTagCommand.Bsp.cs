@@ -21,6 +21,15 @@ namespace TagTool.Commands.Porting
             sbsp.Unknown86 = 1;
 
             //
+            // Set compatibility flag for H3 mopps
+            //
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+                sbsp.CompatibilityFlags = ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
+            else
+                sbsp.CompatibilityFlags = ScenarioStructureBsp.StructureBspCompatibilityValue.None;
+
+            //
             // Fix cluster tag ref and decorator grids
             //
 
@@ -102,14 +111,7 @@ namespace TagTool.Commands.Porting
             // Temporary Fixes:
             //
 
-            // Without this 005_intro crash on cortana sbsp
-
-            for (int i = 0; i < sbsp.Clusters.Count; i++)
-            {
-                sbsp.Clusters[i].ObjectPlacements = new List<ScenarioStructureBsp.Cluster.ObjectPlacement>();
-                sbsp.Clusters[i].Unknown25 = new List<ScenarioStructureBsp.Cluster.UnknownBlock2>();
-            }
-            
+            // Without this 005_intro crash on cortana sbsp       
             sbsp.Geometry2.UnknownSections = new List<RenderGeometry.UnknownSection>();
             
             return sbsp;

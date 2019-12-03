@@ -444,6 +444,10 @@ namespace TagTool.Bitmaps.Converter
                 default:
                     throw new Exception($"Unsupported format {image.Format} flipping");
             }
+
+            if (bitmap.Format == BitmapFormat.Dxn)
+                bitmap.Data = BitmapDecoder.SwapXYDxn(bitmap.Data, bitmap.Width, bitmap.Height);
+
         }
 
         private static BaseBitmap RebuildBitmap(List<BaseBitmap> bitmaps)
@@ -528,14 +532,14 @@ namespace TagTool.Bitmaps.Converter
                     var newFixup = new TagResourceGen3.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
-                        Address = new CacheAddress(CacheAddressType.Definition, fixup.Offset)
+                        Address = new CacheResourceAddress(CacheResourceAddressType.Definition, fixup.Offset)
                     };
 
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
                 }
 
-                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
                 definitionStream.Position = resourceEntry.DefinitionAddress.Offset;
                 definition = cache.Deserializer.Deserialize<BitmapTextureInteropResource>(dataContext);
             }
@@ -556,14 +560,14 @@ namespace TagTool.Bitmaps.Converter
                     var newFixup = new TagResourceGen3.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
-                        Address = new CacheAddress(CacheAddressType.Definition, fixup.Offset)
+                        Address = new CacheResourceAddress(CacheResourceAddressType.Definition, fixup.Offset)
                     };
 
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
                 }
 
-                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
                 definitionStream.Position = resourceEntry.DefinitionAddress.Offset;
                 definition = cache.Deserializer.Deserialize<BitmapTextureInterleavedInteropResource>(dataContext);
             }

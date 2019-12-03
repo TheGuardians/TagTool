@@ -29,7 +29,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             if (args.Count != 0)
                 return false;
 
-            Definition.Modes = Definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+            Definition.Modes = Definition.Modes.OrderBy(a => a.Name.Set).ThenBy(a => a.Name.Index).ToList();
 
             foreach (var mode in Definition.Modes)
             {

@@ -103,15 +103,15 @@ namespace TagTool.Commands.Scenarios
 
                 var scriptGroupName = "";
                 if (expr.NextExpressionHandle == DatumIndex.None &&
-                    expr.ExpressionType == Scripting.ScriptExpressionType.Group &&
+                    expr.Flags == Scripting.HsSyntaxNodeFlags.Group &&
                     expr.Opcode == 0x0)
                 {
-                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Salt);
+                    var ScriptGroupName = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == expr.Identifier);
                     if (ScriptGroupName != null)
                         scriptGroupName = $",S:{ScriptGroupName.ScriptName}";
                 }
 
-                var ExpressionHandle = new DatumIndex((uint)((expr.Salt << 16) + i));
+                var ExpressionHandle = new DatumIndex((uint)((expr.Identifier << 16) + i));
 
                 if (globals.ContainsKey(ExpressionHandle))
                     scriptGroupName = $"G:{globals[ExpressionHandle]}";
@@ -129,10 +129,10 @@ namespace TagTool.Commands.Scenarios
                         opcodeName = Scripting.ScriptInfo.Scripts[CacheVersion.HaloOnline106708][expr.Opcode].Name;
                 }
 
-                if (expr.ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (expr.Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
-                if (Definition.ScriptExpressions[i - 1].ExpressionType == Scripting.ScriptExpressionType.ScriptReference)
+                if (i > 0 && Definition.ScriptExpressions[i - 1].Flags == Scripting.HsSyntaxNodeFlags.ScriptReference)
                     opcodeName = "";
 
                 var ValueType = "";
@@ -141,14 +141,14 @@ namespace TagTool.Commands.Scenarios
 
                 CsvAdd(
                     $"{i:D8}," +
-                    $"{expr.Salt:X4}{i:X4}," +
-                    $"{expr.NextExpressionHandle:X8}," +
+                    $"{((expr.Identifier << 16) | i):X8}," +
+                    $"{expr.NextExpressionHandle.Value:X8}," +
                     $"{expr.Opcode:X4}," +
                     $"{expr.Data[0]:X2}" +
                     $"{expr.Data[1]:X2}" +
                     $"{expr.Data[2]:X2}" +
                     $"{expr.Data[3]:X2}," +
-                    $"{expr.ExpressionType}," +
+                    $"{expr.Flags}," +
                     $"{ValueType}," +
                     $"{opcodeName}," +
                     $"{scriptGroupName}" +

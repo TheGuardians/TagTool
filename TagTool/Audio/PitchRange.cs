@@ -32,20 +32,23 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public short Unknown6;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte PermutationCount;
+        public short PermutationCount;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public byte Unknown7;
+        public sbyte Unknown7;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public short Unknown8;
+        public sbyte Unknown8;
 
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short EncodedPermutationDataIndex;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public short EncodedRuntimePermutationFlagIndex;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
         public short EncodedPermutationCount;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public ushort FirstPermutationIndex;
+        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+        public short PermutationCountH2;
+
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<Permutation> Permutations;

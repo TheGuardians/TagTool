@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -20,7 +21,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeTotalLength;
         public List<Vertex> Vertices;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [TagStructure(Size = 0x40)]
@@ -29,7 +30,7 @@ namespace TagTool.Tags.Definitions
             public RealEulerAngles2d Angles;
             public float Length;
             public short SequenceIndex;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
             public RealArgbColor Color;
             public RealArgbColor LodColor;

@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -16,7 +17,7 @@ namespace TagTool.Tags.Definitions
         public CachedTagInstance CrackBitmap;
         public CachedTagInstance HoleBitmap;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused1;
 
         [TagStructure(Size = 0x24)]

@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Geometry;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
@@ -10,10 +11,10 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "render_geometry_api_resource_definition", Size = 0x30)]
     public class RenderGeometryApiResourceDefinition : TagStructure
 	{
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused1;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12)]
+        [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused2;
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace TagTool.Tags.Resources
         /// </summary>
         public TagData Data;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 
@@ -78,7 +79,7 @@ namespace TagTool.Tags.Resources
         /// </summary>
         public TagData Data;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
 }

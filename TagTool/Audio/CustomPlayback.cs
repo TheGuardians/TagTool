@@ -7,13 +7,17 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloOnline106708)]
     public class CustomPlayback : TagStructure
 	{
         public uint Unknown1;
         public uint Unknown2;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown3;
+
         public FlagsValue Flags;
         public uint Unknown4;
         public uint Unknown5;
@@ -23,10 +27,16 @@ namespace TagTool.Audio
         public uint Unknown8;
         public uint Unknown9;
         public uint Unknown10;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown11;
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown12;
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown13;
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown14;
+
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown15;
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]

@@ -523,21 +523,21 @@ namespace TagTool.Geometry
         {
             return new StaticPerVertexData
             {
-                Texcoord1 = _stream.ReadUByte4N(),
-                Texcoord2 = _stream.ReadUByte4N(),
-                Texcoord3 = _stream.ReadUByte4N(),
-                Texcoord4 = _stream.ReadUByte4N(),
-                Texcoord5 = _stream.ReadUByte4N()
+                Color1 = _stream.ReadColor(),
+                Color2 = _stream.ReadColor(),
+                Color3 = _stream.ReadColor(),
+                Color4 = _stream.ReadColor(),
+                Color5 = _stream.ReadColor()
             };
         }
 
         public void WriteStaticPerVertexData(StaticPerVertexData v)
         {
-            _stream.WriteUByte4N(v.Texcoord1);
-            _stream.WriteUByte4N(v.Texcoord2);
-            _stream.WriteUByte4N(v.Texcoord3);
-            _stream.WriteUByte4N(v.Texcoord4);
-            _stream.WriteUByte4N(v.Texcoord5);
+            _stream.WriteColor(v.Color1);
+            _stream.WriteColor(v.Color2);
+            _stream.WriteColor(v.Color3);
+            _stream.WriteColor(v.Color4);
+            _stream.WriteColor(v.Color5);
         }
 
         public AmbientPrtData ReadAmbientPrtData()

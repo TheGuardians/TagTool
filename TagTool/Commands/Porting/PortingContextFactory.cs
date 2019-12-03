@@ -55,6 +55,8 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
             context.AddCommand(new NameBlamTagCommand(cacheContext, blamCache));
             context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
+            context.AddCommand(new PortMultiplayerScenarioCommand(cacheContext, blamCache, portTagCommand));
+            context.AddCommand(new CopyTagNamesCommand(cacheContext, blamCache));
 		}
 	}
 }

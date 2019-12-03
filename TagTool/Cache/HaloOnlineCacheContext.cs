@@ -47,6 +47,7 @@ namespace TagTool.Cache
             TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, GetStringId("device"));
             TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, GetStringId("unit"));
             TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, GetStringId("render_method"));
+            TagGroup.Instances[new Tag("test")] = new TagGroup(new Tag("test"), Tag.Null, Tag.Null, GetStringId("test_blah"));
         }
 
         #region Tag Cache Functionality
@@ -63,6 +64,34 @@ namespace TagTool.Cache
                     throw new FileNotFoundException(Path.Combine(Directory.FullName, "tags.dat"));
 
                 return files[0];
+            }
+        }
+
+        private List<int> ModifiedTags = new List<int>();
+
+        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
+
+        public void SaveModifiedTagNames(string path = null)
+        {
+            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "modified_tags.csv"));
+
+            if (!csvFile.Directory.Exists)
+                csvFile.Directory.Create();
+
+            using (var csvWriter = new StreamWriter(csvFile.Create()))
+            {
+                foreach (var instance in ModifiedTags)
+                {
+                    var tag = TagCache.Index[instance];
+                    string name;
+                    if (tag.Name == null)
+                        name = $"0x{tag.Index:X8}";
+                    else
+                        name = tag.Name;
+
+                    csvWriter.WriteLine($"{name}.{tag.Group.ToString()}");
+                }
+                
             }
         }
 
@@ -231,6 +260,12 @@ namespace TagTool.Cache
         /// <returns>True if the tag was found, false otherwise.</returns>
         public bool TryGetTag<T>(string name, out CachedTagInstance result) where T : TagStructure
         {
+            if (name == "none" || name == "null")
+            {
+                result = null;
+                return true;
+            }
+
             if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
             {
                 var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
@@ -292,7 +327,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.Index.Last(tag => tag.IsInGroup(starGroupTag));
+                result = TagCache.Index.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
                 return true;
             }
 
@@ -313,10 +348,12 @@ namespace TagTool.Cache
                 return true;
             }
 
-            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[1], out var groupTag))
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
                 throw new Exception($"Invalid tag name: {name}");
 
-            var tagName = namePieces[0];
+            //var tagName = namePieces[0];
+
+            var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
 
             foreach (var instance in TagCache.Index)
             {
@@ -348,8 +385,13 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagInstance instance) =>
             Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
 
-        public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
+        public void Serialize(Stream stream, CachedTagInstance instance, object definition)
+        {
+            if(!ModifiedTags.Contains(instance.Index))
+                SignalModifiedTag(instance.Index);
             Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
+        }
+            
 
         /// <summary>
         /// Attempts to parse a group tag or name.
@@ -376,7 +418,7 @@ namespace TagTool.Cache
             }
 
             result = Tag.Null;
-            return false;
+            return name == "none" || name == "null";
         }
 
         /// <summary>
@@ -388,6 +430,14 @@ namespace TagTool.Cache
         {
             if (name == "****" || name == "null")
                 return Tag.Null;
+
+            if(name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
 
             if (TryParseGroupTag(name, out var result))
                 return result;
@@ -523,6 +573,54 @@ namespace TagTool.Cache
         /// <param name="index">The index of the string.</param>
         /// <returns></returns>
         public StringId GetStringId(int index) => StringIdCache.GetStringId(index);
+
+
+        public bool TryGetStringId(string value, out StringId result)
+        {
+            if (!StringIdCache.Strings.Contains(value))
+            {
+                result = StringId.Invalid;
+                return false;
+            }
+
+            var index = StringIdCache.Strings.IndexOf(value);
+
+            var setMin = StringIdCache.Resolver.GetMinSetStringIndex();
+            var setMax = StringIdCache.Resolver.GetMaxSetStringIndex();
+            var setOffsets = StringIdCache.Resolver.GetSetOffsets();
+
+            if (index < setMin || index > setMax)
+            {
+                result = new StringId(0, index);
+                return true;
+            }
+
+            var set = 0;
+            var minDistance = int.MaxValue;
+
+            for (var i = 0; i < setOffsets.Length; i++)
+            {
+                if (index < setOffsets[i])
+                    continue;
+
+                var distance = index - setOffsets[i];
+
+                if (distance >= minDistance)
+                    continue;
+
+                set = i;
+                minDistance = distance;
+            }
+
+            var idIndex = index - setOffsets[set];
+
+            if (set == 0)
+                idIndex += setMin;
+
+            result = new StringId(set, idIndex, Version);
+            return true;
+        }
+
         #endregion
 
         #region Resource Cache Functionality

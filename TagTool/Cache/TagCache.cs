@@ -255,9 +255,14 @@ namespace TagTool.Cache
                 fixup.WriteOffset -= startOffset;
                 fixup.TargetOffset -= startOffset;
             }
+
             data.ResourcePointerOffsets.AddRange(tag.ResourcePointerOffsets.Select(offset => offset - startOffset));
+
+            data.TagReferenceOffsets.AddRange(tag.TagReferenceOffsets.Select(offset => offset - startOffset));
+
             data.MainStructOffset -= startOffset;
             dataOffset = startOffset;
+
             return data;
         }
 
@@ -280,9 +285,13 @@ namespace TagTool.Cache
             var oldEndOffset = startOffset + oldSize;
             var sizeDelta = newSize - oldSize;
 
-            StreamUtil.Copy(stream, oldEndOffset, oldEndOffset + sizeDelta, stream.Length - oldEndOffset);
-
-            FixTagOffsets(oldEndOffset, sizeDelta, tag);
+            if (stream.Length - oldEndOffset >= 0)
+            {
+                StreamUtil.Copy(stream, oldEndOffset, oldEndOffset + sizeDelta, stream.Length - oldEndOffset);
+                FixTagOffsets(oldEndOffset, sizeDelta, tag);
+            }
+            else
+                return;
         }
 
         /// <summary>

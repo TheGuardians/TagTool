@@ -11,28 +11,28 @@ namespace TagTool.Serialization
     {
         public EndianReader Reader { get; }
         public EndianWriter Writer { get; }
-        public CacheAddressType AddressType { get; }
+        public CacheResourceAddressType AddressType { get; }
 
-        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
+        public DataSerializationContext(EndianReader reader, EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory)
         {
             Reader = reader;
             Writer = writer;
             AddressType = addressType;
         }
 
-        public DataSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory) :
+        public DataSerializationContext(EndianReader reader, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
             this(reader, null, addressType)
         {
         }
 
-        public DataSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory) :
+        public DataSerializationContext(EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
             this(null, writer, addressType)
         {
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            var resourceAddress = new CacheAddress(address);
+            var resourceAddress = new CacheResourceAddress(address);
 
             if (resourceAddress.Type != AddressType)
                 throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
@@ -73,7 +73,7 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheAddress address, IList block)
+        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
         {
             throw new NotImplementedException();
         }
@@ -81,12 +81,12 @@ namespace TagTool.Serialization
         private class GenericDataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }
-            public BinaryWriter Writer { get; private set; }
+            public EndianWriter Writer { get; private set; }
 
             public GenericDataBlock()
             {
                 Stream = new MemoryStream();
-                Writer = new BinaryWriter(Stream);
+                Writer = new EndianWriter(Stream);
             }
 
             public void WritePointer(uint targetOffset, Type type)
@@ -113,6 +113,10 @@ namespace TagTool.Serialization
                 Writer = null;
 
                 return dataOffset;
+            }
+
+            public void AddTagReference(CachedTagInstance referencedTag)
+            {
             }
         }
     }

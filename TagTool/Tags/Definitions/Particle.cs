@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -39,7 +40,7 @@ namespace TagTool.Tags.Definitions
         public List<RuntimeMSpritesBlock> RuntimeMSprites;
         public List<RuntimeMFramesBlock> RuntimeMFrames;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
 
         [Flags]
@@ -57,7 +58,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class Attachment : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public CachedTagInstance Type;
             public TriggerValue Trigger;
             public byte SkipFraction;

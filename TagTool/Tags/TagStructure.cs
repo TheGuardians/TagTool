@@ -45,26 +45,12 @@ namespace TagTool.Tags
         public TagFieldAttribute GetTagFieldAttribute(FieldInfo fieldInfo, CacheVersion version = CacheVersion.Unknown) =>
             GetTagFieldAttribute(GetType(), fieldInfo, version);
 
-        protected virtual void PreConvert(CacheVersion from, CacheVersion to)
+        public virtual void PreConvert(CacheVersion from, CacheVersion to)
         {
-            throw new NotImplementedException();
         }
 
-        protected virtual void MainConvert(CacheVersion from, CacheVersion to)
+        public virtual void PostConvert(CacheVersion from, CacheVersion to)
         {
-            throw new NotImplementedException();
-        }
-
-        protected virtual void PostConvert(CacheVersion from, CacheVersion to)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Convert(CacheVersion from, CacheVersion to)
-        {
-            PreConvert(from, to);
-            MainConvert(from, to);
-            PostConvert(from, to);
         }
 
         private class VersionedCache

@@ -17,12 +17,12 @@ namespace TagTool.Ai
         /// <summary>
         /// Seconds; The time which we should inspect each object for.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public Bounds<float> InspectTime;
 
         /// <summary>
         /// World Units; Range in which we should search for objects to inspect
         /// </summary>
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public Bounds<float> SearchRange;
     }
 }

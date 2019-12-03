@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -17,7 +18,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
         public class HudWidget : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public SpecialHudTypeValue SpecialHudType;
             public byte Unknown;
@@ -760,7 +761,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C)]
             public class PlacementDatum : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public AnchorValue Anchor;
                 public short Unknown;
                 public RealPoint2d MirrorOffset;
@@ -782,22 +783,22 @@ namespace TagTool.Tags.Definitions
                     ScoreboardFriendly,
                     ScoreboardEnemy,
                     HealthAndShield,
-                    BottomEdge,
-                    Unknown,
-                    Equipment,
-                    Unknown2,
+                    BottomEdge, //same as center
+                    EquipmentXY, //uses both x and y offsets
+                    EquipmentY, //x offset always 0
+                    Unknown2, //same as center
                     Depreciated,
                     Depreciated2,
                     Depreciated3,
                     Depreciated4,
                     Depreciated5,
-                    Unknown3,
-                    Gametype,
+                    Notification, //uses notification offset in chgd
+                    Gametype, //bottom center
                     Unknown4,
                     StateRight,
                     StateLeft,
                     StateCenter,
-                    Unknown5,
+                    StateCenter2, //separate float for this in chgd
                     GametypeFriendly,
                     GametypeEnemy,
                     MetagameTop,
@@ -806,7 +807,12 @@ namespace TagTool.Tags.Definitions
                     MetagamePlayer3,
                     MetagamePlayer4,
                     Theater,
-                    Unknown6 //ODST
+                    Prompt, //ODST, corresponds to prompt offset in chgd
+                    HologramTarget, 
+                    Medals, //uses medal offset in chgd
+                    SurvivalMedals, //has values in chgd
+                    UnknownHO_Offset3, //has values in chgd
+                    MotionSensor
                 }
             }
 
@@ -877,7 +883,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class RenderDatum : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public ShaderIndexValue ShaderIndex;
                 public short Unknown;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -1347,7 +1353,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x54)]
             public class BitmapWidget : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown;
@@ -1392,7 +1398,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
             public class TextWidget : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId Name;
                 public SpecialHudTypeValue SpecialHudType;
                 public byte Unknown1;

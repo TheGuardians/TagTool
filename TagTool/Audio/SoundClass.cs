@@ -19,6 +19,67 @@ namespace TagTool.Audio
         [TagField(Version = CacheVersion.HaloReach)]
         public SoundClassHaloReach HaloReach;
 
+        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+        public SoundClassHalo2 Halo2;
+
+        public enum SoundClassHalo2 : sbyte
+        {
+            ProjectileImpact,
+            ProjectileDetonation,
+            ProjectileFlyby,
+            ProjectileDetonationLod,
+            WeaponFire,
+            WeaponReady,
+            WeaponReload,
+            WeaponEmpty,
+            WeaponCharge,
+            WeaponOverheat,
+            WeaponIdle,
+            WeaponMelee,
+            WeaponAnimation,
+            ObjectImpacts,
+            ParticleImpacts,
+            WeaponFireLod,
+            Unused1Impact,
+            Unused2Impact,
+            UnitFootsteps,
+            UnitDialog,
+            UnitAnimation,
+            UnitUnused,
+            VehicleCollision,
+            VehicleEngine,
+            VehicleAnimation,
+            VehicleEngineLod,
+            DeviceDoor,
+            DeviceUnused0,
+            DeviceMachinery,
+            DeviceStationary,
+            DeviceUnused1,
+            DeviceUnused2,
+            Music,
+            AmbientNature,
+            AmbientMachinery,
+            AmbientStationary,
+            HugeAss,
+            ObjectLooping,
+            CinematicMusic,
+            UnknownUnused0,
+            UnknownUnused1,
+            UnknownUnused2,
+            UnknownUnused3,
+            UnknownUnused4,
+            MissionUnused0,
+            CortanaMission,
+            CortanaCinematic,
+            MissionDialog,
+            CinematicDialog,
+            ScriptedCinematicFoley,
+            GameEvent,
+            Ui,
+            Test,
+            MultilingualTest
+        }
+
         public enum SoundClassHalo3Retail : sbyte
         {
             ProjectileImpact,

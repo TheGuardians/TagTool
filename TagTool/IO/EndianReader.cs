@@ -276,10 +276,14 @@ namespace TagTool.IO
             if (charSet == CharSet.Ansi)
                 str = Encoding.UTF8.GetString(ReadBytes(MaxLength));
             else if (charSet == CharSet.Unicode)
-                str = Encoding.Unicode.GetString(ReadBytes(MaxLength * 2));
+                if(Format == EndianFormat.LittleEndian)
+                    str = Encoding.Unicode.GetString(ReadBytes(MaxLength * 2));
+                else
+                    str = Encoding.BigEndianUnicode.GetString(ReadBytes(MaxLength * 2));
             else
                 str = "";
-            return str.Substring(0, str.IndexOf('\0'));
+            var nullTermIndex = str.IndexOf('\0');
+            return nullTermIndex < 0 ? str : str.Substring(0, nullTermIndex);
         }
         #endregion
 

@@ -34,6 +34,11 @@ namespace TagTool.Cache
         public List<uint> ResourcePointerOffsets { get; } = new List<uint>();
 
         /// <summary>
+        /// Gets a list of offsets to each tag reference in the tag data.
+        /// </summary>
+        public List<uint> TagReferenceOffsets { get; } = new List<uint>();
+
+        /// <summary>
         /// The serialized tag data.
         /// </summary>
         public byte[] Data { get; set; }

@@ -389,22 +389,22 @@ namespace TagTool.Commands.Files
             return pageable;
         }
 
-        private bool ScriptExpressionIsValue(ScriptExpression expr)
+        private bool ScriptExpressionIsValue(HsSyntaxNode expr)
         {
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.ParameterReference:
+                case HsSyntaxNodeFlags.ParameterReference:
                     return true;
 
-                case ScriptExpressionType.Expression:
+                case HsSyntaxNodeFlags.Expression:
                     if ((int)expr.ValueType.HaloOnline > 0x4)
                         return true;
                     else
                         return false;
 
-                case ScriptExpressionType.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
-                case ScriptExpressionType.GlobalsReference: // The opcode is the tagblock index of the global it uses, so ignore
-                case ScriptExpressionType.Group:
+                case HsSyntaxNodeFlags.ScriptReference: // The opcode is the tagblock index of the script it uses, so ignore
+                case HsSyntaxNodeFlags.GlobalsReference: // The opcode is the tagblock index of the global it uses, so ignore
+                case HsSyntaxNodeFlags.Group:
                     return false;
 
                 default:
@@ -412,7 +412,7 @@ namespace TagTool.Commands.Files
             }
         }
 
-        private void CopyScriptTagReferenceExpressionData(ScriptExpression expr)
+        private void CopyScriptTagReferenceExpressionData(HsSyntaxNode expr)
         {
             var srcTagIndex = BitConverter.ToInt32(expr.Data, 0);
             var destTagIndex = srcTagIndex == -1 ? -1 : ConvertedTags[srcTagIndex].Index;
@@ -1360,23 +1360,23 @@ namespace TagTool.Commands.Files
 
                 switch (expr.ValueType.HaloOnline)
                 {
-                    case ScriptValueType.HaloOnlineValue.Sound:
-                    case ScriptValueType.HaloOnlineValue.Effect:
-                    case ScriptValueType.HaloOnlineValue.Damage:
-                    case ScriptValueType.HaloOnlineValue.LoopingSound:
-                    case ScriptValueType.HaloOnlineValue.AnimationGraph:
-                    case ScriptValueType.HaloOnlineValue.DamageEffect:
-                    case ScriptValueType.HaloOnlineValue.ObjectDefinition:
-                    case ScriptValueType.HaloOnlineValue.Bitmap:
-                    case ScriptValueType.HaloOnlineValue.Shader:
-                    case ScriptValueType.HaloOnlineValue.RenderModel:
-                    case ScriptValueType.HaloOnlineValue.StructureDefinition:
-                    case ScriptValueType.HaloOnlineValue.LightmapDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicDefinition:
-                    case ScriptValueType.HaloOnlineValue.CinematicSceneDefinition:
-                    case ScriptValueType.HaloOnlineValue.BinkDefinition:
-                    case ScriptValueType.HaloOnlineValue.AnyTag:
-                    case ScriptValueType.HaloOnlineValue.AnyTagNotResolving:
+                    case HsType.HaloOnlineValue.Sound:
+                    case HsType.HaloOnlineValue.Effect:
+                    case HsType.HaloOnlineValue.Damage:
+                    case HsType.HaloOnlineValue.LoopingSound:
+                    case HsType.HaloOnlineValue.AnimationGraph:
+                    case HsType.HaloOnlineValue.DamageEffect:
+                    case HsType.HaloOnlineValue.ObjectDefinition:
+                    case HsType.HaloOnlineValue.Bitmap:
+                    case HsType.HaloOnlineValue.Shader:
+                    case HsType.HaloOnlineValue.RenderModel:
+                    case HsType.HaloOnlineValue.StructureDefinition:
+                    case HsType.HaloOnlineValue.LightmapDefinition:
+                    case HsType.HaloOnlineValue.CinematicDefinition:
+                    case HsType.HaloOnlineValue.CinematicSceneDefinition:
+                    case HsType.HaloOnlineValue.BinkDefinition:
+                    case HsType.HaloOnlineValue.AnyTag:
+                    case HsType.HaloOnlineValue.AnyTagNotResolving:
                         CopyScriptTagReferenceExpressionData(expr);
                         break;
 

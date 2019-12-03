@@ -96,7 +96,7 @@ namespace TagTool.Commands.Editing
 
             if (args.Count > 2)
             {
-                if (!int.TryParse(args[2], out count) || count < 1)
+                if (args[2] != "*" && (!int.TryParse(args[2], out count) || count < 1))
                 {
                     Console.WriteLine($"Invalid count specified: {args[2]}");
                     return false;

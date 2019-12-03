@@ -128,6 +128,20 @@ namespace TagTool.Commands.Geometry
                                         fileWriter.WriteLine(Environment.NewLine);
                                     }
                                     break;
+
+                                case VertexBufferFormat.Skinned:
+                                    for (var j = 0; j < vertexBuffer.Count; j++)
+                                    {
+                                        fileWriter.WriteLine($"{j}:");
+                                        fileWriter.WriteLine($"Position X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
+                                        fileWriter.WriteLine($"Texcoord U = " + edResourceReader.ReadSingle() + " V = " + edResourceReader.ReadSingle());
+                                        fileWriter.WriteLine($"Normal   X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
+                                        fileWriter.WriteLine($"Tangent  X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
+                                        fileWriter.WriteLine($"Binormal X = " + edResourceReader.ReadSingle() + " Y = " + edResourceReader.ReadSingle() + " Z = " + edResourceReader.ReadSingle());
+                                        edResourceReader.ReadUInt32();
+                                        edResourceReader.ReadUInt32();
+                                    }
+                                    break;
                                     /*
                                     case VertexBufferFormat.Unknown1B:
                                         var goodCount = 0;

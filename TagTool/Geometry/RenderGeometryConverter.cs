@@ -38,6 +38,12 @@ namespace TagTool.Geometry
                 BlamCache.LoadResourceTags();
 
             //
+            // Set up ElDorado resource reference
+            //
+
+            geometry.Resource = new PageableResource(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
+
+            //
             // Convert byte[] of UnknownBlock
             //
 
@@ -137,27 +143,6 @@ namespace TagTool.Geometry
             }
 
             //
-            // Set up ElDorado resource reference
-            //
-
-            geometry.Resource = new PageableResource
-            {
-                Page = new RawPage
-                {
-                    Index = -1
-                },
-                Resource = new TagResourceGen3
-                {
-                    ResourceType = TagResourceTypeGen3.RenderGeometry,
-                    DefinitionData = new byte[0x30],
-                    DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
-                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                    Unknown2 = 1
-                }
-            };
-
-            //
             // Port Blam resource definition
             //
 
@@ -201,7 +186,7 @@ namespace TagTool.Geometry
                         geometry.Resource.Resource.ResourceDefinitionFixups.Add(newDefinitionFixup);
                     }
 
-                    var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                    var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
                     definitionStream.Position = geometry.Resource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(dataContext);
@@ -284,7 +269,7 @@ namespace TagTool.Geometry
                                 Size = 32,
                                 Unused4 = 0,
                                 Unused8 = 0,
-                                Address = new CacheAddress(CacheAddressType.Resource, (int)dataStream.Position),
+                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)dataStream.Position),
                                 Unused10 = 0
                             }
                         }
@@ -390,7 +375,7 @@ namespace TagTool.Geometry
             var count = vertexBuffer.Count;
 
             var startPos = (int)outputStream.Position;
-            vertexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, startPos);
+            vertexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, startPos);
 
             var inVertexStream = VertexStreamFactory.Create(BlamCache.Version, inputStream);
             var outVertexStream = VertexStreamFactory.Create(CacheContext.Version, outputStream);
@@ -402,7 +387,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                     ConvertVertices(count, inVertexStream.ReadWorldVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteWorldVertex(v);
                     });
                     break;
@@ -410,7 +397,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Rigid:
                     ConvertVertices(count, inVertexStream.ReadRigidVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteRigidVertex(v);
                     });
                     break;
@@ -418,7 +407,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Skinned:
                     ConvertVertices(count, inVertexStream.ReadSkinnedVertex, (v, i) =>
                     {
-                        //v.Tangent = new RealQuaternion(-Math.Abs(v.Tangent.I), -Math.Abs(v.Tangent.J), Math.Abs(v.Tangent.K), Math.Abs(v.Tangent.W)); // great results for H3 armors
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        v.Tangent = ConvertVectorSpace(v.Tangent);
+                        v.Binormal = ConvertVectorSpace(v.Binormal);
                         outVertexStream.WriteSkinnedVertex(v);
                     });
                     break;
@@ -430,11 +421,11 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.StaticPerVertex:
                     ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
                     {
-                        v.Texcoord1 = ConvertNormal(v.Texcoord1);
-                        v.Texcoord2 = ConvertNormal(v.Texcoord2);
-                        v.Texcoord3 = ConvertNormal(v.Texcoord3);
-                        v.Texcoord4 = ConvertNormal(v.Texcoord4);
-                        v.Texcoord5 = ConvertNormal(v.Texcoord5);
+                        v.Color1 = ConvertColorSpace(v.Color1);
+                        v.Color2 = ConvertColorSpace(v.Color2);
+                        v.Color3 = ConvertColorSpace(v.Color3);
+                        v.Color4 = ConvertColorSpace(v.Color4);
+                        v.Color5 = ConvertColorSpace(v.Color5);
                         outVertexStream.WriteStaticPerVertexData(v);
                     });
                     break;
@@ -460,7 +451,11 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.Decorator:
-                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) => outVertexStream.WriteDecoratorVertex(v));
+                    ConvertVertices(count, inVertexStream.ReadDecoratorVertex, (v, i) =>
+                    {
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        outVertexStream.WriteDecoratorVertex(v);
+                    });
                     break;
 
                 case VertexBufferFormat.World2:
@@ -566,7 +561,11 @@ namespace TagTool.Geometry
                     break;
 
                 case VertexBufferFormat.ParticleModel:
-                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) => outVertexStream.WriteParticleModelVertex(v));
+                    ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) =>
+                    {
+                        v.Normal = ConvertVectorSpace(v.Normal);
+                        outVertexStream.WriteParticleModelVertex(v);
+                    });
                     break;
 
                 case VertexBufferFormat.TinyPosition:
@@ -623,7 +622,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.WriteIndex(inIndexStream.ReadIndex());
@@ -644,7 +643,7 @@ namespace TagTool.Geometry
                         Size = count * 2,
                         Unused4 = 0,
                         Unused8 = 0,
-                        Address = new CacheAddress(),
+                        Address = new CacheResourceAddress(),
                         Unused10 = 0
                     }
                 }
@@ -659,7 +658,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)j);
@@ -679,7 +678,7 @@ namespace TagTool.Geometry
                         Size = buffer.Count() * 2,
                         Unused4 = 0,
                         Unused8 = 0,
-                        Address = new CacheAddress(),
+                        Address = new CacheResourceAddress(),
                         Unused10 = 0
                     }
                 }
@@ -694,7 +693,7 @@ namespace TagTool.Geometry
                 EndianFormat.LittleEndian);
 
             StreamUtil.Align(outputStream, 4);
-            indexBuffer.Data.Address = new CacheAddress(CacheAddressType.Resource, (int)outputStream.Position);
+            indexBuffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outputStream.Position);
 
             for (var j = 0; j < indexCount; j++)
                 outIndexStream.Write((short)buffer[j]);
@@ -732,6 +731,35 @@ namespace TagTool.Geometry
                 value = VertexElementStream.Clamp(value);
             }
             return value;
+        }
+
+        private static uint ConvertColorSpace(uint color)
+        {
+            uint c1 = color & 0xFF;
+            uint c2 = (color >> 8) & 0xFF;
+            uint c3 = (color >> 16) & 0xFF;
+            uint c4 = (color >> 24) & 0xFF;
+            c1 = (c1 + 0x7F) & 0xFF;
+            c2 = (c2 + 0x7F) & 0xFF;
+            c3 = (c3 + 0x7F) & 0xFF;
+            c4 = (c4 + 0x7F) & 0xFF;
+
+            return c1 | (c2 << 8) | (c3 << 16) | (c4 << 24);
+        }
+
+        private static float ConvertVectorSpace(float value)
+        {
+            return value <= 0.5? 2.0f * value : (value - 1.0f) * 2.0f;
+        }
+
+        private static RealVector3d ConvertVectorSpace(RealVector3d vector)
+        {
+            return new RealVector3d(ConvertVectorSpace(vector.I), ConvertVectorSpace(vector.J), ConvertVectorSpace(vector.K));
+        }
+
+        private static RealQuaternion ConvertVectorSpace(RealQuaternion vector)
+        {
+            return new RealQuaternion(ConvertVectorSpace(vector.I), ConvertVectorSpace(vector.J), ConvertVectorSpace(vector.K), vector.W);
         }
 
         /// <summary>

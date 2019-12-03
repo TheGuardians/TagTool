@@ -18,7 +18,7 @@ namespace TagTool.Serialization
         private const int DefaultBlockAlign = 4;
 
         private Stream Stream { get; }
-        private HaloOnlineCacheContext Context { get; }
+        protected HaloOnlineCacheContext Context { get; }
         private CachedTagData Data { get; set; }
 
         /// <summary>
@@ -78,14 +78,14 @@ namespace TagTool.Serialization
             return Tag.PointerToOffset(address);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public virtual CachedTagInstance GetTagByIndex(int index)
         {
             return (index >= 0 && index < Context.TagCache.Index.Count) ? Context.TagCache.Index[index] : null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public virtual CachedTagInstance GetTagByName(TagGroup group, string name)
         {
-            if (group == TagGroup.None)
+            if (group != TagGroup.None)
                 foreach (var instance in Context.TagCache.Index)
                     if ((instance?.IsInGroup(group) ?? false) && (instance?.Name?.Equals(name) ?? false))
                         return instance;
@@ -98,7 +98,7 @@ namespace TagTool.Serialization
             return new TagDataBlock(this);
         }
 
-        public void AddResourceBlock(int count, CacheAddress address, IList block)
+        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
         {
             throw new NotImplementedException();
         }
@@ -108,18 +108,19 @@ namespace TagTool.Serialization
             private readonly TagSerializationContext _context;
             private readonly List<CachedTagData.PointerFixup> _fixups = new List<CachedTagData.PointerFixup>();
             private readonly List<uint> _resourceOffsets = new List<uint>();
+            private readonly List<uint> _tagReferenceOffsets = new List<uint>();
             private uint _align = DefaultBlockAlign;
 
             public TagDataBlock(TagSerializationContext context)
             {
                 _context = context;
                 Stream = new MemoryStream();
-                Writer = new BinaryWriter(Stream);
+                Writer = new EndianWriter(Stream);
             }
 
             public MemoryStream Stream { get; private set; }
 
-            public BinaryWriter Writer { get; private set; }
+            public EndianWriter Writer { get; private set; }
 
             public void WritePointer(uint targetOffset, Type type)
             {
@@ -156,6 +157,7 @@ namespace TagTool.Serialization
                     if (obj is CachedTagInstance referencedTag && referencedTag != _context.Tag)
                         _context.Data.Dependencies.Add(referencedTag.Index);
                 }
+
                 return obj;
             }
 
@@ -175,6 +177,7 @@ namespace TagTool.Serialization
                 // Adjust fixups and add them to the tag
                 _context.Data.PointerFixups.AddRange(_fixups.Select(f => FinalizeFixup(f, dataOffset)));
                 _context.Data.ResourcePointerOffsets.AddRange(_resourceOffsets.Select(o => o + dataOffset));
+                _context.Data.TagReferenceOffsets.AddRange(_tagReferenceOffsets.Select(o => o + dataOffset));
 
                 // Free the block data
                 Writer.Close();
@@ -199,6 +202,11 @@ namespace TagTool.Serialization
                     TargetOffset = fixup.TargetOffset,
                     WriteOffset = dataOffset + fixup.WriteOffset
                 };
+            }
+
+            public void AddTagReference(CachedTagInstance referencedTag)
+            {
+                _tagReferenceOffsets.Add((uint)Stream.Position);
             }
         }
     }

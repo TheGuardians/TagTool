@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -22,7 +23,7 @@ namespace TagTool.Ai
         public uint Unknown6;
         public uint Unknown7;
         public uint Unknown8;
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public CachedTagInstance Character;
         public uint Unknown9;
         public StringId Unknown10;

@@ -56,7 +56,7 @@ namespace TagTool.Commands.Porting
                             var newFixup = new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = (uint)fixup.BlockOffset,
-                                Address = new CacheAddress(CacheAddressType.Resource, fixup.Offset)
+                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, fixup.Offset)
                             };
 
                             definitionStream.Position = newFixup.BlockOffset;
@@ -65,7 +65,7 @@ namespace TagTool.Commands.Porting
                             group.Resource.Resource.ResourceFixups.Add(newFixup);
                         }
 
-                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
+                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
                         definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset + 0x4;
                         definitionWriter.Write(0x20000000);
@@ -176,7 +176,8 @@ namespace TagTool.Commands.Porting
                                 dataStream.Position = blamResourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext,
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                                 break;
 
@@ -466,7 +467,7 @@ namespace TagTool.Commands.Porting
                 BlamCache.LoadResourceTags();
 
             definition.ResourceGroups = ConvertModelAnimationGraphResourceGroups(cacheStream, resourceStreams, definition.ResourceGroups);
-            definition.Modes = definition.Modes.OrderBy(a => a.Label.Set).ThenBy(a => a.Label.Index).ToList();
+            definition.Modes = definition.Modes.OrderBy(a => a.Name.Set).ThenBy(a => a.Name.Index).ToList();
 
             foreach (var mode in definition.Modes)
             {

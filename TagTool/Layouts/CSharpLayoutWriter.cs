@@ -154,7 +154,7 @@ namespace TagTool.Layouts
                 else if (_align > 4)
                     _writer.WriteLine("{0}[TagField(DataAlign = 0x{1:X})] public {2} {3};", _indent, _align, type, MakeName(name));
                 else
-                    _writer.WriteLine("{0}{1}public {2} {3};", _indent, _short ? "[TagField(Flags = TagFieldFlags.Short)] " : "", type, MakeName(name));
+                    _writer.WriteLine("{0}{1}public {2} {3};", _indent, _short ? "[TagField(Flags = Short)] " : "", type, MakeName(name));
             }
 
             private string BuildEnum(EnumLayout layout, TextWriter writer)

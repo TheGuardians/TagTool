@@ -17,6 +17,8 @@ using TagTool.Commands.Scenarios;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.Files;
+using TagTool.Commands.Forge;
+using TagTool.Commands.Bipeds;
 
 namespace TagTool.Commands.Editing
 {
@@ -38,6 +40,10 @@ namespace TagTool.Commands.Editing
 
             switch (tag.Group.Tag.ToString())
             {
+                case "bipd":
+                    BipedContextFactory.Populate(commandContext, cacheContext, tag, (Biped)definition);
+                    break;
+
                 case "bink":
                     VideoContextFactory.Populate(commandContext, cacheContext, tag, (Bink)definition);
                     break;
@@ -48,6 +54,10 @@ namespace TagTool.Commands.Editing
 
                 case "coll":
                     CollisionModelContextFactory.Populate(commandContext, cacheContext, tag, (CollisionModel)definition);
+                    break;
+
+                case "forg":
+                    ForgeContextFactory.Populate(commandContext, cacheContext, tag, (ForgeGlobalsDefinition)definition);
                     break;
 
                 case "hlmt": // model

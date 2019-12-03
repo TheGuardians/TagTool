@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using TagTool.Cache;
+using TagTool.IO;
 using TagTool.Tags;
 
 namespace TagTool.Serialization
@@ -17,7 +19,7 @@ namespace TagTool.Serialization
         /// <summary>
         /// Gets the writer open on the data block's stream.
         /// </summary>
-        BinaryWriter Writer { get; }
+        EndianWriter Writer { get; }
 
         /// <summary>
         /// Writes a pointer to an object at the current position in the block.
@@ -25,6 +27,8 @@ namespace TagTool.Serialization
         /// <param name="targetOffset">The target offset.</param>
         /// <param name="type">The type of object that the pointer will point to.</param>
         void WritePointer(uint targetOffset, Type type);
+
+        void AddTagReference(CachedTagInstance referencedTag);
 
         /// <summary>
         /// Called before an object is serialized into the block.

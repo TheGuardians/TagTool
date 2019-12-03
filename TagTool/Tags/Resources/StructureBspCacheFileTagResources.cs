@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
     [TagStructure(Name = "structure_bsp_cache_file_tag_resources", Size = 0x30)]
     public class StructureBspCacheFileTagResources : TagStructure
 	{
-        public TagBlock<ScenarioStructureBsp.UnknownRaw6th> UnknownRaw6ths;
+        public TagBlock<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
         public TagBlock<ScenarioStructureBsp.Plane> Planes;
-        public TagBlock<ScenarioStructureBsp.UnknownRaw7th> UnknownRaw7ths;
+        public TagBlock<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeams;
         public List<PathfindingDatum> PathfindingData;
 
         [TagStructure(Size = 0x94)]
@@ -34,12 +35,12 @@ namespace TagTool.Tags.Resources
             {
                 public ushort Flags;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
                 public List<BspReference> Bsps;
 
-                public DatumIndex ObjectHandle;
+                public int ObjectUniqueID;
                 public short OriginBspIndex;
                 public ScenarioObjectType ObjectType;
                 public Scenario.ScenarioInstance.SourceValue Source;
@@ -47,21 +48,15 @@ namespace TagTool.Tags.Resources
                 [TagStructure(Size = 0x18)]
                 public class BspReference : TagStructure
                 {
-                    public DatumIndex BspHandle;
+                    public int BspIndex;
                     public short NodeIndex;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
-                    public TagBlock<Bsp2dRef> Bsp2dRefs;
+                    public TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef> Bsp2dRefs;
 
                     public int VertexOffset;
-
-                    [TagStructure(Size = 0x4)]
-                    public class Bsp2dRef : TagStructure
-                    {
-                        public int Index;
-                    }
                 }
             }
 
@@ -77,7 +72,7 @@ namespace TagTool.Tags.Resources
                 public short UserJumpIndex;
                 public byte DestOnly;
 
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Unused = new byte[1];
 
                 public float Length;

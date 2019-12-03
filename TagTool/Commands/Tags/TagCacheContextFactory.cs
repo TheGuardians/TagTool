@@ -8,6 +8,7 @@ using TagTool.Commands.Porting;
 using TagTool.Commands.RenderModels;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Strings;
+using TagTool.Commands.Modding;
 
 namespace TagTool.Commands.Tags
 {
@@ -29,6 +30,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ImportTagCommand(cacheContext));
             context.AddCommand(new GetTagInfoCommand(cacheContext));
             context.AddCommand(new ListTagsCommand(cacheContext));
+            context.AddCommand(new ListUnnamedTagsCommand(cacheContext));
             context.AddCommand(new GetMapInfoCommand());
             context.AddCommand(new DuplicateTagCommand(cacheContext));
             context.AddCommand(new GetTagAddressCommand());
@@ -54,6 +56,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new MatchTagsCommand(cacheContext));
             context.AddCommand(new ConvertTagCommand(cacheContext));
             context.AddCommand(new UpdateMapFilesCommand(cacheContext));
+            context.AddCommand(new UpdateMapFilesNewCommand(cacheContext));
             context.AddCommand(new Bitmaps.ExtractBitmapsCommand(cacheContext));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
             context.AddCommand(new RelocateResourcesCommand(cacheContext));
@@ -63,8 +66,23 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new Shaders.RegenerateShaders(cacheContext));
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new ForEachCommand(contextStack, cacheContext));
-            context.AddCommand(new ExportModPackageCommand(cacheContext));
+            context.AddCommand(new ClearMultiplayerCustomizationCommand(cacheContext));
+            context.AddCommand(new ModelAnimationGraphs.AnimationTestCommand(cacheContext));
+            context.AddCommand(new ExportTagDefinitionsCommand(cacheContext));
+            context.AddCommand(new ModelAnimationGraphs.ApplySprintFixupsCommand(cacheContext));
+            context.AddCommand(new ListMultiMeshModelsCommand(cacheContext));
+            context.AddCommand(new OpenMapFileCommand(cacheContext));
 
+            //
+            // Modding commands
+            //
+
+            context.AddCommand(new ExportModPackageCommand(cacheContext));
+            context.AddCommand(new CreateCharacterType(cacheContext));
+            context.AddCommand(new UpgradeModPackage(cacheContext));
+            //context.AddCommand(new MergeModPackagesCommand(cacheContext));
+            context.AddCommand(new ApplyModPackageCommand(cacheContext));
+            context.AddCommand(new SaveModdedTagsCommand(cacheContext));
             return context;
         }
     }

@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,7 +9,7 @@ namespace TagTool.Tags.Definitions
     public class Bink : TagStructure
 	{
         public int FrameCount;
-        [TagField(Flags = TagFieldFlags.Pointer)]
+        [TagField(Flags = Pointer)]
         public PageableResource Resource;
         public int UselessPadding;
         public uint Unknown;

@@ -1,3 +1,5 @@
+using static TagTool.Tags.TagFieldFlags;
+
 namespace TagTool.Tags
 {
     /// <summary>
@@ -9,7 +11,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The definition data for the object.
         /// </summary>
-        [TagField(Flags = TagFieldFlags.Pointer)]
+        [TagField(Flags = Pointer)]
         public TDefinition Definition;
 
         /// <summary>

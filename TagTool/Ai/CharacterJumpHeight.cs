@@ -1,6 +1,6 @@
 namespace TagTool.Ai
 {
-    public enum CharacterJumpHeight : int
+    public enum CharacterJumpHeight : short
     {
         None,
         Down,

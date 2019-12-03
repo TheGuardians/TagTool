@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Editing
 {
@@ -148,7 +149,7 @@ namespace TagTool.Commands.Editing
             blockName = args[0];
             args = args.Skip(1).ToList();
 
-            for (var i = (from.HasValue ? from.Value : 0);
+            for (var i = (from ?? 0);
                 i < (to.HasValue ? to.Value + 1 : fieldValue.Count);
                 i++)
             {
@@ -185,7 +186,7 @@ namespace TagTool.Commands.Editing
 
             foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], CacheContext.Version))
             {
-                if (info.Attribute == null || !info.Attribute.Flags.HasFlag(TagFieldFlags.Label))
+                if (info.Attribute == null || !info.Attribute.Flags.HasFlag(Label))
                     continue;
 
                 var value = info.FieldInfo.GetValue(elements[index]);

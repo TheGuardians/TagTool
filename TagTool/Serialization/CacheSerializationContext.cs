@@ -109,10 +109,10 @@ namespace TagTool.Serialization
                     BlamCache.CacheContext?.GetStringId(item.GroupName) ?? StringId.Invalid) :
                 TagGroup.None;
 
-            if (index == -1)
+            if (index == -1 || group == TagGroup.None)
                 return null;
 
-            return new CachedTagInstance(index, group);
+            return new CachedTagInstance(index, group, item.Name);
         }
 
         public CachedTagInstance GetTagByName(TagGroup group, string name)
@@ -120,7 +120,12 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheAddress address, IList block)
+        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddTagReference(CachedTagInstance referencedTag)
         {
             throw new NotImplementedException();
         }

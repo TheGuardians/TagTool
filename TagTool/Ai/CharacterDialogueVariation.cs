@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
@@ -8,7 +9,7 @@ namespace TagTool.Ai
     public class CharacterDialogueVariation : TagStructure
 	{
         public CachedTagInstance Dialogue;
-        [TagField(Flags = TagFieldFlags.Label)]
+        [TagField(Flags = Label)]
         public StringId Name;
         public float Weight;
     }

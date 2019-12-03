@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Resources
 {
@@ -176,7 +177,7 @@ namespace TagTool.Tags.Resources
             [TagStructure(Size = 0x20)]
             public class HavokGeometry : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
+                [TagField(Flags = Padding, Length = 4)]
                 public byte[] Unused;
                 public int CollisionType;
                 public int ShapeCount;

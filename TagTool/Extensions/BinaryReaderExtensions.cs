@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.InteropServices;
 using TagTool.Common;
+using TagTool.Tags;
 
 namespace System.IO
 {
@@ -22,6 +23,21 @@ namespace System.IO
             var array = new T[1];
             bits.CopyTo(array, 0);
             return array[0];
+        }
+
+        public static float ReadSingle(this BinaryReader reader, TagFieldCompression compression)
+        {
+            switch (compression)
+            {
+                case TagFieldCompression.Int8:
+                    return (float)reader.ReadSByte() / sbyte.MaxValue;
+
+                case TagFieldCompression.Int16:
+                    return (float)reader.ReadInt16() / short.MaxValue;
+
+                default:
+                    return reader.ReadSingle();
+            }
         }
 
         public static Half ReadHalf(this BinaryReader reader) =>

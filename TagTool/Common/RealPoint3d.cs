@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -74,6 +76,37 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ X: {X}, Y: {Y}, Z: {Z} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 3)
+            {
+                error = $"{args.Count} arguments supplied; should be 3";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float x))
+            {
+                error = $"Unable to parse \"{args[0]}\" (x) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float y))
+            {
+                error = $"Unable to parse \"{args[1]}\" (y) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[2], out float z))
+            {
+                error = $"Unable to parse \"{args[2]}\" (z) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealPoint3d(x, y, z);
+                error = null;
+                return true;
+            }
+        }
 
         public float[] ToArray() => new[] { X, Y, Z };
     }

@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
@@ -28,7 +29,7 @@ namespace TagTool.Tags.Definitions
 		{
             public ushort Flags;
             public TypeValue Type;
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Event;
             public AudienceValue Audience;
             public short Unknown;
@@ -114,21 +115,21 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ArmorCustomization : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId CharacterName;
             public List<Region> Regions;
 
             [TagStructure(Size = 0x10)]
             public class Region : TagStructure
 			{
-                [TagField(Flags = TagFieldFlags.Label)]
+                [TagField(Flags = Label)]
                 public StringId RegionName;
                 public List<Permutation> Permutations;
 
                 [TagStructure(Size = 0x1C)]
                 public class Permutation : TagStructure
 				{
-                    [TagField(Flags = TagFieldFlags.Label)]
+                    [TagField(Flags = Label)]
                     public StringId Name;
                     public StringId Description;
                     public short Flags;
@@ -139,7 +140,7 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x8)]
                     public class Variant : TagStructure
 					{
-                        [TagField(Flags = TagFieldFlags.Label)]
+                        [TagField(Flags = Label)]
                         public StringId Region;
                         public StringId Permutation;
                     }

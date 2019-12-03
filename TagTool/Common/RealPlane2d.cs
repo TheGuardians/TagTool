@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -92,5 +94,36 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Normal: {Normal}, Distance: {Distance} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 3)
+            {
+                error = $"{args.Count} arguments supplied; should be 3";
+                return false;
+            }
+            else if (!float.TryParse(args[0], out float i))
+            {
+                error = $"Unable to parse \"{args[0]}\" (i) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[1], out float j))
+            {
+                error = $"Unable to parse \"{args[1]}\" (j) as `float`.";
+                return false;
+            }
+            else if (!float.TryParse(args[2], out float d))
+            {
+                error = $"Unable to parse \"{args[2]}\" (d) as `float`.";
+                return false;
+            }
+            else
+            {
+                result = new RealPlane2d(i, j, d);
+                error = null;
+                return true;
+            }
+        }
     }
 }

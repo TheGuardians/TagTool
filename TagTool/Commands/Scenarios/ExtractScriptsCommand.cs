@@ -49,45 +49,45 @@ namespace TagTool.Commands.Scenarios
             return result;
         }
 
-        private void WriteValueExpression(ScriptExpression expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteValueExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
         {
-            var valueType = (ScriptValueType.Halo3ODSTValue)Enum.Parse(typeof(ScriptValueType.Halo3ODSTValue), expr.ValueType.HaloOnline.ToString());
+            var valueType = (HsType.Halo3ODSTValue)Enum.Parse(typeof(HsType.Halo3ODSTValue), expr.ValueType.HaloOnline.ToString());
 
             switch (valueType)
             {
-                case ScriptValueType.Halo3ODSTValue.FunctionName:
+                case HsType.Halo3ODSTValue.FunctionName:
                     scriptWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress)); 
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
-                case ScriptValueType.Halo3ODSTValue.Boolean:
+                case HsType.Halo3ODSTValue.Boolean:
                     scriptWriter.Write(expr.Data[0] == 0 ? "false" : "true");
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.Real:
+                case HsType.Halo3ODSTValue.Real:
                     scriptWriter.Write(BitConverter.ToSingle(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0));
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.Short:
+                case HsType.Halo3ODSTValue.Short:
                     scriptWriter.Write(BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1], }, 0));
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.Long:
+                case HsType.Halo3ODSTValue.Long:
                     scriptWriter.Write(BitConverter.ToInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0));
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.String:
+                case HsType.Halo3ODSTValue.String:
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.Script:
+                case HsType.Halo3ODSTValue.Script:
                     scriptWriter.Write(Definition.Scripts[BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1] }, 0)].ScriptName);
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.StringId:
+                case HsType.Halo3ODSTValue.StringId:
                     scriptWriter.Write(CacheContext.GetString(new StringId(BitConverter.ToUInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0))));
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.GameDifficulty:
+                case HsType.Halo3ODSTValue.GameDifficulty:
                     switch (BitConverter.ToInt16(new[] { expr.Data[0], expr.Data[1] }, 0))
                     {
                         case 0: scriptWriter.Write("easy"); break;
@@ -98,27 +98,27 @@ namespace TagTool.Commands.Scenarios
                     }
                     break;
 
-                case ScriptValueType.Halo3ODSTValue.Object:
-                case ScriptValueType.Halo3ODSTValue.Device:
-                case ScriptValueType.Halo3ODSTValue.CutsceneCameraPoint:
-                case ScriptValueType.Halo3ODSTValue.TriggerVolume:
-                case ScriptValueType.Halo3ODSTValue.UnitSeatMapping:
-                case ScriptValueType.Halo3ODSTValue.Vehicle:
-                case ScriptValueType.Halo3ODSTValue.VehicleName:
+                case HsType.Halo3ODSTValue.Object:
+                case HsType.Halo3ODSTValue.Device:
+                case HsType.Halo3ODSTValue.CutsceneCameraPoint:
+                case HsType.Halo3ODSTValue.TriggerVolume:
+                case HsType.Halo3ODSTValue.UnitSeatMapping:
+                case HsType.Halo3ODSTValue.Vehicle:
+                case HsType.Halo3ODSTValue.VehicleName:
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED VALUE: {expr.ExpressionType.ToString()} {expr.ValueType.ToString()}>");
+                    scriptWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {expr.ValueType.ToString()}>");
                     break;
             }
         }
 
-        private void WriteGroupExpression(ScriptExpression expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteGroupExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
         {
             scriptWriter.Write('(');
 
-            for (var exprIndex = Definition.ScriptExpressions.IndexOf(expr) + 1; Definition.ScriptExpressions[exprIndex].ValueType.HaloOnline != ScriptValueType.HaloOnlineValue.Invalid; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
+            for (var exprIndex = Definition.ScriptExpressions.IndexOf(expr) + 1; Definition.ScriptExpressions[exprIndex].ValueType.HaloOnline != HsType.HaloOnlineValue.Invalid; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
             {
                 WriteExpression(Definition.ScriptExpressions[exprIndex], stringReader, scriptWriter);
 
@@ -131,25 +131,25 @@ namespace TagTool.Commands.Scenarios
             scriptWriter.Write(')');
         }
 
-        private void WriteExpression(ScriptExpression expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
         {
-            switch (expr.ExpressionType)
+            switch (expr.Flags)
             {
-                case ScriptExpressionType.Group:
+                case HsSyntaxNodeFlags.Group:
                     WriteGroupExpression(expr, stringReader, scriptWriter);
                     break;
 
-                case ScriptExpressionType.Expression:
+                case HsSyntaxNodeFlags.Expression:
                     WriteValueExpression(expr, stringReader, scriptWriter);
                     break;
 
-                case ScriptExpressionType.GlobalsReference:
-                case ScriptExpressionType.ParameterReference:
+                case HsSyntaxNodeFlags.GlobalsReference:
+                case HsSyntaxNodeFlags.ParameterReference:
                     scriptWriter.Write(expr.StringAddress == 0 ? "none" : ReadScriptString(stringReader, expr.StringAddress));
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED EXPR: {expr.ExpressionType.ToString()} {expr.ValueType.ToString()}>");
+                    scriptWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {expr.ValueType.ToString()}>");
                     break;
             }
         }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using TagTool.Cache;
 
 namespace TagTool.Common
 {
@@ -42,5 +44,41 @@ namespace TagTool.Common
 
         public override string ToString() =>
             $"{{ Top: {Top}, Left: {Left}, Bottom: {Bottom}, Right: {Right} }}";
+
+        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        {
+            result = null;
+            if (args.Count != 4)
+            {
+                error = $"{args.Count} arguments supplied; should be 4";
+                return false;
+            }
+            else if (!short.TryParse(args[0], out short top))
+            {
+                error = $"Unable to parse \"{args[0]}\" (top) as `short`.";
+                return false;
+            }
+            else if (!short.TryParse(args[1], out short left))
+            {
+                error = $"Unable to parse \"{args[1]}\" (left) as `short`.";
+                return false;
+            }
+            else if (!short.TryParse(args[2], out short bottom))
+            {
+                error = $"Unable to parse \"{args[2]}\" (bottom) as `short`.";
+                return false;
+            }
+            else if (!short.TryParse(args[3], out short right))
+            {
+                error = $"Unable to parse \"{args[3]}\" (right) as `short`.";
+                return false;
+            }
+            else
+            {
+                result = new Rectangle2d(top, left, bottom, right);
+                error = null;
+                return true;
+            }
+        }
     }
 }
