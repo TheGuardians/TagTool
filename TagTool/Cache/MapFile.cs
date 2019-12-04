@@ -69,7 +69,7 @@ namespace TagTool.Cache
                 reader.SeekTo(mapFileHeaderSize);
                 // Read blf
                 MapFileBlf = new Blf(Version);
-                if (MapFileBlf.Read(reader))
+                if (!MapFileBlf.Read(reader))
                     MapFileBlf = null;
             }
         }

@@ -20,7 +20,7 @@ namespace TagTool.Commands.Files
                   "UpdateMapFiles",
                   "Updates the game's .map files to contain valid scenario indices.",
 
-                  "UpdateMapFiles <MapInfo Directory>",
+                  "UpdateMapFiles <MapInfo Directory> [forceupdate]",
 
                   "Updates the game's .map files to contain valid scenario indices.")
         {
@@ -29,10 +29,19 @@ namespace TagTool.Commands.Files
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1)
+            if (args.Count > 2)
             {
                 return false;
             }
+
+            bool forceUpdate = false;
+            bool hasMapInfo = false;
+
+            if (args.Count >= 1)
+                hasMapInfo = true;
+            if (args.Count == 2)
+                if (args[1].ToLower() == "forceupdate")
+                    forceUpdate = true;
 
             // Generate / update the map files
             foreach(var scenario in CacheContext.TagCache.Index.FindAllInGroup("scnr"))
@@ -45,7 +54,7 @@ namespace TagTool.Commands.Files
                 MapFile map;
                 Blf mapInfo = null;
 
-                if(args.Count == 1)
+                if(hasMapInfo)
                 {
                     var mapInfoDir = new DirectoryInfo(args[0]);
                     var files = mapInfoDir.GetFiles(mapInfoName);
@@ -82,9 +91,11 @@ namespace TagTool.Commands.Files
                     using (var reader = new EndianReader(stream))
                         map.Read(reader);
                     map.UpdateScenarioIndices(scenario.Index);
-                    if(mapInfo != null)
-                        map.MapFileBlf = mapInfo;
 
+                    if(mapInfo != null)
+                        if(forceUpdate || map.MapFileBlf == null)
+                            map.MapFileBlf = mapInfo;
+                                 
                 }
                 catch (Exception)
                 {
@@ -92,7 +103,7 @@ namespace TagTool.Commands.Files
                 }
 
                 var targetFile = new FileInfo(targetPath);
-                using(var stream = targetFile.OpenWrite())
+                using(var stream = targetFile.Create())
                 using(var writer = new EndianWriter(stream))
                 {
                     map.Write(writer);
