@@ -264,7 +264,7 @@
     <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
     <Compile Include="Commands\Editing\ExtractResourceCommand.cs" />
     <Compile Include="Commands\Files\OpenMapFileCommand.cs" />
-    <Compile Include="Commands\Files\UpdateMapFilesNewCommand.cs" />
+    <Compile Include="Commands\Files\UpdateMapFilesCommand.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
     <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />
@@ -384,7 +384,6 @@
     <Compile Include="Commands\Files\RelocateResourcesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceAllFilesCommand.cs" />
     <Compile Include="Commands\Files\ReplaceFileCommand.cs" />
-    <Compile Include="Commands\Files\UpdateMapFilesCommand.cs" />
     <Compile Include="Commands\Files\VFilesContextFactory.cs" />
     <Compile Include="Commands\Geometry\DumpRenderGeometryCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationContextFactory.cs" />
