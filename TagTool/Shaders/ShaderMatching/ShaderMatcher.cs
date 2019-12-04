@@ -1032,13 +1032,7 @@ namespace TagTool.Shaders.ShaderMatching
                         reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
                         var pixelShaderIndex = reader.ReadInt32();
 
-
-                        var vertexShaderTag = CacheContext.GetTag(vertexShaderIndex);
-                        var pixelShaderTag = CacheContext.GetTag(pixelShaderIndex);
-
-                        if (!UseMS30 && (vertexShaderTag.Name.StartsWith("ms30")))
-                            continue;
-                        if (!UseMS30 && (pixelShaderTag.Name.StartsWith("ms30")))
+                        if (!UseMS30 && (instance.Name.StartsWith("ms30")))
                             continue;
 
                         return instance;
