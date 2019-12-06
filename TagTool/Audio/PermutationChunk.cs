@@ -27,7 +27,8 @@ namespace TagTool.Audio
         /// </summary>
         public int RuntimeIndex;
 
-        // should be a short sounddialogueinfoindex
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        public int UnknownSize;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short SoundDialogInfoIndex;
@@ -35,8 +36,6 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short Unknown;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public int UnknownSize;
 
         public PermutationChunk()
         {

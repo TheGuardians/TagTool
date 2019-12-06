@@ -99,9 +99,9 @@ namespace TagTool.Audio
                 [TagStructure(Size = 0x18)]
                 public class Unknown : TagStructure
 				{
+                    public int Unknown2;
                     public short SoundDialogInfoSize;
                     public short Unknown1;
-                    public int Unknown2;
                     public int Unknown3;
                     public uint Unknown4;
                     public int Unknown5;

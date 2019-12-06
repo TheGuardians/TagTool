@@ -179,7 +179,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     // fixup dialog indices, might need more work
-                    var firstPermutationChunk = BlamSoundGestalt.GetFirstPermutatioChunk(permutationIndex);
+                    var firstPermutationChunk = BlamSoundGestalt.GetFirstPermutationChunk(permutationIndex);
                     var newChunk = new PermutationChunk(currentSoundDataOffset, permutationData.Length, firstPermutationChunk.SoundDialogInfoIndex, firstPermutationChunk.Unknown, firstPermutationChunk.UnknownSize);
                     permutation.PermutationChunks.Add(newChunk);
                     currentSoundDataOffset += permutationData.Length;
