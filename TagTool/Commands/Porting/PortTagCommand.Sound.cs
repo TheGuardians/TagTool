@@ -247,6 +247,7 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var section in BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections)
                 {
+                    /*
                     var newSection = section.DeepClone();
 
                     foreach (var info in newSection.SoundDialogueInfo)
@@ -257,8 +258,8 @@ namespace TagTool.Commands.Porting
                         for (var i = ((info.LipsyncDataLength % 2) == 0 ? 0 : 1); (i + 1) < info.LipsyncDataLength; i += 2)
                             Array.Reverse(newSection.EncodedData, (int)(info.LipsyncDataOffset + i), 2);
                     }
-
-                    extraInfo.EncodedPermutationSections.Add(newSection);
+                    */
+                    extraInfo.EncodedPermutationSections.Add(section);
                 }
             }
 
