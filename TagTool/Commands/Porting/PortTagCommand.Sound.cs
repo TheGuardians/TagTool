@@ -178,7 +178,10 @@ namespace TagTool.Commands.Porting
                         permutationData = File.ReadAllBytes(cacheFileName);
                     }
 
-                    permutation.PermutationChunks.Add(new PermutationChunk(currentSoundDataOffset, permutationData.Length));
+                    // fixup dialog indices, might need more work
+                    var firstPermutationChunk = BlamSoundGestalt.GetFirstPermutatioChunk(permutationIndex);
+                    var newChunk = new PermutationChunk(currentSoundDataOffset, permutationData.Length, firstPermutationChunk.SoundDialogInfoIndex, firstPermutationChunk.Unknown, firstPermutationChunk.UnknownSize);
+                    permutation.PermutationChunks.Add(newChunk);
                     currentSoundDataOffset += permutationData.Length;
                     pitchRange.Permutations.Add(permutation);
 
@@ -219,7 +222,8 @@ namespace TagTool.Commands.Porting
                                 {
                                     new ExtraInfo.LanguagePermutation.RawInfoBlock.Unknown
                                     {
-                                        Unknown1 = permutationChunk.UnknownA,
+                                        SoundDialogInfoSize = permutationChunk.SoundDialogInfoIndex,
+                                        Unknown1 = permutationChunk.Unknown,
                                         Unknown2 = permutationChunk.UnknownSize,
                                         Unknown3 = 0,
                                         Unknown4 = permutation.SampleSize,

@@ -229,5 +229,11 @@ namespace TagTool.Tags.Definitions
             return PermutationChunks[permutationChunkIndex];
         }
 
+        public PermutationChunk GetFirstPermutatioChunk(int permutationIndex)
+        {
+            var permutation = Permutations[permutationIndex];
+            return PermutationChunks[permutation.FirstPermutationChunkIndex];
+        }
+
     }
 }
