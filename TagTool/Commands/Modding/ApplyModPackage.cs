@@ -22,8 +22,6 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<int, int> TagMapping = new Dictionary<int, int>();
 
-        private int MagicNumber = 0x5AF7;
-
         private Stream CacheStream;
 
         public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
@@ -121,9 +119,7 @@ namespace TagTool.Commands.Modding
                 else
                 {
                     CachedTagInstance newTag;
-                    if (modTag.Index <= MagicNumber)
-                        newTag = CacheContext.GetTag(modTag.Index);
-                    else if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
+                    if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
                     {
                         newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
                         newTag.Name = modTag.Name;
