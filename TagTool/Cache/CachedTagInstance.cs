@@ -86,6 +86,8 @@ namespace TagTool.Cache
 
         public CachedTagInstance()
         {
+            Index = -1;
+            Name = null;
             Group = TagGroup.None;
         }
 
