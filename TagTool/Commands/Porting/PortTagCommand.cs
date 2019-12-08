@@ -550,12 +550,12 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertRasterizerGlobals(rasg);
 					break;
 
-				// If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-				case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
-					blamDefinition = null;
-					break;
+                //If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
+                //case RenderModel mode when BlamCache.Version > CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
+                //	blamDefinition = null;
+                //	break;
 
-				case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
+                case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
 					mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
 					break;
 
@@ -839,7 +839,17 @@ namespace TagTool.Commands.Porting
 				case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
-				case Array _:
+                case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
+                    renderGeometry = ConvertStructure(cacheStream, resourceStreams, renderGeometry, definition, blamTagName);
+                    renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
+                    if (renderGeometry.Resource.Page.Index == -1)
+                    {
+                        renderGeometry.Meshes = new List<Mesh>();
+                        Console.WriteLine("WARNING mode tag null resource");
+                    }
+                    return renderGeometry;
+
+                case Array _:
 				case IList _: // All arrays and List<T> implement IList, so we should just use that
 					data = ConvertCollection(cacheStream, resourceStreams, data as IList, definition, blamTagName);
 					return data;
