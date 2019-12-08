@@ -55,8 +55,7 @@ namespace TagTool.Cache
         [TagField(Length = 20, MaxVersion = CacheVersion.Halo3ODST)]
         public byte[] LastChunkHash;
 
-        public short BlockAssetCount;
-        public short Unknown3;
+        public uint UnknownSize;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown4;
