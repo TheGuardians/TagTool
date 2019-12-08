@@ -312,17 +312,11 @@ namespace TagTool.Commands.Modding
         public void ConvertScriptTagReferenceExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
         {
             var tagIndex = BitConverter.ToInt32(expr.Data.ToArray(), 0);
-            CachedTagInstance tag = null;
-
-            if (modPack.Tags.Index[tagIndex] == null)
-                return;  // references an HO tag
-
             if (TagMapping.ContainsKey(tagIndex))
             {
-                tag = CacheContext.TagCache.Index[TagMapping[tagIndex]];
+                CachedTagInstance tag = CacheContext.TagCache.Index[TagMapping[tagIndex]];
+                expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
             }
-
-            expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();  // apply proper tag index or set to -1
         }
     }
 }
