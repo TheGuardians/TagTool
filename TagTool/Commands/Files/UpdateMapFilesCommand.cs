@@ -157,6 +157,7 @@ namespace TagTool.Commands.Files
             header.ScenarioTagIndex = scenarioTag.Index;
             header.Name = scenarioTag.Name.Split('\\').Last();
             header.ScenarioPath = scenarioTag.Name;
+            header.ExternalDependencies = 0x3E;
 
             map.Header = header;
 
