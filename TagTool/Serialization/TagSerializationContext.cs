@@ -204,9 +204,13 @@ namespace TagTool.Serialization
                 };
             }
 
-            public void AddTagReference(CachedTagInstance referencedTag)
+            // add position of tag index from tag references in definition
+            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
             {
-                _tagReferenceOffsets.Add((uint)Stream.Position);
+                if(isShort)
+                    _tagReferenceOffsets.Add((uint)Stream.Position);
+                else
+                    _tagReferenceOffsets.Add((uint)Stream.Position + 0xC);
             }
         }
     }

@@ -332,12 +332,15 @@ namespace TagTool.Serialization
             if ((referencedTag?.Index ?? 0) == -1)
                 referencedTag = context.GetTagByName(referencedTag.Group, referencedTag.Name);
 
+            if (referencedTag != null && referencedTag.Group == TagGroup.None)
+                referencedTag = null;
+
             if (referencedTag != null && valueInfo != null && valueInfo.ValidTags != null)
                 foreach (string tag in valueInfo.ValidTags)
                     if (!referencedTag.IsInGroup(tag))
                        throw new Exception($"Invalid group for tag reference: {referencedTag.Group.Tag}");
 
-            block.AddTagReference(referencedTag);
+            block.AddTagReference(referencedTag, valueInfo.Flags.HasFlag(Short));
 
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
             {

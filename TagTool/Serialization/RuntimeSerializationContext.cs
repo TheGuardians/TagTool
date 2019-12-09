@@ -99,7 +99,7 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            public void AddTagReference(CachedTagInstance referencedTag)
+            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
             {
             }
         }
