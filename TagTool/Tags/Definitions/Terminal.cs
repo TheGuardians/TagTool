@@ -6,7 +6,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "device_terminal", Tag = "term", Size = 0x140, MinVersion = CacheVersion.Halo3Retail)]
     public class Terminal : Device
     {
-        public uint Unknown;
+        public uint Unknown1;
         public StringId ActionString;
         public short TerminalIndex;
         public short Unknown2;
