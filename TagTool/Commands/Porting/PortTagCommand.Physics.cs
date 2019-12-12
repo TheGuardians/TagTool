@@ -54,10 +54,7 @@ namespace TagTool.Commands.Porting
         }
 
         private Projectile ConvertProjectile(Projectile proj)
-        {   if (proj.AirborneDetonationEffect == null)
-                proj.AirborneDetonationEffect = proj.DetonationDamage;
-            if (proj.GroundDetonationEffect == null)
-                proj.GroundDetonationEffect = proj.DetonationDamage;
+        {
             return proj;
         }
     }
