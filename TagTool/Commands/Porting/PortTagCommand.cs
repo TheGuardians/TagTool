@@ -528,7 +528,7 @@ namespace TagTool.Commands.Porting
                     };
 
                     //all gameobjects are handled within this subswitch now
-                    switch (blamDefinition)
+                    switch (gameobject)
                     {
                         case Weapon weapon:
                             //fix weapon firing looping sounds
@@ -536,14 +536,13 @@ namespace TagTool.Commands.Porting
                                 if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
                                     attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
                             //fix weapon target tracking
-                            if (weapon.Tracking > 0)
+                            if (weapon.Tracking > 0 || weapon.WeaponType == Weapon.WeaponTypeValue.Needler)
+                            {
                                 weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>{
                                     new Weapon.TargetTrackingBlock{
                                         AcquireTime = (weapon.Tracking == Weapon.TrackingType.HumanTracking ? 1.0f : 0.0f),
-                                        GraceTime = 0.1f,
-                                        DecayTime = 0.2f,
-                                        TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]),
-                                        LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]),
+                                        GraceTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.2f : 0.1f),
+                                        DecayTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.0f : 0.2f),
                                         TrackingTypes = (weapon.Tracking == Weapon.TrackingType.HumanTracking ?
                                             new List<Weapon.TargetTrackingBlock.TrackingType> {
                                                 new Weapon.TargetTrackingBlock.TrackingType{
@@ -558,15 +557,15 @@ namespace TagTool.Commands.Porting
                                                 new Weapon.TargetTrackingBlock.TrackingType{
                                                     TrackingType2 = CacheContext.GetStringId("bipeds")
                                                 },
-                                                new Weapon.TargetTrackingBlock.TrackingType{
-                                                    TrackingType2 = CacheContext.GetStringId("ground_vehicles")
-                                                },
-                                                new Weapon.TargetTrackingBlock.TrackingType{
-                                                    TrackingType2 = CacheContext.GetStringId("flying_vehicles")
-                                                },
                                         })
                                     }
                                 };
+                                if (weapon.Tracking == Weapon.TrackingType.HumanTracking)
+                                {
+                                    weapon.TargetTracking[0].TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
+                                    weapon.TargetTracking[0].LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);                                      
+                                }
+                            }                    
                             break;
                         default:
                             break;
