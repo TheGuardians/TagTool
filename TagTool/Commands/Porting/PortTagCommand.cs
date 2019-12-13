@@ -506,22 +506,26 @@ namespace TagTool.Commands.Porting
                     //fix AI object avoidance
                     if (gameobject.Model != null)
                     {
-                        var childmodel = CacheContext.Deserialize<Model>(cacheStream, CacheContext.GetTag(gameobject.Model.Index));
-                        if (childmodel.CollisionModel != null)
+                        var childmodeltag = CacheContext.GetTag(gameobject.Model.Index);
+                        if (childmodeltag.HeaderOffset > 0) //sometimes a tag that isn't ported yet can be referenced here, which causes a crash
                         {
-                            var childcollisionmodel = CacheContext.Deserialize<CollisionModel>(cacheStream, CacheContext.GetTag(childmodel.CollisionModel.Index));
-                            if (childcollisionmodel.PathfindingSpheres.Count > 0)
+                            var childmodel = CacheContext.Deserialize<Model>(cacheStream, childmodeltag);
+                            if (childmodel.CollisionModel != null)
                             {
-                                gameobject.PathfindingSpheres = new List<GameObject.PathfindingSphere>();
-                                for (var i = 0; i < childcollisionmodel.PathfindingSpheres.Count; i++)
+                                var childcollisionmodel = CacheContext.Deserialize<CollisionModel>(cacheStream, CacheContext.GetTag(childmodel.CollisionModel.Index));
+                                if (childcollisionmodel.PathfindingSpheres.Count > 0)
                                 {
-                                    gameobject.PathfindingSpheres.Add(new GameObject.PathfindingSphere
+                                    gameobject.PathfindingSpheres = new List<GameObject.PathfindingSphere>();
+                                    for (var i = 0; i < childcollisionmodel.PathfindingSpheres.Count; i++)
                                     {
-                                        Node = childcollisionmodel.PathfindingSpheres[i].Node,
-                                        Flags = (GameObject.PathfindingSphereFlags)childcollisionmodel.PathfindingSpheres[i].Flags,
-                                        Center = childcollisionmodel.PathfindingSpheres[i].Center,
-                                        Radius = childcollisionmodel.PathfindingSpheres[i].Radius
-                                    });
+                                        gameobject.PathfindingSpheres.Add(new GameObject.PathfindingSphere
+                                        {
+                                            Node = childcollisionmodel.PathfindingSpheres[i].Node,
+                                            Flags = (GameObject.PathfindingSphereFlags)childcollisionmodel.PathfindingSpheres[i].Flags,
+                                            Center = childcollisionmodel.PathfindingSpheres[i].Center,
+                                            Radius = childcollisionmodel.PathfindingSpheres[i].Radius
+                                        });
+                                    }
                                 }
                             }
                         }
