@@ -18,6 +18,7 @@ namespace TagTool.Cache
         public FileInfo File;
         public Stream Stream;
         public EndianReader Reader;
+        public MapFile Map;
 
         public IGameCacheContext CacheContext;
 
@@ -27,10 +28,10 @@ namespace TagTool.Cache
             Stream = file.OpenRead();
             Reader = new EndianReader(Stream);
 
-            var mapFile = new MapFile();
-            mapFile.Read(Reader);
+            Map = new MapFile();
+            Map.Read(Reader);
 
-            switch (mapFile.Version)
+            switch (Map.Version)
             {
                 case CacheVersion.HaloPC:
                 case CacheVersion.HaloXbox:
@@ -43,7 +44,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.HaloReach:
                 case CacheVersion.HaloReachMCC824:
-                    CacheContext = new GameCacheContextGen3(mapFile, Reader);
+                    CacheContext = new GameCacheContextGen3(Map, Reader);
                     break;
 
                 case CacheVersion.HaloOnline106708:
@@ -61,16 +62,34 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline554482:
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
+
+                    var directory = File.Directory.FullName;
+                    var tagsPath = Path.Combine(directory, "tags.dat");
+                    var tagsFile = new FileInfo(tagsPath);
+
+                    if (!tagsFile.Exists)
+                        break;
+
+#if DEBUG
+                    Console.WriteLine("Found tags.dat");
+#endif
+
+                    CacheContext = new GameCacheContextHaloOnline(tagsFile.Directory);
                     break;
             }
         }
 
-        ~GameCache()
+        private void DisposeStreams()
         {
             Reader.Close();
             Reader.Dispose();
             Stream.Close();
             Stream.Dispose();
+        }
+
+        ~GameCache()
+        {
+            DisposeStreams();
         }
     }
 }

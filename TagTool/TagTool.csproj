@@ -233,6 +233,7 @@
     <Compile Include="Cache\CacheLocalTable.cs" />
     <Compile Include="Cache\CacheStringTable.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
+    <Compile Include="Cache\GameCacheContextHaloOnline.cs" />
     <Compile Include="Cache\HaloOnlineGameCacheContext.cs" />
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
@@ -337,6 +338,7 @@
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\TagFile.cs" />
+    <Compile Include="Tags\TagReference.cs" />
     <Compile Include="Tags\TagResourceGen3.cs" />
     <Compile Include="Tags\TagResourceTypeGen3.cs" />
     <Compile Include="Commands\ArgumentParser.cs" />
