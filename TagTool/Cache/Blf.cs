@@ -274,6 +274,8 @@ namespace TagTool.Cache
 
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloOnline106708:
+                    if (targetVersion == CacheVersion.HaloOnline106708)
+                        Format = EndianFormat.LittleEndian;
                     return;
 
                 default:
