@@ -52,10 +52,5 @@ namespace TagTool.Commands.Porting
 
             return phmo;
         }
-
-        private Projectile ConvertProjectile(Projectile proj)
-        {
-            return proj;
-        }
     }
 }

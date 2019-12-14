@@ -502,6 +502,80 @@ namespace TagTool.Commands.Porting
                     blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
                     break;
 
+                case GameObject gameobject:
+                    //fix AI object avoidance
+                    if (gameobject.Model != null)
+                    {
+                        var childmodeltag = CacheContext.GetTag(gameobject.Model.Index);
+                        if (childmodeltag.HeaderOffset > 0) //sometimes a tag that isn't ported yet can be referenced here, which causes a crash
+                        {
+                            var childmodel = CacheContext.Deserialize<Model>(cacheStream, childmodeltag);
+                            if (childmodel.CollisionModel != null)
+                            {
+                                var childcollisionmodel = CacheContext.Deserialize<CollisionModel>(cacheStream, CacheContext.GetTag(childmodel.CollisionModel.Index));
+                                if (childcollisionmodel.PathfindingSpheres.Count > 0)
+                                {
+                                    gameobject.PathfindingSpheres = new List<GameObject.PathfindingSphere>();
+                                    for (var i = 0; i < childcollisionmodel.PathfindingSpheres.Count; i++)
+                                    {
+                                        gameobject.PathfindingSpheres.Add(new GameObject.PathfindingSphere
+                                        {
+                                            Node = childcollisionmodel.PathfindingSpheres[i].Node,
+                                            Flags = (GameObject.PathfindingSphereFlags)childcollisionmodel.PathfindingSpheres[i].Flags,
+                                            Center = childcollisionmodel.PathfindingSpheres[i].Center,
+                                            Radius = childcollisionmodel.PathfindingSpheres[i].Radius
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    //all gameobjects are handled within this subswitch now
+                    switch (gameobject)
+                    {
+                        case Weapon weapon:
+                            //fix weapon firing looping sounds
+                            foreach (var attach in weapon.Attachments)
+                                if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
+                                    attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
+                            //fix weapon target tracking
+                            if (weapon.Tracking > 0 || weapon.WeaponType == Weapon.WeaponTypeValue.Needler)
+                            {
+                                weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>{
+                                    new Weapon.TargetTrackingBlock{
+                                        AcquireTime = (weapon.Tracking == Weapon.TrackingType.HumanTracking ? 1.0f : 0.0f),
+                                        GraceTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.2f : 0.1f),
+                                        DecayTime = (weapon.WeaponType == Weapon.WeaponTypeValue.Needler ? 0.0f : 0.2f),
+                                        TrackingTypes = (weapon.Tracking == Weapon.TrackingType.HumanTracking ?
+                                            new List<Weapon.TargetTrackingBlock.TrackingType> {
+                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                                    TrackingType2 = CacheContext.GetStringId("ground_vehicles")
+                                                },
+                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                                    TrackingType2 = CacheContext.GetStringId("flying_vehicles")
+                                                },
+                                            }
+                                            :
+                                            new List<Weapon.TargetTrackingBlock.TrackingType> {
+                                                new Weapon.TargetTrackingBlock.TrackingType{
+                                                    TrackingType2 = CacheContext.GetStringId("bipeds")
+                                                },
+                                        })
+                                    }
+                                };
+                                if (weapon.Tracking == Weapon.TrackingType.HumanTracking)
+                                {
+                                    weapon.TargetTracking[0].TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
+                                    weapon.TargetTracking[0].LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);                                      
+                                }
+                            }                    
+                            break;
+                        default:
+                            break;
+                    };                                     
+                    break;
+
 				case Globals matg:
 					blamDefinition = ConvertGlobals(matg, cacheStream);
 					break;
@@ -540,10 +614,6 @@ namespace TagTool.Commands.Porting
 
 				case PhysicsModel phmo:
 					blamDefinition = ConvertPhysicsModel(edTag, phmo);
-					break;
-
-				case Projectile proj:
-					blamDefinition = ConvertProjectile(proj);
 					break;
 
 				case RasterizerGlobals rasg:
@@ -601,50 +671,6 @@ namespace TagTool.Commands.Porting
 
                 case TextValuePairDefinition sily:
                     Enum.TryParse(sily.ParameterH3.ToString(), out sily.ParameterHO);
-                    break;
-
-                case Weapon weapon:
-                    //fix weapon firing looping sounds
-                    foreach (var attach in weapon.Attachments)
-                        if (attach.PrimaryScale == CacheContext.GetStringId("primary_firing"))
-                            attach.PrimaryScale = CacheContext.GetStringId("primary_rate_of_fire");
-                    if (weapon.Tracking == Weapon.TrackingType.HumanTracking)
-                    {
-                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
-                        var trackblock = new Weapon.TargetTrackingBlock();
-                        trackblock.AcquireTime = 1.0f;
-                        trackblock.GraceTime = 0.1f;
-                        trackblock.DecayTime = 0.2f;
-                        trackblock.TrackingSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locking\tracking_locking.sound_looping")[0]);
-                        trackblock.LockedSound = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"sound\weapons\missile_launcher\tracking_locked\tracking_locked.sound_looping")[0]);
-                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
-                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
-                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
-                        trackblock.TrackingTypes.Add(tracktype);
-                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
-                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
-                        trackblock.TrackingTypes.Add(tracktype);
-                        weapon.TargetTracking.Add(trackblock);
-                    }
-                    if (weapon.Tracking == Weapon.TrackingType.CovenantTracking)
-                    {
-                        weapon.TargetTracking = new List<Weapon.TargetTrackingBlock>();
-                        var trackblock = new Weapon.TargetTrackingBlock();
-                        trackblock.AcquireTime = 0.0f;
-                        trackblock.GraceTime = 0.1f;
-                        trackblock.DecayTime = 0.2f;
-                        trackblock.TrackingTypes = new List<Weapon.TargetTrackingBlock.TrackingType>();
-                        var tracktype = new Weapon.TargetTrackingBlock.TrackingType();
-                        tracktype.TrackingType2 = CacheContext.GetStringId("bipeds");
-                        trackblock.TrackingTypes.Add(tracktype);
-                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
-                        tracktype.TrackingType2 = CacheContext.GetStringId("flying_vehicles");
-                        trackblock.TrackingTypes.Add(tracktype);
-                        tracktype = new Weapon.TargetTrackingBlock.TrackingType();
-                        tracktype.TrackingType2 = CacheContext.GetStringId("ground_vehicles");
-                        trackblock.TrackingTypes.Add(tracktype);
-                        weapon.TargetTracking.Add(trackblock);
-                    }
                     break;
 
                 case Shader rmsh:
