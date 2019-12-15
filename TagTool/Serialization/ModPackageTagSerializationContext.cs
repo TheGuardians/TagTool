@@ -26,7 +26,7 @@ namespace TagTool.Serialization
             var tag = Package.Tags.Index[index];
 
             // check if the tag is empty, meaning it is a reference to tag in the base cache
-            if(tag.HeaderOffset == tag.TotalSize)
+            if(tag.DefinitionOffset == tag.TotalSize)
             {
 
                 CachedTagInstance baseTag = null;

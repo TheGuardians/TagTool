@@ -111,7 +111,7 @@ namespace TagTool.Commands.Modding
                 return CacheContext.TagCache.Index[TagMapping[modTag.Index]];   // get the matching tag in the destination package
 
             // Determine if tag requires conversion
-            if (modTag.HeaderOffset == modTag.TotalSize)
+            if (modTag.DefinitionOffset == modTag.TotalSize)
             {
                 //modtag references a base tag, figure out which one is it and add it to the mapping
                 CachedTagInstance baseTag = null;
@@ -129,7 +129,7 @@ namespace TagTool.Commands.Modding
                     // tag name/group doesn't match base tag, try to look for it
                     foreach (var cacheTag in CacheContext.TagCache.Index)
                     {
-                        if (cacheTag.Group == modTag.Group && cacheTag.Name == modTag.Name)
+                        if (cacheTag != null && cacheTag.Group == modTag.Group && cacheTag.Name == modTag.Name)
                         {
                             TagMapping[modTag.Index] = cacheTag.Index;
                             return cacheTag;
