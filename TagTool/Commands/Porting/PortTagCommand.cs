@@ -306,13 +306,9 @@ namespace TagTool.Commands.Porting
                 if (instance == null || !instance.IsInGroup(groupTag) || instance.Name == null || instance.Name != blamTag.Name)
                     continue;
 
-                if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30))
+                if (instance.IsInGroup("rm  ") && !FlagIsSet(PortingFlags.Ms30) && instance.Name.StartsWith("ms30"))
                 {
-                    var rm = CacheContext.Deserialize<RenderMethod>(cacheStream, instance);
-                    var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, rm.ShaderProperties[0].Template);
-
-                    if (rmt2.VertexShader?.Index >= 0x4455 || rmt2.PixelShader?.Index >= 0x4455)
-                        continue;
+                    continue;
                 }
 
                 if (ReplacedTags.ContainsKey(groupTag) && ReplacedTags[groupTag].Contains(blamTag.Name))

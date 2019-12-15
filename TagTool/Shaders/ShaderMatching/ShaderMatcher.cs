@@ -123,12 +123,6 @@ namespace TagTool.Shaders.ShaderMatching
                     if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                         continue;
 
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
-                    var vertexShaderIndex = reader.ReadInt32();
-
-                    reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
-                    var pixelShaderIndex = reader.ReadInt32();
-
                     if (!UseMS30 && instance.Name.StartsWith("ms30"))
                         continue;
 
