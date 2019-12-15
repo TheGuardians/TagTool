@@ -140,5 +140,7 @@ namespace TagTool.Common
         {
             return Value - other.Value;
         }
+
+        public static implicit operator Tag(string tagString) => new Tag(tagString);
     }
 }
