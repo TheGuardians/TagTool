@@ -303,13 +303,18 @@ namespace TagTool.Commands.Modding
 
                 for (var tagIndex = 0; tagIndex < CacheContext.TagCache.Index.Count; tagIndex++)
                 {
+                    var srcTag = CacheContext.GetTag(tagIndex);
+
                     if (!tagIndices.Contains(tagIndex))
                     {
-                        ModPackage.Tags.AllocateTag();
+                        var emptyTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
+                        var cachedTagData = new CachedTagData();
+                        cachedTagData.Data = new byte[0];
+                        cachedTagData.Group = emptyTag.Group;
+                        ModPackage.Tags.SetTagData(ModPackage.TagsStream, emptyTag, cachedTagData);
                         continue;
                     }
-
-                    var srcTag = CacheContext.GetTag(tagIndex);
+                    
                     var destTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
 
                     using (var tagDataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(srcTagStream, srcTag)))
