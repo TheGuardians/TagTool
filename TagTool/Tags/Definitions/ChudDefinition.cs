@@ -1153,7 +1153,6 @@ namespace TagTool.Tags.Definitions
                     Unknown2,
                     CompassDistanceToTarget,
                     CompassDistanceToTarget2,
-                    Unknown3,
                     SurvivalCurrentSet,
                     SurvivalCurrentRound,
                     SurvivalCurrentWave,
