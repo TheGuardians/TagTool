@@ -106,46 +106,69 @@ namespace TagTool.Commands.Modding
 
         private CachedTagInstance ConvertCachedTagInstance(ModPackageExtended modPack, CachedTagInstance modTag)
         {
+            // tag has already been converted
+            if (TagMapping.ContainsKey(modTag.Index))
+                return CacheContext.TagCache.Index[TagMapping[modTag.Index]];   // get the matching tag in the destination package
+
             // Determine if tag requires conversion
-            if (modPack.Tags.Index[modTag.Index] == null)
-                return CacheContext.TagCache.Index[modTag.Index];   // references an HO tag
-            else
+            if (modTag.HeaderOffset == modTag.TotalSize)
             {
-                // tag has already been converted
-                if (TagMapping.ContainsKey(modTag.Index))
+                //modtag references a base tag, figure out which one is it and add it to the mapping
+                CachedTagInstance baseTag = null;
+                if (modTag.Index < CacheContext.TagCache.Index.Count)
+                    baseTag = CacheContext.GetTag(modTag.Index);
+
+                // mod tag has a name, first check if baseTag name is null, else if the names don't match or group don't match
+                if (baseTag != null && baseTag.Name != null && baseTag.Name == modTag.Name && baseTag.Group == modTag.Group)
                 {
-                    return CacheContext.TagCache.Index[TagMapping[modTag.Index]];   // get the matching tag in the destination package
+                    TagMapping[modTag.Index] = baseTag.Index;
+                    return baseTag;
                 }
                 else
                 {
-                    CachedTagInstance newTag;
-                    if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
+                    // tag name/group doesn't match base tag, try to look for it
+                    foreach (var cacheTag in CacheContext.TagCache.Index)
                     {
-                        newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
-                        newTag.Name = modTag.Name;
+                        if (cacheTag.Group == modTag.Group && cacheTag.Name == modTag.Name)
+                        {
+                            TagMapping[modTag.Index] = cacheTag.Index;
+                            return cacheTag;
+                        }
                     }
-
-                    TagMapping.Add(modTag.Index, newTag.Index);
-                    var definitionType = TagDefinition.Find(modTag.Group.Tag);
-                    var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
-                    tagDefinition = ConvertData(modPack, tagDefinition);
-
-                    if (definitionType == typeof(ForgeGlobalsDefinition))
-                    {
-                        tagDefinition = ConvertForgeGlobals((ForgeGlobalsDefinition)tagDefinition);
-                    }
-                    else if (definitionType == typeof(Scenario))
-                    {
-                        tagDefinition = ConvertScenario(modPack, (Scenario)tagDefinition);
-                    }
-                    CacheContext.Serialize(CacheStream, newTag, tagDefinition);
-
-                    foreach (var resourcePointer in modTag.ResourcePointerOffsets)
-                    {
-                        newTag.AddResourceOffset(resourcePointer);
-                    }
-                    return newTag;
+                    // Failed to find tag in base cache
+                    Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group.ToString()} in the base cache, returning null tag reference.");
+                    return null;
                 }
+            }     
+            else
+            {
+                CachedTagInstance newTag;
+                if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
+                {
+                    newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
+                    newTag.Name = modTag.Name;
+                }
+
+                TagMapping.Add(modTag.Index, newTag.Index);
+                var definitionType = TagDefinition.Find(modTag.Group.Tag);
+                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
+                tagDefinition = ConvertData(modPack, tagDefinition);
+
+                if (definitionType == typeof(ForgeGlobalsDefinition))
+                {
+                    tagDefinition = ConvertForgeGlobals((ForgeGlobalsDefinition)tagDefinition);
+                }
+                else if (definitionType == typeof(Scenario))
+                {
+                    tagDefinition = ConvertScenario(modPack, (Scenario)tagDefinition);
+                }
+                CacheContext.Serialize(CacheStream, newTag, tagDefinition);
+
+                foreach (var resourcePointer in modTag.ResourcePointerOffsets)
+                {
+                    newTag.AddResourceOffset(resourcePointer);
+                }
+                return newTag;
             }
         }
 
@@ -312,11 +335,12 @@ namespace TagTool.Commands.Modding
         public void ConvertScriptTagReferenceExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
         {
             var tagIndex = BitConverter.ToInt32(expr.Data.ToArray(), 0);
-            if (TagMapping.ContainsKey(tagIndex))
-            {
-                CachedTagInstance tag = CacheContext.TagCache.Index[TagMapping[tagIndex]];
-                expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
-            }
+
+            if (tagIndex == -1)
+                return;
+
+            var tag = ConvertCachedTagInstance(modPack, modPack.Tags.Index[tagIndex]);
+            expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
         }
     }
 }
