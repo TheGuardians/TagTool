@@ -306,8 +306,11 @@ namespace TagTool.Commands.Modding
                     var srcTag = CacheContext.GetTag(tagIndex);
 
                     if (srcTag == null)
+                    {
+                        ModPackage.Tags.AllocateTag();
                         continue;
-
+                    }
+                        
                     if (!tagIndices.Contains(tagIndex))
                     {
                         var emptyTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
