@@ -98,8 +98,23 @@ namespace TagTool.Serialization
             if (tagFieldInfo.Attribute.Flags.HasFlag(Runtime))
                 return;
 
-            SerializeValue(version, context, tagStream, block,
-                tagFieldInfo.GetValue(instance), tagFieldInfo.Attribute, tagFieldInfo.FieldType);
+            object objectValue = tagFieldInfo.GetValue(instance);
+
+            if(objectValue != null)
+            {
+                if (objectValue.GetType() == tagFieldInfo.FieldType)
+                {
+                    SerializeValue(version, context, tagStream, block,
+                                    objectValue, tagFieldInfo.Attribute, tagFieldInfo.FieldType);
+                }
+                else
+                    throw new Exception($"TagFieldInfo.GetValue return type {objectValue.GetType().ToString()} is not the same as the FieldInfo Type {tagFieldInfo.FieldType.ToString()}!");
+            }
+            else
+            {
+                SerializeValue(version, context, tagStream, block,
+                                    objectValue, tagFieldInfo.Attribute, tagFieldInfo.FieldType);
+            }
         }
 
         /// <summary>

@@ -70,7 +70,10 @@ namespace TagTool.Commands.Porting
             var edRmt2Instance = Matcher.FixRmt2Reference(cacheStream, blamTagName, bmRmt2Instance, bmRmt2, bmMaps, bmArgs);
 
             if (edRmt2Instance == null)
-                return CacheContext.Deserialize<Shader>(cacheStream, CacheContext.GetTag<Shader>(@"shaders\invalid"));
+            {
+                throw new Exception($"Failed to find HO rmt2 for this RenderMethod instance");
+            }
+                
 
             var edRmt2Tagname = edRmt2Instance.Name ?? $"0x{edRmt2Instance.Index:X4}";
 
