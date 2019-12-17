@@ -1,37 +1,43 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    /// <summary>
-    /// Frontend for game cache context, determines the right format for the given map file and opens the right generation of game cache context. Implements the IGameCacheContext
-    /// for ease of modification.
-    /// </summary>
-    public class GameCache
+    public abstract class GameCache
     {
-        public FileInfo File;
-        public Stream Stream;
-        public EndianReader Reader;
-        public MapFile Map;
+        public CacheVersion Version;
 
-        public IGameCacheContext CacheContext;
+        public abstract TagCacheTest TagCache { get; }
 
-        public GameCache(FileInfo file)
+        public static GameCache Open(FileInfo file)
         {
-            File = file;
-            Stream = file.OpenRead();
-            Reader = new EndianReader(Stream);
+            MapFile map = new MapFile();
+            var estimatedVersion = CacheVersion.HaloOnline106708;
 
-            Map = new MapFile();
-            Map.Read(Reader);
+            using (var stream = file.OpenRead())
+            using (var reader = new EndianReader(stream))
+            {
+                if (file.Name.Contains(".map"))
+                {
+                    map.Read(reader);
+                    estimatedVersion = map.Version;
+                }
+                else if (file.Name.Equals("tags.dat"))
+                    estimatedVersion = CacheVersion.HaloOnline106708;
+                else
+                    throw new Exception("Invalid file passed to GameCache constructor");
+            }
 
-            switch (Map.Version)
+            switch (estimatedVersion)
             {
                 case CacheVersion.HaloPC:
                 case CacheVersion.HaloXbox:
@@ -43,9 +49,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC824:
-                    CacheContext = new GameCacheContextGen3(Map, Reader);
-                    break;
+                    return new GameCacheContextGen3(map, file);
 
                 case CacheVersion.HaloOnline106708:
                 case CacheVersion.HaloOnline235640:
@@ -62,34 +66,102 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline554482:
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline700123:
-
-                    var directory = File.Directory.FullName;
+                    var directory = file.Directory.FullName;
                     var tagsPath = Path.Combine(directory, "tags.dat");
                     var tagsFile = new FileInfo(tagsPath);
 
                     if (!tagsFile.Exists)
-                        break;
+                        throw new Exception("Failed to find tags.dat");
 
-#if DEBUG
-                    Console.WriteLine("Found tags.dat");
-#endif
-
-                    CacheContext = new GameCacheContextHaloOnline(tagsFile.Directory);
+                    //CacheContext = new GameCacheContextHaloOnline(tagsFile.Directory);
                     break;
             }
+
+            return null;
         }
 
-        private void DisposeStreams()
+        public abstract Stream OpenCacheRead();
+        public abstract Stream OpenTagCacheRead();
+
+
+        public abstract object Deserialize(Stream stream, CachedTag instance);
+        public abstract T Deserialize<T>(Stream stream, CachedTag instance);
+
+    }
+    /*
+    public class TagTable<T> : List<T> where T : ICachedTag
+    {
+
+    }
+    */
+    public interface ITagCache
+    {
+        List<ICachedTag> GetGenericTagTable();
+        ICachedTag GetTagByName(string name, Tag groupTag);
+        ICachedTag GetTagByIndex(int index);
+        ICachedTag GetTagByID(int ID);
+    }
+
+    public interface IResourceCache
+    {
+
+    }
+
+    public interface ITagSerialization
+    {
+        object Deserialize(Stream stream, ICachedTag instance);
+        T Deserialize<T>(Stream stream, ICachedTag instance);
+    }
+
+    public interface ICacheFile
+    {
+        Stream OpenCacheRead();
+        Stream OpenTagCacheRead();
+    }
+
+    public interface ICachedTag
+    {
+        string GetName();
+        TagGroup GetTagGroup();
+        int GetIndex();
+        int GetID();
+        int GetOffset();
+    }
+
+    //
+    // New design
+    //
+
+    public abstract class CachedTag
+    {
+        public string Name;
+        public int Index;
+        public uint ID;
+        public TagGroup Group;
+
+        public abstract uint DefinitionOffset { get; }
+
+        public override string ToString()
         {
-            Reader.Close();
-            Reader.Dispose();
-            Stream.Close();
-            Stream.Dispose();
+            if(Name == null)
+                return $"0x{Index.ToString("X8")}.{Group.ToString()}";
+            else
+                return $"{Name}.{Group.ToString()}";
         }
 
-        ~GameCache()
+        public bool IsInGroup(params Tag[] groupTags)
         {
-            DisposeStreams();
+            return Group.BelongsTo(groupTags);
         }
+    }
+
+    public abstract class TagCacheTest
+    {
+        public virtual IEnumerable<CachedTag> TagTable { get;}
+
+        public abstract CachedTag GetTagByID(int ID);
+        public abstract CachedTag GetTagByIndex(int index);
+        public abstract CachedTag GetTagByName(string name, Tag groupTag);
+
     }
 }

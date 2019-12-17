@@ -1,30 +1,40 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using TagTool.Common;
-using TagTool.Tags;
-using TagTool.Serialization;
-using TagTool.Tags.Resources;
 using System.Text;
+using System.Threading.Tasks;
+using TagTool.Common;
+using TagTool.IO;
+using TagTool.Serialization;
+using TagTool.Tags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
-    /// <summary>
-    /// Manages game cache file interop.
-    /// </summary>
-    public class GameCacheContextHaloOnline : GameCacheContext, IGameCacheContext
+    public class GameCacheContextHaloOnline : GameCache
     {
-        public GameCacheContextHaloOnline(DirectoryInfo directory) :
-            base(directory)
+        public readonly DirectoryInfo Directory;
+
+        public static readonly string TagNamesFile = "tag_list.csv";
+
+
+        public TagSerializer Serializer;
+        public TagDeserializer Deserializer;
+
+        public TagCache TagCacheGenHO;
+        public override TagCacheTest TagCache => throw new Exception();
+
+        public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
+            Directory = directory;
             var tagNames = LoadTagNames();
 
             using (var stream = OpenTagCacheRead())
-                TagCache = new TagCache(stream, tagNames);
+                TagCacheGenHO = new TagCache(stream, tagNames);
 
-            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTagCache(TagCache, out var closestVersion)))
+            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTagCache(TagCacheGenHO, out var closestVersion)))
                 Version = closestVersion;
 
             Deserializer = new TagDeserializer(Version == CacheVersion.Unknown ? closestVersion : Version);
@@ -47,8 +57,11 @@ namespace TagTool.Cache
             TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, GetStringId("device"));
             TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, GetStringId("unit"));
             TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, GetStringId("render_method"));
-            TagGroup.Instances[new Tag("test")] = new TagGroup(new Tag("test"), Tag.Null, Tag.Null, GetStringId("test_blah"));
         }
+
+        //
+        // Helpers
+        //
 
         #region Tag Cache Functionality
         /// <summary>
@@ -66,39 +79,6 @@ namespace TagTool.Cache
                 return files[0];
             }
         }
-
-        private List<int> ModifiedTags = new List<int>();
-
-        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
-
-        public void SaveModifiedTagNames(string path = null)
-        {
-            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "modified_tags.csv"));
-
-            if (!csvFile.Directory.Exists)
-                csvFile.Directory.Create();
-
-            using (var csvWriter = new StreamWriter(csvFile.Create()))
-            {
-                foreach (var instance in ModifiedTags)
-                {
-                    var tag = TagCache.Index[instance];
-                    string name;
-                    if (tag.Name == null)
-                        name = $"0x{tag.Index:X8}";
-                    else
-                        name = tag.Name;
-
-                    csvWriter.WriteLine($"{name}.{tag.Group.ToString()}");
-                }
-                
-            }
-        }
-
-        /// <summary>
-        /// The tag cache.
-        /// </summary>
-        public TagCache TagCache { get; set; }
 
         public TagCache CreateTagCache(DirectoryInfo directory, out FileInfo file)
         {
@@ -141,7 +121,7 @@ namespace TagTool.Cache
         /// Opens the tag cache file for reading.
         /// </summary>
         /// <returns>The stream that was opened.</returns>
-        public Stream OpenTagCacheRead() => TagCacheFile.OpenRead();
+        public override Stream OpenTagCacheRead() => TagCacheFile.OpenRead();
 
         /// <summary>
         /// Opens the tag cache file for writing.
@@ -160,7 +140,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="index">The index of the tag.</param>
         /// <returns>The tag at the specified index from the current cache.</returns>
-        public override CachedTagInstance GetTag(int index)
+        public CachedTagInstance GetTag(int index)
         {
             if (!TryGetTag(index, out var result))
                 throw new IndexOutOfRangeException($"0x{index:X4}");
@@ -176,13 +156,13 @@ namespace TagTool.Cache
         /// <returns>true if the index is within the range of the tag cache, false otherwise.</returns>
         public bool TryGetTag(int index, out CachedTagInstance instance)
         {
-            if (index < 0 || index >= TagCache.Index.Count)
+            if (index < 0 || index >= TagCacheGenHO.Index.Count)
             {
                 instance = null;
                 return false;
             }
 
-            instance = TagCache.Index[index];
+            instance = TagCacheGenHO.Index[index];
             return true;
         }
 
@@ -192,7 +172,7 @@ namespace TagTool.Cache
         /// <typeparam name="T">The type of the tag definition.</typeparam>
         /// <param name="name">The name of the tag.</param>
         /// <returns>The tag of the specified type with the specified name from the current cache.</returns>
-        public override CachedTagInstance GetTag<T>(string name)
+        public CachedTagInstance GetTag<T>(string name)
         {
             if (TryGetTag<T>(name, out var result))
                 return result;
@@ -225,7 +205,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.AllocateTag(TagGroup.Instances[groupTag], name);
+                result = TagCacheGenHO.AllocateTag(TagGroup.Instances[groupTag], name);
 
                 if (result == null)
                     return false;
@@ -258,19 +238,13 @@ namespace TagTool.Cache
         /// <param name="name">The name of the tag.</param>
         /// <param name="result">The resulting tag.</param>
         /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag<T>(string name, out CachedTagInstance result) where T : TagStructure
+        public bool TryGetTag<T>(string name, out CachedTagInstance result)
         {
-            if (name == "none" || name == "null")
-            {
-                result = null;
-                return true;
-            }
-
             if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
             {
                 var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
 
-                foreach (var instance in TagCache.Index)
+                foreach (var instance in TagCacheGenHO.Index)
                 {
                     if (instance is null)
                         continue;
@@ -309,13 +283,13 @@ namespace TagTool.Cache
 
             if (name == "*")
             {
-                if (TagCache.Index.Count == 0)
+                if (TagCacheGenHO.Index.Count == 0)
                 {
                     result = null;
                     return false;
                 }
 
-                result = TagCache.Index.Last();
+                result = TagCacheGenHO.Index.Last();
                 return true;
             }
 
@@ -327,7 +301,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.Index.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
+                result = TagCacheGenHO.Index.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
                 return true;
             }
 
@@ -338,24 +312,22 @@ namespace TagTool.Cache
                 if (name.TrySplit('.', out var hexNamePieces))
                     name = hexNamePieces[0];
 
-                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !TagCache.Index.Contains(tagIndex))
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !TagCacheGenHO.Index.Contains(tagIndex))
                 {
                     result = null;
                     return false;
                 }
 
-                result = TagCache.Index[tagIndex];
+                result = TagCacheGenHO.Index[tagIndex];
                 return true;
             }
 
-            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[1], out var groupTag))
                 throw new Exception($"Invalid tag name: {name}");
 
-            //var tagName = namePieces[0];
+            var tagName = namePieces[0];
 
-            var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
-
-            foreach (var instance in TagCache.Index)
+            foreach (var instance in TagCacheGenHO.Index)
             {
                 if (instance is null)
                     continue;
@@ -379,6 +351,16 @@ namespace TagTool.Cache
             throw new KeyNotFoundException(name);
         }
 
+        /*
+        public T Deserialize<T>(Stream stream, CachedTagInstance instance) =>
+            Deserialize<T>(new TagSerializationContext(stream, this, instance));
+
+        public object Deserialize(Stream stream, CachedTagInstance instance) =>
+            Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
+
+        public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
+            Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
+        */
         /// <summary>
         /// Attempts to parse a group tag or name.
         /// </summary>
@@ -404,7 +386,7 @@ namespace TagTool.Cache
             }
 
             result = Tag.Null;
-            return name == "none" || name == "null";
+            return false;
         }
 
         /// <summary>
@@ -416,14 +398,6 @@ namespace TagTool.Cache
         {
             if (name == "****" || name == "null")
                 return Tag.Null;
-
-            if(name.Length < 4)
-            {
-                if (name.Length == 3)
-                    name = $"{name} ";
-                else if (name.Length == 2)
-                    name = $"{name}  ";
-            }
 
             if (TryParseGroupTag(name, out var result))
                 return result;
@@ -491,7 +465,7 @@ namespace TagTool.Cache
 
             using (var csvWriter = new StreamWriter(csvFile.Create()))
             {
-                foreach (var instance in TagCache.Index)
+                foreach (var instance in TagCacheGenHO.Index)
                     if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
                         csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
             }
@@ -544,14 +518,14 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="id">The id of the string.</param>
         /// <returns></returns>
-        public override string GetString(StringId id) => StringIdCache.GetString(id);
+        public string GetString(StringId id) => StringIdCache.GetString(id);
 
         /// <summary>
         /// Gets the string_id associated with the specified value from the string_id cache.
         /// </summary>
         /// <param name="value">The value to search for.</param>
         /// <returns></returns>
-        public override StringId GetStringId(string value) => StringIdCache.GetStringId(value);
+        public StringId GetStringId(string value) => StringIdCache.GetStringId(value);
 
         /// <summary>
         /// Gets the string_id associated with the specified index from the string_id cache.
@@ -559,7 +533,6 @@ namespace TagTool.Cache
         /// <param name="index">The index of the string.</param>
         /// <returns></returns>
         public StringId GetStringId(int index) => StringIdCache.GetStringId(index);
-
 
         public bool TryGetStringId(string value, out StringId result)
         {
@@ -739,7 +712,7 @@ namespace TagTool.Cache
         /// <param name="dataStream">The stream to read the resource data from.</param>
         /// <exception cref="System.ArgumentNullException">resource</exception>
         /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
-        public override void AddResource(PageableResource resource, Stream dataStream)
+        public void AddResource(PageableResource resource, Stream dataStream)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -782,7 +755,7 @@ namespace TagTool.Cache
         /// <param name="outStream">The stream to write the extracted data to.</param>
         /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
         /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
-        public override void ExtractResource(PageableResource pageable, Stream outStream)
+        public void ExtractResource(PageableResource pageable, Stream outStream)
         {
             if (pageable == null)
                 throw new ArgumentNullException("resource");
@@ -895,8 +868,11 @@ namespace TagTool.Cache
             return cache;
         }
 
+        #endregion
+
+
         public T Deserialize<T>(PageableResource pageable) =>
-            Deserialize<T>(new ResourceSerializationContext(this, pageable));
+            Deserialize<T>(new ResourceSerializationContext(null, pageable));
 
         public object Deserialize(PageableResource pageable)
         {
@@ -930,7 +906,35 @@ namespace TagTool.Cache
         }
 
         public void Serialize(PageableResource pageable, object definition) =>
-            Serialize(new ResourceSerializationContext(this, pageable), definition);
+            Serialize(new ResourceSerializationContext(null, pageable), definition);
+
+        public void Serialize(ISerializationContext context, object definition, uint? offset = null) => 
+            Serializer.Serialize(context, definition, offset);
+
+        public T Deserialize<T>(ISerializationContext context) => 
+            Deserializer.Deserialize<T>(context);
+
+        public object Deserialize(ISerializationContext context, Type type) =>
+            Deserializer.Deserialize(context, type);
+
+        public override object Deserialize(Stream stream, CachedTag instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override T Deserialize<T>(Stream stream, CachedTag instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Stream OpenCacheRead()
+        {
+            throw new NotImplementedException();
+        }
+
+        //
+        // Extra classes
+        //
 
         private class LoadedResourceCache
         {
@@ -938,11 +942,10 @@ namespace TagTool.Cache
 
             public FileInfo File { get; set; }
         }
-        #endregion
-
-        public CacheVersion GetVersion()
+        
+        private class TagCacheHaloOnline
         {
-            return Version;
+
         }
     }
 }

@@ -2,6 +2,8 @@ using TagTool.Cache;
 using TagTool.IO;
 using System.Collections.Generic;
 using System.IO;
+using System;
+using TagTool.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -30,6 +32,17 @@ namespace TagTool.Commands.Porting
             var path = args[0];
             var file = new FileInfo(path);
 
+            GameCache cache = GameCache.Open(file);
+            
+            var tag = cache.TagCache.GetTagByName("levels\\atlas\\sc100\\h100_shared", "sbsp");
+
+            using (var cacheStream = cache.OpenCacheRead())
+            {
+                var def = cache.Deserialize(cacheStream, tag);
+            }
+            
+            return true;
+
             /*
             MapFile map;
 
@@ -39,13 +52,6 @@ namespace TagTool.Commands.Porting
                 map = new MapFile(reader);
             }
             */
-            
-            GameCache cache;
-            cache = new GameCache(file);
-            
-
-
-            return true;
         }
     }
 }

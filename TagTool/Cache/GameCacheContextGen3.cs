@@ -1,55 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
-using static TagTool.Cache.CacheFile;
+using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    public class GameCacheContextGen3 : IGameCacheContext
+    public class GameCacheContextGen3 : GameCache
     {
-
         public int Magic;
         public MapFile BaseMapFile;
-        public CacheVersion Version;
-
+        public FileInfo CacheFile;
         public TagDeserializer Deserializer;
-
         public StringIdResolver Resolver;
-
-        public CacheIndexHeader IndexHeader;
-        public CacheIndexTable IndexItems;
         public CacheStringTable Strings;
         public List<CacheLocaleTable> LocaleTables;
 
-        /// <summary>
-        /// Dictionary of shared map file names with IMapFile interface
-        /// </summary>
-        public Dictionary<string, IGameCacheContext> SharedMapFiles { get; } = new Dictionary<string, IGameCacheContext>();
+        public TagCacheGen3 TagCacheGen3;
+        public override TagCacheTest TagCache => TagCacheGen3;
 
+        public Dictionary<string, GameCacheContextGen3> SharedMapFiles { get; } = new Dictionary<string, GameCacheContextGen3>();
         public string LocalesKey { get; }
-        
         public string StringsKey { get; }
-
         public string TagsKey { get; }
-
         public string NetworkKey { get; }
-
         public string StringMods { get; }
-
         public int LocaleGlobalsSize { get; }
-
         public int LocaleGlobalsOffset { get; }
 
-        public GameCacheContextGen3(MapFile mapFile, EndianReader reader)
+        public GameCacheContextGen3(MapFile mapFile, FileInfo file)
         {
             BaseMapFile = mapFile;
             Version = BaseMapFile.Version;
+            CacheFile = file;
             Deserializer = new TagDeserializer(Version);
             LocalesKey = SetLocalesKey();
             StringsKey = SetStringsKey();
@@ -77,144 +62,38 @@ namespace TagTool.Cache
 
             mapFile.Header.SetTagIndexAddress(BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.GetTagIndexAddress() - Magic), 0));
 
-            IndexHeader = mapFile.GetIndexHeader(reader, Magic);
-            Strings = CreateStringTable(reader);
-            IndexItems = CreateCacheIndexTable(reader);
-            
-            LocaleTables = new List<CacheLocaleTable>();
-
-            switch (mapFile.Version)
+            using(var reader = new EndianReader(OpenCacheRead(), BaseMapFile.EndianFormat))
             {
-                case CacheVersion.Halo3Retail:
-                    Resolver = new StringIdResolverHalo3();
-                    break;
+                
 
-                case CacheVersion.Halo3ODST:
-                    Resolver = new StringIdResolverHalo3ODST();
-                    break;
+                var tagTableHeader = mapFile.GetTagTableHeader(reader, Magic);
 
-                case CacheVersion.HaloReach:
-                    Resolver = new StringIdResolverHaloReach();
-                    break;
+                Strings = CreateStringTable(reader);
+                TagCacheGen3 = new TagCacheGen3(reader, tagTableHeader, BaseMapFile, Strings, Magic, TagsKey);
+                
+                LocaleTables = new List<CacheLocaleTable>();
 
-                default:
-                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(mapFile.Version));
-            }
-
-            foreach (var language in Enum.GetValues(typeof(GameLanguage)))
-                LocaleTables.Add(CreateLocaleTable(reader, (GameLanguage)language));
-        }
-
-        private CacheIndexTable CreateCacheIndexTable(EndianReader reader)
-        {
-            CacheIndexTable indexTable = new CacheIndexTable();
-            indexTable.ClassList = new List<TagClass>();
-
-            #region Read Class List
-            reader.SeekTo(IndexHeader.TagGroupsOffset);
-            for (int i = 0; i < IndexHeader.TagGroupCount; i++)
-            {
-                var tc = new TagClass()
+                switch (mapFile.Version)
                 {
-                    ClassCode = reader.ReadString(4),
-                    Parent = reader.ReadString(4),
-                    Parent2 = reader.ReadString(4),
-                    StringID = reader.ReadInt32()
-                };
-                indexTable.ClassList.Add(tc);
-            }
-            #endregion
+                    case CacheVersion.Halo3Retail:
+                        Resolver = new StringIdResolverHalo3();
+                        break;
 
-            #region Read Tags Info
-            reader.SeekTo(IndexHeader.TagsOffset);
-            for (int i = 0; i < IndexHeader.TagCount; i++)
-            {
-                var classIndex = reader.ReadInt16();
-                var tagClass = classIndex == -1 ? null : indexTable.ClassList[classIndex];
-                string groupName = classIndex == -1 ? "" : Strings.GetItemByID(tagClass.StringID);
-                CacheIndexItem item = new CacheIndexItem(classIndex, (reader.ReadInt16() << 16) | i, reader.ReadInt32() - Magic, i, tagClass, groupName);
-                indexTable.Add(item);
-            }
-            #endregion
+                    case CacheVersion.Halo3ODST:
+                        Resolver = new StringIdResolverHalo3ODST();
+                        break;
 
-            #region Read Indices
-            reader.SeekTo(BaseMapFile.Header.GetTagNamesIndicesOffset());
-            int[] indices = new int[IndexHeader.TagCount];
-            for (int i = 0; i < IndexHeader.TagCount; i++)
-                indices[i] = reader.ReadInt32();
-            #endregion
+                    case CacheVersion.HaloReach:
+                        Resolver = new StringIdResolverHaloReach();
+                        break;
 
-            #region Read Names
-            reader.SeekTo(BaseMapFile.Header.GetTagNamesBufferOffset());
-
-            EndianReader newReader = null;
-
-            if (TagsKey == "" || TagsKey == null)
-            {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
-            }
-            else
-            {
-                reader.BaseStream.Position = BaseMapFile.Header.GetTagNamesBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
-            }
-
-            for (int i = 0; i < indices.Length; i++)
-            {
-                if (indices[i] == -1)
-                {
-                    indexTable[i].Name = "<null>";
-                    continue;
+                    default:
+                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(mapFile.Version));
                 }
 
-                newReader.SeekTo(indices[i]);
-
-                int length;
-                if (i == indices.Length - 1)
-                    length = BaseMapFile.Header.GetTagNamesBufferSize() - indices[i];
-                else
-                {
-                    if (indices[i + 1] == -1)
-                    {
-                        int index = -1;
-
-                        for (int j = i + 1; j < indices.Length; j++)
-                        {
-                            if (indices[j] != -1)
-                            {
-                                index = j;
-                                break;
-                            }
-                        }
-
-                        length = (index == -1) ? BaseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
-                    }
-                    else
-                        length = indices[i + 1] - indices[i];
-                }
-
-                if (length == 1)
-                {
-                    indexTable[i].Name = "<blank>";
-                    continue;
-                }
-
-                if (length < 0)
-                {
-                    int i0 = indices[i];
-                    int i1 = indices[i + 1];
-                    int i2 = indices[i + 2];
-                    int i3 = indices[i + 3];
-                }
-
-                indexTable[i].Name = newReader.ReadString(length);
+                foreach (var language in Enum.GetValues(typeof(GameLanguage)))
+                    LocaleTables.Add(CreateLocaleTable(reader, (GameLanguage)language));
             }
-
-            newReader.Close();
-            newReader.Dispose();
-            #endregion
-
-            return indexTable;
         }
 
         private CacheStringTable CreateStringTable(EndianReader reader)
@@ -281,11 +160,11 @@ namespace TagTool.Cache
             int matgOffset = -1;
             var interop = BaseMapFile.Header.GetInterop();
 
-            foreach (var item in IndexItems)
+            foreach (var item in TagCacheGen3.Tags)
             {
                 if (item.IsInGroup("matg"))
                 {
-                    matgOffset = item.Offset;
+                    matgOffset = (int)item.DefinitionOffset;
                     break;
                 }
             }
@@ -487,15 +366,210 @@ namespace TagTool.Cache
         }
 
         //
-        // Interface methods
+        // Overrides from abstract class
         //
 
-        public CacheVersion GetVersion() => Version;
+        public override Stream OpenCacheRead() => CacheFile.OpenRead();
+
+        public override Stream OpenTagCacheRead() => OpenCacheRead();
+
+
+        public override T Deserialize<T>(Stream stream, CachedTag instance) =>
+            Deserialize<T>(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance));
+
+        public override object Deserialize(Stream stream, CachedTag instance) =>
+            Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagDefinition.Find(instance.Group.Tag));
 
         //
-        // Helpers
+        // private methods for internal use
         //
 
-        public static int GetCacheIndex(int index) => index & 0xFFFF;
+        private T Deserialize<T>(ISerializationContext context) =>
+            Deserializer.Deserialize<T>(context);
+
+        private object Deserialize(ISerializationContext context, Type type) =>
+            Deserializer.Deserialize(context, type);
+        
+        //
+        // public methods specific to gen3
+        //
+
+        public T Deserialize<T>(Stream stream, CachedTagGen3 instance) =>
+            Deserialize<T>(new Gen3SerializationContext(stream, this, instance));
+
+        public object Deserialize(Stream stream, CachedTagGen3 instance) =>
+            Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+
+
+
+
     }
+
+    public class CachedTagGen3 : CachedTag
+    {
+        public uint Offset;
+        public int GroupIndex;
+        public int Size;
+
+        public override uint DefinitionOffset => Offset;
+
+        public CachedTagGen3(int groupIndex, uint id, uint offset, int index, TagGroup tagGroup, string groupName)
+        {
+            GroupIndex = groupIndex;
+            ID = id;
+            Offset = offset;
+            Index = index;
+            Group = tagGroup;
+        }
+    }
+
+
+    public class TagTableHeaderGen3
+    {
+        public int TagGroupsOffset;
+        public int TagGroupCount;
+        public int TagsOffset;
+        public DatumIndex ScenarioHandle;
+        public DatumIndex GlobalsHandle;
+        public int CRC;
+        public int TagCount;
+        public int TagInfoHeaderCount;
+        public int TagInfoHeaderOffset;
+        public int TagInfoHeaderCount2;
+        public int TagInfoHeaderOffset2;
+    }
+
+    public class TagCacheGen3 : TagCacheTest
+    {
+        public List<CachedTagGen3> Tags;
+        public TagTableHeaderGen3 TagTableHeader;
+        public List<TagGroup> TagGroups;
+
+        public override IEnumerable<CachedTag> TagTable { get => Tags; }
+
+        public override CachedTag GetTagByID(int ID) => GetTagByIndex(0xFFFF & ID);
+
+        public override CachedTag GetTagByIndex(int index)
+        {
+            if (index > 0 && index < Tags.Count)
+                return Tags[index];
+            else
+                return null;
+        }
+
+        public override CachedTag GetTagByName(string name, Tag groupTag)
+        {
+            foreach (var tag in Tags)
+            {
+                if (groupTag == tag.Group.Tag && name == tag.Name)
+                    return tag;
+            }
+            return null;
+        }
+
+        public TagCacheGen3(EndianReader reader, TagTableHeaderGen3 tagTableHeader, MapFile BaseMapFile, CacheStringTable Strings, int Magic, string TagsKey)
+        {
+            Tags = new List<CachedTagGen3>();
+            TagGroups = new List<TagGroup>();
+            TagTableHeader = tagTableHeader;
+
+            #region Read Class List
+            reader.SeekTo(TagTableHeader.TagGroupsOffset);
+            for (int i = 0; i < TagTableHeader.TagGroupCount; i++)
+            {
+                var group = new TagGroup()
+                {
+                    Tag = new Tag(reader.ReadString(4)),
+                    ParentTag = new Tag(reader.ReadString(4)),
+                    GrandparentTag = new Tag(reader.ReadString(4)),
+                    Name = new StringId(reader.ReadUInt32())
+                };
+                TagGroups.Add(group);
+            }
+            #endregion
+
+            #region Read Tags Info
+            reader.SeekTo(TagTableHeader.TagsOffset);
+            for (int i = 0; i < TagTableHeader.TagCount; i++)
+            {
+                var groupIndex = reader.ReadInt16();
+                var tagGroup = groupIndex == -1 ? new TagGroup() : TagGroups[groupIndex];
+                string groupName = groupIndex == -1 ? "" : Strings.GetItemByID((int)tagGroup.Name.Value);
+                CachedTagGen3 tag = new CachedTagGen3(groupIndex, (uint)((reader.ReadInt16() << 16) | i), (uint)(reader.ReadUInt32() - Magic), i, tagGroup, groupName);
+                Tags.Add(tag);
+            }
+            #endregion
+
+            #region Read Indices
+            reader.SeekTo(BaseMapFile.Header.GetTagNamesIndicesOffset());
+            int[] indices = new int[TagTableHeader.TagCount];
+            for (int i = 0; i < TagTableHeader.TagCount; i++)
+                indices[i] = reader.ReadInt32();
+            #endregion
+
+            #region Read Names
+            reader.SeekTo(BaseMapFile.Header.GetTagNamesBufferOffset());
+
+            EndianReader newReader = null;
+
+            if (TagsKey == "" || TagsKey == null)
+            {
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
+            }
+            else
+            {
+                reader.BaseStream.Position = BaseMapFile.Header.GetTagNamesBufferOffset();
+                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
+            }
+
+            for (int i = 0; i < indices.Length; i++)
+            {
+                if (indices[i] == -1)
+                {
+                    Tags[i].Name = null;
+                    continue;
+                }
+
+                newReader.SeekTo(indices[i]);
+
+                int length;
+                if (i == indices.Length - 1)
+                    length = BaseMapFile.Header.GetTagNamesBufferSize() - indices[i];
+                else
+                {
+                    if (indices[i + 1] == -1)
+                    {
+                        int index = -1;
+
+                        for (int j = i + 1; j < indices.Length; j++)
+                        {
+                            if (indices[j] != -1)
+                            {
+                                index = j;
+                                break;
+                            }
+                        }
+
+                        length = (index == -1) ? BaseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
+                    }
+                    else
+                        length = indices[i + 1] - indices[i];
+                }
+
+                if (length == 1)
+                {
+                    Tags[i].Name = "<blank>";
+                    continue;
+                }
+
+                Tags[i].Name = newReader.ReadString(length);
+            }
+
+            newReader.Close();
+            newReader.Dispose();
+            #endregion
+
+        }
+    }
+
 }

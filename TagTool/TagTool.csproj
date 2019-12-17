@@ -234,7 +234,6 @@
     <Compile Include="Cache\CacheStringTable.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
     <Compile Include="Cache\GameCacheContextHaloOnline.cs" />
-    <Compile Include="Cache\HaloOnlineGameCacheContext.cs" />
     <Compile Include="Cache\ContentItemMetadata.cs" />
     <Compile Include="Cache\GameCacheContext.cs" />
     <Compile Include="Cache\GameCacheContextGen3.cs" />
@@ -242,7 +241,6 @@
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
     <Compile Include="Cache\HaloOnlineDatFiles.cs" />
     <Compile Include="Cache\HaloOnlineMapFile.cs" />
-    <Compile Include="Cache\IGameCacheContext.cs" />
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
@@ -331,6 +329,7 @@
     <Compile Include="Scripting\HsScriptParameter.cs" />
     <Compile Include="Scripting\HsScriptType.cs" />
     <Compile Include="Scripting\HsType.cs" />
+    <Compile Include="Serialization\Gen3SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />

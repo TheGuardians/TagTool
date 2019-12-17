@@ -162,7 +162,7 @@ namespace TagTool.Cache
         // Interface methods
         //
 
-        public CacheIndexHeader GetIndexHeader(EndianReader reader, int magic)
+        public TagTableHeaderGen3 GetTagTableHeader(EndianReader reader, int magic)
         {
             switch (Version)
             {
@@ -170,7 +170,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
                     reader.SeekTo(Header.GetTagIndexAddress());
-                    return new CacheIndexHeader
+                    return new TagTableHeaderGen3
                     {
                         TagGroupCount = reader.ReadInt32(),
                         TagGroupsOffset = reader.ReadInt32() - magic,
@@ -195,7 +195,7 @@ namespace TagTool.Cache
 
     public interface IMapFile
     {
-        CacheIndexHeader GetIndexHeader(EndianReader reader, int magic);
+        TagTableHeaderGen3 GetTagTableHeader(EndianReader reader, int magic);
     }
 
     public interface IMapFileHeader
