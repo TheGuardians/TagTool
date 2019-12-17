@@ -6,8 +6,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x1A0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "particle", Tag = "prt3", Size = 0x194)]
     public class Particle : TagStructure
 	{
         public int Flags;
@@ -39,9 +38,6 @@ namespace TagTool.Tags.Definitions
         public uint RuntimeMConstantOverTimeProperties;
         public List<RuntimeMSpritesBlock> RuntimeMSprites;
         public List<RuntimeMFramesBlock> RuntimeMFrames;
-
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [Flags]
         public enum FlagsValue : int

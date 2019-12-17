@@ -5,14 +5,10 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_method_option", Tag = "rmop", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "render_method_option", Tag = "rmop", Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "render_method_option", Tag = "rmop", Size = 0xC)]
     public class RenderMethodOption : TagStructure
 	{
         public List<OptionBlock> Options;
-
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]

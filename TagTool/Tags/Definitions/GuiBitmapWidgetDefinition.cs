@@ -3,8 +3,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_bitmap_widget_definition", Tag = "bmp3", Size = 0x5C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "gui_bitmap_widget_definition", Tag = "bmp3", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "gui_bitmap_widget_definition", Tag = "bmp3", Size = 0x5C)]
     public class GuiBitmapWidgetDefinition : TagStructure
 	{
         public uint Flags;
@@ -28,9 +27,6 @@ namespace TagTool.Tags.Definitions
         public short Unknown4;
         public StringId DataSourceName;
         public StringId SpriteDataSourceName;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown5;
 
         public enum BlendMethodValue : short
         {

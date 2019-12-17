@@ -5,8 +5,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3D0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
         public short IncTextUpdatePeriod;
@@ -142,9 +141,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown23;
 
         [TagStructure(Size = 0x24)]
         public class ARGBlock : TagStructure

@@ -1,17 +1,12 @@
 using TagTool.Cache;
 using System.Collections.Generic;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "effect_globals", Tag = "effg", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "effect_globals", Tag = "effg", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "effect_globals", Tag = "effg", Size = 0xC)]
     public class EffectGlobals : TagStructure
 	{
         public List<UnknownBlock> Unknown;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused1;
 
         [TagStructure(Size = 0x14)]
         public class UnknownBlock : TagStructure

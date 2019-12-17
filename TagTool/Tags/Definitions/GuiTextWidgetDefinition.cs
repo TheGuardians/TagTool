@@ -3,8 +3,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x3C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x40, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "gui_text_widget_definition", Tag = "txt3", Size = 0x3C)]
     public class GuiTextWidgetDefinition : TagStructure
 	{
         public uint Flags;
@@ -25,8 +24,5 @@ namespace TagTool.Tags.Definitions
         public StringId TextColor;
         public short TextFont;
         public short Unknown2;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown3;
     }
 }

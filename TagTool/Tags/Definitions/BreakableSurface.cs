@@ -3,8 +3,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x54, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x60, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x54)]
     public class BreakableSurface : TagStructure
 	{
         public float MaximumVitality;
@@ -16,9 +15,6 @@ namespace TagTool.Tags.Definitions
         public uint Unknown4;
         public CachedTagInstance CrackBitmap;
         public CachedTagInstance HoleBitmap;
-
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused1;
 
         [TagStructure(Size = 0x24)]
         public class UnknownBlock : TagStructure

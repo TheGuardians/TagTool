@@ -8,8 +8,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x84, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1D0, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC)]
     public class RenderModel : TagStructure
 	{
         public StringId Name;
@@ -83,9 +82,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<RuntimeNodeOrientation> RuntimeNodeOrientations;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public int Unknown1CC;
 
         [Flags]
         public enum FlagsValue : ushort
