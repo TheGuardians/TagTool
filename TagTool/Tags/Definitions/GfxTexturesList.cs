@@ -12,8 +12,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x110)]
         public class Texture : TagStructure
 		{
-            [TagField(Length = 252)] public string FileName;
-            public int MapId;
+            [TagField(Length = 256)] 
+            public string FileName;
             public CachedTagInstance Bitmap;
         }
     }
