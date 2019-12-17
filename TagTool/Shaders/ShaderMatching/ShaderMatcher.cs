@@ -258,6 +258,18 @@ namespace TagTool.Shaders.ShaderMatching
             return edRmt2BestStats;
         }
 
+        private List<string> SplitRenderMethodTemplateName(string rmt2Name, ref string type)
+        {
+            var split = rmt2Name.Split("\\".ToCharArray()).ToList();
+            if (rmt2Name.StartsWith("ms30"))
+                    split.RemoveAt(0);
+
+            type = split[1];    // shader_template, halogram_template and so on
+            var rmdfOptions = split.Last().Split("_".ToCharArray()).ToList();
+            rmdfOptions.RemoveAt(0);    // remove empty option
+            return rmdfOptions;
+        }
+
         public CachedTagInstance FindEquivalentRmt2(Stream cacheStream, CacheFile.IndexItem blamRmt2Tag, RenderMethodTemplate blamRmt2Definition, List<string> bmMaps, List<string> bmArgs)
         {
             // Find similar shaders by finding tags with as many common bitmaps and arguments as possible.
@@ -275,16 +287,12 @@ namespace TagTool.Shaders.ShaderMatching
 
                 if (dInstance == null || dInstance.Name == null)
                     continue;
+                
+                string edType = "";
+                var edRmdfValues = SplitRenderMethodTemplateName(dInstance.Name, ref edType);
 
-                var edSplit = dInstance.Name.Split("\\".ToCharArray());
-                var edType = edSplit[1];
-                var edRmdfValues = edSplit.Last().Split("_".ToCharArray()).ToList();
-                edRmdfValues.RemoveAt(0);
-
-                var bmSplit = blamRmt2Tag.Name.Split("\\".ToCharArray());
-                var bmType = bmSplit[1];
-                var bmRmdfValues = bmSplit.Last().Split("_".ToCharArray()).ToList();
-                bmRmdfValues.RemoveAt(0);
+                string bmType = "";
+                var bmRmdfValues = SplitRenderMethodTemplateName(blamRmt2Tag.Name, ref bmType);
 
                 int matchingValues = 0;
                 for (int i = 0; i < bmRmdfValues.Count; i++)
@@ -1018,7 +1026,11 @@ namespace TagTool.Shaders.ShaderMatching
                     if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
                         continue;
 
-                    if (instance.Name.StartsWith(blamRmt2Tag.Name))
+                    var rmt2Name = instance.Name;
+                    if(rmt2Name.StartsWith("ms30"))
+                        rmt2Name = rmt2Name.Replace("ms30\\", "");
+
+                    if (rmt2Name.StartsWith(blamRmt2Tag.Name))
                     {
                         reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
                         var vertexShaderIndex = reader.ReadInt32();
