@@ -8,18 +8,7 @@ namespace TagTool.Tags.Definitions
     public class GuiScreenWidgetDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYBoundsMin;
-        public short WidescreenXBoundsMin;
-        public short WidescreenYBoundsMax;
-        public short WidescreenXBoundsMax;
-        public short StandardYBoundsMin;
-        public short StandardXBoundsMin;
-        public short StandardYBoundsMax;
-        public short StandardXBoundsMax;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
         public CachedTagInstance Strings;
         public CachedTagInstance Parent;
         public StringId DefaultKeyLegendString;
@@ -42,46 +31,18 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYOffset;
-            public short WidescreenXOffset;
-            public short WidescreenYUnknown;
-            public short WidescreenXUnknown;
-            public short StandardYOffset;
-            public short StandardXOffset;
-            public short StandardYUnknown;
-            public short StandardXUnknown;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public List<ListWidget> ListWidgets;
             public List<TextWidget> TextWidgets;
             public List<BitmapWidget> BitmapWidgets;
             public List<ModelWidget> ModelWidgets;
 
-            [TagStructure(Size = 0x2C)]
-			public class WidgetData : TagStructure
-			{
-                public uint Flags;
-                public StringId Name;
-                public short Unknown;
-                public short Layer;
-                public short WidescreenYOffset;
-                public short WidescreenXOffset;
-                public short WidescreenYUnknown;
-                public short WidescreenXUnknown;
-                public short StandardYOffset;
-                public short StandardXOffset;
-                public short StandardYUnknown;
-                public short StandardXUnknown;
-                public CachedTagInstance Animation;
-            }
-
             [TagStructure(Size = 0x80)]
             public class ListWidget : TagStructure
 			{
                 public CachedTagInstance Parent;
-                public WidgetData Data;
+                public uint Flags;
+                public GuiDefinition GuiRenderBlock;
                 public StringId DataSourceName;
                 public CachedTagInstance Skin;
                 public int Unknown2;
@@ -92,7 +53,8 @@ namespace TagTool.Tags.Definitions
                 [TagStructure(Size = 0x30)]
                 public class ListWidgetItem : TagStructure
 				{
-                    public WidgetData Data;
+                    public uint Flags;
+                    public GuiDefinition GuiRenderBlock;
                     public StringId Target;
                 }
             }
@@ -101,7 +63,8 @@ namespace TagTool.Tags.Definitions
             public class TextWidget : TagStructure
 			{
                 public CachedTagInstance Parent;
-                public WidgetData Data;
+                public uint Flags;
+                public GuiDefinition GuiRenderBlock;
                 public StringId DataSourceName;
                 public StringId TextString;
                 public StringId TextColor;
@@ -113,7 +76,8 @@ namespace TagTool.Tags.Definitions
             public class BitmapWidget : TagStructure
 			{
                 public CachedTagInstance Parent;
-                public WidgetData Data;
+                public uint Flags;
+                public GuiDefinition GuiRenderBlock;
                 public CachedTagInstance Bitmap;
                 public CachedTagInstance Unknown2;
                 public BlendMethodValue BlendMethod;
@@ -147,7 +111,8 @@ namespace TagTool.Tags.Definitions
             public class ModelWidget : TagStructure
 			{
                 public CachedTagInstance Parent;
-                public WidgetData Data;
+                public uint Flags;
+                public GuiDefinition GuiRenderBlock;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public List<CameraRefinementOld> CameraRefinementsOld;

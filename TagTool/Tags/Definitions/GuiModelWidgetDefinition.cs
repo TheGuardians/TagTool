@@ -9,18 +9,7 @@ namespace TagTool.Tags.Definitions
     public class GuiModelWidgetDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYBoundsMin;
-        public short WidescreenXBoundsMin;
-        public short WidescreenYBoundsMax;
-        public short WidescreenXBoundsMax;
-        public short StandardYBoundsMin;
-        public short StandardXBoundsMin;
-        public short StandardYBoundsMax;
-        public short StandardXBoundsMax;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
         public List<CameraRefinement> CameraControl;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

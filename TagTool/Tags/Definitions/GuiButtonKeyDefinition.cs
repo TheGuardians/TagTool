@@ -8,18 +8,7 @@ namespace TagTool.Tags.Definitions
     public class GuiButtonKeyDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYBoundsMin;
-        public short WidescreenXBoundsMin;
-        public short WidescreenYBoundsMax;
-        public short WidescreenXBoundsMax;
-        public short StandardYBoundsMin;
-        public short StandardXBoundsMin;
-        public short StandardYBoundsMax;
-        public short StandardXBoundsMax;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
         public CachedTagInstance Strings;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
@@ -29,18 +18,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
             public StringId TextString;
             public StringId TextColor;
@@ -53,18 +31,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public CachedTagInstance Bitmap;
             public CachedTagInstance Unknown2;
             public BlendMethodValue BlendMethod;

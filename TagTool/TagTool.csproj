@@ -334,6 +334,7 @@
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
+    <Compile Include="Tags\Definitions\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />

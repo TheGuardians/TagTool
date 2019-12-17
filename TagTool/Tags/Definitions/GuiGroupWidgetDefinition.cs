@@ -8,18 +8,7 @@ namespace TagTool.Tags.Definitions
     public class GuiGroupWidgetDefinition : TagStructure
 	{
         public uint Flags;
-        public StringId Name;
-        public short Unknown;
-        public short Layer;
-        public short WidescreenYOffset;
-        public short WidescreenXOffset;
-        public short WidescreenYUnknown;
-        public short WidescreenXUnknown;
-        public short StandardYOffset;
-        public short StandardXOffset;
-        public short StandardYUnknown;
-        public short StandardXUnknown;
-        public CachedTagInstance Animation;
+        public GuiDefinition GuiRenderBlock;
         public List<ListWidget> ListWidgets;
         public List<TextWidget> TextWidgets;
         public List<BitmapWidget> BitmapWidgets;
@@ -30,18 +19,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYOffset;
-            public short WidescreenXOffset;
-            public short WidescreenYUnknown;
-            public short WidescreenXUnknown;
-            public short StandardYOffset;
-            public short StandardXOffset;
-            public short StandardYUnknown;
-            public short StandardXUnknown;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
             public CachedTagInstance Skin;
             public int RowCount;
@@ -53,18 +31,7 @@ namespace TagTool.Tags.Definitions
             public class ListWidgetItem : TagStructure
 			{
                 public uint Flags;
-                public StringId Name;
-                public short Unknown;
-                public short Layer;
-                public short WidescreenYOffset;
-                public short WidescreenXOffset;
-                public short WidescreenYUnknown;
-                public short WidescreenXUnknown;
-                public short StandardYOffset;
-                public short StandardXOffset;
-                public short StandardYUnknown;
-                public short StandardXUnknown;
-                public CachedTagInstance Animation;
+                public GuiDefinition GuiRenderBlock;
                 public StringId Target;
             }
         }
@@ -74,18 +41,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public StringId DataSourceName;
             public StringId TextString;
             public StringId TextColor;
@@ -98,18 +54,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Layer;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public CachedTagInstance Bitmap;
             public CachedTagInstance Unknown2;
             public BlendMethodValue BlendMethod;
@@ -143,18 +88,7 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTagInstance Parent;
             public uint Flags;
-            public StringId Name;
-            public short Unknown;
-            public short Unknown2;
-            public short WidescreenYBoundsMin;
-            public short WidescreenXBoundsMin;
-            public short WidescreenYBoundsMax;
-            public short WidescreenXBoundsMax;
-            public short StandardYBoundsMin;
-            public short StandardXBoundsMin;
-            public short StandardYBoundsMax;
-            public short StandardXBoundsMax;
-            public CachedTagInstance Animation;
+            public GuiDefinition GuiRenderBlock;
             public List<UnknownBlock> Unknown3;
             public uint Unknown4;
             public uint Unknown5;
