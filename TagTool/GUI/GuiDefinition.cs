@@ -1,7 +1,7 @@
 ﻿using TagTool.Common;
 using TagTool.Cache;
 
-namespace TagTool.Tags.Definitions
+namespace TagTool.Tags.GUI
 {
     [TagStructure(Size = 0x28)]
     public class GuiDefinition : TagStructure

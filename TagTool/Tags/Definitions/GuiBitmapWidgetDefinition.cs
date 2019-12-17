@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Tags.GUI;
 
 namespace TagTool.Tags.Definitions
 {
