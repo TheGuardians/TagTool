@@ -42,16 +42,6 @@ namespace TagTool.Commands.Porting
             }
             
             return true;
-
-            /*
-            MapFile map;
-
-            using(var stream = new FileStream(path, FileMode.Open))
-            using(var reader = new EndianReader(stream))
-            {
-                map = new MapFile(reader);
-            }
-            */
         }
     }
 }
