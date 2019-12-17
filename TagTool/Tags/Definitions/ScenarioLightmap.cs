@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x58, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x4C)]
+    [TagStructure(Name = "scenario_lightmap", Tag = "sLdT", Size = 0x4C, MinVersion = CacheVersion.Halo3ODST)]
     public class ScenarioLightmap : TagStructure
 	{
         public uint Unknown;
