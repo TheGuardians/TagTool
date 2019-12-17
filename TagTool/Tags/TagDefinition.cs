@@ -185,6 +185,7 @@ namespace TagTool.Tags
             { new Tag("mdl3"), typeof(GuiModelWidgetDefinition) },
             { new Tag("mdlg"), typeof(AiMissionDialogue) },
             { new Tag("mffn"), typeof(Muffin) },
+            { new Tag("mlst"), typeof(MapList) },
             { new Tag("mode"), typeof(RenderModel) },
             { new Tag("modg"), typeof(ModGlobalsDefinition) },
             { new Tag("mulg"), typeof(MultiplayerGlobals) },
