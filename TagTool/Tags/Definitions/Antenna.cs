@@ -5,8 +5,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x4C, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "antenna", Tag = "ant!", Size = 0x4C)]
     public class Antenna : TagStructure
 	{
         public StringId AttachmentMarkerName;
@@ -20,9 +19,6 @@ namespace TagTool.Tags.Definitions
         public float EndingBend;
         public float RuntimeTotalLength;
         public List<Vertex> Vertices;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x40)]
         public class Vertex : TagStructure

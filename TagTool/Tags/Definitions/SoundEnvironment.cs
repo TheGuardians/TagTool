@@ -3,8 +3,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_environment", Tag = "snde", Size = 0x48, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound_environment", Tag = "snde", Size = 0x50, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound_environment", Tag = "snde", Size = 0x48, MinVersion = CacheVersion.Halo3Retail)]
     public class SoundEnvironment : TagStructure
 	{
         public uint Unknown1;
@@ -26,8 +25,5 @@ namespace TagTool.Tags.Definitions
         public uint Unknown4;
         public uint Unknown5;
         public uint Unknown6;
-
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
     }
 }

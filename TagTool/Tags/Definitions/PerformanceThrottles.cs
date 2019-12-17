@@ -4,14 +4,10 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "performance_throttles", Tag = "perf", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "performance_throttles", Tag = "perf", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "performance_throttles", Tag = "perf", Size = 0xC)]
     public class PerformanceThrottles : TagStructure
 	{
         public List<PerformanceBlock> Performance;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x38)]
         public class PerformanceBlock : TagStructure

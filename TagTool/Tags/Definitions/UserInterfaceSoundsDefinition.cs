@@ -1,13 +1,11 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x140, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x14C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x150, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x14C, MinVersion = CacheVersion.Halo3ODST)]
     public class UserInterfaceSoundsDefinition : TagStructure
 	{
         public CachedTagInstance Error;
@@ -33,9 +31,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<AtlasSound> AtlasSounds;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x14)]
         public class AtlasSound : TagStructure

@@ -4,14 +4,10 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0xC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0x10, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
     public class SoundClasses : TagStructure
 	{
         public List<Class> Classes;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0x98, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]

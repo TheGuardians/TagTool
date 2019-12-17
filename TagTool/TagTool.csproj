@@ -333,6 +333,7 @@
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
+    <Compile Include="Tags\Definitions\GuiDefinition.cs" />
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
@@ -910,7 +911,7 @@ EXIT %25ERRORLEVEL%25</PostBuildEvent>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <Import Project="..\packages\AssimpNet.4.1.0\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.4.1.0\build\AssimpNet.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

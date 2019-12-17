@@ -6,8 +6,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "effect", Tag = "effe", Size = 0x68, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "effect", Tag = "effe", Size = 0x70, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "effect", Tag = "effe", Size = 0x68, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "effect", Tag = "effe", Size = 0x60, MinVersion = CacheVersion.HaloReach)]
     public class Effect : TagStructure
 	{
@@ -48,9 +47,6 @@ namespace TagTool.Tags.Definitions
         public float RuntimeLightprobeDeathDelay;
         public float RuntimeLocalSpaceDeathDelay;
         public List<ConicalDistribution> ConicalDistributions;
-
-        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
