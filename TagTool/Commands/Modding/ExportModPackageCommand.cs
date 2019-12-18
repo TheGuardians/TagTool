@@ -403,6 +403,12 @@ namespace TagTool.Commands.Modding
                     }
                 }
 
+                foreach(var stream in srcResourceStreams.Values)
+                {
+                    if (stream != null)
+                        stream.Dispose();
+                }
+
                 ModPackage.Tags.UpdateTagOffsets(new BinaryWriter(ModPackage.TagsStream, Encoding.Default, true));
             }
         }
