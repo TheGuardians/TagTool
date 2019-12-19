@@ -13,21 +13,13 @@ namespace TagTool.Cache
         public int Magic;
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
-        
-        public CacheStringTable Strings;
-        public List<CacheLocaleTable> LocaleTables;
+        public string NetworkKey;
 
+        public StringTableGen3 StringTableGen3;
         public TagCacheGen3 TagCacheGen3;
-        public override TagCacheTest TagCache => TagCacheGen3;
 
-        public Dictionary<string, GameCacheContextGen3> SharedMapFiles { get; } = new Dictionary<string, GameCacheContextGen3>();
-        public string LocalesKey { get; }
-        public string StringsKey { get; }
-        public string TagsKey { get; }
-        public string NetworkKey { get; }
-        public string StringMods { get; }
-        public int LocaleGlobalsSize { get; }
-        public int LocaleGlobalsOffset { get; }
+        public override TagCacheTest TagCache => TagCacheGen3;
+        public override StringTable StringTable => StringTableGen3;
 
         public GameCacheContextGen3(MapFile mapFile, FileInfo file)
         {
@@ -36,13 +28,6 @@ namespace TagTool.Cache
             CacheFile = file;
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
-            LocalesKey = SetLocalesKey();
-            StringsKey = SetStringsKey();
-            TagsKey = SetTagsKey();
-            NetworkKey = SetNetworkKey();
-            StringMods = SetStringMods();
-            LocaleGlobalsSize = SetLocaleGlobalsSize();
-            LocaleGlobalsOffset = SetLocaleGlobalsOffset();
 
             var interop = mapFile.Header.GetInterop();
 
@@ -63,300 +48,22 @@ namespace TagTool.Cache
 
             using(var reader = new EndianReader(OpenCacheRead(), BaseMapFile.EndianFormat))
             {
-                Strings = CreateStringTable(reader);
-                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, Strings, Magic, TagsKey);
-                
-                LocaleTables = new List<CacheLocaleTable>();
-
-                switch (mapFile.Version)
-                {
-                    case CacheVersion.Halo3Retail:
-                        Resolver = new StringIdResolverHalo3();
-                        break;
-
-                    case CacheVersion.Halo3ODST:
-                        Resolver = new StringIdResolverHalo3ODST();
-                        break;
-
-                    case CacheVersion.HaloReach:
-                        Resolver = new StringIdResolverHaloReach();
-                        break;
-
-                    default:
-                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(mapFile.Version));
-                }
-
-                foreach (var language in Enum.GetValues(typeof(GameLanguage)))
-                    LocaleTables.Add(CreateLocaleTable(reader, (GameLanguage)language));
-            }
-        }
-
-        private CacheStringTable CreateStringTable(EndianReader reader)
-        {
-            CacheStringTable table = new CacheStringTable();
-            table.StringMods = StringMods;
-            reader.SeekTo(BaseMapFile.Header.GetStringIDsIndicesOffset());
-            int[] indices = new int[BaseMapFile.Header.GetStringIDsCount()];
-            for (var i = 0; i < BaseMapFile.Header.GetStringIDsCount(); i++)
-            {
-                indices[i] = reader.ReadInt32();
-                table.Add("");
+                StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
+                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3, Magic);
+                LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, TagCacheGen3);
             }
 
-            reader.SeekTo(BaseMapFile.Header.GetStringIDsBufferOffset());
-
-            EndianReader newReader = null;
-
-            if (StringsKey == "" || StringsKey == null)
+            // unused but kept for future uses
+            switch (Version)
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetStringIDsBufferSize())), reader.Format);
-            }
-            else
-            {
-                reader.BaseStream.Position = BaseMapFile.Header.GetStringIDsBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetStringIDsBufferSize(), StringsKey), reader.Format);
-            }
-
-            for (var i = 0; i < indices.Length; i++)
-            {
-                if (indices[i] == -1)
-                {
-                    table[i] = "<null>";
-                    continue;
-                }
-
-                newReader.SeekTo(indices[i]);
-
-                int length;
-                if (i == indices.Length - 1)
-                    length = BaseMapFile.Header.GetStringIDsBufferSize() - indices[i];
-                else
-                    length = (indices[i + 1] != -1)
-                        ? indices[i + 1] - indices[i]
-                        : indices[i + 2] - indices[i];
-
-                if (length == 1)
-                {
-                    table[i] = "";
-                    continue;
-                }
-
-                table[i] = newReader.ReadString(length);
-            }
-            newReader.Close();
-            newReader.Dispose();
-            return table;
-        }
-
-        private CacheLocaleTable CreateLocaleTable(EndianReader reader, GameLanguage language)
-        {
-            CacheLocaleTable table = new CacheLocaleTable();
-
-            int matgOffset = -1;
-            var interop = BaseMapFile.Header.GetInterop();
-
-            foreach (var item in TagCacheGen3.Tags)
-            {
-                if (item.IsInGroup("matg"))
-                {
-                    matgOffset = (int)item.DefinitionOffset;
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                    NetworkKey = "";
                     break;
-                }
-            }
-
-            if (matgOffset == -1)
-                return null;
-
-            reader.SeekTo(matgOffset + LocaleGlobalsOffset + ((int)language * LocaleGlobalsSize));
-
-            var localeCount = reader.ReadInt32();
-            var tableSize = reader.ReadInt32();
-            var indexOffset = (int)(reader.ReadInt32() + interop.UnknownBaseAddress);
-            var tableOffset = (int)(reader.ReadInt32() + interop.UnknownBaseAddress);
-
-            reader.SeekTo(indexOffset);
-            var indices = new int[localeCount];
-
-            for (var i = 0; i < localeCount; i++)
-            {
-                table.Add(new CacheLocalizedString(reader.ReadInt32(), "", i));
-                indices[i] = reader.ReadInt32();
-            }
-
-            reader.SeekTo(tableOffset);
-
-            EndianReader newReader = null;
-
-            if (LocalesKey == null || LocalesKey == "")
-            {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(tableSize)), EndianFormat.BigEndian);
-            }
-            else
-            {
-                reader.BaseStream.Position = tableOffset;
-                newReader = new EndianReader(reader.DecryptAesSegment(tableSize, LocalesKey));
-            }
-
-            for (var i = 0; i < indices.Length; i++)
-            {
-                if (indices[i] == -1)
-                {
-                    table[i].String = "<null>";
-                    continue;
-                }
-
-                newReader.SeekTo(indices[i]);
-
-                int length;
-                if (i == indices.Length - 1)
-                    length = tableSize - indices[i];
-                else
-                    length = (indices[i + 1] != -1)
-                        ? indices[i + 1] - indices[i]
-                        : indices[i + 2] - indices[i];
-
-                if (length == 1)
-                {
-
-                    table[i].String = "<blank>";
-                    continue;
-                }
-                table[i].String = newReader.ReadString(length);
-            }
-
-            newReader.Close();
-            newReader.Dispose();
-
-            return table;
-        }
-
-        private string SetLocalesKey()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    return "";
-
                 case CacheVersion.HaloReach:
-                    return "BungieHaloReach!";
-
-                case CacheVersion.HaloReachMCC824:
-                    return "";
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private string SetStringsKey()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    return "";
-
-                case CacheVersion.HaloReach:
-                    return "ILikeSafeStrings";
-
-                case CacheVersion.HaloReachMCC824:
-                    return "";
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private string SetTagsKey()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    return "";
-
-                case CacheVersion.HaloReach:
-                    return "LetsAllPlayNice!";
-
-                case CacheVersion.HaloReachMCC824:
-                    return "";
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private string SetNetworkKey()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                    return "";
-
-                case CacheVersion.HaloReach:
-                    return "SneakerNetReigns";
-
-                case CacheVersion.HaloReachMCC824:
-                    return "";
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private string SetStringMods()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                    return "+262143,-259153;+64329,-64329;+1208,+1882";
-
-                case CacheVersion.Halo3ODST:
-                    return "+258846,-258846;+64231,-64231;+1304,+2098";
-
-                case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC824:   // verify
-                    return "+1174139,-1174139;+129874,-129874;+1123,+4604";
-
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private int SetLocaleGlobalsOffset()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                    return 452;
-
-                case CacheVersion.Halo3ODST:
-                    return 508;
-
-                case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC824:   // verify
-                    return 656;
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
-            }
-        }
-
-        private int SetLocaleGlobalsSize()
-        {
-            switch (Version)
-            {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloReach:
-                case CacheVersion.HaloReachMCC824:   // verify
-                    return 68;
-
-                default:
-                    throw new ArgumentException(nameof(Version), new NotSupportedException(Version.ToString()));
+                    NetworkKey = "SneakerNetReigns";
+                    break;
+                
             }
         }
 
@@ -437,6 +144,7 @@ namespace TagTool.Cache
         public List<CachedTagGen3> Tags;
         public TagTableHeaderGen3 TagTableHeader;
         public List<TagGroup> TagGroups;
+        public string TagsKey = "";
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
@@ -460,11 +168,23 @@ namespace TagTool.Cache
             return null;
         }
 
-        public TagCacheGen3(EndianReader reader, MapFile BaseMapFile, CacheStringTable Strings, int Magic, string TagsKey)
+        public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
         {
             Tags = new List<CachedTagGen3>();
             TagGroups = new List<TagGroup>();
-            TagTableHeader = BaseMapFile.GetTagTableHeader(reader, Magic);
+            TagTableHeader = baseMapFile.GetTagTableHeader(reader, Magic);
+            Version = baseMapFile.Version;
+
+            switch (Version)
+            {
+                case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3ODST:
+                    TagsKey = "";
+                    break;
+                case CacheVersion.HaloReach:
+                    TagsKey =  "LetsAllPlayNice!";
+                    break;
+            }
 
             #region Read Class List
             reader.SeekTo(TagTableHeader.TagGroupsOffset);
@@ -487,32 +207,32 @@ namespace TagTool.Cache
             {
                 var groupIndex = reader.ReadInt16();
                 var tagGroup = groupIndex == -1 ? new TagGroup() : TagGroups[groupIndex];
-                string groupName = groupIndex == -1 ? "" : Strings.GetItemByID((int)tagGroup.Name.Value);
+                string groupName = groupIndex == -1 ? "" : stringTable.GetString(tagGroup.Name);
                 CachedTagGen3 tag = new CachedTagGen3(groupIndex, (uint)((reader.ReadInt16() << 16) | i), (uint)(reader.ReadUInt32() - Magic), i, tagGroup, groupName);
                 Tags.Add(tag);
             }
             #endregion
 
             #region Read Indices
-            reader.SeekTo(BaseMapFile.Header.GetTagNamesIndicesOffset());
+            reader.SeekTo(baseMapFile.Header.GetTagNamesIndicesOffset());
             int[] indices = new int[TagTableHeader.TagCount];
             for (int i = 0; i < TagTableHeader.TagCount; i++)
                 indices[i] = reader.ReadInt32();
             #endregion
 
             #region Read Names
-            reader.SeekTo(BaseMapFile.Header.GetTagNamesBufferOffset());
+            reader.SeekTo(baseMapFile.Header.GetTagNamesBufferOffset());
 
             EndianReader newReader = null;
 
             if (TagsKey == "" || TagsKey == null)
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(BaseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
             }
             else
             {
-                reader.BaseStream.Position = BaseMapFile.Header.GetTagNamesBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(BaseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
+                reader.BaseStream.Position = baseMapFile.Header.GetTagNamesBufferOffset();
+                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
             }
 
             for (int i = 0; i < indices.Length; i++)
@@ -527,7 +247,7 @@ namespace TagTool.Cache
 
                 int length;
                 if (i == indices.Length - 1)
-                    length = BaseMapFile.Header.GetTagNamesBufferSize() - indices[i];
+                    length = baseMapFile.Header.GetTagNamesBufferSize() - indices[i];
                 else
                 {
                     if (indices[i + 1] == -1)
@@ -543,7 +263,7 @@ namespace TagTool.Cache
                             }
                         }
 
-                        length = (index == -1) ? BaseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
+                        length = (index == -1) ? baseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
                     }
                     else
                         length = indices[i + 1] - indices[i];
@@ -565,4 +285,202 @@ namespace TagTool.Cache
         }
     }
 
+    public class StringTableGen3 : StringTable
+    {
+        public string StringKey = "";
+
+        public StringTableGen3(EndianReader reader, MapFile baseMapFile) : base()
+        {
+            Version = baseMapFile.Version;
+            
+            switch (Version)
+            {
+                case CacheVersion.Halo3Retail:
+                    Resolver = new StringIdResolverHalo3();
+                    break;
+
+                case CacheVersion.Halo3ODST:
+                    Resolver = new StringIdResolverHalo3ODST();
+                    break;
+
+                case CacheVersion.HaloReach:
+                    Resolver = new StringIdResolverHaloReach();
+                    StringKey = "ILikeSafeStrings";
+                    break;
+
+                default:
+                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
+            }
+
+            reader.SeekTo(baseMapFile.Header.GetStringIDsIndicesOffset());
+            int[] indices = new int[baseMapFile.Header.GetStringIDsCount()];
+            for (var i = 0; i < baseMapFile.Header.GetStringIDsCount(); i++)
+            {
+                indices[i] = reader.ReadInt32();
+                Add("");
+            }
+
+            reader.SeekTo(baseMapFile.Header.GetStringIDsBufferOffset());
+
+            EndianReader newReader;
+
+            if (StringKey == "")
+            {
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.GetStringIDsBufferSize())), reader.Format);
+            }
+            else
+            {
+                reader.BaseStream.Position = baseMapFile.Header.GetStringIDsBufferOffset();
+                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.GetStringIDsBufferSize(), StringKey), reader.Format);
+            }
+
+            for (var i = 0; i < indices.Length; i++)
+            {
+                if (indices[i] == -1)
+                {
+                    this[i] = "<null>";
+                    continue;
+                }
+
+                newReader.SeekTo(indices[i]);
+
+                int length;
+                if (i == indices.Length - 1)
+                    length = baseMapFile.Header.GetStringIDsBufferSize() - indices[i];
+                else
+                    length = (indices[i + 1] != -1)
+                        ? indices[i + 1] - indices[i]
+                        : indices[i + 2] - indices[i];
+
+                if (length == 1)
+                {
+                    this[i] = "";
+                    continue;
+                }
+
+                this[i] = newReader.ReadString(length);
+            }
+            newReader.Close();
+            newReader.Dispose();
+        }
+
+        public override StringId AddString(string newString)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Save()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LocalesTableGen3
+    {
+        public static List<LocaleTable> CreateLocalesTable(EndianReader reader, MapFile baseMapFile, TagCacheGen3 tagCache)
+        {
+            CachedTagGen3 matg = null;
+            foreach (var tag in tagCache.Tags)
+                if (tag.IsInGroup("matg"))
+                {
+                    matg = tag;
+                    break;
+                }
+                    
+            List < LocaleTable >  localesTable = new List<LocaleTable>();
+            string localesKey = "";
+            uint localeGlobalsOffset = 0;
+            uint localeGlobalsSize = 0;
+            uint matgOffset = matg.DefinitionOffset;
+            var interop = baseMapFile.Header.GetInterop();
+
+            switch (baseMapFile.Version)
+            {
+                case CacheVersion.Halo3Retail:
+                    localesKey = "";
+                    localeGlobalsOffset = 452;
+                    localeGlobalsSize = 68;
+                    break;
+                case CacheVersion.Halo3ODST:
+                    localesKey = "";
+                    localeGlobalsOffset = 508;
+                    localeGlobalsSize = 68;
+                    break;
+                case CacheVersion.HaloReach:
+                    localesKey = "BungieHaloReach!";
+                    localeGlobalsOffset = 656;
+                    localeGlobalsSize = 68;
+                    break;
+            }
+
+            foreach (var language in Enum.GetValues(typeof(GameLanguage)))
+            {
+                LocaleTable table = new LocaleTable();
+
+                reader.SeekTo(matgOffset + localeGlobalsOffset + ((int)language * localeGlobalsSize));
+
+                var localeCount = reader.ReadInt32();
+                var tableSize = reader.ReadInt32();
+                var indexOffset = (int)(reader.ReadInt32() + interop.UnknownBaseAddress);
+                var tableOffset = (int)(reader.ReadInt32() + interop.UnknownBaseAddress);
+
+                reader.SeekTo(indexOffset);
+                var indices = new int[localeCount];
+
+                for (var i = 0; i < localeCount; i++)
+                {
+                    table.Add(new CacheLocalizedStringTest(reader.ReadInt32(), "", i));
+                    indices[i] = reader.ReadInt32();
+                }
+
+                reader.SeekTo(tableOffset);
+
+                EndianReader newReader = null;
+
+                if (localesKey == "")
+                {
+                    newReader = new EndianReader(new MemoryStream(reader.ReadBytes(tableSize)), EndianFormat.BigEndian);
+                }
+                else
+                {
+                    reader.BaseStream.Position = tableOffset;
+                    newReader = new EndianReader(reader.DecryptAesSegment(tableSize, localesKey));
+                }
+
+                for (var i = 0; i < indices.Length; i++)
+                {
+                    if (indices[i] == -1)
+                    {
+                        table[i].String = "<null>";
+                        continue;
+                    }
+
+                    newReader.SeekTo(indices[i]);
+
+                    int length;
+                    if (i == indices.Length - 1)
+                        length = tableSize - indices[i];
+                    else
+                        length = (indices[i + 1] != -1)
+                            ? indices[i + 1] - indices[i]
+                            : indices[i + 2] - indices[i];
+
+                    if (length == 1)
+                    {
+
+                        table[i].String = "<blank>";
+                        continue;
+                    }
+                    table[i].String = newReader.ReadString(length);
+                }
+
+                newReader.Close();
+                newReader.Dispose();
+
+                localesTable.Add(table);
+            }
+
+            return localesTable;
+        }
+    }
 }

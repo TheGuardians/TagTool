@@ -15,13 +15,18 @@ namespace TagTool.Cache
     public abstract class GameCache
     {
         public CacheVersion Version;
-
         public TagSerializer Serializer;
         public TagDeserializer Deserializer;
 
-        public StringIdResolver Resolver;
-
+        public List<LocaleTable> LocaleTables;
+        public abstract StringTable StringTable { get; }
         public abstract TagCacheTest TagCache { get; }
+        
+        public abstract Stream OpenCacheRead();
+        public abstract Stream OpenTagCacheRead();
+
+        public abstract object Deserialize(Stream stream, CachedTag instance);
+        public abstract T Deserialize<T>(Stream stream, CachedTag instance);
 
         public static GameCache Open(FileInfo file)
         {
@@ -83,13 +88,6 @@ namespace TagTool.Cache
 
             return null;
         }
-
-        public abstract Stream OpenCacheRead();
-        public abstract Stream OpenTagCacheRead();
-
-        public abstract object Deserialize(Stream stream, CachedTag instance);
-        public abstract T Deserialize<T>(Stream stream, CachedTag instance);
-
     }
 
     public abstract class CachedTag
@@ -134,6 +132,8 @@ namespace TagTool.Cache
 
     public abstract class TagCacheTest
     {
+        public CacheVersion Version;
+
         public virtual IEnumerable<CachedTag> TagTable { get;}
 
         public abstract CachedTag GetTagByID(int ID);
@@ -141,4 +141,52 @@ namespace TagTool.Cache
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
 
     }
+
+    public abstract class StringTable : List<string>
+    {
+        public CacheVersion Version;
+        public StringIdResolver Resolver;
+
+        public abstract StringId AddString(string newString);
+
+        public abstract void Save();
+
+        // override if required
+        public virtual string GetString(StringId id)
+        {
+            var index = Resolver.StringIDToIndex(id);
+            if (index > 0 && index < Count)
+                return this[index];
+            else
+                return "invalid";
+        }
+        // override if required
+        public virtual StringId GetStringId(string str)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (this[i] == str)
+                {
+                    return Resolver.IndexToStringID(i, Version);
+                }
+            }
+            return StringId.Invalid;
+        }
+    }
+
+    public class CacheLocalizedStringTest
+    {
+        public int StringIndex;
+        public string String;
+        public int Index;
+
+        public CacheLocalizedStringTest(int index, string locale, int localeIndex)
+        {
+            StringIndex = index;
+            String = locale;
+            Index = localeIndex;
+        }
+    }
+
+    public class LocaleTable : List<CacheLocalizedStringTest> { }
 }
