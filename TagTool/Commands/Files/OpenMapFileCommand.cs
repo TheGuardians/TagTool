@@ -26,17 +26,20 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count > 1)
                 return false;
-
-            var path = args[0];
+            string path = "";
+            if (args.Count == 1)
+                path = args[0];
+            else
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\tags.dat";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
             
-            var tag = cache.TagCache.GetTagByName("levels\\atlas\\sc100\\h100_shared", "sbsp");
+            var tag = cache.TagCache.GetTagByName("levels\\multi\\guardian\\guardian", "sbsp");
 
-            using (var cacheStream = cache.OpenCacheRead())
+            using (var cacheStream = cache.OpenTagCacheRead())
             {
                 var def = cache.Deserialize(cacheStream, tag);
             }

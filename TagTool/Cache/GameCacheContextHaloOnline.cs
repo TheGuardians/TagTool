@@ -16,15 +16,11 @@ namespace TagTool.Cache
     public class GameCacheContextHaloOnline : GameCache
     {
         public readonly DirectoryInfo Directory;
-
         public static readonly string TagNamesFile = "tag_list.csv";
+        public StringIdCache StringIdCache { get; set; }
+        public TagCacheHaloOnline TagCacheGenHO;
 
-
-        public TagSerializer Serializer;
-        public TagDeserializer Deserializer;
-
-        public TagCache TagCacheGenHO;
-        public override TagCacheTest TagCache => throw new Exception();
+        public override TagCacheTest TagCache => TagCacheGenHO;
 
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
@@ -32,25 +28,25 @@ namespace TagTool.Cache
             var tagNames = LoadTagNames();
 
             using (var stream = OpenTagCacheRead())
-                TagCacheGenHO = new TagCache(stream, tagNames);
+                TagCacheGenHO = new TagCacheHaloOnline(stream, tagNames);
 
-            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTagCache(TagCacheGenHO, out var closestVersion)))
+            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
 
             Deserializer = new TagDeserializer(Version == CacheVersion.Unknown ? closestVersion : Version);
             Serializer = new TagSerializer(Version == CacheVersion.Unknown ? closestVersion : Version);
 
-            StringIdResolver stringIdResolver = null;
+            Resolver = null;
 
             if (CacheVersionDetection.Compare(Version, CacheVersion.HaloOnline700123) >= 0)
-                stringIdResolver = new StringIdResolverMS30();
+                Resolver = new StringIdResolverMS30();
             else if (CacheVersionDetection.Compare(Version, CacheVersion.HaloOnline498295) >= 0)
-                stringIdResolver = new StringIdResolverMS28();
+                Resolver = new StringIdResolverMS28();
             else
-                stringIdResolver = new StringIdResolverMS23();
+                Resolver = new StringIdResolverMS23();
 
             using (var stream = OpenStringIdCacheRead())
-                StringIdCache = new StringIdCache(stream, stringIdResolver);
+                StringIdCache = new StringIdCache(stream, Resolver);
 
             TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, GetStringId("object"));
             TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, GetStringId("item"));
@@ -123,6 +119,8 @@ namespace TagTool.Cache
         /// <returns>The stream that was opened.</returns>
         public override Stream OpenTagCacheRead() => TagCacheFile.OpenRead();
 
+        public override Stream OpenCacheRead() => OpenTagCacheRead();
+
         /// <summary>
         /// Opens the tag cache file for writing.
         /// </summary>
@@ -140,7 +138,7 @@ namespace TagTool.Cache
         /// </summary>
         /// <param name="index">The index of the tag.</param>
         /// <returns>The tag at the specified index from the current cache.</returns>
-        public CachedTagInstance GetTag(int index)
+        public CachedTagHaloOnline GetTag(int index)
         {
             if (!TryGetTag(index, out var result))
                 throw new IndexOutOfRangeException($"0x{index:X4}");
@@ -154,15 +152,15 @@ namespace TagTool.Cache
         /// <param name="index">The index of the tag.</param>
         /// <param name="instance">The tag at the specified index from the current cache.</param>
         /// <returns>true if the index is within the range of the tag cache, false otherwise.</returns>
-        public bool TryGetTag(int index, out CachedTagInstance instance)
+        public bool TryGetTag(int index, out CachedTagHaloOnline instance)
         {
-            if (index < 0 || index >= TagCacheGenHO.Index.Count)
+            if (index < 0 || index >= TagCacheGenHO.TagTable.Count())
             {
                 instance = null;
                 return false;
             }
 
-            instance = TagCacheGenHO.Index[index];
+            instance = TagCacheGenHO.Tags[index];
             return true;
         }
 
@@ -172,7 +170,7 @@ namespace TagTool.Cache
         /// <typeparam name="T">The type of the tag definition.</typeparam>
         /// <param name="name">The name of the tag.</param>
         /// <returns>The tag of the specified type with the specified name from the current cache.</returns>
-        public CachedTagInstance GetTag<T>(string name)
+        public CachedTagHaloOnline GetTag<T>(string name)
         {
             if (TryGetTag<T>(name, out var result))
                 return result;
@@ -183,7 +181,7 @@ namespace TagTool.Cache
             throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
         }
 
-        public bool TryAllocateTag(out CachedTagInstance result, Type type, string name = null)
+        public bool TryAllocateTag(out CachedTagHaloOnline result, Type type, string name = null)
         {
             result = null;
 
@@ -219,7 +217,7 @@ namespace TagTool.Cache
             return true;
         }
 
-        public CachedTagInstance AllocateTag(Type type, string name = null)
+        public CachedTagHaloOnline AllocateTag(Type type, string name = null)
         {
             if (TryAllocateTag(out var result, type, name))
                 return result;
@@ -228,7 +226,7 @@ namespace TagTool.Cache
             return null;
         }
 
-        public CachedTagInstance AllocateTag<T>(string name = null) where T : TagStructure
+        public CachedTagHaloOnline AllocateTag<T>(string name = null) where T : TagStructure
             => AllocateTag(typeof(T), name);
 
         /// <summary>
@@ -238,13 +236,13 @@ namespace TagTool.Cache
         /// <param name="name">The name of the tag.</param>
         /// <param name="result">The resulting tag.</param>
         /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag<T>(string name, out CachedTagInstance result)
+        public bool TryGetTag<T>(string name, out CachedTagHaloOnline result)
         {
             if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
             {
                 var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
 
-                foreach (var instance in TagCacheGenHO.Index)
+                foreach (var instance in TagCacheGenHO.Tags)
                 {
                     if (instance is null)
                         continue;
@@ -267,7 +265,7 @@ namespace TagTool.Cache
         /// <param name="name">The full name of the tag.</param>
         /// <param name="result">The resulting tag.</param>
         /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag(string name, out CachedTagInstance result)
+        public bool TryGetTag(string name, out CachedTagHaloOnline result)
         {
             if (name.Length == 0)
             {
@@ -283,13 +281,13 @@ namespace TagTool.Cache
 
             if (name == "*")
             {
-                if (TagCacheGenHO.Index.Count == 0)
+                if (TagCacheGenHO.Tags.Count == 0)
                 {
                     result = null;
                     return false;
                 }
 
-                result = TagCacheGenHO.Index.Last();
+                result = TagCacheGenHO.Tags.Last();
                 return true;
             }
 
@@ -301,7 +299,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCacheGenHO.Index.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
+                result = TagCacheGenHO.Tags.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
                 return true;
             }
 
@@ -312,13 +310,13 @@ namespace TagTool.Cache
                 if (name.TrySplit('.', out var hexNamePieces))
                     name = hexNamePieces[0];
 
-                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !TagCacheGenHO.Index.Contains(tagIndex))
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !(tagIndex >= 0 && tagIndex < TagCacheGenHO.Tags.Count))
                 {
                     result = null;
                     return false;
                 }
 
-                result = TagCacheGenHO.Index[tagIndex];
+                result = TagCacheGenHO.Tags[tagIndex];
                 return true;
             }
 
@@ -327,7 +325,7 @@ namespace TagTool.Cache
 
             var tagName = namePieces[0];
 
-            foreach (var instance in TagCacheGenHO.Index)
+            foreach (var instance in TagCacheGenHO.Tags)
             {
                 if (instance is null)
                     continue;
@@ -343,7 +341,7 @@ namespace TagTool.Cache
             return false;
         }
 
-        public CachedTagInstance GetTag(string name)
+        public CachedTagHaloOnline GetTag(string name)
         {
             if (TryGetTag(name, out var result))
                 return result;
@@ -465,7 +463,7 @@ namespace TagTool.Cache
 
             using (var csvWriter = new StreamWriter(csvFile.Create()))
             {
-                foreach (var instance in TagCacheGenHO.Index)
+                foreach (var instance in TagCacheGenHO.Tags)
                     if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
                         csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
             }
@@ -489,11 +487,7 @@ namespace TagTool.Cache
             }
         }
 
-        /// <summary>
-        /// The stringID cache.
-        /// Can be <c>null</c>.
-        /// </summary>
-        public StringIdCache StringIdCache { get; set; }
+        
 
         /// <summary>
         /// Opens the string_id cache file for reading.
@@ -871,81 +865,620 @@ namespace TagTool.Cache
         #endregion
 
 
-        public T Deserialize<T>(PageableResource pageable) =>
-            Deserialize<T>(new ResourceSerializationContext(null, pageable));
-
-        public object Deserialize(PageableResource pageable)
-        {
-            switch (pageable.Resource.ResourceType)
-            {
-                case TagResourceTypeGen3.Animation:
-                    return Deserialize<ModelAnimationTagResource>(pageable);
-
-                case TagResourceTypeGen3.Bink:
-                    return Deserialize<BinkResource>(pageable);
-
-                case TagResourceTypeGen3.Bitmap:
-                case TagResourceTypeGen3.BitmapInterleaved:
-                    return Deserialize<BitmapTextureInteropResource>(pageable);
-
-                case TagResourceTypeGen3.Collision:
-                    return Deserialize<StructureBspTagResources>(pageable);
-
-                case TagResourceTypeGen3.Pathfinding:
-                    return Deserialize<StructureBspCacheFileTagResources>(pageable);
-
-                case TagResourceTypeGen3.RenderGeometry:
-                    return Deserialize<RenderGeometryApiResourceDefinition>(pageable);
-
-                case TagResourceTypeGen3.Sound:
-                    return Deserialize<SoundResourceDefinition>(pageable);
-
-                default:
-                    throw new NotSupportedException(pageable.Resource.ResourceType.ToString());
-            }
-        }
-
         public void Serialize(PageableResource pageable, object definition) =>
             Serialize(new ResourceSerializationContext(null, pageable), definition);
 
         public void Serialize(ISerializationContext context, object definition, uint? offset = null) => 
             Serializer.Serialize(context, definition, offset);
 
-        public T Deserialize<T>(ISerializationContext context) => 
+        //
+        // DeserializationMethods
+        // 
+
+        private T Deserialize<T>(ISerializationContext context) =>
             Deserializer.Deserialize<T>(context);
 
-        public object Deserialize(ISerializationContext context, Type type) =>
+        private object Deserialize(ISerializationContext context, Type type) =>
             Deserializer.Deserialize(context, type);
 
-        public override object Deserialize(Stream stream, CachedTag instance)
-        {
-            throw new NotImplementedException();
-        }
+        public override T Deserialize<T>(Stream stream, CachedTag instance) =>
+            Deserialize<T>(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance));
 
-        public override T Deserialize<T>(Stream stream, CachedTag instance)
-        {
-            throw new NotImplementedException();
-        }
+        public override object Deserialize(Stream stream, CachedTag instance) =>
+            Deserialize(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance), TagDefinition.Find(instance.Group.Tag));
 
-        public override Stream OpenCacheRead()
-        {
-            throw new NotImplementedException();
-        }
+        public T Deserialize<T>(Stream stream, CachedTagHaloOnline instance) =>
+            Deserialize<T>(new HaloOnlineSerializationContext(stream, this, instance));
 
-        //
-        // Extra classes
-        //
+        public object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
+            Deserialize(new HaloOnlineSerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+
+        
 
         private class LoadedResourceCache
         {
             public ResourceCache Cache { get; set; }
-
             public FileInfo File { get; set; }
         }
         
-        private class TagCacheHaloOnline
+        public class TagCacheHaloOnline : TagCacheTest
         {
+            public List<CachedTagHaloOnline> Tags;
 
+            public override IEnumerable<CachedTag> TagTable { get => Tags; }
+
+            public TagCacheHaloOnlineHeader Header;
+
+            public TagCacheHaloOnline(Stream stream, Dictionary<int, string> tagNames)
+            {
+                Tags = new List<CachedTagHaloOnline>();
+
+                if (stream.Length != 0)
+                    Load(new EndianReader(stream, EndianFormat.LittleEndian), tagNames);
+                else
+                    Console.Error.WriteLine("Failed to open tag cache");
+            }
+
+            private void Load(EndianReader reader, Dictionary<int, string> names)
+            {
+                // Read file header
+                reader.SeekTo(0);
+                var dataContext = new DataSerializationContext(reader);
+                var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708); // temporary workaround having a structure serializer
+
+                Header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
+                
+                // Read tag offset list
+                var headerOffsets = new uint[Header.TagCount];
+                reader.BaseStream.Position = Header.TagListOffset;
+                for (var i = 0; i < Header.TagCount; i++)
+                    headerOffsets[i] = reader.ReadUInt32();
+
+                // Read each tag
+                for (var i = 0; i < Header.TagCount; i++)
+                {
+                    if (headerOffsets[i] == 0)
+                    {
+                        // Offset of 0 = null tag
+                        Tags.Add(null);
+                        continue;
+                    }
+
+                    string name = null;
+
+                    if (names.ContainsKey(i))
+                        name = names[i];
+
+                    var tag = new CachedTagHaloOnline(i, name) { HeaderOffset = headerOffsets[i] };
+                    Tags.Add(tag);
+
+                    reader.BaseStream.Position = tag.HeaderOffset;
+                    tag.ReadHeader(reader);
+                }
+            }
+
+            /// <summary>
+            /// Allocates a new tag at the end of the tag list without updating the file.
+            /// The tag's group will be null until it is assigned data.
+            /// You can give the tag data by using one of the overwrite functions.
+            /// </summary>
+            /// <returns>The allocated tag.</returns>
+            public CachedTagHaloOnline AllocateTag() => AllocateTag(TagGroup.None);
+
+            /// <summary>
+            /// Allocates a new tag at the end of the tag list without updating the file.
+            /// You can give the tag data by using one of the overwrite functions.
+            /// </summary>
+            /// <param name="type">The tag's type information.</param>
+            /// <param name="name">The name of the tag instance.</param>
+            /// <returns>The allocated tag.</returns>
+            public CachedTagHaloOnline AllocateTag(TagGroup type, string name = null)
+            {
+                var tagIndex = Tags.Count;
+                var tag = new CachedTagHaloOnline(tagIndex, type, name);
+                Tags.Add(tag);
+                return tag;
+            }
+
+
+            /// <summary>
+            /// Reads a tag's raw data from the file, including its header.
+            /// </summary>
+            /// <param name="stream">The stream to read from.</param>
+            /// <param name="tag">The tag to read.</param>
+            /// <returns>The data that was read.</returns>
+            public byte[] ExtractTagRaw(Stream stream, CachedTagHaloOnline tag)
+            {
+                if (tag == null)
+                    throw new ArgumentNullException(nameof(tag));
+                else if (tag.HeaderOffset < 0)
+                    throw new ArgumentException("The tag is not in the cache file");
+
+                var result = new byte[tag.TotalSize];
+
+                stream.Position = tag.HeaderOffset;
+                stream.Read(result, 0, result.Length);
+
+                return result;
+            }
+
+            /// <summary>
+            /// Reads a tag's data from the file.
+            /// </summary>
+            /// <param name="stream">The stream to read from.</param>
+            /// <param name="tag">The tag to read.</param>
+            /// <returns>The data that was read.</returns>
+            public CachedTagData ExtractTag(Stream stream, CachedTagInstance tag)
+            {
+                if (tag == null)
+                    throw new ArgumentNullException(nameof(tag));
+                else if (tag.HeaderOffset < 0)
+                    throw new ArgumentException("The tag is not in the cache file");
+
+                // Build the description info and get the data offset
+                var data = BuildTagData(stream, tag, out uint dataOffset);
+
+                // Read the tag data
+                stream.Position = tag.HeaderOffset + dataOffset;
+                data.Data = new byte[tag.TotalSize - dataOffset];
+                stream.Read(data.Data, 0, data.Data.Length);
+
+                // Correct pointers
+                using (var dataWriter = new BinaryWriter(new MemoryStream(data.Data)))
+                {
+                    foreach (var fixup in data.PointerFixups)
+                    {
+                        dataWriter.BaseStream.Position = fixup.WriteOffset;
+                        dataWriter.Write(tag.OffsetToPointer(fixup.TargetOffset));
+                    }
+                }
+                return data;
+            }
+
+            /// <summary>
+            /// Overwrites a tag's raw data, including its header.
+            /// </summary>
+            /// <param name="stream">The stream to write to.</param>
+            /// <param name="tag">The tag to overwrite.</param>
+            /// <param name="data">The data to overwrite the tag with.</param>
+            /// <exception cref="System.ArgumentNullException">tag</exception>
+            public void SetTagDataRaw(Stream stream, CachedTagHaloOnline tag, byte[] data)
+            {
+                if (tag == null)
+                    throw new ArgumentNullException(nameof(tag));
+
+                // Ensure the data fits
+                if (tag.HeaderOffset < 0)
+                    tag.HeaderOffset = GetNewTagOffset(tag.Index);
+                ResizeBlock(stream, tag, tag.HeaderOffset, tag.TotalSize, data.Length);
+                tag.TotalSize = (uint)data.Length;
+
+                // Write the data
+                stream.Position = tag.HeaderOffset;
+                stream.Write(data, 0, data.Length);
+
+                // Re-parse it
+                stream.Position = tag.HeaderOffset;
+                tag.ReadHeader(new BinaryReader(stream));
+                UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
+            }
+
+            /// <summary>
+            /// Overwrites a tag's data.
+            /// </summary>
+            /// <param name="stream">The stream to write to.</param>
+            /// <param name="tag">The tag to overwrite.</param>
+            /// <param name="data">The data to store.</param>
+            public void SetTagData(Stream stream, CachedTagHaloOnline tag, CachedTagData data)
+            {
+                if (tag == null)
+                    throw new ArgumentNullException(nameof(tag));
+                else if (data == null)
+                    throw new ArgumentNullException(nameof(data));
+                else if (data.Group == TagGroup.None)
+                    throw new ArgumentException("Cannot assign a tag to a null tag group");
+                else if (data.Data == null)
+                    throw new ArgumentException("The tag data buffer is null");
+
+                // Ensure the data fits
+                var headerSize = CachedTagHaloOnline.CalculateHeaderSize(data);
+                var alignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
+                if (tag.HeaderOffset < 0)
+                    tag.HeaderOffset = GetNewTagOffset(tag.Index);
+                var alignedLength = (data.Data.Length + 0xF) & ~0xF;
+                ResizeBlock(stream, tag, tag.HeaderOffset, tag.TotalSize, alignedHeaderSize + alignedLength);
+                tag.TotalSize = (uint)(alignedHeaderSize + alignedLength);
+                tag.Update(data, alignedHeaderSize);
+
+                // Write in the new header and data
+                stream.Position = tag.HeaderOffset;
+                var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
+                tag.WriteHeader(writer);
+                StreamUtil.Fill(stream, 0, (int)(alignedHeaderSize - headerSize));
+                stream.Write(data.Data, 0, data.Data.Length);
+                StreamUtil.Fill(stream, 0, alignedLength - data.Data.Length);
+
+                // Correct pointers
+                foreach (var fixup in data.PointerFixups)
+                {
+                    writer.BaseStream.Position = tag.HeaderOffset + alignedHeaderSize + fixup.WriteOffset;
+                    writer.Write(tag.OffsetToPointer(alignedHeaderSize + fixup.TargetOffset));
+                }
+
+                UpdateTagOffsets(writer);
+            }
+
+            /// <summary>
+            /// Builds a description for a tag's data without extracting anything.
+            /// </summary>
+            /// <param name="stream">The stream to read from.</param>
+            /// <param name="tag">The tag to read.</param>
+            /// <param name="dataOffset">On return, this will contain the offset of the tag's data relative to its header.</param>
+            /// <returns>The description that was built. </returns>
+            private static CachedTagData BuildTagData(Stream stream, CachedTagInstance tag, out uint dataOffset)
+            {
+                var data = new CachedTagData
+                {
+                    Group = tag.Group,
+                    MainStructOffset = tag.DefinitionOffset,
+                };
+
+                foreach (var dependency in tag.Dependencies)
+                    data.Dependencies.Add(dependency);
+
+                // Read pointer fixups
+                var reader = new BinaryReader(stream);
+                foreach (var pointerOffset in tag.PointerOffsets)
+                {
+                    reader.BaseStream.Position = tag.HeaderOffset + pointerOffset;
+                    data.PointerFixups.Add(new CachedTagData.PointerFixup
+                    {
+                        WriteOffset = pointerOffset,
+                        TargetOffset = tag.PointerToOffset(reader.ReadUInt32()),
+                    });
+                }
+
+                // Find the start of the tag's data by finding the offset of the first block which is pointed to by something
+                // We CAN'T just calculate a header size here because we don't know for sure if there's padding and how big it is
+                var startOffset = tag.DefinitionOffset;
+                foreach (var fixup in data.PointerFixups)
+                    startOffset = Math.Min(startOffset, Math.Min(fixup.WriteOffset, fixup.TargetOffset));
+
+                // Now convert all offsets into relative ones
+                foreach (var fixup in data.PointerFixups)
+                {
+                    fixup.WriteOffset -= startOffset;
+                    fixup.TargetOffset -= startOffset;
+                }
+
+                data.ResourcePointerOffsets.AddRange(tag.ResourcePointerOffsets.Select(offset => offset - startOffset));
+
+                data.TagReferenceOffsets.AddRange(tag.TagReferenceOffsets.Select(offset => offset - startOffset));
+
+                data.MainStructOffset -= startOffset;
+                dataOffset = startOffset;
+
+                return data;
+            }
+
+            /// <summary>
+            /// Resizes a block of data in the file.
+            /// </summary>
+            /// <param name="stream">The stream.</param>
+            /// <param name="tag">The tag that the block belongs to, if any.</param>
+            /// <param name="startOffset">The offset where the block to resize begins at.</param>
+            /// <param name="oldSize">The current size of the block to resize.</param>
+            /// <param name="newSize">The new size of the block.</param>
+            /// <exception cref="System.ArgumentException">Cannot resize a block to a negative size</exception>
+            private void ResizeBlock(Stream stream, CachedTagHaloOnline tag, long startOffset, long oldSize, long newSize)
+            {
+                if (newSize < 0)
+                    throw new ArgumentException("Cannot resize a block to a negative size");
+                else if (oldSize == newSize)
+                    return;
+
+                var oldEndOffset = startOffset + oldSize;
+                var sizeDelta = newSize - oldSize;
+
+                if (stream.Length - oldEndOffset >= 0)
+                {
+                    StreamUtil.Copy(stream, oldEndOffset, oldEndOffset + sizeDelta, stream.Length - oldEndOffset);
+                    FixTagOffsets(oldEndOffset, sizeDelta, tag);
+                }
+                else
+                    return;
+            }
+
+            /// <summary>
+            /// Fixes tag offsets after a resize operation.
+            /// </summary>
+            /// <param name="startOffset">The offset where the resize operation took place.</param>
+            /// <param name="sizeDelta">The amount to add to each tag offset after the start offset.</param>
+            /// <param name="ignore">A tag to ignore.</param>
+            private void FixTagOffsets(long startOffset, long sizeDelta, CachedTagHaloOnline ignore)
+            {
+                foreach (var adjustTag in Tags.Where(t => t != null && t != ignore && t.HeaderOffset >= startOffset))
+                    adjustTag.HeaderOffset += sizeDelta;
+            }
+
+
+            /// <summary>
+            /// Gets the offset that a new tag should be inserted at so that the tags are stored in order by index.
+            /// </summary>
+            /// <param name="index">The index of the new tag.</param>
+            /// <returns>The offset that the tag data should be written to.</returns>
+            private long GetNewTagOffset(int index)
+            {
+                if (index < 0)
+                    throw new ArgumentException("Index cannot be negative");
+
+                if (index >= Tags.Count - 1)
+                    return GetTagDataEndOffset();
+
+                for (var i = index - 1; i >= 0; i--)
+                {
+                    var tag = Tags[i];
+                    if (tag != null && tag.HeaderOffset >= 0)
+                        return tag.HeaderOffset + tag.TotalSize;
+                }
+
+                return new TagStructureInfo(typeof(TagCacheHaloOnlineHeader)).TotalSize;
+            }
+
+            /// <summary>
+            /// Gets the tag data end offset.
+            /// </summary>
+            /// <returns>The offset of the first byte past the last tag in the file.</returns>
+            private uint GetTagDataEndOffset()
+            {
+                uint endOffset = new TagStructureInfo(typeof(TagCacheHaloOnlineHeader)).TotalSize;
+                foreach (var tag in Tags)
+                {
+                    if(tag != null)
+                        endOffset = (uint)Math.Max(endOffset, tag.HeaderOffset + tag.TotalSize);
+                }
+                return endOffset;
+            }
+
+            /// <summary>
+            /// Updates the tag offset table in the file.
+            /// </summary>
+            /// <param name="writer">The stream to write to.</param>
+            public void UpdateTagOffsets(EndianWriter writer)
+            {
+                uint offsetTableOffset = GetTagDataEndOffset();
+                writer.BaseStream.Position = offsetTableOffset;
+                foreach (var tag in Tags)
+                {
+                    if (tag != null && tag.HeaderOffset >= 0)
+                        writer.Write((uint)tag.HeaderOffset);
+                    else
+                        writer.Write(0);
+                }
+                writer.BaseStream.SetLength(writer.BaseStream.Position); // Truncate the file to end after the last offset
+                UpdateFileHeader(writer, offsetTableOffset);
+            }
+
+            /// <summary>
+            /// Updates the file header.
+            /// </summary>
+            /// <param name="writer">The stream to write to.</param>
+            /// <param name="offsetTableOffset">The offset table offset.</param>
+            private void UpdateFileHeader(EndianWriter writer, uint offsetTableOffset)
+            {
+                Header.TagListOffset = offsetTableOffset;
+                var dataContext = new DataSerializationContext(writer);
+                var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+                serializer.Serialize(dataContext, Header);
+            }
+
+            // there are no IDs in HO
+            public override CachedTag GetTagByID(int ID) => GetTagByIndex(ID);
+            
+            public override CachedTag GetTagByIndex(int index)
+            {
+                if (index < 0 || index > Tags.Count)
+                    return null;
+                return Tags[index];
+            }
+
+            public override CachedTag GetTagByName(string name, Tag groupTag)
+            {
+                foreach (var tag in Tags)
+                {
+                    if (groupTag == tag.Group.Tag && name == tag.Name)
+                        return tag;
+                }
+                return null;
+            }
+        }
+
+    }
+
+    public class CachedTagHaloOnline : CachedTag
+    {
+        public CachedTagHaloOnline() : base() { }
+
+        public CachedTagHaloOnline(int index, string name = null) : base(index, name) { }
+
+        public CachedTagHaloOnline(int index, TagGroup group, string name = null) : base(index, group, name) { }
+
+        public override uint DefinitionOffset => Offset;
+
+        // Magic constant (NOT a build-specific memory address) used for pointers in tag data
+        private const uint FixupPointerBase = 0x40000000;
+
+        // Size of a tag header with no dependencies or offsets
+        private const uint TagHeaderSize = 0x24;
+
+        private List<uint> _pointerOffsets = new List<uint>();
+        private List<uint> _resourceOffsets = new List<uint>();
+        private List<uint> _tagReferenceOffsets = new List<uint>();
+
+
+        /// <summary>
+        /// Gets the offset of the tag's header, or -1 if the tag is not in a file.
+        /// </summary>
+        public long HeaderOffset { get; internal set; } = -1;
+
+        /// <summary>
+        /// Gets the offset of the tag's main structure from the start of its header.
+        /// </summary>
+        public uint Offset;
+
+        /// <summary>
+        /// Gets the total size of the tag (including both its header and data), or 0 if the tag is not in a file.
+        /// </summary>
+        public uint TotalSize { get; internal set; }
+
+        /// <summary>
+        /// Gets the checksum (adler32?) of the tag's data. Ignored if checksum verification is patched out.
+        /// </summary>
+        public uint Checksum { get; private set; }
+
+        /// <summary>
+        /// Gets the indices of tags that this tag depends on.
+        /// </summary>
+        public ReadOnlySet<int> Dependencies { get; private set; } = new ReadOnlySet<int>(new HashSet<int>());
+
+        /// <summary>
+        /// Gets a list of offsets to each pointer in the tag, relative to the beginning of the tag's header.
+        /// </summary>
+        /// <remarks>
+        /// This previously used offsets relative to the beginning of the tag's data.
+        /// This was changed in order to speed up loading and be more closer to the engine.
+        /// </remarks>
+        public IReadOnlyList<uint> PointerOffsets => _pointerOffsets;
+
+        /// <summary>
+        /// Gets a list of offsets to each resource pointer in the tag, relative to the beginning of the tag's header.
+        /// </summary>
+        /// <remarks>
+        /// See the remarks for <see cref="PointerOffsets"/>.
+        /// </remarks>
+        public IReadOnlyList<uint> ResourcePointerOffsets => _resourceOffsets;
+
+        /// <summary>
+        /// Gets a list of offsets to each tag reference in the tag, relative to the beginning of the tag's header.
+        /// </summary>
+        public IReadOnlyList<uint> TagReferenceOffsets => _tagReferenceOffsets;
+
+        /// <summary>
+        /// Converts a pointer to an offset relative to the tag's header.
+        /// </summary>
+        /// <param name="pointer">The pointer to convert.</param>
+        /// <returns>The offset.</returns>
+        public uint PointerToOffset(uint pointer) => pointer - FixupPointerBase;
+
+        /// <summary>
+        /// Converts an offset relative to the tag's header to a pointer.
+        /// </summary>
+        /// <param name="offset">The offset to convert.</param>
+        /// <returns>The pointer.</returns>
+        public uint OffsetToPointer(uint offset) => offset + FixupPointerBase;
+
+        /// <summary>
+        /// Reads the header for the tag instance from a stream.
+        /// </summary>
+        /// <param name="reader">The stream to read from.</param>
+        internal void ReadHeader(BinaryReader reader)
+        {
+            Checksum = reader.ReadUInt32();                        // 0x00 uint32 checksum
+            TotalSize = reader.ReadUInt32();                       // 0x04 uint32 total size
+            var numDependencies = reader.ReadInt16();              // 0x08 int16  dependencies count
+            var numDataFixups = reader.ReadInt16();                // 0x0A int16  data fixup count
+            var numResourceFixups = reader.ReadInt16();            // 0x0C int16  resource fixup count
+            var numTagReferenceFixups = reader.ReadInt16();        // 0x0E int16  tag reference fixup count(was padding)
+            Offset = reader.ReadUInt32();                // 0x10 uint32 main struct offset
+            var groupTag = new Tag(reader.ReadInt32());            // 0x14 int32  group tag
+            var parentGroupTag = new Tag(reader.ReadInt32());      // 0x18 int32  parent group tag
+            var grandparentGroupTag = new Tag(reader.ReadInt32()); // 0x1C int32  grandparent group tag
+            var groupName = new StringId(reader.ReadUInt32());     // 0x20 uint32 group name stringid
+            Group = new TagGroup(groupTag, parentGroupTag, grandparentGroupTag, groupName);
+
+            // Read dependencies
+            var dependencies = new HashSet<int>();
+            for (var j = 0; j < numDependencies; j++)
+                dependencies.Add(reader.ReadInt32());
+            Dependencies = new ReadOnlySet<int>(dependencies);
+
+            // Read offsets
+            _pointerOffsets = new List<uint>(numDataFixups);
+            for (var j = 0; j < numDataFixups; j++)
+                _pointerOffsets.Add(PointerToOffset(reader.ReadUInt32()));
+            _resourceOffsets = new List<uint>(numResourceFixups);
+            for (var j = 0; j < numResourceFixups; j++)
+                _resourceOffsets.Add(PointerToOffset(reader.ReadUInt32()));
+            _tagReferenceOffsets = new List<uint>(numTagReferenceFixups);
+            for (var i = 0; i < numTagReferenceFixups; i++)
+                _tagReferenceOffsets.Add(PointerToOffset(reader.ReadUInt32()));
+        }
+
+        /// <summary>
+        /// Writes the header for the tag instance to a stream.
+        /// </summary>
+        /// <param name="writer">The stream to write to.</param>
+        internal void WriteHeader(BinaryWriter writer)
+        {
+            writer.Write(Checksum);
+            writer.Write((uint)TotalSize);
+            writer.Write((short)Dependencies.Count);
+            writer.Write((short)PointerOffsets.Count);
+            writer.Write((short)ResourcePointerOffsets.Count);
+            writer.Write((short)TagReferenceOffsets.Count);
+            writer.Write(DefinitionOffset);
+            writer.Write(Group.Tag.Value);
+            writer.Write(Group.ParentTag.Value);
+            writer.Write(Group.GrandparentTag.Value);
+            writer.Write(Group.Name.Value);
+
+            // Write dependencies
+            foreach (var dependency in Dependencies)
+                writer.Write(dependency);
+
+            // Write offsets
+            foreach (var offset in _pointerOffsets.Concat(_resourceOffsets).Concat(_tagReferenceOffsets))
+                writer.Write(OffsetToPointer(offset));
+        }
+
+        /// <summary>
+        /// Calculates the header size that would be needed for a given block of tag data.
+        /// </summary>
+        /// <param name="data">The descriptor to use.</param>
+        /// <returns>The size of the tag's header.</returns>
+        internal static uint CalculateHeaderSize(CachedTagData data) =>
+            (uint)(TagHeaderSize +
+                data.Dependencies.Count * 4 +
+                data.PointerFixups.Count * 4 +
+                data.ResourcePointerOffsets.Count * 4 +
+                data.TagReferenceOffsets.Count * 4);
+
+        /// <summary>
+        /// Updates the tag instance's state from a block of tag data.
+        /// </summary>
+        /// <param name="data">The tag data.</param>
+        /// <param name="dataOffset">The offset of the tag data relative to the tag instance's header.</param>
+        internal void Update(CachedTagData data, uint dataOffset)
+        {
+            Group = data.Group;
+            Offset = data.MainStructOffset + dataOffset;
+            Dependencies = new ReadOnlySet<int>(new HashSet<int>(data.Dependencies));
+            _pointerOffsets = data.PointerFixups.Select(fixup => fixup.WriteOffset + dataOffset).ToList();
+            _resourceOffsets = data.ResourcePointerOffsets.Select(offset => offset + dataOffset).ToList();
+            _tagReferenceOffsets = data.TagReferenceOffsets.Select(offset => offset + dataOffset).ToList();
         }
     }
+
+    [TagStructure(Size = 0x20)]
+    public class TagCacheHaloOnlineHeader
+    {
+        public int UnusedTag;
+        public uint TagListOffset;
+        public int TagCount;
+        public int Unused;
+        public long CreationTime;
+        public int Unused2;
+        public int Unused3;
+    }
+
 }

@@ -16,6 +16,11 @@ namespace TagTool.Cache
     {
         public CacheVersion Version;
 
+        public TagSerializer Serializer;
+        public TagDeserializer Deserializer;
+
+        public StringIdResolver Resolver;
+
         public abstract TagCacheTest TagCache { get; }
 
         public static GameCache Open(FileInfo file)
@@ -73,8 +78,7 @@ namespace TagTool.Cache
                     if (!tagsFile.Exists)
                         throw new Exception("Failed to find tags.dat");
 
-                    //CacheContext = new GameCacheContextHaloOnline(tagsFile.Directory);
-                    break;
+                    return new GameCacheContextHaloOnline(tagsFile.Directory);
             }
 
             return null;
@@ -83,54 +87,10 @@ namespace TagTool.Cache
         public abstract Stream OpenCacheRead();
         public abstract Stream OpenTagCacheRead();
 
-
         public abstract object Deserialize(Stream stream, CachedTag instance);
         public abstract T Deserialize<T>(Stream stream, CachedTag instance);
 
     }
-    /*
-    public class TagTable<T> : List<T> where T : ICachedTag
-    {
-
-    }
-    */
-    public interface ITagCache
-    {
-        List<ICachedTag> GetGenericTagTable();
-        ICachedTag GetTagByName(string name, Tag groupTag);
-        ICachedTag GetTagByIndex(int index);
-        ICachedTag GetTagByID(int ID);
-    }
-
-    public interface IResourceCache
-    {
-
-    }
-
-    public interface ITagSerialization
-    {
-        object Deserialize(Stream stream, ICachedTag instance);
-        T Deserialize<T>(Stream stream, ICachedTag instance);
-    }
-
-    public interface ICacheFile
-    {
-        Stream OpenCacheRead();
-        Stream OpenTagCacheRead();
-    }
-
-    public interface ICachedTag
-    {
-        string GetName();
-        TagGroup GetTagGroup();
-        int GetIndex();
-        int GetID();
-        int GetOffset();
-    }
-
-    //
-    // New design
-    //
 
     public abstract class CachedTag
     {
@@ -140,6 +100,23 @@ namespace TagTool.Cache
         public TagGroup Group;
 
         public abstract uint DefinitionOffset { get; }
+
+        public CachedTag()
+        {
+            Index = -1;
+            Name = null;
+            Group = TagGroup.None;
+        }
+
+        public CachedTag(int index, string name = null) : this(index, TagGroup.None, name) { }
+
+        public CachedTag(int index, TagGroup group, string name = null)
+        {
+            Index = index;
+            Group = group;
+            if (name != null)
+                Name = name;
+        }
 
         public override string ToString()
         {

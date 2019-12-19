@@ -13,8 +13,7 @@ namespace TagTool.Cache
         public int Magic;
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
-        public TagDeserializer Deserializer;
-        public StringIdResolver Resolver;
+        
         public CacheStringTable Strings;
         public List<CacheLocaleTable> LocaleTables;
 
@@ -36,6 +35,7 @@ namespace TagTool.Cache
             Version = BaseMapFile.Version;
             CacheFile = file;
             Deserializer = new TagDeserializer(Version);
+            Serializer = new TagSerializer(Version);
             LocalesKey = SetLocalesKey();
             StringsKey = SetStringsKey();
             TagsKey = SetTagsKey();
@@ -43,7 +43,6 @@ namespace TagTool.Cache
             StringMods = SetStringMods();
             LocaleGlobalsSize = SetLocaleGlobalsSize();
             LocaleGlobalsOffset = SetLocaleGlobalsOffset();
-
 
             var interop = mapFile.Header.GetInterop();
 
@@ -64,12 +63,8 @@ namespace TagTool.Cache
 
             using(var reader = new EndianReader(OpenCacheRead(), BaseMapFile.EndianFormat))
             {
-                
-
-                var tagTableHeader = mapFile.GetTagTableHeader(reader, Magic);
-
                 Strings = CreateStringTable(reader);
-                TagCacheGen3 = new TagCacheGen3(reader, tagTableHeader, BaseMapFile, Strings, Magic, TagsKey);
+                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, Strings, Magic, TagsKey);
                 
                 LocaleTables = new List<CacheLocaleTable>();
 
@@ -400,9 +395,6 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
             Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
-
-
-
     }
 
     public class CachedTagGen3 : CachedTag
@@ -413,6 +405,8 @@ namespace TagTool.Cache
 
         public override uint DefinitionOffset => Offset;
 
+        public CachedTagGen3() : base() { }
+
         public CachedTagGen3(int groupIndex, uint id, uint offset, int index, TagGroup tagGroup, string groupName)
         {
             GroupIndex = groupIndex;
@@ -422,7 +416,6 @@ namespace TagTool.Cache
             Group = tagGroup;
         }
     }
-
 
     public class TagTableHeaderGen3
     {
@@ -467,11 +460,11 @@ namespace TagTool.Cache
             return null;
         }
 
-        public TagCacheGen3(EndianReader reader, TagTableHeaderGen3 tagTableHeader, MapFile BaseMapFile, CacheStringTable Strings, int Magic, string TagsKey)
+        public TagCacheGen3(EndianReader reader, MapFile BaseMapFile, CacheStringTable Strings, int Magic, string TagsKey)
         {
             Tags = new List<CachedTagGen3>();
             TagGroups = new List<TagGroup>();
-            TagTableHeader = tagTableHeader;
+            TagTableHeader = BaseMapFile.GetTagTableHeader(reader, Magic);
 
             #region Read Class List
             reader.SeekTo(TagTableHeader.TagGroupsOffset);
