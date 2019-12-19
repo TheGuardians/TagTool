@@ -120,7 +120,7 @@ namespace TagTool.Shaders.ShaderMatching
             {
                 foreach (var instance in CacheContext.TagCache.Index)
                 {
-                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null)
+                    if (instance == null || !instance.IsInGroup("rmt2") || instance.Name == null || instance.Name.StartsWith("s3d"))
                         continue;
 
                     if (!UseMS30 && instance.Name.StartsWith("ms30"))
@@ -683,7 +683,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"levels\multi\snowbound\shaders\cov_grey_icy":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_7_2_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"ms30\shaders\shader_templates\_0_2_0_1_7_2_0_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -703,7 +703,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\vehicles\wraith\shaders\wraith_torn":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_2_2_0_0_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_2_2_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -711,7 +711,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\vehicles\wraith\shaders\wraith_torn_metal":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_1_2_0_0_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_1_1_1_2_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -754,28 +754,16 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_0_1_2_2_5_0_1_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\dlc\sidewinder\shaders\side_tree_branch_snow":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_0_0_2_5_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\dlc\sidewinder\shaders\justin\sw_ground_ice1":
@@ -785,28 +773,16 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\terrain_templates\_0_0_1_1_1_2_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\multi\snowbound\sky\shaders\skydome":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"levels\solo\020_base\lights\light_volume_hatlight":
@@ -831,7 +807,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"levels\dlc\armory\shaders\razor_wire":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_5_2_0_1_0_1_0");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_1_1_2_5_2_0_1_0_0_0");
                     }
                     catch { }
                     break;
@@ -940,7 +916,7 @@ namespace TagTool.Shaders.ShaderMatching
                 case @"objects\characters\flood_infection\shaders\flood_infection":
                     try
                     {
-                        return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_1_0_0_1");
+                        return CacheContext.GetTag<RenderMethodTemplate>(@"ms30\shaders\shader_templates\_0_2_0_1_1_0_1_0_0_0_0_0");
                     }
                     catch { }
                     break;
@@ -951,13 +927,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_1_0_3_3_1_1_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\rifle\plasma_rifle_red\shaders\plasma_rifle_red":
@@ -975,13 +945,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_2_0_1_2_1_1_0_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\pistol\needler\shaders\needler_glass":
@@ -990,13 +954,7 @@ namespace TagTool.Shaders.ShaderMatching
                         return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0");
                     }
                     catch
-                    {
-                        try
-                        {
-                            return CacheContext.GetTag<RenderMethodTemplate>(@"shaders\shader_templates\_0_0_0_0_0_1_0_3_0_0_0_0");
-                        }
-                        catch { }
-                    }
+                    { }
                     break;
 
                 case @"objects\weapons\rifle\sniper_rifle\shaders\scope_alpha":
@@ -1070,6 +1028,5 @@ namespace TagTool.Shaders.ShaderMatching
             finalRm.BaseRenderMethod = CacheContext.GetTag<RenderMethodDefinition>(@"shaders\shader");
             Console.WriteLine($"WARNING: Unable to locate `{rmdfName}.rmdf`; using `shaders\\shader.rmdf` instead.");
         }
-
     }
 }
