@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
     public class Equipment : Item
     {
         public float UseDuration;
-        public uint Unknown8;
+        public float ActivationDelay;
         public short NumberOfUses;
         public EquipmentFlagBits EquipmentFlags;
         public float Unknown9;
@@ -29,9 +29,8 @@ namespace TagTool.Tags.Definitions
         public List<MotionTrackerNoiseBlock> MotionTrackerNoise;
 
         //Probably a unused tagblock
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
+        [TagField(Flags = Padding, Length = 12)]
+        public byte[] Unused;
 
         public List<InvisibilityBlock> Invisibility;
         public List<InvincibilityBlock> Invincibility;
@@ -234,19 +233,24 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class InvisibilityBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
+            public float InvisibilityDuration;
+            public float InvisibilityFadeTime;
         }
 
-        [TagStructure(Size = 0x2C)]
+        [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
         public class InvincibilityBlock : TagStructure
 		{
             public StringId NewPlayerMaterial;
             public short NewPlayerMaterialGlobalIndex;
             public short Unknown;
-            public uint Unknown2;
-            public CachedTagInstance Unknown3;
-            public CachedTagInstance Unknown4;
+            public float Unknown2;
+            public CachedTagInstance ActivationEffect;
+            public CachedTagInstance ActiveEffect;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public CachedTagInstance DeactivationEffect;
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
@@ -263,8 +267,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class NewHealthPackBlock : TagStructure
 		{
-            public float Unknown1;
-            public float Unknown2;
+            public float HealthGiven;
+            public float ShieldsGiven;
         }
 
         [TagStructure(Size = 0x14)]
@@ -345,23 +349,23 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x20)]
         public class ArmorLockBlock : TagStructure
 		{
-            public CachedTagInstance Unknown;
-            public CachedTagInstance Unknown2;
+            public CachedTagInstance CollisionDamage;
+            public CachedTagInstance UnknownCollisionDamage;
         }
 
         [TagStructure(Size = 0x24)]
         public class AdrenalineBlock : TagStructure
 		{
-            public uint Unknown;
-            public CachedTagInstance Unknown2;
+            public float Unknown;
+            public CachedTagInstance ActivationEffect;
             public CachedTagInstance Unknown3;
         }
 
         [TagStructure(Size = 0x14)]
         public class LightningStrikeBlock : TagStructure
 		{
-            public uint Unknown;
-            public CachedTagInstance Unknown2;
+            public uint MeleeTimeReduction;
+            public CachedTagInstance UnknownEffect;
         }
 
         [TagStructure(Size = 0x24)]
@@ -411,7 +415,7 @@ namespace TagTool.Tags.Definitions
         public class VisionBlock : TagStructure
 		{
             public CachedTagInstance ScreenEffect;
-            public CachedTagInstance Unknown;
+            public CachedTagInstance DamageResponse;
         }
     }
 }
