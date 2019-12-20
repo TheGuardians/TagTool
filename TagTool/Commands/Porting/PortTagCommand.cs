@@ -530,9 +530,6 @@ namespace TagTool.Commands.Porting
                     //all gameobjects are handled within this subswitch now
                     switch (gameobject)
                     {
-                        case Equipment equip:
-                            equip.NewHealthPack = null; //saber nuked the code for this, it does nothing but cause crashes
-                            break;
                         case Weapon weapon:
                             //fix weapon firing looping sounds
                             foreach (var attach in weapon.Attachments)
