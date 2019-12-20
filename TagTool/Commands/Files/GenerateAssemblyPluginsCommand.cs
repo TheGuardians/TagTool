@@ -39,6 +39,9 @@ namespace TagTool.Commands.Files
 
             foreach (KeyValuePair<Tag, Type> tagType in TagDefinition.Types)
             {
+                if (tagType.Key == "test")  // skip test definition as it contains unsuported bounds of type long and ulong
+                    continue;
+
                 foreach (KeyValuePair<CacheVersion, string> assemblyVersion in assemblyCacheVersions)
                 {
                     if (path != null)
@@ -570,7 +573,9 @@ namespace TagTool.Commands.Files
 
                     foreach (object value in System.Enum.GetValues(enumType))
                     {
-                        if (isBitfield && (int)Convert.ChangeType(value, typeof(int)) == 0) //Skip the "None" value.
+                        var underlyingType = System.Enum.GetUnderlyingType(enumType);
+                        var typeofvalue = value.GetType();  //(int)Convert.ChangeType(value, underlyingType)
+                        if (isBitfield && Convert.ToInt64(value) == 0) //Skip the "None" value.
                             continue;
 
                         if (isBitfield)
@@ -651,7 +656,7 @@ namespace TagTool.Commands.Files
 
                     if (elementAssemblyPluginFieldType == AssemblyPluginFieldTypes.undefined && (elementType.IsClass || (elementType.IsValueType && !elementType.IsEnum)) && !elementType.IsGenericType)
                     {
-                        int childClassOffset = 0;
+                        int childClassOffset = 0; // here
                         reflexiveAssemblyPluginField.children = CommonFieldTypes.ReferencedStructure(elementType, cacheVersion, null, ref childClassOffset);
                         reflexiveAssemblyPluginField.attributes.Add("entrySize", "0x" + childClassOffset.ToString("X"));
                         assemblyPluginFields.Add(reflexiveAssemblyPluginField);
@@ -673,6 +678,11 @@ namespace TagTool.Commands.Files
                     {
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 0", ref offset));
                         assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 1", ref offset));
+                    }
+                    else if (fieldType == typeof(long))
+                    {
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.uint32, fieldName + " 0", ref offset));
+                        assemblyPluginFields.Add(new AssemblyPluginField(AssemblyPluginFieldTypes.int32, fieldName + " 1", ref offset));
                     }
                     else if (fieldType == typeof(string))
                     {
