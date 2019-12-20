@@ -20,9 +20,11 @@ namespace TagTool.Commands.Modding
     {
         private HaloOnlineCacheContext CacheContext { get; }
 
-        private Dictionary<int, int> TagMapping = new Dictionary<int, int>();
+        private Dictionary<int, int> TagMapping;
 
         private Stream CacheStream;
+
+        private Dictionary<string, CachedTagInstance> CacheTagsByName;
 
         public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
@@ -49,6 +51,15 @@ namespace TagTool.Commands.Modding
                 Console.WriteLine($"File {filePath} does not exist!");
                 return false;
             }
+
+            TagMapping = new Dictionary<int, int>();
+
+            // build dictionary of names to tag instance for faster lookups
+            CacheTagsByName = CacheContext.TagCache.Index
+                .Where(tag => tag != null)
+                .GroupBy(tag => $"{tag.Name}.{tag.Group}")
+                .Select(tags => tags.Last())
+                .ToDictionary(tag => $"{tag.Name}.{tag.Group}", tag => tag);
 
             CacheStream = CacheContext.OpenTagCacheReadWrite();
 
@@ -106,6 +117,8 @@ namespace TagTool.Commands.Modding
 
         private CachedTagInstance ConvertCachedTagInstance(ModPackageExtended modPack, CachedTagInstance modTag)
         {
+            Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
+
             // tag has already been converted
             if (TagMapping.ContainsKey(modTag.Index))
                 return CacheContext.TagCache.Index[TagMapping[modTag.Index]];   // get the matching tag in the destination package
@@ -119,7 +132,7 @@ namespace TagTool.Commands.Modding
                     baseTag = CacheContext.GetTag(modTag.Index);
 
                 // mod tag has a name, first check if baseTag name is null, else if the names don't match or group don't match
-                if (baseTag != null && baseTag.Name != null && baseTag.Name == modTag.Name && baseTag.Group == modTag.Group)
+                if (baseTag != null && baseTag.Group == modTag.Group && baseTag.Name != null && baseTag.Name == modTag.Name)
                 {
                     TagMapping[modTag.Index] = baseTag.Index;
                     return baseTag;
@@ -127,14 +140,14 @@ namespace TagTool.Commands.Modding
                 else
                 {
                     // tag name/group doesn't match base tag, try to look for it
-                    foreach (var cacheTag in CacheContext.TagCache.Index)
+
+                    CachedTagInstance cacheTag;
+                    if(CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
                     {
-                        if (cacheTag != null && cacheTag.Group == modTag.Group && cacheTag.Name == modTag.Name)
-                        {
-                            TagMapping[modTag.Index] = cacheTag.Index;
-                            return cacheTag;
-                        }
+                        TagMapping[modTag.Index] = cacheTag.Index;
+                        return cacheTag;
                     }
+
                     // Failed to find tag in base cache
                     Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group.ToString()} in the base cache, returning null tag reference.");
                     return null;
@@ -143,7 +156,7 @@ namespace TagTool.Commands.Modding
             else
             {
                 CachedTagInstance newTag;
-                if (!CacheContext.TryGetTag($"{modTag.Name}.{modTag.Group}", out newTag))
+                if (!CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out newTag))
                 {
                     newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
                     newTag.Name = modTag.Name;
