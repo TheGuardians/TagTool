@@ -985,22 +985,24 @@ namespace TagTool.Shaders.ShaderMatching
                         continue;
 
                     var rmt2Name = instance.Name;
-                    if(rmt2Name.StartsWith("ms30"))
-                        rmt2Name = rmt2Name.Replace("ms30\\", "");
 
-                    if (rmt2Name.StartsWith(blamRmt2Tag.Name))
+                    // ignore s3d rmt2s
+                    if (rmt2Name.StartsWith("s3d"))
+                        continue;
+
+                    // check if rmt2 is from ms30
+                    if (rmt2Name.StartsWith("ms30"))
                     {
-                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 12);
-                        var vertexShaderIndex = reader.ReadInt32();
-
-                        reader.SeekTo(instance.HeaderOffset + instance.DefinitionOffset + 28);
-                        var pixelShaderIndex = reader.ReadInt32();
-
-                        if (!UseMS30 && (instance.Name.StartsWith("ms30")))
+                        rmt2Name = rmt2Name.Replace("ms30\\", "");
+                        // skip over ms30 rmt2s
+                        if (!UseMS30)
                             continue;
-
-                        return instance;
                     }
+
+                    //match found    
+                    if (rmt2Name.StartsWith(blamRmt2Tag.Name))
+                        return instance;
+
                 }
             }
 
