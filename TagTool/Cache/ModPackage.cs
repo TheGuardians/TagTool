@@ -263,7 +263,7 @@ namespace TagTool.Cache
 
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
-                writer.BaseStream.Seek(tagCachesEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
+                writer.BaseStream.Seek(tagCachesEntry.TableOffset + 0x28 * i, SeekOrigin.Begin);
                 var tableEntry = new CacheTableEntry(size, offset, CacheNames[i]);
                 serializer.Serialize(context, tableEntry);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
