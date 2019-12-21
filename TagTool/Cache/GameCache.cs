@@ -23,8 +23,10 @@ namespace TagTool.Cache
         public abstract TagCacheTest TagCache { get; }
         
         public abstract Stream OpenCacheRead();
-        public abstract Stream OpenTagCacheRead();
+        public abstract FileStream OpenCacheReadWrite();
+        public abstract FileStream OpenCacheWrite();
 
+        public abstract void Serialize(Stream stream, CachedTag instance, object definition);
         public abstract object Deserialize(Stream stream, CachedTag instance);
         public abstract T Deserialize<T>(Stream stream, CachedTag instance);
 
@@ -140,6 +142,9 @@ namespace TagTool.Cache
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
 
+        public abstract Stream OpenTagCacheRead();
+        public abstract FileStream OpenTagCacheReadWrite();
+        public abstract FileStream OpenTagCacheWrite();
     }
 
     public abstract class StringTable : List<string>

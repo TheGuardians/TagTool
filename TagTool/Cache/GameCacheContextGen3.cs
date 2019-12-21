@@ -49,7 +49,7 @@ namespace TagTool.Cache
             using(var reader = new EndianReader(OpenCacheRead(), BaseMapFile.EndianFormat))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
-                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3, Magic);
+                TagCacheGen3 = new TagCacheGen3(this, reader, BaseMapFile, StringTableGen3, Magic);
                 LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, TagCacheGen3);
             }
 
@@ -72,15 +72,28 @@ namespace TagTool.Cache
         //
 
         public override Stream OpenCacheRead() => CacheFile.OpenRead();
-
-        public override Stream OpenTagCacheRead() => OpenCacheRead();
-
+        public override FileStream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override FileStream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
 
         public override T Deserialize<T>(Stream stream, CachedTag instance) =>
             Deserialize<T>(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
             Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagDefinition.Find(instance.Group.Tag));
+
+        public override void Serialize(Stream stream, CachedTag instance, object definition)
+        {
+            if (typeof(CachedTagGen3) == instance.GetType())
+                Serialize(stream, (CachedTagGen3)instance, definition);
+            else
+                throw new Exception($"Try to serialize a {instance.GetType()} into a Gen 3 Game Cache");
+        }
+
+        //TODO: Implement serialization for H3
+        public void Serialize(Stream stream, CachedTagGen3 instance, object definition)
+        {
+            throw new NotImplementedException();
+        }
 
         //
         // private methods for internal use
@@ -145,6 +158,7 @@ namespace TagTool.Cache
         public TagTableHeaderGen3 TagTableHeader;
         public List<TagGroup> TagGroups;
         public string TagsKey = "";
+        private readonly GameCacheContextGen3 GameCache;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
@@ -168,12 +182,19 @@ namespace TagTool.Cache
             return null;
         }
 
-        public TagCacheGen3(EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
+        public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();
+
+        public override FileStream OpenTagCacheReadWrite() => GameCache.OpenCacheReadWrite();
+
+        public override FileStream OpenTagCacheWrite() => GameCache.OpenCacheWrite();
+
+        public TagCacheGen3(GameCacheContextGen3 cache, EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
         {
             Tags = new List<CachedTagGen3>();
             TagGroups = new List<TagGroup>();
             TagTableHeader = baseMapFile.GetTagTableHeader(reader, Magic);
             Version = baseMapFile.Version;
+            GameCache = cache;
 
             switch (Version)
             {

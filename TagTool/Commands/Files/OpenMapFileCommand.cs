@@ -39,7 +39,7 @@ namespace TagTool.Commands.Porting
             
             var tag = cache.TagCache.GetTagByName("levels\\multi\\guardian\\guardian", "sbsp");
 
-            using (var cacheStream = cache.OpenTagCacheRead())
+            using (var cacheStream = cache.TagCache.OpenTagCacheRead())
             {
                 var def = cache.Deserialize(cacheStream, tag);
             }

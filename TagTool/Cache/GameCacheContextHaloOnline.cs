@@ -20,6 +20,8 @@ namespace TagTool.Cache
         public StringIdCache StringIdCache { get; set; }
         public TagCacheHaloOnline TagCacheGenHO;
         public StringTableHaloOnline StringTableHaloOnline;
+        
+        public List<int> ModifiedTags = new List<int>();
 
         public override TagCacheTest TagCache => TagCacheGenHO;
         public override StringTable StringTable => StringTableHaloOnline;
@@ -27,10 +29,8 @@ namespace TagTool.Cache
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
             Directory = directory;
-            var tagNames = LoadTagNames();
 
-            using (var stream = OpenTagCacheRead())
-                TagCacheGenHO = new TagCacheHaloOnline(stream, tagNames);
+            TagCacheGenHO = new TagCacheHaloOnline(directory);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
@@ -47,27 +47,7 @@ namespace TagTool.Cache
             TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, StringTableHaloOnline.GetStringId("render_method"));
         }
 
-        //
-        // Helpers
-        //
-
-        #region Tag Cache Functionality
-        /// <summary>
-        /// Gets the tag cache file information.
-        /// </summary>
-        public FileInfo TagCacheFile
-        {
-            get
-            {
-                var files = Directory.GetFiles("tags.dat");
-
-                if (files.Length == 0)
-                    throw new FileNotFoundException(Path.Combine(Directory.FullName, "tags.dat"));
-
-                return files[0];
-            }
-        }
-
+        // TODO: move these into the tag cache
         public TagCache CreateTagCache(DirectoryInfo directory, out FileInfo file)
         {
             if (directory == null)
@@ -105,25 +85,10 @@ namespace TagTool.Cache
             return cache;
         }
 
-        /// <summary>
-        /// Opens the tag cache file for reading.
-        /// </summary>
-        /// <returns>The stream that was opened.</returns>
-        public override Stream OpenTagCacheRead() => TagCacheFile.OpenRead();
 
-        public override Stream OpenCacheRead() => OpenTagCacheRead();
-
-        /// <summary>
-        /// Opens the tag cache file for writing.
-        /// </summary>
-        /// <returns>The stream that was opened.</returns>
-        public FileStream OpenTagCacheWrite() => TagCacheFile.Open(FileMode.Open, FileAccess.Write);
-
-        /// <summary>
-        /// Opens the tag cache file for reading and writing.
-        /// </summary>
-        /// <returns>The stream that was opened.</returns>
-        public FileStream OpenTagCacheReadWrite() => TagCacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenCacheRead() => TagCache.OpenTagCacheRead();
+        public override FileStream OpenCacheReadWrite() => TagCache.OpenTagCacheReadWrite();
+        public override FileStream OpenCacheWrite() => TagCache.OpenTagCacheWrite();
 
         /// <summary>
         /// Gets a tag from the current cache.
@@ -341,11 +306,6 @@ namespace TagTool.Cache
             throw new KeyNotFoundException(name);
         }
 
-        /*
-        
-        public void Serialize(Stream stream, CachedTagInstance instance, object definition) =>
-            Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
-        */
         /// <summary>
         /// Attempts to parse a group tag or name.
         /// </summary>
@@ -390,72 +350,6 @@ namespace TagTool.Cache
             throw new KeyNotFoundException(name);
         }
 
-        /// <summary>
-        /// Loads tag file names from the appropriate tag_list.csv file.
-        /// </summary>
-        /// <param name="path">The path to the tag_list.csv file.</param>
-        public Dictionary<int, string> LoadTagNames(string path = null)
-        {
-            var names = new Dictionary<int, string>();
-
-            if (path == null)
-                path = Path.Combine(Directory.FullName, "tag_list.csv");
-
-            if (File.Exists(path))
-            {
-                using (var tagNamesStream = File.Open(path, FileMode.Open, FileAccess.Read))
-                {
-                    var reader = new StreamReader(tagNamesStream);
-
-                    while (!reader.EndOfStream)
-                    {
-                        var line = reader.ReadLine();
-                        var separatorIndex = line.IndexOf(',');
-                        var indexString = line.Substring(2, separatorIndex - 2);
-
-                        if (!int.TryParse(indexString, NumberStyles.HexNumber, null, out int tagIndex))
-                            tagIndex = -1;
-
-                        //if (tagIndex < 0 || tagIndex >= TagCache.Index.Count || TagCache.Index[tagIndex] == null)
-                        //continue;
-
-                        var nameString = line.Substring(separatorIndex + 1);
-
-                        if (nameString.Contains(" "))
-                        {
-                            var lastSpaceIndex = nameString.LastIndexOf(' ');
-                            nameString = nameString.Substring(lastSpaceIndex + 1, nameString.Length - lastSpaceIndex - 1);
-                        }
-
-                        names[tagIndex] = nameString;
-                    }
-
-                    reader.Close();
-                }
-            }
-
-            return names;
-        }
-
-        /// <summary>
-        /// Saves tag file names to the appropriate tag_list.csv file.
-        /// </summary>
-        /// <param name="path">The path to the tag_list.csv file.</param>
-        public void SaveTagNames(string path = null)
-        {
-            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "tag_list.csv"));
-
-            if (!csvFile.Directory.Exists)
-                csvFile.Directory.Create();
-
-            using (var csvWriter = new StreamWriter(csvFile.Create()))
-            {
-                foreach (var instance in TagCacheGenHO.Tags)
-                    if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
-                        csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
-            }
-        }
-        #endregion
 
         #region Resource Cache Functionality
         /// <summary>
@@ -745,16 +639,24 @@ namespace TagTool.Cache
 
         #endregion
 
+        #region Serialization Methods
 
-        public void Serialize(PageableResource pageable, object definition) =>
-            Serialize(new ResourceSerializationContext(null, pageable), definition);
+        public override void Serialize(Stream stream, CachedTag instance, object definition)
+        {
+            if (typeof(CachedTagHaloOnline) == instance.GetType())
+                Serialize(stream, (CachedTagHaloOnline)instance, definition);
+            else
+                throw new Exception($"Try to serialize a {instance.GetType()} into an Halo Online Game Cache");
+            
+        }
 
-        public void Serialize(ISerializationContext context, object definition, uint? offset = null) => 
-            Serializer.Serialize(context, definition, offset);
+        public void Serialize(Stream stream, CachedTagHaloOnline instance, object definition)
+        {
+            if (!ModifiedTags.Contains(instance.Index))
+                SignalModifiedTag(instance.Index);
 
-        //
-        // DeserializationMethods
-        // 
+            Serializer.Serialize(new HaloOnlineSerializationContext(stream, this, instance), definition);
+        }
 
         private T Deserialize<T>(ISerializationContext context) =>
             Deserializer.Deserialize<T>(context);
@@ -774,13 +676,16 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
             Deserialize(new HaloOnlineSerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
+        #endregion
 
         private class LoadedResourceCache
         {
             public ResourceCache Cache { get; set; }
             public FileInfo File { get; set; }
         }
-        
+
+        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
+
     }
 
     [TagStructure(Size = 0x20)]
@@ -798,19 +703,40 @@ namespace TagTool.Cache
     public class TagCacheHaloOnline : TagCacheTest
     {
         public List<CachedTagHaloOnline> Tags;
+        public TagCacheHaloOnlineHeader Header;
+        public DirectoryInfo Directory;
+        public FileInfo TagsFile;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
-        public TagCacheHaloOnlineHeader Header;
+        public override Stream OpenTagCacheRead() => TagsFile.OpenRead();
 
-        public TagCacheHaloOnline(Stream stream, Dictionary<int, string> tagNames)
+        public override FileStream OpenTagCacheWrite() => TagsFile.Open(FileMode.Open, FileAccess.Write);
+
+        public override FileStream OpenTagCacheReadWrite() => TagsFile.Open(FileMode.Open, FileAccess.ReadWrite);
+
+        public TagCacheHaloOnline(DirectoryInfo directory)
         {
             Tags = new List<CachedTagHaloOnline>();
 
-            if (stream.Length != 0)
-                Load(new EndianReader(stream, EndianFormat.LittleEndian), tagNames);
-            else
-                Console.Error.WriteLine("Failed to open tag cache");
+            Directory = directory;
+            var files = Directory.GetFiles("tags.dat");
+
+            if (files.Length == 0)
+                throw new FileNotFoundException(Path.Combine(Directory.FullName, "tags.dat"));
+
+            TagsFile = files[0];
+
+            var tagNames = LoadTagNames();
+
+            using(var stream = OpenTagCacheRead())
+            {
+                if (stream.Length != 0)
+                    Load(new EndianReader(stream, EndianFormat.LittleEndian), tagNames);
+                else
+                    Console.Error.WriteLine("Failed to open tag cache");
+            }
+            
         }
 
         private void Load(EndianReader reader, Dictionary<int, string> names)
@@ -1164,6 +1090,72 @@ namespace TagTool.Cache
             var dataContext = new DataSerializationContext(writer);
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
             serializer.Serialize(dataContext, Header);
+        }
+
+        /// <summary>
+        /// Loads tag file names from the appropriate tag_list.csv file.
+        /// </summary>
+        /// <param name="path">The path to the tag_list.csv file.</param>
+        public Dictionary<int, string> LoadTagNames(string path = null)
+        {
+            var names = new Dictionary<int, string>();
+
+            if (path == null)
+                path = Path.Combine(Directory.FullName, "tag_list.csv");
+
+            if (File.Exists(path))
+            {
+                using (var tagNamesStream = File.Open(path, FileMode.Open, FileAccess.Read))
+                {
+                    var reader = new StreamReader(tagNamesStream);
+
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        var separatorIndex = line.IndexOf(',');
+                        var indexString = line.Substring(2, separatorIndex - 2);
+
+                        if (!int.TryParse(indexString, NumberStyles.HexNumber, null, out int tagIndex))
+                            tagIndex = -1;
+
+                        //if (tagIndex < 0 || tagIndex >= TagCache.Index.Count || TagCache.Index[tagIndex] == null)
+                        //continue;
+
+                        var nameString = line.Substring(separatorIndex + 1);
+
+                        if (nameString.Contains(" "))
+                        {
+                            var lastSpaceIndex = nameString.LastIndexOf(' ');
+                            nameString = nameString.Substring(lastSpaceIndex + 1, nameString.Length - lastSpaceIndex - 1);
+                        }
+
+                        names[tagIndex] = nameString;
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return names;
+        }
+
+        /// <summary>
+        /// Saves tag file names to the appropriate tag_list.csv file.
+        /// </summary>
+        /// <param name="path">The path to the tag_list.csv file.</param>
+        public void SaveTagNames(string path = null)
+        {
+            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "tag_list.csv"));
+
+            if (!csvFile.Directory.Exists)
+                csvFile.Directory.Create();
+
+            using (var csvWriter = new StreamWriter(csvFile.Create()))
+            {
+                foreach (var instance in Tags)
+                    if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
+                        csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
+            }
         }
 
         // there are no IDs in HO
