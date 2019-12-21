@@ -122,7 +122,7 @@ namespace TagTool.Cache
                 writer.Write(new byte[typeof(ModPackageSectionHeader).GetSize() * (int)ModPackageSection.SectionCount]);
 
 
-                int size;
+                uint size;
                 uint offset;
 
                 //
@@ -131,7 +131,7 @@ namespace TagTool.Cache
 
                 offset = (uint)writer.BaseStream.Position;
                 WriteMetadataSection(dataContext, serializer);
-                size = (int)(writer.BaseStream.Position - offset);
+                size = (uint)(writer.BaseStream.Position - offset);
                 WriteSectionEntry((int)ModPackageSection.Metadata, writer, size, offset);
 
                 //
@@ -140,11 +140,8 @@ namespace TagTool.Cache
 
                 offset = (uint)writer.BaseStream.Position;
                 WriteTagsSection(writer, dataContext, serializer);
-                size = (int)(writer.BaseStream.Position - offset);
-                writer.BaseStream.Seek(Header.SectionTable.Offset + typeof(ModPackageSectionHeader).GetSize() * (int)ModPackageSection.Tags, SeekOrigin.Begin);
-                var tableEntry = new ModPackageCacheSectionHeader(size, offset);
-                tableEntry.Write(writer);
-                writer.BaseStream.Seek(0, SeekOrigin.End);
+                size = (uint)(writer.BaseStream.Position - offset);
+                WriteSectionEntry((int)ModPackageSection.Tags, writer, size, offset);
 
                 // 
                 // Write tag names table
@@ -152,7 +149,7 @@ namespace TagTool.Cache
 
                 offset = (uint)writer.BaseStream.Position;
                 WriteTagNamesSection(writer, dataContext, serializer);
-                size = (int)(writer.BaseStream.Position - offset);
+                size = (uint)(writer.BaseStream.Position - offset);
                 WriteSectionEntry((int)ModPackageSection.TagNames, writer, size, offset);
 
                 //
@@ -161,7 +158,7 @@ namespace TagTool.Cache
 
                 offset = (uint)writer.BaseStream.Position;
                 WriteResourcesSection(writer);
-                size = (int)(writer.BaseStream.Position - offset);
+                size = (uint)(writer.BaseStream.Position - offset);
                 WriteSectionEntry((int)ModPackageSection.Resources, writer, size, offset);
 
                 //
@@ -172,7 +169,7 @@ namespace TagTool.Cache
                 {
                     offset = (uint)writer.BaseStream.Position;
                     WriteMapsSection(writer);
-                    size = (int)(writer.BaseStream.Position - offset);
+                    size = (uint)(writer.BaseStream.Position - offset);
                     WriteSectionEntry((int)ModPackageSection.MapFiles, writer, size, offset);
 
                     DetermineMapFlags();
@@ -185,7 +182,7 @@ namespace TagTool.Cache
                 {
                     offset = (uint)writer.BaseStream.Position;
                     WriteCampaignFileSection(writer);
-                    size = (int)(writer.BaseStream.Position - offset);
+                    size = (uint)(writer.BaseStream.Position - offset);
                     WriteSectionEntry((int)ModPackageSection.CampaignFiles, writer, size, offset);
                 }
                 
@@ -212,7 +209,7 @@ namespace TagTool.Cache
             }
         }
 
-        private void WriteSectionEntry(int index, EndianWriter writer, int size, uint offset)
+        private void WriteSectionEntry(int index, EndianWriter writer, uint size, uint offset)
         {
             // seek to the table and update size and offset
             writer.BaseStream.Seek(Header.SectionTable.Offset + typeof(ModPackageSectionHeader).GetSize() * index, SeekOrigin.Begin);
@@ -264,7 +261,7 @@ namespace TagTool.Cache
                 StreamUtil.Copy(TagCachesStreams[i], writer.BaseStream, (int)TagCachesStreams[i].Length);
                 StreamUtil.Align(writer.BaseStream, 4);
 
-                int size = (int)(writer.BaseStream.Position - offset);
+                uint size = (uint)(writer.BaseStream.Position - offset);
 
                 writer.BaseStream.Seek(tagCachesEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
                 var tableEntry = new CacheTableEntry(size, offset, CacheNames[i]);
@@ -297,7 +294,7 @@ namespace TagTool.Cache
                     var tagNameEntry = new ModPackageTagNamesEntry(entry.Key, entry.Value);
                     serializer.Serialize(context, tagNameEntry);
                 }
-                int size = (int)(writer.BaseStream.Position - offset);
+                uint size = (uint)(writer.BaseStream.Position - offset);
 
                 writer.BaseStream.Seek(tagNamesEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
                 var tableEntry = new GenericTableEntry(size, offset);
@@ -343,9 +340,9 @@ namespace TagTool.Cache
 
         private void ReadTagsSection(EndianReader reader, DataSerializationContext context, TagDeserializer deserializer)
         {
-            reader.SeekTo(Header.SectionTable.Offset + 0x8 * (int)ModPackageSection.Tags);
-            var section = new ModPackageCacheSectionHeader(reader);
-            reader.BaseStream.Position = section.Offset;
+            var section = GetSectionHeader(reader, ModPackageSection.Tags);
+            if (!GoToSectionHeaderOffset(reader, section))
+                return;
 
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
@@ -362,9 +359,13 @@ namespace TagTool.Cache
                 CacheNames.Add(tableEntry.CacheName);
                 reader.BaseStream.Position = tableEntry.Offset;
 
-                byte[] data = new byte[section.Size];
-                reader.Read(data, 0, section.Size);
-                tagStream.Write(data, 0, section.Size);
+                if (section.Size > int.MaxValue)
+                    throw new Exception("Tag cache size not supported");
+                int size = (int)section.Size;
+
+                byte[] data = new byte[size];
+                reader.Read(data, 0, size);
+                tagStream.Write(data, 0, size);
                 tagStream.Position = 0;
                 TagCachesStreams.Add(tagStream);
             }
@@ -419,10 +420,12 @@ namespace TagTool.Cache
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
 
+            int size = (int)section.Size;   // Campaign files will never exceed the int limits.
+
             CampaignFileStream = new MemoryStream();
-            byte[] data = new byte[section.Size];
-            reader.Read(data, 0, section.Size);
-            CampaignFileStream.Write(data, 0, section.Size);
+            byte[] data = new byte[size];
+            reader.Read(data, 0, size);
+            CampaignFileStream.Write(data, 0, size);
             CampaignFileStream.Position = 0;
         }
 
@@ -446,11 +449,11 @@ namespace TagTool.Cache
                 reader.BaseStream.Position = tableEntry.Offset;
 
                 MapToCacheMapping.Add(i, tableEntry.CacheIndex);
-
+                int size = (int)section.Size;
                 var stream = new MemoryStream();
-                byte[] data = new byte[section.Size];
-                reader.Read(data, 0, section.Size);
-                stream.Write(data, 0, section.Size);
+                byte[] data = new byte[size];
+                reader.Read(data, 0, size);
+                stream.Write(data, 0, size);
                 MapFileStreams.Add(stream);
 
             }

@@ -100,13 +100,13 @@ namespace TagTool.Cache
         /// <summary>
         /// Size of the section
         /// </summary>
-        public int Size;
+        public uint Size;
         /// <summary>
         /// Offset of the section in the file
         /// </summary>
         public uint Offset;
 
-        public ModPackageSectionHeader(int size, uint offset)
+        public ModPackageSectionHeader(uint size, uint offset)
         {
             Size = size;
             Offset = offset;
@@ -114,7 +114,7 @@ namespace TagTool.Cache
 
         public ModPackageSectionHeader(EndianReader reader)
         {
-            Size = reader.ReadInt32();
+            Size = reader.ReadUInt32();
             Offset = reader.ReadUInt32();
         }
 
@@ -177,10 +177,10 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x8)]
     public class GenericTableEntry
     {
-        public int Size;
+        public uint Size;
         public uint Offset;
 
-        public GenericTableEntry(int size, uint offset)
+        public GenericTableEntry(uint size, uint offset)
         {
             Size = size;
             Offset = offset;
@@ -188,7 +188,7 @@ namespace TagTool.Cache
 
         public GenericTableEntry(EndianReader reader)
         {
-            Size = reader.ReadInt32();
+            Size = reader.ReadUInt32();
             Offset = reader.ReadUInt32();
         }
 
@@ -202,47 +202,16 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x28)]
     public class CacheTableEntry
     {
-        public int Size;
+        public uint Size;
         public uint Offset;
         [TagField(Length = 0x20)]
         public string CacheName;
 
-        public CacheTableEntry(int size, uint offset, string name)
+        public CacheTableEntry(uint size, uint offset, string name)
         {
             Size = size;
             Offset = offset;
             CacheName = name;
-        }
-    }
-
-    [TagStructure(Size = 0x8)]
-    public class ModPackageCacheSectionHeader
-    {
-        /// <summary>
-        /// Size of the section
-        /// </summary>
-        public int Size;
-        /// <summary>
-        /// Offset of the section in the file
-        /// </summary>
-        public uint Offset;
-
-        public ModPackageCacheSectionHeader(int size, uint offset)
-        {
-            Size = size;
-            Offset = offset;
-        }
-
-        public ModPackageCacheSectionHeader(EndianReader reader)
-        {
-            Size = reader.ReadInt32();
-            Offset = reader.ReadUInt32();
-        }
-
-        public void Write(EndianWriter writer)
-        {
-            writer.Write(Size);
-            writer.Write(Offset);
         }
     }
 
