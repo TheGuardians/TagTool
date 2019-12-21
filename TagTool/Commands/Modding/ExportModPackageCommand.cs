@@ -18,7 +18,7 @@ namespace TagTool.Commands.Modding
 
         private ExportOptions Options = ExportOptions.None;
 
-        private ModPackageExtended ModPackage = null;
+        private ModPackage ModPackage = null;
 
         public ExportModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
@@ -79,7 +79,7 @@ namespace TagTool.Commands.Modding
 
             packageName = args[0];
 
-            ModPackage = new ModPackageExtended();
+            ModPackage = new ModPackage();
 
             //
             // Process options and create mod package

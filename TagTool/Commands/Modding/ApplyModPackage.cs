@@ -63,7 +63,7 @@ namespace TagTool.Commands.Modding
 
             CacheStream = CacheContext.OpenTagCacheReadWrite();
 
-            var modPackage = new ModPackageExtended(new FileInfo(filePath));
+            var modPackage = new ModPackage(new FileInfo(filePath));
 
             for (int i = 0; i < modPackage.Tags.Index.Count; i++)
             {
@@ -115,7 +115,7 @@ namespace TagTool.Commands.Modding
         }
 
 
-        private CachedTagInstance ConvertCachedTagInstance(ModPackageExtended modPack, CachedTagInstance modTag)
+        private CachedTagInstance ConvertCachedTagInstance(ModPackage modPack, CachedTagInstance modTag)
         {
             Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
 
@@ -185,7 +185,7 @@ namespace TagTool.Commands.Modding
             }
         }
 
-        private object ConvertData(ModPackageExtended modPack, object data)
+        private object ConvertData(ModPackage modPack, object data)
         {
 
             var type = data.GetType();
@@ -209,7 +209,7 @@ namespace TagTool.Commands.Modding
             return data;
         }
 
-        private PageableResource ConvertPageableResource(ModPackageExtended modPack, PageableResource resource)
+        private PageableResource ConvertPageableResource(ModPackage modPack, PageableResource resource)
         {
             if (resource.Page.Index == -1)
                 return resource;
@@ -224,7 +224,7 @@ namespace TagTool.Commands.Modding
             return resource;
         }
 
-        private IList ConvertCollection(ModPackageExtended modPack, IList collection)
+        private IList ConvertCollection(ModPackage modPack, IList collection)
         {
             // return early where possible
             if (collection is null || collection.Count == 0)
@@ -240,7 +240,7 @@ namespace TagTool.Commands.Modding
             return collection;
         }
 
-        private T ConvertStructure<T>(ModPackageExtended modPack, T data) where T : TagStructure
+        private T ConvertStructure<T>(ModPackage modPack, T data) where T : TagStructure
         {
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
             {
@@ -299,7 +299,7 @@ namespace TagTool.Commands.Modding
             return currentForg;
         }
 
-        private Scenario ConvertScenario(ModPackageExtended modPack, Scenario scnr)
+        private Scenario ConvertScenario(ModPackage modPack, Scenario scnr)
         {
 
             foreach (var expr in scnr.ScriptExpressions)
@@ -310,12 +310,12 @@ namespace TagTool.Commands.Modding
             return scnr;
         }
 
-        public void ConvertScriptExpression(ModPackageExtended modPack, HsSyntaxNode expr)
+        public void ConvertScriptExpression(ModPackage modPack, HsSyntaxNode expr)
         {
             ConvertScriptExpressionData(modPack, expr);
         }
 
-        public void ConvertScriptExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
+        public void ConvertScriptExpressionData(ModPackage modPack, HsSyntaxNode expr)
         {
             if (expr.Flags == HsSyntaxNodeFlags.Expression)
                 switch (expr.ValueType.HaloOnline)
@@ -345,7 +345,7 @@ namespace TagTool.Commands.Modding
 
         }
 
-        public void ConvertScriptTagReferenceExpressionData(ModPackageExtended modPack, HsSyntaxNode expr)
+        public void ConvertScriptTagReferenceExpressionData(ModPackage modPack, HsSyntaxNode expr)
         {
             var tagIndex = BitConverter.ToInt32(expr.Data.ToArray(), 0);
 

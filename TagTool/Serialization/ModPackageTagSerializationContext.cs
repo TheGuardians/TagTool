@@ -11,9 +11,9 @@ namespace TagTool.Serialization
 {
     class ModPackageTagSerializationContext : TagSerializationContext
     {
-        private ModPackageExtended Package;
+        private ModPackage Package;
 
-        public ModPackageTagSerializationContext(Stream stream, HaloOnlineCacheContext context, ModPackageExtended package, CachedTagInstance tag) : base(stream, context, tag)
+        public ModPackageTagSerializationContext(Stream stream, HaloOnlineCacheContext context, ModPackage package, CachedTagInstance tag) : base(stream, context, tag)
         {
             Package = package;
         }

@@ -244,10 +244,8 @@
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
-    <Compile Include="Cache\ModPackageExtended.cs" />
-    <Compile Include="Cache\ModPackageSimplified.cs" />
+    <Compile Include="Cache\ModPackage.cs" />
     <Compile Include="Cache\ModPackageHeader.cs" />
-    <Compile Include="Cache\ModPackageHeaderExtended.cs" />
     <Compile Include="Cache\RawPage.cs" />
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringIdCache.cs" />
@@ -271,7 +269,6 @@
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\MergeModPackagesCommand.cs" />
-    <Compile Include="Commands\Modding\UpgradeModPackage.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyTagNamesCommand.cs" />

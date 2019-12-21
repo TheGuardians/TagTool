@@ -7,10 +7,10 @@ using TagTool.Serialization;
 
 namespace TagTool.Cache
 {
-    public class ModPackageExtended
+    public class ModPackage
     {
         
-        public ModPackageHeaderExtended Header { get; set; } = new ModPackageHeaderExtended();
+        public ModPackageHeader Header { get; set; } = new ModPackageHeader();
 
         public ModPackageMetadata Metadata { get; set; } = new ModPackageMetadata();
 
@@ -28,7 +28,7 @@ namespace TagTool.Cache
 
         public MemoryStream CampaignFileStream { get; set; } = new MemoryStream();
 
-        public ModPackageExtended(FileInfo file = null)
+        public ModPackage(FileInfo file = null)
         {
             if (file != null)
                 Load(file);
@@ -54,7 +54,7 @@ namespace TagTool.Cache
                 var dataContext = new DataSerializationContext(reader);
                 var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
 
-                Header = deserializer.Deserialize<ModPackageHeaderExtended>(dataContext);
+                Header = deserializer.Deserialize<ModPackageHeader>(dataContext);
 
                 ReadMetadataSection(reader, dataContext, deserializer);
                 ReadTagsSection(reader);
@@ -85,7 +85,7 @@ namespace TagTool.Cache
                 // reserve header space
                 //
 
-                writer.Write(new byte[typeof(ModPackageHeaderExtended).GetSize()]);
+                writer.Write(new byte[typeof(ModPackageHeader).GetSize()]);
 
                 //
                 // build section table
@@ -168,7 +168,7 @@ namespace TagTool.Cache
                 // calculate package sha1
                 //
 
-                packageStream.Position = typeof(ModPackageHeaderExtended).GetSize();
+                packageStream.Position = typeof(ModPackageHeader).GetSize();
                 Header.SHA1 = new SHA1Managed().ComputeHash(packageStream);
 
                 //
