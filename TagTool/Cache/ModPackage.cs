@@ -44,8 +44,11 @@ namespace TagTool.Cache
                 var tagStream = new MemoryStream();
                 TagCachesStreams.Add(tagStream);
 
-                var tags = new TagCache(tagStream, new Dictionary<int, string>());
+                var names = new Dictionary<int, string>();
+                var tags = new TagCache(tagStream, names);
+                TagCaches = new List<TagCache>();
                 TagCaches.Add(tags);
+                TagCacheNames.Add(names);
 
                 Resources = new ResourceCache(ResourcesStream);
                 Header.SectionTable = new ModPackageSectionTable();
@@ -258,6 +261,7 @@ namespace TagTool.Cache
 
                 uint offset = (uint)writer.BaseStream.Position;
 
+                TagCachesStreams[i].Position = 0;
                 StreamUtil.Copy(TagCachesStreams[i], writer.BaseStream, (int)TagCachesStreams[i].Length);
                 StreamUtil.Align(writer.BaseStream, 4);
 
@@ -272,8 +276,8 @@ namespace TagTool.Cache
 
         private void WriteTagNamesSection(EndianWriter writer, DataSerializationContext context, TagSerializer serializer)
         {
-            GenericSectionEntry tagNamesEntry = new GenericSectionEntry(TagCacheNames.Count, (uint)writer.BaseStream.Position + 0x8);
-            tagNamesEntry.Write(writer);
+            GenericSectionEntry tagNameFileEntry = new GenericSectionEntry(TagCacheNames.Count, (uint)writer.BaseStream.Position + 0x8);
+            tagNameFileEntry.Write(writer);
             // make room for table
 
             writer.Write(new byte[0x8 * TagCacheNames.Count]);
@@ -289,14 +293,18 @@ namespace TagTool.Cache
 
                 uint offset = (uint)writer.BaseStream.Position;
 
+                GenericSectionEntry tagNameTable = new GenericSectionEntry(names.Count, offset + 0x8);
+                tagNameTable.Write(writer);
+
                 foreach (var entry in names)
                 {
                     var tagNameEntry = new ModPackageTagNamesEntry(entry.Key, entry.Value);
                     serializer.Serialize(context, tagNameEntry);
                 }
+
                 uint size = (uint)(writer.BaseStream.Position - offset);
 
-                writer.BaseStream.Seek(tagNamesEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
+                writer.BaseStream.Seek(tagNameFileEntry.TableOffset + 0x8 * i, SeekOrigin.Begin);
                 var tableEntry = new GenericTableEntry(size, offset);
                 tableEntry.Write(writer);
                 writer.BaseStream.Seek(0, SeekOrigin.End);
