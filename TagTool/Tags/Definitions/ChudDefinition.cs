@@ -1316,6 +1316,7 @@ namespace TagTool.Tags.Definitions
                     GlobalDynamic16,
                     GlobalDynamic17,
                     GlobalDynamic18,
+                    BlueWaypoint_HO,
                     GlobalDynamic19,
                     GlobalDynamic20,
                     GlobalDynamic21,
@@ -1332,8 +1333,7 @@ namespace TagTool.Tags.Definitions
                     GlobalDynamic32,
                     GlobalDynamic33,
                     GlobalDynamic34,
-                    GlobalDynamic35,
-                    GlobalDynamic36
+                    GlobalDynamic35
                 }
                 
                 public enum OutputScalarValue : short
