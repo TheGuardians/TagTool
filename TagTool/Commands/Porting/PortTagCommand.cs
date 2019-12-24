@@ -184,7 +184,11 @@ namespace TagTool.Commands.Porting
                     break;
 
 				case "shit": // use the global shit tag until shit tags are port-able
-					return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
+					if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
+                        return shitInstance;
+                    if (BlamCache.Version < CacheVersion.HaloReach)
+                        return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
+                    break;
 
 				case "sncl": // always use the default sncl tag
 					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
