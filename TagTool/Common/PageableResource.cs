@@ -11,7 +11,8 @@ namespace TagTool.Common
     /// </summary>
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline106708)]
-    [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloOnline235640)]
+    [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
     public class PageableResource : TagStructure
 	{
         /// <summary>

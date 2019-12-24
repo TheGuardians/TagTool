@@ -4,13 +4,14 @@ using TagTool.Tags;
 namespace TagTool.Cache
 {
     [TagStructure(Size = 0x58, Align = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline106708)]
-    [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640)]
+    [TagStructure(Size = 0x58, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
     public class RawPage : TagStructure
 	{
         public short Salt;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public byte XboxFlags;
 
         /// <summary>
@@ -22,48 +23,48 @@ namespace TagTool.Cache
         /// <summary>
         /// Gets or sets flags containing information about where the resource is located.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.HaloOnline235640)]
+        [TagField(MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
         public NewRawPageFlags NewFlags;
 
         public sbyte CompressionCodecIndex;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public short SharedCacheIndex;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public short Unknown0;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline235640)]
+        [TagField(MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown1;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Index;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public int BlockOffset;
 
         public uint CompressedBlockSize;
         public uint UncompressedBlockSize;
         public uint CrcChecksum;
 
-        [TagField(Length = 20, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 20, Gen = CacheGeneration.Third)]
         public byte[] EntireBufferHash;
 
-        [TagField(Length = 20, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 20, Gen = CacheGeneration.Third)]
         public byte[] FirstChunkHash;
 
-        [TagField(Length = 20, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 20, Gen = CacheGeneration.Third)]
         public byte[] LastChunkHash;
 
         public uint UnknownSize;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown4;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown5;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown6;
     }
 
