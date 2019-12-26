@@ -18,8 +18,9 @@ namespace TagTool.Tags
         /// </summary>
         public CacheResourceAddress Address;
 
-        [TagField(Flags = TagFieldFlags.Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused = new byte[4];
+        // Non-zero in sbsp resources
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        public int Unknown;
 
         [TagField(Flags = TagFieldFlags.Runtime)]
         public List<T> Elements;
