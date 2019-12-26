@@ -197,8 +197,11 @@ namespace TagTool.Commands.Porting
 					return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
 				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
+                    return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
-				case "rmbk": // pure black, but with slightly reflective light
+                case "rmbk": // sometimes pure black, or they can have patterns??? use basic shader for now
+                    if (CacheContext.TryGetTag<Shader>(blamTag.Name, out var rmshInstance) && !FlagIsSet(PortingFlags.Replace))
+                        return rmshInstance;
                     if (CacheContext.TryGetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black", out var zBlackInstance))
                         return zBlackInstance;
 					return CacheContext.GetTag<Shader>(@"shaders\invalid");
