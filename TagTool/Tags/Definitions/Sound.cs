@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public SampleRate SampleRate;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third)]
         public SoundCacheFileGestaltReference SoundReference;
         
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -62,11 +62,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<LanguageBlock> Languages;
 
-        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource Resource;
-        
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused;
+        public TagResourceReference Resource;
 
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
         public uint Unknown12;
@@ -79,8 +75,8 @@ namespace TagTool.Tags.Definitions
             SplitLongSoundIntoPermutations  = 1 << 1
         }
 
-        [TagStructure(Size = 0x11, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x1D, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x9, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x15, MinVersion = CacheVersion.Halo3Retail)]
         public class SoundCacheFileGestaltReference : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -131,12 +127,6 @@ namespace TagTool.Tags.Definitions
 
 
             public int MaximumPlayTime;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public DatumIndex ZoneAssetHandle;
-
-            [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail)]
-            public byte[] Unused;
         }
     }
 }

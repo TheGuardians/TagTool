@@ -35,9 +35,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             foreach (var resourceGroup in Definition.ResourceGroups)
             {
-                resourceGroup.Resource.GetLocation(out var location);
+                resourceGroup.ResourceReference.HaloOnlinePageableResource.GetLocation(out var location);
 
-                Console.WriteLine($"{Definition.ResourceGroups.IndexOf(resourceGroup)}: [Location: {location}, Index: 0x{resourceGroup.Resource.Page.Index:X}, Compressed Size: 0x{resourceGroup.Resource.Page.CompressedBlockSize:X}]");
+                Console.WriteLine($"{Definition.ResourceGroups.IndexOf(resourceGroup)}: [Location: {location}, Index: 0x{resourceGroup.ResourceReference.HaloOnlinePageableResource.Page.Index:X}, Compressed Size: 0x{resourceGroup.ResourceReference.HaloOnlinePageableResource.Page.CompressedBlockSize:X}]");
             }
 
             return true;

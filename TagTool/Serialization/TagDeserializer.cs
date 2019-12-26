@@ -347,7 +347,7 @@ namespace TagTool.Serialization
             var count = reader.ReadInt32();
             
             var pointer = new CacheResourceAddress(reader.ReadUInt32());
-            if (count == 0 || pointer.Value == 0)
+            if (count == 0)
             {
                 // Null tag block
                 reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
@@ -384,9 +384,10 @@ namespace TagTool.Serialization
         {
             // Read the pointer
             var pointer = reader.ReadUInt32();
+            /*
             if (pointer == 0)
                 return null; // Null object
-
+            */
             // Seek to it and read the object
             var nextOffset = reader.BaseStream.Position;
             reader.BaseStream.Position = context.AddressToOffset((uint)nextOffset - 4, pointer);

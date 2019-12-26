@@ -125,7 +125,7 @@ namespace TagTool.Commands.Porting
             if (xmaFileSize < 0)
                 return;
 
-            var xmaData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
+            var xmaData = BlamCache.GetSoundRaw(sound.Resource.Gen3ResourceID, xmaFileSize);
 
             if (xmaData == null)
             {

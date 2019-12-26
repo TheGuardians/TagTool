@@ -35,36 +35,38 @@ public class BaseBitmap
 
     public BaseBitmap(BitmapTextureInteropResource definition, Bitmap.Image image)
     {
-        var def = definition.Texture.Definition;
+        var def = definition.Texture.Definition.Bitmap;
         Height = def.Height;
         Width = def.Width;
         Depth = def.Depth;
         MipMapCount = def.MipmapCount - 1;
-        Type = def.Type;
+        Type = def.BitmapType;
         Flags = image.Flags;
         UpdateFormat(image.Format);
     }
 
     public BaseBitmap(BitmapTextureInterleavedInteropResource definition, int index, Bitmap.Image image)
     {
-        var def = definition.Texture.Definition;
+        
         if(index == 0)
         {
-            Height = def.Height1;
-            Width = def.Width1;
-            Depth = def.Depth1;
-            MipMapCount = def.MipmapCount1 - 1;
-            Type = def.Type1;
+            var def = definition.Texture.Definition.Bitmap1;
+            Height = def.Height;
+            Width = def.Width;
+            Depth = def.Depth;
+            MipMapCount = def.MipmapCount - 1;
+            Type = def.BitmapType;
             Flags = image.Flags;
             UpdateFormat(image.Format);
         }
         else
         {
-            Height = def.Height2;
-            Width = def.Width2;
-            Depth = def.Depth2;
-            MipMapCount = def.MipmapCount2 - 1;
-            Type = def.Type2;
+            var def = definition.Texture.Definition.Bitmap2;
+            Height = def.Height;
+            Width = def.Width;
+            Depth = def.Depth;
+            MipMapCount = def.MipmapCount - 1;
+            Type = def.BitmapType;
             Flags = image.Flags;
             UpdateFormat(image.Format);
         }

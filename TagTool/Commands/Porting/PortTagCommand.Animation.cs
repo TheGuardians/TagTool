@@ -23,9 +23,9 @@ namespace TagTool.Commands.Porting
 
             foreach (var group in resourceGroups)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ZoneAssetHandle.Index];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[group.ResourceReference.Gen3ResourceID.Index];
 
-                group.Resource = new PageableResource
+                group.ResourceReference.HaloOnlinePageableResource = new PageableResource
                 {
                     Page = new RawPage
                     {
@@ -45,9 +45,9 @@ namespace TagTool.Commands.Porting
                 // Convert blam fixups
 
                 // get the list of members in this resourcegroup. this list contains address, various offsets, and other info about the member.
-                if (group.Resource.Resource.DefinitionData.Length != 0)
+                if (group.ResourceReference.HaloOnlinePageableResource.Resource.DefinitionData.Length != 0)
                 {
-                    using (var definitionStream = new MemoryStream(group.Resource.Resource.DefinitionData, true))
+                    using (var definitionStream = new MemoryStream(group.ResourceReference.HaloOnlinePageableResource.Resource.DefinitionData, true))
                     using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                     using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                     {
@@ -62,16 +62,16 @@ namespace TagTool.Commands.Porting
                             definitionStream.Position = newFixup.BlockOffset;
                             definitionWriter.Write(newFixup.Address.Value);
 
-                            group.Resource.Resource.ResourceFixups.Add(newFixup);
+                            group.ResourceReference.HaloOnlinePageableResource.Resource.ResourceFixups.Add(newFixup);
                         }
 
                         var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
-                        definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset + 0x4;
+                        definitionStream.Position = group.ResourceReference.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset + 0x4;
                         definitionWriter.Write(0x20000000);
                         // ODST's resource type is 4 when it's supposed to be 2 because the resource definition is in the tag and not as a raw resource 
 
-                        definitionStream.Position = group.Resource.Resource.DefinitionAddress.Offset;
+                        definitionStream.Position = group.ResourceReference.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset;
 
                         resourceDefinition.Add(BlamCache.Deserializer.Deserialize<ModelAnimationTagResource>(dataContext));
                     }
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting
                         groupSize += 4;
                 }
 
-                var resourceData = BlamCache.GetRawFromID(group.ZoneAssetHandle, groupSize);
+                var resourceData = BlamCache.GetRawFromID(group.ResourceReference.Gen3ResourceID, groupSize);
 
                 if (resourceData == null)
                     return null;
@@ -423,10 +423,10 @@ namespace TagTool.Commands.Porting
 
                     dataStream.Position = 0;
 
-                    CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, group.Resource), resourceDefinition[resDefIndex]);
+                    CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, group.ResourceReference.HaloOnlinePageableResource), resourceDefinition[resDefIndex]);
 
-                    group.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                    var resource = group.Resource;
+                    group.ResourceReference.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                    var resource = group.ResourceReference.HaloOnlinePageableResource;
 
                     if (resource == null)
                         throw new ArgumentNullException("resource");

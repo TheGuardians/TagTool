@@ -37,21 +37,21 @@ namespace TagTool.Commands.Porting
             //
 
             var tagName = blamTag.Name;
-            var resourceList = new List<Bitmap.BitmapResource>();
+            var resourceList = new List<TagResourceReference>();
             for (int i = 0; i < bitmap.Images.Count(); i++)
             {
                 var resource = ConvertBitmap(bitmap, resourceStreams, i, tagName);
                 if (resource == null)
                     return null;
-                Bitmap.BitmapResource bitmapResource = new Bitmap.BitmapResource
+                TagResourceReference bitmapResource = new TagResourceReference
                 {
-                    Resource = resource
+                    HaloOnlinePageableResource = resource
                 };
                 resourceList.Add(bitmapResource);
             }
 
             bitmap.Resources = resourceList;
-            bitmap.InterleavedResourcesOld = null;
+            bitmap.InterleavedResources = null;
 
             //fixup for HO expecting 6 sequences in sensor_blips bitmap
             if (tagName == "ui\\chud\\bitmaps\\sensor_blips")
@@ -92,10 +92,9 @@ namespace TagTool.Commands.Porting
 
             using (var dataStream = new MemoryStream(baseBitmap.Data))
             {
-                var bitmapResource = new Bitmap.BitmapResource
+                var bitmapResource = new TagResourceReference
                 {
-                    Resource = resource,
-                    Unknown4 = 0
+                    HaloOnlinePageableResource = resource,
                 };
                 var resourceContext = new ResourceSerializationContext(CacheContext, resource);
 
@@ -106,8 +105,8 @@ namespace TagTool.Commands.Porting
                     {
                         Definition = new BitmapTextureInteropResource.BitmapDefinition
                         {
-                            Data = new TagData(),
-                            UnknownData = new TagData(),
+                            PrimaryResourceData = new TagData(),
+                            SecondaryResourceData = new TagData(),
                         }
                     }
                 };
@@ -177,16 +176,16 @@ namespace TagTool.Commands.Porting
 
         private void SetResourceDefinitionData(BaseBitmap bitmap, Bitmap.Image image, BitmapTextureInteropResource.BitmapDefinition definition)
         {
-            definition.Data = new TagData(bitmap.Data.Length, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
-            definition.Width = (short)bitmap.Width;
-            definition.Height = (short)bitmap.Height;
-            definition.Depth = (sbyte)bitmap.Depth;
-            definition.MipmapCount =(sbyte)(bitmap.MipMapCount + 1);
-            definition.Type = bitmap.Type;
-            definition.D3DFormat = GetUnusedFormat(bitmap.Format);
-            definition.Format = bitmap.Format;
-            definition.Curve = image.Curve;
-            definition.Flags = bitmap.Flags;
+            definition.PrimaryResourceData = new TagData(bitmap.Data.Length, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
+            definition.Bitmap.Width = (short)bitmap.Width;
+            definition.Bitmap.Height = (short)bitmap.Height;
+            definition.Bitmap.Depth = (byte)bitmap.Depth;
+            definition.Bitmap.MipmapCount =(byte)(bitmap.MipMapCount + 1);
+            definition.Bitmap.BitmapType = bitmap.Type;
+            definition.Bitmap.D3DFormat = (D3DFormat)GetUnusedFormat(bitmap.Format);
+            definition.Bitmap.Format = bitmap.Format;
+            definition.Bitmap.Curve = image.Curve;
+            definition.Bitmap.Flags = bitmap.Flags;
         }
 
         private int GetUnusedFormat(BitmapFormat format)

@@ -21,7 +21,7 @@ namespace TagTool.Bitmaps
 
         public void InjectDds(TagSerializer serializer, TagDeserializer deserializer, Bitmap bitmap, int imageIndex, Stream ddsStream, ResourceLocation location = ResourceLocation.Textures)
         {
-            var resource = bitmap.Resources[imageIndex].Resource;
+            var resource = bitmap.Resources[imageIndex].HaloOnlinePageableResource;
             var newResource = (resource == null);
             ResourceSerializationContext resourceContext;
             BitmapTextureInteropResource definition;
@@ -40,7 +40,7 @@ namespace TagTool.Bitmaps
                     }
                 };
 
-                bitmap.Resources[imageIndex].Resource = resource;
+                bitmap.Resources[imageIndex].HaloOnlinePageableResource = resource;
                 resourceContext = new ResourceSerializationContext(CacheContext, resource);
                 definition = new BitmapTextureInteropResource
                 {
@@ -48,8 +48,8 @@ namespace TagTool.Bitmaps
                     {
                         Definition = new BitmapTextureInteropResource.BitmapDefinition
                         {
-                            Data = new TagData(),
-                            UnknownData = new TagData(),
+                            PrimaryResourceData = new TagData(),
+                            SecondaryResourceData = new TagData(),
                         }
                     }
                 };
@@ -62,19 +62,19 @@ namespace TagTool.Bitmaps
             }
             if (definition.Texture == null || definition.Texture.Definition == null)
                 throw new ArgumentException("Invalid bitmap definition");
-            var texture = definition.Texture.Definition;
+            var texture = definition.Texture.Definition.Bitmap;
             var imageData = bitmap.Images[imageIndex];
 
             // Read the DDS header and modify the definition to match
             var dds = DdsHeader.Read(ddsStream);
             var dataSize = (int)(ddsStream.Length - ddsStream.Position);
-            texture.Data = new TagData(dataSize, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
+            definition.Texture.Definition.PrimaryResourceData = new TagData(dataSize, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
             texture.Width = (short)dds.Width;
             texture.Height = (short)dds.Height;
-            texture.Depth = (sbyte)Math.Max(1, dds.Depth);
-            texture.MipmapCount = (sbyte)Math.Max(1, dds.MipMapCount);
-            texture.Type = BitmapDdsFormatDetection.DetectType(dds);
-            texture.D3DFormat = (int)((dds.D3D10Format != DxgiFormat.Bc5UNorm) ? dds.FourCc : DdsFourCc.FromString("ATI2"));
+            texture.Depth = (byte)Math.Max(1, dds.Depth);
+            texture.MipmapCount = (byte)Math.Max(1, dds.MipMapCount);
+            texture.BitmapType = BitmapDdsFormatDetection.DetectType(dds);
+            texture.D3DFormat = (D3DFormat)((dds.D3D10Format != DxgiFormat.Bc5UNorm) ? dds.FourCc : DdsFourCc.FromString("ATI2"));
             texture.Format = BitmapDdsFormatDetection.DetectFormat(dds);
 
             // Set flags based on the format
@@ -108,13 +108,13 @@ namespace TagTool.Bitmaps
             // Modify the image data in the bitmap tag to match the definition
             imageData.Width = texture.Width;
             imageData.Height = texture.Height;
-            imageData.Depth = texture.Depth;
-            imageData.Type = texture.Type;
+            imageData.Depth = (sbyte)texture.Depth;
+            imageData.Type = texture.BitmapType;
             imageData.Format = texture.Format;
             imageData.Flags = texture.Flags;
             imageData.MipmapCount = (sbyte)(texture.MipmapCount - 1);
-            imageData.DataOffset = texture.Data.Address.Offset;
-            imageData.DataSize = texture.Data.Size;
+            imageData.DataOffset = definition.Texture.Definition.PrimaryResourceData.Address.Offset;
+            imageData.DataSize = definition.Texture.Definition.PrimaryResourceData.Size;
             imageData.Curve = (BitmapImageCurve)texture.Curve;
         }
     }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
@@ -14,12 +17,16 @@ namespace TagTool.Cache
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
         public string NetworkKey;
-
+        
         public StringTableGen3 StringTableGen3;
         public TagCacheGen3 TagCacheGen3;
+        public ResourceCacheGen3 ResourceCacheGen3;
 
         public override TagCacheTest TagCache => TagCacheGen3;
         public override StringTable StringTable => StringTableGen3;
+        public override ResourceCacheTest ResourceCache => ResourceCacheGen3; 
+
+        public Dictionary<string, GameCacheContextGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheContextGen3>();
 
         public GameCacheContextGen3(MapFile mapFile, FileInfo file)
         {
@@ -30,6 +37,8 @@ namespace TagTool.Cache
             Serializer = new TagSerializer(Version);
 
             var interop = mapFile.Header.GetInterop();
+
+            Directory = file.Directory;
 
             if ( interop != null && interop.ResourceBaseAddress == 0)
                 Magic = (int)(interop.RuntimeBaseAddress - mapFile.Header.GetMemoryBufferSize());
@@ -46,11 +55,13 @@ namespace TagTool.Cache
 
             mapFile.Header.SetTagIndexAddress(BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.GetTagIndexAddress() - Magic), 0));
 
-            using(var reader = new EndianReader(OpenCacheRead(), BaseMapFile.EndianFormat))
+            using(var cacheStream = OpenCacheRead())
+            using(var reader = new EndianReader(cacheStream, BaseMapFile.EndianFormat))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
                 TagCacheGen3 = new TagCacheGen3(this, reader, BaseMapFile, StringTableGen3, Magic);
                 LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, TagCacheGen3);
+                ResourceCacheGen3 = new ResourceCacheGen3(this);
             }
 
             // unused but kept for future uses
@@ -75,6 +86,8 @@ namespace TagTool.Cache
         public override FileStream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
         public override FileStream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
 
+        #region Serialization
+
         public override T Deserialize<T>(Stream stream, CachedTag instance) =>
             Deserialize<T>(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance));
 
@@ -89,7 +102,7 @@ namespace TagTool.Cache
                 throw new Exception($"Try to serialize a {instance.GetType()} into a Gen 3 Game Cache");
         }
 
-        //TODO: Implement serialization for H3
+        //TODO: Implement serialization for gen3
         public void Serialize(Stream stream, CachedTagGen3 instance, object definition)
         {
             throw new NotImplementedException();
@@ -115,6 +128,7 @@ namespace TagTool.Cache
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
             Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
 
+        #endregion
     }
 
     public class CachedTagGen3 : CachedTag
@@ -162,7 +176,7 @@ namespace TagTool.Cache
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
-        public override CachedTag GetTagByID(int ID) => GetTagByIndex(0xFFFF & ID);
+        public override CachedTag GetTagByID(uint ID) => GetTagByIndex((int)(ID & 0xFFFF));
 
         public override CachedTag GetTagByIndex(int index)
         {
@@ -503,5 +517,328 @@ namespace TagTool.Cache
 
             return localesTable;
         }
+    }
+
+    public class ResourceCacheGen3 : ResourceCacheTest
+    {
+        public bool isLoaded;
+        public CacheFileResourceGestalt ResourceGestalt;
+        public CacheFileResourceLayoutTable ResourceLayoutTable;
+        public GameCacheContextGen3 Cache;
+
+        public ResourceCacheGen3(GameCacheContextGen3 cache, bool load = false)
+        {
+            isLoaded = false;
+            Cache = cache;
+
+            if (load)
+                LoadResourceCache();
+        }
+
+        public void LoadResourceCache()
+        {
+            using (var cacheStream = Cache.OpenCacheRead())
+            {
+                ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCache.GetTagByName("there they are all standing in a row", "zone"));
+                ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCache.GetTagByID(0xE1760001));
+            }
+
+            isLoaded = true;
+        }
+
+        public TagResourceGen3 GetTagResourceFromReference(TagResourceReference resourceReference)
+        {
+            if (!isLoaded)
+                LoadResourceCache();
+            return ResourceGestalt.TagResources[resourceReference.Gen3ResourceID.Index];
+        }
+
+        public override BinkResource GetBinkResource(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
+                return null;
+            return GetResourceDefinition<BitmapTextureInteropResource>(tagResource);
+        }
+
+        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "bitmap_texture_interleaved_interop_resource")
+                return null;
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(tagResource);
+        }
+
+        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
+                return null;
+            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(tagResource);
+        }
+
+        public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "model_animation_tag_resource")
+                return null;
+            return GetResourceDefinition<ModelAnimationTagResource>(tagResource);
+        }
+
+        public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "structure_bsp_tag_resources")
+                return null;
+            return GetResourceDefinition<StructureBspTagResources>(tagResource);
+        }
+
+        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (GetResourceTypeName(tagResource) != "structure_bsp_cache_file_tag_resources")
+                return null;
+            return GetResourceDefinition<StructureBspCacheFileTagResources>(tagResource);
+        }
+
+        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        {
+            if (!isLoaded)
+                LoadResourceCache();
+
+            var tagResource = GetTagResourceFromReference(resourceReference);
+
+            int primarySize = 0;
+            int secondarySize = 0;
+
+            switch (GetResourceTypeName(tagResource))
+            {
+                case "bitmap_texture_interop_resource":
+                    var bitmapDefinition = GetBitmapTextureInteropResource(resourceReference);
+                    primarySize = bitmapDefinition.Texture.Definition.PrimaryResourceData.Size;
+                    secondarySize = bitmapDefinition.Texture.Definition.SecondaryResourceData.Size;
+                    break;
+
+                case "bitmap_texture_interleaved_interop_resource":
+                    var interleavedBitmapDefinition = GetBitmapTextureInterleavedInteropResource(resourceReference);
+                    primarySize = interleavedBitmapDefinition.Texture.Definition.PrimaryResourceData.Size;
+                    secondarySize = interleavedBitmapDefinition.Texture.Definition.SecondaryResourceData.Size;
+                    break;
+
+                case "sound_resource_definition":
+                    var segment = ResourceLayoutTable.Segments[tagResource.SegmentIndex];
+                    primarySize = segment.RequiredSizeIndex != -1 ? ResourceLayoutTable.Sizes[segment.RequiredSizeIndex].OverallSize : 0;
+                    secondarySize = segment.OptionalSizeIndex != -1 ? ResourceLayoutTable.Sizes[segment.OptionalSizeIndex].OverallSize : 0;
+                    break;
+
+                case "model_animation_tag_resource":
+                    var animationDefinition = GetModelAnimationTagResource(resourceReference);
+                    foreach (var group in animationDefinition.GroupMembers)
+                        primarySize += group.AnimationData.Size;
+                    break;
+
+                case "render_geometry_api_resource_definition":
+                    var geometryDefinition = GetRenderGeometryApiResourceDefinition(resourceReference);
+                    foreach(var vertexBuffer in geometryDefinition.VertexBuffers)
+                        primarySize += vertexBuffer.Definition.Data.Size;
+                    foreach (var indexBuffer in geometryDefinition.IndexBuffers)
+                        primarySize += indexBuffer.Definition.Data.Size;
+                    break;
+
+                case "structure_bsp_tag_resources":
+                case "structure_bsp_cache_file_tag_resources":
+                    Console.WriteLine($"Tag resource {GetResourceTypeName(tagResource)} does not contain data in pages.");
+                    return null;
+
+                default:
+                    throw new Exception($"Unsupported Resource Type {GetResourceTypeName(tagResource)}");
+
+            }
+            return GetResourceData(resourceReference, primarySize, secondarySize);
+        }
+
+        private string GetResourceTypeName(TagResourceGen3 tagResource)
+        {
+            return Cache.StringTable.GetString(ResourceGestalt.ResourceTypes[tagResource.ResourceTypeIndex].Name);
+        }
+
+        private void ApplyResourceFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
+        {
+            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
+            {
+                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                {
+                    var fixup = tagResource.ResourceFixups[i];
+                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
+                    fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                    fixupWriter.Write(fixup.Address.Offset);
+                }
+            }
+        }
+
+        private T GetResourceDefinition<T>(TagResourceGen3 tagResource)
+        {
+            T result;
+            byte[] resourceDefinitionData = new byte[tagResource.FixupInformationLength];
+            Array.Copy(ResourceGestalt.FixupInformation, tagResource.FixupInformationOffset, resourceDefinitionData, 0, tagResource.FixupInformationLength);
+            ApplyResourceFixups(tagResource, resourceDefinitionData);
+            using (var fixupStream = new MemoryStream(resourceDefinitionData))
+            using (var fixupReader = new EndianReader(fixupStream, EndianFormat.BigEndian))
+            {
+                var context = new DataSerializationContext(fixupReader);
+                var deserializer = new TagDeserializer(Cache.Version);
+                fixupReader.SeekTo(tagResource.DefinitionAddress.Offset);
+                result = deserializer.Deserialize<T>(context);
+            }
+
+            return result;
+        }
+
+        private byte[] GetResourceData(TagResourceReference resourceReference, int PrimarySize, int SecondarySize)
+        {
+            
+            byte[] result = new byte[PrimarySize + SecondarySize];
+
+            if(PrimarySize != 0)
+            {
+                var primaryData = GetPrimaryResource(resourceReference.Gen3ResourceID, PrimarySize);
+                if (primaryData != null)
+                    Array.Copy(primaryData, 0, result, 0, PrimarySize);
+            }
+            if(SecondarySize != 0)
+            {
+                var secondaryData = GetSecondaryResource(resourceReference.Gen3ResourceID, SecondarySize);
+                if (secondaryData != null)
+                    Array.Copy(secondaryData, 0, result, PrimarySize, SecondarySize);
+            }
+
+            return result;
+        }
+
+        private byte[] ReadSegmentData(TagResourceGen3 resource, int pageIndex, int offset, int length, bool padding=true)
+        {
+            var page = ResourceLayoutTable.RawPages[pageIndex];
+            var decompressed = ReadPageData(resource, page);
+
+            var data = new byte[length];
+
+            if (length > decompressed.Length || (length + offset) > decompressed.Length)
+            {
+                if (padding)
+                {
+                    length = decompressed.Length;
+                    if (length + offset > decompressed.Length)
+                        length = decompressed.Length - offset;
+                }
+                else
+                    return null;
+            }
+
+            Array.Copy(decompressed, offset, data, 0, (int)length);
+
+            return data;
+        }
+
+        private byte[] GetPrimaryResource(DatumIndex ID, int dataLength, bool padding = true)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
+
+            if (segment.RequiredPageIndex == -1 || segment.RequiredSegmentOffset == -1)
+                return null;
+
+            if (ResourceLayoutTable.RawPages[segment.RequiredPageIndex].BlockOffset == -1)
+                return null;
+
+            return ReadSegmentData(resource, segment.RequiredPageIndex, segment.RequiredSegmentOffset, dataLength, padding);
+        }
+
+        private byte[] GetSecondaryResource(DatumIndex ID, int dataLength, bool padding = true)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Segments[resource.SegmentIndex];
+
+            if (segment.OptionalPageIndex == -1 || segment.OptionalSegmentOffset == -1)
+                return null;
+
+            if (ResourceLayoutTable.RawPages[segment.OptionalPageIndex].BlockOffset == -1)
+                return null;
+
+            return ReadSegmentData(resource, segment.OptionalPageIndex, segment.OptionalSegmentOffset, dataLength, padding);
+        }
+
+        private byte[] ReadPageData(TagResourceGen3 resource, RawPage page)
+        {
+            string cacheFilePath;
+
+            var cache = Cache;
+
+            if (page.SharedCacheIndex != -1)
+            {
+                cacheFilePath = ResourceLayoutTable.ExternalCacheReferences[page.SharedCacheIndex].MapPath;
+                var pathComponent = cacheFilePath.Split('\\');
+                cacheFilePath = pathComponent[pathComponent.Length - 1];
+                cacheFilePath = Path.Combine(Cache.Directory.FullName, cacheFilePath);
+
+                if (cacheFilePath != Cache.CacheFile.FullName)
+                {
+                    if (Cache.SharedCacheFiles.ContainsKey(cacheFilePath))
+                        cache = Cache.SharedCacheFiles[cacheFilePath];
+                    else
+                    {
+                        var newCache = new FileInfo(cacheFilePath);
+                        using(var newCacheStream = newCache.OpenRead())
+                        using(var newCacheReader = new EndianReader(newCacheStream))
+                        {
+                            var newMapFile = new MapFile();
+                            newMapFile.Read(newCacheReader);
+                            cache = Cache.SharedCacheFiles[cacheFilePath] = new GameCacheContextGen3(newMapFile, newCache);
+                        }
+                    }  
+                }
+            }
+
+            var decompressed = new byte[page.UncompressedBlockSize];
+
+            using (var cacheStream = cache.OpenCacheRead())
+            using(var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
+            {
+                reader.SeekTo(cache.BaseMapFile.Header.GetInterop().DebugSectionSize + page.BlockOffset);
+                var compressed = reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
+
+                if (resource.ResourceTypeIndex != -1 && GetResourceTypeName(resource) == "sound_resource_definition")
+                    return compressed;
+
+                if (page.CompressionCodecIndex == -1)
+                    reader.BaseStream.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
+                else
+                    using (var readerDeflate = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
+                        readerDeflate.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
+
+               
+            }
+            return decompressed;
+
+        }
+
     }
 }

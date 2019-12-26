@@ -73,13 +73,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             try
             {
-                Definition.ResourceGroups[groupIndex].Resource.GetLocation(out var location);
+                Definition.ResourceGroups[groupIndex].ResourceReference.HaloOnlinePageableResource.GetLocation(out var location);
                 using (var stream = File.OpenRead(CacheContext.TagCacheFile.DirectoryName + "\\" + CacheContext.ResourceCacheNames[location]))
                 {
                     var cache = new ResourceCache(stream);
                     using (var outStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        cache.Decompress(stream, Definition.ResourceGroups[groupIndex].Resource.Page.Index, 0x7FFFFFFF, outStream);
+                        cache.Decompress(stream, Definition.ResourceGroups[groupIndex].ResourceReference.HaloOnlinePageableResource.Page.Index, 0x7FFFFFFF, outStream);
                         Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, filePath);
                     }
                 }
@@ -150,14 +150,14 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                 }
 
-                Definition.ResourceGroups[index].Resource.ChangeLocation(location);
-                CacheContext.AddResource(Definition.ResourceGroups[index].Resource, stream);
+                Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource.ChangeLocation(location);
+                CacheContext.AddResource(Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource, stream);
 
                 Console.WriteLine($"New resource info: " +
-                    $"Index 0x{Definition.ResourceGroups[index].Resource.Page.Index:X4}, " +
-                    $"Index {Definition.ResourceGroups[index].Resource.Page.Index:D8}, " +
-                    $"Compressed size: 0x{Definition.ResourceGroups[index].Resource.Page.CompressedBlockSize:X8}, " +
-                    $"Decompressed size: 0x{Definition.ResourceGroups[index].Resource.Page.UncompressedBlockSize:X8}, " +
+                    $"Index 0x{Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource.Page.Index:X4}, " +
+                    $"Index {Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource.Page.Index:D8}, " +
+                    $"Compressed size: 0x{Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource.Page.CompressedBlockSize:X8}, " +
+                    $"Decompressed size: 0x{Definition.ResourceGroups[index].ResourceReference.HaloOnlinePageableResource.Page.UncompressedBlockSize:X8}, " +
                     $"");
             }
 

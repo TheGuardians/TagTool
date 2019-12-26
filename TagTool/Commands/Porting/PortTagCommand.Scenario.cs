@@ -46,12 +46,12 @@ namespace TagTool.Commands.Porting
                     if (sbsp.PathfindingResource != null)
                     {
                         pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
-                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource));
+                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource.HaloOnlinePageableResource));
 
                         using (var resourceStream = new MemoryStream())
                         using (var resourceReader = new EndianReader(resourceStream))
                         {
-                            if (!sbsp.PathfindingResource.GetLocation(out var location))
+                            if (!sbsp.PathfindingResource.HaloOnlinePageableResource.GetLocation(out var location))
                                 throw new NullReferenceException();
 
                             var resourceCache = CacheContext.GetResourceCache(location);
@@ -67,7 +67,7 @@ namespace TagTool.Commands.Porting
                                         stream.CopyTo(resourceStreams[location]);
                             }
 
-                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource, resourceStream);
+                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource.HaloOnlinePageableResource, resourceStream);
 
                             var resourceDataContext = new DataSerializationContext(resourceReader);
 

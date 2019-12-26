@@ -54,7 +54,7 @@ namespace TagTool.Commands.Sounds
 
 
             var resource = Definition.Resource;
-            var resourceContext = new ResourceSerializationContext(CacheContext, resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource.HaloOnlinePageableResource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<SoundResourceDefinition>(resourceContext);
 
             if (resourceDefinition.Data == null)
@@ -68,7 +68,7 @@ namespace TagTool.Commands.Sounds
 
             byte[] soundData = new byte[dataReference.Size];
             var resourceDataStream = new MemoryStream(soundData);
-            CacheContext.ExtractResource(resource, resourceDataStream);
+            CacheContext.ExtractResource(resource.HaloOnlinePageableResource, resourceDataStream);
 
             for (int i = 0; i < Definition.PitchRanges.Count; i++)
             {

@@ -24,17 +24,17 @@ namespace TagTool.Bitmaps
 
             // Deserialize the resource definition and verify it
             var resource = bitmap.Resources[imageIndex];
-            var resourceContext = new ResourceSerializationContext(CacheContext, resource.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource.HaloOnlinePageableResource);
             var definition = CacheContext.Deserializer.Deserialize<BitmapTextureInteropResource>(resourceContext);
             if (definition.Texture == null || definition.Texture.Definition == null)
                 throw new ArgumentException("Invalid bitmap definition");
-            var dataReference = definition.Texture.Definition.Data;
+            var dataReference = definition.Texture.Definition.PrimaryResourceData;
             if (dataReference.Address.Type != CacheResourceAddressType.Resource)
                 throw new InvalidOperationException("Invalid resource data address");
 
             var header = CreateDdsHeader(definition);
             var resourceDataStream = new MemoryStream();
-            CacheContext.ExtractResource(resource.Resource, resourceDataStream);
+            CacheContext.ExtractResource(resource.HaloOnlinePageableResource, resourceDataStream);
             header.WriteTo(outStream);
             resourceDataStream.Position = dataReference.Address.Offset;
             StreamUtil.Copy(resourceDataStream, outStream, dataReference.Size);
@@ -42,7 +42,7 @@ namespace TagTool.Bitmaps
 
         private static DdsHeader CreateDdsHeader(BitmapTextureInteropResource definition)
         {
-            var info = definition.Texture.Definition;
+            var info = definition.Texture.Definition.Bitmap;
             var result = new DdsHeader
             {
                 Width = (uint)info.Width,
@@ -50,7 +50,7 @@ namespace TagTool.Bitmaps
                 MipMapCount = (uint)info.MipmapCount
             };
             BitmapDdsFormatDetection.SetUpHeaderForFormat(info.Format, result);
-            switch (info.Type)
+            switch (info.BitmapType)
             {
                 case BitmapType.CubeMap:
                     result.SurfaceComplexityFlags = DdsSurfaceComplexityFlags.Complex;

@@ -317,13 +317,13 @@ namespace TagTool.Commands.Porting
             return moppData;
         }
 
-        private PageableResource ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.CollisionBspResource = new PageableResource
+            bsp.CollisionBspResource.HaloOnlinePageableResource = new PageableResource
             {
                 Page = new RawPage
                 {
@@ -344,14 +344,14 @@ namespace TagTool.Commands.Porting
             // Port Blam resource definition
             //
             
-            var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex3.Index];
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.CollisionBspResource.Gen3ResourceID.Index];
 
-            bsp.CollisionBspResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
-            bsp.CollisionBspResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+            bsp.CollisionBspResource.HaloOnlinePageableResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
+            bsp.CollisionBspResource.HaloOnlinePageableResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             StructureBspTagResources resourceDefinition = null;
 
-            using (var definitionStream = new MemoryStream(bsp.CollisionBspResource.Resource.DefinitionData, true))
+            using (var definitionStream = new MemoryStream(bsp.CollisionBspResource.HaloOnlinePageableResource.Resource.DefinitionData, true))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
             {
@@ -370,12 +370,12 @@ namespace TagTool.Commands.Porting
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
 
-                    bsp.CollisionBspResource.Resource.ResourceFixups.Add(newFixup);
+                    bsp.CollisionBspResource.HaloOnlinePageableResource.Resource.ResourceFixups.Add(newFixup);
                 }
 
                 var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
-                definitionStream.Position = bsp.CollisionBspResource.Resource.DefinitionAddress.Offset;
+                definitionStream.Position = bsp.CollisionBspResource.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset;
                 resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspTagResources>(dataContext);
 
                 //
@@ -399,11 +399,11 @@ namespace TagTool.Commands.Porting
             // Load Blam resource data
             //
 
-            var resourceData = BlamCache.GetRawFromID(bsp.ZoneAssetIndex3);
+            var resourceData = BlamCache.GetRawFromID(bsp.CollisionBspResource.Gen3ResourceID);
 
             if (resourceData == null)
             {
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource.HaloOnlinePageableResource), resourceDefinition);
                 return bsp.CollisionBspResource;
             }
 
@@ -677,10 +677,10 @@ namespace TagTool.Commands.Porting
 
                 dataStream.Position = 0;
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.CollisionBspResource.HaloOnlinePageableResource), resourceDefinition);
 
-                bsp.CollisionBspResource.ChangeLocation(ResourceLocation.ResourcesB);
-                var resource = bsp.CollisionBspResource;
+                bsp.CollisionBspResource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                var resource = bsp.CollisionBspResource.HaloOnlinePageableResource;
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");

@@ -37,19 +37,19 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (args.Count != 1)
                 return false;
 
-            if (Definition.PathfindingResource == null)
+            if (Definition.PathfindingResource.HaloOnlinePageableResource == null)
             {
                 Console.WriteLine("ERROR: Pathfinding geometry does not have a resource associated with it.");
                 return true;
             }
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.PathfindingResource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.PathfindingResource.HaloOnlinePageableResource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
             using (var reader = new EndianReader(resourceStream))
             {
-                CacheContext.ExtractResource(Definition.PathfindingResource, resourceStream);
+                CacheContext.ExtractResource(Definition.PathfindingResource.HaloOnlinePageableResource, resourceStream);
                 var dataContext = new DataSerializationContext(reader);
 
                 foreach (var pathfindingDatum in resourceDefinition.PathfindingData)

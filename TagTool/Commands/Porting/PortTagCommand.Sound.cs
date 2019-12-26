@@ -73,7 +73,7 @@ namespace TagTool.Commands.Porting
             if (xmaFileSize < 0)
                 return null;
 
-            var xmaData = BlamCache.GetSoundRaw(sound.SoundReference.ZoneAssetHandle, xmaFileSize);
+            var xmaData = BlamCache.GetSoundRaw(sound.Resource.Gen3ResourceID, xmaFileSize);
 
             if (xmaData == null)
                 return null;
@@ -316,10 +316,9 @@ namespace TagTool.Commands.Porting
             // Prepare resource
             //
 
-            sound.Unused = new byte[] { 0, 0, 0, 0 };
             sound.Unknown12 = 0;
 
-            sound.Resource = new PageableResource
+            sound.Resource.HaloOnlinePageableResource = new PageableResource
             {
                 Page = new RawPage
                 {
@@ -338,7 +337,7 @@ namespace TagTool.Commands.Porting
 
             var data = soundDataAggregate.ToArray();
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, sound.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, sound.Resource.HaloOnlinePageableResource);
             CacheContext.Serializer.Serialize(resourceContext,
                 new SoundResourceDefinition
                 {
@@ -351,10 +350,10 @@ namespace TagTool.Commands.Porting
                 Address = new CacheResourceAddress(CacheResourceAddressType.Resource, 1073741824)
             };
 
-            sound.Resource.Resource.ResourceFixups.Add(definitionFixup);
+            sound.Resource.HaloOnlinePageableResource.Resource.ResourceFixups.Add(definitionFixup);
 
-            sound.Resource.ChangeLocation(ResourceLocation.Audio);
-            var resource = sound.Resource;
+            sound.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.Audio);
+            var resource = sound.Resource.HaloOnlinePageableResource;
 
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -379,7 +378,7 @@ namespace TagTool.Commands.Porting
 
             for (int i = 0; i < 4; i++)
             {
-                sound.Resource.Resource.DefinitionData[i] = (byte)(sound.Resource.Page.UncompressedBlockSize >> (i * 8));
+                sound.Resource.HaloOnlinePageableResource.Resource.DefinitionData[i] = (byte)(sound.Resource.HaloOnlinePageableResource.Page.UncompressedBlockSize >> (i * 8));
             }
 
             return sound;

@@ -156,14 +156,14 @@ namespace TagTool.Commands.Sounds
             {
 
                 var fileSize = (int)dataStream.Length;
-                var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource.HaloOnlinePageableResource);
                 CacheContext.Serializer.Serialize(resourceContext,
                     new SoundResourceDefinition
                     {
                         Data = new TagData(fileSize, new CacheResourceAddress(CacheResourceAddressType.Resource, 0))
                     });
 
-                Definition.Resource = new PageableResource
+                Definition.Resource.HaloOnlinePageableResource = new PageableResource
                 {
                     Page = new RawPage
                     {
@@ -187,12 +187,12 @@ namespace TagTool.Commands.Sounds
                     }
                 };
 
-                Definition.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(Definition.Resource, dataStream);
+                Definition.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(Definition.Resource.HaloOnlinePageableResource, dataStream);
                 
                 for (int i = 0; i < 4; i++)
                 {
-                    Definition.Resource.Resource.DefinitionData[i] = (byte)(Definition.Resource.Page.UncompressedBlockSize >> (i * 8));
+                    Definition.Resource.HaloOnlinePageableResource.Resource.DefinitionData[i] = (byte)(Definition.Resource.HaloOnlinePageableResource.Page.UncompressedBlockSize >> (i * 8));
                 }
 
                 Console.WriteLine("done.");

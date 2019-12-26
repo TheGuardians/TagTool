@@ -15,16 +15,17 @@ namespace TagTool.Cache
 {
     public class GameCacheContextHaloOnline : GameCache
     {
-        public readonly DirectoryInfo Directory;
         public static readonly string TagNamesFile = "tag_list.csv";
         public StringIdCache StringIdCache { get; set; }
         public TagCacheHaloOnline TagCacheGenHO;
         public StringTableHaloOnline StringTableHaloOnline;
-        
+        public ResourceCacheHaloOnline ResourceCacheHaloOnline;
+
         public List<int> ModifiedTags = new List<int>();
 
         public override TagCacheTest TagCache => TagCacheGenHO;
         public override StringTable StringTable => StringTableHaloOnline;
+        public override ResourceCacheTest ResourceCache => ResourceCacheHaloOnline;
 
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
@@ -84,7 +85,6 @@ namespace TagTool.Cache
 
             return cache;
         }
-
 
         public override Stream OpenCacheRead() => TagCache.OpenTagCacheRead();
         public override FileStream OpenCacheReadWrite() => TagCache.OpenTagCacheReadWrite();
@@ -1158,8 +1158,8 @@ namespace TagTool.Cache
             }
         }
 
-        // there are no IDs in HO
-        public override CachedTag GetTagByID(int ID) => GetTagByIndex(ID);
+        // there are no tag IDs in Halo Online
+        public override CachedTag GetTagByID(uint ID) => GetTagByIndex((int)ID);
 
         public override CachedTag GetTagByIndex(int index)
         {
@@ -1473,6 +1473,54 @@ namespace TagTool.Cache
             }
             Clear();
             AddRange(strings.ToList());
+        }
+    }
+
+    public class ResourceCacheHaloOnline : ResourceCacheTest
+    {
+        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override BinkResource GetBinkResource(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -10,6 +10,8 @@ using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Bitmaps.DDS;
+using TagTool.Tags;
+
 namespace TagTool.Bitmaps
 {
     public class BitmapExtractor
@@ -24,7 +26,7 @@ namespace TagTool.Bitmaps
         public void ExtractBitmap(Bitmap bitmap, int imageIndex, Stream outStream)
         {
             var resource = bitmap.Resources[imageIndex];
-            var resourceContext = new ResourceSerializationContext(CacheContext, resource.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, resource.HaloOnlinePageableResource);
             var definition = ExtractResourceDefinition(resource, resourceContext);
 
             var header = new DDSHeader(definition.Texture.Definition);
@@ -35,7 +37,7 @@ namespace TagTool.Bitmaps
 
         }
 
-        private BitmapTextureInteropResource ExtractResourceDefinition(Bitmap.BitmapResource resource, ResourceSerializationContext context)
+        private BitmapTextureInteropResource ExtractResourceDefinition(TagResourceReference resource, ResourceSerializationContext context)
         {
             var definition = CacheContext.Deserializer.Deserialize<BitmapTextureInteropResource>(context);
             if (definition.Texture == null || definition.Texture.Definition == null)
@@ -43,14 +45,14 @@ namespace TagTool.Bitmaps
             return definition;
         }
 
-        private void ExtractResourceData(BitmapTextureInteropResource definition, Bitmap.BitmapResource resource, Stream outStream)
+        private void ExtractResourceData(BitmapTextureInteropResource definition, TagResourceReference resource, Stream outStream)
         {
-            var dataReference = definition.Texture.Definition.Data;
+            var dataReference = definition.Texture.Definition.PrimaryResourceData;
             if (dataReference.Address.Type != CacheResourceAddressType.Resource)
                 throw new InvalidOperationException("Invalid resource data address");
 
             var resourceDataStream = new MemoryStream();
-            CacheContext.ExtractResource(resource.Resource, resourceDataStream);
+            CacheContext.ExtractResource(resource.HaloOnlinePageableResource, resourceDataStream);
             resourceDataStream.Position = dataReference.Address.Offset;
             StreamUtil.Copy(resourceDataStream, outStream, dataReference.Size);
         }

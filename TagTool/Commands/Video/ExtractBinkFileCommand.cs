@@ -36,7 +36,7 @@ namespace TagTool.Commands.Video
 
             var binkFile = new FileInfo(args[0]);
             
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.ResourceReference.HaloOnlinePageableResource);
             var resourceDefinition = CacheContext.Deserializer.Deserialize<BinkResource>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Video
             using (var fileStream = binkFile.Create())
             using (var fileWriter = new BinaryWriter(fileStream))
             {
-                CacheContext.ExtractResource(Definition.Resource, resourceStream);
+                CacheContext.ExtractResource(Definition.ResourceReference.HaloOnlinePageableResource, resourceStream);
                 resourceReader.BaseStream.Position = resourceDefinition.Data.Address.Offset;
                 fileWriter.Write(resourceReader.ReadBytes(resourceDefinition.Data.Size));
             }

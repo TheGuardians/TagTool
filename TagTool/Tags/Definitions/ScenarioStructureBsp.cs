@@ -175,22 +175,13 @@ namespace TagTool.Tags.Definitions
         public List<LeafSystem> LeafSystems;
         public List<TagResourcesBlock> TagResources;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public DatumIndex ZoneAssetIndex3;
-        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource CollisionBspResource;
-
-        public int UselessPadding3;
+        public TagResourceReference CollisionBspResource;
 
         [TagField(MaxVersion = CacheVersion.Halo3Retail)]
         public int UnknownH3;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public DatumIndex ZoneAssetIndex4;
-        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource PathfindingResource;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public int UselessPadding4;
+        public TagResourceReference PathfindingResource;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline106708)]
         public int Unknown86;

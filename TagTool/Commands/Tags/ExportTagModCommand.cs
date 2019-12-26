@@ -188,7 +188,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(bink.Resource, "bink_resource");
+                                var resourceFile = ExportResource(bink.ResourceReference.HaloOnlinePageableResource, "bink_resource");
 
                                 if (resourceFile == null)
                                 {
@@ -212,7 +212,7 @@ namespace TagTool.Commands.Tags
 
                                 for (var i = 0; i < bitm.Resources.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(bitm.Resources[i].Resource, "bitmap_texture_interop_resource", bitm.Resources.Count > 1 ? $"_image_{i}" : "_image");
+                                    var resourceFile = ExportResource(bitm.Resources[i].HaloOnlinePageableResource, "bitmap_texture_interop_resource", bitm.Resources.Count > 1 ? $"_image_{i}" : "_image");
 
                                     if (resourceFile == null)
                                     {
@@ -258,7 +258,7 @@ namespace TagTool.Commands.Tags
 
                                 for (var i = 0; i < jmad.ResourceGroups.Count; i++)
                                 {
-                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].Resource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group");
+                                    var resourceFile = ExportResource(jmad.ResourceGroups[i].ResourceReference.HaloOnlinePageableResource, "model_animation_tag_resource", jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group");
 
                                     if (resourceFile == null)
                                     {
@@ -304,7 +304,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField Geometry2.Resource ResourcesB \"tags\\{tagName}_bsp_geometry.render_geometry_api_resource_definition\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.CollisionBspResource, "structure_bsp_tag_resources", "_collision");
+                                resourceFile = ExportResource(sbsp.CollisionBspResource.HaloOnlinePageableResource, "structure_bsp_tag_resources", "_collision");
 
                                 if (resourceFile == null)
                                 {
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField CollisionBspResource ResourcesB \"tags\\{tagName}_collision.structure_bsp_tag_resources\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.PathfindingResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
+                                resourceFile = ExportResource(sbsp.PathfindingResource.HaloOnlinePageableResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
 
                                 if (resourceFile == null)
                                 {
@@ -382,7 +382,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(snd_.Resource, "sound_resource");
+                                var resourceFile = ExportResource(snd_.Resource.HaloOnlinePageableResource, "sound_resource");
 
                                 if (resourceFile == null)
                                 {

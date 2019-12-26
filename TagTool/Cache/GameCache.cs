@@ -9,6 +9,7 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
@@ -17,11 +18,13 @@ namespace TagTool.Cache
         public CacheVersion Version;
         public TagSerializer Serializer;
         public TagDeserializer Deserializer;
+        public DirectoryInfo Directory;
 
         public List<LocaleTable> LocaleTables;
         public abstract StringTable StringTable { get; }
         public abstract TagCacheTest TagCache { get; }
-        
+        public abstract ResourceCacheTest ResourceCache { get; }
+
         public abstract Stream OpenCacheRead();
         public abstract FileStream OpenCacheReadWrite();
         public abstract FileStream OpenCacheWrite();
@@ -138,7 +141,7 @@ namespace TagTool.Cache
 
         public virtual IEnumerable<CachedTag> TagTable { get;}
 
-        public abstract CachedTag GetTagByID(int ID);
+        public abstract CachedTag GetTagByID(uint ID);
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
 
@@ -177,6 +180,19 @@ namespace TagTool.Cache
             }
             return StringId.Invalid;
         }
+    }
+
+    public abstract class ResourceCacheTest
+    {
+        public abstract byte[] GetResourceData(TagResourceReference resourceReference);
+        public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
+        public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
+        public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);
+        public abstract RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference);
+        public abstract ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference);
+        public abstract SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference);
+        public abstract StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference);
+        public abstract StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
     }
 
     public class CacheLocalizedStringTest

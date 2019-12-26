@@ -58,7 +58,7 @@ namespace TagTool.Commands.Sounds
 
             var resource = Definition.Resource;
 
-            if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
+            if (resource == null || resource.HaloOnlinePageableResource.Page.Index < 0 || !resource.HaloOnlinePageableResource.GetLocation(out var location))
             {
                 Console.WriteLine("Resource is null.");
                 return false;
@@ -73,7 +73,7 @@ namespace TagTool.Commands.Sounds
                     var cache = new ResourceCache(stream);
                     using (var outStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        cache.Decompress(stream, resource.Page.Index, resource.Page.CompressedBlockSize, outStream);
+                        cache.Decompress(stream, resource.HaloOnlinePageableResource.Page.Index, resource.HaloOnlinePageableResource.Page.CompressedBlockSize, outStream);
                         Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, filePath);
                     }
                 }
@@ -129,9 +129,9 @@ namespace TagTool.Commands.Sounds
             {
                 using (var stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite))
                 {
-                    Definition.Resource.ChangeLocation(resourceLocation);
-                    CacheContext.AddResource(Definition.Resource, stream);
-                    Console.WriteLine($"New Geometry resource index = 0x{Definition.Resource.Page.Index:X4}, {Definition.Resource.Page.Index:D4}");
+                    Definition.Resource.HaloOnlinePageableResource.ChangeLocation(resourceLocation);
+                    CacheContext.AddResource(Definition.Resource.HaloOnlinePageableResource, stream);
+                    Console.WriteLine($"New Geometry resource index = 0x{Definition.Resource.HaloOnlinePageableResource.Page.Index:X4}, {Definition.Resource.HaloOnlinePageableResource.Page.Index:D4}");
                 }
 
                 Console.WriteLine("Done.");

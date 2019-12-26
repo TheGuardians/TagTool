@@ -852,15 +852,7 @@ namespace TagTool.Tags.Definitions
         public class ResourceGroup : TagStructure
 		{
             public int MemberCount;
-
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public DatumIndex ZoneAssetHandle;
-
-            [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-            public PageableResource Resource;
-
-            [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unused = new byte[4];
+            public TagResourceReference ResourceReference;
         }
     }
 }

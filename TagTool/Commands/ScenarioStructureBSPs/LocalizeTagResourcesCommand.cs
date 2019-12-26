@@ -45,11 +45,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 return true;
             }
 
-            var resourceDefinition = CacheContext.Deserialize<StructureBspTagResources>(Definition.CollisionBspResource);
+            var resourceDefinition = CacheContext.Deserialize<StructureBspTagResources>(Definition.CollisionBspResource.HaloOnlinePageableResource);
 
             using (var resourceStream = new MemoryStream())
             {
-                CacheContext.ExtractResource(Definition.CollisionBspResource, resourceStream);
+                CacheContext.ExtractResource(Definition.CollisionBspResource.HaloOnlinePageableResource, resourceStream);
 
                 using (var reader = new EndianReader(resourceStream))
                 {

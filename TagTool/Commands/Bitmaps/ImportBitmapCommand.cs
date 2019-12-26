@@ -6,6 +6,7 @@ using TagTool.Bitmaps;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Tags;
 
 namespace TagTool.Commands.Bitmaps
 {
@@ -86,7 +87,7 @@ namespace TagTool.Commands.Bitmaps
             {
                 Bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
                 Bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
-                Bitmap.Resources.Add(new Bitmap.BitmapResource());
+                Bitmap.Resources.Add(new TagResourceReference());
             }
 
             if (imageIndex < 0 || imageIndex >= Bitmap.Images.Count)

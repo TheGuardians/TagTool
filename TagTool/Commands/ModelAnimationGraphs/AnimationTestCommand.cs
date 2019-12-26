@@ -47,12 +47,12 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             foreach (var resourceGroup in definition.ResourceGroups)
             {
-                var resource = CacheContext.Deserialize<ModelAnimationTagResource>(resourceGroup.Resource);
+                var resource = CacheContext.Deserialize<ModelAnimationTagResource>(resourceGroup.ResourceReference.HaloOnlinePageableResource);
 
                 using (var stream = new MemoryStream())
                 using (var reader = new EndianReader(stream))
                 {
-                    CacheContext.ExtractResource(resourceGroup.Resource, stream);
+                    CacheContext.ExtractResource(resourceGroup.ResourceReference.HaloOnlinePageableResource, stream);
 
                     foreach (var groupMember in resource.GroupMembers)
                     {

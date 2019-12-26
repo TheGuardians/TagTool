@@ -48,7 +48,7 @@ namespace Sentinel.Controls
                 SoundFile.Delete();
 
             using (var fileStream = SoundFile.Create())
-                CacheContext.ExtractResource(Sound.Resource, fileStream);
+                CacheContext.ExtractResource(Sound.Resource.HaloOnlinePageableResource, fileStream);
 
             base.OnLoad(e);
         }
@@ -84,7 +84,7 @@ namespace Sentinel.Controls
 
             if (!SoundFile.Exists)
                 using (var fileStream = SoundFile.Create())
-                    CacheContext.ExtractResource(Sound.Resource, fileStream);
+                    CacheContext.ExtractResource(Sound.Resource.HaloOnlinePageableResource, fileStream);
 
             var destSoundFile = new FileInfo(sfd.FileName);
 

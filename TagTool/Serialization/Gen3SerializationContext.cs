@@ -55,7 +55,7 @@ namespace TagTool.Serialization
 
         public CachedTagInstance GetTagByIndex(int index)
         {
-            var tag = GameCache.TagCache.GetTagByID(index);
+            var tag = GameCache.TagCache.GetTagByID((uint)index);
 
             var group = (tag != null) ? tag.Group : TagGroup.None;
 

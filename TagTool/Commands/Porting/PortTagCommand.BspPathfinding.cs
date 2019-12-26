@@ -15,13 +15,16 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private PageableResource ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             //
             // Set up ElDorado resource reference
             //
 
-            bsp.PathfindingResource = new PageableResource
+            if (BlamCache.Version < CacheVersion.Halo3ODST)
+                bsp.PathfindingResource = new TagResourceReference();
+
+            bsp.PathfindingResource.HaloOnlinePageableResource = new PageableResource
             {
                 Page = new RawPage
                 {
@@ -43,7 +46,7 @@ namespace TagTool.Commands.Porting
             //
 
             var resourceData = BlamCache.Version > CacheVersion.Halo3Retail ?
-                    BlamCache.GetRawFromID(bsp.ZoneAssetIndex4) :
+                    BlamCache.GetRawFromID(bsp.PathfindingResource.Gen3ResourceID) :
                     null;
 
             if (resourceData == null)
@@ -62,12 +65,12 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version >= CacheVersion.Halo3ODST)
             {
-                var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.ZoneAssetIndex4.Index];
+                var resourceEntry = BlamCache.ResourceGestalt.TagResources[bsp.PathfindingResource.Gen3ResourceID.Index];
 
-                bsp.PathfindingResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
-                bsp.PathfindingResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+                bsp.PathfindingResource.HaloOnlinePageableResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
+                bsp.PathfindingResource.HaloOnlinePageableResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
-                using (var definitionStream = new MemoryStream(bsp.PathfindingResource.Resource.DefinitionData, true))
+                using (var definitionStream = new MemoryStream(bsp.PathfindingResource.HaloOnlinePageableResource.Resource.DefinitionData, true))
                 using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                 using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                 {
@@ -86,12 +89,12 @@ namespace TagTool.Commands.Porting
                         definitionStream.Position = newFixup.BlockOffset;
                         definitionWriter.Write(newFixup.Address.Value);
 
-                        bsp.PathfindingResource.Resource.ResourceFixups.Add(newFixup);
+                        bsp.PathfindingResource.HaloOnlinePageableResource.Resource.ResourceFixups.Add(newFixup);
                     }
 
                     var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
-                    definitionStream.Position = bsp.PathfindingResource.Resource.DefinitionAddress.Offset;
+                    definitionStream.Position = bsp.PathfindingResource.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<StructureBspCacheFileTagResources>(dataContext);
                 }
             }
@@ -434,12 +437,12 @@ namespace TagTool.Commands.Porting
                             BlamCache.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(dataContext));
                 }
 
-                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.PathfindingResource), resourceDefinition);
+                CacheContext.Serializer.Serialize(new ResourceSerializationContext(CacheContext, bsp.PathfindingResource.HaloOnlinePageableResource), resourceDefinition);
                 resourceWriter.BaseStream.Position = 0;
                 dataStream.Position = 0;
 
-                bsp.PathfindingResource.ChangeLocation(ResourceLocation.ResourcesB);
-                var resource = bsp.PathfindingResource;
+                bsp.PathfindingResource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                var resource = bsp.PathfindingResource.HaloOnlinePageableResource;
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");

@@ -11,11 +11,15 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "render_geometry_api_resource_definition", Size = 0x30)]
     public class RenderGeometryApiResourceDefinition : TagStructure
 	{
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Unused1;
+        /// <summary>
+        /// Unused s_tag_d3d_texture
+        /// </summary>
+        public List<TagStructureReference<TagD3DTexture>> Textures;
 
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] Unused2;
+        /// <summary>
+        /// Unused s_tag_d3d_texture_interleaved
+        /// </summary>
+        public List<TagStructureReference<TagD3DTextureInterleaved>> InterleavedTextures;
 
         /// <summary>
         /// The vertex buffer definitions for the model data.
@@ -82,4 +86,11 @@ namespace TagTool.Tags.Resources
         [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;
     }
+
+    [TagStructure(Size = 0x0)]
+    public class TagD3DTexture { }
+
+    [TagStructure(Size = 0x0)]
+    public class TagD3DTextureInterleaved { }
+
 }
