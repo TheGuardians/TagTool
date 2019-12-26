@@ -198,7 +198,9 @@ namespace TagTool.Commands.Porting
 
 				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
 
-				case "rmbk": // Unknown, black shaders don't exist in HO, only in ODST, might be just complete blackness
+				case "rmbk": // pure black, but with slightly reflective light
+                    if (CacheContext.TryGetTag<Shader>(@"levels\dlc\bunkerworld\shaders\z_black", out var zBlackInstance))
+                        return zBlackInstance;
 					return CacheContext.GetTag<Shader>(@"shaders\invalid");
 
 				//TODO: Someday we might be able to generate these, but for now lets just use the standard vertex shaders
