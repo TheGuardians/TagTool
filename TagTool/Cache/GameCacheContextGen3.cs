@@ -618,6 +618,9 @@ namespace TagTool.Cache
 
             var tagResource = GetTagResourceFromReference(resourceReference);
 
+            if (tagResource.ResourceTypeIndex == -1)    // no resource
+                return null;
+
             int primarySize = 0;
             int secondarySize = 0;
 
