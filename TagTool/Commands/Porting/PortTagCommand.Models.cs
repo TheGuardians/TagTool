@@ -835,8 +835,8 @@ namespace TagTool.Commands.Porting
                         mesh.RigidNodeIndex = -1;
                 
                 dataStream.Position = 0;
-                result.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                var resource = result.Geometry.Resource;
+                result.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                var resource = result.Geometry.Resource.HaloOnlinePageableResource;
 
                 if (resource == null)
                     throw new ArgumentNullException("resource");

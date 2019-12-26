@@ -35,10 +35,10 @@ namespace TagTool.Geometry
             BoneNodes = new List<Node>();
 
             // Deserialize the render_model resource
-            var resourceContext = new ResourceSerializationContext(CacheContext, RenderModel.Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, RenderModel.Geometry.Resource.HaloOnlinePageableResource);
             RenderModelResourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
             RenderModelResourceStream = new MemoryStream();
-            CacheContext.ExtractResource(RenderModel.Geometry.Resource, RenderModelResourceStream);
+            CacheContext.ExtractResource(RenderModel.Geometry.Resource.HaloOnlinePageableResource, RenderModelResourceStream);
 
         }
 

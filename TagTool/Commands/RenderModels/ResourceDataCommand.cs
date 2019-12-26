@@ -61,8 +61,8 @@ namespace TagTool.Commands.RenderModels
 
             try
             {
-                resourceIndex = Definition.Geometry.Resource.Page.Index;
-                compressedSize = Definition.Geometry.Resource.Page.CompressedBlockSize;
+                resourceIndex = Definition.Geometry.Resource.HaloOnlinePageableResource.Page.Index;
+                compressedSize = Definition.Geometry.Resource.HaloOnlinePageableResource.Page.CompressedBlockSize;
             }
             catch { Console.WriteLine("ERROR: resource index out of range."); };
 
@@ -109,8 +109,8 @@ namespace TagTool.Commands.RenderModels
                     case "resources":
                         try
                         {
-                            Definition.Geometry.Resource.ChangeLocation(ResourceLocation.Resources);
-                            CacheContext.AddResource(Definition.Geometry.Resource, stream);
+                            Definition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.Resources);
+                            CacheContext.AddResource(Definition.Geometry.Resource.HaloOnlinePageableResource, stream);
                         }
                         catch (Exception ex)
                         {
@@ -121,8 +121,8 @@ namespace TagTool.Commands.RenderModels
                     case "resources_b":
                         try
                         {
-                            Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                            CacheContext.AddResource(Definition.Geometry.Resource, stream);
+                            Definition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                            CacheContext.AddResource(Definition.Geometry.Resource.HaloOnlinePageableResource, stream);
                         }
                         catch (Exception ex)
                         {
@@ -137,12 +137,12 @@ namespace TagTool.Commands.RenderModels
             }
 
             Console.WriteLine($"Imported the new resource. " +
-                $"Index: 0x{Definition.Geometry.Resource.Page.Index:X4}, \n" +
-                $"Index: {Definition.Geometry.Resource.Page.Index}, \n" +
-                $"NewLocationFlags {Definition.Geometry.Resource.Page.NewFlags}, \n" +
-                $"OldLocationFlags {Definition.Geometry.Resource.Page.OldFlags}, \n" +
-                $"CompressedSize {Definition.Geometry.Resource.Page.CompressedBlockSize}, \n" +
-                $"CompressedSize {Definition.Geometry.Resource.Page.CompressedBlockSize:X8}");
+                $"Index: 0x{Definition.Geometry.Resource.HaloOnlinePageableResource.Page.Index:X4}, \n" +
+                $"Index: {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.Index}, \n" +
+                $"NewLocationFlags {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.NewFlags}, \n" +
+                $"OldLocationFlags {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.OldFlags}, \n" +
+                $"CompressedSize {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.CompressedBlockSize}, \n" +
+                $"CompressedSize {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.CompressedBlockSize:X8}");
 
 
             return true;

@@ -317,8 +317,8 @@ namespace TagTool.Commands.RenderModels
 
             resourceStream.Position = 0;
 
-            renderModel.Geometry.Resource.ChangeLocation(resourceLocation);
-            CacheContext.AddResource(renderModel.Geometry.Resource, resourceStream);
+            renderModel.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(resourceLocation);
+            CacheContext.AddResource(renderModel.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
 
             Console.WriteLine("done.");
 

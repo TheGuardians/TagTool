@@ -31,7 +31,7 @@ namespace TagTool.Commands.RenderModels
             if (args.Count != 0)
                 return false;
 
-            var resource = Definition.Geometry.Resource;
+            var resource = Definition.Geometry.Resource.HaloOnlinePageableResource;
 
             if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return true;

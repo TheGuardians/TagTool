@@ -255,8 +255,8 @@ namespace TagTool.Commands.RenderModels
 
 				resourceStream.Position = 0;
 
-				Definition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-				CacheContext.AddResource(Definition.Geometry.Resource, resourceStream);
+				Definition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+				CacheContext.AddResource(Definition.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
 
 				Console.WriteLine("done.");
 			}

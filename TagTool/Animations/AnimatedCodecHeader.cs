@@ -1,9 +1,6 @@
 ﻿using TagTool.Tags;
 
-/// <summary>
-/// Thanks Grimdoomer! -Camden
-/// </summary>
-
+// Thanks Grimdoomer! -Camden
 namespace TagTool.Animations
 {
     [TagStructure(Size = 0x24)]

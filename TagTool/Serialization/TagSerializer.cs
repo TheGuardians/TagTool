@@ -25,6 +25,7 @@ namespace TagTool.Serialization
         /// Constructs a tag serializer for a specific engine version.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
+        /// <param name="format">EndianFormat, default to little endian</param>
         public TagSerializer(CacheVersion version, EndianFormat format=EndianFormat.LittleEndian)
         {
             Version = version;

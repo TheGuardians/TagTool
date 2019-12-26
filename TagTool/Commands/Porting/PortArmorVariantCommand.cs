@@ -267,7 +267,7 @@ namespace TagTool.Commands.Porting
             // Load Blam resource data
             //
 
-            var resourceData = BlamCache.GetRawFromID(edModeDefinition.Geometry.ZoneAssetHandle);
+            var resourceData = BlamCache.GetRawFromID(edModeDefinition.Geometry.Resource.Gen3ResourceID);
 
             if (resourceData == null)
             {
@@ -281,7 +281,7 @@ namespace TagTool.Commands.Porting
 
             Console.Write("Loading Blam render_geometry resource definition...");
 
-            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.ZoneAssetHandle.Index];
+            var definitionEntry = BlamCache.ResourceGestalt.TagResources[edModeDefinition.Geometry.Resource.Gen3ResourceID.Index];
 
             var resourceDefinition = new RenderGeometryApiResourceDefinition
             {
@@ -407,7 +407,7 @@ namespace TagTool.Commands.Porting
 
                 Console.Write("Writing resource data...");
 
-                edModeDefinition.Geometry.Resource = new PageableResource
+                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource = new PageableResource
                 {
                     Page = new RawPage(),
                     Resource = new TagResourceGen3
@@ -421,10 +421,10 @@ namespace TagTool.Commands.Porting
 
                 edResourceStream.Position = 0;
 
-                var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource.HaloOnlinePageableResource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
-                edModeDefinition.Geometry.Resource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(edModeDefinition.Geometry.Resource, edResourceStream);
+                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                CacheContext.AddResource(edModeDefinition.Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
 
                 Console.WriteLine("done.");
             }

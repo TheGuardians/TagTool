@@ -92,7 +92,7 @@ namespace TagTool.Commands.Models
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, renderModel.Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, renderModel.Geometry.Resource.HaloOnlinePageableResource);
             var resourceDefinition = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
@@ -101,7 +101,7 @@ namespace TagTool.Commands.Models
                 // Extract the resource data
                 //
 
-                CacheContext.ExtractResource(renderModel.Geometry.Resource, resourceStream);
+                CacheContext.ExtractResource(renderModel.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
 
                 var modelFile = new FileInfo(modelFileName);
 

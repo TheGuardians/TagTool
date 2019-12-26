@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LZ4;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -19,13 +20,13 @@ namespace TagTool.Cache
         public StringIdCache StringIdCache { get; set; }
         public TagCacheHaloOnline TagCacheGenHO;
         public StringTableHaloOnline StringTableHaloOnline;
-        public ResourceCacheHaloOnline ResourceCacheHaloOnline;
+        public ResourceCachesHaloOnline ResourceCaches;
 
         public List<int> ModifiedTags = new List<int>();
 
         public override TagCacheTest TagCache => TagCacheGenHO;
         public override StringTable StringTable => StringTableHaloOnline;
-        public override ResourceCacheTest ResourceCache => ResourceCacheHaloOnline;
+        public override ResourceCacheTest ResourceCache => ResourceCaches;
 
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
@@ -38,8 +39,8 @@ namespace TagTool.Cache
 
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
-
             StringTableHaloOnline = new StringTableHaloOnline(Version, Directory);
+            ResourceCaches = new ResourceCachesHaloOnline(this);
 
             TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, StringTableHaloOnline.GetStringId("object"));
             TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, StringTableHaloOnline.GetStringId("item"));
@@ -48,596 +49,9 @@ namespace TagTool.Cache
             TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, StringTableHaloOnline.GetStringId("render_method"));
         }
 
-        // TODO: move these into the tag cache
-        public TagCache CreateTagCache(DirectoryInfo directory, out FileInfo file)
-        {
-            if (directory == null)
-                directory = Directory;
-
-            if (!directory.Exists)
-                directory.Create();
-
-            file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
-
-            using (var stream = file.Create())
-                return CreateTagCache(stream);
-        }
-
-        public TagCache CreateTagCache(Stream stream)
-        {
-            TagCache cache = null;
-
-            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
-            {
-                // Write the new resource cache file
-                writer.Write(0);                  // padding
-                writer.Write(32);                 // table offset
-                writer.Write(0);                  // table entry count
-                writer.Write(0);                  // padding
-                writer.Write(0x01D0631BCC791704); // guid
-                writer.Write(0);                  // padding
-                writer.Write(0);                  // padding
-
-                // Load the new resource cache file
-                stream.Position = 0;
-                cache = new TagCache(stream, new Dictionary<int, string>());
-            }
-
-            return cache;
-        }
-
         public override Stream OpenCacheRead() => TagCache.OpenTagCacheRead();
         public override FileStream OpenCacheReadWrite() => TagCache.OpenTagCacheReadWrite();
         public override FileStream OpenCacheWrite() => TagCache.OpenTagCacheWrite();
-
-        /// <summary>
-        /// Gets a tag from the current cache.
-        /// </summary>
-        /// <param name="index">The index of the tag.</param>
-        /// <returns>The tag at the specified index from the current cache.</returns>
-        public CachedTagHaloOnline GetTag(int index)
-        {
-            if (!TryGetTag(index, out var result))
-                throw new IndexOutOfRangeException($"0x{index:X4}");
-
-            return result;
-        }
-
-        /// <summary>
-        /// Attempts to get a tag from the current cache.
-        /// </summary>
-        /// <param name="index">The index of the tag.</param>
-        /// <param name="instance">The tag at the specified index from the current cache.</param>
-        /// <returns>true if the index is within the range of the tag cache, false otherwise.</returns>
-        public bool TryGetTag(int index, out CachedTagHaloOnline instance)
-        {
-            if (index < 0 || index >= TagCacheGenHO.TagTable.Count())
-            {
-                instance = null;
-                return false;
-            }
-
-            instance = TagCacheGenHO.Tags[index];
-            return true;
-        }
-
-        /// <summary>
-        /// Gets a tag of a specific type from the current cache.
-        /// </summary>
-        /// <typeparam name="T">The type of the tag definition.</typeparam>
-        /// <param name="name">The name of the tag.</param>
-        /// <returns>The tag of the specified type with the specified name from the current cache.</returns>
-        public CachedTagHaloOnline GetTag<T>(string name)
-        {
-            if (TryGetTag<T>(name, out var result))
-                return result;
-
-            var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
-            var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
-
-            throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
-        }
-
-        public bool TryAllocateTag(out CachedTagHaloOnline result, Type type, string name = null)
-        {
-            result = null;
-
-            try
-            {
-                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
-
-                if (structure == null)
-                {
-                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
-                    return false;
-                }
-
-                var groupTag = new Tag(structure.Tag);
-
-                if (!TagGroup.Instances.ContainsKey(groupTag))
-                {
-                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
-                    return false;
-                }
-
-                result = TagCacheGenHO.AllocateTag(TagGroup.Instances[groupTag], name);
-
-                if (result == null)
-                    return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
-                return false;
-            }
-
-            return true;
-        }
-
-        public CachedTagHaloOnline AllocateTag(Type type, string name = null)
-        {
-            if (TryAllocateTag(out var result, type, name))
-                return result;
-
-            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
-            return null;
-        }
-
-        public CachedTagHaloOnline AllocateTag<T>(string name = null) where T : TagStructure
-            => AllocateTag(typeof(T), name);
-
-        /// <summary>
-        /// Attempts to get a tag of a specific type from the current cache.
-        /// </summary>
-        /// <typeparam name="T">The type of the tag definition.</typeparam>
-        /// <param name="name">The name of the tag.</param>
-        /// <param name="result">The resulting tag.</param>
-        /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag<T>(string name, out CachedTagHaloOnline result)
-        {
-            if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
-            {
-                var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
-
-                foreach (var instance in TagCacheGenHO.Tags)
-                {
-                    if (instance is null)
-                        continue;
-
-                    if (instance.IsInGroup(groupTag) && instance.Name == name)
-                    {
-                        result = instance;
-                        return true;
-                    }
-                }
-            }
-
-            result = null;
-            return false;
-        }
-
-        /// <summary>
-        /// Attempts to get a tag by parsing its group name.
-        /// </summary>
-        /// <param name="name">The full name of the tag.</param>
-        /// <param name="result">The resulting tag.</param>
-        /// <returns>True if the tag was found, false otherwise.</returns>
-        public bool TryGetTag(string name, out CachedTagHaloOnline result)
-        {
-            if (name.Length == 0)
-            {
-                result = null;
-                return false;
-            }
-
-            if (name == "null")
-            {
-                result = null;
-                return true;
-            }
-
-            if (name == "*")
-            {
-                if (TagCacheGenHO.Tags.Count == 0)
-                {
-                    result = null;
-                    return false;
-                }
-
-                result = TagCacheGenHO.Tags.Last();
-                return true;
-            }
-
-            if (name.StartsWith("*."))
-            {
-                if (!name.TrySplit('.', out var startNamePieces) || !TryParseGroupTag(startNamePieces[1], out var starGroupTag))
-                {
-                    result = null;
-                    return false;
-                }
-
-                result = TagCacheGenHO.Tags.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
-                return true;
-            }
-
-            if (name.StartsWith("0x"))
-            {
-                name = name.Substring(2);
-
-                if (name.TrySplit('.', out var hexNamePieces))
-                    name = hexNamePieces[0];
-
-                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !(tagIndex >= 0 && tagIndex < TagCacheGenHO.Tags.Count))
-                {
-                    result = null;
-                    return false;
-                }
-
-                result = TagCacheGenHO.Tags[tagIndex];
-                return true;
-            }
-
-            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[1], out var groupTag))
-                throw new Exception($"Invalid tag name: {name}");
-
-            var tagName = namePieces[0];
-
-            foreach (var instance in TagCacheGenHO.Tags)
-            {
-                if (instance is null)
-                    continue;
-
-                if (instance.IsInGroup(groupTag) && instance.Name == tagName)
-                {
-                    result = instance;
-                    return true;
-                }
-            }
-
-            result = null;
-            return false;
-        }
-
-        public CachedTagHaloOnline GetTag(string name)
-        {
-            if (TryGetTag(name, out var result))
-                return result;
-
-            throw new KeyNotFoundException(name);
-        }
-
-        /// <summary>
-        /// Attempts to parse a group tag or name.
-        /// </summary>
-        /// <param name="name">The tag or name of the tag group.</param>
-        /// <param name="result">The resulting group tag.</param>
-        /// <returns>True if the group tag was parsed, false otherwise.</returns>
-        public bool TryParseGroupTag(string name, out Tag result)
-        {
-            if (Tags.TagDefinition.TryFind(name, out var type))
-            {
-                var attribute = TagStructure.GetTagStructureAttribute(type);
-                result = new Tag(attribute.Tag);
-                return true;
-            }
-
-            foreach (var pair in TagGroup.Instances)
-            {
-                if (name == StringTableHaloOnline.GetString(pair.Value.Name))
-                {
-                    result = pair.Value.Tag;
-                    return true;
-                }
-            }
-
-            result = Tag.Null;
-            return false;
-        }
-
-        /// <summary>
-        /// Parses a group tag or name;
-        /// </summary>
-        /// <param name="name">The tag or name of the tag group.</param>
-        /// <returns>The resulting group tag.</returns>
-        public Tag ParseGroupTag(string name)
-        {
-            if (name == "****" || name == "null")
-                return Tag.Null;
-
-            if (TryParseGroupTag(name, out var result))
-                return result;
-
-            throw new KeyNotFoundException(name);
-        }
-
-
-        #region Resource Cache Functionality
-        /// <summary>
-        /// The file names associated to each <see cref="ResourceLocation"/>.
-        /// </summary>
-        public Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
-        {
-            { ResourceLocation.Resources, "resources.dat" },
-            { ResourceLocation.Textures, "textures.dat" },
-            { ResourceLocation.TexturesB, "textures_b.dat" },
-            { ResourceLocation.Audio, "audio.dat" },
-            { ResourceLocation.ResourcesB, "resources_b.dat" },
-            { ResourceLocation.RenderModels, "render_models.dat" },
-            { ResourceLocation.Lightmaps, "lightmaps.dat" },
-            { ResourceLocation.Mods, "mods.dat" }
-        };
-
-        /// <summary>
-        /// The loaded <see cref="ResourceCache"/> for each <see cref="ResourceLocation"/>.
-        /// </summary>
-        private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
-
-        public FileInfo GetResourceCacheFile(ResourceLocation location)
-        {
-            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
-            {
-                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
-
-                using (var stream = file.OpenRead())
-                {
-                    cache = new LoadedResourceCache
-                    {
-                        File = file,
-                        Cache = new ResourceCache(stream)
-                    };
-                }
-
-                LoadedResourceCaches[location] = cache;
-            }
-
-            return cache.File;
-        }
-
-        /// <summary>
-        /// Gets a resource cache file descriptor for the specified <see cref="ResourceLocation"/>.
-        /// </summary>
-        /// <param name="location">The location of the resource file.</param>
-        /// <returns></returns>
-        public ResourceCache GetResourceCache(ResourceLocation location)
-        {
-            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
-            {
-                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
-
-                using (var stream = file.OpenRead())
-                {
-                    cache = new LoadedResourceCache
-                    {
-                        File = file,
-                        Cache = new ResourceCache(stream)
-                    };
-                }
-
-                LoadedResourceCaches[location] = cache;
-            }
-
-            return cache.Cache;
-        }
-
-        public ResourceCache CreateResourceCache(DirectoryInfo directory, ResourceLocation location, out FileInfo file)
-        {
-            if (!directory.Exists)
-                directory.Create();
-
-            file = new FileInfo(Path.Combine(directory.FullName, ResourceCacheNames[location]));
-
-            using (var stream = file.Create())
-                return CreateResourceCache(stream);
-        }
-
-        public ResourceCache CreateResourceCache(Stream stream)
-        {
-            ResourceCache cache = null;
-
-            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
-            {
-                // Write the new resource cache file
-                writer.Write(0);                  // padding
-                writer.Write(32);                 // table offset
-                writer.Write(0);                  // table entry count
-                writer.Write(0);                  // padding
-                writer.Write(0x01D0631BCC92931B); // guid
-                writer.Write(0);                  // padding
-                writer.Write(0);                  // padding
-
-                // Load the new resource cache file
-                stream.Position = 0;
-                cache = new ResourceCache(stream);
-            }
-
-            return cache;
-        }
-
-        /// <summary>
-        /// Opens a resource cache file for reading.
-        /// </summary>
-        /// <param name="location">The location of the resource file.</param>
-        /// <returns></returns>
-        public FileStream OpenResourceCacheRead(ResourceLocation location) => LoadedResourceCaches[location].File.OpenRead();
-
-        /// <summary>
-        /// Opens a resource cache file for writing.
-        /// </summary>
-        /// <param name="location">The location of the resource file.</param>
-        /// <returns></returns>
-        public FileStream OpenResourceCacheWrite(ResourceLocation location) => LoadedResourceCaches[location].File.OpenWrite();
-
-        /// <summary>
-        /// Opens a resource cache file for reading and writing.
-        /// </summary>
-        /// <param name="location">The location of the resource file.</param>
-        /// <returns></returns>
-        public FileStream OpenResourceCacheReadWrite(ResourceLocation location) => LoadedResourceCaches[location].File.Open(FileMode.Open, FileAccess.ReadWrite);
-
-        /// <summary>
-        /// Adds a new pageable_resource to the current cache.
-        /// </summary>
-        /// <param name="resource">The pageable_resource to add.</param>
-        /// <param name="dataStream">The stream to read the resource data from.</param>
-        /// <exception cref="System.ArgumentNullException">resource</exception>
-        /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
-        public void AddResource(PageableResource resource, Stream dataStream)
-        {
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-            if (!dataStream.CanRead)
-                throw new ArgumentException("The input stream is not open for reading", "dataStream");
-
-            var cache = GetResourceCache(resource);
-            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var dataSize = (int)(dataStream.Length - dataStream.Position);
-                var data = new byte[dataSize];
-                dataStream.Read(data, 0, dataSize);
-                resource.Page.Index = cache.Cache.Add(stream, data, out uint compressedSize);
-                resource.Page.CompressedBlockSize = compressedSize;
-                resource.Page.UncompressedBlockSize = (uint)dataSize;
-                resource.DisableChecksum();
-            }
-        }
-
-        /// <summary>
-        /// Adds raw, pre-compressed resource data to a cache.
-        /// </summary>
-        /// <param name="resource">The resource reference to initialize.</param>
-        /// <param name="data">The pre-compressed data to store.</param>
-        public void AddRawResource(PageableResource resource, byte[] data)
-        {
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-
-            resource.DisableChecksum();
-            var cache = GetResourceCache(resource);
-            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
-                resource.Page.Index = cache.Cache.AddRaw(stream, data);
-        }
-
-        /// <summary>
-        /// Extracts and decompresses the data for a resource from the current cache.
-        /// </summary>
-        /// <param name="pageable">The resource.</param>
-        /// <param name="outStream">The stream to write the extracted data to.</param>
-        /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
-        /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
-        public void ExtractResource(PageableResource pageable, Stream outStream)
-        {
-            if (pageable == null)
-                throw new ArgumentNullException("resource");
-            if (!outStream.CanWrite)
-                throw new ArgumentException("The output stream is not open for writing", "outStream");
-
-            var cache = GetResourceCache(pageable);
-            using (var stream = cache.File.OpenRead())
-                cache.Cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
-        }
-
-        /// <summary>
-        /// Extracts and decompresses the data for a resource from the current cache.
-        /// </summary>
-        /// <param name="inStream"></param>
-        /// <param name="pageable">The resource.</param>
-        /// <param name="outStream">The stream to write the extracted data to.</param>
-        /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
-        /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
-        public void ExtractResource(Stream inStream, PageableResource pageable, Stream outStream)
-        {
-            if (pageable == null)
-                throw new ArgumentNullException("resource");
-            if (!outStream.CanWrite)
-                throw new ArgumentException("The output stream is not open for writing", "outStream");
-
-            var cache = GetResourceCache(pageable);
-            cache.Cache.Decompress(inStream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
-        }
-
-        /// <summary>
-        /// Extracts raw, compressed resource data.
-        /// </summary>
-        /// <param name="resource">The resource.</param>
-        /// <returns>The raw, compressed resource data.</returns>
-        public byte[] ExtractRawResource(PageableResource resource)
-        {
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-
-            var cache = GetResourceCache(resource);
-            using (var stream = cache.File.OpenRead())
-                return cache.Cache.ExtractRaw(stream, resource.Page.Index, resource.Page.CompressedBlockSize);
-        }
-
-        /// <summary>
-        /// Compresses and replaces the data for a resource.
-        /// </summary>
-        /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
-        /// <param name="dataStream">The stream to read the new data from.</param>
-        /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
-        public void ReplaceResource(PageableResource resource, Stream dataStream)
-        {
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-            if (!dataStream.CanRead)
-                throw new ArgumentException("The input stream is not open for reading", "dataStream");
-
-            var cache = GetResourceCache(resource);
-            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
-            {
-                var dataSize = (int)(dataStream.Length - dataStream.Position);
-                var data = new byte[dataSize];
-                dataStream.Read(data, 0, dataSize);
-                var compressedSize = cache.Cache.Compress(stream, resource.Page.Index, data);
-                resource.Page.CompressedBlockSize = compressedSize;
-                resource.Page.UncompressedBlockSize = (uint)dataSize;
-                resource.DisableChecksum();
-            }
-        }
-
-        /// <summary>
-        /// Replaces a resource with raw, pre-compressed data.
-        /// </summary>
-        /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
-        /// <param name="data">The raw, pre-compressed data to use.</param>
-        public void ReplaceRawResource(PageableResource resource, byte[] data)
-        {
-            if (resource == null)
-                throw new ArgumentNullException("resource");
-
-            resource.DisableChecksum();
-            var cache = GetResourceCache(resource);
-            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
-                cache.Cache.ImportRaw(stream, resource.Page.Index, data);
-        }
-
-        private LoadedResourceCache GetResourceCache(PageableResource resource)
-        {
-            if (!resource.GetLocation(out var location))
-                return null;
-
-            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
-            {
-                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
-
-                if (!file.Exists && file.Name == "resources_b.dat")
-                    file = new FileInfo(Path.Combine(Directory.FullName, "video.dat"));
-
-                using (var stream = file.OpenRead())
-                {
-                    cache = new LoadedResourceCache
-                    {
-                        File = file,
-                        Cache = new ResourceCache(stream)
-                    };
-                }
-            }
-
-            return cache;
-        }
-
-        #endregion
 
         #region Serialization Methods
 
@@ -692,7 +106,7 @@ namespace TagTool.Cache
     public class TagCacheHaloOnlineHeader
     {
         public int UnusedTag;
-        public uint TagListOffset;
+        public uint TagTableOffset;
         public int TagCount;
         public int Unused;
         public long CreationTime;
@@ -744,13 +158,13 @@ namespace TagTool.Cache
             // Read file header
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708); // temporary workaround having a structure serializer
+            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
 
             Header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
 
             // Read tag offset list
             var headerOffsets = new uint[Header.TagCount];
-            reader.BaseStream.Position = Header.TagListOffset;
+            reader.BaseStream.Position = Header.TagTableOffset;
             for (var i = 0; i < Header.TagCount; i++)
                 headerOffsets[i] = reader.ReadUInt32();
 
@@ -799,7 +213,6 @@ namespace TagTool.Cache
             Tags.Add(tag);
             return tag;
         }
-
 
         /// <summary>
         /// Reads a tag's raw data from the file, including its header.
@@ -1021,7 +434,6 @@ namespace TagTool.Cache
                 adjustTag.HeaderOffset += sizeDelta;
         }
 
-
         /// <summary>
         /// Gets the offset that a new tag should be inserted at so that the tags are stored in order by index.
         /// </summary>
@@ -1086,7 +498,7 @@ namespace TagTool.Cache
         /// <param name="offsetTableOffset">The offset table offset.</param>
         private void UpdateFileHeader(EndianWriter writer, uint offsetTableOffset)
         {
-            Header.TagListOffset = offsetTableOffset;
+            Header.TagTableOffset = offsetTableOffset;
             var dataContext = new DataSerializationContext(writer);
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
             serializer.Serialize(dataContext, Header);
@@ -1156,6 +568,45 @@ namespace TagTool.Cache
                     if (instance != null && instance.Name != null && !instance.Name.ToLower().StartsWith("0x"))
                         csvWriter.WriteLine($"0x{instance.Index:X8},{instance.Name}");
             }
+        }
+
+        public TagCacheHaloOnline CreateTagCache(DirectoryInfo directory, out FileInfo file)
+        {
+            if (directory == null)
+                directory = Directory;
+
+            if (!directory.Exists)
+                directory.Create();
+
+            file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
+
+            TagCacheHaloOnline cache = null;
+
+            using (var stream = file.Create())
+                cache = CreateTagCache(stream, directory);
+
+            return cache;
+        }
+
+        public TagCacheHaloOnline CreateTagCache(Stream stream, DirectoryInfo directory)
+        {
+            TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
+            {
+                TagTableOffset = 0x20,
+                CreationTime = 0x01D0631BCC791704
+            };
+
+            stream.Position = 0;
+            using (var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+            {
+                
+                var dataContext = new DataSerializationContext(writer);
+                var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+                serializer.Serialize(dataContext, header);
+            }
+            stream.Position = 0;
+
+            return new TagCacheHaloOnline(directory);
         }
 
         // there are no tag IDs in Halo Online
@@ -1476,9 +927,246 @@ namespace TagTool.Cache
         }
     }
 
-    public class ResourceCacheHaloOnline : ResourceCacheTest
+    [TagStructure(Size = 0x20)]
+    public class ResourceCacheHaloOnlineHeader
     {
-        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        public int UnusedTag;
+        public uint ResourceTableOffset;
+        public int ResourceCount;
+        public int Unused;
+        public long CreationTime;
+        public int Unused2;
+        public int Unused3;
+    }
+
+    // Wrapper for multiple ResourceCacheHaloOnline instances (one per .dat), implements the abstract class and refers to the individual class
+    public class ResourceCachesHaloOnline : ResourceCacheTest
+    {
+        public DirectoryInfo Directory;
+        public GameCacheContextHaloOnline Cache;
+
+        public Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
+        {
+            { ResourceLocation.Resources, "resources.dat" },
+            { ResourceLocation.Textures, "textures.dat" },
+            { ResourceLocation.TexturesB, "textures_b.dat" },
+            { ResourceLocation.Audio, "audio.dat" },
+            { ResourceLocation.ResourcesB, "resources_b.dat" },
+            { ResourceLocation.RenderModels, "render_models.dat" },
+            { ResourceLocation.Lightmaps, "lightmaps.dat" },
+            { ResourceLocation.Mods, "mods.dat" }
+        };
+
+        private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
+
+        public ResourceCachesHaloOnline(GameCacheContextHaloOnline cache)
+        {
+            Cache = cache;
+            Directory = Cache.Directory;
+        }
+
+        public PageableResource GetPageableResource(TagResourceReference resourceReference)
+        {
+            return resourceReference.HaloOnlinePageableResource;
+        }
+
+        private LoadedResourceCache GetResourceCache(ResourceLocation location)
+        {
+            if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
+            {
+                ResourceCacheHaloOnline resourceCache;
+
+                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
+
+                using(var stream = file.OpenRead())
+                {
+                    resourceCache = new ResourceCacheHaloOnline(Cache, stream);
+                }
+                    
+                cache = new LoadedResourceCache
+                {
+                    File = file,
+                    Cache = resourceCache
+                };
+                LoadedResourceCaches[location] = cache;
+            }
+            return cache;
+        }
+
+        private LoadedResourceCache GetResourceCache(PageableResource resource)
+        {
+            if (!resource.GetLocation(out var location))
+                return null;
+
+            return GetResourceCache(location);
+        }
+
+        /// <summary>
+        /// Adds a new pageable_resource to the current cache.
+        /// </summary>
+        /// <param name="resource">The pageable_resource to add.</param>
+        /// <param name="dataStream">The stream to read the resource data from.</param>
+        /// <exception cref="System.ArgumentNullException">resource</exception>
+        /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
+        public void AddResource(PageableResource resource, Stream dataStream)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+            if (!dataStream.CanRead)
+                throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+            var cache = GetResourceCache(resource);
+            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+                resource.Page.Index = cache.Cache.Add(stream, data, out uint compressedSize);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
+            }
+        }
+
+        /// <summary>
+        /// Adds raw, pre-compressed resource data to a cache.
+        /// </summary>
+        /// <param name="resource">The resource reference to initialize.</param>
+        /// <param name="data">The pre-compressed data to store.</param>
+        public void AddRawResource(PageableResource resource, byte[] data)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+
+            resource.DisableChecksum();
+            var cache = GetResourceCache(resource);
+            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
+                resource.Page.Index = cache.Cache.AddRaw(stream, data);
+        }
+
+        /// <summary>
+        /// Extracts and decompresses the data for a resource from the current cache.
+        /// </summary>
+        /// <param name="pageable">The resource.</param>
+        /// <param name="outStream">The stream to write the extracted data to.</param>
+        /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
+        /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
+        public void ExtractResource(PageableResource pageable, Stream outStream)
+        {
+            if (pageable == null)
+                throw new ArgumentNullException("resource");
+            if (!outStream.CanWrite)
+                throw new ArgumentException("The output stream is not open for writing", "outStream");
+
+            var cache = GetResourceCache(pageable);
+            using (var stream = cache.File.OpenRead())
+                cache.Cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
+        }
+
+        /// <summary>
+        /// Extracts and decompresses the data for a resource from the current cache.
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="pageable">The resource.</param>
+        /// <param name="outStream">The stream to write the extracted data to.</param>
+        /// <exception cref="System.ArgumentException">Thrown if the output stream is not open for writing.</exception>
+        /// <exception cref="System.InvalidOperationException">Thrown if the file containing the resource has not been loaded.</exception>
+        public void ExtractResource(Stream inStream, PageableResource pageable, Stream outStream)
+        {
+            if (pageable == null)
+                throw new ArgumentNullException("resource");
+            if (!outStream.CanWrite)
+                throw new ArgumentException("The output stream is not open for writing", "outStream");
+
+            var cache = GetResourceCache(pageable);
+            cache.Cache.Decompress(inStream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
+        }
+
+        /// <summary>
+        /// Extracts raw, compressed resource data.
+        /// </summary>
+        /// <param name="resource">The resource.</param>
+        /// <returns>The raw, compressed resource data.</returns>
+        public byte[] ExtractRawResource(PageableResource resource)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+
+            var cache = GetResourceCache(resource);
+            using (var stream = cache.File.OpenRead())
+                return cache.Cache.ExtractRaw(stream, resource.Page.Index, resource.Page.CompressedBlockSize);
+        }
+
+        /// <summary>
+        /// Compresses and replaces the data for a resource.
+        /// </summary>
+        /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
+        /// <param name="dataStream">The stream to read the new data from.</param>
+        /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
+        public void ReplaceResource(PageableResource resource, Stream dataStream)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+            if (!dataStream.CanRead)
+                throw new ArgumentException("The input stream is not open for reading", "dataStream");
+
+            var cache = GetResourceCache(resource);
+            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
+            {
+                var dataSize = (int)(dataStream.Length - dataStream.Position);
+                var data = new byte[dataSize];
+                dataStream.Read(data, 0, dataSize);
+                var compressedSize = cache.Cache.Compress(stream, resource.Page.Index, data);
+                resource.Page.CompressedBlockSize = compressedSize;
+                resource.Page.UncompressedBlockSize = (uint)dataSize;
+                resource.DisableChecksum();
+            }
+        }
+
+        /// <summary>
+        /// Replaces a resource with raw, pre-compressed data.
+        /// </summary>
+        /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
+        /// <param name="data">The raw, pre-compressed data to use.</param>
+        public void ReplaceRawResource(PageableResource resource, byte[] data)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+
+            resource.DisableChecksum();
+            var cache = GetResourceCache(resource);
+            using (var stream = cache.File.Open(FileMode.Open, FileAccess.ReadWrite))
+                cache.Cache.ImportRaw(stream, resource.Page.Index, data);
+        }
+
+        public FileStream OpenResourceCacheRead(ResourceLocation location) => LoadedResourceCaches[location].File.OpenRead();
+
+        public FileStream OpenResourceCacheWrite(ResourceLocation location) => LoadedResourceCaches[location].File.OpenWrite();
+
+        public FileStream OpenResourceCacheReadWrite(ResourceLocation location) => LoadedResourceCaches[location].File.Open(FileMode.Open, FileAccess.ReadWrite);
+
+        //
+        // Overrides
+        //
+
+        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        {
+            var pageableResource = GetPageableResource(resourceReference);
+            var cache = GetResourceCache(pageableResource);
+
+            if (pageableResource.Page == null || pageableResource.Page.UncompressedBlockSize < 0)
+                return null;
+
+            byte[] result = new byte[pageableResource.Page.UncompressedBlockSize];
+            using(var cacheStream = cache.File.OpenRead())
+            using(var dataStream = new MemoryStream(result))
+            {
+                ExtractResource(cacheStream, pageableResource, dataStream);
+            }
+            return result;
+        }
+
+        public override BinkResource GetBinkResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
         }
@@ -1488,7 +1176,7 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
+        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
         }
@@ -1498,7 +1186,7 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
         }
@@ -1508,19 +1196,362 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
-        {
-            throw new NotImplementedException();
-        }
-
         public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
         }
 
-        public override BinkResource GetBinkResource(TagResourceReference resourceReference)
+        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
+        }
+
+        //
+        // Utilities
+        //
+
+        private class LoadedResourceCache
+        {
+            public ResourceCacheHaloOnline Cache { get; set; }
+            public FileInfo File { get; set; }
+        }
+    }
+
+    // Class for .dat files containing resources
+    public class ResourceCacheHaloOnline
+    {
+        public GameCacheContextHaloOnline Cache;
+        public ResourceCacheHaloOnlineHeader Header;
+
+        private List<Resource> Resources;
+
+        private const int ChunkHeaderSize = 0x8;
+        private const int MaxDecompressedBlockSize = 0x7FFF8; // Decompressed chunks cannot exceed this size
+
+        public int Count
+        {
+            get { return Resources.Count; }
+        }
+
+        public ResourceCacheHaloOnline(GameCacheContextHaloOnline cache, Stream stream)
+        {
+            Cache = cache;
+            Resources = new List<Resource>();
+            if(stream.Length == 0)
+                CreateEmptyResourceCache();
+            else
+                Read(stream);
+        }
+
+        public ResourceCacheHaloOnline(GameCacheContextHaloOnline cache)
+        {
+            Cache = cache;
+            Resources = new List<Resource>();
+            CreateEmptyResourceCache();
+        }
+
+        private void Read(Stream stream)
+        {
+            using (var reader = new EndianReader(stream, EndianFormat.LittleEndian))
+            {
+                var addresses = new List<uint>();
+                var sizes = new List<uint>();
+                var dataContext = new DataSerializationContext(reader);
+                var deserializer = new TagDeserializer(Cache.Version);
+                Header = deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(dataContext);
+
+                reader.SeekTo(Header.ResourceTableOffset);
+
+                // read all resource offsets
+
+                for (var i = 0; i < Header.ResourceCount; i++)
+                {
+                    var address = reader.ReadUInt32();
+
+                    if (!addresses.Contains(address) && (address != uint.MaxValue))
+                        addresses.Add(address);
+
+                    Resources.Add(new Resource { Offset = address });
+                }
+
+                // compute chunk sizes
+
+                addresses.Sort((a, b) => a.CompareTo(b));
+
+                for (var i = 0; i < addresses.Count - 1; i++)
+                    sizes.Add(addresses[i + 1] - addresses[i]);
+
+                sizes.Add(Header.ResourceTableOffset - addresses.Last());
+
+                foreach (var resource in Resources)
+                {
+                    if (resource.Offset == uint.MaxValue)
+                        continue;
+
+                    resource.ChunkSize = sizes[addresses.IndexOf(resource.Offset)];
+                }
+            }
+        }
+
+        private void WriteHeader(Stream stream)
+        {
+            stream.Position = 0;
+            using (var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+            {
+                var dataContext = new DataSerializationContext(writer);
+                var serializer = new TagSerializer(Cache.Version);
+                serializer.Serialize(dataContext, Header);
+            }
+        }
+
+        private void CreateEmptyResourceCache()
+        {
+            Header = new ResourceCacheHaloOnlineHeader
+            {
+                ResourceTableOffset = 0x20,
+                CreationTime = 0x01D0631BCC92931B
+            };
+        }
+
+        /// <summary>
+        /// Adds a resource to the cache.
+        /// </summary>
+        /// <param name="resourceCacheStream">The stream open on the resource cache.</param>
+        /// <param name="tagResourceData">The data to compress.</param>
+        /// <param name="compressedSize">On return, the size of the compressed data.</param>
+        /// <returns>The index of the resource that was added.</returns>
+        public int Add(Stream resourceCacheStream, byte[] tagResourceData, out uint compressedSize)
+        {
+            var resourceIndex = NewResource();
+            compressedSize = Compress(resourceCacheStream, resourceIndex, tagResourceData);
+            return resourceIndex;
+        }
+
+        /// <summary>
+        /// Adds a raw, pre-compressed resource to the cache.
+        /// </summary>
+        /// <param name="resourceCacheStream">The stream open on the resource cache.</param>
+        /// <param name="rawData">The raw data to add.</param>
+        /// <returns>The index of the resource that was added.</returns>
+        public int AddRaw(Stream resourceCacheStream, byte[] rawData)
+        {
+            var resourceIndex = NewResource();
+            ImportRaw(resourceCacheStream, resourceIndex, rawData);
+            return resourceIndex;
+        }
+
+        /// <summary>
+        /// Extracts raw, compressed resource data.
+        /// </summary>
+        /// <param name="resourceCacheStream">The stream open on the resource cache.</param>
+        /// <param name="resourceIndex">The index of the resource to decompress.</param>
+        /// <param name="compressedSize">Total size of the compressed data, including chunk headers.</param>
+        /// <returns>The raw, compressed resource data.</returns>
+        public byte[] ExtractRaw(Stream resourceCacheStream, int resourceIndex, uint compressedSize)
+        {
+            if (resourceIndex < 0 || resourceIndex >= Resources.Count)
+                throw new ArgumentOutOfRangeException("resourceIndex");
+
+            var resource = Resources[resourceIndex];
+            resourceCacheStream.Position = resource.Offset;
+            var result = new byte[compressedSize];
+            resourceCacheStream.Read(result, 0, result.Length);
+            return result;
+        }
+
+        /// <summary>
+        /// Overwrites a resource with raw, pre-compressed data.
+        /// </summary>
+        /// <param name="resourceCacheStream">The stream open on the resource cache.</param>
+        /// <param name="resourceIndex">The index of the resource to overwrite.</param>
+        /// <param name="data">The raw, pre-compressed data to overwrite it with.</param>
+        public void ImportRaw(Stream resourceCacheStream, int resourceIndex, byte[] data)
+        {
+            if (resourceIndex < 0 || resourceIndex >= Resources.Count)
+                throw new ArgumentOutOfRangeException("resourceIndex");
+
+            var roundedSize = ResizeResource(resourceCacheStream, resourceIndex, (uint)data.Length);
+            var resource = Resources[resourceIndex];
+            resourceCacheStream.Position = resource.Offset;
+            resourceCacheStream.Write(data, 0, data.Length);
+            StreamUtil.Fill(resourceCacheStream, 0, (int)(roundedSize - data.Length)); // Padding
+        }
+
+        public void NullResource(Stream resourceStream, int resourceIndex)
+        {
+            if (resourceIndex < 0 || resourceIndex >= Resources.Count)
+                throw new ArgumentOutOfRangeException("resourceIndex");
+
+            var resource = Resources[resourceIndex];
+            var writer = new BinaryWriter(resourceStream);
+
+            if (IsResourceShared(resourceIndex))
+                return;
+
+            if (resource.Offset != uint.MaxValue && resource.ChunkSize > 0)
+            {
+                StreamUtil.Copy(resourceStream, resource.Offset + resource.ChunkSize, resource.Offset, resourceStream.Length - resource.Offset);
+
+                for (var i = 0; i < Resources.Count; i++)
+                    if (Resources[i].Offset > resource.Offset)
+                        Resources[i].Offset = (Resources[i].Offset - resource.ChunkSize);
+            }
+
+            resource.Offset = uint.MaxValue;
+            resource.ChunkSize = 0;
+
+            UpdateResourceTable(resourceStream);
+        }
+
+        /// <summary>
+        /// Decompresses a resource.
+        /// </summary>
+        /// <param name="resourceStream">The stream open on the resource cache.</param>
+        /// <param name="resourceIndex">The index of the resource to decompress.</param>
+        /// <param name="compressedSize">Total size of the compressed data, including chunk headers.</param>
+        /// <param name="outStream">The stream to write the decompressed resource data to.</param>
+        public void Decompress(Stream resourceStream, int resourceIndex, uint compressedSize, Stream outStream)
+        {
+            if (resourceIndex < 0 || resourceIndex >= Resources.Count)
+                throw new ArgumentOutOfRangeException("resourceIndex");
+
+            var reader = new BinaryReader(resourceStream);
+            var resource = Resources[resourceIndex];
+            reader.BaseStream.Position = resource.Offset;
+
+            // Compressed resources are split into chunks, so decompress each chunk until the complete data is decompressed
+            var totalProcessed = 0U;
+            compressedSize = Math.Min(compressedSize, resource.ChunkSize);
+            while (totalProcessed < compressedSize)
+            {
+                // Each chunk begins with a 32-bit decompressed size followed by a 32-bit compressed size
+                var chunkDecompressedSize = reader.ReadInt32();
+                var chunkCompressedSize = reader.ReadInt32();
+                totalProcessed += 8;
+                if (totalProcessed >= compressedSize)
+                    break;
+
+                // Decompress the chunk and write it to the output stream
+                var compressedData = new byte[chunkCompressedSize];
+                reader.Read(compressedData, 0, chunkCompressedSize);
+                var decompressedData = LZ4Codec.Decode(compressedData, 0, chunkCompressedSize, chunkDecompressedSize);
+                outStream.Write(decompressedData, 0, chunkDecompressedSize);
+                totalProcessed += (uint)chunkCompressedSize;
+            }
+        }
+
+        /// <summary>
+        /// Compresses and saves data for a resource.
+        /// </summary>
+        /// <param name="resourceStream">The stream open on the resource data. It must have read/write access.</param>
+        /// <param name="resourceIndex">The index of the resource to edit.</param>
+        /// <param name="data">The data to compress.</param>
+        /// <returns>The total size of the compressed resource in bytes.</returns>
+        public uint Compress(Stream resourceStream, int resourceIndex, byte[] data)
+        {
+            if (resourceIndex < 0 || resourceIndex >= Resources.Count)
+                throw new ArgumentOutOfRangeException("resourceIndex");
+
+            // Divide the data into chunks with decompressed sizes no larger than the maximum allowed size
+            var chunks = new List<byte[]>();
+            var startOffset = 0;
+            uint newSize = 0;
+            while (startOffset < data.Length)
+            {
+                var chunkSize = Math.Min(data.Length - startOffset, MaxDecompressedBlockSize);
+                var chunk = LZ4Codec.Encode(data, startOffset, chunkSize);
+                chunks.Add(chunk);
+                startOffset += chunkSize;
+                newSize += (uint)(ChunkHeaderSize + chunk.Length);
+            }
+
+            // Write the chunks in
+            var writer = new BinaryWriter(resourceStream);
+            var roundedSize = ResizeResource(writer.BaseStream, resourceIndex, newSize);
+            var resource = Resources[resourceIndex];
+            resourceStream.Position = resource.Offset;
+            var sizeRemaining = data.Length;
+            foreach (var chunk in chunks)
+            {
+                var decompressedSize = Math.Min(sizeRemaining, MaxDecompressedBlockSize);
+                writer.Write(decompressedSize);
+                writer.Write(chunk.Length);
+                writer.Write(chunk);
+                sizeRemaining -= decompressedSize;
+            }
+            StreamUtil.Fill(resourceStream, 0, (int)(roundedSize - newSize)); // Padding
+            return newSize;
+        }
+
+        private int NewResource()
+        {
+            var lastResource = (Resources.Count > 0) ? Resources[Resources.Count - 1] : null;
+            var resourceIndex = Resources.Count;
+            Resources.Add(new Resource
+            {
+                Offset = (Resources.Count == 0) ? 0x20 : (lastResource != null) ? lastResource.Offset + lastResource.ChunkSize : uint.MaxValue,
+                ChunkSize = 0,
+            });
+            return resourceIndex;
+        }
+
+        private uint ResizeResource(Stream resourceStream, int resourceIndex, uint minSize)
+        {
+            var resource = Resources[resourceIndex];
+            var roundedSize = ((minSize + 0xF) & ~0xFU); // Round up to a multiple of 0x10
+            var sizeDelta = (int)(roundedSize - resource.ChunkSize);
+            var endOffset = resource.Offset + resource.ChunkSize;
+            StreamUtil.Copy(resourceStream, endOffset, endOffset + sizeDelta, resourceStream.Length - endOffset);
+            resource.ChunkSize = roundedSize;
+
+            // Update resource offsets
+            for (var i = resourceIndex + 1; i < Resources.Count; i++)
+                Resources[i].Offset = (uint)(Resources[i].Offset + sizeDelta);
+            UpdateResourceTable(resourceStream);
+            return roundedSize;
+        }
+
+        public bool IsResourceShared(int index) => Resources.Where(i => i.Offset == Resources[index].Offset).Count() > 1;
+
+        public void UpdateResourceTable(Stream resourceStream)
+        {
+            // Assume the table is past the last resource
+            uint tableOffset = 0xC;
+
+            var writer = new BinaryWriter(resourceStream);
+
+            if (Resources.Count != 0)
+            {
+                var lastResource = Resources[Resources.Count - 1];
+                tableOffset = lastResource.Offset + lastResource.ChunkSize;
+            }
+
+            writer.BaseStream.Position = tableOffset;
+
+            // Write each resource offset
+            foreach (var resource in Resources)
+                writer.Write(resource.Offset);
+
+            var tableEndOffset = writer.BaseStream.Position;
+
+            // Update the file header
+            writer.BaseStream.Position = 0x4;
+            writer.Write(tableOffset);
+            writer.Write(Resources.Count);
+
+            writer.BaseStream.SetLength(tableEndOffset);
+        }
+
+        //
+        // Utilities
+        //
+
+        private class Resource
+        {
+            // Offset in the resource file
+            public uint Offset;
+            // Distance between Offset and next resource Offset, may not be equal to the actual resource size
+            public uint ChunkSize;
         }
     }
 }

@@ -102,12 +102,12 @@ namespace Sentinel.Render
                 if (RenderModel.Geometry.Resource == null)
                     throw new NullReferenceException(nameof(RenderModel.Geometry.Resource));
 
-                RenderGeometryResource = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(RenderModel.Geometry.Resource);
+                RenderGeometryResource = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(RenderModel.Geometry.Resource.HaloOnlinePageableResource);
 
                 using (var resourceStream = new MemoryStream())
                 using (var reader = new BinaryReader(resourceStream))
                 {
-                    CacheContext.ExtractResource(RenderModel.Geometry.Resource, resourceStream);
+                    CacheContext.ExtractResource(RenderModel.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
 
                     VertexBuffers = new Dictionary<int, VertexBuffer>();
                     IndexBuffers = new Dictionary<int, IndexBuffer>();

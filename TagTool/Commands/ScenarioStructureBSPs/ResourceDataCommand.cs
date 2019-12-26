@@ -69,11 +69,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             switch (resourceType)
             {
                 case "geometry":
-                    resource = Definition.Geometry.Resource;
+                    resource = Definition.Geometry.Resource.HaloOnlinePageableResource;
                     break;
 
                 case "geometry2":
-                    resource = Definition.Geometry2.Resource;
+                    resource = Definition.Geometry2.Resource.HaloOnlinePageableResource;
                     break;
 
                 case "collisionbspresource":
@@ -159,14 +159,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 switch (resourceType)
                 {
                     case "geometry":
-                        Definition.Geometry.Resource.ChangeLocation(resourceLocation);
-                        CacheContext.AddResource(Definition.Geometry.Resource, stream);
-                        Console.WriteLine($"New Geometry resource index = {Definition.Geometry.Resource.Page.Index:X4}; {Definition.Geometry.Resource.Page.Index:D4}");
+                        Definition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.Geometry.Resource.HaloOnlinePageableResource, stream);
+                        Console.WriteLine($"New Geometry resource index = {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.Index:X4}; {Definition.Geometry.Resource.HaloOnlinePageableResource.Page.Index:D4}");
                         break;
                     case "geometry2":
-                        Definition.Geometry2.Resource.ChangeLocation(resourceLocation);
-                        CacheContext.AddResource(Definition.Geometry2.Resource, stream);
-                        Console.WriteLine($"New Geometry2 resource index = {Definition.Geometry2.Resource.Page.Index:X4}; {Definition.Geometry2.Resource.Page.Index:D4}");
+                        Definition.Geometry2.Resource.HaloOnlinePageableResource.ChangeLocation(resourceLocation);
+                        CacheContext.AddResource(Definition.Geometry2.Resource.HaloOnlinePageableResource, stream);
+                        Console.WriteLine($"New Geometry2 resource index = {Definition.Geometry2.Resource.HaloOnlinePageableResource.Page.Index:X4}; {Definition.Geometry2.Resource.HaloOnlinePageableResource.Page.Index:D4}");
                         break;
                     case "collisionbspresource":
                         Definition.CollisionBspResource.HaloOnlinePageableResource.ChangeLocation(resourceLocation);

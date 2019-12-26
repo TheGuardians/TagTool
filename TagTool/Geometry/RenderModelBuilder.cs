@@ -481,7 +481,7 @@ namespace TagTool.Geometry
 
         private void SerializeDefinitionData(TagSerializer serializer, RenderGeometryApiResourceDefinition definition)
         {
-            _model.Geometry.Resource = new PageableResource
+            _model.Geometry.Resource.HaloOnlinePageableResource = new PageableResource
             {
                 Page = new RawPage(),
                 Resource = new TagResourceGen3
@@ -492,7 +492,7 @@ namespace TagTool.Geometry
                     Unknown2 = 1
                 }
             };
-            var context = new ResourceSerializationContext(CacheContext, _model.Geometry.Resource);
+            var context = new ResourceSerializationContext(CacheContext, _model.Geometry.Resource.HaloOnlinePageableResource);
             serializer.Serialize(context, definition);
         }
 

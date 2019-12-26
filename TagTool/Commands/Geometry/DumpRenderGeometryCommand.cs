@@ -42,7 +42,7 @@ namespace TagTool.Commands.Geometry
             else
                 file = args[1];
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Geometry.Resource.HaloOnlinePageableResource);
             var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             if (args.Count == 2)
@@ -89,7 +89,7 @@ namespace TagTool.Commands.Geometry
                         //
 
                         Console.Write("Converting vertex buffers...");
-                        CacheContext.ExtractResource(Geometry.Resource, edResourceStream);
+                        CacheContext.ExtractResource(Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
 
                         for (var i = 0; i < definition.VertexBuffers.Count; i++)
                         {

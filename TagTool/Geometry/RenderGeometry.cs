@@ -55,21 +55,8 @@ namespace TagTool.Geometry
         /// The per-mesh level-of-detail data of the render geometry.
         /// </summary>
         public List<PerMeshLodDatum> PerMeshLodData;
-        
-        /// <summary>
-        /// The resource containing the raw geometry data.
-        /// </summary>
-        [TagField(Flags = Pointer, MinVersion = CacheVersion.HaloOnline106708)]
-        public PageableResource Resource;
 
-        /// <summary>
-        /// The index of the resource entry in the cache_file_resource_gestalt tag.
-        /// </summary>
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public DatumIndex ZoneAssetHandle;
-        
-        [TagField(Flags = Padding, Length = 4)]
-        public byte[] Unused;
+        public TagResourceReference Resource;
 
         [TagStructure(Size = 0x30)]
         public class BoundingSphere : TagStructure

@@ -327,7 +327,7 @@ namespace TagTool.Commands.Tags
 
         private RenderGeometry ConvertGeometry(RenderGeometry geometry, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
         {
-            if (geometry == null || geometry.Resource == null || geometry.Resource.Page.Index < 0 || !geometry.Resource.GetLocation(out var location))
+            if (geometry == null || geometry.Resource.HaloOnlinePageableResource == null || geometry.Resource.HaloOnlinePageableResource.Page.Index < 0 || !geometry.Resource.HaloOnlinePageableResource.GetLocation(out var location))
                 return geometry;
 
             // The format changed starting with version 1.235640, so if both versions are on the same side then they can be converted normally
@@ -335,15 +335,15 @@ namespace TagTool.Commands.Tags
             var destCompare = CacheVersionDetection.Compare(destCacheContext.Version, CacheVersion.HaloOnline235640);
             if ((srcCompare < 0 && destCompare < 0) || (srcCompare >= 0 && destCompare >= 0))
             {
-                geometry.Resource = ConvertResource(geometry.Resource, srcCacheContext, destCacheContext);
+                geometry.Resource.HaloOnlinePageableResource = ConvertResource(geometry.Resource.HaloOnlinePageableResource, srcCacheContext, destCacheContext);
                 return geometry;
             }
 
-            Console.WriteLine("- Rebuilding geometry resource {0} in {1}...", geometry.Resource.Page.Index, location);
+            Console.WriteLine("- Rebuilding geometry resource {0} in {1}...", geometry.Resource.HaloOnlinePageableResource.Page.Index, location);
             using (MemoryStream inStream = new MemoryStream(), outStream = new MemoryStream())
             {
                 // First extract the model data
-                srcCacheContext.ExtractResource(geometry.Resource, inStream);
+                srcCacheContext.ExtractResource(geometry.Resource.HaloOnlinePageableResource, inStream);
 
                 // Now open source and destination vertex streams
                 inStream.Position = 0;
@@ -351,7 +351,7 @@ namespace TagTool.Commands.Tags
                 var outVertexStream = VertexStreamFactory.Create(destCacheContext.Version, outStream);
 
                 // Deserialize the definition data
-                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource.HaloOnlinePageableResource);
                 var definition = srcCacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
                 // Convert each vertex buffer
@@ -378,8 +378,8 @@ namespace TagTool.Commands.Tags
                 var newLocation = FixResourceLocation(location, srcCacheContext.Version, destCacheContext.Version);
 
                 outStream.Position = 0;
-                geometry.Resource.ChangeLocation(newLocation);
-                destCacheContext.AddResource(geometry.Resource, outStream);
+                geometry.Resource.HaloOnlinePageableResource.ChangeLocation(newLocation);
+                destCacheContext.AddResource(geometry.Resource.HaloOnlinePageableResource, outStream);
             }
 
             return geometry;

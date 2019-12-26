@@ -610,7 +610,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				// If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
-				case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.Page.Index == -1:
+				case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.HaloOnlinePageableResource.Page.Index == -1:
 					blamDefinition = null;
 					break;
 
@@ -623,7 +623,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				// If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-				case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.Page.Index == -1:
+				case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.HaloOnlinePageableResource.Page.Index == -1:
 					blamDefinition = null;
 					break;
 

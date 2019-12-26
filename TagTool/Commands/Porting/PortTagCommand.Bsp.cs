@@ -35,15 +35,15 @@ namespace TagTool.Commands.Porting
 
             var resource = sbsp.Geometry.Resource;
 
-            if (resource != null && resource.Page.Index >= 0 && resource.GetLocation(out var location))
+            if (resource != null && resource.HaloOnlinePageableResource.Page.Index >= 0 && resource.HaloOnlinePageableResource.GetLocation(out var location))
             {
-                var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource.HaloOnlinePageableResource);
                 var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
                 using (var edResourceStream = new MemoryStream())
                 using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                 {
-                    var pageable = sbsp.Geometry.Resource;
+                    var pageable = sbsp.Geometry.Resource.HaloOnlinePageableResource;
 
                     if (pageable == null)
                         throw new ArgumentNullException("sbsp.Geometry.Resource");

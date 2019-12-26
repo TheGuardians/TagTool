@@ -53,7 +53,7 @@ namespace TagTool.Commands.ScenarioLightmaps
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource);
+            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource.HaloOnlinePageableResource);
             var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
 
             using (var resourceStream = new MemoryStream())
@@ -62,7 +62,7 @@ namespace TagTool.Commands.ScenarioLightmaps
                 // Extract the resource data
                 //
 
-                CacheContext.ExtractResource(Definition.Geometry.Resource, resourceStream);
+                CacheContext.ExtractResource(Definition.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
 
                 var file = new FileInfo(fileName);
 

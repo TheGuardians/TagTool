@@ -37,31 +37,54 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\odst\sc100.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\guardian.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
-
-            var tag = cache.TagCache.GetTagByName("there they are all standing in a row", "zone");
-
-            using (var cacheStream = cache.TagCache.OpenTagCacheRead())
+            using(var stream = cache.TagCache.OpenTagCacheRead())
             {
-                var zone = cache.Deserialize<CacheFileResourceGestalt>(cacheStream, tag);
-                var play = cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, cache.TagCache.GetTagByID(0x0001));
-
-                for(int i = 0; i < zone.TagResources.Count; i++)
+                foreach (var tag in cache.TagCache.TagTable)
                 {
-                    var tagResource = zone.TagResources[i];
-                    if (tagResource.ResourceTypeIndex == -1)
-                        continue;
-
-                    var tempRef = new TagResourceReference();
-                    tempRef.Gen3ResourceID = new DatumIndex(0, (ushort)i);
-                    byte[] data = cache.ResourceCache.GetResourceData(tempRef);
-                    // TODO: test ODST 
+                    if (tag.Group.Tag == "bitm")
+                    {
+                        var def = cache.Deserialize<Bitmap>(stream, tag);
+                        byte[] bitmapData;
+                        foreach (var res in def.Resources)
+                            bitmapData = cache.ResourceCache.GetResourceData(res);
+                    }
+                    else if(tag.Group.Tag == "snd!")
+                    {
+                        var def = cache.Deserialize<Sound>(stream, tag);
+                        byte[] soundData = cache.ResourceCache.GetResourceData(def.Resource);
+                    }
+                    else if(tag.Group.Tag == "jmad")
+                    {
+                        var def = cache.Deserialize<ModelAnimationGraph>(stream, tag);
+                        byte[] jmadData;
+                        foreach (var res in def.ResourceGroups)
+                            jmadData = cache.ResourceCache.GetResourceData(res.ResourceReference);
+                    }
+                    else if(tag.Group.Tag == "mode")
+                    {
+                        var def = cache.Deserialize<RenderModel>(stream, tag);
+                        byte[] modeData = cache.ResourceCache.GetResourceData(def.Geometry.Resource);
+                    }
+                    else if(tag.Group.Tag == "sbsp")
+                    {
+                        var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
+                        byte[] data;
+                        if (def.Geometry.Resource.HaloOnlinePageableResource != null)
+                            data = cache.ResourceCache.GetResourceData(def.Geometry.Resource);
+                        if(def.Geometry2.Resource.HaloOnlinePageableResource != null)
+                            data = cache.ResourceCache.GetResourceData(def.Geometry2.Resource);
+                        if(def.PathfindingResource.HaloOnlinePageableResource != null)
+                            data = cache.ResourceCache.GetResourceData(def.PathfindingResource);
+                        if(def.CollisionBspResource.HaloOnlinePageableResource != null)
+                            data = cache.ResourceCache.GetResourceData(def.CollisionBspResource);
+                    }
                 }
-                return true;
             }
+            return true;
         }
     }
 }

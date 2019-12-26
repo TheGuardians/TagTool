@@ -41,7 +41,7 @@ namespace TagTool.Geometry
             // Set up ElDorado resource reference
             //
 
-            geometry.Resource = new PageableResource(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
+            geometry.Resource.HaloOnlinePageableResource = new PageableResource(TagResourceTypeGen3.RenderGeometry, CacheContext.Version);
 
             //
             // Convert byte[] of UnknownBlock
@@ -146,14 +146,14 @@ namespace TagTool.Geometry
             // Port Blam resource definition
             //
 
-            var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.ZoneAssetHandle.Index];
+            var resourceEntry = BlamCache.ResourceGestalt.TagResources[geometry.Resource.Gen3ResourceID.Index];
 
-            geometry.Resource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
-            geometry.Resource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+            geometry.Resource.HaloOnlinePageableResource.Resource.DefinitionAddress = resourceEntry.DefinitionAddress;
+            geometry.Resource.HaloOnlinePageableResource.Resource.DefinitionData = BlamCache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
 
             RenderGeometryApiResourceDefinition resourceDefinition = null;
 
-            if (geometry.Resource.Resource.DefinitionData.Length < 0x30)
+            if (geometry.Resource.HaloOnlinePageableResource.Resource.DefinitionData.Length < 0x30)
             {
                 resourceDefinition = new RenderGeometryApiResourceDefinition
                 {
@@ -163,7 +163,7 @@ namespace TagTool.Geometry
             }
             else
             {
-                using (var definitionStream = new MemoryStream(geometry.Resource.Resource.DefinitionData, true))
+                using (var definitionStream = new MemoryStream(geometry.Resource.HaloOnlinePageableResource.Resource.DefinitionData, true))
                 using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
                 using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.BigEndian))
                 {
@@ -172,7 +172,7 @@ namespace TagTool.Geometry
                         definitionStream.Position = fixup.BlockOffset;
                         definitionWriter.Write(fixup.Address.Value);
 
-                        geometry.Resource.Resource.ResourceFixups.Add(fixup);
+                        geometry.Resource.HaloOnlinePageableResource.Resource.ResourceFixups.Add(fixup);
                     }
 
                     foreach (var definitionFixup in resourceEntry.ResourceDefinitionFixups)
@@ -183,12 +183,12 @@ namespace TagTool.Geometry
                             ResourceStructureTypeIndex = definitionFixup.ResourceStructureTypeIndex
                         };
 
-                        geometry.Resource.Resource.ResourceDefinitionFixups.Add(newDefinitionFixup);
+                        geometry.Resource.HaloOnlinePageableResource.Resource.ResourceDefinitionFixups.Add(newDefinitionFixup);
                     }
 
                     var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
 
-                    definitionStream.Position = geometry.Resource.Resource.DefinitionAddress.Offset;
+                    definitionStream.Position = geometry.Resource.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset;
                     resourceDefinition = BlamCache.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(dataContext);
                 }
             }
@@ -197,7 +197,7 @@ namespace TagTool.Geometry
             // Load Blam resource data
             //
 
-            var resourceData = BlamCache.GetRawFromID(geometry.ZoneAssetHandle);
+            var resourceData = BlamCache.GetRawFromID(geometry.Resource.Gen3ResourceID);
             var generateParticles = false;
 
             if (resourceData == null)
@@ -209,7 +209,7 @@ namespace TagTool.Geometry
                 }
                 else
                 {
-                    geometry.Resource.Resource.ResourceType = TagResourceTypeGen3.None;
+                    geometry.Resource.HaloOnlinePageableResource.Resource.ResourceType = TagResourceTypeGen3.None;
                     return geometry;
                 }
             }
@@ -349,14 +349,14 @@ namespace TagTool.Geometry
                             resourceStream.CopyTo(resourceStreams[ResourceLocation.Resources]);
                 }
 
-                geometry.Resource.ChangeLocation(ResourceLocation.Resources);
+                geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.Resources);
 
-                geometry.Resource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Resources], dataStream.ToArray(), out uint compressedSize);
-                geometry.Resource.Page.CompressedBlockSize = compressedSize;
-                geometry.Resource.Page.UncompressedBlockSize = (uint)dataStream.Length;
-                geometry.Resource.DisableChecksum();
+                geometry.Resource.HaloOnlinePageableResource.Page.Index = cache.Add(resourceStreams[ResourceLocation.Resources], dataStream.ToArray(), out uint compressedSize);
+                geometry.Resource.HaloOnlinePageableResource.Page.CompressedBlockSize = compressedSize;
+                geometry.Resource.HaloOnlinePageableResource.Page.UncompressedBlockSize = (uint)dataStream.Length;
+                geometry.Resource.HaloOnlinePageableResource.DisableChecksum();
 
-                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource);
+                var resourceContext = new ResourceSerializationContext(CacheContext, geometry.Resource.HaloOnlinePageableResource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
             }
 

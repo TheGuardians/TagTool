@@ -384,10 +384,10 @@ namespace TagTool.Serialization
         {
             // Read the pointer
             var pointer = reader.ReadUInt32();
-            /*
-            if (pointer == 0)
+            
+            if ( valueType == typeof(PageableResource) && pointer == 0)
                 return null; // Null object
-            */
+            
             // Seek to it and read the object
             var nextOffset = reader.BaseStream.Position;
             reader.BaseStream.Position = context.AddressToOffset((uint)nextOffset - 4, pointer);
