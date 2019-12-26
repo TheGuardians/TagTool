@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\guardian.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\chillout.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -50,37 +50,9 @@ namespace TagTool.Commands.Porting
                         var def = cache.Deserialize<Bitmap>(stream, tag);
                         byte[] bitmapData;
                         foreach (var res in def.Resources)
+                        {
                             bitmapData = cache.ResourceCache.GetResourceData(res);
-                    }
-                    else if(tag.Group.Tag == "snd!")
-                    {
-                        var def = cache.Deserialize<Sound>(stream, tag);
-                        byte[] soundData = cache.ResourceCache.GetResourceData(def.Resource);
-                    }
-                    else if(tag.Group.Tag == "jmad")
-                    {
-                        var def = cache.Deserialize<ModelAnimationGraph>(stream, tag);
-                        byte[] jmadData;
-                        foreach (var res in def.ResourceGroups)
-                            jmadData = cache.ResourceCache.GetResourceData(res.ResourceReference);
-                    }
-                    else if(tag.Group.Tag == "mode")
-                    {
-                        var def = cache.Deserialize<RenderModel>(stream, tag);
-                        byte[] modeData = cache.ResourceCache.GetResourceData(def.Geometry.Resource);
-                    }
-                    else if(tag.Group.Tag == "sbsp")
-                    {
-                        var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
-                        byte[] data;
-                        if (def.Geometry.Resource.HaloOnlinePageableResource != null)
-                            data = cache.ResourceCache.GetResourceData(def.Geometry.Resource);
-                        if(def.Geometry2.Resource.HaloOnlinePageableResource != null)
-                            data = cache.ResourceCache.GetResourceData(def.Geometry2.Resource);
-                        if(def.PathfindingResource.HaloOnlinePageableResource != null)
-                            data = cache.ResourceCache.GetResourceData(def.PathfindingResource);
-                        if(def.CollisionBspResource.HaloOnlinePageableResource != null)
-                            data = cache.ResourceCache.GetResourceData(def.CollisionBspResource);
+                        }  
                     }
                 }
             }

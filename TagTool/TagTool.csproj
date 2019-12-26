@@ -240,8 +240,6 @@
     <Compile Include="Cache\GameCache.cs" />
     <Compile Include="Cache\GameCacheContextHaloOnline.cs" />
     <Compile Include="Cache\HaloOnlineCacheContext.cs" />
-    <Compile Include="Cache\HaloOnlineDatFiles.cs" />
-    <Compile Include="Cache\HaloOnlineMapFile.cs" />
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\MapVariant.cs" />
@@ -251,12 +249,12 @@
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringIdCache.cs" />
     <Compile Include="Cache\StringIdResolver.cs" />
-    <Compile Include="Cache\StringIdResolverHalo3.cs" />
-    <Compile Include="Cache\StringIdResolverHaloReach.cs" />
-    <Compile Include="Cache\StringIdResolverHalo3ODST.cs" />
-    <Compile Include="Cache\StringIdResolverMS23.cs" />
-    <Compile Include="Cache\StringIdResolverMS28.cs" />
-    <Compile Include="Cache\StringIdResolverMS30.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHalo3.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHaloReach.cs" />
+    <Compile Include="Cache\Gen3\StringIdResolverHalo3ODST.cs" />
+    <Compile Include="Cache\HaloOnline\StringIdResolverMS23.cs" />
+    <Compile Include="Cache\HaloOnline\StringIdResolverMS28.cs" />
+    <Compile Include="Cache\HaloOnline\StringIdResolverMS30.cs" />
     <Compile Include="Cache\TagCache.cs" />
     <Compile Include="Cache\TagCacheIndex.cs" />
     <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
@@ -880,10 +878,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Cache\Gen3\" />
-    <Folder Include="Cache\HaloOnline\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
