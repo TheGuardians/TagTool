@@ -177,15 +177,18 @@ namespace TagTool.Commands.Porting
         private void SetResourceDefinitionData(BaseBitmap bitmap, Bitmap.Image image, BitmapTextureInteropResource.BitmapDefinition definition)
         {
             definition.PrimaryResourceData = new TagData(bitmap.Data.Length, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
-            definition.Bitmap.Width = (short)bitmap.Width;
-            definition.Bitmap.Height = (short)bitmap.Height;
-            definition.Bitmap.Depth = (byte)bitmap.Depth;
-            definition.Bitmap.MipmapCount =(byte)(bitmap.MipMapCount + 1);
-            definition.Bitmap.BitmapType = bitmap.Type;
-            definition.Bitmap.D3DFormat = (D3DFormat)GetUnusedFormat(bitmap.Format);
-            definition.Bitmap.Format = bitmap.Format;
-            definition.Bitmap.Curve = image.Curve;
-            definition.Bitmap.Flags = bitmap.Flags;
+            definition.Bitmap = new BitmapTextureInteropDefinition
+            {
+                Width = (short)bitmap.Width,
+                Height = (short)bitmap.Height,
+                Depth = (byte)bitmap.Depth,
+                MipmapCount = (byte)(bitmap.MipMapCount + 1),
+                BitmapType = bitmap.Type,
+                D3DFormat = (D3DFormat)GetUnusedFormat(bitmap.Format),
+                Format = bitmap.Format,
+                Curve = image.Curve,
+                Flags = bitmap.Flags
+            };
         }
 
         private int GetUnusedFormat(BitmapFormat format)
