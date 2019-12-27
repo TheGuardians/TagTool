@@ -785,6 +785,9 @@ namespace TagTool.Commands.Porting
 		{
 			switch (data)
 			{
+                case TagResourceReference _:
+                    return data;
+
 				case StringId stringId:
 					stringId = ConvertStringId(stringId);
 					return stringId;
