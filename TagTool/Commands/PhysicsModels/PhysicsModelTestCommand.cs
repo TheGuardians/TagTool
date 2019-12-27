@@ -33,6 +33,12 @@ namespace TagTool.Commands.PhysicsModels
                 return false;
             }
 
+            if (Environment.Is64BitProcess) // JsonMoppNet uses Havok 6.5.0, which is x86 only
+            {
+                Console.WriteLine("TagTool must be compiled in 32bit mode to use this command.");
+                return true;
+            }
+
             CachedTagInstance tag = null;
             bool b_duplicate;
             // optional argument: forces overwriting of tags that are not type: phmo
