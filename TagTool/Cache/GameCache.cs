@@ -191,8 +191,8 @@ namespace TagTool.Cache
         public abstract RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference);
         public abstract ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference);
         public abstract SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference);
-        public abstract StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference);
-        public abstract StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
+        public abstract StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference);
+        public abstract StructureBspCacheFileTagResourcesTest GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
     }
 
     public class CacheLocalizedStringTest

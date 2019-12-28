@@ -36,16 +36,6 @@ namespace TagTool.Serialization
         public uint AddressToOffset(uint currentOffset, uint address)
         {
             var resourceAddress = new CacheResourceAddress(address);
-
-            if(resourceAddress.Type == CacheResourceAddressType.Definition)
-            {
-
-            }
-            else if(resourceAddress.Type == CacheResourceAddressType.Resource)
-            {
-
-            }
-
             return (uint)resourceAddress.Offset;
         }
 

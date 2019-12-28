@@ -1328,20 +1328,20 @@ namespace TagTool.Cache
             return GetResourceDefinition<SoundResourceDefinition>(resourceReference);
         }
 
-        public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
+        public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Collision)
                 return null;
-            return GetResourceDefinition<StructureBspTagResources>(resourceReference);
+            return GetResourceDefinition<StructureBspTagResourcesTest>(resourceReference);
         }
 
-        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
+        public override StructureBspCacheFileTagResourcesTest GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Pathfinding)
                 return null;
-            return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
+            return GetResourceDefinition<StructureBspCacheFileTagResourcesTest>(resourceReference);
         }
 
         //

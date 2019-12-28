@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\010_jungle.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\odst\sc100.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -47,7 +47,7 @@ namespace TagTool.Commands.Porting
                 {
                     // TODO: add resource size calculation for sbsp
 
-                    
+                    /*
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
@@ -76,16 +76,24 @@ namespace TagTool.Commands.Porting
                         var def = cache.Deserialize<RenderModel>(stream, tag);
                         var resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
                     }
-
-                    /*
+                    
+                    if(tag.Group.Tag == "snd!")
+                    {
+                        var def = cache.Deserialize<Sound>(stream, tag);
+                        var resource = cache.ResourceCache.GetSoundResourceDefinition(def.Resource);
+                    }
+                    */
+                    
                     if (tag.Group.Tag == "sbsp")
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
 
-                        var resourceDef = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
-                        var data = cache.ResourceCache.GetResourceData(def.CollisionBspResource);
+                        var geo1Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
+                        var geo2Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry2.Resource);
+                        var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
+                        var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
 
-                    }*/
+                    }
                 }
             }
             return true;
