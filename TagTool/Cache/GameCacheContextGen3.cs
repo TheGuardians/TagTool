@@ -661,15 +661,36 @@ namespace TagTool.Cache
             {
                 var animationDefinition = resourceDefinition as ModelAnimationTagResource;
                 foreach (var group in animationDefinition.GroupMembers)
-                    resourceSize.PrimarySize += group.AnimationData.Size;
+                {
+                    if(group.AnimationData.Size % 0x10 != 0)
+                        resourceSize.PrimarySize += group.AnimationData.Size - (group.AnimationData.Size % 0x10) + 0x10;
+                    else
+                        resourceSize.PrimarySize += group.AnimationData.Size;
+                }         
             }
             else if (resourceDefinition.GetType() == typeof(RenderGeometryApiResourceDefinition))
             {
                 var renderGeometryDefinition = resourceDefinition as RenderGeometryApiResourceDefinition;
                 foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
-                    resourceSize.PrimarySize = vertexBuffer.Definition.Data.Size;
+                {
+                    if(vertexBuffer.Definition.Data.Size % 0x4 != 0)
+                    {
+                        resourceSize.PrimarySize += vertexBuffer.Definition.Data.Size - (vertexBuffer.Definition.Data.Size % 0x4) + 0x4;
+                    }
+                    else
+                        resourceSize.PrimarySize += vertexBuffer.Definition.Data.Size;
+                }
+                    
                 foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
-                    resourceSize.PrimarySize = indexBuffer.Definition.Data.Size;
+                {
+                    if (indexBuffer.Definition.Data.Size % 0x4 != 0)
+                    {
+                        resourceSize.PrimarySize += indexBuffer.Definition.Data.Size - (indexBuffer.Definition.Data.Size % 0x4) + 0x4;
+                    }
+                    else
+                        resourceSize.PrimarySize += indexBuffer.Definition.Data.Size;
+                }
+                    
             }
             else if (resourceDefinition.GetType() == typeof(StructureBspTagResources))
             {
@@ -685,7 +706,7 @@ namespace TagTool.Cache
             return Cache.StringTable.GetString(ResourceGestalt.ResourceTypes[tagResource.ResourceTypeIndex].Name);
         }
 
-        private void ApplyResourceFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
+        private void ApplyResourceDefinitionFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
@@ -703,8 +724,7 @@ namespace TagTool.Cache
             }
         }
 
-        // I don't like this solution as it breaks offsets in the TagData, really gotta use a dual stream in the deserializer
-        private void ApplyResourceFixupsExtraRawOffset(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
+        private void ApplyResourceDataFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
             using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
@@ -729,7 +749,12 @@ namespace TagTool.Cache
             T result;
             byte[] resourceDefinitionData = new byte[tagResource.FixupInformationLength];
             Array.Copy(ResourceGestalt.FixupInformation, tagResource.FixupInformationOffset, resourceDefinitionData, 0, tagResource.FixupInformationLength);
-            ApplyResourceFixups(tagResource, resourceDefinitionData);
+
+            ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
+
+            if (typeof(T) != typeof(StructureBspTagResources) && typeof(T) != typeof(StructureBspCacheFileTagResources))
+                ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
+
             using (var fixupStream = new MemoryStream(resourceDefinitionData))
             using (var fixupReader = new EndianReader(fixupStream, EndianFormat.BigEndian))
             {
@@ -739,6 +764,8 @@ namespace TagTool.Cache
                 result = deserializer.Deserialize<T>(context);
             }
 
+            // get resource data
+
             var resourceSizes = GetResourceSize(tagResource, result);
             byte[] resourceRawDataPrimary = GetPrimaryResource(resourceReference.Gen3ResourceID, resourceSizes.PrimarySize);
             byte[] resourceRawDataSecondary = GetSecondaryResource(resourceReference.Gen3ResourceID, resourceSizes.SecondarySize);
@@ -746,7 +773,7 @@ namespace TagTool.Cache
             if (resourceRawDataPrimary == null)
                 return result;
 
-            // only these types use the resourceRawData for the definition structure
+            // only these types use the resourceRawData for the definition structure, apply fixups again and reserialize
             if(typeof(T) == typeof(StructureBspTagResources) || typeof(T) == typeof(StructureBspCacheFileTagResources))
             {
                 // combine both the definition data and the resource data in a single byte[] then update the offsets
@@ -755,8 +782,8 @@ namespace TagTool.Cache
                 byte[] resourceData = new byte[resourceDefinitionData.Length + resourceRawDataPrimary.Length];
                 Array.Copy(resourceDefinitionData, 0, resourceData, 0, resourceDefinitionData.Length);
                 Array.Copy(resourceRawDataPrimary, 0, resourceData, offset, resourceRawDataPrimary.Length);
-
-                ApplyResourceFixupsExtraRawOffset(tagResource, resourceData, offset);
+                // not the best way to go about this, ideally  the deserializer would have access to both the definitionData and resourceData
+                ApplyResourceDataFixups(tagResource, resourceData, offset);
 
                 // deserialize the resource definition again
                 using (var definitionDataStream = new MemoryStream(resourceData))
@@ -768,38 +795,42 @@ namespace TagTool.Cache
                     definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
                     result = deserializer.Deserialize<T>(context);
                 }
+                // they do not contain TagData as byte[] so we are done
+                return result;
             }
+            else
+            {
+                // set the tagData to the resourceData and return
+                // in the future we could set the byte[] exactly to the data and ignore offsets
+                if (result.GetType() == typeof(BitmapTextureInteropResource))
+                {
+                    var bitmapDefinition = result as BitmapTextureInteropResource;
+                    bitmapDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
+                    bitmapDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
+                }
+                else if (result.GetType() == typeof(BitmapTextureInterleavedInteropResource))
+                {
+                    var bitmapInterleavedDefinition = result as BitmapTextureInterleavedInteropResource;
+                    bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
+                    bitmapInterleavedDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
+                }
+                else if (result.GetType() == typeof(ModelAnimationTagResource))
+                {
+                    var animationDefinition = result as ModelAnimationTagResource;
+                    foreach (var group in animationDefinition.GroupMembers)
+                        group.AnimationData.Data = resourceRawDataPrimary;
+                }
+                else if (result.GetType() == typeof(RenderGeometryApiResourceDefinition))
+                {
+                    var renderGeometryDefinition = result as RenderGeometryApiResourceDefinition;
+                    foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
+                        vertexBuffer.Definition.Data.Data = resourceRawDataPrimary;
+                    foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
+                        indexBuffer.Definition.Data.Data = resourceRawDataPrimary;
+                }
 
-            // set the tagData to the resourceData  (if any) and return
-
-            if (result.GetType() == typeof(BitmapTextureInteropResource))
-            {
-                var bitmapDefinition = result as BitmapTextureInteropResource;
-                bitmapDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
-                bitmapDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
+                return result;
             }
-            else if (result.GetType() == typeof(BitmapTextureInterleavedInteropResource))
-            {
-                var bitmapInterleavedDefinition = result as BitmapTextureInterleavedInteropResource;
-                bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
-                bitmapInterleavedDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
-            }
-            else if (result.GetType() == typeof(ModelAnimationTagResource))
-            {
-                var animationDefinition = result as ModelAnimationTagResource;
-                foreach (var group in animationDefinition.GroupMembers)
-                    group.AnimationData.Data = resourceRawDataPrimary;
-            }
-            else if (result.GetType() == typeof(RenderGeometryApiResourceDefinition))
-            {
-                var renderGeometryDefinition = result as RenderGeometryApiResourceDefinition;
-                foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
-                    vertexBuffer.Definition.Data.Data = resourceRawDataPrimary;
-                foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
-                    indexBuffer.Definition.Data.Data = resourceRawDataPrimary;
-            }
-
-            return result;
         }
 
         private byte[] GetResourceData(TagResourceReference resourceReference, int PrimarySize, int SecondarySize)

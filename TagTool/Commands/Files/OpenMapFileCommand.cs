@@ -46,15 +46,20 @@ namespace TagTool.Commands.Porting
                 foreach (var tag in cache.TagCache.TagTable)
                 {
                     // TODO: add resource size calculation for sbsp
-                    // TODO: find proper way to deserialize the resource definitions using dual streams for both definition data and resources
 
+                    
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
                         foreach (var res in def.Resources)
                         {
                             var resource = cache.ResourceCache.GetBitmapTextureInteropResource(res);
-                        }  
+                        }
+                        foreach (var res in def.InterleavedResources)
+                        {
+                            var interleavedResource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(res);
+                        }
+                            
                     }
                     
                     if (tag.Group.Tag == "jmad")
@@ -64,6 +69,12 @@ namespace TagTool.Commands.Porting
                         {
                             var resource = cache.ResourceCache.GetModelAnimationTagResource(res.ResourceReference);
                         }
+                    }
+
+                    if(tag.Group.Tag == "mode")
+                    {
+                        var def = cache.Deserialize<RenderModel>(stream, tag);
+                        var resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
                     }
 
                     /*
