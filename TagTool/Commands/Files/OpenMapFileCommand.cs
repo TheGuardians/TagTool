@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\chillout.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\010_jungle.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -45,15 +45,36 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
+                    // TODO: add resource size calculation for sbsp
+                    // TODO: find proper way to deserialize the resource definitions using dual streams for both definition data and resources
+
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
-                        byte[] bitmapData;
                         foreach (var res in def.Resources)
                         {
-                            bitmapData = cache.ResourceCache.GetResourceData(res);
+                            var resource = cache.ResourceCache.GetBitmapTextureInteropResource(res);
                         }  
                     }
+                    
+                    if (tag.Group.Tag == "jmad")
+                    {
+                        var def = cache.Deserialize<ModelAnimationGraph>(stream, tag);
+                        foreach (var res in def.ResourceGroups)
+                        {
+                            var resource = cache.ResourceCache.GetModelAnimationTagResource(res.ResourceReference);
+                        }
+                    }
+
+                    /*
+                    if (tag.Group.Tag == "sbsp")
+                    {
+                        var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
+
+                        var resourceDef = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
+                        var data = cache.ResourceCache.GetResourceData(def.CollisionBspResource);
+
+                    }*/
                 }
             }
             return true;

@@ -325,6 +325,7 @@
     <Compile Include="Scripting\HsScriptParameter.cs" />
     <Compile Include="Scripting\HsScriptType.cs" />
     <Compile Include="Scripting\HsType.cs" />
+    <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />
     <Compile Include="Serialization\Gen3SerializationContext.cs" />
     <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\HaloOnlineSerializationContext.cs" />

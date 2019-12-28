@@ -1149,7 +1149,7 @@ namespace TagTool.Cache
         // Overrides
         //
 
-        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        public byte[] GetResourceData(TagResourceReference resourceReference)
         {
             var pageableResource = GetPageableResource(resourceReference);
             var cache = GetResourceCache(pageableResource);
@@ -1166,44 +1166,182 @@ namespace TagTool.Cache
             return result;
         }
 
+        private void ApplyResourceFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData)
+        {
+            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
+            {
+                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                {
+                    var fixup = tagResource.ResourceFixups[i];
+                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
+                    fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                    fixupWriter.Write(fixup.Address.Offset);
+                }
+            }
+        }
+
+        private void ApplyResourceFixupsExtraRawOffset(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
+        {
+            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
+            {
+                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                {
+                    var fixup = tagResource.ResourceFixups[i];
+                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
+                    if (fixup.Address.Type == CacheResourceAddressType.Resource)
+                    {
+                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                        fixupWriter.Write(fixup.Address.Offset + rawOffset);
+                    }
+                }
+            }
+        }
+
+        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        {
+            var tagResource = GetPageableResource(resourceReference).Resource;
+
+            T result;
+            byte[] resourceDefinitionData = tagResource.DefinitionData;
+            ApplyResourceFixups(tagResource, resourceDefinitionData);
+            using (var definitionDataStream = new MemoryStream(resourceDefinitionData))
+            using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.LittleEndian))
+            {
+                var context = new DataSerializationContext(definitionDataReader);
+                var deserializer = new TagDeserializer(Cache.Version);
+                // deserialize without access to the data
+                definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
+                result = deserializer.Deserialize<T>(context);
+            }
+
+            byte[] resourceRawData = GetResourceData(resourceReference);
+
+            if (resourceRawData == null)
+                return result;
+
+            // combine both the definition data and the resource data in a single byte[] then update the offsets
+            // pointing to data in the resource data array
+            var offset = resourceDefinitionData.Length;
+            byte[] resourceData = new byte[resourceDefinitionData.Length + resourceRawData.Length];
+            Array.Copy(resourceDefinitionData, 0, resourceData, 0, resourceDefinitionData.Length);
+            Array.Copy(resourceRawData, 0, resourceData, offset, resourceRawData.Length);
+            ApplyResourceFixupsExtraRawOffset(tagResource, resourceData, offset);
+
+            // deserialize the resource definition again
+            using (var definitionDataStream = new MemoryStream(resourceData))
+            using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.LittleEndian))
+            {
+                var context = new DataSerializationContext(definitionDataReader);
+                var deserializer = new TagDeserializer(Cache.Version);
+                // deserialize without access to the data
+                definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
+                result = deserializer.Deserialize<T>(context);
+            }
+
+            // set the tagData to the resourceData  (if any) and return
+
+            if(result.GetType() == typeof(BinkResource))
+            {
+                var binkDefinition = result as BinkResource;
+                binkDefinition.Data.Data = resourceRawData;
+            }
+            else if(result.GetType() == typeof(BitmapTextureInteropResource))
+            {
+                var bitmapDefinition = result as BitmapTextureInteropResource;
+                bitmapDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawData;
+            }
+            else if (result.GetType() == typeof(BitmapTextureInterleavedInteropResource))
+            {
+                var bitmapInterleavedDefinition = result as BitmapTextureInterleavedInteropResource;
+                bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawData;
+            }
+            else if (result.GetType() == typeof(ModelAnimationTagResource))
+            {
+                var animationDefinition = result as ModelAnimationTagResource;
+                foreach(var group in animationDefinition.GroupMembers)
+                    group.AnimationData.Data = resourceRawData;
+            }
+            else if (result.GetType() == typeof(RenderGeometryApiResourceDefinition))
+            {
+                var renderGeometryDefinition = result as RenderGeometryApiResourceDefinition;
+                foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
+                    vertexBuffer.Definition.Data.Data = resourceRawData;
+                foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
+                    indexBuffer.Definition.Data.Data = resourceRawData;
+            }
+            else if (result.GetType() == typeof(SoundResourceDefinition))
+            {
+                var soundDefinition = result as SoundResourceDefinition;
+                soundDefinition.Data.Data = resourceRawData;
+            }
+
+            return result;
+        }
+
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Bink)
+                return null;
+            return GetResourceDefinition<BinkResource>(resourceReference);
         }
 
         public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Bitmap)
+                return null;
+            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
         }
 
         public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.BitmapInterleaved)
+                return null;
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
         }
 
         public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.RenderGeometry)
+                return null;
+            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
         }
 
         public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Animation)
+                return null;
+            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Sound)
+                return null;
+            return GetResourceDefinition<SoundResourceDefinition>(resourceReference);
         }
 
         public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Collision)
+                return null;
+            return GetResourceDefinition<StructureBspTagResources>(resourceReference);
         }
 
         public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var resource = GetPageableResource(resourceReference).Resource;
+            if (resource.ResourceType != TagResourceTypeGen3.Pathfinding)
+                return null;
+            return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
 
         //

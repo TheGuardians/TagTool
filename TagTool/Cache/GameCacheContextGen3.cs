@@ -553,6 +553,14 @@ namespace TagTool.Cache
             return ResourceGestalt.TagResources[resourceReference.Gen3ResourceID.Index];
         }
 
+        public bool IsResourceValid(TagResourceGen3 tagResource)
+        {
+            if (tagResource.ResourceTypeIndex == -1)
+                return false;
+            else 
+                return true;
+        }
+
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();
@@ -561,113 +569,115 @@ namespace TagTool.Cache
         public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInteropResource>(tagResource);
+            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
         }
 
         public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "bitmap_texture_interleaved_interop_resource")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interleaved_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(tagResource);
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
         }
 
         public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
                 return null;
-            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(tagResource);
+            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
         {
-            throw new NotImplementedException();
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (!IsResourceValid(tagResource))
+                return null;
+            var resourceSize = GetResourceSize(tagResource, null);
+            byte[] data = GetResourceData(resourceReference, resourceSize.PrimarySize, resourceSize.SecondarySize);
+            // does not exist in gen3, create one.
+            var resourceDef = new SoundResourceDefinition
+            {
+                Data = new TagData
+                {
+                    Size = resourceSize.PrimarySize + resourceSize.SecondarySize,
+                    Data = data
+                }
+            };
+            return resourceDef;
         }
 
         public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "model_animation_tag_resource")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "model_animation_tag_resource")
                 return null;
-            return GetResourceDefinition<ModelAnimationTagResource>(tagResource);
+            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
         }
 
         public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "structure_bsp_tag_resources")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_tag_resources")
                 return null;
-            return GetResourceDefinition<StructureBspTagResources>(tagResource);
+            return GetResourceDefinition<StructureBspTagResources>(resourceReference);
         }
 
         public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
-            if (GetResourceTypeName(tagResource) != "structure_bsp_cache_file_tag_resources")
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_cache_file_tag_resources")
                 return null;
-            return GetResourceDefinition<StructureBspCacheFileTagResources>(tagResource);
+            return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
 
-        public override byte[] GetResourceData(TagResourceReference resourceReference)
+        private ResourceSize GetResourceSize(TagResourceGen3 tagResource, object resourceDefinition)
         {
-            if (!isLoaded)
-                LoadResourceCache();
-
-            var tagResource = GetTagResourceFromReference(resourceReference);
-
-            if (tagResource.ResourceTypeIndex == -1)    // no resource
-                return null;
-
-            int primarySize = 0;
-            int secondarySize = 0;
-
-            switch (GetResourceTypeName(tagResource))
+            ResourceSize resourceSize = new ResourceSize();
+            if (GetResourceTypeName(tagResource) == "sound_resource_definition")
             {
-                case "bitmap_texture_interop_resource":
-                    var bitmapDefinition = GetBitmapTextureInteropResource(resourceReference);
-                    primarySize = bitmapDefinition.Texture.Definition.PrimaryResourceData.Size;
-                    secondarySize = bitmapDefinition.Texture.Definition.SecondaryResourceData.Size;
-                    break;
+                var segment = ResourceLayoutTable.Segments[tagResource.SegmentIndex];
 
-                case "bitmap_texture_interleaved_interop_resource":
-                    var interleavedBitmapDefinition = GetBitmapTextureInterleavedInteropResource(resourceReference);
-                    primarySize = interleavedBitmapDefinition.Texture.Definition.PrimaryResourceData.Size;
-                    secondarySize = interleavedBitmapDefinition.Texture.Definition.SecondaryResourceData.Size;
-                    break;
+                resourceSize.PrimarySize = ResourceLayoutTable.Sizes[segment.RequiredSizeIndex].OverallSize;
 
-                case "sound_resource_definition":
-                    var segment = ResourceLayoutTable.Segments[tagResource.SegmentIndex];
-                    primarySize = segment.RequiredSizeIndex != -1 ? ResourceLayoutTable.Sizes[segment.RequiredSizeIndex].OverallSize : 0;
-                    secondarySize = segment.OptionalSizeIndex != -1 ? ResourceLayoutTable.Sizes[segment.OptionalSizeIndex].OverallSize : 0;
-                    break;
-
-                case "model_animation_tag_resource":
-                    var animationDefinition = GetModelAnimationTagResource(resourceReference);
-                    foreach (var group in animationDefinition.GroupMembers)
-                        primarySize += group.AnimationData.Size;
-                    break;
-
-                case "render_geometry_api_resource_definition":
-                    var geometryDefinition = GetRenderGeometryApiResourceDefinition(resourceReference);
-                    foreach(var vertexBuffer in geometryDefinition.VertexBuffers)
-                        primarySize += vertexBuffer.Definition.Data.Size;
-                    foreach (var indexBuffer in geometryDefinition.IndexBuffers)
-                        primarySize += indexBuffer.Definition.Data.Size;
-                    break;
-
-                case "structure_bsp_tag_resources":
-                case "structure_bsp_cache_file_tag_resources":
-                    Console.WriteLine($"Tag resource {GetResourceTypeName(tagResource)} does not contain data in pages.");
-                    return null;
-
-                default:
-                    throw new Exception($"Unsupported Resource Type {GetResourceTypeName(tagResource)}");
-
+                if(segment.OptionalSizeIndex != -1)
+                    resourceSize.SecondarySize = ResourceLayoutTable.Sizes[segment.OptionalSizeIndex].OverallSize;
             }
-            return GetResourceData(resourceReference, primarySize, secondarySize);
+            else if (resourceDefinition.GetType() == typeof(BitmapTextureInteropResource))
+            {
+                var bitmapDefinition = resourceDefinition as BitmapTextureInteropResource;
+                resourceSize.PrimarySize = bitmapDefinition.Texture.Definition.PrimaryResourceData.Size;
+                resourceSize.SecondarySize = bitmapDefinition.Texture.Definition.SecondaryResourceData.Size;
+            }
+            else if (resourceDefinition.GetType() == typeof(BitmapTextureInterleavedInteropResource))
+            {
+                var bitmapInterleavedDefinition = resourceDefinition as BitmapTextureInterleavedInteropResource;
+                resourceSize.PrimarySize = bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Size;
+                resourceSize.SecondarySize = bitmapInterleavedDefinition.Texture.Definition.SecondaryResourceData.Size;
+            }
+            else if (resourceDefinition.GetType() == typeof(ModelAnimationTagResource))
+            {
+                var animationDefinition = resourceDefinition as ModelAnimationTagResource;
+                foreach (var group in animationDefinition.GroupMembers)
+                    resourceSize.PrimarySize += group.AnimationData.Size;
+            }
+            else if (resourceDefinition.GetType() == typeof(RenderGeometryApiResourceDefinition))
+            {
+                var renderGeometryDefinition = resourceDefinition as RenderGeometryApiResourceDefinition;
+                foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
+                    resourceSize.PrimarySize = vertexBuffer.Definition.Data.Size;
+                foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
+                    resourceSize.PrimarySize = indexBuffer.Definition.Data.Size;
+            }
+            else if (resourceDefinition.GetType() == typeof(StructureBspTagResources))
+            {
+            }
+            else if (resourceDefinition.GetType() == typeof(StructureBspCacheFileTagResources))
+            {
+            }
+            return resourceSize;
         }
 
         private string GetResourceTypeName(TagResourceGen3 tagResource)
@@ -684,14 +694,38 @@ namespace TagTool.Cache
                 {
                     var fixup = tagResource.ResourceFixups[i];
                     // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
-                    fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                    fixupWriter.Write(fixup.Address.Offset);
+                    if(fixup.Address.Type == CacheResourceAddressType.Definition)
+                    {
+                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                        fixupWriter.Write(fixup.Address.Offset);
+                    }
                 }
             }
         }
 
-        private T GetResourceDefinition<T>(TagResourceGen3 tagResource)
+        // I don't like this solution as it breaks offsets in the TagData, really gotta use a dual stream in the deserializer
+        private void ApplyResourceFixupsExtraRawOffset(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
         {
+            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
+            {
+                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
+                {
+                    var fixup = tagResource.ResourceFixups[i];
+                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
+                    if (fixup.Address.Type == CacheResourceAddressType.Resource || fixup.Address.Type == CacheResourceAddressType.SecondaryResource)
+                    {
+                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                        fixupWriter.Write(fixup.Address.Offset + rawOffset);
+                    }
+                }
+            }
+        }
+
+        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+
             T result;
             byte[] resourceDefinitionData = new byte[tagResource.FixupInformationLength];
             Array.Copy(ResourceGestalt.FixupInformation, tagResource.FixupInformationOffset, resourceDefinitionData, 0, tagResource.FixupInformationLength);
@@ -703,6 +737,66 @@ namespace TagTool.Cache
                 var deserializer = new TagDeserializer(Cache.Version);
                 fixupReader.SeekTo(tagResource.DefinitionAddress.Offset);
                 result = deserializer.Deserialize<T>(context);
+            }
+
+            var resourceSizes = GetResourceSize(tagResource, result);
+            byte[] resourceRawDataPrimary = GetPrimaryResource(resourceReference.Gen3ResourceID, resourceSizes.PrimarySize);
+            byte[] resourceRawDataSecondary = GetSecondaryResource(resourceReference.Gen3ResourceID, resourceSizes.SecondarySize);
+
+            if (resourceRawDataPrimary == null)
+                return result;
+
+            // only these types use the resourceRawData for the definition structure
+            if(typeof(T) == typeof(StructureBspTagResources) || typeof(T) == typeof(StructureBspCacheFileTagResources))
+            {
+                // combine both the definition data and the resource data in a single byte[] then update the offsets
+                // pointing to data in the resource data array. This will only use the primary resource
+                var offset = resourceDefinitionData.Length;
+                byte[] resourceData = new byte[resourceDefinitionData.Length + resourceRawDataPrimary.Length];
+                Array.Copy(resourceDefinitionData, 0, resourceData, 0, resourceDefinitionData.Length);
+                Array.Copy(resourceRawDataPrimary, 0, resourceData, offset, resourceRawDataPrimary.Length);
+
+                ApplyResourceFixupsExtraRawOffset(tagResource, resourceData, offset);
+
+                // deserialize the resource definition again
+                using (var definitionDataStream = new MemoryStream(resourceData))
+                using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.BigEndian))
+                {
+                    var context = new DataSerializationContext(definitionDataReader);
+                    var deserializer = new TagDeserializer(Cache.Version);
+                    // deserialize without access to the data
+                    definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
+                    result = deserializer.Deserialize<T>(context);
+                }
+            }
+
+            // set the tagData to the resourceData  (if any) and return
+
+            if (result.GetType() == typeof(BitmapTextureInteropResource))
+            {
+                var bitmapDefinition = result as BitmapTextureInteropResource;
+                bitmapDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
+                bitmapDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
+            }
+            else if (result.GetType() == typeof(BitmapTextureInterleavedInteropResource))
+            {
+                var bitmapInterleavedDefinition = result as BitmapTextureInterleavedInteropResource;
+                bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawDataPrimary;
+                bitmapInterleavedDefinition.Texture.Definition.SecondaryResourceData.Data = resourceRawDataSecondary;
+            }
+            else if (result.GetType() == typeof(ModelAnimationTagResource))
+            {
+                var animationDefinition = result as ModelAnimationTagResource;
+                foreach (var group in animationDefinition.GroupMembers)
+                    group.AnimationData.Data = resourceRawDataPrimary;
+            }
+            else if (result.GetType() == typeof(RenderGeometryApiResourceDefinition))
+            {
+                var renderGeometryDefinition = result as RenderGeometryApiResourceDefinition;
+                foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
+                    vertexBuffer.Definition.Data.Data = resourceRawDataPrimary;
+                foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
+                    indexBuffer.Definition.Data.Data = resourceRawDataPrimary;
             }
 
             return result;

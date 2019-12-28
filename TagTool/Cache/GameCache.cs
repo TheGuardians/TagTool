@@ -184,7 +184,7 @@ namespace TagTool.Cache
 
     public abstract class ResourceCacheTest
     {
-        public abstract byte[] GetResourceData(TagResourceReference resourceReference);
+        //public abstract byte[] GetResourceData(TagResourceReference resourceReference);
         public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);
@@ -210,4 +210,10 @@ namespace TagTool.Cache
     }
 
     public class LocaleTable : List<CacheLocalizedStringTest> { }
+
+    public class ResourceSize
+    {
+        public int PrimarySize;
+        public int SecondarySize;
+    }
 }

@@ -18,6 +18,11 @@ namespace TagTool.Cache
         /// <summary>
         /// The address points to a location in the raw resource data.
         /// </summary>
-        Resource
+        Resource,
+
+        /// <summary>
+        /// The address points to a location in the raw secondary resource data. Gen 3 only
+        /// </summary>
+        SecondaryResource,
     }
 }
