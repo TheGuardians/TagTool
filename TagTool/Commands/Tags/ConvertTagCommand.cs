@@ -364,7 +364,7 @@ namespace TagTool.Commands.Tags
                     if (buffer.Definition.Data.Size == 0)
                         continue;
                     inStream.Position = buffer.Definition.Data.Address.Offset;
-                    buffer.Definition.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, (int)outStream.Position);
+                    buffer.Definition.Data.Address = new CacheAddress(CacheAddressType.Data, (int)outStream.Position);
                     var bufferData = new byte[buffer.Definition.Data.Size];
                     inStream.Read(bufferData, 0, bufferData.Length);
                     outStream.Write(bufferData, 0, bufferData.Length);
@@ -392,7 +392,7 @@ namespace TagTool.Commands.Tags
             var count = buffer.Count;
             var startPos = (int)outStream.Position;
             inStream.Position = buffer.Data.Address.Offset;
-            buffer.Data.Address = new CacheResourceAddress(CacheResourceAddressType.Resource, startPos);
+            buffer.Data.Address = new CacheAddress(CacheAddressType.Data, startPos);
             switch (buffer.Format)
             {
                 case VertexBufferFormat.World:

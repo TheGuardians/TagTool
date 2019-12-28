@@ -292,7 +292,7 @@ namespace TagTool.Commands.Porting
             using (var definitionStream = new MemoryStream(BlamCache.ResourceGestalt.FixupInformation))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
             {
-                var dataContext = new DataSerializationContext(definitionReader, null, CacheResourceAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, null, CacheAddressType.Definition);
 
                 definitionReader.SeekTo(definitionEntry.FixupInformationOffset + (definitionEntry.FixupInformationLength - 24));
 
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Porting
                                 Size = definitionReader.ReadInt32(),
                                 Unused4 = definitionReader.ReadInt32(),
                                 Unused8 = definitionReader.ReadInt32(),
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Memory, definitionReader.ReadInt32()),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
                                 Unused10 = definitionReader.ReadInt32()
                             }
                         }
@@ -337,7 +337,7 @@ namespace TagTool.Commands.Porting
                                 Size = definitionReader.ReadInt32(),
                                 Unused4 = definitionReader.ReadInt32(),
                                 Unused8 = definitionReader.ReadInt32(),
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Memory, definitionReader.ReadInt32()),
+                                Address = new CacheAddress(CacheAddressType.Memory, definitionReader.ReadInt32()),
                                 Unused10 = definitionReader.ReadInt32()
                             }
                         }

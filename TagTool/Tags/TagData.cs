@@ -16,7 +16,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The address of the referenced data.
         /// </summary>
-        public CacheResourceAddress Address;
+        public CacheAddress Address;
 
         public int Unused10;
 
@@ -27,7 +27,7 @@ namespace TagTool.Tags
         {
         }
 
-        public TagData(int size, CacheResourceAddress address)
+        public TagData(int size, CacheAddress address)
         {
             Size = size;
             Address = address;

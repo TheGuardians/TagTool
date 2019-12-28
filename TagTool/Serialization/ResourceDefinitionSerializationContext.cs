@@ -14,28 +14,28 @@ namespace TagTool.Serialization
         public EndianReader ResourceReader { get; }
         public EndianWriter ResourceWriter { get;  }
 
-        public CacheResourceAddressType AddressType { get; }
+        public CacheAddressType AddressType { get; }
 
-        public ResourceDefinitionSerializationContext(EndianReader reader, EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory)
+        public ResourceDefinitionSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
         {
             Reader = reader;
             Writer = writer;
             AddressType = addressType;
         }
 
-        public ResourceDefinitionSerializationContext(EndianReader reader, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
+        public ResourceDefinitionSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory) :
             this(reader, null, addressType)
         {
         }
 
-        public ResourceDefinitionSerializationContext(EndianWriter writer, CacheResourceAddressType addressType = CacheResourceAddressType.Memory) :
+        public ResourceDefinitionSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory) :
             this(null, writer, addressType)
         {
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            var resourceAddress = new CacheResourceAddress(address);
+            var resourceAddress = new CacheAddress(address);
             return (uint)resourceAddress.Offset;
         }
 
@@ -72,7 +72,7 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }

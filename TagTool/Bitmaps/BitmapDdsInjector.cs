@@ -68,7 +68,7 @@ namespace TagTool.Bitmaps
             // Read the DDS header and modify the definition to match
             var dds = DdsHeader.Read(ddsStream);
             var dataSize = (int)(ddsStream.Length - ddsStream.Position);
-            definition.Texture.Definition.PrimaryResourceData = new TagData(dataSize, new CacheResourceAddress(CacheResourceAddressType.Resource, 0));
+            definition.Texture.Definition.PrimaryResourceData = new TagData(dataSize, new CacheAddress(CacheAddressType.Data, 0));
             texture.Width = (short)dds.Width;
             texture.Height = (short)dds.Height;
             texture.Depth = (byte)Math.Max(1, dds.Depth);

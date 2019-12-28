@@ -41,7 +41,7 @@ namespace TagTool.Serialization
             Resource.Resource.ResourceDefinitionFixups.Clear();
             foreach(var fixup in ResourceFixups)
             {
-                if(fixup.Address.Type != CacheResourceAddressType.Memory)
+                if(fixup.Address.Type != CacheAddressType.Memory)
                 {
                     Resource.Resource.ResourceFixups.Add(fixup);
                 }
@@ -49,12 +49,12 @@ namespace TagTool.Serialization
             }
             Resource.Resource.ResourceDefinitionFixups.AddRange(ResourceDefinitionFixups);
             Resource.Resource.DefinitionData = data;
-            Resource.Resource.DefinitionAddress = new CacheResourceAddress(CacheResourceAddressType.Definition, (int)mainStructOffset);
+            Resource.Resource.DefinitionAddress = new CacheAddress(CacheAddressType.Definition, (int)mainStructOffset);
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
-            if (Resource.Resource.DefinitionAddress.Value == 0 || Resource.Resource.DefinitionAddress.Type != CacheResourceAddressType.Definition)
+            if (Resource.Resource.DefinitionAddress.Value == 0 || Resource.Resource.DefinitionAddress.Type != CacheAddressType.Definition)
                 throw new InvalidOperationException("Invalid resource definition address");
 
             // Create a stream with a copy of the resource definition data
@@ -78,8 +78,8 @@ namespace TagTool.Serialization
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            var resourceAddress = new CacheResourceAddress(address);
-            if (resourceAddress.Type != CacheResourceAddressType.Definition)
+            var resourceAddress = new CacheAddress(address);
+            if (resourceAddress.Type != CacheAddressType.Definition)
                 throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
             return (uint)resourceAddress.Offset;
         }
@@ -99,9 +99,9 @@ namespace TagTool.Serialization
             return new ResourceDataBlock(this);
         }
 
-        private Dictionary<(int, CacheResourceAddress), IList> ResourceBlocks = new Dictionary<(int, CacheResourceAddress), IList>();
+        private Dictionary<(int, CacheAddress), IList> ResourceBlocks = new Dictionary<(int, CacheAddress), IList>();
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             foreach (var key in ResourceBlocks.Keys)
                 if (key.Item1 == count && key.Item2 == address)
@@ -131,7 +131,7 @@ namespace TagTool.Serialization
             public void WritePointer(uint targetOffset, Type type)
             {
                 // Add a fixup for the pointer
-                _fixups.Add(MakeDefinitionFixup(new CacheResourceAddress(CacheResourceAddressType.Definition, (int)targetOffset)));
+                _fixups.Add(MakeDefinitionFixup(new CacheAddress(CacheAddressType.Definition, (int)targetOffset)));
 
                 // Just write a zero (this is how it's done officially...)
                 Writer.Write(0);
@@ -143,9 +143,9 @@ namespace TagTool.Serialization
                     return null;
 
                 // When serializing a resource address, just add a fixup for it and serialize a null pointer
-                if (obj is CacheResourceAddress)
+                if (obj is CacheAddress)
                 {
-                    _fixups.Add(MakeDefinitionFixup((CacheResourceAddress)obj));
+                    _fixups.Add(MakeDefinitionFixup((CacheAddress)obj));
                     return 0U;
                 }
 
@@ -195,7 +195,7 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            private TagResourceGen3.ResourceFixup MakeDefinitionFixup(CacheResourceAddress address)
+            private TagResourceGen3.ResourceFixup MakeDefinitionFixup(CacheAddress address)
             {
                 return new TagResourceGen3.ResourceFixup
                 {
@@ -208,7 +208,7 @@ namespace TagTool.Serialization
             {
                 return new TagResourceGen3.ResourceDefinitionFixup
                 {
-                    Address = new CacheResourceAddress(CacheResourceAddressType.Definition, (int)offset),
+                    Address = new CacheAddress(CacheAddressType.Definition, (int)offset),
                     ResourceStructureTypeIndex = typeIndex
                 };
             }
@@ -226,7 +226,7 @@ namespace TagTool.Serialization
             {
                 return new TagResourceGen3.ResourceDefinitionFixup
                 {
-                    Address = new CacheResourceAddress(fixup.Address.Type, fixup.Address.Offset + (int)dataOffset),
+                    Address = new CacheAddress(fixup.Address.Type, fixup.Address.Offset + (int)dataOffset),
                     ResourceStructureTypeIndex = fixup.ResourceStructureTypeIndex
                 };
             }

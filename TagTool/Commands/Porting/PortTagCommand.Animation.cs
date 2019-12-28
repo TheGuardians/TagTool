@@ -56,7 +56,7 @@ namespace TagTool.Commands.Porting
                             var newFixup = new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = (uint)fixup.BlockOffset,
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, fixup.Offset)
+                                Address = new CacheAddress(CacheAddressType.Data, fixup.Offset)
                             };
 
                             definitionStream.Position = newFixup.BlockOffset;
@@ -65,7 +65,7 @@ namespace TagTool.Commands.Porting
                             group.ResourceReference.HaloOnlinePageableResource.Resource.ResourceFixups.Add(newFixup);
                         }
 
-                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
+                        var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
 
                         definitionStream.Position = group.ResourceReference.HaloOnlinePageableResource.Resource.DefinitionAddress.Offset + 0x4;
                         definitionWriter.Write(0x20000000);

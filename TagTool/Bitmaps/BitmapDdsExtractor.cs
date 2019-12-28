@@ -29,7 +29,7 @@ namespace TagTool.Bitmaps
             if (definition.Texture == null || definition.Texture.Definition == null)
                 throw new ArgumentException("Invalid bitmap definition");
             var dataReference = definition.Texture.Definition.PrimaryResourceData;
-            if (dataReference.Address.Type != CacheResourceAddressType.Resource)
+            if (dataReference.Address.Type != CacheAddressType.Data)
                 throw new InvalidOperationException("Invalid resource data address");
 
             var header = CreateDdsHeader(definition);

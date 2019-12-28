@@ -160,7 +160,7 @@ namespace TagTool.Commands.Sounds
                 CacheContext.Serializer.Serialize(resourceContext,
                     new SoundResourceDefinition
                     {
-                        Data = new TagData(fileSize, new CacheResourceAddress(CacheResourceAddressType.Resource, 0))
+                        Data = new TagData(fileSize, new CacheAddress(CacheAddressType.Data, 0))
                     });
 
                 Definition.Resource.HaloOnlinePageableResource = new PageableResource
@@ -173,13 +173,13 @@ namespace TagTool.Commands.Sounds
                     {
                         ResourceType = TagResourceTypeGen3.Sound,
                         DefinitionData = new byte[20],
-                        DefinitionAddress = new CacheResourceAddress(CacheResourceAddressType.Definition, 536870912),
+                        DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 536870912),
                         ResourceFixups = new List<TagResourceGen3.ResourceFixup>
                         {
                             new TagResourceGen3.ResourceFixup
                             {
                                 BlockOffset = 12,
-                                Address = new CacheResourceAddress(CacheResourceAddressType.Resource, 1073741824)
+                                Address = new CacheAddress(CacheAddressType.Data, 1073741824)
                             }
                         },
                         ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),

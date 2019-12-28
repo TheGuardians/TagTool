@@ -16,7 +16,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The address of the referenced block.
         /// </summary>
-        public CacheResourceAddress Address;
+        public CacheAddress Address;
 
         // Non-zero in sbsp resources
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -25,9 +25,9 @@ namespace TagTool.Tags
         [TagField(Flags = TagFieldFlags.Runtime)]
         public List<T> Elements;
 
-        public TagBlock() : this(0, new CacheResourceAddress()) { }
+        public TagBlock() : this(0, new CacheAddress()) { }
 
-        public TagBlock(int count, CacheResourceAddress address)
+        public TagBlock(int count, CacheAddress address)
         {
             Count = count;
             Address = address;

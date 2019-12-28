@@ -57,7 +57,7 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public void AddResourceBlock(int count, CacheResourceAddress address, IList block)
+        public void AddResourceBlock(int count, CacheAddress address, IList block)
         {
             throw new NotImplementedException();
         }

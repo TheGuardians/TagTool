@@ -3,7 +3,7 @@ namespace TagTool.Cache
     /// <summary>
     /// Resource address types.
     /// </summary>
-    public enum CacheResourceAddressType
+    public enum CacheAddressType
     {
         /// <summary>
         /// The address is a memory address.
@@ -16,13 +16,13 @@ namespace TagTool.Cache
         Definition,
 
         /// <summary>
-        /// The address points to a location in the raw resource data.
+        /// The address points to a location in the data (tag or resource data)
         /// </summary>
-        Resource,
+        Data,
 
         /// <summary>
         /// The address points to a location in the raw secondary resource data. Gen 3 only
         /// </summary>
-        SecondaryResource,
+        SecondaryData,
     }
 }

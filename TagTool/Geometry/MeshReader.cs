@@ -62,7 +62,7 @@ namespace TagTool.Geometry
         /// <returns>The vertex stream if successful, or <c>null</c> otherwise.</returns>
         public IVertexStream OpenVertexStream(VertexBufferDefinition definition, Stream baseStream)
         {
-            if (definition.Data.Address.Type != CacheResourceAddressType.Resource)
+            if (definition.Data.Address.Type != CacheAddressType.Data)
                 return null; // Don't bother supporting non-resource addresses
             baseStream.Position = definition.Data.Address.Offset;
             return VertexStreamFactory.Create(_version, baseStream);
@@ -92,7 +92,7 @@ namespace TagTool.Geometry
         /// <returns>The index buffer stream if successful, or <c>null</c> otherwise.</returns>
         public IndexBufferStream OpenIndexBufferStream(IndexBufferDefinition definition, Stream baseStream)
         {
-            if (definition.Data.Address.Type != CacheResourceAddressType.Resource)
+            if (definition.Data.Address.Type != CacheAddressType.Data)
                 return null; // Don't bother supporting non-resource addresses
             baseStream.Position = definition.Data.Address.Offset;
             return new IndexBufferStream(baseStream);

@@ -59,7 +59,7 @@ namespace TagTool.Commands.Files
                     using (var dataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(tagsStream, tag)))
                     using (var reader = new EndianReader(dataStream))
                     {
-                        var dataContext = new DataSerializationContext(reader, null, CacheResourceAddressType.Resource);
+                        var dataContext = new DataSerializationContext(reader, null, CacheAddressType.Data);
 
                         foreach (var resourcePointerOffset in tag.ResourcePointerOffsets)
                         {

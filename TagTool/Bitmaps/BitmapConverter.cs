@@ -521,14 +521,14 @@ namespace TagTool.Bitmaps.Converter
                     var newFixup = new TagResourceGen3.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
-                        Address = new CacheResourceAddress(CacheResourceAddressType.Definition, fixup.Offset)
+                        Address = new CacheAddress(CacheAddressType.Definition, fixup.Offset)
                     };
 
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
                 }
 
-                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
                 definitionStream.Position = resourceEntry.DefinitionAddress.Offset;
                 definition = cache.Deserializer.Deserialize<BitmapTextureInteropResource>(dataContext);
             }
@@ -549,14 +549,14 @@ namespace TagTool.Bitmaps.Converter
                     var newFixup = new TagResourceGen3.ResourceFixup
                     {
                         BlockOffset = (uint)fixup.BlockOffset,
-                        Address = new CacheResourceAddress(CacheResourceAddressType.Definition, fixup.Offset)
+                        Address = new CacheAddress(CacheAddressType.Definition, fixup.Offset)
                     };
 
                     definitionStream.Position = newFixup.BlockOffset;
                     definitionWriter.Write(newFixup.Address.Value);
                 }
 
-                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheResourceAddressType.Definition);
+                var dataContext = new DataSerializationContext(definitionReader, definitionWriter, CacheAddressType.Definition);
                 definitionStream.Position = resourceEntry.DefinitionAddress.Offset;
                 definition = cache.Deserializer.Deserialize<BitmapTextureInterleavedInteropResource>(dataContext);
             }
