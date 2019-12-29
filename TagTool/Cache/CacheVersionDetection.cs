@@ -169,8 +169,8 @@ namespace TagTool.Cache
                     return "May 29 2019 00:44:52";
                 case CacheVersion.HaloReachMCC887:
                     return "Jun 24 2019 00:36:03";
-                case CacheVersion.HaloReachMCC1035:
-                    return "Jul 30 2019 14:17:16";
+                //case CacheVersion.HaloReachMCC1035:
+                //    return "Jul 30 2019 14:17:16";
                 default:
                     return version.ToString();
             }
@@ -366,7 +366,7 @@ namespace TagTool.Cache
             -1, // HaloReach
             -1, // HaloReachMCC824
             -1, // HaloReachMCC887
-            -1, // HaloReachMCC1035
+            //-1, // HaloReachMCC1035
         };
     }
 
