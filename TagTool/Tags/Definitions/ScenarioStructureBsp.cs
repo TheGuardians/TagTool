@@ -11,7 +11,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x388, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3B8, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
     public class ScenarioStructureBsp : TagStructure
     {
         [TagField(Flags = Padding, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
@@ -110,6 +111,9 @@ namespace TagTool.Tags.Definitions
         public uint Unknown19;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown20;
+
+        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] UnknownUnused2;
 
         public List<DetailObject> DetailObjects;
         public List<Cluster> Clusters;
@@ -518,7 +522,8 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xDC)]
+        [TagStructure(Size = 0xDC, MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0xE0, MinVersion = CacheVersion.HaloOnline700123)]
         public class Cluster : TagStructure
         {
             public Bounds<float> BoundsX;
@@ -535,6 +540,12 @@ namespace TagTool.Tags.Definitions
             public short Unknown5;
             public short Unknown6;
             public short Unknown7;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline700123)]
+            public short Ms30Unknown0;
+            [TagField(MinVersion = CacheVersion.HaloOnline700123)]
+            public short Ms30Unknown1;
+
             public short RuntimeDecalStartIndex;
             public short RuntimeDecalEntryCount;
             public short Flags;
