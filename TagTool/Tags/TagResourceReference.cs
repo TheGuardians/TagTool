@@ -4,7 +4,7 @@ using TagTool.Common;
 namespace TagTool.Tags
 {
     [TagStructure(Size = 0x8)]
-    public class TagResourceReference
+    public class TagResourceReference : TagStructure
     {
         /// <summary>
         /// ID is an index in ResourceGestalt.TagResources

@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\odst\sc100.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\guardian.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -45,8 +45,6 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
-                    // TODO: add resource size calculation for sbsp
-
                     /*
                     if (tag.Group.Tag == "bitm")
                     {
@@ -88,11 +86,13 @@ namespace TagTool.Commands.Porting
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
 
+
+                        
                         var geo1Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
                         var geo2Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry2.Resource);
                         var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
                         var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
-
+                        
                     }
                 }
             }
