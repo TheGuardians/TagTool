@@ -279,7 +279,7 @@ namespace TagTool.Cache
         /// <returns></returns>
         public static bool IsInGen(CacheGeneration gen, CacheVersion compare)
         {
-            if (gen == CacheGeneration.Unknown)
+            if (compare == CacheVersion.Unknown)
                 return true;
             else
             {
