@@ -1176,7 +1176,7 @@ namespace TagTool.Cache
                     var fixup = tagResource.ResourceFixups[i];
                     // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
                     fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                    fixupWriter.Write(fixup.Address.Offset);
+                    fixupWriter.Write(fixup.Address.Value);
                 }
             }
         }
@@ -1193,7 +1193,7 @@ namespace TagTool.Cache
                     if (fixup.Address.Type == CacheAddressType.Data)
                     {
                         fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write(fixup.Address.Offset + rawOffset);
+                        fixupWriter.Write((uint)(fixup.Address.Value + rawOffset));
                     }
                 }
             }

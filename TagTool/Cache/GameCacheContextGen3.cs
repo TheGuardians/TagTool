@@ -742,7 +742,7 @@ namespace TagTool.Cache
                     if(fixup.Address.Type == CacheAddressType.Definition)
                     {
                         fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write(fixup.Address.Offset);
+                        fixupWriter.Write(fixup.Address.Value);
                     }
                 }
             }
@@ -760,7 +760,7 @@ namespace TagTool.Cache
                     if (fixup.Address.Type == CacheAddressType.Data || fixup.Address.Type == CacheAddressType.SecondaryData)
                     {
                         fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write(fixup.Address.Offset + rawOffset);
+                        fixupWriter.Write((uint)(fixup.Address.Value + rawOffset));
                     }
                 }
             }

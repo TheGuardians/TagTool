@@ -33,10 +33,6 @@ namespace TagTool.Serialization
         public uint AddressToOffset(uint currentOffset, uint address)
         {
             var resourceAddress = new CacheAddress(address);
-
-            if (resourceAddress.Type != AddressType)
-                throw new InvalidOperationException("Cannot dereference a resource address of type " + resourceAddress.Type);
-
             return (uint)resourceAddress.Offset;
         }
 
