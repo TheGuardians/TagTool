@@ -45,7 +45,7 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
-                    /*
+                    
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
@@ -80,14 +80,12 @@ namespace TagTool.Commands.Porting
                         var def = cache.Deserialize<Sound>(stream, tag);
                         var resource = cache.ResourceCache.GetSoundResourceDefinition(def.Resource);
                     }
-                    */
+                    
                     
                     if (tag.Group.Tag == "sbsp")
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
 
-
-                        
                         var geo1Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
                         var geo2Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry2.Resource);
                         var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);

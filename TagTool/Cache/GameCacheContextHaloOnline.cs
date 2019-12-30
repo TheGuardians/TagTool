@@ -1360,6 +1360,58 @@ namespace TagTool.Cache
             return GetResourceDefinition<SoundResourceDefinition>(resourceReference);
         }
 
+        public TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition)
+        {
+            var resourceReference = new TagResourceReference();
+            var pageableResource = new PageableResource();
+            pageableResource.Page = new RawPage();
+            pageableResource.Resource = new TagResourceGen3();
+
+            pageableResource.ChangeLocation(ResourceLocation.Audio);
+            //pageableResource.DisableChecksum();
+            var crc = new Crc32();
+            // add resource data
+            var data = soundResourceDefinition.Data.Data;
+            var checksum = BitConverter.ToUInt32(crc.ComputeHash(data), 0);
+            pageableResource.Page.CrcChecksum = checksum;
+            
+            using (var stream = new MemoryStream(data))
+            {
+                AddResource(pageableResource, stream);
+            }
+
+            // add resource definition and fixups
+
+            var definitionStream = new MemoryStream();
+
+            using(var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            {
+                var context = new DataSerializationContext(definitionWriter);
+                var serializer = Cache.Serializer;
+                // remove for serialization
+                soundResourceDefinition.Data.Address = new CacheAddress();
+                soundResourceDefinition.Data.Data = null;
+                // maybe reset them after
+                serializer.Serialize(context, soundResourceDefinition);
+
+            }
+
+            pageableResource.Resource.DefinitionData = definitionStream.ToArray();
+            pageableResource.Resource.ResourceFixups = new List<TagResourceGen3.ResourceFixup>();
+            pageableResource.Resource.ResourceFixups.Add(new TagResourceGen3.ResourceFixup 
+            { 
+                Address = new CacheAddress(CacheAddressType.Data, 0),
+                BlockOffset = 0xC
+            });
+
+            pageableResource.Resource.Unknown2 = 1;
+
+            pageableResource.Resource.ResourceType = TagResourceTypeGen3.Sound;
+
+            resourceReference.HaloOnlinePageableResource = pageableResource;
+            return resourceReference;
+        }
+
         public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))

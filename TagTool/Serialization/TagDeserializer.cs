@@ -303,7 +303,7 @@ namespace TagTool.Serialization
 
             // List = Tag block
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
-                return DeserializeTagBlock(reader, context, valueType);
+                return DeserializeTagBlock(reader, context, valueInfo, valueType);
 
             // Ranges
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
@@ -326,7 +326,7 @@ namespace TagTool.Serialization
         /// <param name="context">The serialization context to use.</param>
         /// <param name="valueType">The type of the value to deserialize.</param>
         /// <returns>The deserialized tag block.</returns>
-        public object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+        public object DeserializeTagBlock(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
         {
             var result = Activator.CreateInstance(valueType);
             var elementType = valueType.GenericTypeArguments[0];
