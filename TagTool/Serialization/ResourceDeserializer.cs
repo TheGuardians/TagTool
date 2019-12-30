@@ -100,7 +100,6 @@ namespace TagTool.Serialization
             // instantiate tagdata and return it
             var tagData = new TagData
             {
-                Size = size,
                 Data = result,
                 Address = address
             };

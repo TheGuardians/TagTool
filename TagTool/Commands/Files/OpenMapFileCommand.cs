@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\guardian.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\010_jungle.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -45,7 +45,6 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
-                    
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
@@ -59,7 +58,7 @@ namespace TagTool.Commands.Porting
                         }
                             
                     }
-                    /*
+                    
                     if (tag.Group.Tag == "jmad")
                     {
                         var def = cache.Deserialize<ModelAnimationGraph>(stream, tag);
@@ -81,7 +80,6 @@ namespace TagTool.Commands.Porting
                         var resource = cache.ResourceCache.GetSoundResourceDefinition(def.Resource);
                     }
                     
-                    */
                     if (tag.Group.Tag == "sbsp")
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
