@@ -10,46 +10,46 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "structure_bsp_tag_resources", Size = 0x30, MinVersion = CacheVersion.Halo3ODST)]
     public class StructureBspTagResourcesTest : TagStructure
 	{
-        public List<CollisionBspBlock> CollisionBsps;
+        public TagBlock<CollisionBspBlock> CollisionBsps;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<LargeCollisionBspBlock> LargeCollisionBsps;
+        public TagBlock<LargeCollisionBspBlock> LargeCollisionBsps;
 
-        public List<InstancedGeometryBlock> InstancedGeometry;
+        public TagBlock<InstancedGeometryBlock> InstancedGeometry;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<HavokDatum> HavokData;
+        public TagBlock<HavokDatum> HavokData;
 
         [TagStructure(Size = 0x60)]
         public class CollisionBspBlock : TagStructure
 		{
-            public List<CollisionGeometry.Bsp3dNode> Bsp3dNodes;
+            public TagBlock<CollisionGeometry.Bsp3dNode> Bsp3dNodes;
             //
             // TODO: Add supernodes block for reach and beyond?
             //
-            public List<CollisionGeometry.Plane> Planes;
-            public List<CollisionGeometry.Leaf> Leaves;
-            public List<CollisionGeometry.Bsp2dReference> Bsp2dReferences;
-            public List<CollisionGeometry.Bsp2dNode> Bsp2dNodes;
-            public List<CollisionGeometry.Surface> Surfaces;
-            public List<CollisionGeometry.Edge> Edges;
-            public List<CollisionGeometry.Vertex> Vertices;
+            public TagBlock<CollisionGeometry.Plane> Planes;
+            public TagBlock<CollisionGeometry.Leaf> Leaves;
+            public TagBlock<CollisionGeometry.Bsp2dReference> Bsp2dReferences;
+            public TagBlock<CollisionGeometry.Bsp2dNode> Bsp2dNodes;
+            public TagBlock<CollisionGeometry.Surface> Surfaces;
+            public TagBlock<CollisionGeometry.Edge> Edges;
+            public TagBlock<CollisionGeometry.Vertex> Vertices;
         }
 
         [TagStructure(Size = 0x60)]
         public class LargeCollisionBspBlock : TagStructure
 		{
-            public List<Bsp3dNode> Bsp3dNodes;
+            public TagBlock<Bsp3dNode> Bsp3dNodes;
             //
             // TODO: Add supernodes block for reach and beyond?
             //
-            public List<CollisionGeometry.Plane> Planes;
-            public List<CollisionGeometry.Leaf> Leaves;
-            public List<Bsp2dReference> Bsp2dReferences;
-            public List<Bsp2dNode> Bsp2dNodes;
-            public List<Surface> Surfaces;
-            public List<Edge> Edges;
-            public List<Vertex> Vertices;
+            public TagBlock<CollisionGeometry.Plane> Planes;
+            public TagBlock<CollisionGeometry.Leaf> Leaves;
+            public TagBlock<Bsp2dReference> Bsp2dReferences;
+            public TagBlock<Bsp2dNode> Bsp2dNodes;
+            public TagBlock<Surface> Surfaces;
+            public TagBlock<Edge> Edges;
+            public TagBlock<Vertex> Vertices;
 
             [TagStructure(Size = 0xC)]
             public class Bsp3dNode : TagStructure
@@ -114,18 +114,18 @@ namespace TagTool.Tags.Resources
             public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
             public CollisionBspBlock CollisionInfo;
-            public List<CollisionBspBlock> CollisionGeometries;
-            public List<CollisionBspPhysicsBlock> BspPhysics;
-            public List<Unknown1Block> Unknown1;
-            public List<Unknown2Block> Unknown2;
-            public List<Unknown3Block> Unknown3;
+            public TagBlock<CollisionBspBlock> CollisionGeometries;
+            public TagBlock<CollisionBspPhysicsBlock> BspPhysics;
+            public TagBlock<Unknown1Block> Unknown1;
+            public TagBlock<Unknown2Block> Unknown2;
+            public TagBlock<Unknown3Block> Unknown3;
             public short MeshIndex;
             public short CompressionIndex;
 
             public float Unknown4;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public List<Unknown4Block> Unknown5;
+            public TagBlock<Unknown4Block> Unknown5;
 
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public float Unknown6;
@@ -169,8 +169,8 @@ namespace TagTool.Tags.Resources
         public class HavokDatum : TagStructure
 		{
             public int PrefabIndex;
-            public List<HavokGeometry> HavokGeometries;
-            public List<HavokGeometry> HavokInvertedGeometries;
+            public TagBlock<HavokGeometry> HavokGeometries;
+            public TagBlock<HavokGeometry> HavokInvertedGeometries;
             public RealPoint3d ShapesBoundsMinimum;
             public RealPoint3d ShapesBoundsMaximum;
 
@@ -200,7 +200,7 @@ namespace TagTool.Tags.Resources
             public sbyte DataBuildType;
             public sbyte Unused4;
             public short Unused5;
-            public List<Datum> Data;
+            public TagBlock<Datum> Data;
             public sbyte MoppBuildType;
             public byte Unused6;
             public short Unused7;

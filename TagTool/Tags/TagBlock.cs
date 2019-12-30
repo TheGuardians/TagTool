@@ -4,34 +4,23 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
-    public class TagBlock<T> : TagStructure, IList<T> where T : TagStructure
+    public class TagBlock<T> : IList<T>
     {
-        /// <summary>
-        /// The count of the referenced block.
-        /// </summary>
-        public int Count;
 
-        /// <summary>
-        /// The address of the referenced block.
-        /// </summary>
-        public CacheAddress Address;
-
-        // Non-zero in sbsp resources
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public int Unknown;
-
-        [TagField(Flags = TagFieldFlags.Runtime)]
+        public int Count => Elements.Count;
         public List<T> Elements;
+
+        public CacheAddress Address; // REMOVE ASAP
+        public CacheAddressType AddressType;
+        
 
         public TagBlock() : this(0, new CacheAddress()) { }
 
-        public TagBlock(int count, CacheAddress address)
+        public TagBlock(int count, CacheAddress address) // REMOVE ASAP
         {
-            Count = count;
             Address = address;
-            Elements = new List<T>();
+            Elements = new List<T>(count);
+            AddressType = CacheAddressType.Memory;
         }
 
         public T this[int index]

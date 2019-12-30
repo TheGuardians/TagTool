@@ -59,7 +59,7 @@ namespace TagTool.Commands.Porting
                         }
                             
                     }
-                    
+                    /*
                     if (tag.Group.Tag == "jmad")
                     {
                         var def = cache.Deserialize<ModelAnimationGraph>(stream, tag);
@@ -81,7 +81,7 @@ namespace TagTool.Commands.Porting
                         var resource = cache.ResourceCache.GetSoundResourceDefinition(def.Resource);
                     }
                     
-                    
+                    */
                     if (tag.Group.Tag == "sbsp")
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
@@ -90,7 +90,6 @@ namespace TagTool.Commands.Porting
                         var geo2Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry2.Resource);
                         var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
                         var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
-                        
                     }
                 }
             }

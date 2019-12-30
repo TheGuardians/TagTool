@@ -85,11 +85,6 @@ namespace TagTool.Tags
         /// If the field is a real number, the compression of the field.
         /// </summary>
         public TagFieldCompression Compression { get; set; } = TagFieldCompression.None;
-
-        /// <summary>
-        /// If the field has an address, which type of address it is.
-        /// </summary>
-        public CacheAddressType AddressType = CacheAddressType.Memory;
     }
 
     [Flags]

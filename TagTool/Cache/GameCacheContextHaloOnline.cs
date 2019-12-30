@@ -1217,86 +1217,24 @@ namespace TagTool.Cache
             T result;
             byte[] resourceDefinitionData = tagResource.DefinitionData;
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
+            ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
 
             byte[] resourceRawData = GetResourceData(resourceReference);
+            if (resourceRawData == null)
+                resourceRawData = new byte[0];
 
-            if (typeof(T) != typeof(StructureBspTagResourcesTest) && typeof(T) != typeof(StructureBspCacheFileTagResourcesTest))
+            // deserialize the resource definition again
+            using (var definitionDataStream = new MemoryStream(resourceDefinitionData))
+            using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.LittleEndian))
+            using (var dataStream = new MemoryStream(resourceRawData))
+            using (var dataReader = new EndianReader(dataStream, EndianFormat.LittleEndian))
             {
-                ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
-                using (var fixupStream = new MemoryStream(resourceDefinitionData))
-                using (var fixupReader = new EndianReader(fixupStream, EndianFormat.LittleEndian))
-                {
-                    var context = new DataSerializationContext(fixupReader);
-                    var deserializer = new TagDeserializer(Cache.Version);
-                    fixupReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                    result = deserializer.Deserialize<T>(context);
-                }
-
-                if (resourceRawData == null)
-                    return result;
-
-                // set the tagData to the resourceData and return
-                // in the future we could set the byte[] exactly to the data and ignore offsets
-                if (result.GetType() == typeof(BitmapTextureInteropResource))
-                {
-                    var bitmapDefinition = result as BitmapTextureInteropResource;
-                    bitmapDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawData;
-                }
-                else if (result.GetType() == typeof(BitmapTextureInterleavedInteropResource))
-                {
-                    var bitmapInterleavedDefinition = result as BitmapTextureInterleavedInteropResource;
-                    bitmapInterleavedDefinition.Texture.Definition.PrimaryResourceData.Data = resourceRawData;
-                }
-                else if (result.GetType() == typeof(ModelAnimationTagResource))
-                {
-                    var animationDefinition = result as ModelAnimationTagResource;
-                    foreach (var group in animationDefinition.GroupMembers)
-                        group.AnimationData.Data = resourceRawData;
-                }
-                else if (result.GetType() == typeof(RenderGeometryApiResourceDefinition))
-                {
-                    var renderGeometryDefinition = result as RenderGeometryApiResourceDefinition;
-                    foreach (var vertexBuffer in renderGeometryDefinition.VertexBuffers)
-                        vertexBuffer.Definition.Data.Data = resourceRawData;
-                    foreach (var indexBuffer in renderGeometryDefinition.IndexBuffers)
-                        indexBuffer.Definition.Data.Data = resourceRawData;
-                }
+                var context = new ResourceDefinitionSerializationContext(dataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
+                var deserializer = new ResourceDeserializer(Cache.Version);
+                // deserialize without access to the data
+                definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
+                result = deserializer.Deserialize<T>(context);
             }
-            else
-            {
-                int offset;
-                byte[] resourceData;
-
-                if (resourceRawData != null)
-                {
-                    // not the best way to go about this, ideally  the deserializer would have access to both the definitionData and resourceData
-                    offset = resourceDefinitionData.Length;
-                    resourceData = new byte[resourceDefinitionData.Length + resourceRawData.Length];
-                    Array.Copy(resourceDefinitionData, 0, resourceData, 0, resourceDefinitionData.Length);
-                    Array.Copy(resourceRawData, 0, resourceData, offset, resourceRawData.Length);
-
-                }
-                else
-                {
-                    offset = 0;
-                    resourceData = resourceDefinitionData;
-                }
-
-                ApplyResourceDataFixups(tagResource, resourceData, offset);
-
-                // deserialize the resource definition again
-                using (var definitionDataStream = new MemoryStream(resourceData))
-                using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.LittleEndian))
-                {
-                    var context = new DataSerializationContext(definitionDataReader);
-                    var deserializer = new TagDeserializer(Cache.Version);
-                    // deserialize without access to the data
-                    definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                    result = deserializer.Deserialize<T>(context);
-                }
-                return result;
-            }
-
             return result;
         }
 
@@ -1368,45 +1306,38 @@ namespace TagTool.Cache
             pageableResource.Resource = new TagResourceGen3();
 
             pageableResource.ChangeLocation(ResourceLocation.Audio);
-            //pageableResource.DisableChecksum();
-            var crc = new Crc32();
-            // add resource data
-            var data = soundResourceDefinition.Data.Data;
-            var checksum = BitConverter.ToUInt32(crc.ComputeHash(data), 0);
-            pageableResource.Page.CrcChecksum = checksum;
             
-            using (var stream = new MemoryStream(data))
-            {
-                AddResource(pageableResource, stream);
-            }
-
-            // add resource definition and fixups
-
             var definitionStream = new MemoryStream();
+            var dataStream = new MemoryStream();
 
             using(var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            using(var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
-                var context = new DataSerializationContext(definitionWriter);
-                var serializer = Cache.Serializer;
-                // remove for serialization
-                soundResourceDefinition.Data.Address = new CacheAddress();
-                soundResourceDefinition.Data.Data = null;
-                // maybe reset them after
+                var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
+                var serializer = new ResourceSerializer(Cache.Version);
+                // this will populate both the dataStream and definitionStream
                 serializer.Serialize(context, soundResourceDefinition);
 
+                var data = dataStream.ToArray();
+                var definitionData = definitionStream.ToArray();
+
+                //pageableResource.DisableChecksum();
+                var crc = new Crc32();
+                // add resource data
+                
+                var checksum = BitConverter.ToUInt32(crc.ComputeHash(data), 0);
+                pageableResource.Page.CrcChecksum = checksum;
+
+                AddResource(pageableResource, dataStream);
+
+                // add resource definition and fixups
+                pageableResource.Resource.DefinitionData = definitionData;
+                pageableResource.Resource.ResourceFixups = context.ResourceFixups;
+                pageableResource.Resource.Unknown2 = 1;
+                pageableResource.Resource.ResourceType = TagResourceTypeGen3.Sound;
             }
 
-            pageableResource.Resource.DefinitionData = definitionStream.ToArray();
-            pageableResource.Resource.ResourceFixups = new List<TagResourceGen3.ResourceFixup>();
-            pageableResource.Resource.ResourceFixups.Add(new TagResourceGen3.ResourceFixup 
-            { 
-                Address = new CacheAddress(CacheAddressType.Data, 0),
-                BlockOffset = 0xC
-            });
-
-            pageableResource.Resource.Unknown2 = 1;
-
-            pageableResource.Resource.ResourceType = TagResourceTypeGen3.Sound;
+            
 
             resourceReference.HaloOnlinePageableResource = pageableResource;
             return resourceReference;

@@ -2,7 +2,7 @@ using TagTool.Cache;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x14)]
+    [TagStructure(Size = 0x14)] // TODO: refactor into not a tag structure, this has a special case in the deserializer now
     public class TagData : TagStructure
 	{
         /// <summary>

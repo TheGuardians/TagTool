@@ -8,27 +8,27 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "structure_bsp_cache_file_tag_resources", Size = 0x30)]
     public class StructureBspCacheFileTagResourcesTest : TagStructure
 	{
-        public List<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
-        public List<ScenarioStructureBsp.Plane> Planes;
-        public List<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeams;
-        public List<PathfindingDatum> PathfindingData;
+        public TagBlock<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
+        public TagBlock<ScenarioStructureBsp.Plane> Planes;
+        public TagBlock<ScenarioStructureBsp.EdgeToSeamMapping> EdgeToSeams;
+        public TagBlock<PathfindingDatum> PathfindingData;
 
         [TagStructure(Size = 0x94)]
         public class PathfindingDatum : TagStructure
 		{
-            public List<ScenarioStructureBsp.PathfindingDatum.Sector> Sectors;
-            public List<ScenarioStructureBsp.PathfindingDatum.Link> Links;
-            public List<ScenarioStructureBsp.PathfindingDatum.Reference> References;
-            public List<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode> Bsp2dNodes;
-            public List<ScenarioStructureBsp.PathfindingDatum.Vertex> Vertices;
-            public List<ObjectReference> ObjectReferences;
-            public List<ScenarioStructureBsp.PathfindingDatum.PathfindingHint> PathfindingHints;
-            public List<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference> InstancedGeometryReferences;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Sector> Sectors;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Link> Links;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Reference> References;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode> Bsp2dNodes;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Vertex> Vertices;
+            public TagBlock<ObjectReference> ObjectReferences;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.PathfindingHint> PathfindingHints;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference> InstancedGeometryReferences;
             public int StructureChecksum;
-            public List<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock> GiantPathfinding;
-            public List<Seam> Seams;
-            public List<JumpSeam> JumpSeams;
-            public List<ScenarioStructureBsp.PathfindingDatum.Door> Doors;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock> GiantPathfinding;
+            public TagBlock<Seam> Seams;
+            public TagBlock<JumpSeam> JumpSeams;
+            public TagBlock<ScenarioStructureBsp.PathfindingDatum.Door> Doors;
 
             [TagStructure(Size = 0x18)]
             public class ObjectReference : TagStructure
@@ -38,7 +38,7 @@ namespace TagTool.Tags.Resources
                 [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
-                public List<BspReference> Bsps;
+                public TagBlock<BspReference> Bsps;
 
                 public int ObjectUniqueID;
                 public short OriginBspIndex;
@@ -54,7 +54,7 @@ namespace TagTool.Tags.Resources
                     [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
-                    public List<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef> Bsp2dRefs;
+                    public TagBlock<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef> Bsp2dRefs;
 
                     public int VertexOffset;
                 }
@@ -63,7 +63,7 @@ namespace TagTool.Tags.Resources
             [TagStructure(Size = 0xC)]
             public class Seam : TagStructure
 			{
-                public List<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock> LinkIndices;
+                public TagBlock<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock> LinkIndices;
             }
 
             [TagStructure(Size = 0x14)]
@@ -77,7 +77,7 @@ namespace TagTool.Tags.Resources
 
                 public float Length;
 
-                public List<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock> JumpIndices;
+                public TagBlock<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock> JumpIndices;
             }
         }
     }

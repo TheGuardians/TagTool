@@ -4,32 +4,52 @@ using System;
 using System.IO;
 using TagTool.Tags;
 using System.Collections;
+using System.Collections.Generic;
+using static TagTool.Tags.TagResourceGen3;
 
 namespace TagTool.Serialization
 {
     public class ResourceDefinitionSerializationContext : ISerializationContext
     {
-        public EndianReader Reader { get; }
-        public EndianWriter Writer { get; }
-        public EndianReader ResourceReader { get; }
-        public EndianWriter ResourceWriter { get;  }
+        public EndianReader DataReader { get; }
+        public EndianWriter DataWriter { get; }
+        public EndianReader SecondaryDataReader { get; }
+        public EndianWriter SecondaryDataWriter { get; }
+        public EndianReader DefinitionReader { get; }
+        public EndianWriter DefinitionWriter { get;  }
 
-        public CacheAddressType AddressType { get; }
+        public CacheAddressType InitialAddressType { get; }
 
-        public ResourceDefinitionSerializationContext(EndianReader reader, EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory)
+        public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
+
+        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader, EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
         {
-            Reader = reader;
-            Writer = writer;
-            AddressType = addressType;
+            DataReader = dataReader;
+            DataWriter = dataWriter;
+            DefinitionReader = definitionReader;
+            DefinitionWriter = definitionWriter;
+            SecondaryDataReader = secondaryDataReader;
+            SecondaryDataWriter = secondaryDataWriter;
+            InitialAddressType = initialAddressType;
         }
 
-        public ResourceDefinitionSerializationContext(EndianReader reader, CacheAddressType addressType = CacheAddressType.Memory) :
-            this(reader, null, addressType)
+        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianReader definitionReader, CacheAddressType initialAddressType) :
+            this(dataReader, null, null, null, definitionReader, null, initialAddressType)
         {
         }
 
-        public ResourceDefinitionSerializationContext(EndianWriter writer, CacheAddressType addressType = CacheAddressType.Memory) :
-            this(null, writer, addressType)
+        public ResourceDefinitionSerializationContext(EndianWriter dataWriter, EndianWriter definitionWriter, CacheAddressType initialAddressType) :
+            this(null, dataWriter, null, null, null, definitionWriter, initialAddressType)
+        {
+        }
+
+        public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianReader secondaryDataReader, EndianReader definitionReader, CacheAddressType initialAddressType) :
+            this(dataReader, null, secondaryDataReader, null, definitionReader, null, initialAddressType)
+        {
+        }
+
+        public ResourceDefinitionSerializationContext(EndianWriter dataWriter, EndianWriter secondaryDataWriter, EndianWriter definitionWriter, CacheAddressType initialAddressType) :
+            this(null, dataWriter, null, secondaryDataWriter, null, definitionWriter, initialAddressType)
         {
         }
 
@@ -39,9 +59,39 @@ namespace TagTool.Serialization
             return (uint)resourceAddress.Offset;
         }
 
+        public EndianReader GetReader(CacheAddressType type)
+        {
+            switch (type)
+            {
+                case CacheAddressType.Data:
+                    return DataReader;
+                case CacheAddressType.Definition:
+                    return DefinitionReader;
+                case CacheAddressType.SecondaryData:
+                    return SecondaryDataReader;
+                default:
+                    return null;
+            }
+        }
+
+        public EndianWriter GetWriter(CacheAddressType type)
+        {
+            switch (type)
+            {
+                case CacheAddressType.Data:
+                    return DataWriter;
+                case CacheAddressType.Definition:
+                    return DefinitionWriter;
+                case CacheAddressType.SecondaryData:
+                    return SecondaryDataWriter;
+                default:
+                    return null;
+            }
+        }
+
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
-            return Reader;
+            return GetReader(InitialAddressType);
         }
 
         public void BeginSerialize(TagStructureInfo info)
@@ -53,13 +103,18 @@ namespace TagTool.Serialization
             return new GenericDataBlock();
         }
 
+        public IDataBlock CreateBlockForResource(EndianWriter writer)
+        {
+            return new GenericDataBlock(writer);
+        }
+
         public void EndDeserialize(TagStructureInfo info, object obj)
         {
         }
 
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
-            Writer.Write(data);
+            GetWriter(InitialAddressType).Write(data);
         }
 
         public CachedTagInstance GetTagByIndex(int index)
@@ -86,6 +141,12 @@ namespace TagTool.Serialization
             {
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
+            }
+
+            public GenericDataBlock(EndianWriter writer)
+            {
+                Stream = (MemoryStream)writer.BaseStream;
+                Writer = writer;
             }
 
             public void WritePointer(uint targetOffset, Type type)

@@ -776,6 +776,10 @@ namespace TagTool.Cache
 
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
 
+            byte[] primaryResourceData;
+            byte[] secondaryResourceData;
+
+
             if (typeof(T) != typeof(StructureBspTagResourcesTest) && typeof(T) != typeof(StructureBspCacheFileTagResourcesTest))
             {
                 ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
