@@ -1248,44 +1248,44 @@ namespace TagTool.Cache
             return GetResourceDefinition<BinkResource>(resourceReference);
         }
 
-        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInteropResourceTest GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Bitmap)
                 return null;
-            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInteropResourceTest>(resourceReference);
         }
 
-        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInterleavedInteropResourceTest GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.BitmapInterleaved)
                 return null;
-            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResourceTest>(resourceReference);
         }
 
-        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        public override RenderGeometryApiResourceDefinitionTest GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.RenderGeometry)
                 return null;
-            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
+            return GetResourceDefinition<RenderGeometryApiResourceDefinitionTest>(resourceReference);
         }
 
-        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
+        public override ModelAnimationTagResourceTest GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Animation)
                 return null;
-            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
+            return GetResourceDefinition<ModelAnimationTagResourceTest>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
@@ -1298,49 +1298,85 @@ namespace TagTool.Cache
             return GetResourceDefinition<SoundResourceDefinition>(resourceReference);
         }
 
-        public TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition)
+        private TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
         {
             var resourceReference = new TagResourceReference();
             var pageableResource = new PageableResource();
+            
             pageableResource.Page = new RawPage();
             pageableResource.Resource = new TagResourceGen3();
+            pageableResource.ChangeLocation(location);
+            pageableResource.Resource.Unknown2 = 1;
+            pageableResource.Resource.ResourceType = resourceType;
 
-            pageableResource.ChangeLocation(ResourceLocation.Audio);
-            
+            resourceReference.HaloOnlinePageableResource = pageableResource;
+
             var definitionStream = new MemoryStream();
             var dataStream = new MemoryStream();
 
-            using(var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
-            using(var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
+            using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
                 var serializer = new ResourceSerializer(Cache.Version);
-                // this will populate both the dataStream and definitionStream
-                serializer.Serialize(context, soundResourceDefinition);
+                serializer.Serialize(context, resourceDefinition);
 
                 var data = dataStream.ToArray();
                 var definitionData = definitionStream.ToArray();
+                dataStream.Position = 0;
 
-                //pageableResource.DisableChecksum();
-                var crc = new Crc32();
-                // add resource data
-                
-                var checksum = BitConverter.ToUInt32(crc.ComputeHash(data), 0);
-                pageableResource.Page.CrcChecksum = checksum;
+                pageableResource.DisableChecksum();
 
+                dataStream.Position = 0;
                 AddResource(pageableResource, dataStream);
 
                 // add resource definition and fixups
                 pageableResource.Resource.DefinitionData = definitionData;
                 pageableResource.Resource.ResourceFixups = context.ResourceFixups;
-                pageableResource.Resource.Unknown2 = 1;
-                pageableResource.Resource.ResourceType = TagResourceTypeGen3.Sound;
+                pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
+                pageableResource.Resource.ResourceDefinitionFixups = context.D3DFixups;
             }
-
-            
-
-            resourceReference.HaloOnlinePageableResource = pageableResource;
             return resourceReference;
+        }
+
+        public override TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition)
+        {
+            return CreateResource(soundResourceDefinition, ResourceLocation.Audio, TagResourceTypeGen3.Sound);
+        }
+
+        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition)
+        {
+            return CreateResource(bitmapResourceDefinition, ResourceLocation.Textures, TagResourceTypeGen3.Bitmap);
+        }
+
+        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition)
+        {
+            return CreateResource(bitmapResourceDefinition, ResourceLocation.Textures, TagResourceTypeGen3.BitmapInterleaved);
+        }
+
+        public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
+        {
+            return CreateResource(binkResourceDefinition, ResourceLocation.Resources, TagResourceTypeGen3.Bink);
+        }
+
+        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinitionTest renderGeometryDefinition)
+        {
+            return CreateResource(renderGeometryDefinition, ResourceLocation.Resources, TagResourceTypeGen3.RenderGeometry);
+        }
+
+        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResourceTest modelAnimationGraphDefinition)
+        {
+            return CreateResource(modelAnimationGraphDefinition, ResourceLocation.Resources, TagResourceTypeGen3.Animation);
+        }
+
+        public override TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource)
+        {
+            return CreateResource(sbspResource, ResourceLocation.Resources, TagResourceTypeGen3.Collision);
+        }
+
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspTagResourcesTest sbspCacheFileResource)
+        {
+            return CreateResource(sbspCacheFileResource, ResourceLocation.Resources, TagResourceTypeGen3.Pathfinding);
         }
 
         public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)

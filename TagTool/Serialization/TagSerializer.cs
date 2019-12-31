@@ -38,7 +38,7 @@ namespace TagTool.Serialization
         /// <param name="context">The serialization context to use.</param>
         /// <param name="tagStructure">The tag structure.</param>
         /// <param name="offset">An optional offset to begin serializing at.</param>
-        public void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
+        public virtual void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
         {
             // Serialize the structure to a data block
             var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version);
@@ -63,7 +63,7 @@ namespace TagTool.Serialization
         /// <param name="info">Information about the tag structure type.</param>
         /// <param name="structure">The structure to serialize.</param>
         /// <exception cref="System.InvalidOperationException">Structure type must have TagStructureAttribute</exception>
-        private void SerializeStruct(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagStructureInfo info, object structure)
+        public void SerializeStruct(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagStructureInfo info, object structure)
         {
             var baseOffset = block.Stream.Position;
 
@@ -280,6 +280,8 @@ namespace TagTool.Serialization
                 SerializeTagBlockAsList(version, context, tagStream, block, value, valueType, valueInfo);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TagBlock<>))
                 SerializeTagBlock(version, context, tagStream, block, value, valueType, valueInfo);
+            else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
+                SerializeD3DStructure(version, context, tagStream, block, value, valueType);
             else if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
                 SerializeRange(version, context, tagStream, block, value);
             else
@@ -593,6 +595,28 @@ namespace TagTool.Serialization
 
             // Finalize the block and write the pointer
             block.WritePointer(valueBlock.Finalize(tagStream), valueType);
+        }
+
+        public virtual void SerializeD3DStructure(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
+        {
+            var writer = block.Writer;
+
+            if (val == null)
+            {
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                return;
+            }
+
+            // Serialize the value to a temporary block
+            var valueBlock = context.CreateBlock();
+            SerializeValue(version, context, tagStream, valueBlock, val, null, valueType);
+
+            // Finalize the block and write the pointer
+            block.WritePointer(valueBlock.Finalize(tagStream), valueType);
+            writer.Write(0);
+            writer.Write(0);
         }
 
         private void SerializeColor(IDataBlock block, RealRgbColor color)

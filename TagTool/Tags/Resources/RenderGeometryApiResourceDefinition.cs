@@ -14,12 +14,12 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// Unused s_tag_d3d_texture
         /// </summary>
-        public List<TagStructureReference<TagD3DTexture>> Textures;
+        public List<TagStructureReference<BitmapTextureInteropResource.BitmapDefinition>> Textures;
 
         /// <summary>
         /// Unused s_tag_d3d_texture_interleaved
         /// </summary>
-        public List<TagStructureReference<TagD3DTextureInterleaved>> InterleavedTextures;
+        public List<TagStructureReference<BitmapTextureInterleavedInteropResource.BitmapInterleavedDefinition>> InterleavedTextures;
 
         /// <summary>
         /// The vertex buffer definitions for the model data.
@@ -60,6 +60,7 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// The reference to the the data for the vertex buffer.
         /// </summary>
+        [TagField(Align = 0x4)]
         public TagData Data;
 
         [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
@@ -81,6 +82,7 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// The reference to the data for the index buffer.
         /// </summary>
+        [TagField(Align = 0x4)]
         public TagData Data;
 
         [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnline106708)]

@@ -4,26 +4,80 @@ using TagTool.IO;
 using System;
 using System.IO;
 using TagTool.Tags;
+using static TagTool.Tags.Resources.BitmapTextureInterleavedInteropResource;
+using TagTool.Tags.Resources;
+using static TagTool.Tags.Resources.BitmapTextureInteropResourceTest;
 
 namespace TagTool.Serialization
 {
     public class ResourceSerializer : TagSerializer
     {
+        public const int DefaultResourceAlign = 0;
+
         public ResourceSerializer(CacheVersion version) : base(version) {  }
 
-        public override void SerializeTagData(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagData tagData, TagFieldAttribute valueInfo)
+        /// <summary>
+        /// Serializes a tag structure into a context.
+        /// </summary>
+        /// <param name="context">The serialization context to use.</param>
+        /// <param name="tagStructure">The tag structure.</param>
+        /// <param name="offset">An optional offset to begin serializing at.</param>
+        public override void Serialize(ISerializationContext context, object tagStructure, uint? offset = null)
         {
             if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
                 throw new Exception($"Invalid context type given resource deserialization");
 
             var resourceContext = context as ResourceDefinitionSerializationContext;
 
+            // Serialize the structure to a data block
+            var info = TagStructure.GetTagStructureInfo(tagStructure.GetType(), Version);
+            context.BeginSerialize(info);
+            var tagStream = new MemoryStream();
+            var structBlock = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)context.CreateBlock();
+            structBlock.BlockType = resourceContext.InitialAddressType;
+            structBlock.Writer.Format = Format;
+            SerializeStruct(context, tagStream, structBlock, info, tagStructure);
+
+            // Finalize the block and write all of the tag data out
+            var mainStructOffset = offset ?? structBlock.Finalize(tagStream);
+
+            // move over the fixups to the context
+            foreach (var fixup in structBlock.ResourceFixups)
+                resourceContext.ResourceFixups.Add(fixup);
+            foreach (var d3dfixup in structBlock.D3DFixups)
+                resourceContext.D3DFixups.Add(d3dfixup);
+
+            var data = tagStream.ToArray();
+            context.EndSerialize(info, data, mainStructOffset);
+        }
+
+        public override void SerializeTagData(ISerializationContext context, MemoryStream tagStream, IDataBlock block, TagData tagData, TagFieldAttribute valueInfo)
+        {
+            if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
+                throw new Exception($"Invalid context type given resource deserialization");
+
+            if (block.GetType() != typeof(ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock))
+                throw new Exception($"Invalid block type given resource deserialization");
+
+            var resourceBlock = block as ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock;
+            var resourceContext = context as ResourceDefinitionSerializationContext;
+
+            var writer = block.Writer;
+
+            if (tagData.Data == null || tagData.Data.Length == 0)
+            {
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                return;
+            }
+
             CacheAddressType addressType = tagData.Address.Type;
 
             var nextStream = (MemoryStream)resourceContext.GetWriter(addressType).BaseStream;
 
-
-            var writer = block.Writer;
             uint offset = 0;
             uint size = 0;
             var data = tagData.Data;
@@ -31,27 +85,30 @@ namespace TagTool.Serialization
             if (data != null && data.Length > 0)
             {
                 // Ensure the block is aligned correctly
-                var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
+                var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.Align : 0);
                 StreamUtil.Align(nextStream, (int)align);
 
                 // Write its data
                 offset = (uint)nextStream.Position;
                 size = (uint)data.Length;
                 nextStream.Write(data, 0, data.Length);
-                StreamUtil.Align(nextStream, DefaultBlockAlign);
+                StreamUtil.Align(nextStream, DefaultResourceAlign);
             }
+            var address = new CacheAddress(addressType, (int)offset);
 
-            resourceContext.ResourceFixups.Add(new TagResourceGen3.ResourceFixup
+            var dataFixup = new TagResourceGen3.ResourceFixup
             {
                 BlockOffset = (uint)writer.BaseStream.Position + 0xC,
-                Address = new CacheAddress(addressType, (int)offset)
-            });
+                Address = address
+            };
+
+            resourceBlock.ResourceFixups.Add(dataFixup);
 
             // Write the reference data
             writer.Write(size);
             writer.Write(0);
             writer.Write(0);
-            writer.Write(0);
+            writer.Write(address.Value);
             writer.Write(0);
         }
 
@@ -60,6 +117,10 @@ namespace TagTool.Serialization
             if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
                 throw new Exception($"Invalid context type given resource deserialization");
 
+            if (block.GetType() != typeof(ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock))
+                throw new Exception($"Invalid block type given resource deserialization");
+
+            var resourceBlock = block as ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock;
             var resourceContext = context as ResourceDefinitionSerializationContext;
 
             CacheAddressType addressType = (CacheAddressType)listType.GetField("AddressType").GetValue(list);
@@ -93,30 +154,116 @@ namespace TagTool.Serialization
             }
 
             // Serialize each value in the list to a data block
-            var tagBlock = resourceContext.CreateBlock();
-
+            var resourceBlock2 = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)resourceContext.CreateBlock();
+            resourceBlock2.BlockType = addressType;
             var addressTypeStream = (MemoryStream)resourceContext.GetWriter(addressType).BaseStream;
 
             var enumerableList = (System.Collections.IEnumerable)list;
 
             foreach (var val in enumerableList)
-                SerializeValue(version, resourceContext, addressTypeStream, tagBlock, val, null, elementType);
+                SerializeValue(version, resourceContext, resourceBlock2.Stream, resourceBlock2, val, null, elementType);
 
             // Ensure the block is aligned correctly
-            var align = Math.Max(DefaultBlockAlign, (valueInfo != null) ? valueInfo.Align : 0);
-            StreamUtil.Align(addressTypeStream, (int)align);
+            var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.Align : 0);
+            StreamUtil.Align(resourceBlock2.Stream, (int)align);
 
             // Finalize the block and write the tag block reference using a cache address
-            var offset = tagBlock.Finalize(addressTypeStream);
+            
+            var offset = resourceBlock2.Finalize(addressTypeStream);
+            var blockOffset = addressTypeStream.Position;
             var address = new CacheAddress(addressType, (int)offset);
-            resourceContext.ResourceFixups.Add(new TagResourceGen3.ResourceFixup
+            var resourceFixup = new TagResourceGen3.ResourceFixup
             {
                 Address = address,
-                BlockOffset = (uint)writer.BaseStream.Position + 0x4
-            });
+                BlockOffset = (uint)blockOffset + 0x4
+            };
+
+            foreach (var fixup in resourceBlock2.ResourceFixups)
+                resourceBlock.ResourceFixups.Add(fixup);
+            foreach (var d3dfixup in resourceBlock2.D3DFixups)
+                resourceBlock.D3DFixups.Add(d3dfixup);
+
+            resourceBlock.ResourceFixups.Add(resourceFixup);
 
             writer.Write(count);
-            writer.Write(0);    // write address as 0, we use the fixups
+            writer.Write(new CacheAddress(addressType, 0).Value);    // write address as 0, we use the fixups
+            writer.Write(0);
+        }
+
+        public override void SerializeD3DStructure(CacheVersion version, ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, Type valueType)
+        {
+            if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
+                throw new Exception($"Invalid context type given resource deserialization");
+
+            if (block.GetType() != typeof(ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock))
+                throw new Exception($"Invalid block type given resource deserialization");
+
+            var resourceBlock = block as ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock;
+            var resourceContext = context as ResourceDefinitionSerializationContext;
+
+            var writer = block.Writer;
+
+            if (val == null)
+            {
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                return;
+            }
+
+            var addressType = (CacheAddressType)valueType.GetField("AddressType").GetValue(val);
+            var nextStream = (MemoryStream)resourceContext.GetWriter(addressType).BaseStream;
+            var genericType = valueType.GenericTypeArguments[0];
+            var def = valueType.GetField("Definition").GetValue(val);
+            // Serialize the value to a temporary block
+            var resourceBlock2 = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)context.CreateBlock();
+            resourceBlock2.BlockType = addressType;
+            SerializeValue(version, context, resourceBlock2.Stream, resourceBlock2, def, null, genericType);
+
+            // Finalize the block and write the pointer
+
+            var offset = (int)resourceBlock2.Finalize(nextStream);
+
+
+            // find where in the stream the d3dstructure pointer will be written
+            var blockOffset = (int)nextStream.Position;
+            var address = new CacheAddress(addressType, blockOffset);
+
+
+            int structureTypeIndex;
+
+            if (genericType == typeof(BitmapDefinition))
+                structureTypeIndex = 2;
+            else if (genericType == typeof(BitmapInterleavedDefinition))
+                structureTypeIndex = 3;
+            else if (genericType == typeof(VertexBufferDefinition))
+                structureTypeIndex = 0;
+            else if (genericType == typeof(IndexBufferDefinition))
+                structureTypeIndex = 1;
+            else
+                throw new Exception();
+
+            var d3dFixup = new TagResourceGen3.ResourceDefinitionFixup
+            {
+                ResourceStructureTypeIndex = structureTypeIndex,
+                Address = address
+            };
+            var resourceFixup = new TagResourceGen3.ResourceFixup
+            {
+                Address = new CacheAddress(addressType, offset),
+                BlockOffset = (uint)blockOffset
+            };
+
+            foreach (var fixup in resourceBlock2.ResourceFixups)
+                resourceBlock.ResourceFixups.Add(fixup);
+            foreach (var d3dfixup in resourceBlock2.D3DFixups)
+                resourceBlock.D3DFixups.Add(d3dfixup);
+
+            resourceBlock.ResourceFixups.Add(resourceFixup);
+            resourceBlock.D3DFixups.Add(d3dFixup);
+
+            writer.Write(address.Value);
+            writer.Write(0);
             writer.Write(0);
         }
     }

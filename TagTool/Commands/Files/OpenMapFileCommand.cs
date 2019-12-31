@@ -37,7 +37,7 @@ namespace TagTool.Commands.Porting
             if (args.Count == 1)
                 path = args[0];
             else
-                path = @"C:\Users\Tiger\Desktop\halo online\maps\halo3\010_jungle.map";
+                path = @"C:\Users\Tiger\Desktop\halo online\maps\haloonline\guardian.map";
             var file = new FileInfo(path);
 
             GameCache cache = GameCache.Open(file);
@@ -45,19 +45,22 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
+                    // TODO: test out the resource serialization
+                    // TODO: gut tagtool and replace context system and fix all commands (end me)
+
+                    /*
                     if (tag.Group.Tag == "bitm")
                     {
                         var def = cache.Deserialize<Bitmap>(stream, tag);
                         foreach (var res in def.Resources)
                         {
                             var resource = cache.ResourceCache.GetBitmapTextureInteropResource(res);
+                            var newRes = cache.ResourceCache.CreateBitmapResource(resource);
+                            var testResource = cache.ResourceCache.GetBitmapTextureInteropResource(newRes);
                         }
-                        foreach (var res in def.InterleavedResources)
-                        {
-                            var interleavedResource = cache.ResourceCache.GetBitmapTextureInterleavedInteropResource(res);
-                        }
-                            
+                          
                     }
+                    
                     
                     if (tag.Group.Tag == "jmad")
                     {
@@ -65,15 +68,22 @@ namespace TagTool.Commands.Porting
                         foreach (var res in def.ResourceGroups)
                         {
                             var resource = cache.ResourceCache.GetModelAnimationTagResource(res.ResourceReference);
+                            var newRes = cache.ResourceCache.CreateModelAnimationGraphResource(resource);
+                            var testResource = cache.ResourceCache.GetModelAnimationTagResource(newRes);
                         }
                     }
 
+                    */
                     if(tag.Group.Tag == "mode")
                     {
                         var def = cache.Deserialize<RenderModel>(stream, tag);
-                        var resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
+                        var res = def.Geometry.Resource;
+                        var resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(res);
+                        var newRes = cache.ResourceCache.CreateRenderGeometryApiResource(resource);
+                        var testResource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(newRes);
                     }
                     
+                    /*
                     if(tag.Group.Tag == "snd!")
                     {
                         var def = cache.Deserialize<Sound>(stream, tag);
@@ -89,8 +99,10 @@ namespace TagTool.Commands.Porting
                         var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
                         var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
                     }
+                    */
                 }
             }
+
             return true;
         }
     }

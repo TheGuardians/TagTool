@@ -19,8 +19,9 @@ namespace TagTool.Serialization
         public EndianWriter DefinitionWriter { get;  }
 
         public CacheAddressType InitialAddressType { get; }
-
+        public CacheAddress MainStructOffset;
         public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
+        public List<ResourceDefinitionFixup> D3DFixups = new List<ResourceDefinitionFixup>();
 
         public ResourceDefinitionSerializationContext(EndianReader dataReader, EndianWriter dataWriter, EndianReader secondaryDataReader, EndianWriter secondaryDataWriter, EndianReader definitionReader, EndianWriter definitionWriter, CacheAddressType initialAddressType)
         {
@@ -100,12 +101,12 @@ namespace TagTool.Serialization
 
         public IDataBlock CreateBlock()
         {
-            return new GenericDataBlock();
+            return new ResourceDefinitionDataBlock();
         }
 
         public IDataBlock CreateBlockForResource(EndianWriter writer)
         {
-            return new GenericDataBlock(writer);
+            return new ResourceDefinitionDataBlock(writer);
         }
 
         public void EndDeserialize(TagStructureInfo info, object obj)
@@ -114,7 +115,10 @@ namespace TagTool.Serialization
 
         public void EndSerialize(TagStructureInfo info, byte[] data, uint mainStructOffset)
         {
-            GetWriter(InitialAddressType).Write(data);
+            var writer = GetWriter(InitialAddressType);
+            var definitionOffset = writer.BaseStream.Position;
+            writer.Write(data);
+            MainStructOffset = new CacheAddress(InitialAddressType, (int)definitionOffset);
         }
 
         public CachedTagInstance GetTagByIndex(int index)
@@ -132,18 +136,22 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        private class GenericDataBlock : IDataBlock
+        public class ResourceDefinitionDataBlock : IDataBlock
         {
             public MemoryStream Stream { get; private set; }
             public EndianWriter Writer { get; private set; }
 
-            public GenericDataBlock()
+            public List<ResourceFixup> ResourceFixups = new List<ResourceFixup>();
+            public List<ResourceDefinitionFixup> D3DFixups = new List<ResourceDefinitionFixup>();
+            public CacheAddressType BlockType;
+
+            public ResourceDefinitionDataBlock()
             {
                 Stream = new MemoryStream();
                 Writer = new EndianWriter(Stream);
             }
 
-            public GenericDataBlock(EndianWriter writer)
+            public ResourceDefinitionDataBlock(EndianWriter writer)
             {
                 Stream = (MemoryStream)writer.BaseStream;
                 Writer = writer;
@@ -151,7 +159,7 @@ namespace TagTool.Serialization
 
             public void WritePointer(uint targetOffset, Type type)
             {
-                Writer.Write(targetOffset);
+                throw new NotImplementedException();
             }
 
             public object PreSerialize(TagFieldAttribute info, object obj)
@@ -177,6 +185,7 @@ namespace TagTool.Serialization
 
             public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
             {
+                throw new NotImplementedException();
             }
         }
     }

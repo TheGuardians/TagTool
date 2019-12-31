@@ -20,13 +20,50 @@ namespace TagTool.Serialization
 
         public ResourceDeserializer(CacheVersion version) : base(version) { }
 
-        public override object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+        /// <summary>
+        /// Deserializes a value which is pointed to by an address.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="context">The serialization context to use.</param>
+        /// <param name="valueType">The type of the value to deserialize.</param>
+        /// <returns>The deserialized value.</returns>
+        public override object DeserializeD3DStructure(EndianReader reader, ISerializationContext context, Type valueType)
         {
             if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
                 throw new Exception($"Invalid context type given resource deserialization");
 
             var resourceContext = context as ResourceDefinitionSerializationContext;
 
+            var result = Activator.CreateInstance(valueType);
+            var elementType = valueType.GenericTypeArguments[0];
+
+            // Read the pointer
+            var startOffset = reader.BaseStream.Position;
+            var address = new CacheAddress(reader.ReadUInt32());
+            var definitionAddress = reader.ReadUInt32(); // unused
+            var runtimeAddress = reader.ReadUInt32(); // unused
+            
+
+            var nextReader = resourceContext.GetReader(address.Type);
+
+            // Seek to it and read the object
+
+            nextReader.BaseStream.Position = address.Offset;
+
+            var definition = DeserializeValue(nextReader, context, null, elementType);
+            valueType.GetField("Definition").SetValue(result, definition);
+            valueType.GetField("AddressType").SetValue(result, address.Type);
+
+            reader.BaseStream.Position = startOffset + 0xC;
+            return result;
+        }
+
+        public override object DeserializeTagBlock(EndianReader reader, ISerializationContext context, Type valueType)
+        {
+            if (context.GetType() != typeof(ResourceDefinitionSerializationContext))
+                throw new Exception($"Invalid context type given resource deserialization");
+
+            var resourceContext = context as ResourceDefinitionSerializationContext;
 
             var result = Activator.CreateInstance(valueType);
             var elementType = valueType.GenericTypeArguments[0];

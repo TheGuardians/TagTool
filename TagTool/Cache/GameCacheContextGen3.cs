@@ -570,28 +570,28 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInteropResourceTest GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInteropResourceTest>(resourceReference);
         }
 
-        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInterleavedInteropResourceTest GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interleaved_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResourceTest>(resourceReference);
         }
 
-        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        public override RenderGeometryApiResourceDefinitionTest GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
                 return null;
-            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
+            return GetResourceDefinition<RenderGeometryApiResourceDefinitionTest>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
@@ -625,12 +625,12 @@ namespace TagTool.Cache
             return resourceDef;
         }
 
-        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
+        public override ModelAnimationTagResourceTest GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "model_animation_tag_resource")
                 return null;
-            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
+            return GetResourceDefinition<ModelAnimationTagResourceTest>(resourceReference);
         }
 
         public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)
@@ -653,6 +653,47 @@ namespace TagTool.Cache
             if (ResourceLayoutTable.Segments[tagResource.SegmentIndex].RequiredPageIndex == -1)
                 return null;
             return GetResourceDefinition<StructureBspCacheFileTagResourcesTest>(resourceReference);
+        }
+
+
+        public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinitionTest renderGeometryDefinition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResourceTest modelAnimationGraphDefinition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspTagResourcesTest sbspCacheFileResource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition)
+        {
+            return null;
+        }
+
+        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition)
+        {
+            return null;
         }
 
         private string GetResourceTypeName(TagResourceGen3 tagResource)

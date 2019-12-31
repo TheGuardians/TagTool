@@ -312,6 +312,9 @@ namespace TagTool.Serialization
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(TagBlock<>))
                 return DeserializeTagBlock(reader, context, valueType);
 
+            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
+                return DeserializeD3DStructure(reader, context, valueType);
+
             // Ranges
             if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Bounds<>))
                 return DeserializeRange(reader, context, valueType);
@@ -431,6 +434,34 @@ namespace TagTool.Serialization
 
             reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
 
+            return result;
+        }
+
+        /// <summary>
+        /// Deserializes a value which is pointed to by an address.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="context">The serialization context to use.</param>
+        /// <param name="valueType">The type of the value to deserialize.</param>
+        /// <returns>The deserialized value.</returns>
+        public virtual object DeserializeD3DStructure(EndianReader reader, ISerializationContext context, Type valueType)
+        {
+          
+            var result = Activator.CreateInstance(valueType);
+            var elementType = valueType.GenericTypeArguments[0];
+
+            // Read the pointer
+            var startOffset = reader.BaseStream.Position;
+            var pointer = reader.ReadUInt32();
+
+            // Seek to it and read the object
+
+            reader.BaseStream.Position = context.AddressToOffset((uint)startOffset + 4, pointer);
+
+            var definition = DeserializeValue(reader, context, null, elementType);
+            valueType.GetField("Definition").SetValue(result, definition);
+
+            reader.BaseStream.Position = startOffset + 0xC;
             return result;
         }
 

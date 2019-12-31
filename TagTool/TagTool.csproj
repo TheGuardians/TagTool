@@ -337,7 +337,11 @@
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
+    <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResourceTest.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
+    <Compile Include="Tags\Resources\BitmapTextureInteropResourceTest.cs" />
+    <Compile Include="Tags\Resources\ModelAnimationTagResourceTest.cs" />
+    <Compile Include="Tags\Resources\RenderGeometryApiResourceDefinitionTest.cs" />
     <Compile Include="Tags\Resources\StructureBspCacheFileTagResourcesTest.cs" />
     <Compile Include="Tags\Resources\StructureBspTagResourcesTest.cs" />
     <Compile Include="Tags\TagFile.cs" />
