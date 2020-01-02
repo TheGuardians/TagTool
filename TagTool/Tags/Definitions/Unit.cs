@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)] 
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnline106708)] 
-    public abstract class Unit : GameObject
+    public class Unit : GameObject
     {
         public UnitFlagBits UnitFlags; // int
         public DefaultTeamValue DefaultTeam; // short

@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x104, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnline106708)]
-    public abstract class GameObject : TagStructure
+    public class GameObject : TagStructure
 	{
         public GameObjectType ObjectType;
         public GameObjectFlags ObjectFlags;
