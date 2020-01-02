@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TagTool.Commands.Editing;
 using TagTool.Common;
 
 namespace TagTool.Cache
 {
-    public struct CacheAddress : IComparable<CacheAddress>, IEquatable<CacheAddress>, IBlamType
+    public struct CacheAddress : IComparable<CacheAddress>, IEquatable<CacheAddress>
     {
         private const int TypeShift = 29;
         private const uint OffsetMask = (uint.MaxValue >> (32 - TypeShift));
@@ -37,35 +36,5 @@ namespace TagTool.Cache
 
         public override string ToString() => $"{{ Type: {Type}, Offset: {Offset} }}";
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
-        {
-            result = null;
-            
-            if (args.Count != 2)
-            {
-                error = $"{args.Count} arguments supplied; should be 2";
-                return false;
-            }
-            else
-            {
-                var cacheAddressType = SetFieldCommand.ParseArgs(cacheContext, typeof(CacheAddressType), null, args.Take(1).ToList());
-                if (!(cacheAddressType is CacheAddressType))
-                {
-                    error = $"Failed to parse `{args[0]}` as `CacheAddressType`";
-                    return false;
-                }
-                else if (!int.TryParse(args[1], out int offset))
-                {
-                    error = $"Failed to parse `{args[1]}` as `int` (offset).";
-                    return false;
-                }
-                else
-                {
-                    result = new CacheAddress((cacheAddressType as CacheAddressType?).Value, offset);
-                    error = null;
-                    return true;
-                }
-            }
-        }
     }
 }

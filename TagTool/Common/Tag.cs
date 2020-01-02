@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TagTool.Cache;
+using TagTool.Tags;
 
 namespace TagTool.Common
 {
@@ -80,6 +81,32 @@ namespace TagTool.Common
                 val >>= 8;
             }
             return (i < 4) ? new string(chars, i, chars.Length - i) : "";
+        }
+
+        public static Tag Parse(GameCache cache, string name)
+        {
+            if (name == "****" || name == "null")
+                return Null;
+
+            if (name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
+
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                return new Tag(attribute.Tag);
+            }
+
+            foreach (var pair in TagGroup.Instances)
+                if (name == cache.StringTable.GetString(pair.Value.Name))
+                    return pair.Value.Tag;
+
+            return Null;
         }
 
         public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
