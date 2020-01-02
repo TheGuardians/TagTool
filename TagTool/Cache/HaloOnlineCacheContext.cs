@@ -41,13 +41,13 @@ namespace TagTool.Cache
 
             using (var stream = OpenStringIdCacheRead())
                 StringIdCache = new StringIdCache(stream, stringIdResolver);
-
+            /*
             TagGroup.Instances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, GetStringId("object"));
             TagGroup.Instances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, GetStringId("item"));
             TagGroup.Instances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, GetStringId("device"));
             TagGroup.Instances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, GetStringId("unit"));
             TagGroup.Instances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, GetStringId("render_method"));
-            TagGroup.Instances[new Tag("test")] = new TagGroup(new Tag("test"), Tag.Null, Tag.Null, GetStringId("test_blah"));
+            TagGroup.Instances[new Tag("test")] = new TagGroup(new Tag("test"), Tag.Null, Tag.Null, GetStringId("test_blah"));*/
         }
 
         #region Tag Cache Functionality
@@ -218,7 +218,7 @@ namespace TagTool.Cache
                 }
 
                 var groupTag = new Tag(structure.Tag);
-
+                /*
                 if (!TagGroup.Instances.ContainsKey(groupTag))
                 {
                     Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
@@ -226,7 +226,7 @@ namespace TagTool.Cache
                 }
 
                 result = TagCache.AllocateTag(TagGroup.Instances[groupTag], name);
-
+                */
                 if (result == null)
                     return false;
             }
@@ -407,7 +407,7 @@ namespace TagTool.Cache
                 result = new Tag(attribute.Tag);
                 return true;
             }
-
+            /*
             foreach (var pair in TagGroup.Instances)
             {
                 if (name == GetString(pair.Value.Name))
@@ -416,7 +416,7 @@ namespace TagTool.Cache
                     return true;
                 }
             }
-
+            */
             result = Tag.Null;
             return name == "none" || name == "null";
         }

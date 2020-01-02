@@ -37,11 +37,6 @@ namespace TagTool.Tags
         public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
 
         /// <summary>
-        /// A dictionary of available tag groups.
-        /// </summary>
-        public static Dictionary<Tag, TagGroup> Instances { get; set; }
-
-        /// <summary>
         /// Constructs an empty tag group description.
         /// </summary>
         public TagGroup()
@@ -62,11 +57,6 @@ namespace TagTool.Tags
             ParentTag = parentTag;
             GrandparentTag = grandparentTag;
             Name = name;
-
-            if (Instances == null)
-                Instances = new Dictionary<Tag, TagGroup>();
-
-            Instances[Tag] = this;
         }
 
         /// <summary>

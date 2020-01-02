@@ -10,11 +10,11 @@ namespace TagTool.Commands.Editing
 {
     class ListFieldsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private TagStructureInfo Structure { get; }
         private object Value { get; }
         
-        public ListFieldsCommand(HaloOnlineCacheContext cacheContext, TagStructureInfo structure, object value)
+        public ListFieldsCommand(GameCache cache, TagStructureInfo structure, object value)
             : base(true,
 
                   "ListFields",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Editing
 
                   $"Lists the fields in the current {structure.Types[0].Name} definition.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Structure = structure;
             Value = value;
         }
@@ -64,14 +64,14 @@ namespace TagTool.Commands.Editing
 				if (fieldValue == null)
 					valueString = "null";
 				else if (fieldType == typeof(StringId))
-					valueString = CacheContext.GetString((StringId)fieldValue);
+					valueString = Cache.StringTable.GetString((StringId)fieldValue);
 				else if (fieldType == typeof(CachedTagInstance))
 				{
 					var instance = (CachedTagInstance)fieldValue;
 
 					var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-					valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
+					valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
 				}
 				else if (fieldType == typeof(TagFunction))
 				{

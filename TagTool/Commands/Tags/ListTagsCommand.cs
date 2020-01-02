@@ -28,7 +28,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : Tag.Parse(Cache, args[0]);
+            var groupTag = (args.Count == 0 || args[0].EndsWith(":")) ? Tag.Null : Cache.ParseTag(args[0]);
 
             if (args.Count > 0 && !args[0].EndsWith(":"))
                 args.RemoveAt(0);

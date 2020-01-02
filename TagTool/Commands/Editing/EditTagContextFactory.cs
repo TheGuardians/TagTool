@@ -4,21 +4,6 @@ using TagTool.Cache;
 using System.Reflection;
 using System.IO;
 using System.Xml;
-using TagTool.Commands.Video;
-using TagTool.Commands.Bitmaps;
-using TagTool.Commands.CollisionModels;
-using TagTool.Commands.Models;
-using TagTool.Commands.ModelAnimationGraphs;
-using TagTool.Commands.ScenarioLightmaps;
-using TagTool.Commands.RenderModels;
-using TagTool.Commands.RenderMethods;
-using TagTool.Commands.ScenarioStructureBSPs;
-using TagTool.Commands.Scenarios;
-using TagTool.Commands.Sounds;
-using TagTool.Commands.Unicode;
-using TagTool.Commands.Files;
-using TagTool.Commands.Forge;
-using TagTool.Commands.Bipeds;
 
 namespace TagTool.Commands.Editing
 {
@@ -26,18 +11,18 @@ namespace TagTool.Commands.Editing
     {
         public static XmlDocument Documentation { get; } = new XmlDocument();
 
-        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object definition)
+        public static CommandContext Create(CommandContextStack contextStack, GameCache cache, CachedTag tag, object definition)
         {
             var documentationPath = $"{new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName}\\TagTool.xml";
 
             if (Documentation.ChildNodes.Count == 0 && File.Exists(documentationPath))
                 Documentation.Load(documentationPath);
 
-            var groupName = cacheContext.GetString(tag.Group.Name);
+            var groupName = cache.StringTable.GetString(tag.Group.Name);
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-
+            /*
             switch (tag.Group.Tag.ToString())
             {
                 case "bipd":
@@ -133,20 +118,10 @@ namespace TagTool.Commands.Editing
                     Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
                     break;
             }
+            */
+            var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cache.Version);
 
-            var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cacheContext.Version);
-
-            commandContext.AddCommand(new ListFieldsCommand(cacheContext, structure, definition));
-            commandContext.AddCommand(new SetFieldCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new ExtractResourceCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new EditBlockCommand(contextStack, cacheContext, tag, definition));
-            commandContext.AddCommand(new AddBlockElementsCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new RemoveBlockElementsCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new CopyBlockElementsCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new ForEachCommand(contextStack, cacheContext, tag, structure, definition));
-            commandContext.AddCommand(new SaveTagChangesCommand(cacheContext, tag, definition));
-            commandContext.AddCommand(new PokeTagChangesCommand(cacheContext, tag, definition));
+            commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
             return commandContext;

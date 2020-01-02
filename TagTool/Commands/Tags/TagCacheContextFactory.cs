@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Editing;
 
 namespace TagTool.Commands.Tags
 {
@@ -9,7 +10,8 @@ namespace TagTool.Commands.Tags
             var context = new CommandContext(contextStack.Context, "tags");
 
             context.AddCommand(new ListTagsCommand(cache));
-            
+            context.AddCommand(new EditTagCommand(contextStack, cache));
+
             return context;
         }
     }

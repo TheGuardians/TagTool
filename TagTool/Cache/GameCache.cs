@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -93,6 +94,131 @@ namespace TagTool.Cache
 
             return null;
         }
+
+        // Utilities
+
+        public bool TryParseTag(string name, out Tag result)
+        {
+            result = ParseTag(name);
+            if (result == Tag.Null)
+                return false;
+            else return true;
+        }
+
+        public Tag ParseTag(string name)
+        {
+            if (name == "****" || name == "null")
+                return Tag.Null;
+
+            if (name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
+
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                return new Tag(attribute.Tag);
+            }
+
+            foreach (var pair in TagCache.TagGroupInstances)
+                if (name == StringTable.GetString(pair.Value.Name))
+                    return pair.Value.Tag;
+
+            return Tag.Null;
+        }
+
+        public bool TryGetCachedTag(int index, out CachedTag instance)
+        {
+            if (index < 0 || index >= TagCache.TagTable.Count())
+            {
+                instance = null;
+                return false;
+            }
+
+            instance = TagCache.GetTagByIndex(index);
+            return true;
+        }
+
+        public bool TryGetCachedTag(string name, out CachedTag result)
+        {
+            if (name.Length == 0)
+            {
+                result = null;
+                return false;
+            }
+
+            if (name == "null")
+            {
+                result = null;
+                return true;
+            }
+
+            if (name == "*")
+            {
+                if (TagCache.TagTable.Count() == 0)
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.TagTable.Last();
+                return true;
+            }
+
+            if (name.StartsWith("*."))
+            {
+                if (!name.TrySplit('.', out var startNamePieces) || !TryParseTag(startNamePieces[1], out var starGroupTag))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.TagTable.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
+                return true;
+            }
+
+            if (name.StartsWith("0x"))
+            {
+                name = name.Substring(2);
+
+                if (name.TrySplit('.', out var hexNamePieces))
+                    name = hexNamePieces[0];
+
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || !TagCache.IsTagIndexValid(tagIndex))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.GetTagByIndex(tagIndex);
+                return true;
+            }
+
+            if (!name.TrySplit('.', out var namePieces) || !TryParseTag(namePieces[namePieces.Length - 1], out var groupTag))
+                throw new Exception($"Invalid tag name: {name}");
+
+            var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
+
+            foreach (var instance in TagCache.TagTable)
+            {
+                if (instance is null)
+                    continue;
+
+                if (instance.IsInGroup(groupTag) && instance.Name == tagName)
+                {
+                    result = instance;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
     }
 
     public abstract class CachedTag
@@ -138,7 +264,7 @@ namespace TagTool.Cache
     public abstract class TagCacheTest
     {
         public CacheVersion Version;
-
+        public Dictionary<Tag, TagGroup> TagGroupInstances { get; set; }
         public virtual IEnumerable<CachedTag> TagTable { get;}
 
         public abstract CachedTag GetTagByID(uint ID);
@@ -148,6 +274,16 @@ namespace TagTool.Cache
         public abstract Stream OpenTagCacheRead();
         public abstract FileStream OpenTagCacheReadWrite();
         public abstract FileStream OpenTagCacheWrite();
+
+        // Utilities
+
+        public bool IsTagIndexValid(int tagIndex)
+        {
+            if (tagIndex > 0 && tagIndex < TagTable.Count())
+                return true;
+            else
+                return false;
+        }
     }
 
     public abstract class StringTable : List<string>
