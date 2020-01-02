@@ -3,6 +3,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Tags.Resources
 {
@@ -115,54 +116,18 @@ namespace TagTool.Tags.Resources
             public float BoundingSphereRadius;
             public CollisionBspBlock CollisionInfo;
             public TagBlock<CollisionBspBlock> CollisionGeometries;
-            public TagBlock<CollisionBspPhysicsBlock> BspPhysics;
-            public TagBlock<Unknown1Block> Unknown1;
-            public TagBlock<Unknown2Block> Unknown2;
-            public TagBlock<Unknown3Block> Unknown3;
+            public TagBlock<CollisionMoppCodesBlock> CollisionMoppCodes;
+            public TagBlock<ScenarioStructureBsp.BreakableSurface> BreakableSurfaces;
+            public TagBlock<ScenarioStructureBsp.SurfacesPlanes> SurfacePlanes;
+            public TagBlock<ScenarioStructureBsp.Plane> Planes;
             public short MeshIndex;
             public short CompressionIndex;
-
             public float Unknown4;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public TagBlock<Unknown4Block> Unknown5;
-
+            public TagBlock<CollisionMoppCodesBlock> UnknownBspPhysics;
 			[TagField(MinVersion = CacheVersion.HaloOnline106708)]
 			public float Unknown6;
-
-            [TagStructure(Size = 0x4)]
-            public class Unknown1Block : TagStructure
-			{
-                public uint Unknown;
-            }
-
-            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708)]
-            public class Unknown2Block : TagStructure
-			{
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public short Unknown1_H3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public int Unknown1;
-
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public short Unknown2_H3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public int Unknown2;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class Unknown3Block : TagStructure
-			{
-                public short Unknown;
-                public short Unknown1;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class Unknown4Block : TagStructure
-			{
-                public uint Unknown;
-            }
         }
 
         [TagStructure(Size = 0x34)]
@@ -185,8 +150,8 @@ namespace TagTool.Tags.Resources
             }
         }
 
-        [TagStructure(Size = 0x40, Align = 0x10)]
-        public class CollisionBspPhysicsBlock : TagStructure
+        [TagStructure(Size = 0x40)]
+        public class CollisionMoppCodesBlock : TagStructure
 		{
             public int Unused1;
             public short Size;

@@ -681,7 +681,7 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspTagResourcesTest sbspCacheFileResource)
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource)
         {
             throw new NotImplementedException();
         }

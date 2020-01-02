@@ -72,7 +72,7 @@ namespace TagTool.Serialization
 
             // Honor the struct size if it's defined
             if (info.TotalSize > 0)
-            {
+            { 
                 block.Stream.Position = baseOffset + info.TotalSize;
                 if (block.Stream.Position > block.Stream.Length)
                     block.Stream.SetLength(block.Stream.Position);

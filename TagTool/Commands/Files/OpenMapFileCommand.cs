@@ -45,7 +45,6 @@ namespace TagTool.Commands.Porting
             {
                 foreach (var tag in cache.TagCache.TagTable)
                 {
-                    // TODO: test out the resource serialization
                     // TODO: gut tagtool and replace context system and fix all commands (end me)
 
                     /*
@@ -58,9 +57,9 @@ namespace TagTool.Commands.Porting
                             var newRes = cache.ResourceCache.CreateBitmapResource(resource);
                             var testResource = cache.ResourceCache.GetBitmapTextureInteropResource(newRes);
                         }
-                          
                     }
                     
+
                     
                     if (tag.Group.Tag == "jmad")
                     {
@@ -73,7 +72,9 @@ namespace TagTool.Commands.Porting
                         }
                     }
 
-                    */
+                    
+
+                    
                     if(tag.Group.Tag == "mode")
                     {
                         var def = cache.Deserialize<RenderModel>(stream, tag);
@@ -83,23 +84,56 @@ namespace TagTool.Commands.Porting
                         var testResource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(newRes);
                     }
                     
-                    /*
+                    
+                    
+                    
                     if(tag.Group.Tag == "snd!")
                     {
                         var def = cache.Deserialize<Sound>(stream, tag);
                         var resource = cache.ResourceCache.GetSoundResourceDefinition(def.Resource);
+                        var newRes = cache.ResourceCache.CreateSoundResource(resource);
+                        var testResource = cache.ResourceCache.GetSoundResourceDefinition(newRes);
                     }
+
                     
+                    */
                     if (tag.Group.Tag == "sbsp")
                     {
                         var def = cache.Deserialize<ScenarioStructureBsp>(stream, tag);
 
-                        var geo1Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry.Resource);
-                        var geo2Resource = cache.ResourceCache.GetRenderGeometryApiResourceDefinition(def.Geometry2.Resource);
-                        var collisionResource = cache.ResourceCache.GetStructureBspTagResources(def.CollisionBspResource);
-                        var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
+                        var res = def.CollisionBspResource;
+                        var collisionResoruce = cache.ResourceCache.GetStructureBspTagResources(res);
+                        var newRes = cache.ResourceCache.CreateStructureBspResource(collisionResoruce);
+
+                        var originalDef = new FileInfo(@"C:\Users\Tiger\Desktop\hodef.txt");
+                        var newDef = new FileInfo(@"C:\Users\Tiger\Desktop\mydef.txt");
+
+                        using (var fileStream1 = originalDef.Create())
+                        using (var fileStream2 = newDef.Create())
+                        {
+                            var hodefdata = res.HaloOnlinePageableResource.Resource.DefinitionData;
+                            var mydefdata = newRes.HaloOnlinePageableResource.Resource.DefinitionData;
+                            fileStream1.Write(hodefdata, 0, hodefdata.Length);
+                            fileStream2.Write(mydefdata, 0, mydefdata.Length);
+                        }
+
+                        for (int i = 0; i < newRes.HaloOnlinePageableResource.Resource.ResourceFixups.Count; i++)
+                        {
+                            var newResFixup = newRes.HaloOnlinePageableResource.Resource.ResourceFixups[i];
+                            var oldresFixup = res.HaloOnlinePageableResource.Resource.ResourceFixups[i];
+                            if( newResFixup.BlockOffset != oldresFixup.BlockOffset)
+                            {
+                                var test = -1;
+                            }
+                        }
+
+                        var testResource = cache.ResourceCache.GetStructureBspTagResources(newRes);
+
+                        //var pathfindingResource = cache.ResourceCache.GetStructureBspCacheFileTagResources(def.PathfindingResource);
+                        
                     }
-                    */
+                    
+                    
                 }
             }
 

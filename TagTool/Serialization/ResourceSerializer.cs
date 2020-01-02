@@ -169,10 +169,8 @@ namespace TagTool.Serialization
             // Ensure the block is aligned correctly
             var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.Align : 0);
 
-            if(elementType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
-            {
-                align = 0x10;
-            }
+            //if(elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
+            align = 0x10;
 
             StreamUtil.Align(resourceBlock2.Stream, (int)align);
 
@@ -202,7 +200,7 @@ namespace TagTool.Serialization
             resourceBlock.ResourceFixups.Add(resourceFixup);
 
             writer.Write(count);
-            writer.Write(new CacheAddress(addressType, 0).Value);    // write address as 0, we use the fixups
+            writer.Write(address.Value);    // write address as 0, we use the fixups
             writer.Write(0);
         }
 

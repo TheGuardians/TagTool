@@ -1374,7 +1374,7 @@ namespace TagTool.Cache
             return CreateResource(sbspResource, ResourceLocation.Resources, TagResourceTypeGen3.Collision);
         }
 
-        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspTagResourcesTest sbspCacheFileResource)
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource)
         {
             return CreateResource(sbspCacheFileResource, ResourceLocation.Resources, TagResourceTypeGen3.Pathfinding);
         }

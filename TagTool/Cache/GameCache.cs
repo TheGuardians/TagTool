@@ -201,7 +201,7 @@ namespace TagTool.Cache
         public abstract TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition);
         public abstract TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition);
         public abstract TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource);
-        public abstract TagResourceReference CreateStructureBspCacheFileResource(StructureBspTagResourcesTest sbspCacheFileResource);
+        public abstract TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource);
     }
 
     public class CacheLocalizedStringTest
