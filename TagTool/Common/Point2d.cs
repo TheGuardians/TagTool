@@ -37,7 +37,7 @@ namespace TagTool.Common
         public override string ToString() =>
             $"{{ X: {X}, Y: {Y} }}";
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
 

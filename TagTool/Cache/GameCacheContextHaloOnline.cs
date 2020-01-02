@@ -41,14 +41,6 @@ namespace TagTool.Cache
             Serializer = new TagSerializer(Version);
             StringTableHaloOnline = new StringTableHaloOnline(Version, Directory);
             ResourceCaches = new ResourceCachesHaloOnline(this);
-
-
-            // fix tag groups, not sure why this is here
-            TagCacheGenHO.TagGroupInstances[new Tag("obje")] = new TagGroup(new Tag("obje"), Tag.Null, Tag.Null, StringTableHaloOnline.GetStringId("object"));
-            TagCacheGenHO.TagGroupInstances[new Tag("item")] = new TagGroup(new Tag("item"), new Tag("obje"), Tag.Null, StringTableHaloOnline.GetStringId("item"));
-            TagCacheGenHO.TagGroupInstances[new Tag("devi")] = new TagGroup(new Tag("devi"), new Tag("obje"), Tag.Null, StringTableHaloOnline.GetStringId("device"));
-            TagCacheGenHO.TagGroupInstances[new Tag("unit")] = new TagGroup(new Tag("unit"), new Tag("obje"), Tag.Null, StringTableHaloOnline.GetStringId("unit"));
-            TagCacheGenHO.TagGroupInstances[new Tag("rm  ")] = new TagGroup(new Tag("rm  "), Tag.Null, Tag.Null, StringTableHaloOnline.GetStringId("render_method"));
         }
 
         public override Stream OpenCacheRead() => TagCache.OpenTagCacheRead();

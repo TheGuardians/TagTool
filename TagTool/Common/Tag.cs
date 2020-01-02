@@ -83,7 +83,33 @@ namespace TagTool.Common
             return (i < 4) ? new string(chars, i, chars.Length - i) : "";
         }
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        public static Tag Parse(GameCache cache, string name)
+        {
+            if (name == "****" || name == "null")
+                return Null;
+
+            if (name.Length < 4)
+            {
+                if (name.Length == 3)
+                    name = $"{name} ";
+                else if (name.Length == 2)
+                    name = $"{name}  ";
+            }
+
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                return new Tag(attribute.Tag);
+            }
+
+            foreach (var pair in TagGroup.Instances)
+                if (name == cache.StringTable.GetString(pair.Value.Name))
+                    return pair.Value.Tag;
+
+            return Null;
+        }
+
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
             if (args.Count != 1)
@@ -91,7 +117,7 @@ namespace TagTool.Common
                 error = $"{args.Count} arguments supplied; should be 1";
                 return false;
             }
-            else if (!cacheContext.TryParseGroupTag(args[0], out Tag groupTag))
+            else if (!cache.TryParseGroupTag(args[0], out Tag groupTag))
             {
                 error = $"Invalid tag group specifier: {args[0]}";
                 return false;

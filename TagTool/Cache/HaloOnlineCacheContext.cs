@@ -218,7 +218,7 @@ namespace TagTool.Cache
                 }
 
                 var groupTag = new Tag(structure.Tag);
-                /*
+
                 if (!TagGroup.Instances.ContainsKey(groupTag))
                 {
                     Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
@@ -226,7 +226,7 @@ namespace TagTool.Cache
                 }
 
                 result = TagCache.AllocateTag(TagGroup.Instances[groupTag], name);
-                */
+
                 if (result == null)
                     return false;
             }
@@ -401,13 +401,13 @@ namespace TagTool.Cache
         /// <returns>True if the group tag was parsed, false otherwise.</returns>
         public bool TryParseGroupTag(string name, out Tag result)
         {
-            if (Tags.TagDefinition.TryFind(name, out var type))
+            if (TagDefinition.TryFind(name, out var type))
             {
                 var attribute = TagStructure.GetTagStructureAttribute(type);
                 result = new Tag(attribute.Tag);
                 return true;
             }
-            /*
+
             foreach (var pair in TagGroup.Instances)
             {
                 if (name == GetString(pair.Value.Name))
@@ -416,7 +416,7 @@ namespace TagTool.Cache
                     return true;
                 }
             }
-            */
+
             result = Tag.Null;
             return name == "none" || name == "null";
         }

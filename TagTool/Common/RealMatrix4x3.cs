@@ -129,7 +129,7 @@ namespace TagTool.Common
             $"{m31}, {m32}, {m33} |" +
             $"{m41}, {m42}, {m43} }}";
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
 

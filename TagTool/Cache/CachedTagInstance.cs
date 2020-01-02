@@ -157,25 +157,11 @@ namespace TagTool.Cache
 
         public override string ToString() => $"0x{Index:X8}";
 
-        public bool TryParse(HaloOnlineCacheContext cacheContext, List<string> args, out IBlamType result, out string error)
+        public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
-            if (args.Count != 1)
-            {
-                error = $"{args.Count} arguments supplied; should be 1";
-                return false;
-            }
-            else if (!cacheContext.TryGetTag(args[0], out var tag))
-            {
-                error = $"Unable to locate tag: {args[0]}";
-                return false;
-            }
-            else
-            {
-                result = tag;
-                error = null;
-                return true;
-            }
+            error = null;
+            return true;
         }
 
         public void AddResourceOffset(uint offset)

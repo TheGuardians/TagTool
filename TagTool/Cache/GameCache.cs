@@ -95,41 +95,8 @@ namespace TagTool.Cache
             return null;
         }
 
-        // Utilities
-
-        public bool TryParseTag(string name, out Tag result)
-        {
-            result = ParseTag(name);
-            if (result == Tag.Null)
-                return false;
-            else return true;
-        }
-
-        public Tag ParseTag(string name)
-        {
-            if (name == "****" || name == "null")
-                return Tag.Null;
-
-            if (name.Length < 4)
-            {
-                if (name.Length == 3)
-                    name = $"{name} ";
-                else if (name.Length == 2)
-                    name = $"{name}  ";
-            }
-
-            if (TagDefinition.TryFind(name, out var type))
-            {
-                var attribute = TagStructure.GetTagStructureAttribute(type);
-                return new Tag(attribute.Tag);
-            }
-
-            foreach (var pair in TagCache.TagGroupInstances)
-                if (name == StringTable.GetString(pair.Value.Name))
-                    return pair.Value.Tag;
-
-            return Tag.Null;
-        }
+        // Utilities, I believe they don't belong here but I haven't found a better solution yet. I think GroupTag should store the string,
+        // not the stringid, therefore we could hardcode the list of tag group types
 
         public bool TryGetCachedTag(int index, out CachedTag instance)
         {
@@ -171,7 +138,7 @@ namespace TagTool.Cache
 
             if (name.StartsWith("*."))
             {
-                if (!name.TrySplit('.', out var startNamePieces) || !TryParseTag(startNamePieces[1], out var starGroupTag))
+                if (!name.TrySplit('.', out var startNamePieces) || !TryParseGroupTag(startNamePieces[1], out var starGroupTag))
                 {
                     result = null;
                     return false;
@@ -198,7 +165,7 @@ namespace TagTool.Cache
                 return true;
             }
 
-            if (!name.TrySplit('.', out var namePieces) || !TryParseTag(namePieces[namePieces.Length - 1], out var groupTag))
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
                 throw new Exception($"Invalid tag name: {name}");
 
             var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
@@ -219,6 +186,27 @@ namespace TagTool.Cache
             return false;
         }
 
+        public bool TryParseGroupTag(string name, out Tag result)
+        {
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                result = new Tag(attribute.Tag);
+                return true;
+            }
+
+            foreach (var pair in TagGroup.Instances)
+            {
+                if (name == StringTable.GetString(pair.Value.Name))
+                {
+                    result = pair.Value.Tag;
+                    return true;
+                }
+            }
+
+            result = Tag.Null;
+            return name == "none" || name == "null";
+        }
     }
 
     public abstract class CachedTag
@@ -264,7 +252,6 @@ namespace TagTool.Cache
     public abstract class TagCacheTest
     {
         public CacheVersion Version;
-        public Dictionary<Tag, TagGroup> TagGroupInstances { get; set; }
         public virtual IEnumerable<CachedTag> TagTable { get;}
 
         public abstract CachedTag GetTagByID(uint ID);
