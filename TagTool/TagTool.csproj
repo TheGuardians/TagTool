@@ -261,6 +261,7 @@
     <Compile Include="Commands\Editing\EditTagContextFactory.cs" />
     <Compile Include="Commands\Editing\ExitToCommand.cs" />
     <Compile Include="Commands\Editing\ListFieldsCommand.cs" />
+    <Compile Include="Commands\Tags\TestCommand.cs" />
     <Compile Include="Common\Crc32.cs" />
     <Compile Include="Common\DatumIndex.cs" />
     <Compile Include="Common\GameCharacterPhysics.cs" />

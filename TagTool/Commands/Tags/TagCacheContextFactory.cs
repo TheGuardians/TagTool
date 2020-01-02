@@ -9,6 +9,7 @@ namespace TagTool.Commands.Tags
         {
             var context = new CommandContext(contextStack.Context, "tags");
 
+            context.AddCommand(new TestCommand(cache));
             context.AddCommand(new ListTagsCommand(cache));
             context.AddCommand(new EditTagCommand(contextStack, cache));
 
