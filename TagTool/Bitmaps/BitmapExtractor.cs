@@ -29,7 +29,7 @@ namespace TagTool.Bitmaps
             var resourceContext = new ResourceSerializationContext(CacheContext, resource.HaloOnlinePageableResource);
             var definition = ExtractResourceDefinition(resource, resourceContext);
 
-            var header = new DDSHeader(definition.Texture.Definition);
+            var header = new DDSHeader(definition.Texture.Definition.Bitmap);
 
             header.Write(new EndianWriter(outStream));
 

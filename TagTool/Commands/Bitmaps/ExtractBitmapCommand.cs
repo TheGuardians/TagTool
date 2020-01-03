@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Bitmaps;
+using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.IO;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Bitmaps
 {
     class ExtractBitmapCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ExtractBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ExtractBitmapCommand(GameCache cache, CachedTag tag, Bitmap bitmap)
             : base(false,
 
                   "ExtractBitmap",
@@ -23,7 +26,7 @@ namespace TagTool.Commands.Bitmaps
 
                   "Extracts a bitmap to a file.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Bitmap = bitmap;
         }
@@ -49,42 +52,57 @@ namespace TagTool.Commands.Bitmaps
                     return false;
             }
 
-            //var extractor = new BitmapExtractor(CacheContext);
-            var extractor = new BitmapDdsExtractor(CacheContext);
-
-            using (var tagsStream = CacheContext.OpenTagCacheRead())
+            var ddsOutDir = directory;
+            string name;
+            if(Tag.Name != null)
             {
-            #if !DEBUG
-                try
-                {
-            #endif
-                    var bitmap = CacheContext.Deserialize<Bitmap>(tagsStream, Tag);
-                    var ddsOutDir = directory;
-
-                    if (bitmap.Images.Count > 1)
-                    {
-                        ddsOutDir = Path.Combine(directory, Tag.Index.ToString("X8"));
-                        Directory.CreateDirectory(ddsOutDir);
-                    }
-
-                    for (var i = 0; i < bitmap.Images.Count; i++)
-                    {
-                        var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : Tag.Index.ToString("X8")) + ".dds");
-
-                        using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                        {
-                            //extractor.ExtractBitmap(bitmap, i, outStream);
-                            extractor.ExtractDds(bitmap, i, outStream);
-                        }
-                    }
-            #if !DEBUG
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("ERROR: Failed to extract bitmap: " + ex.Message);
-                }
-            #endif
+                var split = Tag.Name.Split('\\');
+                name = split[split.Length - 1];
             }
+            else
+                name = Tag.Index.ToString("X8");
+            if (Bitmap.Images.Count > 1)
+            {
+                ddsOutDir = Path.Combine(directory, name);
+                Directory.CreateDirectory(ddsOutDir);
+            }
+
+            for (var i = 0; i < Bitmap.Images.Count; i++)
+            {
+                var image = Bitmap.Images[i];
+                var bitmapName = (Bitmap.Images.Count > 1) ? i.ToString() : name;
+                bitmapName += ".dds";
+                var outPath = Path.Combine(ddsOutDir, bitmapName);
+
+                DDSHeader header;
+                byte[] data;
+
+                if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+                {
+                    var resourceRef = Bitmap.InterleavedResources[image.InterleavedTextureIndex1];
+                    Console.WriteLine("ExtractBitmapCommand is not implemented for interleaved bitmaps");
+                    header = null;
+                    data = null;
+                }
+                else
+                {
+                    var resourceRef = Bitmap.Resources[i];
+                    // only works for HO for now
+                    var definition = Cache.ResourceCache.GetBitmapTextureInteropResource(resourceRef).Texture.Definition;
+                    data = definition.PrimaryResourceData.Data;
+                    var bitmapDef = definition.Bitmap;
+                    header = new DDSHeader(bitmapDef);
+                }
+                    
+
+                using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
+                using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
+                {
+                    header.Write(writer);
+                    fileStream.Write(data, 0, data.Length);
+                }
+            }
+
 
             Console.WriteLine("Done!");
 

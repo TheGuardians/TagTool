@@ -4,6 +4,7 @@ using TagTool.Cache;
 using System.Reflection;
 using System.IO;
 using System.Xml;
+using TagTool.Commands.Bitmaps;
 
 namespace TagTool.Commands.Editing
 {
@@ -22,19 +23,19 @@ namespace TagTool.Commands.Editing
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-            /*
+            
             switch (tag.Group.Tag.ToString())
             {
+                case "bitm":
+                    BitmapContextFactory.Populate(commandContext, cache, tag, (Bitmap)definition);
+                    break;
+                /*
                 case "bipd":
                     BipedContextFactory.Populate(commandContext, cacheContext, tag, (Biped)definition);
                     break;
 
                 case "bink":
                     VideoContextFactory.Populate(commandContext, cacheContext, tag, (Bink)definition);
-                    break;
-
-                case "bitm": // bitmap
-                    BitmapContextFactory.Populate(commandContext, cacheContext, tag, (Bitmap)definition);
                     break;
 
                 case "coll":
@@ -117,8 +118,9 @@ namespace TagTool.Commands.Editing
                 case "rmt2":
                     Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
                     break;
+                */
             }
-            */
+            
             var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cache.Version);
 
             commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));
