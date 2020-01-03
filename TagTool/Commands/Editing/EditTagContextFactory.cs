@@ -125,6 +125,7 @@ namespace TagTool.Commands.Editing
 
             commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));
             commandContext.AddCommand(new SetFieldCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new EditBlockCommand(contextStack, cache, tag, definition));
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
             return commandContext;

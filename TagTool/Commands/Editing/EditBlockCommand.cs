@@ -10,13 +10,13 @@ namespace TagTool.Commands.Editing
     class EditBlockCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
         
-        public EditBlockCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, object value)
+        public EditBlockCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, object value)
             : base(true,
 
                   "EditBlock",
@@ -26,10 +26,10 @@ namespace TagTool.Commands.Editing
 
                   "Edit the fields of a particular block element.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = TagStructure.GetTagStructureInfo(value.GetType(), CacheContext.Version);
+            Structure = TagStructure.GetTagStructureInfo(value.GetType(), Cache.Version);
             Owner = value;
         }
 
@@ -128,15 +128,15 @@ namespace TagTool.Commands.Editing
             var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType());
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
-            blockContext.AddCommand(new ListFieldsCommand(CacheContext, blockStructure, blockValue));
-            blockContext.AddCommand(new SetFieldCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new ExtractResourceCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new EditBlockCommand(ContextStack, CacheContext, Tag, blockValue));
-            blockContext.AddCommand(new AddBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new RemoveBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new CopyBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new PasteBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
-            blockContext.AddCommand(new ForEachCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new ListFieldsCommand(Cache, blockStructure, blockValue));
+            blockContext.AddCommand(new SetFieldCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
+            //blockContext.AddCommand(new ExtractResourceCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new EditBlockCommand(ContextStack, Cache, Tag, blockValue));
+            //blockContext.AddCommand(new AddBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            //blockContext.AddCommand(new RemoveBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            //blockContext.AddCommand(new CopyBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            //blockContext.AddCommand(new PasteBlockElementsCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
+            //blockContext.AddCommand(new ForEachCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ExitToCommand(ContextStack));
             ContextStack.Push(blockContext);
 
@@ -151,7 +151,7 @@ namespace TagTool.Commands.Editing
                 args = new List<string> { name };
                 args.AddRange(deferredArgs);
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, blockValue);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, blockValue);
                 return command.Execute(args);
             }
             

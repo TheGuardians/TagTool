@@ -50,15 +50,13 @@ namespace TagTool.Commands.Editing
 
             if (fieldName.Contains(".")) // requires EditBlock command + context
             {
-                Console.WriteLine("Not implemented.");
-                return true;
-                /*var lastIndex = fieldName.LastIndexOf('.');
+                var lastIndex = fieldName.LastIndexOf('.');
                 var blockName = fieldName.Substring(0, lastIndex);
                 fieldName = fieldName.Substring(lastIndex + 1, (fieldName.Length - lastIndex) - 1);
                 fieldNameLow = fieldName.ToLower();
                 fieldNameSnake = fieldName.ToSnakeCase();
 
-                var command = new EditBlockCommand(ContextStack, CacheContext, Tag, Owner);
+                var command = new EditBlockCommand(ContextStack, Cache, Tag, Owner);
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
@@ -79,7 +77,7 @@ namespace TagTool.Commands.Editing
                     Owner = previousOwner;
                     Structure = previousStructure;
                     return false;
-                }*/
+                }
             }
 
 			var field = TagStructure.GetTagFieldEnumerable(Structure)
@@ -454,7 +452,7 @@ namespace TagTool.Commands.Editing
                     Console.WriteLine(error);
                 return blamType;
             }
-            else if (type == typeof(PageableResource))
+            else if (cache.GetType() == typeof(GameCacheContextHaloOnline) && type == typeof(PageableResource))
             {
                 if (args.Count < 1 || args.Count > 2)
                     return false;
