@@ -259,11 +259,13 @@
     <Compile Include="Cache\TagCacheIndex.cs" />
     <Compile Include="Commands\Bitmaps\BitmapContextFactory.cs" />
     <Compile Include="Commands\Bitmaps\ExtractBitmapCommand.cs" />
+    <Compile Include="Commands\Editing\AddBlockElementsCommand.cs" />
     <Compile Include="Commands\Editing\EditBlockCommand.cs" />
     <Compile Include="Commands\Editing\EditTagCommand.cs" />
     <Compile Include="Commands\Editing\EditTagContextFactory.cs" />
     <Compile Include="Commands\Editing\ExitToCommand.cs" />
     <Compile Include="Commands\Editing\ListFieldsCommand.cs" />
+    <Compile Include="Commands\Editing\RemoveBlockElementsCommand.cs" />
     <Compile Include="Commands\Editing\SetFieldCommand.cs" />
     <Compile Include="Commands\Tags\TestCommand.cs" />
     <Compile Include="Common\Crc32.cs" />
