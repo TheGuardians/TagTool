@@ -128,6 +128,8 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new EditBlockCommand(contextStack, cache, tag, definition));
             commandContext.AddCommand(new AddBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new RemoveBlockElementsCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new CopyBlockElementsCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
             return commandContext;
