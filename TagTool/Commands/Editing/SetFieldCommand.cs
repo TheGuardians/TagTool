@@ -12,13 +12,13 @@ namespace TagTool.Commands.Editing
     class SetFieldCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
 
         public TagStructureInfo Structure { get; set; }
         public object Owner { get; set; }
 
-        public SetFieldCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CachedTagInstance tag, TagStructureInfo structure, object owner)
+        public SetFieldCommand(CommandContextStack contextStack, GameCache cache, CachedTag tag, TagStructureInfo structure, object owner)
             : base(true,
 
                   "SetField",
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Editing
                   $"Sets the value of a specific field in the current {structure.Types[0].Name} definition.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Structure = structure;
             Owner = owner;
@@ -48,9 +48,11 @@ namespace TagTool.Commands.Editing
             var previousOwner = Owner;
             var previousStructure = Structure;
 
-            if (fieldName.Contains("."))
+            if (fieldName.Contains(".")) // requires EditBlock command + context
             {
-                var lastIndex = fieldName.LastIndexOf('.');
+                Console.WriteLine("Not implemented.");
+                return true;
+                /*var lastIndex = fieldName.LastIndexOf('.');
                 var blockName = fieldName.Substring(0, lastIndex);
                 fieldName = fieldName.Substring(lastIndex + 1, (fieldName.Length - lastIndex) - 1);
                 fieldNameLow = fieldName.ToLower();
@@ -77,7 +79,7 @@ namespace TagTool.Commands.Editing
                     Owner = previousOwner;
                     Structure = previousStructure;
                     return false;
-                }
+                }*/
             }
 
 			var field = TagStructure.GetTagFieldEnumerable(Structure)
@@ -99,7 +101,7 @@ namespace TagTool.Commands.Editing
             var fieldAttrs = field.GetCustomAttributes(typeof(TagFieldAttribute), false);
             var fieldAttr = fieldAttrs?.Length < 1 ? new TagFieldAttribute() : (TagFieldAttribute)fieldAttrs[0];
             var fieldInfo = new TagFieldInfo(field, fieldAttr, uint.MaxValue, uint.MaxValue);
-            var fieldValue = ParseArgs(CacheContext, field.FieldType, fieldInfo, args.Skip(1).ToList());
+            var fieldValue = ParseArgs(Cache, field.FieldType, fieldInfo, args.Skip(1).ToList());
 
             if (fieldValue != null && fieldValue.Equals(false))
             {
@@ -109,8 +111,10 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
-            if (field.FieldType == typeof(PageableResource))
+            if (Cache.GetType() == typeof(GameCacheContextHaloOnline) && field.FieldType == typeof(PageableResource))
             {
+                var haloOnlineGameCache = (GameCacheContextHaloOnline)Cache;
+
                 var ownerValue = field.GetValue(Owner);
 
                 if (fieldValue == null)
@@ -122,7 +126,7 @@ namespace TagTool.Commands.Editing
                     var newLocation = ResourceLocation.None;
 
                     FileInfo resourceFile = null;
-                    
+
                     switch (fieldValue)
                     {
                         case FileInfo file:
@@ -135,7 +139,7 @@ namespace TagTool.Commands.Editing
                             newLocation = tuple.Item1;
                             resourceFile = tuple.Item2;
                             break;
-                            
+
                         default:
                             throw new FormatException(fieldValue.ToString());
                     }
@@ -143,9 +147,9 @@ namespace TagTool.Commands.Editing
                     ResourceCache oldCache = null;
 
                     if (pageable.GetLocation(out var oldLocation))
-                        oldCache = CacheContext.GetResourceCache(oldLocation);
+                        oldCache = new ResourceCache(haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation));
 
-                    var newCache = CacheContext.GetResourceCache(newLocation);
+                    var newCache = new ResourceCache(haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation));
 
                     var data = File.ReadAllBytes(resourceFile.FullName);
 
@@ -153,14 +157,14 @@ namespace TagTool.Commands.Editing
 
                     if (oldLocation == newLocation && pageable.Page.Index != -1)
                     {
-                        using (var stream = CacheContext.OpenResourceCacheReadWrite(oldLocation))
+                        using (var stream = haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation))
                         {
                             pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
                         }
                     }
                     else
                     {
-                        using (var destStream = CacheContext.OpenResourceCacheReadWrite(newLocation))
+                        using (var destStream = haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation))
                         {
                             pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
                         }
@@ -192,14 +196,14 @@ namespace TagTool.Commands.Editing
                 if (fieldValue == null)
                     valueString = "null";
                 else if (fieldType == typeof(StringId))
-                    valueString = CacheContext.GetString((StringId)fieldValue);
-                else if (fieldType == typeof(CachedTagInstance))
+                    valueString = Cache.StringTable.GetString((StringId)fieldValue);
+                else if (fieldType == typeof(CachedTag))
                 {
-                    var instance = (CachedTagInstance)fieldValue;
+                    var instance = (CachedTag)fieldValue;
 
                     var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-                    valueString = $"[0x{instance.Index:X4}] {tagName}.{CacheContext.GetString(instance.Group.Name)}";
+                    valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
@@ -257,7 +261,7 @@ namespace TagTool.Commands.Editing
             return true;
         }
 
-        public static object ParseArgs(HaloOnlineCacheContext cacheContext, Type type, TagFieldInfo info, List<string> args)
+        public static object ParseArgs(GameCache cache, Type type, TagFieldInfo info, List<string> args)
         {
             var input = args[0];
             object output = null;
@@ -431,7 +435,7 @@ namespace TagTool.Commands.Editing
                     var values = Array.CreateInstance(elementType, info.Attribute.Length);
 
                     for (var i = 0; i < info.Attribute.Length; i++)
-                        values.SetValue(Convert.ChangeType(ParseArgs(cacheContext, elementType, null, new List<string> { args[i] }), elementType), i);
+                        values.SetValue(Convert.ChangeType(ParseArgs(cache, elementType, null, new List<string> { args[i] }), elementType), i);
 
                     return values;
                 }
@@ -446,7 +450,7 @@ namespace TagTool.Commands.Editing
                 }
 
                 var blamType = Activator.CreateInstance(type) as IBlamType;
-                if (!blamType.TryParse(cacheContext, args, out blamType, out string error))
+                if (!blamType.TryParse(cache, args, out blamType, out string error))
                     Console.WriteLine(error);
                 return blamType;
             }
@@ -496,11 +500,11 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.ResourcesB;
                             break;
 
-                        case "render_models" when cacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "render_models" when cache.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.RenderModels;
                             break;
 
-                        case "lightmaps" when cacheContext.Version >= CacheVersion.HaloOnline235640:
+                        case "lightmaps" when cache.Version >= CacheVersion.HaloOnline235640:
                             resourceLocation = ResourceLocation.Lightmaps;
                             break;
 
