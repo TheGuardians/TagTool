@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class LightmapDataReference : TagStructure
 		{
-            public CachedTagInstance LightmapData;
+            public CachedTag LightmapData;
         }
         
         [Flags]

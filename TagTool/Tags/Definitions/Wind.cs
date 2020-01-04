@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
         public TagFunction FrequencyMapping = new TagFunction { Data = new byte[0] };
 
         public float GustSize;
-        public CachedTagInstance GustNoiseBitmap;
+        public CachedTag GustNoiseBitmap;
 
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
         public byte[] Unused;

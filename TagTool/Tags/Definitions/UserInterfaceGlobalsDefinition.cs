@@ -9,16 +9,16 @@ namespace TagTool.Tags.Definitions
     
     public class UserInterfaceGlobalsDefinition : TagStructure
 	{
-        public CachedTagInstance SharedUiGlobals;
-        public CachedTagInstance EditableSettings;
-        public CachedTagInstance MatchmakingHopperStrings;
+        public CachedTag SharedUiGlobals;
+        public CachedTag EditableSettings;
+        public CachedTag MatchmakingHopperStrings;
         public List<ScreenWidget> ScreenWidgets;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance TextureRenderList;
+        public CachedTag TextureRenderList;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public CachedTagInstance SwearFilter; // TODO: Version number
+        public CachedTag SwearFilter; // TODO: Version number
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown;
@@ -26,7 +26,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ScreenWidget : TagStructure
 		{
-            public CachedTagInstance Widget;
+            public CachedTag Widget;
         }
     }
 }

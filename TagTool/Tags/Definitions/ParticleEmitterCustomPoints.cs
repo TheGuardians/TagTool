@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "particle_emitter_custom_points", Tag = "pecp", Size = 0x34)]
     public class ParticleEmitterCustomPoints : TagStructure
 	{
-        public CachedTagInstance ParticleModel;
+        public CachedTag ParticleModel;
         public RealVector3d CompressionScale;
         public RealVector3d CompressionOffset;
         public List<Point> Points;

@@ -13,19 +13,19 @@ namespace TagTool.Tags.Definitions
         public float NearClipPlaneDistance;
         public float ProjectionPlaneDistance;
         public float FarClipPlaneDistance;
-        public CachedTagInstance GlobalStrings;
-        public CachedTagInstance DamageTypeStrings;
+        public CachedTag GlobalStrings;
+        public CachedTag DamageTypeStrings;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance UnknownStrings;
+        public CachedTag UnknownStrings;
 
-        public CachedTagInstance MainMenuMusic;
+        public CachedTag MainMenuMusic;
         public int MusicFadeTime;
         public RealArgbColor Color;
         public RealArgbColor TextColor;
         public List<TextColorBlock> TextColors;
         public List<PlayerColor> PlayerColors;
-        public CachedTagInstance UiSounds;
+        public CachedTag UiSounds;
         public List<Alert> Alerts;
         public List<Dialog> Dialogs;
         public List<GlobalDataSource> GlobalDataSources;
@@ -124,7 +124,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint Unknown6;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown7;      
+        public CachedTag Unknown7;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public RealArgbColor Unknown17;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -146,8 +146,8 @@ namespace TagTool.Tags.Definitions
         public class ARGBlock : TagStructure
 		{
             public StringId Name;
-            public CachedTagInstance Audio;
-            public CachedTagInstance Timing;
+            public CachedTag Audio;
+            public CachedTag Timing;
         }
 
         [TagStructure(Size = 0x14)]
@@ -239,7 +239,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class GlobalDataSource : TagStructure
 		{
-            public CachedTagInstance DataSource;
+            public CachedTag DataSource;
         }
 
         [TagStructure(Size = 0x154)]

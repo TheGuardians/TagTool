@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public ClothFlags Flags;
         public StringId MarkerAttachmentName;
         public StringId SecondMarkerAttachmentName;
-        public CachedTagInstance Shader;
+        public CachedTag Shader;
         public short GridXDimension;
         public short GridYDimension;
         public float GridSpacingX;

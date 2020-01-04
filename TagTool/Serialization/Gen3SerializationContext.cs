@@ -53,7 +53,7 @@ namespace TagTool.Serialization
             throw new NotImplementedException();
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
             var tag = GameCache.TagCache.GetTagByID((uint)index);
 
@@ -62,10 +62,10 @@ namespace TagTool.Serialization
             if (index == -1 || group == TagGroup.None)
                 return null;
 
-            return new CachedTagInstance(index, group, tag.Name);
+            return tag;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }

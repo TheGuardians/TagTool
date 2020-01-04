@@ -32,7 +32,7 @@ namespace TagTool.Tags.Definitions
         public TagMapping FrameIndex;
         public TagMapping AnimationRate;
         public TagMapping PaletteAnimation;
-        public CachedTagInstance ParticleModel;
+        public CachedTag ParticleModel;
         public uint RuntimeMUsedParticleStates;
         public uint RuntimeMConstantPerParticleProperties;
         public uint RuntimeMConstantOverTimeProperties;
@@ -55,7 +55,7 @@ namespace TagTool.Tags.Definitions
         public class Attachment : TagStructure
 		{
             [TagField(Flags = Label)]
-            public CachedTagInstance Type;
+            public CachedTag Type;
             public TriggerValue Trigger;
             public byte SkipFraction;
             public TagMapping.VariableTypeValue PrimaryScale;

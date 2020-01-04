@@ -241,12 +241,12 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x3C)]
             public class Option : TagStructure
 			{
-                public CachedTagInstance ExplicitSubmenu;
-                public CachedTagInstance TemplateBasedSubmenu;
+                public CachedTag ExplicitSubmenu;
+                public CachedTag TemplateBasedSubmenu;
                 public SettingCategoryValue SubmenuSettingCategory;
                 public StringId SubmenuName;
                 public StringId SubmenuDescription;
-                public CachedTagInstance ValuePairs;
+                public CachedTag ValuePairs;
             }
         }
     }

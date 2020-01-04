@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class UiSound : TagStructure
 		{
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
         }
     }
 }

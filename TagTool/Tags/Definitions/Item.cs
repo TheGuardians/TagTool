@@ -21,13 +21,13 @@ namespace TagTool.Tags.Definitions
         public StringId SwitchToMessage;
         public StringId SwitchToFromAiMessage;
         public StringId AllWeaponsEmptyMessage;
-        public CachedTagInstance CollisionSound;
+        public CachedTag CollisionSound;
         public List<TagReferenceBlock> PredictedBitmaps;
-        public CachedTagInstance DetonationDamageEffect;
+        public CachedTag DetonationDamageEffect;
         public float DetonationDelayMin;
         public float DetonationDelayMax;
-        public CachedTagInstance DetonatingEffect;
-        public CachedTagInstance DetonationEffect;
+        public CachedTag DetonatingEffect;
+        public CachedTag DetonationEffect;
         public float CampaignGroundScale;
         public float MultiplayerGroundScale;
         public float SmallHoldScale;

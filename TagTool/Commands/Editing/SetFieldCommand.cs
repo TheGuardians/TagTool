@@ -542,7 +542,7 @@ namespace TagTool.Commands.Editing
                 type == typeof(ulong) ||
                 type == typeof(float) ||
                 type == typeof(string) ||
-                type == typeof(CachedTagInstance) ||
+                type == typeof(CachedTag) ||
                 type == typeof(StringId) ||
                 type == typeof(Angle))
                 return 1;

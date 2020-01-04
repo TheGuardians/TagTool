@@ -30,7 +30,7 @@ namespace TagTool.Tags.Definitions
         public List<StructureBspBlock> StructureBsps;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance ScenarioPDA;
+        public CachedTag ScenarioPDA;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown0;
@@ -39,7 +39,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public uint Unknown2;
 
-        public CachedTagInstance Unknown;
+        public CachedTag Unknown;
         public List<SkyReference> SkyReferences;
         public List<ZoneSetPvsBlock> ZoneSetPvs;
         public List<ZoneSetAudibilityBlock> ZoneSetAudibility;
@@ -197,11 +197,11 @@ namespace TagTool.Tags.Definitions
         public List<CutsceneFlag> CutsceneFlags;
         public List<CutsceneCameraPoint> CutsceneCameraPoints;
         public List<CutsceneTitle> CutsceneTitles;
-        public CachedTagInstance CustomObjectNameStrings;
-        public CachedTagInstance ChapterTitleStrings;
+        public CachedTag CustomObjectNameStrings;
+        public CachedTag ChapterTitleStrings;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public CachedTagInstance Unknown156;
+        public CachedTag Unknown156;
 
         public List<ScenarioResource> ScenarioResources;
         public List<UnitSeatsMappingBlock> UnitSeatsMapping;
@@ -252,20 +252,20 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 32)]
         public int[] ObjectSalts = new int[32];
         public List<SpawnDatum> SpawnData;
-        public CachedTagInstance SoundEffectsCollection;
+        public CachedTag SoundEffectsCollection;
         public List<CrateInstance> Crates;
         public List<ScenarioPaletteEntry> CratePalette;
         public List<TagReferenceBlock> FlockPalette;
         public List<Flock> Flocks;
-        public CachedTagInstance SubtitleStrings;
+        public CachedTag SubtitleStrings;
         public List<CreatureInstance> Creatures;
         public List<ScenarioPaletteEntry> CreaturePalette;
         public List<EditorFolder> EditorFolders;
-        public CachedTagInstance TerritoryLocationNameStrings;
+        public CachedTag TerritoryLocationNameStrings;
         public uint Unknown125;
         public uint Unknown126;
         public List<TagReferenceBlock> MissionDialogue;
-        public CachedTagInstance ObjectiveStrings;
+        public CachedTag ObjectiveStrings;
         public List<Interpolator> Interpolators;
 
         public uint Unknown127;
@@ -277,16 +277,16 @@ namespace TagTool.Tags.Definitions
         public uint Unknown132;
 
         public List<SimulationDefinitionTableBlock> SimulationDefinitionTable;
-        public CachedTagInstance DefaultCameraFx;
-        public CachedTagInstance DefaultScreenFx;
+        public CachedTag DefaultCameraFx;
+        public CachedTag DefaultScreenFx;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance Unknown133;
+        public CachedTag Unknown133;
 
-        public CachedTagInstance SkyParameters;
-        public CachedTagInstance GlobalLighting;
-        public CachedTagInstance Lightmap;
-        public CachedTagInstance PerformanceThrottles;
+        public CachedTag SkyParameters;
+        public CachedTag GlobalLighting;
+        public CachedTag Lightmap;
+        public CachedTag PerformanceThrottles;
         public List<ReferenceFrame> ObjectReferenceFrames;
         public List<AiObjective> AiObjectives;
         public List<DesignerZoneSet> DesignerZoneSets;
@@ -314,13 +314,13 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance MissionVisionModeEffect;
+        public CachedTag MissionVisionModeEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance MissionVisionModeTheaterEffect;
+        public CachedTag MissionVisionModeTheaterEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]     
-        public CachedTagInstance MissionVisionMode;
+        public CachedTag MissionVisionMode;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public List<TagReferenceBlock> Unknown155;
@@ -388,9 +388,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x6C)]
         public class StructureBspBlock : TagStructure
 		{
-            public CachedTagInstance StructureBsp;
-            public CachedTagInstance Design;
-            public CachedTagInstance Lighting;
+            public CachedTag StructureBsp;
+            public CachedTag Design;
+            public CachedTag Lighting;
             public int Unknown;
             public float Unknown2;
             public uint Unknown3;
@@ -399,15 +399,15 @@ namespace TagTool.Tags.Definitions
             public short Unknown6;
             public short Unknown7;
             public short Unknown8;
-            public CachedTagInstance Cubemap;
-            public CachedTagInstance Wind;
+            public CachedTag Cubemap;
+            public CachedTag Wind;
             public int Unknown9;
         }
 
         [TagStructure(Size = 0x14)]
         public class SkyReference : TagStructure
 		{
-            public CachedTagInstance SkyObject;
+            public CachedTag SkyObject;
             [TagField(Flags = Label)]
             public short NameIndex;
             public BspShortFlags ActiveBsps;
@@ -818,7 +818,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class ScenarioPaletteEntry : TagStructure
 		{
-            public CachedTagInstance Object;
+            public CachedTag Object;
             public uint Unknown;
             public uint Unknown2;
             public uint Unknown3;
@@ -1317,7 +1317,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class SandboxObject : TagStructure
 		{
-            public CachedTagInstance Object;
+            public CachedTag Object;
             [TagField(Flags = Label)]
             public StringId Name;
             public int MaxAllowed;
@@ -1367,10 +1367,10 @@ namespace TagTool.Tags.Definitions
             public string Name;
             public float StartingHealthDamage;
             public float StartingShieldDamage;
-            public CachedTagInstance PrimaryWeapon;
+            public CachedTag PrimaryWeapon;
             public short PrimaryRoundsLoaded;
             public short PrimaryRoundsTotal;
-            public CachedTagInstance SecondaryWeapon;
+            public CachedTag SecondaryWeapon;
             public short SecondaryRoundsLoaded;
             public short SecondaryRoundsTotal;
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
@@ -1809,7 +1809,7 @@ namespace TagTool.Tags.Definitions
             public StringId ModuleId;
 
             [TagField(Flags = Short, MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance SquadTemplate;
+            public CachedTag SquadTemplate;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public List<Fireteam> DesignerFireteams;
@@ -2663,35 +2663,35 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x16C, MinVersion = CacheVersion.Halo3ODST)]
             public class Reference : TagStructure
 			{
-                public CachedTagInstance SceneryResource;
+                public CachedTag SceneryResource;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<TagReferenceBlock> OtherScenery;
-                public CachedTagInstance BipedsResource;
+                public CachedTag BipedsResource;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<TagReferenceBlock> OtherBipeds;
-                public CachedTagInstance VehiclesResource;
-                public CachedTagInstance EquipmentResource;
-                public CachedTagInstance WeaponsResource;
-                public CachedTagInstance SoundSceneryResource;
-                public CachedTagInstance LightsResource;
-                public CachedTagInstance DevicesResource;
+                public CachedTag VehiclesResource;
+                public CachedTag EquipmentResource;
+                public CachedTag WeaponsResource;
+                public CachedTag SoundSceneryResource;
+                public CachedTag LightsResource;
+                public CachedTag DevicesResource;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<TagReferenceBlock> OtherDevices;
-                public CachedTagInstance EffectSceneryResource;
-                public CachedTagInstance DecalsResource;
+                public CachedTag EffectSceneryResource;
+                public CachedTag DecalsResource;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<TagReferenceBlock> OtherDecals;
-                public CachedTagInstance CinematicsResource;
-                public CachedTagInstance TriggerVolumesResource;
-                public CachedTagInstance ClusterDataResource;
-                public CachedTagInstance CommentsResource;
-                public CachedTagInstance CreatureResource;
-                public CachedTagInstance StructureLightingResource;
-                public CachedTagInstance DecoratorsResource;
+                public CachedTag CinematicsResource;
+                public CachedTag TriggerVolumesResource;
+                public CachedTag ClusterDataResource;
+                public CachedTag CommentsResource;
+                public CachedTag CreatureResource;
+                public CachedTag StructureLightingResource;
+                public CachedTag DecoratorsResource;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public List<TagReferenceBlock> OtherDecorators;
-                public CachedTagInstance SkyReferencesResource;
-                public CachedTagInstance CubemapResource;
+                public CachedTag SkyReferencesResource;
+                public CachedTag CubemapResource;
             }
         }
 
@@ -2737,7 +2737,7 @@ namespace TagTool.Tags.Definitions
         public class UnitSeatsMappingBlock : TagStructure
 		{
             [TagField(Flags = Short)]
-            public CachedTagInstance Unit;
+            public CachedTag Unit;
             public UnitSeatFlags Seats1;
             public UnitSeatFlags Seats2;
         }
@@ -2797,7 +2797,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public CachedTagInstance CameraFx;
+            public CachedTag CameraFx;
             public byte Unknown;
             public byte Unknown2;
             public byte Unknown3;
@@ -2814,7 +2814,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnline498295)]
         public class ScenarioClusterDatum : TagStructure
 		{
-            public CachedTagInstance Bsp;
+            public CachedTag Bsp;
             public List<BackgroundSoundEnvironment> BackgroundSoundEnvironments;
             public List<UnknownBlock> Unknown;
             public List<UnknownBlock2> Unknown2;
@@ -3082,7 +3082,7 @@ namespace TagTool.Tags.Definitions
         public class SimulationDefinitionTableBlock : TagStructure
 		{
             [TagField(Flags = Short)]
-            public CachedTagInstance Tag;
+            public CachedTag Tag;
         }
 
         [TagStructure(Size = 0x10)]
@@ -3647,7 +3647,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public CachedTagInstance CinematicLight;
+            public CachedTag CinematicLight;
         }
 
         [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]

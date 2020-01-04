@@ -10,7 +10,7 @@ namespace TagTool.Ai
 	{
         [TagField(Flags = Label)]
         public StringId Designation;
-        public CachedTagInstance Sound;
+        public CachedTag Sound;
         public StringId SoundEffect;
     }
 }

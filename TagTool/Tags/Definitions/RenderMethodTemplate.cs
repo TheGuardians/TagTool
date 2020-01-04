@@ -8,8 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method_template", Tag = "rmt2", Size = 0x84)]
     public class RenderMethodTemplate : TagStructure
 	{
-        public CachedTagInstance VertexShader;
-        public CachedTagInstance PixelShader;
+        public CachedTag VertexShader;
+        public CachedTag PixelShader;
         public ShaderModeBitmask DrawModeBitmask;
         public List<DrawMode> DrawModes; // Entries in here correspond to an enum in the EXE
         public List<DrawModeRegisterOffsetBlock> RegisterOffsets;

@@ -266,16 +266,16 @@ namespace TagTool.Tags.Definitions
         public class CollisionMaterial : TagStructure
         {
             [TagField(Flags = Label, MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance OldShader;
+            public CachedTag OldShader;
 
             [TagField(Flags = Label, MinVersion = CacheVersion.Halo3Retail)]
-            public CachedTagInstance RenderMethod;
+            public CachedTag RenderMethod;
 
             public short RuntimeGlobalMaterialIndex;
             public short ConveyorSurfaceIndex;
 
             [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public CachedTagInstance NewShader;
+            public CachedTag NewShader;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public short SeamMappingIndex;
@@ -424,7 +424,7 @@ namespace TagTool.Tags.Definitions
             public string Name;
 
             [TagField(ValidTags = new[] { "weat" })]
-            public CachedTagInstance WeatherSystem;
+            public CachedTag WeatherSystem;
 
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused1 = new byte[2];
@@ -436,7 +436,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Unused3 = new byte[32];
 
             [TagField(ValidTags = new[] { "wind" })]
-            public CachedTagInstance Wind;
+            public CachedTag Wind;
 
             public RealVector3d WindDirection;
             public float WindMagnitude;
@@ -464,7 +464,7 @@ namespace TagTool.Tags.Definitions
         public class CameraEffect : TagStructure
         {
             public StringId Name;
-            public CachedTagInstance Effect;
+            public CachedTag Effect;
             public sbyte Unknown;
             public sbyte Unknown2;
             public sbyte Unknown3;
@@ -540,7 +540,7 @@ namespace TagTool.Tags.Definitions
             public int Unknown12;
             public uint Unknown13;
             public uint Unknown14;
-            public CachedTagInstance Bsp;
+            public CachedTag Bsp;
             public int ClusterIndex;
             public int Unknown15;
             public short Size2;
@@ -901,13 +901,13 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Flags = Label)]
             public StringId Name;
-            public CachedTagInstance SoundEnvironment;
+            public CachedTag SoundEnvironment;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public SoundEnvironmentType Type;
             public float ReverbCutoffDistance;
             public float ReverbInterpolationSpeed;
-            public CachedTagInstance AmbienceBackgroundSound;
-            public CachedTagInstance AmbienceInsideClusterSound;
+            public CachedTag AmbienceBackgroundSound;
+            public CachedTag AmbienceInsideClusterSound;
             public float AmbienceCutoffDistance;
             public BackgroundSoundScaleFlags AmbienceScaleFlags;
             public float AmbienceInteriorScale;
@@ -969,8 +969,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class EnvironmentObjectPaletteBlock : TagStructure
         {
-            public CachedTagInstance Definition;
-            public CachedTagInstance Model;
+            public CachedTag Definition;
+            public CachedTag Model;
             public ObjectTypeValue ObjectType;
 
             [Flags]
@@ -1169,7 +1169,7 @@ namespace TagTool.Tags.Definitions
         {
             public short Unknown;
             public short Unknown2;
-            public CachedTagInstance LeafSystem2;
+            public CachedTag LeafSystem2;
         }
         [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3ODST)]

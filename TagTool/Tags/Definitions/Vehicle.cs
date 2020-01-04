@@ -141,14 +141,14 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public StringId FlipOverMessageNew;
 
-        public CachedTagInstance SuspensionSound;
+        public CachedTag SuspensionSound;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance CrashSound;
+        public CachedTag CrashSound;
 
-        public CachedTagInstance SpecialEffect;
-        public CachedTagInstance DriverBoostDamageEffectOrResponse;
-        public CachedTagInstance RiderBoostDamageEffectOrResponse;
+        public CachedTag SpecialEffect;
+        public CachedTag DriverBoostDamageEffectOrResponse;
+        public CachedTag RiderBoostDamageEffectOrResponse;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public HavokVehiclePhysics HavokPhysicsOld;
@@ -345,7 +345,7 @@ namespace TagTool.Tags.Definitions
             public float EngineMomentum;
             public float EngineMaximumAngularVelocity;
             public List<Gear> Gears;
-            public CachedTagInstance GearShiftSound;
+            public CachedTag GearShiftSound;
         }
 
         [TagStructure(Size = 0x58)]

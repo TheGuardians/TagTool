@@ -7,12 +7,12 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method_definition", Size = 0x5C, Tag = "rmdf")]
     public class RenderMethodDefinition : TagStructure
 	{
-        public CachedTagInstance RenderMethodOptions;
+        public CachedTag RenderMethodOptions;
         public List<Method> Methods;
         public List<DrawMode> DrawModes;
         public List<UnknownBlock> Unknown;
-        public CachedTagInstance GlobalPixelShader;
-        public CachedTagInstance GlobalVertexShader;
+        public CachedTag GlobalPixelShader;
+        public CachedTag GlobalVertexShader;
         public int Unknown2;
         public int Unknown3;
 
@@ -28,7 +28,7 @@ namespace TagTool.Tags.Definitions
             public class ShaderOption : TagStructure
 			{
                 public StringId Type;
-                public CachedTagInstance Option;
+                public CachedTag Option;
                 public StringId Unknown;
                 public StringId Unknown2;
             }

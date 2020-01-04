@@ -10,20 +10,20 @@ namespace TagTool.Tags.Definitions
 	{
         public List<DefaultBitmap> DefaultBitmaps;
         public List<DefaultRasterizerBitmap> DefaultRasterizerBitmaps;
-        public CachedTagInstance VertexShaderSimple;
-        public CachedTagInstance PixelShaderSimple;
+        public CachedTag VertexShaderSimple;
+        public CachedTag PixelShaderSimple;
         public List<DefaultShader> DefaultShaders;
         public uint Unknown;
         public uint Unknown2;
         public uint Unknown3;
         public int Unknown4;
         public int Unknown5;
-        public CachedTagInstance ActiveCamoDistortion;
-        public CachedTagInstance DefaultPerformanceTemplate;
-        public CachedTagInstance DefaultShieldImpact;
+        public CachedTag ActiveCamoDistortion;
+        public CachedTag DefaultPerformanceTemplate;
+        public CachedTag DefaultShieldImpact;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance DefaultVisionMode;
+        public CachedTag DefaultVisionMode;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public int Unknown6;
@@ -42,20 +42,20 @@ namespace TagTool.Tags.Definitions
         public class DefaultBitmap : TagStructure
 		{
             public int Unknown;
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
         }
 
         [TagStructure(Size = 0x10)]
         public class DefaultRasterizerBitmap : TagStructure
 		{
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
         }
 
         [TagStructure(Size = 0x20)]
         public class DefaultShader : TagStructure
 		{
-            public CachedTagInstance VertexShader;
-            public CachedTagInstance PixelShader;
+            public CachedTag VertexShader;
+            public CachedTag PixelShader;
         }
     }
 }

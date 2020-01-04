@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
             public List<RenderDatum> RenderData;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance ParallaxData;
+            public CachedTag ParallaxData;
 
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
@@ -823,42 +823,42 @@ namespace TagTool.Tags.Definitions
                 //HUD Initialize Animation
                 public AnimationFlags HUDInitializeFlags;
                 public AnimationFunction HUDInitializeFunction;
-                public CachedTagInstance HUDInitialize;
+                public CachedTag HUDInitialize;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float HUDInitializeUnknown;
 
                 //Idle Animation
                 public AnimationFlags IdleFlags;
                 public AnimationFunction IdleFunction;
-                public CachedTagInstance Idle;
+                public CachedTag Idle;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float IdleUnknown;
 
                 //Special State Animation
                 public AnimationFlags SpecialStateFlags;
                 public AnimationFunction SpecialStateFunction;
-                public CachedTagInstance SpecialState;
+                public CachedTag SpecialState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float SpecialStateUnknown;
 
                 //Transition In Animation
                 public AnimationFlags TransitionInFlags;
                 public AnimationFunction TransitionInFunction;
-                public CachedTagInstance TransitionIn;
+                public CachedTag TransitionIn;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float TransitionInUnknown;
 
                 //Transition Out Animation
                 public AnimationFlags TransitionOutFlags;
                 public AnimationFunction TransitionOutFunction;
-                public CachedTagInstance TransitionOut;
+                public CachedTag TransitionOut;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float TransitionOutUnknown;
 
                 //Brief State Animation
                 public AnimationFlags BriefStateFlags;
                 public AnimationFunction BriefStateFunction;
-                public CachedTagInstance BriefState;
+                public CachedTag BriefState;
                 [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                 public float BriefStateUnknown;
 
@@ -1364,7 +1364,7 @@ namespace TagTool.Tags.Definitions
                 public int WidgetIndex;
                 public FlagsValue Flags;
                 public short Unknown3;
-                public CachedTagInstance Bitmap;
+                public CachedTag Bitmap;
                 public byte BitmapSpriteIndex;
                 public byte Unknown4;
                 public byte Unknown5;

@@ -9,7 +9,7 @@ namespace TagTool.Tags
     [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     public class TagResourceGen3 : TagStructure
 	{
-        public CachedTagInstance ParentTag;
+        public CachedTag ParentTag;
         public ushort Salt;
 
         [TagField(Gen = CacheGeneration.Third)]

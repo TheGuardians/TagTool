@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x104, MinVersion = CacheVersion.Halo3Retail)]
     public class ModelAnimationGraph : TagStructure
 	{
-        public CachedTagInstance ParentAnimationGraph;
+        public CachedTag ParentAnimationGraph;
         public AnimationInheritanceFlags InheritanceFlags;
         public AnimationPrivateFlags PrivateFlags;
         public short AnimationCodecPack;
@@ -132,7 +132,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail)]
         public class AnimationTagReference : TagStructure
 		{
-            public CachedTagInstance Reference;
+            public CachedTag Reference;
             public AnimationTagReferenceFlags Flags;
             public short Unknown;
         }
@@ -710,7 +710,7 @@ namespace TagTool.Tags.Definitions
                         public class OtherParticipant : TagStructure
 						{
                             public ParticipantFlags Flags;
-                            public CachedTagInstance ObjectType;
+                            public CachedTag ObjectType;
 
                             public enum ParticipantFlags : int
                             {
@@ -783,7 +783,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo3Retail)]
         public class Inheritance : TagStructure
 		{
-            public CachedTagInstance InheritedGraph;
+            public CachedTag InheritedGraph;
             public List<NodeMapBlock> NodeMap;
             public List<NodeMapFlag> NodeMapFlags;
             public float RootZOffset;
@@ -826,7 +826,7 @@ namespace TagTool.Tags.Definitions
         public class CacheBlock : TagStructure
 		{
             [TagField(Flags = Short)]
-            public CachedTagInstance Owner;
+            public CachedTag Owner;
 
             public int BlockSize;
             public int BlockOffset;

@@ -170,7 +170,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when attr != null && attr.Flags.HasFlag(TagFieldFlags.Pointer):
 				case TypeCode.Object when type == typeof(Tag):
 				case TypeCode.Object when type == typeof(CacheAddress):
-				case TypeCode.Object when type == typeof(CachedTagInstance) && attr.Flags.HasFlag(Short):
+				case TypeCode.Object when type == typeof(CachedTag) && attr.Flags.HasFlag(Short):
                 //case TypeCode.Object when type == typeof(RgbColor):
                 case TypeCode.Object when type == typeof(ArgbColor):
                 case TypeCode.Object when type == typeof(Point2d):
@@ -183,7 +183,7 @@ namespace TagTool.Tags
 				case TypeCode.Double:
 				case TypeCode.Int64:
 				case TypeCode.UInt64:
-				case TypeCode.Object when type == typeof(CachedTagInstance) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
+				case TypeCode.Object when type == typeof(CachedTag) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(byte[]) && targetVersion != CacheVersion.Unknown && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo2Xbox, CacheVersion.Halo2Vista):
 				case TypeCode.Object when type == typeof(Rectangle2d):
                 case TypeCode.Object when type == typeof(RealRectangle3d):
@@ -204,7 +204,7 @@ namespace TagTool.Tags
 					return 0x0C;
 
 				case TypeCode.Decimal:
-				case TypeCode.Object when type == typeof(CachedTagInstance) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
+				case TypeCode.Object when type == typeof(CachedTag) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Retail, CacheVersion.Unknown):
 				case TypeCode.Object when type == typeof(RealArgbColor):
 				case TypeCode.Object when type == typeof(RealQuaternion):
 				case TypeCode.Object when type == typeof(RealPlane3d):

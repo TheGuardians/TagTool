@@ -57,12 +57,12 @@ namespace Sentinel.Render
                 if (Object.Model == null)
                     throw new NullReferenceException(nameof(Object.Model));
 
-                Model = CacheContext.Deserialize<Model>(new TagSerializationContext(cacheStream, CacheContext, Object.Model));
+                Model = null; //CacheContext.Deserialize<Model>(new TagSerializationContext(cacheStream, CacheContext, Object.Model));
 
                 if (Model.RenderModel == null)
                     throw new NullReferenceException(nameof(Model.RenderModel));
 
-                RenderModel = CacheContext.Deserialize<RenderModel>(new TagSerializationContext(cacheStream, CacheContext, Model.RenderModel));
+                RenderModel = null; // CacheContext.Deserialize<RenderModel>(new TagSerializationContext(cacheStream, CacheContext, Model.RenderModel));
 
                 if (Model.Variants == null || Model.Variants.Count == 0)
                 {

@@ -19,13 +19,13 @@ namespace TagTool.Geometry
         /// The OLD render method tag to use to render the material.
         /// </summary>
         [TagField(Flags = Label, MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance OldRenderMethod;
+        public CachedTag OldRenderMethod;
 
         /// <summary>
         /// The render method tag to use to render the material.
         /// </summary>
         [TagField(Flags = Label)]
-        public CachedTagInstance RenderMethod;
+        public CachedTag RenderMethod;
 
         [TagField(Version = CacheVersion.HaloOnline700123)]
         public List<Skin> Skins;
@@ -43,7 +43,7 @@ namespace TagTool.Geometry
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public CachedTagInstance RenderMethod;
+            public CachedTag RenderMethod;
         }
 
         [TagStructure(Size = 0x2, MaxVersion = CacheVersion.Halo2Vista)]

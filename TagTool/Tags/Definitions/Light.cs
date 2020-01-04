@@ -55,7 +55,7 @@ namespace TagTool.Tags.Definitions
         public short Unknown9;
         public uint Unknown10;
         public TagFunction Function2 = new TagFunction { Data = new byte[0] };
-        public CachedTagInstance GelMap;
+        public CachedTag GelMap;
         public float Unknown11;
         public float Duration;
 
@@ -68,7 +68,7 @@ namespace TagTool.Tags.Definitions
         public sbyte Unknown15;
         public sbyte Unknown16;
         public sbyte Unknown17;
-        public CachedTagInstance LensFlare;
+        public CachedTag LensFlare;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float RadiusModifer1;

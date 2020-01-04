@@ -24,28 +24,28 @@ namespace TagTool.Tags.Definitions
         public float DynamicLightSphereRadius;
         public RealPoint3d DynamicLightSphereOffset;
         public StringId DefaultModelVariant;
-        public CachedTagInstance Model;
+        public CachedTag Model;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
-        public CachedTagInstance CrateObject;
+        public CachedTag CrateObject;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTagInstance ModifierShader;
+        public CachedTag ModifierShader;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance CollisionDamage;
+        public CachedTag CollisionDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<EarlyMoverProperty> EarlyMoverProperties;
 
-        public CachedTagInstance CreationEffect;
-        public CachedTagInstance MaterialEffects;
+        public CachedTag CreationEffect;
+        public CachedTag MaterialEffects;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ArmorSounds;
+        public CachedTag ArmorSounds;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance MeleeImpact;
+        public CachedTag MeleeImpact;
 
         public List<AiProperty> AiProperties;
         public List<Function> Functions;
@@ -87,7 +87,7 @@ namespace TagTool.Tags.Definitions
         public List<MultiplayerObjectBlock> MultiplayerObject;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public CachedTagInstance SimulationInterpolation;
+        public CachedTag SimulationInterpolation;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<TagReferenceBlock> RevivingEquipment;
@@ -220,7 +220,7 @@ namespace TagTool.Tags.Definitions
             public AtlasFlagsValue AtlasFlags;
 
             [TagField(Flags = Label)]
-            public CachedTagInstance Type;
+            public CachedTag Type;
 
             public StringId Marker;
             public ChangeColorValue ChangeColor;
@@ -301,7 +301,7 @@ namespace TagTool.Tags.Definitions
             public short Type;
             public short ResourceIndex;
             [TagField(Flags = Short)]
-            public CachedTagInstance TagIndex;
+            public CachedTag TagIndex;
         }
 
         [TagStructure(Size = 0x1)]
@@ -333,7 +333,7 @@ namespace TagTool.Tags.Definitions
             public StringId BoundaryCenterMarker;
             public StringId SpawnedObjectMarkerName;
 
-            public CachedTagInstance SpawnedObject;
+            public CachedTag SpawnedObject;
 
             public StringId NyiBoundaryMaterial;
 
@@ -436,8 +436,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x20)]
             public class BoundaryShader : TagStructure
             {
-                public CachedTagInstance StandardShader;
-                public CachedTagInstance OpaqueShader;
+                public CachedTag StandardShader;
+                public CachedTag OpaqueShader;
             }
         }
 

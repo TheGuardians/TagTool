@@ -25,7 +25,7 @@ namespace TagTool.Tags.Definitions
         public List<AiGlobalsDatum> AiGlobalsOld;
 
         [TagField(ValidTags = new[] { "aigl" }, MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance AiGlobals;
+        public CachedTag AiGlobals;
 
         public List<DamageTableBlock> DamageTable;
 
@@ -75,13 +75,13 @@ namespace TagTool.Tags.Definitions
         public List<ColorBlock> Colors;
 
         [TagField(ValidTags = new[] { "mulg" })]
-        public CachedTagInstance MultiplayerGlobals;
+        public CachedTag MultiplayerGlobals;
 
         [TagField(ValidTags = new[] { "smdt" }, MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance SurvivalGlobals;
+        public CachedTag SurvivalGlobals;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-        public CachedTagInstance ArmorGlobals;
+        public CachedTag ArmorGlobals;
 
         public List<CinematicAnchorBlock> CinematicAnchors;
         public List<MetagameGlobal> MetagameGlobals;
@@ -90,22 +90,22 @@ namespace TagTool.Tags.Definitions
         public LocaleGlobalsBlock[] LocaleGlobals = new LocaleGlobalsBlock[12];
 
         [TagField(ValidTags = new[] { "rasg" })]
-        public CachedTagInstance RasterizerGlobals;
+        public CachedTag RasterizerGlobals;
 
         [TagField(ValidTags = new[] { "cfxs" })]
-        public CachedTagInstance DefaultCameraEffect;
+        public CachedTag DefaultCameraEffect;
 
         [TagField(ValidTags = new[] { "pdm!" }, MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance PodiumDefinition;
+        public CachedTag PodiumDefinition;
 
         [TagField(ValidTags = new[] { "wind" })]
-        public CachedTagInstance DefaultWind;
+        public CachedTag DefaultWind;
 
         [TagField(ValidTags = new[] { "jpt!" })]
-        public CachedTagInstance DefaultDamageEffect;
+        public CachedTag DefaultDamageEffect;
 
         [TagField(ValidTags = new[] { "cddf" })]
-        public CachedTagInstance DefaultCollisionDamage;
+        public CachedTag DefaultCollisionDamage;
 
         public StringId DefaultWaterMaterial;
 
@@ -113,16 +113,16 @@ namespace TagTool.Tags.Definitions
         public short Unknown265;
 
         [TagField(ValidTags = new[] { "effg" })]
-        public CachedTagInstance EffectGlobals;
+        public CachedTag EffectGlobals;
         
         [TagField(ValidTags = new[] { "gpdt" }, MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance GameProgressionGlobals;
+        public CachedTag GameProgressionGlobals;
 
         [TagField(ValidTags = new[] { "achi" }, MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance AchievementGlobals;
+        public CachedTag AchievementGlobals;
         
         [TagField(ValidTags = new[] { "inpg" }, MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance InputGlobals;
+        public CachedTag InputGlobals;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public float Unknown266;
@@ -427,7 +427,7 @@ namespace TagTool.Tags.Definitions
             /// The effect produced by the grenade when a biped throws it.
             /// </summary>
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance ThrowingEffect;
+            public CachedTag ThrowingEffect;
 
             public uint Unknown2;
             public uint Unknown3;
@@ -438,37 +438,37 @@ namespace TagTool.Tags.Definitions
             /// The equipment tag associated with the grenade.
             /// </summary>
             [TagField(Flags = Label, ValidTags = new[] { "eqip" })]
-            public CachedTagInstance Equipment;
+            public CachedTag Equipment;
 
             /// <summary>
             /// The projectile tag associated with the grenade.
             /// </summary>
             [TagField(ValidTags = new[] { "proj" })]
-            public CachedTagInstance Projectile;
+            public CachedTag Projectile;
         }
 
         [TagStructure(Size = 0x120, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnline106708)]
         public class InterfaceTagsBlock : TagStructure
 		{
-            public CachedTagInstance Spinner;
-            public CachedTagInstance Obsolete;
-            public CachedTagInstance ScreenColorTable;
-            public CachedTagInstance HudColorTable;
-            public CachedTagInstance EditorColorTable;
-            public CachedTagInstance DialogColorTable;
-            public CachedTagInstance MotionSensorSweepBitmap;
-            public CachedTagInstance MotionSensorSweepBitmapMask;
-            public CachedTagInstance MultiplayerHudBitmap;
-            public CachedTagInstance HudDigitsDefinition;
-            public CachedTagInstance MotionSensorBlipBitmap;
-            public CachedTagInstance InterfaceGooMap1;
-            public CachedTagInstance InterfaceGooMap2;
-            public CachedTagInstance InterfaceGooMap3;
-            public CachedTagInstance MainMenuUiGlobals;
-            public CachedTagInstance SinglePlayerUiGlobals;
-            public CachedTagInstance MultiplayerUiGlobals;
-            public CachedTagInstance HudGlobals;
+            public CachedTag Spinner;
+            public CachedTag Obsolete;
+            public CachedTag ScreenColorTable;
+            public CachedTag HudColorTable;
+            public CachedTag EditorColorTable;
+            public CachedTag DialogColorTable;
+            public CachedTag MotionSensorSweepBitmap;
+            public CachedTag MotionSensorSweepBitmapMask;
+            public CachedTag MultiplayerHudBitmap;
+            public CachedTag HudDigitsDefinition;
+            public CachedTag MotionSensorBlipBitmap;
+            public CachedTag InterfaceGooMap1;
+            public CachedTag InterfaceGooMap2;
+            public CachedTag InterfaceGooMap3;
+            public CachedTag MainMenuUiGlobals;
+            public CachedTag SinglePlayerUiGlobals;
+            public CachedTag MultiplayerUiGlobals;
+            public CachedTag HudGlobals;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public List<GfxUiString> GfxUiStrings;
@@ -478,7 +478,7 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label, Length = 32)]
                 public string Name;
-                public CachedTagInstance Strings;
+                public CachedTag Strings;
             }
         }
 
@@ -508,9 +508,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public float Unknown1;
 
-            public CachedTagInstance Unknown2;
-            public CachedTagInstance Unknown3;
-            public CachedTagInstance Unknown4;
+            public CachedTag Unknown2;
+            public CachedTag Unknown3;
+            public CachedTag Unknown4;
             public int BinocularsZoomCount;
             public Bounds<float> BinocularZoomRange;
 
@@ -519,9 +519,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public uint Unknown6;
 
-            public CachedTagInstance FlashlightOn;
-            public CachedTagInstance FlashlightOff;
-            public CachedTagInstance DefaultDamageResponse;
+            public CachedTag FlashlightOn;
+            public CachedTag FlashlightOff;
+            public CachedTag DefaultDamageResponse;
         }
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
@@ -534,15 +534,15 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public uint Flags;
 
-            public CachedTagInstance FirstPersonHands;
-            public CachedTagInstance FirstPersonBody;
-            public CachedTagInstance ThirdPersonUnit;
+            public CachedTag FirstPersonHands;
+            public CachedTag FirstPersonBody;
+            public CachedTag ThirdPersonUnit;
             public StringId ThirdPersonVariant;
-            public CachedTagInstance BinocularsZoomInSound;
-            public CachedTagInstance BinocularsZoomOutSound;
+            public CachedTag BinocularsZoomInSound;
+            public CachedTag BinocularsZoomOutSound;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance CombatDialogue;
+            public CachedTag CombatDialogue;
         }
 
         [TagStructure(Size = 0xC)]
@@ -574,24 +574,24 @@ namespace TagTool.Tags.Definitions
             public Bounds<float> HarmfulFallingDistanceBounds;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance FallingDamage;
+            public CachedTag FallingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance Unknown;
+            public CachedTag Unknown;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance SoftLanding;
+            public CachedTag SoftLanding;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance HardLanding;
+            public CachedTag HardLanding;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance ScriptDamage;
+            public CachedTag ScriptDamage;
 
             public float TerminalVelocity;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTagInstance DistanceDamage;
+            public CachedTag DistanceDamage;
 
             public uint Unknown2;
             public uint Unknown3;
@@ -659,63 +659,63 @@ namespace TagTool.Tags.Definitions
             public List<WaterDragProperty> WaterDragProperties;
 
             [TagField(ValidTags = new[] { "bsdt" })]
-            public CachedTagInstance BreakableSurface;
+            public CachedTag BreakableSurface;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerSmall;
+            public CachedTag SoundSweetenerSmall;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerMedium;
+            public CachedTag SoundSweetenerMedium;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerLarge;
+            public CachedTag SoundSweetenerLarge;
 
             [TagField(ValidTags = new[] { "lsnd" })]
-            public CachedTagInstance SoundSweetenerRolling;
+            public CachedTag SoundSweetenerRolling;
 
             [TagField(ValidTags = new[] { "lsnd" })]
-            public CachedTagInstance SoundSweetenerGrinding;
+            public CachedTag SoundSweetenerGrinding;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerMeleeSmall;
+            public CachedTag SoundSweetenerMeleeSmall;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerMeleeMedium;
+            public CachedTag SoundSweetenerMeleeMedium;
 
             [TagField(ValidTags = new[] { "snd!" })]
-            public CachedTagInstance SoundSweetenerMeleeLarge;
+            public CachedTag SoundSweetenerMeleeLarge;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerSmall;
+            public CachedTag EffectSweetenerSmall;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerMedium;
+            public CachedTag EffectSweetenerMedium;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerLarge;
+            public CachedTag EffectSweetenerLarge;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerRolling;
+            public CachedTag EffectSweetenerRolling;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerGrinding;
+            public CachedTag EffectSweetenerGrinding;
 
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTagInstance EffectSweetenerMelee;
+            public CachedTag EffectSweetenerMelee;
 
             [TagField(ValidTags = new[] { "rwrd" })]
-            public CachedTagInstance WaterRippleSmall;
+            public CachedTag WaterRippleSmall;
 
             [TagField(ValidTags = new[] { "rwrd" })]
-            public CachedTagInstance WaterRippleMedium;
+            public CachedTag WaterRippleMedium;
 
             [TagField(ValidTags = new[] { "rwrd" })]
-            public CachedTagInstance WaterRippleLarge;
+            public CachedTag WaterRippleLarge;
 
             public SweetenerInheritanceFlags InheritanceFlags;
 
             [TagField(ValidTags = new[] { "foot" })]
-            public CachedTagInstance MaterialEffects;
+            public CachedTag MaterialEffects;
 
             public List<UnderwaterProxy> UnderwaterProxies;
 
@@ -759,7 +759,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST)]
         public class CinematicAnchorBlock : TagStructure
 		{
-            public CachedTagInstance CinematicAnchor;
+            public CachedTag CinematicAnchor;
 
             public float Unknown1;
 

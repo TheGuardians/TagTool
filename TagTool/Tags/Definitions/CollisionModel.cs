@@ -108,7 +108,7 @@ namespace TagTool.Tags.Definitions
                     public uint Unknown14;
 
                     [TagField(Flags = Short)]
-                    public CachedTagInstance Model;
+                    public CachedTag Model;
 
                     public uint Unknown15;
 

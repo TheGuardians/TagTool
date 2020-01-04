@@ -11,14 +11,14 @@ namespace TagTool.Tags.Definitions
         public StringId Stringid;
         public uint Unknown2;
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTagInstance Unknown;
-        public CachedTagInstance WidgetColor;
-        public CachedTagInstance WidgetPosition;
-        public CachedTagInstance WidgetRotation;
-        public CachedTagInstance WidgetScale;
-        public CachedTagInstance WidgetTextureCoordinate;
-        public CachedTagInstance WidgetSprite;
-        public CachedTagInstance WidgetFont;
+        public CachedTag Unknown;
+        public CachedTag WidgetColor;
+        public CachedTag WidgetPosition;
+        public CachedTag WidgetRotation;
+        public CachedTag WidgetScale;
+        public CachedTag WidgetTextureCoordinate;
+        public CachedTag WidgetSprite;
+        public CachedTag WidgetFont;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
         public uint Unknown3;

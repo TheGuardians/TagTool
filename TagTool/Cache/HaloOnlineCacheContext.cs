@@ -91,7 +91,7 @@ namespace TagTool.Cache
 
                     csvWriter.WriteLine($"{name}.{tag.Group.ToString()}");
                 }
-                
+
             }
         }
 
@@ -380,18 +380,18 @@ namespace TagTool.Cache
         }
 
         public T Deserialize<T>(Stream stream, CachedTagInstance instance) =>
-            Deserialize<T>(new TagSerializationContext(stream, this, instance));
+            default(T); // Deserialize<T>(new TagSerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagInstance instance) =>
-            Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
+            null; // Deserialize(new TagSerializationContext(stream, this, instance), Tags.TagDefinition.Find(instance.Group.Tag));
 
         public void Serialize(Stream stream, CachedTagInstance instance, object definition)
         {
-            if(!ModifiedTags.Contains(instance.Index))
+            if (!ModifiedTags.Contains(instance.Index))
                 SignalModifiedTag(instance.Index);
-            Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
+            //Serializer.Serialize(new TagSerializationContext(stream, this, instance), definition);
         }
-            
+
 
         /// <summary>
         /// Attempts to parse a group tag or name.
@@ -431,7 +431,7 @@ namespace TagTool.Cache
             if (name == "****" || name == "null")
                 return Tag.Null;
 
-            if(name.Length < 4)
+            if (name.Length < 4)
             {
                 if (name.Length == 3)
                     name = $"{name} ";
@@ -910,7 +910,7 @@ namespace TagTool.Cache
         }
 
         public T Deserialize<T>(PageableResource pageable) =>
-            Deserialize<T>(new ResourceSerializationContext(this, pageable));
+            default(T); // Deserialize<T>(new ResourceSerializationContext(this, pageable));
 
         public object Deserialize(PageableResource pageable)
         {
@@ -944,7 +944,7 @@ namespace TagTool.Cache
         }
 
         public void Serialize(PageableResource pageable, object definition) =>
-            Serialize(new ResourceSerializationContext(this, pageable), definition);
+            Console.WriteLine("Hello ther"); // Serialize(new ResourceSerializationContext(this, pageable), definition);
 
         private class LoadedResourceCache
         {

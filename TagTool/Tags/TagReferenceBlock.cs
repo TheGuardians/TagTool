@@ -9,6 +9,6 @@ namespace TagTool.Common
 	public class TagReferenceBlock : TagStructure
 	{
         [TagField(Flags = Label)]
-        public CachedTagInstance Instance;
+        public CachedTag Instance;
     }
 }

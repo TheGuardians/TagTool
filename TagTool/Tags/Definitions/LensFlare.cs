@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
 
         public float NearFadeDistance;
         public float FarFadeDistance;
-        public CachedTagInstance Bitmap;
+        public CachedTag Bitmap;
         public FlagsValue Flags;
         public short RuntimeFlags;
 
@@ -131,7 +131,7 @@ namespace TagTool.Tags.Definitions
             public uint Unknown2;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTagInstance BitmapOverride;
+            public CachedTag BitmapOverride;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708)]
             public float RotationOffset_HO;

@@ -59,12 +59,12 @@ namespace TagTool.Serialization
             Writer.Write(data);
         }
 
-        public CachedTagInstance GetTagByIndex(int index)
+        public CachedTag GetTagByIndex(int index)
         {
             return null;
         }
 
-        public CachedTagInstance GetTagByName(TagGroup group, string name)
+        public CachedTag GetTagByName(TagGroup group, string name)
         {
             throw new NotImplementedException();
         }
@@ -111,7 +111,7 @@ namespace TagTool.Serialization
                 return dataOffset;
             }
 
-            public void AddTagReference(CachedTagInstance referencedTag, bool isShort)
+            public void AddTagReference(CachedTag referencedTag, bool isShort)
             {
             }
         }

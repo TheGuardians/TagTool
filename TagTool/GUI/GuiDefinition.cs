@@ -17,6 +17,6 @@ namespace TagTool.Tags.GUI
         public short StandardXOffset;
         public short StandardYUnknown;
         public short StandardXUnknown;
-        public CachedTagInstance Animation;
+        public CachedTag Animation;
     }
 }

@@ -11,7 +11,7 @@ namespace TagTool.Ai
 	{
         public CharacterWeaponFlags Flags;
         [TagField(Flags = Label)]
-        public CachedTagInstance Weapon;
+        public CachedTag Weapon;
         public float MaximumFiringRange;
         public float MinimumFiringRange;
         public Bounds<float> NormalCombatRange;
@@ -44,6 +44,6 @@ namespace TagTool.Ai
         public Bounds<float> LegendaryAccuracyBounds;
         public float LegendaryAccuracyTime;
         public List<CharacterFiringPattern> FiringPatterns;
-        public CachedTagInstance WeaponMeleeDamage;
+        public CachedTag WeaponMeleeDamage;
     }
 }

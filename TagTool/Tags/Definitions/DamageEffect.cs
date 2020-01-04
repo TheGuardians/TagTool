@@ -44,7 +44,7 @@ namespace TagTool.Tags.Definitions
         public float Unknown3 = 1.0f;
 
         public List<PlayerResponseBlock> PlayerResponses;
-        public CachedTagInstance DamageResponse;
+        public CachedTag DamageResponse;
         public float Duration;
         public FunctionType FadeFunction;
         public short Unknown4;
@@ -61,7 +61,7 @@ namespace TagTool.Tags.Definitions
         public short Unknown6;
         public float WobbleFunctionPeriod;
         public float WobbleWeight;
-        public CachedTagInstance Sound;
+        public CachedTag Sound;
         public float ForwardVelocity;
         public float ForwardRadius;
         public float ForwardExponent;

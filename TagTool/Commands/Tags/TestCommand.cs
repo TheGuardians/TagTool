@@ -33,8 +33,13 @@ namespace TagTool.Commands
 
             using(var stream = Cache.TagCache.OpenTagCacheRead())
             {
-                foreach (var tag in Cache.TagCache.TagTable)
+                foreach (var tag in Cache.TagCache.NonNull())
                 {
+                    if (tag.IsInGroup("hlmt"))
+                    {
+                        var model = Cache.Deserialize<Model>(stream, tag);
+
+                    }
                 }
             }
 

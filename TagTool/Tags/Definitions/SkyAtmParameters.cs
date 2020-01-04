@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
     public class SkyAtmParameters : TagStructure
 	{
         public int Unknown1;
-        public CachedTagInstance FogBitmap;
+        public CachedTag FogBitmap;
         public float Unknown2;
         public float Unknown3;
         public float Unknown4;
@@ -64,7 +64,7 @@ namespace TagTool.Tags.Definitions
             public float FogVelocityX;
             public float FogVelocityY;
             public float FogVelocityZ;
-            public CachedTagInstance WeatherEffect;
+            public CachedTag WeatherEffect;
             public uint Unknown7;
             public uint Unknown8;
         }

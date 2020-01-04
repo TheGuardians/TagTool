@@ -7,21 +7,21 @@ namespace TagTool.Tags.Definitions
     public class SoundGlobalsDefinition : TagStructure
 	{
         [TagField(ValidTags = new[] { "sncl" })]
-        public CachedTagInstance SoundClasses;
+        public CachedTag SoundClasses;
 
         [TagField(ValidTags = new[] { "sfx+" })]
-        public CachedTagInstance SoundEffects;
+        public CachedTag SoundEffects;
 
         [TagField(ValidTags = new[] { "snmx" })]
-        public CachedTagInstance SoundMix;
+        public CachedTag SoundMix;
 
         [TagField(ValidTags = new[] { "spk!" })]
-        public CachedTagInstance SoundCombatDialogueConstants;
+        public CachedTag SoundCombatDialogueConstants;
 
         [TagField(ValidTags = new[] { "sgp!" })]
-        public CachedTagInstance SoundGlobalPropagation;
+        public CachedTag SoundGlobalPropagation;
 
         [TagField(ValidTags = new[] { "sus!" }, MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance GfxUiSounds;
+        public CachedTag GfxUiSounds;
     }
 }

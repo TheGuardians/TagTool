@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
     public class RenderMethod : TagStructure
     {
-        public CachedTagInstance BaseRenderMethod;
+        public CachedTag BaseRenderMethod;
         public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
         public List<ImportDatum> ImportData;
         public List<ShaderProperty> ShaderProperties;
@@ -48,7 +48,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
 
             public RenderMethodOption.OptionBlock.OptionDataType Type;
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
             public uint Unknown2;
             public int Unknown3;
             public short Unknown4;
@@ -64,7 +64,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x84)]
         public class ShaderProperty : TagStructure
         {
-            public CachedTagInstance Template;
+            public CachedTag Template;
             public List<ShaderMap> ShaderMaps;
             public List<Argument> Arguments;
             public List<UnknownBlock1> Unknown;
@@ -89,7 +89,7 @@ namespace TagTool.Tags.Definitions
             public class ShaderMap : TagStructure
             {
                 [TagField(Flags = Label)]
-                public CachedTagInstance Bitmap;
+                public CachedTag Bitmap;
                 public sbyte Unknown;
                 public sbyte BitmapIndex;
                 public sbyte Unknown2;

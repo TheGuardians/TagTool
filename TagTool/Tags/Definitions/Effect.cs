@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<LoopingSounds> LoopingSoundBlock;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public CachedTagInstance LoopingSound;
+        public CachedTag LoopingSound;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte LocationIndex;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -106,7 +106,7 @@ namespace TagTool.Tags.Definitions
                 public Tag RuntimeBaseGroupTag;
                 [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Unused;
-                public CachedTagInstance Type;
+                public CachedTag Type;
                 public Bounds<float> VelocityBounds;
                 public RealEulerAngles2d VelocityOrientation;
                 public Angle VelocityConeAngle;
@@ -156,7 +156,7 @@ namespace TagTool.Tags.Definitions
                 public sbyte GameMode;
                 public sbyte Unknown3;
                 public sbyte Unknown4;
-                public CachedTagInstance Particle;
+                public CachedTag Particle;
                 public uint LocationIndex;
                 public ParticleCoordinateSystem CoordinateSystem;
                 public EffectEnvironment Environment;
@@ -204,10 +204,10 @@ namespace TagTool.Tags.Definitions
                     public float Unknown2;
 
                     [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                    public CachedTagInstance CustomShape;
+                    public CachedTag CustomShape;
 
                     [TagField(MinVersion = CacheVersion.HaloReach)]
-                    public CachedTagInstance BoatHull;
+                    public CachedTag BoatHull;
 
                     public uint Unknown3;
                     public uint Unknown4;
@@ -354,14 +354,14 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
 					public class ParticleMovementData : TagStructure
 					{
-                        public CachedTagInstance Template;
+                        public CachedTag Template;
 
                         public FlagsValue Flags;
 
                         public List<Movement> Movements;
 
                         [TagField(ValidTags = new[] { "bitm" }, MinVersion = CacheVersion.HaloReach)]
-                        public CachedTagInstance TurbulenceTexture;
+                        public CachedTag TurbulenceTexture;
 
                         [Flags]
                         public enum FlagsValue : int
@@ -477,7 +477,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
         public class LoopingSounds : TagStructure
 		{
-            public CachedTagInstance LoopingSound;
+            public CachedTag LoopingSound;
             public sbyte LocationIndex;
             public sbyte EventIndex;
             public short BindScale;

@@ -46,7 +46,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown8;
         public uint Unknown9;
         public List<ScenarioZonesetGroup> ScenarioZonesetGroups;
-        public List<CachedTagInstance> ScenarioBsps;
+        public List<CachedTag> ScenarioBsps;
         public uint Unknown10;
         public uint Unknown11;
         public uint Unknown12;
@@ -352,7 +352,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18)]
         public class PredictionD2Tag : TagStructure
 		{
-            public CachedTagInstance Tag;
+            public CachedTag Tag;
             public int FirstValue;
             public int SecondValue;
         }

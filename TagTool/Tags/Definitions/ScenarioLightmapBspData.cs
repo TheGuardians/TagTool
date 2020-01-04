@@ -68,8 +68,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown48;
         public uint Unknown49;
         public uint Unknown50;
-        public CachedTagInstance PrimaryMap;
-        public CachedTagInstance IntensityMap;
+        public CachedTag PrimaryMap;
+        public CachedTag IntensityMap;
         public List<InstancedMesh> InstancedMeshes;
         public List<UnknownBlock> Unknown51;
         public List<InstancedGeometryBlock> InstancedGeometry;

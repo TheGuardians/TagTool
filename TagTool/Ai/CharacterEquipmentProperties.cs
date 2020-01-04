@@ -9,7 +9,7 @@ namespace TagTool.Ai
     public class CharacterEquipmentProperties : TagStructure
 	{
         [TagField(Flags = Label)]
-        public CachedTagInstance Equipment;
+        public CachedTag Equipment;
         public uint Unknown;
         public float UsageChance;
         public List<CharacterEquipmentUsageCondition> UsageConditions;

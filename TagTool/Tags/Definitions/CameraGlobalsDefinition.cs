@@ -9,7 +9,7 @@ namespace TagTool.Tags.Definitions
     public class CameraGlobalsDefinition : TagStructure
 	{
         [TagField(Flags = Label, ValidTags = new[] { "trak" })]
-        public CachedTagInstance DefaultUnitCameraTrack;
+        public CachedTag DefaultUnitCameraTrack;
 
         public float Unknown1;
         public float Unknown2;

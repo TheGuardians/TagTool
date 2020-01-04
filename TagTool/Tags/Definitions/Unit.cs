@@ -17,12 +17,12 @@ namespace TagTool.Tags.Definitions
         public ConstantSoundVolumeValue ConstantSoundVolume; // short
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance HologramUnit;
+        public CachedTag HologramUnit;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<MetagameProperty> MetagameProperties;
 
-        public CachedTagInstance IntegratedLightToggle;
+        public CachedTag IntegratedLightToggle;
         public Angle CameraFieldOfView;
         public float CameraStiffness;
 
@@ -52,7 +52,7 @@ namespace TagTool.Tags.Definitions
         public float StunnedMovementThreshold;
         public float FeignDeathChance;
         public float FeignRepeatChance;
-        public CachedTagInstance SpawnedTurretCharacter;
+        public CachedTag SpawnedTurretCharacter;
         public short SpawnedActorCountMin;
         public short SpawnedActorCountMax;
         public float SpawnedVelocity;
@@ -65,25 +65,25 @@ namespace TagTool.Tags.Definitions
         public StringId LeftHandNode;
         public StringId PreferredGunNode;
 
-        public CachedTagInstance MeleeDamage;
-        public CachedTagInstance BoardingMeleeDamage;
-        public CachedTagInstance BoardingMeleeResponse;
+        public CachedTag MeleeDamage;
+        public CachedTag BoardingMeleeDamage;
+        public CachedTag BoardingMeleeResponse;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance EjectionMeleeDamage;
+        public CachedTag EjectionMeleeDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance EjectionMeleeResponse;
+        public CachedTag EjectionMeleeResponse;
 
-        public CachedTagInstance LandingMeleeDamage;
-        public CachedTagInstance FlurryMeleeDamage;
-        public CachedTagInstance ObstacleSmashMeleeDamage;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance ShieldPopDamage;
+        public CachedTag LandingMeleeDamage;
+        public CachedTag FlurryMeleeDamage;
+        public CachedTag ObstacleSmashMeleeDamage;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTagInstance AssassinationDamage;
+        public CachedTag ShieldPopDamage;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        public CachedTag AssassinationDamage;
 
         public MotionSensorBlipSizeValue MotionSensorBlipSize; // short
         public ItemScaleValue ItemScale; // short
@@ -122,10 +122,10 @@ namespace TagTool.Tags.Definitions
         public float EmpRadius;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance EmpEffect;
+        public CachedTag EmpEffect;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance BoostCollisionDamage;
+        public CachedTag BoostCollisionDamage;
 
         public float BoostPeakPower;
         public float BoostRisePower;
@@ -136,10 +136,10 @@ namespace TagTool.Tags.Definitions
         public float LipsyncDecayWeight;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance DetachDamage;
+        public CachedTag DetachDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTagInstance DetachedWeapon;
+        public CachedTag DetachedWeapon;
 
         [Flags]
         public enum UnitFlagBits : int
@@ -294,7 +294,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitCameraTrack : TagStructure
         {
-            public CachedTagInstance CameraTrack;
+            public CachedTag CameraTrack;
         }
 
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
@@ -327,8 +327,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitAssassination : TagStructure
         {
-            public CachedTagInstance Response;
-            public CachedTagInstance Weapon;
+            public CachedTag Response;
+            public CachedTag Weapon;
             public StringId ToolStowAnchor;
             public StringId ToolHandMarker;
             public StringId ToolMarker;
@@ -368,7 +368,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class HudInterface : TagStructure
 		{
-            public CachedTagInstance UnitHudInterface;
+            public CachedTag UnitHudInterface;
         }
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
@@ -377,7 +377,7 @@ namespace TagTool.Tags.Definitions
 		{
             public short VariantNumber;
             public short Unknown;
-            public CachedTagInstance Dialogue;
+            public CachedTag Dialogue;
         }
 
         public enum GrenadeTypeValue : short
@@ -399,7 +399,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class Weapon : TagStructure
 		{
-            public CachedTagInstance Weapon2;
+            public CachedTag Weapon2;
         }
 
         [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo3Retail)]
@@ -409,8 +409,8 @@ namespace TagTool.Tags.Definitions
             public float AcquireTime;
             public float GraceTime;
             public float DecayTime;
-            public CachedTagInstance TrackingSound;
-            public CachedTagInstance LockedSound;
+            public CachedTag TrackingSound;
+            public CachedTag LockedSound;
 
             [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
             public class TrackingType : TagStructure
@@ -484,7 +484,7 @@ namespace TagTool.Tags.Definitions
             public List<UnitHudInterfaceBlock> UnitHudInterface;
             public StringId EnterSeatString;
             public Bounds<Angle> YawRange;
-            public CachedTagInstance BuiltInGunner;
+            public CachedTag BuiltInGunner;
             public float EntryRadius;
             public Angle EntryMarkerConeAngle;
             public Angle EntryMarkerFacingAngle;
@@ -506,7 +506,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
             public class UnitHudInterfaceBlock : TagStructure
 			{
-                public CachedTagInstance UnitHudInterface;
+                public CachedTag UnitHudInterface;
             }
         }
     }

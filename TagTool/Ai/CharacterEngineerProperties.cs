@@ -52,6 +52,6 @@ namespace TagTool.Ai
         /// <summary>
         /// The equipment that the engineer deploys if target enters radius and detonation is not chosen.
         /// </summary>
-        public CachedTagInstance ProximityEquipment;
+        public CachedTag ProximityEquipment;
     }
 }

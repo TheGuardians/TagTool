@@ -41,7 +41,7 @@ namespace TagTool.Ai
         [TagField(Flags = Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Unused1;
 
-        public CachedTagInstance GlobalDialogue;
+        public CachedTag GlobalDialogue;
         public StringId DefaultMissionDialogueSoundEffect;
 
         [TagField(Flags = Padding, Length = 20, MaxVersion = CacheVersion.Halo3Retail)]

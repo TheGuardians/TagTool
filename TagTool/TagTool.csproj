@@ -321,7 +321,6 @@
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="Geometry\ModelExtractor.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />
     <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
@@ -339,7 +338,6 @@
     <Compile Include="Scripting\HsType.cs" />
     <Compile Include="Serialization\ResourceDefinitionSerializationContext.cs" />
     <Compile Include="Serialization\Gen3SerializationContext.cs" />
-    <Compile Include="Serialization\ModPackageTagSerializationContext.cs" />
     <Compile Include="Serialization\HaloOnlineSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDeserializer.cs" />
     <Compile Include="Serialization\ResourceSerializer.cs" />
@@ -378,7 +376,6 @@
     <Compile Include="Common\BlamType.cs" />
     <Compile Include="Shaders\ShaderMatching\ArgumentMapping.cs" />
     <Compile Include="Shaders\ShaderMatching\FastRenderTags.cs" />
-    <Compile Include="Shaders\ShaderMatching\ShaderMatcher.cs" />
     <Compile Include="Shaders\ShaderMatching\Unknown3TagBlock.cs" />
     <Compile Include="Tags\TagFieldInfo.cs" />
     <Compile Include="Tags\TagStructure.cs" />
@@ -472,7 +469,6 @@
     <Compile Include="Geometry\RenderGeometryCompressionFlags.cs" />
     <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
     <Compile Include="Geometry\RenderMaterial.cs" />
-    <Compile Include="Geometry\RenderModelBuilder.cs" />
     <Compile Include="Geometry\VertexBufferFormat.cs" />
     <Compile Include="Geometry\VertexCompressor.cs" />
     <Compile Include="Geometry\VertexElementStream.cs" />
@@ -506,7 +502,6 @@
     <Compile Include="Layouts\TagLayoutWriter.cs" />
     <Compile Include="Cache\CacheFile.cs" />
     <Compile Include="Cache\CacheFileGen2.cs" />
-    <Compile Include="Cache\CacheFileGen3.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -514,20 +509,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Scripting\HsScript.cs" />
     <Compile Include="Scripting\HsSyntaxNode.cs" />
     <Compile Include="Scripting\HsGlobal.cs" />
     <Compile Include="Scripting\ScriptInfo.cs" />
-    <Compile Include="Serialization\CacheSerializationContext.cs" />
     <Compile Include="Serialization\DataSerializationContext.cs" />
     <Compile Include="Serialization\IDataBlock.cs" />
     <Compile Include="Serialization\ISerializationContext.cs" />
-    <Compile Include="Serialization\ResourceSerializationContext.cs" />
     <Compile Include="Serialization\TagDeserializer.cs" />
     <Compile Include="Tags\TagFieldAttribute.cs" />
     <Compile Include="Tags\TagFieldEnumerable.cs" />
-    <Compile Include="Serialization\TagSerializationContext.cs" />
     <Compile Include="Serialization\TagSerializer.cs" />
     <Compile Include="Tags\TagStructureAttribute.cs" />
     <Compile Include="Tags\TagStructureInfo.cs" />

@@ -8,26 +8,26 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x14C, MinVersion = CacheVersion.Halo3ODST)]
     public class UserInterfaceSoundsDefinition : TagStructure
 	{
-        public CachedTagInstance Error;
-        public CachedTagInstance VerticalNavigation;
-        public CachedTagInstance HorizontalNavigation;
-        public CachedTagInstance AButton;
-        public CachedTagInstance BButton;
-        public CachedTagInstance XButton;
-        public CachedTagInstance YButton;
-        public CachedTagInstance StartButton;
-        public CachedTagInstance BackButton;
-        public CachedTagInstance LeftBumper;
-        public CachedTagInstance RightBumper;
-        public CachedTagInstance LeftTrigger;
-        public CachedTagInstance RightTrigger;
-        public CachedTagInstance TimerSound;
-        public CachedTagInstance TimerSoundZero;
-        public CachedTagInstance AltTimerSound;
-        public CachedTagInstance SecondAltTimerSound;
-        public CachedTagInstance MatchmakingAdvanceSound;
-        public CachedTagInstance RankUp;
-        public CachedTagInstance MatchmakingPartyUpSound;
+        public CachedTag Error;
+        public CachedTag VerticalNavigation;
+        public CachedTag HorizontalNavigation;
+        public CachedTag AButton;
+        public CachedTag BButton;
+        public CachedTag XButton;
+        public CachedTag YButton;
+        public CachedTag StartButton;
+        public CachedTag BackButton;
+        public CachedTag LeftBumper;
+        public CachedTag RightBumper;
+        public CachedTag LeftTrigger;
+        public CachedTag RightTrigger;
+        public CachedTag TimerSound;
+        public CachedTag TimerSoundZero;
+        public CachedTag AltTimerSound;
+        public CachedTag SecondAltTimerSound;
+        public CachedTag MatchmakingAdvanceSound;
+        public CachedTag RankUp;
+        public CachedTag MatchmakingPartyUpSound;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<AtlasSound> AtlasSounds;
@@ -36,7 +36,7 @@ namespace TagTool.Tags.Definitions
         public class AtlasSound : TagStructure
 		{
             public StringId Name;
-            public CachedTagInstance Sound;
+            public CachedTag Sound;
         }
     }
 }

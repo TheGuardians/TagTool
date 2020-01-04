@@ -30,7 +30,7 @@ namespace TagTool.Tags.Definitions
             public float Unknown2;
             public float Unknown3;
             public float Unknown4;
-            public CachedTagInstance Light;
+            public CachedTag Light;
         }
     }
 }

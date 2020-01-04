@@ -153,7 +153,7 @@ namespace TagTool.Tags.Definitions
             public float ScreenShake;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTagInstance ScreenShader; ///#applies this shader to the entire screen
+            public CachedTag ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]
             public enum FlagBits : ushort

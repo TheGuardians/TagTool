@@ -10,9 +10,9 @@ namespace TagTool.Tags.Definitions
         public TriggersWhenValue TriggersWhen;
         public float CallValue;
         public StringId ActionString;
-        public CachedTagInstance On;
-        public CachedTagInstance Off;
-        public CachedTagInstance Deny;
+        public CachedTag On;
+        public CachedTag Off;
+        public CachedTag Deny;
 
         public enum TypeValue : short
         {

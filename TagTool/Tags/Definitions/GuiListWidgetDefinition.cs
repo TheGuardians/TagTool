@@ -12,11 +12,11 @@ namespace TagTool.Tags.Definitions
         public GuiDefinition GuiRenderBlock;
 
         public StringId DataSourceName;
-        public CachedTagInstance Skin;
+        public CachedTag Skin;
         public int RowCount;
         public List<ListWidgetItem> ListWidgetItems;
-        public CachedTagInstance UpArrowBitmap;
-        public CachedTagInstance DownArrowBitmap;
+        public CachedTag UpArrowBitmap;
+        public CachedTag DownArrowBitmap;
 
         [TagStructure(Size = 0x30)]
         public class ListWidgetItem : TagStructure

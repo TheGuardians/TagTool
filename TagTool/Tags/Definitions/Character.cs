@@ -10,14 +10,14 @@ namespace TagTool.Tags.Definitions
     public class Character : TagStructure
 	{
         public uint Flags;
-        public CachedTagInstance ParentCharacter;
-        public CachedTagInstance Unit;
+        public CachedTag ParentCharacter;
+        public CachedTag Unit;
         /// <summary>
         /// Creature reference for swarm characters ONLY
         /// </summary>
-        public CachedTagInstance Creature;
-        public CachedTagInstance Style;
-        public CachedTagInstance MajorCharacter;
+        public CachedTag Creature;
+        public CachedTag Style;
+        public CachedTag MajorCharacter;
 
         public List<CharacterVariant> Variants;
         public List<CharacterUnitDialogue> UnitDialogue;

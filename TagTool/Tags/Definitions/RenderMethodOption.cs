@@ -18,7 +18,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public OptionDataType Type;
             public uint Unknown2;
-            public CachedTagInstance Bitmap;
+            public CachedTag Bitmap;
 
             public float Unknown3;
 

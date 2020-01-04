@@ -209,8 +209,8 @@ namespace TagTool.Serialization
                 SerializeString(block.Writer, (string)value, valueInfo);
             else if (valueType == typeof(Tag))
                 SerializeTag(block, (Tag)value);
-            else if (valueType == typeof(CachedTagInstance))
-                SerializeTagReference(context, block, (CachedTagInstance)value, valueInfo);
+            else if (valueType == typeof(CachedTag))
+                SerializeTagReference(context, block, (CachedTag)value, valueInfo);
             else if (valueType == typeof(CacheAddress))
                 block.Writer.Write(((CacheAddress)value).Value);
             else if (valueType == typeof(byte[]))
@@ -349,7 +349,7 @@ namespace TagTool.Serialization
         /// <param name="block">The block to write to.</param>
         /// <param name="referencedTag">The referenced tag.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
-        private void SerializeTagReference(ISerializationContext context, IDataBlock block, CachedTagInstance referencedTag, TagFieldAttribute valueInfo)
+        private void SerializeTagReference(ISerializationContext context, IDataBlock block, CachedTag referencedTag, TagFieldAttribute valueInfo)
         {
             if (referencedTag != null && referencedTag.Group == TagGroup.None)
                 referencedTag = null;

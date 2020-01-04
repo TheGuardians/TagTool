@@ -65,9 +65,9 @@ namespace TagTool.Commands.Editing
 					valueString = "null";
 				else if (fieldType == typeof(StringId))
 					valueString = Cache.StringTable.GetString((StringId)fieldValue);
-				else if (fieldType == typeof(CachedTagInstance))
+				else if (fieldType == typeof(CachedTag))
 				{
-					var instance = (CachedTagInstance)fieldValue;
+					var instance = (CachedTag)fieldValue;
 
 					var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 

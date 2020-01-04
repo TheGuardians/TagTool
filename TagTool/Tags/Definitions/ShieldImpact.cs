@@ -87,9 +87,9 @@ namespace TagTool.Tags.Definitions
 		{
             public float PlasmaDepthFadeRange;      //In world units
             [TagField(ValidTags = new[] { "bitm" })]
-            public CachedTagInstance PlasmaNoiseBitmap1;
+            public CachedTag PlasmaNoiseBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
-            public CachedTagInstance PlasmaNoiseBitmap2;
+            public CachedTag PlasmaNoiseBitmap2;
             public float TilingScale;
             public float ScrollSpeed;
             public float EdgeSharpness;
@@ -109,8 +109,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public class H3ValuesBlock : TagStructure
 		{
-            public CachedTagInstance Bitmap1;
-            public CachedTagInstance Bitmap2;
+            public CachedTag Bitmap1;
+            public CachedTag Bitmap2;
 
             public float Unknown1;
             public float Unknown2;
@@ -151,9 +151,9 @@ namespace TagTool.Tags.Definitions
         public class ExtrusionOscillationBlock : TagStructure
 		{
             [TagField(ValidTags = new[] { "bitm" })]
-            public CachedTagInstance OscillationBitmap1;
+            public CachedTag OscillationBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
-            public CachedTagInstance OscillationBitmap2;
+            public CachedTag OscillationBitmap2;
 
             public float OscillationTilingScale;
             public float OscillationScrollSpeed;

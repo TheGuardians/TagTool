@@ -28,7 +28,7 @@ namespace TagTool.Serialization
         /// <param name="type">The type of object that the pointer will point to.</param>
         void WritePointer(uint targetOffset, Type type);
 
-        void AddTagReference(CachedTagInstance referencedTag, bool isShort);
+        void AddTagReference(CachedTag referencedTag, bool isShort);
 
         /// <summary>
         /// Called before an object is serialized into the block.
