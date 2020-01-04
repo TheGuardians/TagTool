@@ -40,7 +40,7 @@ namespace Sentinel.Render
                     var shaderMap = renderMethod.ShaderProperties[0].ShaderMaps[shaderMapIndex];
                     var shaderMapDefinition = cacheContext.Deserialize<Bitmap>(new TagSerializationContext(cacheStream, cacheContext, shaderMap.Bitmap));
 
-                    Textures[shaderMapName] = new RenderTexture(device, cacheContext, shaderMapDefinition, shaderMap.BitmapIndex);
+                    Textures[shaderMapName] = null;// new RenderTexture(device, cacheContext, shaderMapDefinition, shaderMap.BitmapIndex);
                 }
             }
         }

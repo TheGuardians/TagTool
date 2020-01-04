@@ -5,6 +5,12 @@ using System.Reflection;
 using System.IO;
 using System.Xml;
 using TagTool.Commands.Bitmaps;
+using TagTool.Commands.Bipeds;
+using TagTool.Commands.Video;
+using TagTool.Commands.Unicode;
+using TagTool.Commands.CollisionModels;
+using TagTool.Commands.Forge;
+using TagTool.Commands.Models;
 
 namespace TagTool.Commands.Editing
 {
@@ -29,27 +35,27 @@ namespace TagTool.Commands.Editing
                 case "bitm":
                     BitmapContextFactory.Populate(commandContext, cache, tag, (Bitmap)definition);
                     break;
-                /*
+                
                 case "bipd":
-                    BipedContextFactory.Populate(commandContext, cacheContext, tag, (Biped)definition);
+                    BipedContextFactory.Populate(commandContext, cache, tag, (Biped)definition);
                     break;
-
+                
                 case "bink":
-                    VideoContextFactory.Populate(commandContext, cacheContext, tag, (Bink)definition);
+                    VideoContextFactory.Populate(commandContext, cache, tag, (Bink)definition);
                     break;
 
                 case "coll":
-                    CollisionModelContextFactory.Populate(commandContext, cacheContext, tag, (CollisionModel)definition);
+                    CollisionModelContextFactory.Populate(commandContext, cache, tag, (CollisionModel)definition);
                     break;
 
                 case "forg":
-                    ForgeContextFactory.Populate(commandContext, cacheContext, tag, (ForgeGlobalsDefinition)definition);
+                    ForgeContextFactory.Populate(commandContext, cache, tag, (ForgeGlobalsDefinition)definition);
                     break;
-
+              
                 case "hlmt": // model
-                    ModelContextFactory.Populate(commandContext, cacheContext, tag, (Model)definition);
+                    ModelContextFactory.Populate(commandContext, cache, tag, (Model)definition);
                     break;
-
+                    /*
                 case "jmad":
                     AnimationContextFactory.Populate(commandContext, cacheContext, tag, (ModelAnimationGraph)definition);
                     break;
@@ -90,11 +96,11 @@ namespace TagTool.Commands.Editing
                 case "snd!":
                     SoundContextFactory.Populate(commandContext, cacheContext, tag, (Sound)definition);
                     break;
-
+                    */
                 case "unic": // multilingual_unicode_string_list
-                    UnicodeContextFactory.Populate(commandContext, cacheContext, tag, (MultilingualUnicodeStringList)definition);
+                    UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
                     break;
-
+/*
                 case "vfsl": // vfiles_list
                     VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
                     break;

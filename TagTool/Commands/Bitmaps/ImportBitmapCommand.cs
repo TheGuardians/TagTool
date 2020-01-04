@@ -7,16 +7,18 @@ using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Bitmaps.DDS;
+using TagTool.IO;
 
 namespace TagTool.Commands.Bitmaps
 {
     class ImportBitmapCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Bitmap Bitmap { get; }
 
-        public ImportBitmapCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bitmap bitmap)
+        public ImportBitmapCommand(GameCache cache, CachedTag tag, Bitmap bitmap)
             : base(false,
 
                   "ImportBitmap",
@@ -28,7 +30,7 @@ namespace TagTool.Commands.Bitmaps
                   "No conversion will be done on the data in the DDS file.\n" +
                   "The pixel format must be supported by the game.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Bitmap = bitmap;
         }
@@ -102,14 +104,18 @@ namespace TagTool.Commands.Bitmaps
             
             try
             {
+                DDSFile file = new DDSFile();
                 using (var imageStream = File.OpenRead(imagePath))
+                using(var reader = new EndianReader(imageStream))
                 {
-                    var injector = new BitmapDdsInjector(CacheContext);
-                    injector.InjectDds(CacheContext.Serializer, CacheContext.Deserializer, Bitmap, imageIndex, imageStream, location);
+                    file.Read(reader);
+                    // TODO:
+                    //var injector = new BitmapDdsInjector(CacheContext);
+                    //injector.InjectDds(CacheContext.Serializer, CacheContext.Deserializer, Bitmap, imageIndex, imageStream, location);
                 }
 
-                using (var tagsStream = CacheContext.OpenTagCacheReadWrite())
-                    CacheContext.Serialize(tagsStream, Tag, Bitmap);
+                using (var tagsStream = Cache.TagCache.OpenTagCacheReadWrite())
+                    Cache.Serialize(tagsStream, Tag, Bitmap);
             }
             catch (Exception ex)
             {

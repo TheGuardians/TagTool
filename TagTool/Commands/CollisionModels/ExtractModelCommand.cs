@@ -9,10 +9,10 @@ namespace TagTool.Commands.CollisionModels
 {
     class ExtractModelCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private CollisionModel Definition { get; }
 
-        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, CollisionModel definition) :
+        public ExtractModelCommand(GameCache cache, CollisionModel definition) :
             base(true,
 
                 "ExtractModel",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.CollisionModels
 
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -42,11 +42,11 @@ namespace TagTool.Commands.CollisionModels
 
                 foreach (var region in Definition.Regions)
                 {
-                    var regionName = CacheContext.GetString(region.Name);
+                    var regionName = Cache.StringTable.GetString(region.Name);
 
                     foreach (var permutation in region.Permutations)
                     {
-                        var permutationName = CacheContext.GetString(permutation.Name);
+                        var permutationName = Cache.StringTable.GetString(permutation.Name);
 
                         foreach (var collisionBsp in permutation.Bsps)
                         {

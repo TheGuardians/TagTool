@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Serialization;
+using TagTool.Bitmaps.DDS;
 
 namespace TagTool.Bitmaps
 {
@@ -74,7 +75,7 @@ namespace TagTool.Bitmaps
             texture.Depth = (byte)Math.Max(1, dds.Depth);
             texture.MipmapCount = (byte)Math.Max(1, dds.MipMapCount);
             texture.BitmapType = BitmapDdsFormatDetection.DetectType(dds);
-            texture.D3DFormat = (D3DFormat)((dds.D3D10Format != DxgiFormat.Bc5UNorm) ? dds.FourCc : DdsFourCc.FromString("ATI2"));
+            texture.D3DFormat = (D3DFormat)((dds.D3D10Format != DXGIFormat.Bc5UNorm) ? dds.FourCc : DDSFourCC.FromString("ATI2"));
             texture.Format = BitmapDdsFormatDetection.DetectFormat(dds);
 
             // Set flags based on the format

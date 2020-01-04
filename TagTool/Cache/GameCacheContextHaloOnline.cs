@@ -233,7 +233,7 @@ namespace TagTool.Cache
         /// <param name="stream">The stream to read from.</param>
         /// <param name="tag">The tag to read.</param>
         /// <returns>The data that was read.</returns>
-        public CachedTagData ExtractTag(Stream stream, CachedTagInstance tag)
+        public CachedTagData ExtractTag(Stream stream, CachedTagHaloOnline tag)
         {
             if (tag == null)
                 throw new ArgumentNullException(nameof(tag));
@@ -340,7 +340,7 @@ namespace TagTool.Cache
         /// <param name="tag">The tag to read.</param>
         /// <param name="dataOffset">On return, this will contain the offset of the tag's data relative to its header.</param>
         /// <returns>The description that was built. </returns>
-        private static CachedTagData BuildTagData(Stream stream, CachedTagInstance tag, out uint dataOffset)
+        private static CachedTagData BuildTagData(Stream stream, CachedTagHaloOnline tag, out uint dataOffset)
         {
             var data = new CachedTagData
             {

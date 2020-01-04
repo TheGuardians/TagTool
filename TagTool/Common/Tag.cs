@@ -130,6 +130,28 @@ namespace TagTool.Common
             }
         }
 
+        public static bool TryParseGroupTag(GameCache cache, string name, out Tag result)
+        {
+            if (TagDefinition.TryFind(name, out var type))
+            {
+                var attribute = TagStructure.GetTagStructureAttribute(type);
+                result = new Tag(attribute.Tag);
+                return true;
+            }
+
+            foreach (var pair in TagGroup.Instances)
+            {
+                if (name == cache.StringTable.GetString(pair.Value.Name))
+                {
+                    result = pair.Value.Tag;
+                    return true;
+                }
+            }
+
+            result = Tag.Null;
+            return name == "none" || name == "null";
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is Tag))

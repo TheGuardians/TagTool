@@ -9,16 +9,16 @@ namespace TagTool.Analysis
 {
     public class TagAnalyzer
     {
-        private readonly TagCache _cache;
+        private readonly TagCacheHaloOnline _cache;
         private MemoryMap _tagMap;
         private readonly HashSet<Tag> _tagGroups = new HashSet<Tag>();
         private Dictionary<uint, CachedTagData.PointerFixup> _dataFixupsByWriteOffset;
         private HashSet<uint> _resourceFixupsByWriteOffset;
 
-        public TagAnalyzer(TagCache cache)
+        public TagAnalyzer(TagCacheHaloOnline cache)
         {
             _cache = cache;
-            foreach (var group in cache.Index.NonNull().Select(t => t.Group.Tag).Distinct())
+            foreach (var group in cache.NonNull().Select(t => t.Group.Tag).Distinct())
                 _tagGroups.Add(group);
         }
 
@@ -80,9 +80,9 @@ namespace TagTool.Analysis
                 else if (offset >= 0xC && lookBehind[0] == 0 && lookBehind[1] == 0 && _tagGroups.Contains(new Tag((int)lookBehind[2])))
                 {
                     // Tag reference
-                    if (val != 0xFFFFFFFF && val < _cache.Index.Count)
+                    if (val != 0xFFFFFFFF && val < _cache.Tags.Count)
                     {
-                        var referencedTag = _cache.Index[(int)val];
+                        var referencedTag = _cache.Tags[(int)val];
                         if (referencedTag != null && referencedTag.Group.Tag.Value == (int)lookBehind[2])
                             result.Add(offset - 0xC, new TagReferenceGuess());
                     }

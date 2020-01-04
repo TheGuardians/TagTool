@@ -13,10 +13,10 @@ namespace TagTool.Commands.Models
 {
     class ExtractModelCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private Model Definition { get; }
 
-        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, Model model)
+        public ExtractModelCommand(GameCache cache, Model model)
             : base(true,
 
                   "ExtractModel",
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Models
                   "If the model does not have any variants, just use \"default\".\n" +
                   "Supported file types: obj")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = model;
         }
         
@@ -64,7 +64,7 @@ namespace TagTool.Commands.Models
             }
 
             
-            var modelVariant = Definition.Variants.FirstOrDefault(v => (CacheContext.GetString(v.Name) ?? v.Name.ToString()) == variantName);
+            var modelVariant = Definition.Variants.FirstOrDefault(v => (Cache.StringTable.GetString(v.Name) ?? v.Name.ToString()) == variantName);
             if (modelVariant == null && Definition.Variants.Count > 0 && fileType != "dae")
             {
                 Console.WriteLine("Unable to find variant \"{0}\"", variantName);
@@ -77,9 +77,9 @@ namespace TagTool.Commands.Models
             //
 
             RenderModel renderModel;
-            using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             {
-                renderModel = CacheContext.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
+                renderModel = Cache.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
             }
 
             if (renderModel.Geometry.Resource == null)

@@ -13,11 +13,11 @@ namespace TagTool.Commands.Forge
 {
     class ParseItemsXmlCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Instance { get; }
+        private GameCache Cache { get; }
+        private CachedTag Instance { get; }
         private ForgeGlobalsDefinition Definition { get; }
 
-        public ParseItemsXmlCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance instance, ForgeGlobalsDefinition definition) :
+        public ParseItemsXmlCommand(GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition) :
             base(true,
 
                 "ParseItemsXml",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Forge
 
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Instance = instance;
             Definition = definition;
         }
@@ -60,8 +60,8 @@ namespace TagTool.Commands.Forge
 
             foreach (var objTagName in extraObjects)
             {
-                CachedTagInstance tag;
-                CacheContext.TryGetTag(objTagName, out tag);
+                CachedTag tag;
+                Cache.TagCache.TryGetTag(objTagName, out tag);
                 var item = new PaletteItem();
                 item.Object = tag;
                 item.CategoryIndex = -1;
@@ -161,7 +161,7 @@ namespace TagTool.Commands.Forge
                         CategoryIndex = (short)CategoryStack.Peek().Item2,
                         DescriptionIndex = -1,
                         MaxAllowed = maxAllowed,
-                        Object = CacheContext.TryGetTag(node.Attributes["tagindex"].InnerText, out var obj) ? obj : null,
+                        Object = Cache.TagCache.TryGetTag(node.Attributes["tagindex"].InnerText, out var obj) ? obj : null,
                         Type = ParseEnum<ForgeGlobalsDefinition.PaletteItemType>(node.Attributes["type"].InnerText)
                             ?? ForgeGlobalsDefinition.PaletteItemType.None,
                         Setters = new List<ForgeGlobalsDefinition.PaletteItem.Setter>()

@@ -346,6 +346,7 @@ namespace Sentinel.Forms
                 else if (tag.IsInGroup("obje"))
                     splitContainer.SplitterDistance = 384;
 
+                /*
                 if (tag.IsInGroup("bitm"))
                 {
                     var bitmDefinition = (TagTool.Tags.Definitions.Bitmap)definition;
@@ -358,7 +359,8 @@ namespace Sentinel.Forms
                     splitContainer.Panel1.Controls.Add(bitmapControl);
                     bitmapControl.BringToFront();
                 }
-                else if (tag.IsInGroup("obje"))
+                else*/
+                if (tag.IsInGroup("obje"))
                 {
                     var modelControl = new ObjectControl(CacheContext, (GameObject)definition)
                     {

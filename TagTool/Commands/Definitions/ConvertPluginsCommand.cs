@@ -12,9 +12,9 @@ namespace TagTool.Commands.Definitions
 {
     class ConvertPluginsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ConvertPluginsCommand(HaloOnlineCacheContext cacheContext)
+        public ConvertPluginsCommand(GameCache cache)
             : base(true,
 
                   "ConvertPlugins",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Definitions
                   "\n" +
                   "Supported output types: c#, c++")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -57,7 +57,7 @@ namespace TagTool.Commands.Definitions
             // order to look up the group name without using a static table.
             var processedGroups = new HashSet<Tag>();
             var numConflicts = 0;
-            foreach (var tag in CacheContext.TagCache.Index.NonNull().Where(tag => !processedGroups.Contains(tag.Group.Tag)))
+            foreach (var tag in Cache.TagCache.NonNull().Where(tag => !processedGroups.Contains(tag.Group.Tag)))
             {
                 processedGroups.Add(tag.Group.Tag);
 
@@ -74,7 +74,7 @@ namespace TagTool.Commands.Definitions
 
                 // Load the plugin into a layout
                 AssemblyPluginLoadResults loadedPlugin;
-                var groupName = CacheContext.GetString(tag.Group.Name);
+                var groupName = Cache.StringTable.GetString(tag.Group.Name);
                 using (var reader = XmlReader.Create(pluginPath))
                     loadedPlugin = AssemblyPluginLoader.LoadPlugin(reader, groupName, tag.Group.Tag);
 

@@ -10,21 +10,21 @@ namespace TagTool.Commands.Forge
 {
     static class ForgeContextFactory
     {
-        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext cacheContext, CachedTagInstance instance, ForgeGlobalsDefinition definition)
+        public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition)
         {
-            var groupName = cacheContext.GetString(instance.Group.Name);
+            var groupName = cache.StringTable.GetString(instance.Group.Name);
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", instance.Index, groupName));
 
-            Populate(context, cacheContext, instance, definition);
+            Populate(context, cache, instance, definition);
 
             return context;
         }
 
-        public static void Populate(CommandContext context, HaloOnlineCacheContext cacheContext, CachedTagInstance instance, ForgeGlobalsDefinition definition)
+        public static void Populate(CommandContext context, GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition)
         {
-            context.AddCommand(new ParseItemsXmlCommand(cacheContext, instance, definition));
+            //context.AddCommand(new ParseItemsXmlCommand(cache, instance, definition));
         }
     }
 }

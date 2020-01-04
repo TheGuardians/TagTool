@@ -18,7 +18,7 @@ namespace TagTool.Commands.Bitmaps
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, Bitmap bitmap)
         {
             commandContext.AddCommand(new ExtractBitmapCommand(cache, tag, bitmap));
-            //commandContext.AddCommand(new ImportBitmapCommand(cache, tag, bitmap));
+            commandContext.AddCommand(new ImportBitmapCommand(cache, tag, bitmap));
         }
     }
 }

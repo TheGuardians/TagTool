@@ -69,40 +69,19 @@ namespace TagTool.Commands.Bitmaps
 
             for (var i = 0; i < Bitmap.Images.Count; i++)
             {
-                var image = Bitmap.Images[i];
                 var bitmapName = (Bitmap.Images.Count > 1) ? i.ToString() : name;
                 bitmapName += ".dds";
                 var outPath = Path.Combine(ddsOutDir, bitmapName);
 
-                DDSHeader header;
-                byte[] data;
-
-                if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
-                {
-                    var resourceRef = Bitmap.InterleavedResources[image.InterleavedTextureIndex1];
-                    Console.WriteLine("ExtractBitmapCommand is not implemented for interleaved bitmaps");
-                    header = null;
-                    data = null;
-                }
-                else
-                {
-                    var resourceRef = Bitmap.Resources[i];
-                    // only works for HO for now
-                    var definition = Cache.ResourceCache.GetBitmapTextureInteropResource(resourceRef).Texture.Definition;
-                    data = definition.PrimaryResourceData.Data;
-                    var bitmapDef = definition.Bitmap;
-                    header = new DDSHeader(bitmapDef);
-                }
-                    
+                var extractor = new BitmapExtractor(Cache);
+                var ddsFile = extractor.ExtractBitmap(Bitmap, i);
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
                 {
-                    header.Write(writer);
-                    fileStream.Write(data, 0, data.Length);
+                    ddsFile.Write(writer);
                 }
             }
-
 
             Console.WriteLine("Done!");
 

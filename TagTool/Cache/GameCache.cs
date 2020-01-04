@@ -251,8 +251,9 @@ namespace TagTool.Cache
 
     public abstract class TagCacheTest
     {
+        // TODO: refactor TagGroup to contain a string instead of string ID
         public CacheVersion Version;
-        public virtual IEnumerable<CachedTag> TagTable { get;}
+        public virtual IEnumerable<CachedTag> TagTable { get; }
 
         public abstract CachedTag GetTagByID(uint ID);
         public abstract CachedTag GetTagByIndex(int index);
@@ -271,6 +272,56 @@ namespace TagTool.Cache
             else
                 return false;
         }
+
+        public IEnumerable<CachedTag> FindAllInGroup(Tag groupTag) =>
+            NonNull().Where(t => t.IsInGroup(groupTag));
+
+        public IEnumerable<CachedTag> NonNull() =>
+            TagTable.Where(t =>
+                (t != null) &&
+                (t.DefinitionOffset >= 0));
+
+        public bool TryGetTag(int index, out CachedTag instance)
+        {
+            if (index < 0 || index >= TagTable.Count())
+            {
+                instance = null;
+                return false;
+            }
+
+            instance = GetTagByIndex(index);
+            return true;
+        }
+
+        public bool TryGetTag<T>(string name, out CachedTag result) where T : TagStructure
+        {
+            if (name == "none" || name == "null")
+            {
+                result = null;
+                return true;
+            }
+
+            if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
+            {
+                var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
+
+                foreach (var instance in TagTable)
+                {
+                    if (instance is null)
+                        continue;
+
+                    if (instance.IsInGroup(groupTag) && instance.Name == name)
+                    {
+                        result = instance;
+                        return true;
+                    }
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
     }
 
     public abstract class StringTable : List<string>
@@ -291,7 +342,7 @@ namespace TagTool.Cache
             else
                 return "invalid";
         }
-        // override if required
+        
         public virtual StringId GetStringId(string str)
         {
             for (int i = 0; i < Count; i++)
@@ -302,6 +353,14 @@ namespace TagTool.Cache
                 }
             }
             return StringId.Invalid;
+        }
+
+        public virtual StringId GetStringId(int index)
+        {
+            if (index < 0 || index >= this.Count)
+                return StringId.Invalid;
+
+            return Resolver.IndexToStringID(index);
         }
     }
 

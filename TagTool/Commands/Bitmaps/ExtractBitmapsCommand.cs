@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Commands.Common;
+using TagTool.IO;
 
 namespace TagTool.Commands.Bitmaps
 {
     class ExtractBitmapsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext) :
+        public ExtractBitmapsCommand(GameCache cache) :
             base(true,
                 
                 "ExtractBitmaps",
@@ -23,7 +24,7 @@ namespace TagTool.Commands.Bitmaps
                 "Extract all bitmap tags and any subimages to the given folder.\n" +
                 "If the folder does not exist, it will be created.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -38,11 +39,11 @@ namespace TagTool.Commands.Bitmaps
 
             var count = 0;
 
-            using (var tagsStream = CacheContext.OpenTagCacheRead())
+            using (var tagsStream = Cache.TagCache.OpenTagCacheRead())
             {
-                var extractor = new BitmapDdsExtractor(CacheContext);
+                var extractor = new BitmapExtractor(Cache);
 
-                foreach (var tag in CacheContext.TagCache.Index.FindAllInGroup("bitm"))
+                foreach (var tag in Cache.TagCache.FindAllInGroup("bitm"))
                 {
                     Console.Write("Extracting ");
                     TagPrinter.PrintTagShort(tag);
@@ -51,7 +52,7 @@ namespace TagTool.Commands.Bitmaps
                     try
                     {
                 #endif
-                        var bitmap = CacheContext.Deserialize<Bitmap>(tagsStream, tag);
+                        var bitmap = Cache.Deserialize<Bitmap>(tagsStream, tag);
                         var ddsOutDir = outDir;
 
                         if (bitmap.Images.Count > 1)
@@ -63,9 +64,12 @@ namespace TagTool.Commands.Bitmaps
                         for (var i = 0; i < bitmap.Images.Count; i++)
                         {
                             var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Index.ToString("X8")) + ".dds");
-
+                            var ddsFile = extractor.ExtractBitmap(bitmap, i);
                             using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                                extractor.ExtractDds(bitmap, i, outStream);
+                            using (var writer = new EndianWriter(outStream, EndianFormat.LittleEndian))
+                            {
+                                ddsFile.Write(writer);
+                            }
                         }
                         count++;
                 #if !DEBUG

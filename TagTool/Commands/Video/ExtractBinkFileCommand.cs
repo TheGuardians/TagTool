@@ -10,11 +10,11 @@ namespace TagTool.Commands.Video
 {
     class ExtractBinkFileCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Bink Definition { get; }
 
-        public ExtractBinkFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Bink definition)
+        public ExtractBinkFileCommand(GameCache cache, CachedTag tag, Bink definition)
             : base(false,
                   
                   "ExtractBinkFile",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Video
 
                   "Extracts the .bik file from the bink tag's resource.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -36,17 +36,11 @@ namespace TagTool.Commands.Video
 
             var binkFile = new FileInfo(args[0]);
             
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.ResourceReference.HaloOnlinePageableResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<BinkResource>(resourceContext);
-
-            using (var resourceStream = new MemoryStream())
-            using (var resourceReader = new BinaryReader(resourceStream))
             using (var fileStream = binkFile.Create())
             using (var fileWriter = new BinaryWriter(fileStream))
             {
-                CacheContext.ExtractResource(Definition.ResourceReference.HaloOnlinePageableResource, resourceStream);
-                resourceReader.BaseStream.Position = resourceDefinition.Data.Address.Offset;
-                fileWriter.Write(resourceReader.ReadBytes(resourceDefinition.Data.Size));
+                var binkResourceDefinition = Cache.ResourceCache.GetBinkResource(Definition.ResourceReference);
+                fileWriter.Write(binkResourceDefinition.Data.Data);
             }
 
             Console.WriteLine($"Created \"{binkFile.FullName}\" successfully.");

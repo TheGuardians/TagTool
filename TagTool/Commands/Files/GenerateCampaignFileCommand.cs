@@ -12,9 +12,9 @@ namespace TagTool.Commands.Files
 {
     class GenerateCampaignFileCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
-        public GenerateCampaignFileCommand(HaloOnlineCacheContext cacheContext)
+        public GenerateCampaignFileCommand(GameCache cache)
             : base(true,
 
                   "GenerateCampaignFile",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Files
 
                   "Generate the halo3.campaign file for the specificed map info folder")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Files
             var mapInfoDir = new DirectoryInfo(args[0]);
 
             var srcFile = new FileInfo(Path.Combine(mapInfoDir.FullName, fileName));
-            var destFile = new FileInfo(Path.Combine(CacheContext.Directory.FullName, fileName));
+            var destFile = new FileInfo(Path.Combine(Cache.Directory.FullName, fileName));
 
             using (var stream = srcFile.Open(FileMode.Open, FileAccess.Read))
             using (var reader = new EndianReader(stream))
@@ -48,7 +48,7 @@ namespace TagTool.Commands.Files
 
                 Blf campaignBlf = new Blf(CacheVersion.Halo3Retail);
                 campaignBlf.Read(reader);
-                campaignBlf.ConvertBlf(CacheContext.Version);
+                campaignBlf.ConvertBlf(Cache.Version);
                 campaignBlf.Write(writer);
             }
             Console.WriteLine("Done!");
