@@ -13,7 +13,7 @@ namespace TagTool.Cache
 
         public ModPackageVersion Version = ModPackageVersion.MultiCache;
 
-        public int FileSize;
+        public uint FileSize;
 
         [TagField(Length = 0x14)]
         public byte[] SHA1 = new byte[0x14];

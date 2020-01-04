@@ -16,17 +16,17 @@ namespace TagTool.Cache
 
         public List<TagCache> TagCaches { get; set; } = null;
 
-        public List<MemoryStream> TagCachesStreams { get; set; } = new List<MemoryStream>();
+        public List<Stream> TagCachesStreams { get; set; } = new List<Stream>();
 
         public List<Dictionary<int, string>> TagCacheNames { get; set; } = new List<Dictionary<int, string>>();
 
         public ResourceCache Resources { get; set; } = null;
 
-        public MemoryStream ResourcesStream { get; set; } = new MemoryStream();
+        public Stream ResourcesStream { get; set; } = new MemoryStream();
 
-        public List<MemoryStream> MapFileStreams { get; set; } = new List<MemoryStream>();
+        public List<Stream> MapFileStreams { get; set; } = new List<Stream>();
 
-        public MemoryStream CampaignFileStream { get; set; } = new MemoryStream();
+        public Stream CampaignFileStream { get; set; } = new MemoryStream();
 
         public Dictionary<int, int> MapToCacheMapping { get; set; } = new Dictionary<int, int>();
 
@@ -204,7 +204,7 @@ namespace TagTool.Cache
                 // update package header
                 //
 
-                Header.FileSize = (int)packageStream.Length;
+                Header.FileSize = (uint)packageStream.Length;
 
                 packageStream.Position = 0;
                 serializer.Serialize(dataContext, Header);
@@ -227,14 +227,15 @@ namespace TagTool.Cache
             mapEntry.Write(writer);
             // make room for table
 
-            writer.Write(new byte[0x8 * mapEntry.Count]);
+            writer.Write(new byte[0x10 * mapEntry.Count]);
 
             for(int i = 0; i < MapFileStreams.Count; i++)
             {
                 var mapFileStream = MapFileStreams[i];
-                mapFileStream.Position = 0;
                 uint offset = (uint)writer.BaseStream.Position;
                 int size = (int)mapFileStream.Length;
+
+                mapFileStream.Position = 0;
                 StreamUtil.Copy(mapFileStream, writer.BaseStream, (int)mapFileStream.Length);
                 StreamUtil.Align(writer.BaseStream, 4);
 
@@ -315,7 +316,7 @@ namespace TagTool.Cache
         private void WriteResourcesSection(EndianWriter writer)
         {
             ResourcesStream.Position = 0;
-            StreamUtil.Copy(ResourcesStream, writer.BaseStream, (int)ResourcesStream.Length);
+            StreamUtil.Copy(ResourcesStream, writer.BaseStream, ResourcesStream.Length);
             StreamUtil.Align(writer.BaseStream, 4);
         }
 
@@ -355,7 +356,7 @@ namespace TagTool.Cache
             var entry = new GenericSectionEntry(reader);
             var cacheCount = entry.Count;
 
-            TagCachesStreams = new List<MemoryStream>();
+            TagCachesStreams = new List<Stream>();
             CacheNames = new List<string>();
 
             for(int i = 0; i < cacheCount; i++)
@@ -446,7 +447,7 @@ namespace TagTool.Cache
             var entry = new GenericSectionEntry(reader);
             var mapCount = entry.Count;
 
-            MapFileStreams = new List<MemoryStream>();
+            MapFileStreams = new List<Stream>();
             MapToCacheMapping = new Dictionary<int, int>();
 
             for(int i = 0; i < mapCount; i++)
