@@ -65,9 +65,17 @@ namespace TagTool.Commands.Modding
 
             var modPackage = new ModPackage(new FileInfo(filePath));
 
-            for (int i = 0; i < modPackage.Tags.Index.Count; i++)
+            var cacheIndex = 0; // Only apply cache at index 0 for now
+
+            if(modPackage.Header.Version != ModPackageVersion.MultiCache)
             {
-                var modTag = modPackage.Tags.Index[i];
+                Console.WriteLine($"Wrong mod package version {modPackage.Header.Version.ToString()}");
+                return true;
+            }
+
+            for (int i = 0; i < modPackage.TagCaches[cacheIndex].Index.Count; i++)
+            {
+                var modTag = modPackage.TagCaches[cacheIndex].Index[i];
 
                 if (modTag != null)
                 {
@@ -164,7 +172,7 @@ namespace TagTool.Commands.Modding
 
                 TagMapping.Add(modTag.Index, newTag.Index);
                 var definitionType = TagDefinition.Find(modTag.Group.Tag);
-                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
+                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, modTag), definitionType);
                 tagDefinition = ConvertData(modPack, tagDefinition);
 
                 if (definitionType == typeof(ForgeGlobalsDefinition))
@@ -352,7 +360,7 @@ namespace TagTool.Commands.Modding
             if (tagIndex == -1)
                 return;
 
-            var tag = ConvertCachedTagInstance(modPack, modPack.Tags.Index[tagIndex]);
+            var tag = ConvertCachedTagInstance(modPack, modPack.TagCaches[0].Index[tagIndex]);
             expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
         }
     }

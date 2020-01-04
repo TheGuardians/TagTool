@@ -269,7 +269,6 @@
     <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
-    <Compile Include="Commands\Modding\MergeModPackagesCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\AnimationTestCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
     <Compile Include="Commands\Porting\CopyTagNamesCommand.cs" />

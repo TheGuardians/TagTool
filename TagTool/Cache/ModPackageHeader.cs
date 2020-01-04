@@ -11,9 +11,9 @@ namespace TagTool.Cache
     {
         public Tag Signature = new Tag("mod!");
 
-        public ModPackageVersion Version = ModPackageVersion.Extended;
+        public ModPackageVersion Version = ModPackageVersion.MultiCache;
 
-        public int FileSize;
+        public uint FileSize;
 
         [TagField(Length = 0x14)]
         public byte[] SHA1 = new byte[0x14];
@@ -63,7 +63,8 @@ namespace TagTool.Cache
     {
         Unknown = 0,
         Basic = 1,
-        Extended = 2
+        Extended = 2,
+        MultiCache = 3
     }
 
     [Flags]
@@ -90,7 +91,7 @@ namespace TagTool.Cache
         /// <summary>
         /// Offset of the section table in the file
         /// </summary>
-        public int Offset;
+        public uint Offset;
     }
 
     [TagStructure(Size = 0x8)]
@@ -99,13 +100,13 @@ namespace TagTool.Cache
         /// <summary>
         /// Size of the section
         /// </summary>
-        public int Size;
+        public uint Size;
         /// <summary>
         /// Offset of the section in the file
         /// </summary>
-        public int Offset;
+        public uint Offset;
 
-        public ModPackageSectionHeader(int size, int offset)
+        public ModPackageSectionHeader(uint size, uint offset)
         {
             Size = size;
             Offset = offset;
@@ -113,8 +114,8 @@ namespace TagTool.Cache
 
         public ModPackageSectionHeader(EndianReader reader)
         {
-            Size = reader.ReadInt32();
-            Offset = reader.ReadInt32();
+            Size = reader.ReadUInt32();
+            Offset = reader.ReadUInt32();
         }
 
         public void Write(EndianWriter writer)
@@ -151,9 +152,9 @@ namespace TagTool.Cache
         /// <summary>
         /// Offset to the table
         /// </summary>
-        public int TableOffset;
+        public uint TableOffset;
 
-        public GenericSectionEntry(int count, int tableOffset)
+        public GenericSectionEntry(int count, uint tableOffset)
         {
             Count = count;
             TableOffset = tableOffset;
@@ -162,7 +163,7 @@ namespace TagTool.Cache
         public GenericSectionEntry(EndianReader reader)
         {
             Count = reader.ReadInt32();
-            TableOffset = reader.ReadInt32();
+            TableOffset = reader.ReadUInt32();
         }
 
         public void Write(EndianWriter writer)
@@ -176,10 +177,10 @@ namespace TagTool.Cache
     [TagStructure(Size = 0x8)]
     public class GenericTableEntry
     {
-        public int Size;
-        public int Offset;
+        public uint Size;
+        public uint Offset;
 
-        public GenericTableEntry(int size, int offset)
+        public GenericTableEntry(uint size, uint offset)
         {
             Size = size;
             Offset = offset;
@@ -187,8 +188,8 @@ namespace TagTool.Cache
 
         public GenericTableEntry(EndianReader reader)
         {
-            Size = reader.ReadInt32();
-            Offset = reader.ReadInt32();
+            Size = reader.ReadUInt32();
+            Offset = reader.ReadUInt32();
         }
 
         public void Write(EndianWriter writer)
@@ -198,5 +199,52 @@ namespace TagTool.Cache
         }
     }
 
+    [TagStructure(Size = 0x28)]
+    public class CacheTableEntry
+    {
+        public uint Size;
+        public uint Offset;
+        [TagField(Length = 0x20)]
+        public string CacheName;
 
+        public CacheTableEntry(uint size, uint offset, string name)
+        {
+            Size = size;
+            Offset = offset;
+            CacheName = name;
+        }
+    }
+
+    [TagStructure(Size = 0x10)]
+    public class CacheMapTableEntry
+    {
+        public int Size;
+        public uint Offset;
+        public int CacheIndex;
+        public int MapId;
+
+        public CacheMapTableEntry(int size, uint offset, int cacheIndex, int mapId)
+        {
+            Size = size;
+            Offset = offset;
+            CacheIndex = cacheIndex;
+            MapId = mapId;
+        }
+
+        public CacheMapTableEntry(EndianReader reader)
+        {
+            Size = reader.ReadInt32();
+            Offset = reader.ReadUInt32();
+            CacheIndex = reader.ReadInt32();
+            MapId = reader.ReadInt32();
+        }
+
+        public void Write(EndianWriter writer)
+        {
+            writer.Write(Size);
+            writer.Write(Offset);
+            writer.Write(CacheIndex);
+            writer.Write(MapId);
+        }
+    }
 }

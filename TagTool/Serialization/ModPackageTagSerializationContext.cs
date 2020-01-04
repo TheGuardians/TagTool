@@ -23,7 +23,7 @@ namespace TagTool.Serialization
             if (index < 0)
                 return null;
 
-            return Package.Tags.Index[index];
+            return Package.TagCaches[0].Index[index];
         }
 
         public override CachedTagInstance GetTagByName(TagGroup group, string name)
