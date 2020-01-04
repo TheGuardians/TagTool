@@ -213,6 +213,8 @@ namespace TagTool.Cache
             Offset = offset;
             CacheName = name;
         }
+
+        public CacheTableEntry() {}
     }
 
     [TagStructure(Size = 0x10)]
