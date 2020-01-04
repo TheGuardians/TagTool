@@ -69,7 +69,7 @@ namespace TagTool.Cache
 
         private List<int> ModifiedTags = new List<int>();
 
-        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
+        public void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
 
         public void SaveModifiedTagNames(string path = null)
         {

@@ -33,7 +33,10 @@ namespace TagTool.Commands.Tags
 
             CachedTagInstance newTag;
             using (var stream = CacheContext.OpenTagCacheReadWrite())
+            {
                 newTag = CacheContext.TagCache.DuplicateTag(stream, tag);
+                CacheContext.SignalModifiedTag(newTag.Index);
+            }
 
             Console.WriteLine("Tag duplicated successfully!");
             Console.Write("New tag: ");
