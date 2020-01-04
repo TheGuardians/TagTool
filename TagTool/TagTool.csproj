@@ -198,6 +198,7 @@
     <Compile Include="Bitmaps\BitmapFlagsXbox.cs" />
     <Compile Include="Bitmaps\BitmapFormat.cs" />
     <Compile Include="Bitmaps\BitmapImageCurve.cs" />
+    <Compile Include="Bitmaps\BitmapInjector.cs" />
     <Compile Include="Bitmaps\BitmapRuntimeFlags.cs" />
     <Compile Include="Bitmaps\BitmapType.cs" />
     <Compile Include="Bitmaps\BitmapUtils.cs" />
