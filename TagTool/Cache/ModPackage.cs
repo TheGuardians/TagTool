@@ -87,6 +87,7 @@ namespace TagTool.Cache
 
                 int tagCacheCount = TagCachesStreams.Count;
 
+                TagCaches = new List<TagCache>();
                 for (int i = 0; i < tagCacheCount; i++)
                 {
                     TagCaches.Add(new TagCache(TagCachesStreams[i], TagCacheNames[i]));
@@ -369,10 +370,10 @@ namespace TagTool.Cache
             {
                 var tagStream = new MemoryStream();
 
-                reader.BaseStream.Position = entry.TableOffset + 0x28 * i;
+                reader.BaseStream.Position = entry.TableOffset + 0x28 * i + section.Offset;
                 var tableEntry = deserializer.Deserialize<CacheTableEntry>(context);
                 CacheNames.Add(tableEntry.CacheName);
-                reader.BaseStream.Position = tableEntry.Offset;
+                reader.BaseStream.Position = tableEntry.Offset + section.Offset;
 
                 if (section.Size > int.MaxValue)
                     throw new Exception("Tag cache size not supported");
@@ -414,10 +415,14 @@ namespace TagTool.Cache
             for(int i = 0; i < cacheCount; i++)
             {
                 var nameDict = new Dictionary<int, string>();
-                reader.BaseStream.Position = entry.TableOffset + 0x8 * i;
+                reader.BaseStream.Position = entry.TableOffset + 0x8 * i + section.Offset;
+
+                var tagNamesTableEntry = new GenericTableEntry(reader);
+                if (tagNamesTableEntry.Size == 0)
+                    throw new Exception("invalid tag name table entry size!");
 
                 var tagNamesHeader = new GenericSectionEntry(reader);
-                reader.BaseStream.Position = tagNamesHeader.TableOffset;
+                reader.BaseStream.Position = entry.TableOffset + tagNamesTableEntry.Offset + section.Offset;
 
                 for (int j = 0; j < tagNamesHeader.Count; j++)
                 {
@@ -458,7 +463,7 @@ namespace TagTool.Cache
 
             for(int i = 0; i < mapCount; i++)
             {
-                reader.BaseStream.Position = entry.TableOffset + 0x10 * i;
+                reader.BaseStream.Position = entry.TableOffset + 0x10 * i + section.Offset;
                 var tableEntry = new CacheMapTableEntry(reader);
 
                 reader.BaseStream.Position = tableEntry.Offset;
