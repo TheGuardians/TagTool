@@ -112,20 +112,27 @@ namespace TagTool.Commands.Modding
             }
 
             // apply .campaign file
-
-            var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
-            var campaignFile = new FileInfo(campaignFilepath);
-            using (var campaignFileStream = campaignFile.OpenWrite())
+            if(modPackage.CampaignFileStream != null && modPackage.CampaignFileStream.Length > 0)
             {
-                modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
+                var campaignFile = new FileInfo(campaignFilepath);
+                using (var campaignFileStream = campaignFile.OpenWrite())
+                {
+                    modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                }
             }
-
-            var fontFilePath = $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin";
-            var fontFile = new FileInfo(fontFilePath);
-            using (var fontFileStream = fontFile.OpenWrite())
+            
+            // apply fonts
+            if(modPackage.FontPackage != null && modPackage.FontPackage.Length > 0)
             {
-                modPackage.FontPackage.CopyTo(fontFileStream);
+                var fontFilePath = $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin";
+                var fontFile = new FileInfo(fontFilePath);
+                using (var fontFileStream = fontFile.OpenWrite())
+                {
+                    modPackage.FontPackage.CopyTo(fontFileStream);
+                }
             }
+            
 
 
             CacheStream.Close();
