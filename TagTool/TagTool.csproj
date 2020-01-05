@@ -294,6 +294,8 @@
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
     <Compile Include="Commands\Models\ListVariantsCommand.cs" />
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
+    <Compile Include="Commands\Tags\NameTagCommand.cs" />
+    <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\TestCommand.cs" />
     <Compile Include="Commands\Unicode\GetStringCommand.cs" />
     <Compile Include="Commands\Unicode\ListStringsCommand.cs" />
