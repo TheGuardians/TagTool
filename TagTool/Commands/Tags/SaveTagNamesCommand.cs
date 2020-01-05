@@ -5,9 +5,9 @@ namespace TagTool.Commands.Tags
 {
     class SaveTagNamesCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheContextHaloOnline Cache { get; }
 
-        public SaveTagNamesCommand(HaloOnlineCacheContext cacheContext) :
+        public SaveTagNamesCommand(GameCacheContextHaloOnline cache) :
             base(true,
 
                 "SaveTagNames",
@@ -17,7 +17,7 @@ namespace TagTool.Commands.Tags
 
                 "Saves the current tag names to the specified csv file.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -25,7 +25,7 @@ namespace TagTool.Commands.Tags
             if (args.Count > 1)
                 return false;
 
-            CacheContext.SaveTagNames(args.Count == 1 ? args[0] : null);
+            Cache.TagCacheGenHO.SaveTagNames(args.Count == 1 ? args[0] : null);
 
             return true;
         }
