@@ -71,6 +71,7 @@ namespace TagTool.Commands.Modding
                         break;
 
                     case "fontpackage":
+                    case "fontpackagefile":
                         Options |= ExportOptions.FontPackage;
                         break;
 
