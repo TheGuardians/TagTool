@@ -26,7 +26,7 @@ namespace TagTool.Commands.Modding
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] <Package File>",
+                "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] [FontPackageFile] <Package File>",
 
                 "")
         {
@@ -68,6 +68,10 @@ namespace TagTool.Commands.Modding
 
                     case "campaignfile":
                         Options |= ExportOptions.CampaignFile;
+                        break;
+
+                    case "fontpackage":
+                        Options |= ExportOptions.FontPackage;
                         break;
 
                     default:
@@ -223,14 +227,21 @@ namespace TagTool.Commands.Modding
                 }
             }
 
+            if (Options.HasFlag(ExportOptions.FontPackage))
+            {
+                Console.WriteLine("Using fonts\\font_package.bin");
+                AddFontPackage();
+            }
+
             //
             // Use the tag list collected to create new mod package
             //
 
             Console.WriteLine("Building...");
 
+            AddStringIds();
             AddTags(tagIndices);
-
+            
             ModPackage.Save(new FileInfo(packageName));
 
             Console.WriteLine("Done!");
@@ -247,6 +258,7 @@ namespace TagTool.Commands.Modding
             TagBounds = 1 << 2,
             MapFiles = 1 << 3,
             CampaignFile = 1 << 4,
+            FontPackage = 1 << 5
         }
 
         private void CreateDescription()
@@ -456,6 +468,22 @@ namespace TagTool.Commands.Modding
             {
                 ModPackage.CampaignFileStream = new MemoryStream();
                 mapFileStream.CopyTo(ModPackage.CampaignFileStream);
+            }
+        }
+
+        private void AddStringIds()
+        {
+            ModPackage.StringTable = CacheContext.StringIdCache;
+        }
+
+        private void AddFontPackage()
+        {
+            var location = Path.Combine(CacheContext.Directory.FullName, $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin");
+            var file = new FileInfo(location);
+            using(var stream = file.OpenRead())
+            {
+                ModPackage.FontPackage = new MemoryStream();
+                StreamUtil.Copy(stream, ModPackage.FontPackage, stream.Length);
             }
         }
     }

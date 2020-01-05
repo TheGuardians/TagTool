@@ -34,6 +34,10 @@ namespace TagTool.Cache
 
         public List<string> CacheNames { get; set; } = new List<string>();
 
+        public StringIdCache StringTable { get; set; }
+
+        public Stream FontPackage;
+
         public ModPackage(FileInfo file = null)
         {
             if (file != null)
@@ -84,6 +88,8 @@ namespace TagTool.Cache
                 ReadResourcesSection(reader);
                 ReadMapFilesSection(reader);
                 ReadCampaignFileSection(reader);
+                ReadStringIdSection(reader);
+                ReadFontSection(reader);
 
                 int tagCacheCount = TagCachesStreams.Count;
 
@@ -189,10 +195,28 @@ namespace TagTool.Cache
                     size = (uint)(writer.BaseStream.Position - offset);
                     WriteSectionEntry((int)ModPackageSection.CampaignFiles, writer, size, offset);
                 }
-                
+
                 //
-                // Add support for the remaining sections when needed (Fonts, StringIds, Locales)
+                // Write font file section
+                // 
+                if (FontPackage != null && FontPackage.Length > 0)
+                {
+                    offset = (uint)writer.BaseStream.Position;
+                    WriteFontFileSection(writer);
+                    size = (uint)(writer.BaseStream.Position - offset);
+                    WriteSectionEntry((int)ModPackageSection.Fonts, writer, size, offset);
+                }
+
                 //
+                // Write stringid file section
+                // 
+                if (StringTable != null)
+                {
+                    offset = (uint)writer.BaseStream.Position;
+                    WriteStringIdsSection(writer);
+                    size = (uint)(writer.BaseStream.Position - offset);
+                    WriteSectionEntry((int)ModPackageSection.StringIds, writer, size, offset);
+                }
 
                 //
                 // calculate package sha1
@@ -334,6 +358,22 @@ namespace TagTool.Cache
             StreamUtil.Align(writer.BaseStream, 4);
         }
 
+        private void WriteFontFileSection(EndianWriter writer)
+        {
+            FontPackage.Position = 0;
+            StreamUtil.Copy(FontPackage, writer.BaseStream, (int)FontPackage.Length);
+            StreamUtil.Align(writer.BaseStream, 4);
+        }
+
+        private void WriteStringIdsSection(EndianWriter writer)
+        {
+            var stringIdStream = new MemoryStream();
+            StringTable.Save(stringIdStream);
+            stringIdStream.Position = 0;
+            StreamUtil.Copy(stringIdStream, writer.BaseStream, (int)stringIdStream.Length);
+            StreamUtil.Align(writer.BaseStream, 4);
+        }
+
         private void WriteMetadataSection(DataSerializationContext context, TagSerializer serializer)
         {
             serializer.Serialize(context, Metadata);
@@ -434,6 +474,37 @@ namespace TagTool.Cache
             }
         }
 
+        private void ReadStringIdSection(EndianReader reader)
+        {
+            var section = GetSectionHeader(reader, ModPackageSection.StringIds);
+            if (!GoToSectionHeaderOffset(reader, section))
+                return;
+
+            int size = (int)section.Size;   // string_ids.dat will never exceed the int limits.
+
+            var stringIdCacheStream = new MemoryStream();
+            byte[] data = new byte[size];
+            reader.Read(data, 0, size);
+            stringIdCacheStream.Write(data, 0, size);
+            stringIdCacheStream.Position = 0;
+            StringTable = new StringIdCache(stringIdCacheStream, new StringIdResolverMS23());
+        }
+
+        private void ReadFontSection(EndianReader reader)
+        {
+            var section = GetSectionHeader(reader, ModPackageSection.Fonts);
+            if (!GoToSectionHeaderOffset(reader, section))
+                return;
+
+            int size = (int)section.Size;   // font_package.bin will never exceed the int limits.
+
+            FontPackage = new MemoryStream();
+            byte[] data = new byte[size];
+            reader.Read(data, 0, size);
+            FontPackage.Write(data, 0, size);
+            FontPackage.Position = 0;
+        }
+
         private void ReadCampaignFileSection(EndianReader reader)
         {
             var section = GetSectionHeader(reader, ModPackageSection.CampaignFiles);
@@ -466,7 +537,7 @@ namespace TagTool.Cache
                 reader.BaseStream.Position = entry.TableOffset + 0x10 * i + section.Offset;
                 var tableEntry = new CacheMapTableEntry(reader);
 
-                reader.BaseStream.Position = tableEntry.Offset;
+                reader.BaseStream.Position = tableEntry.Offset + section.Offset;
 
                 MapToCacheMapping.Add(i, tableEntry.CacheIndex);
                 int size = (int)section.Size;

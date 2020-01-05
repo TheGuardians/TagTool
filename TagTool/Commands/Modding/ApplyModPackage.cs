@@ -26,6 +26,8 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<string, CachedTagInstance> CacheTagsByName;
 
+        private Dictionary<StringId, StringId> StringIdMapping;
+
         public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
 
@@ -53,6 +55,7 @@ namespace TagTool.Commands.Modding
             }
 
             TagMapping = new Dictionary<int, int>();
+            StringIdMapping = new Dictionary<StringId, StringId>();
 
             // build dictionary of names to tag instance for faster lookups
             CacheTagsByName = CacheContext.TagCache.Index
@@ -112,9 +115,18 @@ namespace TagTool.Commands.Modding
 
             var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
             var campaignFile = new FileInfo(campaignFilepath);
-            var campaignFileStream = campaignFile.OpenWrite();
-            modPackage.CampaignFileStream.CopyTo(campaignFileStream);
-            campaignFileStream.Close();
+            using (var campaignFileStream = campaignFile.OpenWrite())
+            {
+                modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+            }
+
+            var fontFilePath = $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin";
+            var fontFile = new FileInfo(fontFilePath);
+            using (var fontFileStream = fontFile.OpenWrite())
+            {
+                modPackage.FontPackage.CopyTo(fontFileStream);
+            }
+
 
             CacheStream.Close();
             CacheStream.Dispose();
@@ -200,6 +212,9 @@ namespace TagTool.Commands.Modding
 
             switch (data)
             {
+                case StringId _:
+                    return ConvertStringId(modPack, (StringId)data);
+
                 case null:
                 case string _:
                 case ValueType _:
@@ -212,9 +227,33 @@ namespace TagTool.Commands.Modding
                     return ConvertCollection(modPack, collection);
                 case CachedTagInstance tag:
                     return ConvertCachedTagInstance(modPack, tag);
+                
+
             }
 
             return data;
+        }
+
+        private StringId ConvertStringId(ModPackage modPack, StringId stringId)
+        {
+            if (StringIdMapping.ContainsKey(stringId))
+                return StringIdMapping[stringId];
+            else
+            {
+                StringId cacheStringId;
+                var modString = modPack.StringTable.GetString(stringId);
+                var cacheStringTest = CacheContext.StringIdCache.GetString(stringId);
+
+                if (cacheStringTest != null && modString == cacheStringTest)            // check if base cache contains the exact same id with matching strings
+                    cacheStringId = stringId;
+                else if (CacheContext.StringIdCache.Contains(modString))                // try to find the string among all stringids
+                    cacheStringId = CacheContext.StringIdCache.GetStringId(modString);
+                else                                                                    // add new stringid
+                    cacheStringId = CacheContext.StringIdCache.AddString(modString, CacheContext.Version);
+
+                StringIdMapping[stringId] = cacheStringId;
+                return cacheStringId;
+            }
         }
 
         private PageableResource ConvertPageableResource(ModPackage modPack, PageableResource resource)
