@@ -138,6 +138,10 @@ namespace TagTool.Commands.Modding
             CacheStream.Close();
             CacheStream.Dispose();
             CacheContext.SaveTagNames();
+
+            using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
+                CacheContext.StringIdCache.Save(stringIdCacheStream);
+
             return true;
         }
 
