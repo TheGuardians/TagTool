@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagTool.Bitmaps.DDS;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Bitmaps
 {
@@ -152,6 +154,72 @@ namespace TagTool.Bitmaps
             int virtualHeight = GetVirtualSize(height, minimalSize);
             int size = (int)(virtualHeight * virtualWidth / compressionFactor); ;
             return size;
+        }
+
+        public static bool IsPowerOfTwo(int size)
+        {
+            return (size != 0) && ((size & (size - 1)) == 0);
+        }
+
+        public static BitmapTextureInteropDefinition CreateBitmapTextureInteropDefinition(DDSHeader header)
+        {
+            var result = new BitmapTextureInteropDefinition
+            {
+                Width = (short)header.Width,
+                Height = (short)header.Height,
+                Depth = (byte)header.Depth,
+                MipmapCount = (byte)header.MipMapCount,
+                HighResOffsetIsValid = 0,
+            };
+
+            result.BitmapType = BitmapDdsFormatDetection.DetectType(header);
+            result.Format = BitmapDdsFormatDetection.DetectFormat(header);
+
+            switch (result.Format)
+            {
+                case BitmapFormat.Dxt1:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT1;
+                    break;
+                case BitmapFormat.Dxt3:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT3;
+                    break;
+                case BitmapFormat.Dxt5:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT5;
+                    break;
+                case BitmapFormat.Dxn:
+                    result.D3DFormat = D3DFormat.D3DFMT_ATI2;
+                    break;
+                default:
+                    result.D3DFormat = D3DFormat.D3DFMT_UNKNOWN;
+                    break;
+            }
+
+            result.Curve = BitmapImageCurve.Linear; // find a way to properly determine that
+
+            if (header.PixelFormat.Flags.HasFlag(DDSPixelFormatFlags.Compressed))
+                result.Flags |= BitmapFlags.Compressed;
+
+            if (IsPowerOfTwo(header.Width) && IsPowerOfTwo(header.Height))
+                result.Flags |= BitmapFlags.PowerOfTwoDimensions;
+
+            return result;
+        }
+
+        public static Bitmap.Image CreateBitmapImageFromResourceDefinition(BitmapTextureInteropDefinition definition)
+        {
+            var result = new Bitmap.Image()
+            {
+                Signature = "mtib",
+                Width = definition.Width,
+                Height = definition.Height,
+                Depth = (sbyte)definition.Depth,
+                Format = definition.Format,
+                Type = definition.BitmapType,
+                MipmapCount = (sbyte)(definition.MipmapCount != 0 ? definition.MipmapCount - 1 : 0),
+                Flags = definition.Flags,
+                Curve = definition.Curve
+            };
+            return result;
         }
     }
 }

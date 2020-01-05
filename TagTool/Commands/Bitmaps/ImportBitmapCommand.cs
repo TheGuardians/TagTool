@@ -24,7 +24,7 @@ namespace TagTool.Commands.Bitmaps
                   "ImportBitmap",
                   "Imports an image from a DDS file.",
 
-                  "ImportBitmap [location = textures] <image index> <dds file>",
+                  "ImportBitmap <image index> <dds file>",
 
                   "The image index must be in hexadecimal.\n" +
                   "No conversion will be done on the data in the DDS file.\n" +
@@ -37,50 +37,8 @@ namespace TagTool.Commands.Bitmaps
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2 || args.Count > 3)
+            if (args.Count != 2)
                 return false;
-
-            var location = ResourceLocation.Textures;
-
-            if (args.Count == 3)
-            {
-                switch (args[0])
-                {
-                    case "resources":
-                        location = ResourceLocation.Resources;
-                        break;
-
-                    case "textures":
-                        location = ResourceLocation.Textures;
-                        break;
-
-                    case "textures_b":
-                        location = ResourceLocation.TexturesB;
-                        break;
-
-                    case "audio":
-                        location = ResourceLocation.Audio;
-                        break;
-
-                    case "resources_b":
-                        location = ResourceLocation.ResourcesB;
-                        break;
-
-                    case "render_models":
-                        location = ResourceLocation.RenderModels;
-                        break;
-
-                    case "lightmaps":
-                        location = ResourceLocation.Lightmaps;
-                        break;
-
-                    default:
-                        Console.WriteLine($"Invalid resource location: {args[0]}");
-                        return false;
-                }
-
-                args.RemoveAt(0);
-            }
 
             if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
                 return false;
@@ -105,14 +63,20 @@ namespace TagTool.Commands.Bitmaps
             try
             {
                 DDSFile file = new DDSFile();
+
                 using (var imageStream = File.OpenRead(imagePath))
                 using(var reader = new EndianReader(imageStream))
                 {
                     file.Read(reader);
-                    // TODO:
-                    //var injector = new BitmapDdsInjector(CacheContext);
-                    //injector.InjectDds(CacheContext.Serializer, CacheContext.Deserializer, Bitmap, imageIndex, imageStream, location);
                 }
+
+                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file);
+                var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
+
+                // set the tag data
+
+                Bitmap.Resources[imageIndex] = reference;
+                Bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
 
                 using (var tagsStream = Cache.TagCache.OpenTagCacheReadWrite())
                     Cache.Serialize(tagsStream, Tag, Bitmap);
