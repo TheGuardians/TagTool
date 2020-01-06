@@ -14,7 +14,8 @@ namespace TagTool.Bitmaps
             {
                 Texture = new D3DStructure<BitmapTextureInteropResourceTest.BitmapDefinition>
                 {
-                    Definition = new BitmapTextureInteropResourceTest.BitmapDefinition()
+                    Definition = new BitmapTextureInteropResourceTest.BitmapDefinition(),
+                    AddressType = CacheAddressType.Definition
                 }
             };
 
