@@ -6,21 +6,21 @@ namespace TagTool.Tags
 {
     public class TagBlock<T> : IList<T>
     {
-
         public int Count => Elements.Count;
         public List<T> Elements;
-
-        public CacheAddress Address; // REMOVE ASAP
         public CacheAddressType AddressType;
         
+        public TagBlock() { }
 
-        public TagBlock() : this(0, new CacheAddress()) { }
-
-        public TagBlock(int count, CacheAddress address) // REMOVE ASAP
+        public TagBlock(CacheAddressType addressType)
         {
-            Address = address;
-            Elements = new List<T>(count);
-            AddressType = CacheAddressType.Memory;
+            AddressType = addressType;
+        }
+
+        public TagBlock(CacheAddressType addressType, List<T> elements)
+        {
+            AddressType = addressType;
+            Elements = elements;
         }
 
         public T this[int index]
