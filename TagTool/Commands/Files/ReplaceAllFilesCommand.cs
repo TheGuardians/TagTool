@@ -8,11 +8,11 @@ namespace TagTool.Commands.Files
 {
     class ReplaceAllFilesCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private VFilesList Definition { get; }
 
-        public ReplaceAllFilesCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
+        public ReplaceAllFilesCommand(GameCache cache, CachedTag tag, VFilesList definition)
             : base(false,
 
                   "ReplaceAllFiles",
@@ -21,7 +21,7 @@ namespace TagTool.Commands.Files
                   "ReplaceAllFiles <directory>",
                   "Replaces all file stored in the tag. The tag will be resized as necessary.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -58,8 +58,8 @@ namespace TagTool.Commands.Files
                 directories.RemoveAt(0);
             }
             
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(stream, Tag, Definition);
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+                Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Imported {0} files.", imported);
 

@@ -8,11 +8,11 @@ namespace TagTool.Commands.Files
 {
     class ReplaceFileCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private VFilesList Definition { get; }
 
-        public ReplaceFileCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, VFilesList definition)
+        public ReplaceFileCommand(GameCache cache, CachedTag tag, VFilesList definition)
             : base(false,
 
                   "ReplaceFile",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.Files
 
                   "Replaces a file stored in the tag. The tag will be resized as necessary.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -56,8 +56,8 @@ namespace TagTool.Commands.Files
 
             Definition.Replace(file, data);
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.Serialize(stream, Tag, Definition);
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+                Cache.Serialize(stream, Tag, Definition);
 
             Console.WriteLine("Imported 0x{0:X} bytes.", data.Length);
 

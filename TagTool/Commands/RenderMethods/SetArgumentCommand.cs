@@ -8,11 +8,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class SetArgumentCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderMethod Definition { get; }
 
-        public SetArgumentCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public SetArgumentCommand(GameCache cache, CachedTag tag, RenderMethod definition)
             : base(true,
 
                  "SetArgument",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.RenderMethods
 
                  "Sets the value(s) of the specified argument in the render_method.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -47,14 +47,14 @@ namespace TagTool.Commands.RenderMethods
             RenderMethodTemplate template = null;
             var properties = Definition.ShaderProperties[0];
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
-                template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+                template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, properties.Template);
 
             var argumentIndex = -1;
 
             for (var i = 0; i < template.VectorArguments.Count; i++)
             {
-                if (CacheContext.GetString(template.VectorArguments[i].Name) == argumentName)
+                if (Cache.StringTable.GetString(template.VectorArguments[i].Name) == argumentName)
                 {
                     argumentIndex = i;
                     break;

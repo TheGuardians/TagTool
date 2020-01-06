@@ -8,11 +8,11 @@ namespace TagTool.Commands.RenderMethods
 {
     class ListArgumentsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private RenderMethod Definition { get; }
 
-        public ListArgumentsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderMethod definition)
+        public ListArgumentsCommand(GameCache cache, CachedTag tag, RenderMethod definition)
             : base(true,
 
                  "ListArguments",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.RenderMethods
 
                  "Lists the arguments of the render_method.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -33,14 +33,14 @@ namespace TagTool.Commands.RenderMethods
             {
                 RenderMethodTemplate template = null;
 
-                using (var cacheStream = CacheContext.OpenTagCacheRead())
-                    template = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
+                using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+                    template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, property.Template);
 
                 for (var i = 0; i < template.VectorArguments.Count; i++)
                 {
                     Console.WriteLine("");
 
-                    var argumentName = CacheContext.GetString(template.VectorArguments[i].Name);
+                    var argumentName = Cache.StringTable.GetString(template.VectorArguments[i].Name);
                     var argumentValue = new RealQuaternion(property.Arguments[i].Values);
 
                     Console.WriteLine(string.Format("{0}:", argumentName));

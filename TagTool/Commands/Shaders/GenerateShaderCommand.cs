@@ -12,13 +12,13 @@ namespace TagTool.Commands.Shaders
 {
     public class GenerateShader<T> : Command
     {
-        private GameCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private T Definition { get; }
         public static bool IsVertexShader => typeof(T) == typeof(GlobalVertexShader) || typeof(T) == typeof(VertexShader);
         public static bool IsPixelShader => typeof(T) == typeof(GlobalPixelShader) || typeof(T) == typeof(PixelShader);
 
-        public GenerateShader(GameCacheContext cacheContext, CachedTagInstance tag, T definition) :
+        public GenerateShader(GameCache cache, CachedTag tag, T definition) :
             base(true,
 
                 "Generate",
@@ -26,7 +26,7 @@ namespace TagTool.Commands.Shaders
                 "Generate <index> <shader_type> <drawmode> <parameters...>",
                 "Compiles HLSL source file from scratch :D")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -235,7 +235,7 @@ namespace TagTool.Commands.Shaders
                         var split = line.Split(' ');
                         parameters.Add(new ShaderParameter
                         {
-                            ParameterName = (CacheContext as HaloOnlineCacheContext).GetStringId(split[0]),
+                            ParameterName = Cache.StringTable.GetStringId(split[0]),
                             RegisterType = (ShaderParameter.RType)Enum.Parse(typeof(ShaderParameter.RType), split[1][0].ToString()),
                             RegisterIndex = byte.Parse(split[1].Substring(1)),
                             RegisterCount = byte.Parse(split[2])

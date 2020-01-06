@@ -19,12 +19,12 @@ namespace TagTool.Commands.Files
 
         public static void Populate(CommandContext context, GameCache cache, CachedTag tag, VFilesList definition)
         {
-            //context.AddCommand(new ListFilesCommand(definition));
-            //context.AddCommand(new ExtractFileCommand(definition));
-            //context.AddCommand(new ExtractFilesCommand(definition));
-            //context.AddCommand(new ReplaceFileCommand(cacheContext, tag, definition));
-            //context.AddCommand(new ReplaceAllFilesCommand(cacheContext, tag, definition));
-            //context.AddCommand(new AddFileCommand(cacheContext, tag, definition));
+            context.AddCommand(new ListFilesCommand(definition));
+            context.AddCommand(new ExtractFileCommand(definition));
+            context.AddCommand(new ExtractFilesCommand(definition));
+            context.AddCommand(new ReplaceFileCommand(cache, tag, definition));
+            context.AddCommand(new ReplaceAllFilesCommand(cache, tag, definition));
+            context.AddCommand(new AddFileCommand(cache, tag, definition));
         }
     }
 }

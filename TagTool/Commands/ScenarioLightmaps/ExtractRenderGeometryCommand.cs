@@ -14,10 +14,10 @@ namespace TagTool.Commands.ScenarioLightmaps
 {
     class ExtractRenderGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ScenarioLightmapBspData Definition { get; }
 
-        public ExtractRenderGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioLightmapBspData definition)
+        public ExtractRenderGeometryCommand(GameCache cache, ScenarioLightmapBspData definition)
             : base(true,
 
                   "ExtractRenderGeometry",
@@ -28,7 +28,7 @@ namespace TagTool.Commands.ScenarioLightmaps
                   "Extracts render geometry from the current scenario_lightmap_bsp_data definition.\n" +
                   "Supported file types: obj")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -53,17 +53,13 @@ namespace TagTool.Commands.ScenarioLightmaps
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource.HaloOnlinePageableResource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
 
             using (var resourceStream = new MemoryStream())
             {
                 //
                 // Extract the resource data
                 //
-
-                CacheContext.ExtractResource(Definition.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
-
                 var file = new FileInfo(fileName);
 
                 if (!file.Directory.Exists)
@@ -71,16 +67,16 @@ namespace TagTool.Commands.ScenarioLightmaps
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    var objExtractor = new ObjExtractor(objFile);
+                    //var objExtractor = new ObjExtractor(objFile);
 
                     foreach (var mesh in Definition.Geometry.Meshes)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, mesh, definition);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        //var meshReader = new MeshReader(CacheContext.Version, mesh, definition);
+                        //objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
                     }
 
-                    objExtractor.Finish();
+                    //objExtractor.Finish();
                 }
             }
 

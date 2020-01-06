@@ -5,19 +5,19 @@ namespace TagTool.Commands.RenderMethods
 {
     static class RenderMethodContextFactory
     {
-        public static CommandContext Create(CommandContext parent, HaloOnlineCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
+        public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, RenderMethod renderMethod)
         {
-            var groupName = info.GetString(tag.Group.Name);
+            var groupName = cache.StringTable.GetString(tag.Group.Name);
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));
 
-            Populate(context, info, tag, renderMethod);
+            Populate(context, cache, tag, renderMethod);
 
             return context;
         }
 
-        public static void Populate(CommandContext context, HaloOnlineCacheContext info, CachedTagInstance tag, RenderMethod renderMethod)
+        public static void Populate(CommandContext context, GameCache info, CachedTag tag, RenderMethod renderMethod)
         {
             context.AddCommand(new ListArgumentsCommand(info, tag, renderMethod));
             context.AddCommand(new SetArgumentCommand(info, tag, renderMethod));

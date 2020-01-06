@@ -14,6 +14,10 @@ using TagTool.Commands.Models;
 using TagTool.Commands.RenderModels;
 using TagTool.Commands.ModelAnimationGraphs;
 using TagTool.Commands.Sounds;
+using TagTool.Commands.RenderMethods;
+using TagTool.Commands.Shaders;
+using TagTool.Commands.ScenarioLightmaps;
+using TagTool.Commands.Files;
 
 namespace TagTool.Commands.Editing
 {
@@ -55,7 +59,7 @@ namespace TagTool.Commands.Editing
                     ForgeContextFactory.Populate(commandContext, cache, tag, (ForgeGlobalsDefinition)definition);
                     break;
               
-                case "hlmt": // model
+                case "hlmt":
                     ModelContextFactory.Populate(commandContext, cache, tag, (Model)definition);
                     break;
 
@@ -67,7 +71,7 @@ namespace TagTool.Commands.Editing
                     ParticleModelContextFactory.Populate(commandContext, cache, tag, (ParticleModel)definition);
                     break;
 
-                case "unic": // multilingual_unicode_string_list
+                case "unic":
                     UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
                     break;
 
@@ -75,18 +79,9 @@ namespace TagTool.Commands.Editing
                     SoundContextFactory.Populate(commandContext, cache, tag, (Sound)definition);
                     break;
 
-                    /*
-
-
-                case "Lbsp":
-                    LightmapContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioLightmapBspData)definition);
+                case "rmt2":
+                    RenderMethodTemplateContextFactory.Populate(commandContext, cache, tag, (RenderMethodTemplate)definition);
                     break;
-
-                case "mode": // render_model
-                    RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
-                    break;
-
-
 
                 case "rm  ": // render_method
                 case "rmsh": // shader
@@ -98,7 +93,38 @@ namespace TagTool.Commands.Editing
                 case "rmw ": // shader_water
                 case "rmzo": // shader_zonly
                 case "rmcs": // shader_custom
-                    RenderMethodContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethod)definition);
+                    RenderMethodContextFactory.Populate(commandContext, cache, tag, (RenderMethod)definition);
+                    break;
+
+                case "pixl":
+                    Shaders.ShaderContextFactory<PixelShader>.Populate(commandContext, cache, tag, (PixelShader)definition);
+                    break;
+
+                case "vtsh":
+                    Shaders.ShaderContextFactory<VertexShader>.Populate(commandContext, cache, tag, (VertexShader)definition);
+                    break;
+
+                case "glps":
+                    Shaders.ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cache, tag, (GlobalPixelShader)definition);
+                    break;
+
+                case "glvs":
+                    Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cache, tag, (GlobalVertexShader)definition);
+                    break;
+
+                case "Lbsp":
+                    LightmapContextFactory.Populate(commandContext, cache, tag, (ScenarioLightmapBspData)definition);
+                    break;
+
+
+                case "vfsl":
+                    VFilesContextFactory.Populate(commandContext, cache, tag, (VFilesList)definition);
+                    break;
+
+                    /*
+
+                case "mode": 
+                    RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
                     break;
 
                 case "sbsp":
@@ -107,31 +133,7 @@ namespace TagTool.Commands.Editing
 
                 case "scnr":
                     ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
-                    break;
-
-                                    case "vfsl": // vfiles_list
-                                        VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
-                                        break;
-
-                                    case "pixl":
-                                        Shaders.ShaderContextFactory<PixelShader>.Populate(commandContext, cacheContext, tag, (PixelShader)definition);
-                                        break;
-
-                                    case "vtsh":
-                                        Shaders.ShaderContextFactory<VertexShader>.Populate(commandContext, cacheContext, tag, (VertexShader)definition);
-                                        break;
-
-                                    case "glps":
-                                        Shaders.ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cacheContext, tag, (GlobalPixelShader)definition);
-                                        break;
-
-                                    case "glvs":
-                                        Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cacheContext, tag, (GlobalVertexShader)definition);
-                                        break;
-
-                                    case "rmt2":
-                                        Shaders.RenderMethodTemplateContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethodTemplate)definition);
-                                        break;
+                    break;                        
                                     */
             }
             

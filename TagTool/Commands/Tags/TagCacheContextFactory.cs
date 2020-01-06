@@ -30,7 +30,8 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ForEachCommand(contextStack, cache));
             context.AddCommand(new ListAllStringsCommand(cache));
             context.AddCommand(new StringIdCommand(cache));
-            
+            context.AddCommand(new GenerateAssemblyPluginsCommand());
+
             // Halo Online Specific Commands
             if (cache.GetType() == typeof(GameCacheContextHaloOnline))
             {
@@ -40,7 +41,8 @@ namespace TagTool.Commands.Tags
 
             // porting related
             context.AddCommand(new UseAudioCacheCommand());
-
+            context.AddCommand(new UpdateMapFilesCommand(cache));
+            
             return context;
         }
     }
