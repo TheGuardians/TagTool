@@ -616,11 +616,7 @@ namespace TagTool.Cache
             // does not exist in gen3, create one.
             var resourceDef = new SoundResourceDefinition
             {
-                Data = new TagData
-                {
-                    Size = data.Length,
-                    Data = data
-                }
+                Data = new TagData(data)
             };
             return resourceDef;
         }

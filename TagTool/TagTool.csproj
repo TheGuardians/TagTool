@@ -473,8 +473,6 @@
     <Compile Include="Geometry\IVertexStream.cs" />
     <Compile Include="Geometry\Mesh.cs" />
     <Compile Include="Geometry\MeshFlags.cs" />
-    <Compile Include="Geometry\MeshReader.cs" />
-    <Compile Include="Geometry\ObjExtractor.cs" />
     <Compile Include="Geometry\PhysicsModelBuilder.cs" />
     <Compile Include="Geometry\PrimitiveType.cs" />
     <Compile Include="Geometry\PrtType.cs" />

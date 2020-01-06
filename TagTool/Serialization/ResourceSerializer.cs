@@ -82,7 +82,7 @@ namespace TagTool.Serialization
                 return;
             }
 
-            CacheAddressType addressType = tagData.Address.Type;
+            CacheAddressType addressType = tagData.AddressType;
 
             int dataOffset = 0; // offset in the data stream to the start of the data
             uint blockOffset = (uint)writer.BaseStream.Position + 0xC; // offset to the address pointing to the above relative to the current block.

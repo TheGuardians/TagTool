@@ -138,7 +138,7 @@ namespace TagTool.Serialization
             var tagData = new TagData
             {
                 Data = result,
-                Address = address
+                AddressType = address.Type
             };
 
             return tagData;

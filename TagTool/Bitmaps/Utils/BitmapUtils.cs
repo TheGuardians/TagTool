@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.Bitmaps.DDS;
+using TagTool.Cache;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 
@@ -224,6 +226,23 @@ namespace TagTool.Bitmaps
                 Curve = definition.Curve
             };
             return result;
+        }
+
+        public static BitmapTextureInteropResourceTest CreateEmptyBitmapTextureInteropResource()
+        {
+            return new BitmapTextureInteropResourceTest
+            {
+                Texture = new D3DStructure<BitmapTextureInteropResourceTest.BitmapDefinition>
+                {
+                    Definition = new BitmapTextureInteropResourceTest.BitmapDefinition
+                    {
+                        PrimaryResourceData = new TagData(),
+                        SecondaryResourceData = new TagData(),
+                        Bitmap = new BitmapTextureInteropDefinition()
+                    },
+                    AddressType = CacheAddressType.Definition
+                }
+            };
         }
     }
 }

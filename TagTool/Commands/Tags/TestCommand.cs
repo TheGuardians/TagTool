@@ -33,14 +33,11 @@ namespace TagTool.Commands
 
             using(var stream = Cache.TagCache.OpenTagCacheRead())
             {
-                foreach (var tag in Cache.TagCache.NonNull())
-                {
-                    if (tag.IsInGroup("hlmt"))
-                    {
-                        var model = Cache.Deserialize<Model>(stream, tag);
+                var tag = Cache.TagCache.GetTagByName(@"objects\weapons\rifle\assault_rifle\assault_rifle_v6\material_11\base_map", "bitm");
+                var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+                var resourceDef = Cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[0]);
 
-                    }
-                }
+
             }
 
             return true;

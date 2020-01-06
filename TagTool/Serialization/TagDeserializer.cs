@@ -563,7 +563,6 @@ namespace TagTool.Serialization
             var tagData = new TagData();
 
             tagData.Data = result;
-            tagData.Size = size;
             
             return tagData;
         }

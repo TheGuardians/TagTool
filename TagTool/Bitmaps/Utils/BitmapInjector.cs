@@ -10,16 +10,9 @@ namespace TagTool.Bitmaps
     {
         public static BitmapTextureInteropResourceTest CreateBitmapResourceFromDDS(GameCache cache, DDSFile file)
         {
-            BitmapTextureInteropResourceTest result = new BitmapTextureInteropResourceTest
-            {
-                Texture = new D3DStructure<BitmapTextureInteropResourceTest.BitmapDefinition>
-                {
-                    Definition = new BitmapTextureInteropResourceTest.BitmapDefinition(),
-                    AddressType = CacheAddressType.Definition
-                }
-            };
+            BitmapTextureInteropResourceTest result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
 
-            if(cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
             {
                 result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
                 result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);

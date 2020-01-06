@@ -57,7 +57,7 @@ namespace TagTool.Commands.Geometry
 
                     for (var i = 0; i < definition.VertexBuffers.Count; i++)
                     {
-                        edResourceStream.Position = definition.VertexBuffers[i].Definition.Data.Address.Offset;
+                        edResourceStream.Position = 0;
 
                         var vertexBuffer = definition.VertexBuffers[i].Definition;
 
@@ -65,7 +65,7 @@ namespace TagTool.Commands.Geometry
 
                         using (EndianWriter output = new EndianWriter(File.OpenWrite(dataOutDir), EndianFormat.LittleEndian))
                         {
-                            byte[] data = edResourceReader.ReadBytes((int)vertexBuffer.Data.Size);
+                            byte[] data = null;
                             output.WriteBlock(data);
                         }
                     }
@@ -93,7 +93,7 @@ namespace TagTool.Commands.Geometry
 
                         for (var i = 0; i < definition.VertexBuffers.Count; i++)
                         {
-                            edResourceStream.Position = definition.VertexBuffers[i].Definition.Data.Address.Offset;
+                            edResourceStream.Position = 0;
 
                             var vertexBuffer = definition.VertexBuffers[i].Definition;
                             
