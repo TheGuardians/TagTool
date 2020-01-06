@@ -33,6 +33,8 @@ namespace TagTool.Bitmaps.DDS
         public int Caps4;
         public int Reserved2;
 
+        public DDSHeader() { }
+
         public DDSHeader(BitmapTextureInteropDefinition definition)
         {
             CreateHeaderFromType(definition.Height, definition.Width, definition.Depth, definition.MipmapCount, definition.Format, definition.BitmapType, definition.Flags);

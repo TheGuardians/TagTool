@@ -12,7 +12,10 @@ namespace TagTool.Bitmaps.DDS
         public DDSHeader Header;
         public byte[] BitmapData;
 
-        public DDSFile() { }
+        public DDSFile()
+        {
+            Header = new DDSHeader();
+        }
 
         public DDSFile(DDSHeader header, byte[] data)
         {
