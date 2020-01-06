@@ -179,22 +179,26 @@ namespace TagTool.Bitmaps
             {
                 case BitmapFormat.Dxt1:
                     result.D3DFormat = D3DFormat.D3DFMT_DXT1;
+                    result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt3:
                     result.D3DFormat = D3DFormat.D3DFMT_DXT3;
+                    result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxt5:
                     result.D3DFormat = D3DFormat.D3DFMT_DXT5;
+                    result.Flags |= BitmapFlags.Compressed;
                     break;
                 case BitmapFormat.Dxn:
                     result.D3DFormat = D3DFormat.D3DFMT_ATI2;
+                    result.Flags |= BitmapFlags.Compressed;
                     break;
                 default:
                     result.D3DFormat = D3DFormat.D3DFMT_UNKNOWN;
                     break;
             }
 
-            result.Curve = BitmapImageCurve.Linear; // find a way to properly determine that
+            result.Curve = BitmapImageCurve.xRGB; // find a way to properly determine that
 
             if (header.PixelFormat.Flags.HasFlag(DDSPixelFormatFlags.Compressed))
                 result.Flags |= BitmapFlags.Compressed;
