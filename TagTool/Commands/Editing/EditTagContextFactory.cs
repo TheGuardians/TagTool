@@ -11,6 +11,8 @@ using TagTool.Commands.Unicode;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Forge;
 using TagTool.Commands.Models;
+using TagTool.Commands.RenderModels;
+using TagTool.Commands.ModelAnimationGraphs;
 
 namespace TagTool.Commands.Editing
 {
@@ -55,48 +57,53 @@ namespace TagTool.Commands.Editing
                 case "hlmt": // model
                     ModelContextFactory.Populate(commandContext, cache, tag, (Model)definition);
                     break;
-                    /*
+
                 case "jmad":
-                    AnimationContextFactory.Populate(commandContext, cacheContext, tag, (ModelAnimationGraph)definition);
-                    break;
-
-                case "Lbsp":
-                    LightmapContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioLightmapBspData)definition);
-                    break;
-
-                case "mode": // render_model
-                    RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
+                    AnimationContextFactory.Populate(commandContext, cache, tag, (ModelAnimationGraph)definition);
                     break;
 
                 case "pmdf":
-                    ParticleModelContextFactory.Populate(commandContext, cacheContext, tag, (ParticleModel)definition);
+                    ParticleModelContextFactory.Populate(commandContext, cache, tag, (ParticleModel)definition);
                     break;
 
-                case "rm  ": // render_method
-                case "rmsh": // shader
-                case "rmd ": // shader_decal
-                case "rmfl": // shader_foliage
-                case "rmhg": // shader_halogram
-                case "rmss": // shader_screen
-                case "rmtr": // shader_terrain
-                case "rmw ": // shader_water
-                case "rmzo": // shader_zonly
-                case "rmcs": // shader_custom
-                    RenderMethodContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethod)definition);
-                    break;
+                /*
+            
 
-                case "sbsp":
-                    BSPContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioStructureBsp)definition);
-                    break;
+            case "Lbsp":
+                LightmapContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioLightmapBspData)definition);
+                break;
 
-                case "scnr":
-                    ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
-                    break;
+            case "mode": // render_model
+                RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
+                break;
 
-                case "snd!":
-                    SoundContextFactory.Populate(commandContext, cacheContext, tag, (Sound)definition);
-                    break;
-                    */
+
+
+            case "rm  ": // render_method
+            case "rmsh": // shader
+            case "rmd ": // shader_decal
+            case "rmfl": // shader_foliage
+            case "rmhg": // shader_halogram
+            case "rmss": // shader_screen
+            case "rmtr": // shader_terrain
+            case "rmw ": // shader_water
+            case "rmzo": // shader_zonly
+            case "rmcs": // shader_custom
+                RenderMethodContextFactory.Populate(commandContext, cacheContext, tag, (RenderMethod)definition);
+                break;
+
+            case "sbsp":
+                BSPContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioStructureBsp)definition);
+                break;
+
+            case "scnr":
+                ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
+                break;
+
+            case "snd!":
+                SoundContextFactory.Populate(commandContext, cacheContext, tag, (Sound)definition);
+                break;
+                */
                 case "unic": // multilingual_unicode_string_list
                     UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
                     break;

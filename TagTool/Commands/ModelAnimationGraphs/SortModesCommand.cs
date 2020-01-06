@@ -7,10 +7,10 @@ namespace TagTool.Commands.ModelAnimationGraphs
 {
     class SortModesCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ModelAnimationGraph Definition { get; }
 
-        public SortModesCommand(HaloOnlineCacheContext cacheContext, ModelAnimationGraph definition) :
+        public SortModesCommand(GameCache cache, ModelAnimationGraph definition) :
             base(false,
                 
                 "SortModes",
@@ -20,7 +20,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 "Sorts all \"modes\" block elements in the current model_animation_graph based on their name's string_id set and index.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 

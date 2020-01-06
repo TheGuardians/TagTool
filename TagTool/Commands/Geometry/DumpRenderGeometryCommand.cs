@@ -11,10 +11,10 @@ namespace TagTool.Commands.Geometry
 {
     class DumpRenderGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private RenderGeometry Geometry { get; }
 
-        public DumpRenderGeometryCommand(HaloOnlineCacheContext cacheContext, RenderGeometry geometry, string title = "") :
+        public DumpRenderGeometryCommand(GameCache cache, RenderGeometry geometry, string title = "") :
             base(true,
 
                 $"Dump{title}RenderGeometry",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Geometry
 
                 $"Dumps {title.ToLower()} render geometry in ascii format.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Geometry = geometry;
         }
 
@@ -42,8 +42,7 @@ namespace TagTool.Commands.Geometry
             else
                 file = args[1];
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Geometry.Resource.HaloOnlinePageableResource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Geometry.Resource);
 
             if (args.Count == 2)
             {
@@ -89,7 +88,8 @@ namespace TagTool.Commands.Geometry
                         //
 
                         Console.Write("Converting vertex buffers...");
-                        CacheContext.ExtractResource(Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
+                        // TODO: rewrite this code, bad stuff
+                        //CacheContext.ExtractResource(Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
 
                         for (var i = 0; i < definition.VertexBuffers.Count; i++)
                         {

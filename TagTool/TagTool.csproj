@@ -296,8 +296,15 @@
     <Compile Include="Commands\Files\GenerateCampaignFileCommand.cs" />
     <Compile Include="Commands\Files\VFilesContextFactory.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
+    <Compile Include="Commands\Forge\ParseItemsXmlCommand.cs" />
+    <Compile Include="Commands\Geometry\DumpRenderGeometryCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\AnimationContextFactory.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ApplySprintFixupsCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\SortModesCommand.cs" />
     <Compile Include="Commands\Models\ListVariantsCommand.cs" />
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
+    <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
+    <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
     <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
     <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
