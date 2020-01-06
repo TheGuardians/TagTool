@@ -286,15 +286,19 @@
     <Compile Include="Commands\Editing\EditTagCommand.cs" />
     <Compile Include="Commands\Editing\EditTagContextFactory.cs" />
     <Compile Include="Commands\Editing\ExitToCommand.cs" />
+    <Compile Include="Commands\Editing\ForEachCommand.cs" />
     <Compile Include="Commands\Editing\ListFieldsCommand.cs" />
     <Compile Include="Commands\Editing\PasteBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\PokeTagChangesCommand.cs" />
     <Compile Include="Commands\Editing\RemoveBlockElementsCommand.cs" />
+    <Compile Include="Commands\Editing\SaveTagChangesCommand.cs" />
     <Compile Include="Commands\Editing\SetFieldCommand.cs" />
     <Compile Include="Commands\Files\GenerateCampaignFileCommand.cs" />
     <Compile Include="Commands\Files\VFilesContextFactory.cs" />
     <Compile Include="Commands\Forge\ForgeContextFactory.cs" />
     <Compile Include="Commands\Models\ListVariantsCommand.cs" />
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
+    <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
     <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\TestCommand.cs" />
@@ -344,6 +348,7 @@
     <Compile Include="Serialization\HaloOnlineSerializationContext.cs" />
     <Compile Include="Serialization\ResourceDeserializer.cs" />
     <Compile Include="Serialization\ResourceSerializer.cs" />
+    <Compile Include="Serialization\RuntimeSerializationContext.cs" />
     <Compile Include="Shaders\ShaderConverter.cs" />
     <Compile Include="Tags\Definitions\CustomObject.cs" />
     <Compile Include="GUI\GuiDefinition.cs" />

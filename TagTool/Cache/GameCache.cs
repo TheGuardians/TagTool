@@ -254,7 +254,7 @@ namespace TagTool.Cache
         // TODO: refactor TagGroup to contain a string instead of string ID
         public CacheVersion Version;
         public virtual IEnumerable<CachedTag> TagTable { get; }
-
+        public int Count => TagTable.Count();
         public abstract CachedTag GetTagByID(uint ID);
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);

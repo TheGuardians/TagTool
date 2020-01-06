@@ -27,10 +27,10 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new EditTagCommand(contextStack, cache));
             context.AddCommand(new GenerateCampaignFileCommand(cache));
             context.AddCommand(new NameTagCommand(cache));
-
+            context.AddCommand(new ForEachCommand(contextStack, cache));
 
             // Halo Online Specific Commands
-            if(cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
             {
                 var hoCache = cache as GameCacheContextHaloOnline;
                 context.AddCommand(new SaveTagNamesCommand(hoCache));

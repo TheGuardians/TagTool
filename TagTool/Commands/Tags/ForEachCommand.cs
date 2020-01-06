@@ -12,9 +12,9 @@ namespace TagTool.Commands.Tags
     class ForEachCommand : Command
     {
         private CommandContextStack ContextStack { get; }
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public ForEachCommand(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext) :
+        public ForEachCommand(CommandContextStack contextStack, GameCache cache) :
             base(false,
                 
                 "ForEach",
@@ -25,7 +25,7 @@ namespace TagTool.Commands.Tags
                 "Executes a command on every instance of the specified tag group.")
         {
             ContextStack = contextStack;
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -44,7 +44,7 @@ namespace TagTool.Commands.Tags
             if (args.Count < 2)
                 return false;
 
-            if (!CacheContext.TryParseGroupTag(args[0], out var groupTag))
+            if (!Cache.TryParseGroupTag(args[0], out var groupTag))
             {
                 Console.WriteLine($"Invalid tag group: {args[0]}");
                 return true;
@@ -105,9 +105,9 @@ namespace TagTool.Commands.Tags
 
             var rootContext = ContextStack.Context;
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in Cache.TagCache.TagTable)
                 {
                     if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
                         continue;
@@ -127,17 +127,17 @@ namespace TagTool.Commands.Tags
                     if (!tagName.StartsWith(startFilter) || !tagName.Contains(filter) || !tagName.EndsWith(endFilter))
                         continue;
 
-                    var definition = CacheContext.Deserialize(stream, instance);
-                    ContextStack.Push(EditTagContextFactory.Create(ContextStack, CacheContext, instance, definition));
+                    var definition = Cache.Deserialize(stream, instance);
+                    ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
                     Console.WriteLine();
-                    Console.WriteLine($"{tagName}.{CacheContext.GetString(instance.Group.Name)}:");
+                    Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
                     ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
 
                     while (ContextStack.Context != rootContext) ContextStack.Pop();
 
                     if (!isConst)
-                        CacheContext.Serialize(stream, instance, definition);
+                        Cache.Serialize(stream, instance, definition);
                 }
 
                 Console.WriteLine();
