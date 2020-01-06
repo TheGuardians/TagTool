@@ -72,7 +72,7 @@ namespace TagTool.Serialization
 
             var writer = block.Writer;
 
-            if (tagData.Data == null || tagData.Data.Length == 0)
+            if (tagData == null || tagData.Data == null || tagData.Data.Length == 0)
             {
                 writer.Write(0);
                 writer.Write(0);

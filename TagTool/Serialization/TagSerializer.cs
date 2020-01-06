@@ -101,9 +101,10 @@ namespace TagTool.Serialization
 
             object objectValue = tagFieldInfo.GetValue(instance);
 
-            if(objectValue != null)
+            // second condition is a hack to prevent exceptions when encountering cached tags
+            if (objectValue != null)
             {
-                if (objectValue.GetType() == tagFieldInfo.FieldType)
+                if (objectValue.GetType() == tagFieldInfo.FieldType || tagFieldInfo.FieldType == typeof(CachedTag))
                 {
                     SerializeValue(version, context, tagStream, block,
                                     objectValue, tagFieldInfo.Attribute, tagFieldInfo.FieldType);
@@ -209,7 +210,7 @@ namespace TagTool.Serialization
                 SerializeString(block.Writer, (string)value, valueInfo);
             else if (valueType == typeof(Tag))
                 SerializeTag(block, (Tag)value);
-            else if (valueType == typeof(CachedTag))
+            else if (valueType.BaseType == typeof(CachedTag))
                 SerializeTagReference(context, block, (CachedTag)value, valueInfo);
             else if (valueType == typeof(CacheAddress))
                 block.Writer.Write(((CacheAddress)value).Value);
