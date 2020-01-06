@@ -94,6 +94,29 @@ namespace TagTool.Cache
 
         private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
 
+        public void SaveModifiedTagNames(string path = null)
+        {
+            var csvFile = new FileInfo(path ?? Path.Combine(Directory.FullName, "modified_tags.csv"));
+
+            if (!csvFile.Directory.Exists)
+                csvFile.Directory.Create();
+
+            using (var csvWriter = new StreamWriter(csvFile.Create()))
+            {
+                foreach (var instance in ModifiedTags)
+                {
+                    var tag = TagCacheGenHO.Tags[instance];
+                    string name;
+                    if (tag.Name == null)
+                        name = $"0x{tag.Index:X8}";
+                    else
+                        name = tag.Name;
+
+                    csvWriter.WriteLine($"{name}.{tag.Group.ToString()}");
+                }
+            }
+        }
+
     }
 
     [TagStructure(Size = 0x20)]

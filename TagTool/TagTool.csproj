@@ -335,6 +335,7 @@
     <Compile Include="Commands\Strings\StringIdCommand.cs" />
     <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
+    <Compile Include="Commands\Tags\SaveModdedTagsCommand.cs" />
     <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />
     <Compile Include="Commands\Tags\TestCommand.cs" />
     <Compile Include="Commands\Unicode\GetStringCommand.cs" />

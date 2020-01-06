@@ -37,6 +37,7 @@ namespace TagTool.Commands.Tags
             {
                 var hoCache = cache as GameCacheContextHaloOnline;
                 context.AddCommand(new SaveTagNamesCommand(hoCache));
+                context.AddCommand(new SaveModdedTagsCommand(hoCache));
             }
 
             // porting related
