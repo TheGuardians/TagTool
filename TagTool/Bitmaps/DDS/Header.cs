@@ -33,7 +33,10 @@ namespace TagTool.Bitmaps.DDS
         public int Caps4;
         public int Reserved2;
 
-        public DDSHeader() { }
+        public DDSHeader()
+        {
+            PixelFormat = new PixelFormat();
+        }
 
         public DDSHeader(BitmapTextureInteropDefinition definition)
         {
@@ -213,6 +216,8 @@ namespace TagTool.Bitmaps.DDS
         public uint GBitMask = 0;
         public uint BBitMask = 0;
         public uint ABitMask = 0;
+
+        public PixelFormat() { }
 
         public PixelFormat(BitmapFormat format, BitmapFlags flags)
         {
