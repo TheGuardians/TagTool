@@ -9,9 +9,9 @@ namespace TagTool.Commands.Strings
 {
     class StringIdCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
 
-        public StringIdCommand(HaloOnlineCacheContext cacheContext) : base(
+        public StringIdCommand(GameCache cache) : base(
             true,
 
             "StringId",
@@ -25,7 +25,7 @@ namespace TagTool.Commands.Strings
             "\"StringId Get\" will display the string corresponding to an ID value.\n" +
             "\"StringId List\" will list stringIDs, optionally filtering them.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -58,13 +58,12 @@ namespace TagTool.Commands.Strings
 
             var str = args[1];
 
-            if (CacheContext.StringIdCache.Contains(str))
+            if (Cache.StringTable.Contains(str))
                 return false;
 
-            var id = CacheContext.StringIdCache.AddString(str);
+            var id = Cache.StringTable.AddString(str);
 
-            using (var stream = CacheContext.OpenStringIdCacheReadWrite())
-                CacheContext.StringIdCache.Save(stream);
+            Cache.StringTable.Save();
             
             Console.WriteLine("Added string \"{0}\" as {1}.", str, id);
 
@@ -79,7 +78,7 @@ namespace TagTool.Commands.Strings
             if (!uint.TryParse(args[1], NumberStyles.HexNumber, null, out uint stringId))
                 return false;
 
-            var str = CacheContext.GetString(new StringId(stringId));
+            var str = Cache.StringTable.GetString(new StringId(stringId));
 
             if (str != null)
                 Console.WriteLine(str);
@@ -96,12 +95,12 @@ namespace TagTool.Commands.Strings
             
             var setStrings = new Dictionary<int, List<StringId>>();
 
-            for (var i = 0; i < CacheContext.StringIdCache.Strings.Count; i++)
+            for (var i = 0; i < Cache.StringTable.Count; i++)
             {
-                if (CacheContext.StringIdCache.Strings[i] == null)
+                if (Cache.StringTable[i] == null)
                     continue;
                 
-                var id = CacheContext.GetStringId(i);
+                var id = Cache.StringTable.GetStringId(i);
 
                 if (!setStrings.ContainsKey(id.Set))
                     setStrings[id.Set] = new List<StringId>();
@@ -116,7 +115,7 @@ namespace TagTool.Commands.Strings
                 Console.WriteLine();
 
                 foreach (var id in entry.Value)
-                    Console.WriteLine($"{CacheContext.GetString(id)} - 0x{id.Value:X} (set 0x{id.Set:X}, index 0x{id.Index:X})");
+                    Console.WriteLine($"{Cache.StringTable.GetString(id)} - 0x{id.Value:X} (set 0x{id.Set:X}, index 0x{id.Index:X})");
 
                 Console.WriteLine();
             }
@@ -132,21 +131,21 @@ namespace TagTool.Commands.Strings
             var filter = (args.Count == 2) ? args[1] : null;
             var strings = new List<FoundStringID>();
 
-            for (var i = 0; i < CacheContext.StringIdCache.Strings.Count; i++)
+            for (var i = 0; i < Cache.StringTable.Count; i++)
             {
-                if (CacheContext.StringIdCache.Strings[i] == null)
+                if (Cache.StringTable[i] == null)
                     continue;
 
-                if (filter != null && !CacheContext.StringIdCache.Strings[i].Contains(filter))
+                if (filter != null && !Cache.StringTable[i].Contains(filter))
                     continue;
 
-                var id = CacheContext.GetStringId(i);
+                var id = Cache.StringTable.GetStringId(i);
 
                 strings.Add(new FoundStringID
                 {
                     ID = id,
                     Display = id.ToString(),
-                    Value = CacheContext.StringIdCache.Strings[i]
+                    Value = Cache.StringTable[i]
                 });
             }
 

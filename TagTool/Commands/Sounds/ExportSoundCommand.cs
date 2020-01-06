@@ -13,11 +13,11 @@ namespace TagTool.Commands.Sounds
 {
     class ExportSoundCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Sound Definition { get; }
 
-        public ExportSoundCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition) :
+        public ExportSoundCommand(GameCache cache, CachedTag tag, Sound definition) :
             base(true,
                 
                 "ExportSound",
@@ -26,7 +26,7 @@ namespace TagTool.Commands.Sounds
                 "ExportSound <Path>",
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -53,10 +53,9 @@ namespace TagTool.Commands.Sounds
             }
 
 
-            var resource = Definition.Resource;
-            var resourceContext = new ResourceSerializationContext(CacheContext, resource.HaloOnlinePageableResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<SoundResourceDefinition>(resourceContext);
-
+            var resourceReference = Definition.Resource;
+            var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
+            
             if (resourceDefinition.Data == null)
             {
                 Console.WriteLine("Invalid sound definition");
@@ -64,12 +63,8 @@ namespace TagTool.Commands.Sounds
             }
 
             var dataReference = resourceDefinition.Data;
-
-
-            byte[] soundData = new byte[dataReference.Size];
-            var resourceDataStream = new MemoryStream(soundData);
-            CacheContext.ExtractResource(resource.HaloOnlinePageableResource, resourceDataStream);
-
+            byte[] soundData = dataReference.Data;
+            
             for (int i = 0; i < Definition.PitchRanges.Count; i++)
             {
                 var pitchRange = Definition.PitchRanges[i];

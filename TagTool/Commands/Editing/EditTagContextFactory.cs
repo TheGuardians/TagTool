@@ -13,6 +13,7 @@ using TagTool.Commands.Forge;
 using TagTool.Commands.Models;
 using TagTool.Commands.RenderModels;
 using TagTool.Commands.ModelAnimationGraphs;
+using TagTool.Commands.Sounds;
 
 namespace TagTool.Commands.Editing
 {
@@ -70,6 +71,10 @@ namespace TagTool.Commands.Editing
                     UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
                     break;
 
+                case "snd!":
+                    SoundContextFactory.Populate(commandContext, cache, tag, (Sound)definition);
+                    break;
+
                     /*
 
 
@@ -104,12 +109,6 @@ namespace TagTool.Commands.Editing
                     ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
                     break;
 
-                case "snd!":
-                    SoundContextFactory.Populate(commandContext, cacheContext, tag, (Sound)definition);
-                    break;
-                    */
-
-                    /*
                                     case "vfsl": // vfiles_list
                                         VFilesContextFactory.Populate(commandContext, cacheContext, tag, (VFilesList)definition);
                                         break;

@@ -191,6 +191,7 @@
     <Compile Include="Audio\Converter\XMA.cs" />
     <Compile Include="Audio\Converter\XMA2.cs" />
     <Compile Include="Audio\SoundConverter.cs" />
+    <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />
     <Compile Include="Bitmaps\Utils\BitmapExtractor.cs" />
@@ -305,6 +306,12 @@
     <Compile Include="Commands\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\ParticleModels\ParticleModelContextFactory.cs" />
     <Compile Include="Commands\PhysicsModels\PhysicsModelTestCommand.cs" />
+    <Compile Include="Commands\Sounds\ExportSoundCommand.cs" />
+    <Compile Include="Commands\Sounds\ImportSoundCommand.cs" />
+    <Compile Include="Commands\Sounds\SoundContextFactory.cs" />
+    <Compile Include="Commands\Sounds\UseAudioCacheCommand.cs" />
+    <Compile Include="Commands\Strings\ListAllStringsCommand.cs" />
+    <Compile Include="Commands\Strings\StringIdCommand.cs" />
     <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
     <Compile Include="Commands\Tags\SaveTagNamesCommand.cs" />

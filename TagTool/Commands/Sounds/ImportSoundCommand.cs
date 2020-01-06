@@ -7,18 +7,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Audio;
-using TagTool.Serialization;
 using System.Linq;
 
 namespace TagTool.Commands.Sounds
 {
     class ImportSoundCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Sound Definition { get; }
 
-        public ImportSoundCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Sound definition) :
+        public ImportSoundCommand(GameCache cache, CachedTag tag, Sound definition) :
             base(true,
                 
                 "ImportSound",
@@ -27,7 +26,7 @@ namespace TagTool.Commands.Sounds
                 "ImportSound",
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -142,6 +141,9 @@ namespace TagTool.Commands.Sounds
 
             Definition.ExtraInfo = new List<ExtraInfo>();
 
+
+            Definition.Unknown12 = 0;
+
             //
             // Create new resource
             //
@@ -149,54 +151,12 @@ namespace TagTool.Commands.Sounds
             Console.Write("Creating new sound resource...");
 
             var data = soundDataAggregate.ToArray();
+            var resourceDefinition = AudioUtils.CreateSoundResourceDefinition(data);
+            var resourceReference = Cache.ResourceCache.CreateSoundResource(resourceDefinition);
+            Definition.Resource = resourceReference;
 
-            Definition.Unknown12 = 0;
+            Console.WriteLine("done.");
             
-            using (var dataStream = new MemoryStream(data))
-            {
-
-                var fileSize = (int)dataStream.Length;
-                var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Resource.HaloOnlinePageableResource);
-                CacheContext.Serializer.Serialize(resourceContext,
-                    new SoundResourceDefinition
-                    {
-                        Data = new TagData(fileSize, new CacheAddress(CacheAddressType.Data, 0))
-                    });
-
-                Definition.Resource.HaloOnlinePageableResource = new PageableResource
-                {
-                    Page = new RawPage
-                    {
-                        Index = -1
-                    },
-                    Resource = new TagResourceGen3
-                    {
-                        ResourceType = TagResourceTypeGen3.Sound,
-                        DefinitionData = new byte[20],
-                        DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 536870912),
-                        ResourceFixups = new List<TagResourceGen3.ResourceFixup>
-                        {
-                            new TagResourceGen3.ResourceFixup
-                            {
-                                BlockOffset = 12,
-                                Address = new CacheAddress(CacheAddressType.Data, 1073741824)
-                            }
-                        },
-                        ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                        Unknown2 = 1
-                    }
-                };
-
-                Definition.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
-                CacheContext.AddResource(Definition.Resource.HaloOnlinePageableResource, dataStream);
-                
-                for (int i = 0; i < 4; i++)
-                {
-                    Definition.Resource.HaloOnlinePageableResource.Resource.DefinitionData[i] = (byte)(Definition.Resource.HaloOnlinePageableResource.Page.UncompressedBlockSize >> (i * 8));
-                }
-
-                Console.WriteLine("done.");
-            }
             return true;
         }
 
