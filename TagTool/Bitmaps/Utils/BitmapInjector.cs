@@ -20,7 +20,7 @@ namespace TagTool.Bitmaps
 
             if(cache.GetType() == typeof(GameCacheContextHaloOnline))
             {
-                result.Texture.Definition.PrimaryResourceData.Data = file.BitmapData;
+                result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
                 result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);
             }
             else if(cache.GetType() == typeof(GameCacheContextGen3))

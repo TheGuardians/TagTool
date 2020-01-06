@@ -32,5 +32,11 @@ namespace TagTool.Tags
             Size = size;
             Address = address;
         }
+
+        public TagData(byte[] data)
+        {
+            Data = data;
+            Address = new CacheAddress(CacheAddressType.Data, 0);
+        }
     }
 }

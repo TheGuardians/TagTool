@@ -59,10 +59,12 @@ namespace TagTool.Commands.Bitmaps
             var imagePath = args[1];
             
             Console.WriteLine("Importing image data...");
-            
+
+#if !DEBUG
             try
             {
-                DDSFile file = new DDSFile();
+#endif
+            DDSFile file = new DDSFile();
 
                 using (var imageStream = File.OpenRead(imagePath))
                 using(var reader = new EndianReader(imageStream))
@@ -80,12 +82,15 @@ namespace TagTool.Commands.Bitmaps
 
                 using (var tagsStream = Cache.TagCache.OpenTagCacheReadWrite())
                     Cache.Serialize(tagsStream, Tag, Bitmap);
+#if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Importing image data failed: " + ex.Message);
                 return true;
             }
+#endif
+
 
             Console.WriteLine("Done!");
 
