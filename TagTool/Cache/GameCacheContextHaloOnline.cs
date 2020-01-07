@@ -506,6 +506,8 @@ namespace TagTool.Cache
         private void UpdateFileHeader(EndianWriter writer, uint offsetTableOffset)
         {
             Header.TagTableOffset = offsetTableOffset;
+            Header.TagCount = Tags.Count;
+            writer.BaseStream.Position = 0;
             var dataContext = new DataSerializationContext(writer);
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
             serializer.Serialize(dataContext, Header);
