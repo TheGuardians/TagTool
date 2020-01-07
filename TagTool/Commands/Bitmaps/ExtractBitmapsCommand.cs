@@ -41,7 +41,6 @@ namespace TagTool.Commands.Bitmaps
 
             using (var tagsStream = Cache.TagCache.OpenTagCacheRead())
             {
-                var extractor = new BitmapExtractor(Cache);
 
                 foreach (var tag in Cache.TagCache.FindAllInGroup("bitm"))
                 {
@@ -64,7 +63,7 @@ namespace TagTool.Commands.Bitmaps
                         for (var i = 0; i < bitmap.Images.Count; i++)
                         {
                             var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Index.ToString("X8")) + ".dds");
-                            var ddsFile = extractor.ExtractBitmap(bitmap, i);
+                            var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i);
                             using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                             using (var writer = new EndianWriter(outStream, EndianFormat.LittleEndian))
                             {

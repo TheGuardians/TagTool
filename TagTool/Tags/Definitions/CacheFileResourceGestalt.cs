@@ -56,7 +56,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown16;
         public uint Unknown17;
         public uint Unknown18;
-        public byte[] FixupInformation;
+        public byte[] DefinitionData;
         public uint Unknown19;
         public uint Unknown20;
         public uint Unknown21;

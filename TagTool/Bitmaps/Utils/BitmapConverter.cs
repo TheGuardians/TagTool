@@ -510,7 +510,7 @@ namespace TagTool.Bitmaps.Converter
         private static BitmapTextureInteropResource GetResourceDefinition(CacheFile cache, DatumIndex handle)
         {
             var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
-            var definitionData = cache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+            var definitionData = cache.ResourceGestalt.DefinitionData.Skip(resourceEntry.DefinitionDataOffset).Take(resourceEntry.DefinitionDataLength).ToArray();
             BitmapTextureInteropResource definition;
             using (var definitionStream = new MemoryStream(definitionData, true))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
@@ -538,7 +538,7 @@ namespace TagTool.Bitmaps.Converter
         private static BitmapTextureInterleavedInteropResource GetInterleavedResourceDefinition(CacheFile cache, DatumIndex handle)
         {
             var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
-            var definitionData = cache.ResourceGestalt.FixupInformation.Skip(resourceEntry.FixupInformationOffset).Take(resourceEntry.FixupInformationLength).ToArray();
+            var definitionData = cache.ResourceGestalt.DefinitionData.Skip(resourceEntry.DefinitionDataOffset).Take(resourceEntry.DefinitionDataLength).ToArray();
             BitmapTextureInterleavedInteropResource definition;
             using (var definitionStream = new MemoryStream(definitionData, true))
             using (var definitionReader = new EndianReader(definitionStream, EndianFormat.BigEndian))
@@ -566,7 +566,7 @@ namespace TagTool.Bitmaps.Converter
         private static bool ResourceEntryValid(CacheFile cache, DatumIndex handle)
         {
             var resourceEntry = cache.ResourceGestalt.TagResources[handle.Index];
-            if (resourceEntry.ParentTag == null || resourceEntry.FixupInformationLength == 0 || resourceEntry.SegmentIndex == -1)
+            if (resourceEntry.ParentTag == null || resourceEntry.DefinitionDataLength == 0 || resourceEntry.SegmentIndex == -1)
                 return false;
             else
                 return true;

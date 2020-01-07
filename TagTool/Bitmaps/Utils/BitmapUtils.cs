@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.Direct3D.D3D9;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;

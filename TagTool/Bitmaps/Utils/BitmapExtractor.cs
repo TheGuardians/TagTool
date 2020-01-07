@@ -7,21 +7,14 @@ using TagTool.Bitmaps.DDS;
 
 namespace TagTool.Bitmaps
 {
-    public class BitmapExtractor
+    public static class BitmapExtractor
     {
-        private GameCache Cache { get; }
-
-        public BitmapExtractor(GameCache cache)
+        public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            Cache = cache;
-        }
-
-        public byte[] ExtractBitmapData(Bitmap bitmap, int imageIndex)
-        {
-            if(Cache.GetType() == typeof(GameCacheContextHaloOnline))
+            var resourceReference = bitmap.Resources[imageIndex];
+            var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
+            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
             {
-                var resourceReference = bitmap.Resources[imageIndex];
-                var resourceDefinition = Cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
                 if(resourceDefinition != null)
                 {
                     return resourceDefinition.Texture.Definition.PrimaryResourceData.Data;
@@ -32,23 +25,46 @@ namespace TagTool.Bitmaps
                     return null;
                 }
             }
+            else if(cache.GetType() == typeof(GameCacheContextGen3))
+            {
+                if (resourceDefinition != null)
+                {
+                    var bitmapTextureInteropDefinition = resourceDefinition.Texture.Definition.Bitmap;
+
+                    if(bitmapTextureInteropDefinition.HighResOffsetIsValid == 1)
+                    {
+                        var result = new byte[resourceDefinition.Texture.Definition.PrimaryResourceData.Data.Length + resourceDefinition.Texture.Definition.SecondaryResourceData.Data.Length];
+                        Array.Copy(resourceDefinition.Texture.Definition.PrimaryResourceData.Data, 0, result, 0, resourceDefinition.Texture.Definition.PrimaryResourceData.Data.Length);
+                        Array.Copy(resourceDefinition.Texture.Definition.SecondaryResourceData.Data, 0, result, resourceDefinition.Texture.Definition.PrimaryResourceData.Data.Length, resourceDefinition.Texture.Definition.SecondaryResourceData.Data.Length);
+                        return result;
+                    }
+                    else
+                    {
+                        return resourceDefinition.Texture.Definition.PrimaryResourceData.Data;
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("No resource associated to this bitmap.");
+                    return null;
+                }
+            }
             else
             {
-                // need to implement a converter with the new cache code
                 throw new NotImplementedException();
             }
         }
 
-        public DDSFile ExtractBitmap(Bitmap bitmap, int imageIndex)
+        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            byte[] data = ExtractBitmapData(bitmap, imageIndex);
+            byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
             DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
             return new DDSFile(header, data);
         }
 
-        public byte[] ExtractBitmapToDDSArray(Bitmap bitmap, int imageIndex)
+        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            var ddsFile = ExtractBitmap(bitmap, imageIndex);
+            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex);
             var stream = new MemoryStream();
             using(var writer = new EndianWriter(stream))
             {

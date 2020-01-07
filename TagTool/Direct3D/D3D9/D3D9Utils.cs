@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.Bitmaps.D3D
+namespace TagTool.Direct3D.D3D9
 {
     public static class D3D9Utils
     {

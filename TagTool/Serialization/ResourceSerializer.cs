@@ -257,7 +257,7 @@ namespace TagTool.Serialization
             else
                 throw new Exception();
 
-            var d3dFixup = new TagResourceGen3.ResourceDefinitionFixup
+            var d3dFixup = new TagResourceGen3.D3DFixup
             {
                 ResourceStructureTypeIndex = structureTypeIndex,
                 Address = address

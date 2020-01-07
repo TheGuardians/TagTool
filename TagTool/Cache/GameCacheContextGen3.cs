@@ -743,8 +743,8 @@ namespace TagTool.Cache
             var tagResource = GetTagResourceFromReference(resourceReference);
 
             T result;
-            byte[] resourceDefinitionData = new byte[tagResource.FixupInformationLength];
-            Array.Copy(ResourceGestalt.FixupInformation, tagResource.FixupInformationOffset, resourceDefinitionData, 0, tagResource.FixupInformationLength);
+            byte[] resourceDefinitionData = new byte[tagResource.DefinitionDataLength];
+            Array.Copy(ResourceGestalt.DefinitionData, tagResource.DefinitionDataOffset, resourceDefinitionData, 0, tagResource.DefinitionDataLength);
 
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
             ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);

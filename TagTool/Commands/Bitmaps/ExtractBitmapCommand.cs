@@ -73,8 +73,7 @@ namespace TagTool.Commands.Bitmaps
                 bitmapName += ".dds";
                 var outPath = Path.Combine(ddsOutDir, bitmapName);
 
-                var extractor = new BitmapExtractor(Cache);
-                var ddsFile = extractor.ExtractBitmap(Bitmap, i);
+                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))

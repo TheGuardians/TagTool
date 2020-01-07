@@ -33,9 +33,22 @@ namespace TagTool.Commands
 
             using(var stream = Cache.TagCache.OpenTagCacheRead())
             {
-                var tag = Cache.TagCache.GetTagByName(@"objects\weapons\rifle\assault_rifle\assault_rifle_v6\material_11\base_map", "bitm");
-                var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
-                var resourceDef = Cache.ResourceCache.GetBitmapTextureInteropResource(bitmap.Resources[0]);
+                foreach(var tag in Cache.TagCache.TagTable)
+                {
+                    if(tag.Group.Tag == "bitm")
+                    {
+                        var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+
+                        foreach(var image in bitmap.Images)
+                        {
+                            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+                            {
+                                Console.WriteLine($"Offset {image.DataOffset}, Size {image.DataSize}");
+                            }
+                        }
+
+                    }
+                }
 
 
             }

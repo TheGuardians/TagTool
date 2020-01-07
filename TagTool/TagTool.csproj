@@ -193,6 +193,8 @@
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Direct3D\D3DObjectType.cs" />
+    <Compile Include="Bitmaps\Utils\BitmapConverterNew.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />
     <Compile Include="Bitmaps\Utils\BitmapExtractor.cs" />
     <Compile Include="Bitmaps\BitmapFlags.cs" />
@@ -205,12 +207,12 @@
     <Compile Include="Bitmaps\Utils\BitmapUtils.cs" />
     <Compile Include="Bitmaps\Utils\BlamBitmap.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverter.cs" />
-    <Compile Include="Bitmaps\D3D\D3D10\D3D10AlphaMode.cs" />
-    <Compile Include="Bitmaps\D3D\D3D10\D3D10Dimension.cs" />
-    <Compile Include="Bitmaps\D3D\D3D10\D3D10MiscFlags.cs" />
-    <Compile Include="Bitmaps\D3D\D3D9\D3D9Utils.cs" />
-    <Compile Include="Bitmaps\D3D\D3D9\D3DFormat.cs" />
-    <Compile Include="Bitmaps\D3D\Xbox360\D3DFormatXbox.cs" />
+    <Compile Include="Direct3D\D3D10\D3D10AlphaMode.cs" />
+    <Compile Include="Direct3D\D3D10\D3D10Dimension.cs" />
+    <Compile Include="Direct3D\D3D10\D3D10MiscFlags.cs" />
+    <Compile Include="Direct3D\D3D9\D3D9Utils.cs" />
+    <Compile Include="Direct3D\D3D9\D3DFormat.cs" />
+    <Compile Include="Direct3D\Xbox360\D3DFormatXbox.cs" />
     <Compile Include="Bitmaps\DDS\DDSComplexityFlags.cs" />
     <Compile Include="Bitmaps\DDS\DDSFile.cs" />
     <Compile Include="Bitmaps\DDS\DDSFlags.cs" />

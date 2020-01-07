@@ -30,7 +30,7 @@ namespace TagTool.Common
         {
             ResourceType = TagResourceTypeGen3.None,
             ResourceFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceFixup>(),
-            ResourceDefinitionFixups = new System.Collections.Generic.List<TagResourceGen3.ResourceDefinitionFixup>()
+            D3DFixups = new System.Collections.Generic.List<TagResourceGen3.D3DFixup>()
         };
 
         public PageableResource() { }

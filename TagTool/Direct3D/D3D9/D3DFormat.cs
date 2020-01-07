@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.Bitmaps
+namespace TagTool.Direct3D.D3D9
 {
     // TODO: fill the values using the resource definition and the bitmap tag definition.
     public enum D3DFormat : byte

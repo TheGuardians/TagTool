@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TagTool.Bitmaps.D3D.D3D10
+namespace TagTool.BDirect3D.D3D10
 {
     /// <summary>
     /// Miscellaneous D3D10 flags.

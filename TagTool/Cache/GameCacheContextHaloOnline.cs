@@ -1343,7 +1343,7 @@ namespace TagTool.Cache
                 pageableResource.Resource.DefinitionData = definitionData;
                 pageableResource.Resource.ResourceFixups = context.ResourceFixups;
                 pageableResource.Resource.DefinitionAddress = context.MainStructOffset;
-                pageableResource.Resource.ResourceDefinitionFixups = context.D3DFixups;
+                pageableResource.Resource.D3DFixups = context.D3DFixups;
             }
             return resourceReference;
         }

@@ -1,5 +1,7 @@
 using TagTool.Bitmaps;
 using TagTool.Cache;
+using TagTool.Direct3D.D3D9;
+using TagTool.Direct3D.D3D9x;
 
 namespace TagTool.Tags.Resources
 {
