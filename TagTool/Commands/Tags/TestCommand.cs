@@ -33,27 +33,33 @@ namespace TagTool.Commands
             // Insert what test command you want below
             //
 
+            
             using(var stream = Cache.TagCache.OpenTagCacheRead())
             {
-                var name = @"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle";
-
-                var tag = Cache.TagCache.GetTagByName(name, "bitm");
-                if (tag.Group.Tag == "bitm")
+                foreach (var tag in Cache.TagCache.TagTable)
                 {
-                    var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
-
-                    for (int i = 0; i < bitmap.Images.Count; i++)
+                    if (tag.Group.Tag == "bitm")
                     {
-                        var baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(Cache, bitmap, i);
-                        var ddsFile = new DDSFile(baseBitmap);
+                        var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
 
-                        var fileName = $"Bitmaps\\test_port_{i}";
-                        var file = new FileInfo(fileName);
-
-                        using (var fileStream = file.Create())
-                        using(var writer = new EndianWriter(fileStream))
+                        for (int i = 0; i < bitmap.Images.Count; i++)
                         {
-                            ddsFile.Write(writer);
+                            var baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(Cache, bitmap, i);
+                            if(baseBitmap == null)
+                            {
+                                Console.WriteLine($"Invalid data for {tag.Name}.bitm");
+                                continue;
+                            }
+                            var ddsFile = new DDSFile(baseBitmap);
+                            var tagName = tag.Name.Replace('\\', '_');
+                            var fileName = $"Bitmaps\\{tagName}_{i}.dds";
+                            var file = new FileInfo(fileName);
+
+                            using (var fileStream = file.Create())
+                            using (var writer = new EndianWriter(fileStream))
+                            {
+                                ddsFile.Write(writer);
+                            }
                         }
                     }
                 }
