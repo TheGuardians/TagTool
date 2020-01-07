@@ -196,6 +196,11 @@ namespace TagTool.Cache
             return null;
         }
 
+        public override CachedTag AllocateTag(TagGroup type, string name = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();
 
         public override FileStream OpenTagCacheReadWrite() => GameCache.OpenCacheReadWrite();

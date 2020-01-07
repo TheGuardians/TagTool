@@ -208,20 +208,12 @@ namespace TagTool.Cache
 
         /// <summary>
         /// Allocates a new tag at the end of the tag list without updating the file.
-        /// The tag's group will be null until it is assigned data.
-        /// You can give the tag data by using one of the overwrite functions.
-        /// </summary>
-        /// <returns>The allocated tag.</returns>
-        public CachedTagHaloOnline AllocateTag() => AllocateTag(TagGroup.None);
-
-        /// <summary>
-        /// Allocates a new tag at the end of the tag list without updating the file.
         /// You can give the tag data by using one of the overwrite functions.
         /// </summary>
         /// <param name="type">The tag's type information.</param>
         /// <param name="name">The name of the tag instance.</param>
         /// <returns>The allocated tag.</returns>
-        public CachedTagHaloOnline AllocateTag(TagGroup type, string name = null)
+        public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             var tagIndex = Tags.Count;
             var tag = new CachedTagHaloOnline(tagIndex, type, name);

@@ -31,6 +31,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListAllStringsCommand(cache));
             context.AddCommand(new StringIdCommand(cache));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
+            context.AddCommand(new DuplicateTagCommand(cache));
 
             // Halo Online Specific Commands
             if (cache.GetType() == typeof(GameCacheContextHaloOnline))

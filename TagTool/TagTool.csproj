@@ -333,6 +333,7 @@
     <Compile Include="Commands\Sounds\UseAudioCacheCommand.cs" />
     <Compile Include="Commands\Strings\ListAllStringsCommand.cs" />
     <Compile Include="Commands\Strings\StringIdCommand.cs" />
+    <Compile Include="Commands\Tags\DuplicateTagCommand.cs" />
     <Compile Include="Commands\Tags\ForEachCommand.cs" />
     <Compile Include="Commands\Tags\NameTagCommand.cs" />
     <Compile Include="Commands\Tags\SaveModdedTagsCommand.cs" />
