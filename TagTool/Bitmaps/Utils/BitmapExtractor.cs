@@ -31,7 +31,7 @@ namespace TagTool.Bitmaps
                 {
                     var bitmapTextureInteropDefinition = resourceDefinition.Texture.Definition.Bitmap;
 
-                    if(bitmapTextureInteropDefinition.HighResOffsetIsValid == 1)
+                    if(bitmapTextureInteropDefinition.HighResInSecondaryResource == 1)
                     {
                         var result = new byte[resourceDefinition.Texture.Definition.PrimaryResourceData.Data.Length + resourceDefinition.Texture.Definition.SecondaryResourceData.Data.Length];
                         Array.Copy(resourceDefinition.Texture.Definition.PrimaryResourceData.Data, 0, result, 0, resourceDefinition.Texture.Definition.PrimaryResourceData.Data.Length);

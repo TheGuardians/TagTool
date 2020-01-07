@@ -9,6 +9,8 @@ using TagTool.Tags;
 using TagTool.Serialization;
 using TagTool.Bitmaps;
 using TagTool.Tags.Resources;
+using TagTool.Bitmaps.Utils;
+using TagTool.Bitmaps.DDS;
 
 namespace TagTool.Commands
 {
@@ -33,24 +35,28 @@ namespace TagTool.Commands
 
             using(var stream = Cache.TagCache.OpenTagCacheRead())
             {
-                foreach(var tag in Cache.TagCache.TagTable)
+                var name = @"objects\weapons\rifle\assault_rifle\bitmaps\assault_rifle";
+
+                var tag = Cache.TagCache.GetTagByName(name, "bitm");
+                if (tag.Group.Tag == "bitm")
                 {
-                    if(tag.Group.Tag == "bitm")
+                    var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+
+                    for (int i = 0; i < bitmap.Images.Count; i++)
                     {
-                        var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+                        var baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(Cache, bitmap, i);
+                        var ddsFile = new DDSFile(baseBitmap);
 
-                        foreach(var image in bitmap.Images)
+                        var fileName = $"Bitmaps\\test_port_{i}";
+                        var file = new FileInfo(fileName);
+
+                        using (var fileStream = file.Create())
+                        using(var writer = new EndianWriter(fileStream))
                         {
-                            if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
-                            {
-                                Console.WriteLine($"Offset {image.DataOffset}, Size {image.DataSize}");
-                            }
+                            ddsFile.Write(writer);
                         }
-
                     }
                 }
-
-
             }
 
             return true;

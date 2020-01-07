@@ -32,7 +32,7 @@ namespace TagTool.Tags.Resources
         public byte Depth;
         public byte MipmapCount;
         public BitmapType BitmapType;
-        public byte HighResOffsetIsValid;
+        public byte HighResInSecondaryResource;
 
         // D3D flags
         public byte Unknown3; // could be flags, 0x10 = hasMipMaps

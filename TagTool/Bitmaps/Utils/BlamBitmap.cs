@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Tags.Resources;
+using TagTool.Bitmaps.DDS;
 
 public class BaseBitmap
 {
@@ -16,6 +17,7 @@ public class BaseBitmap
     public int BlockDimension;
     public double CompressionFactor;
     public BitmapType Type;
+    public BitmapImageCurve Curve;
     public BitmapFlags Flags;
     public byte[] Data;
 
@@ -30,6 +32,7 @@ public class BaseBitmap
         MipMapCount = image.MipmapCount;
         Type = image.Type;
         Flags = image.Flags;
+        Curve = image.Curve;
         UpdateFormat(image.Format);
     }
 
@@ -42,6 +45,19 @@ public class BaseBitmap
         MipMapCount = def.MipmapCount - 1;
         Type = def.BitmapType;
         Flags = image.Flags;
+        Curve = image.Curve;
+        UpdateFormat(image.Format);
+    }
+
+    public BaseBitmap(BitmapTextureInteropDefinition definition, Bitmap.Image image)
+    {
+        Height = definition.Height;
+        Width = definition.Width;
+        Depth = definition.Depth;
+        MipMapCount = definition.MipmapCount != 0 ? definition.MipmapCount - 1 : 0;
+        Type = definition.BitmapType;
+        Flags = image.Flags;
+        Curve = image.Curve;
         UpdateFormat(image.Format);
     }
 
@@ -70,6 +86,7 @@ public class BaseBitmap
             Flags = image.Flags;
             UpdateFormat(image.Format);
         }
+        Curve = image.Curve;
     }
 
     public BaseBitmap(BaseBitmap bitmap)
@@ -80,6 +97,7 @@ public class BaseBitmap
         MipMapCount = bitmap.MipMapCount;
         Type = bitmap.Type;
         Flags = bitmap.Flags;
+        Curve = bitmap.Curve;
         UpdateFormat(bitmap.Format);
     }
 
@@ -126,6 +144,15 @@ public class XboxBitmap : BaseBitmap
     }
 
     public XboxBitmap(BitmapTextureInterleavedInteropResource definition, int index, Bitmap.Image image) : base(definition, index, image)
+    {
+        UpdateFormat(image.Format);
+        MultipleOfBlockDimension = Width % BlockDimension == 0 && Height % BlockDimension == 0;
+        NotExact = Width != VirtualWidth || Height != VirtualHeight;
+        InTile = Width <= MinimalBitmapSize / 2 && Height <= MinimalBitmapSize / 2;
+        Offset = 0;
+    }
+
+    public XboxBitmap(BitmapTextureInteropDefinition definition, Bitmap.Image image) : base(definition, image)
     {
         UpdateFormat(image.Format);
         MultipleOfBlockDimension = Width % BlockDimension == 0 && Height % BlockDimension == 0;

@@ -29,9 +29,9 @@ namespace TagTool.Bitmaps
         {
             // add special case for bitmaps not in virtual height/wdith
 
-            int size = 0;
-            int dataWidth = 0;
-            int dataHeight = 0;
+            int size;
+            int dataWidth;
+            int dataHeight;
             if (xboxBitmap.NotExact)
             {
                 dataWidth = xboxBitmap.VirtualWidth;
@@ -79,10 +79,7 @@ namespace TagTool.Bitmaps
                 return 0;
             else
             {
-                var minDim = xboxBitmap.BlockDimension;
-                var minVirtualSize = xboxBitmap.MinimalBitmapSize;
                 var totalSize = 0;
-
                 var mipMapCount = xboxBitmap.MipMapCount - 1;
 
                 var curWidth = xboxBitmap.Width;
@@ -172,7 +169,7 @@ namespace TagTool.Bitmaps
                 Height = (short)header.Height,
                 Depth = (byte)header.Depth,
                 MipmapCount = (byte)header.MipMapCount,
-                HighResOffsetIsValid = 0,
+                HighResInSecondaryResource = 0,
             };
 
             result.BitmapType = BitmapDdsFormatDetection.DetectType(header);

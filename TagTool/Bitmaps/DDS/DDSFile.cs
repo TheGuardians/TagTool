@@ -23,6 +23,12 @@ namespace TagTool.Bitmaps.DDS
             BitmapData = data;
         }
 
+        public DDSFile(BaseBitmap bitmap)
+        {
+            Header = new DDSHeader(bitmap);
+            BitmapData = bitmap.Data;
+        }
+
         public void Write(EndianWriter writer)
         {
             Header.Write(writer);
