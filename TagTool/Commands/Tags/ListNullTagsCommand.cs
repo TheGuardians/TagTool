@@ -6,19 +6,18 @@ namespace TagTool.Commands.Tags
 {
     class ListNullTagsCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
-        public ListNullTagsCommand(HaloOnlineCacheContext cacheContext)
+        public ListNullTagsCommand(GameCache cache)
             : base(false,
                   
                   "ListNullTags",
                   "Lists all null tag indices in the current tag cache",
                   
                   "ListNullTags",
-                  
                   "Lists all null tag indices in the current tag cache")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -26,10 +25,12 @@ namespace TagTool.Commands.Tags
             if (args.Count != 0)
                 return false;
 
-            for (var i = 0; i < CacheContext.TagCache.Index.Count; i++)
+            int currentIndex = 0x0;
+            foreach (var tag in Cache.TagCache.TagTable)
             {
-                if (CacheContext.TagCache.Index[i] == null)
-                    Console.WriteLine($"0x{i:X4}");
+                if (tag == null)
+                    Console.WriteLine($"0x{currentIndex:X4}");
+                currentIndex++;
             }
 
             return true;

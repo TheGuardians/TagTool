@@ -222,6 +222,14 @@ namespace TagTool.Cache
         }
 
         /// <summary>
+        /// Returns a new CachedTag instance without updating the tag cache.
+        /// </summary>
+        public override CachedTag NewCachedTag(int index, TagGroup group, string name = null)
+        {
+            return new CachedTagHaloOnline(index, group, name);
+        }
+
+        /// <summary>
         /// Reads a tag's raw data from the file, including its header.
         /// </summary>
         /// <param name="stream">The stream to read from.</param>

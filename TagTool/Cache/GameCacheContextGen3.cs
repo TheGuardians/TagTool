@@ -141,6 +141,8 @@ namespace TagTool.Cache
 
         public CachedTagGen3() : base() { }
 
+        public CachedTagGen3(int index, TagGroup group, string name = null) : base(index, group, name) { }
+
         public CachedTagGen3(int groupIndex, uint id, uint offset, int index, TagGroup tagGroup, string groupName)
         {
             GroupIndex = groupIndex;
@@ -199,6 +201,11 @@ namespace TagTool.Cache
         public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             throw new NotImplementedException();
+        }
+
+        public override CachedTag NewCachedTag(int index, TagGroup group, string name = null)
+        {
+            return new CachedTagGen3(index, group, name);
         }
 
         public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();

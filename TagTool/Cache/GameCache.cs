@@ -259,6 +259,7 @@ namespace TagTool.Cache
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
         public abstract CachedTag AllocateTag(TagGroup type, string name = null);
+        public abstract CachedTag NewCachedTag(int index, TagGroup group, string name = null);
 
         public abstract Stream OpenTagCacheRead();
         public abstract FileStream OpenTagCacheReadWrite();
