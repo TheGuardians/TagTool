@@ -8,9 +8,9 @@ namespace TagTool.Commands.Tags
 {
     class CreateTagCommand : Command
     {
-        public GameCache Cache { get; }
+        public GameCacheContextHaloOnline Cache { get; }
 
-        public CreateTagCommand(GameCache cache)
+        public CreateTagCommand(GameCacheContextHaloOnline cache)
             : base(true,
 
                   "CreateTag",
@@ -103,19 +103,15 @@ namespace TagTool.Commands.Tags
 
                     if (tagIndex < Cache.TagCache.Count)
                     {
-
-                        // needs updating
-                        /*if (CacheContext.TagCache.Index[tagIndex] != null)
+                        if (Cache.TagCacheGenHO.Tags[tagIndex] != null)
                         {
-                            var oldInstance = CacheContext.TagCache.Index[tagIndex];
-                            CacheContext.TagCache.Index[tagIndex] = null;
-                            CacheContext.TagCache.SetTagDataRaw(stream, oldInstance, new byte[] { });
-                        }*/
+                            var oldInstance = Cache.TagCacheGenHO.Tags[tagIndex];
+                            Cache.TagCacheGenHO.Tags[tagIndex] = null;
+                            Cache.TagCacheGenHO.SetTagDataRaw(stream, oldInstance, new byte[] { });
+                        }
 
                         instance = Cache.TagCache.NewCachedTag(tagIndex, TagGroup.Instances[groupTag]);
-
-                        // needs updating
-                        //CacheContext.TagCache.Index[tagIndex] = instance;
+                        Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)instance;
                     }
                 }
 

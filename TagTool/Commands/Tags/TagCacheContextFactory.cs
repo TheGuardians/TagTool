@@ -31,8 +31,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListAllStringsCommand(cache));
             context.AddCommand(new StringIdCommand(cache));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
-            context.AddCommand(new DuplicateTagCommand(cache));
-            context.AddCommand(new CreateTagCommand(cache));
+            context.AddCommand(new DuplicateTagCommand(cache));    
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
 
@@ -42,6 +41,7 @@ namespace TagTool.Commands.Tags
                 var hoCache = cache as GameCacheContextHaloOnline;
                 context.AddCommand(new SaveTagNamesCommand(hoCache));
                 context.AddCommand(new SaveModdedTagsCommand(hoCache));
+                context.AddCommand(new CreateTagCommand(hoCache));
             }
 
             // porting related
