@@ -386,7 +386,7 @@ namespace TagTool.Bitmaps
             for(int i =0; i< width * height / 2; i += 8, b += 16)
             {
                 // convert X,Y min and max components (swap X and Y)
-                byte minX = data[i];
+                byte minX = data[i + 0];
                 byte maxX = data[i + 2];
                 byte minY = data[i + 1];
                 byte maxY = data[i + 3];
@@ -409,23 +409,23 @@ namespace TagTool.Bitmaps
                 }
 
 
-                Ctx1indices = FixCTX1Indices(Ctx1indices);
+                var XIndices = FixCTX1Indices(Ctx1indices, minX, maxX);
+                var YIndices = FixCTX1Indices(Ctx1indices, minY, maxY);
 
                 // DXN indices
-                buffer[b + 2] = (byte)(((Ctx1indices[3]) << 0) | ((Ctx1indices[2]) << 3) | ((Ctx1indices[1] & 0x3) << 6));
-                buffer[b + 3] = (byte)(((Ctx1indices[1] & 0x4) >> 2) | ((Ctx1indices[0]) << 1) | ((Ctx1indices[7]) << 4) | ((Ctx1indices[6] & 0x1) << 7));
-                buffer[b + 4] = (byte)(((Ctx1indices[6] & 0x6) >> 1) | ((Ctx1indices[5]) << 2) | ((Ctx1indices[4]) << 5));
-                buffer[b + 5] = (byte)(((Ctx1indices[11]) << 0) | ((Ctx1indices[10]) << 3) | ((Ctx1indices[9] & 0x3) << 6));
-                buffer[b + 6] = (byte)(((Ctx1indices[9] & 0x4) >> 2) | ((Ctx1indices[8]) << 1) | ((Ctx1indices[15]) << 4) | ((Ctx1indices[14] & 0x1) << 7));
-                buffer[b + 7] = (byte)(((Ctx1indices[14] & 0x6) >> 1) | ((Ctx1indices[13]) << 2) | ((Ctx1indices[12]) << 5));
+                buffer[b + 2] = (byte)(((XIndices[3]) << 0) | ((XIndices[2]) << 3) | ((XIndices[1] & 0x3) << 6));
+                buffer[b + 3] = (byte)(((XIndices[1] & 0x4) >> 2) | ((XIndices[0]) << 1) | ((XIndices[7]) << 4) | ((XIndices[6] & 0x1) << 7));
+                buffer[b + 4] = (byte)(((XIndices[6] & 0x6) >> 1) | ((XIndices[5]) << 2) | ((XIndices[4]) << 5));
+                buffer[b + 5] = (byte)(((XIndices[11]) << 0) | ((XIndices[10]) << 3) | ((XIndices[9] & 0x3) << 6));
+                buffer[b + 6] = (byte)(((XIndices[9] & 0x4) >> 2) | ((XIndices[8]) << 1) | ((XIndices[15]) << 4) | ((XIndices[14] & 0x1) << 7));
+                buffer[b + 7] = (byte)(((XIndices[14] & 0x6) >> 1) | ((XIndices[13]) << 2) | ((XIndices[12]) << 5));
 
-                // copy indices for X component
-                buffer[b + 10] = buffer[b + 2];
-                buffer[b + 11] = buffer[b + 3];
-                buffer[b + 12] = buffer[b + 4];
-                buffer[b + 13] = buffer[b + 5];
-                buffer[b + 14] = buffer[b + 6];
-                buffer[b + 15] = buffer[b + 7];
+                buffer[b + 10] = (byte)(((YIndices[3]) << 0) | ((YIndices[2]) << 3) | ((YIndices[1] & 0x3) << 6));
+                buffer[b + 11] = (byte)(((YIndices[1] & 0x4) >> 2) | ((YIndices[0]) << 1) | ((YIndices[7]) << 4) | ((YIndices[6] & 0x1) << 7));
+                buffer[b + 12] = (byte)(((YIndices[6] & 0x6) >> 1) | ((YIndices[5]) << 2) | ((YIndices[4]) << 5));
+                buffer[b + 13] = (byte)(((YIndices[11]) << 0) | ((YIndices[10]) << 3) | ((YIndices[9] & 0x3) << 6));
+                buffer[b + 14] = (byte)(((YIndices[9] & 0x4) >> 2) | ((YIndices[8]) << 1) | ((YIndices[15]) << 4) | ((YIndices[14] & 0x1) << 7));
+                buffer[b + 15] = (byte)(((YIndices[14] & 0x6) >> 1) | ((YIndices[13]) << 2) | ((YIndices[12]) << 5));
 
             }
 
@@ -433,14 +433,27 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        private static byte[] FixCTX1Indices(byte[] indices)
+        /// <summary>
+        /// Converts from 2 bit to 3 bit index in table
+        /// </summary>
+        /// <param name="indices"></param>
+        /// <returns></returns>
+        private static byte[] FixCTX1Indices(byte[] indices, byte c0, byte c1)
         {
+            byte[] result = new byte[indices.Length];
+
             for(int i = 0; i< 16; i++)
             {
-                
                 byte index = indices[i];
-                
-                if(index != 0 || index != 1)
+
+                if(c0 > c1)
+                {
+                    if (index == 2)
+                        index = 4;
+                    if (index == 3)
+                        index = 5;
+                }
+                else
                 {
                     if (index == 2)
                         index = 3;
@@ -448,10 +461,9 @@ namespace TagTool.Bitmaps
                         index = 4;
                 }
 
-                indices[i] = index;
-                
+                result[i] = index; 
             }
-            return indices;
+            return result;
         }
 
         private static byte[] DecodeDxnMA(byte[] data, int width, int height)
