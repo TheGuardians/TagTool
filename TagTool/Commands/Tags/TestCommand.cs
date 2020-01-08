@@ -38,9 +38,13 @@ namespace TagTool.Commands
             {
                 foreach (var tag in Cache.TagCache.TagTable)
                 {
-                    if (tag.Group.Tag == "bitm")
+                    if (tag.Group.Tag == "bitm" && tag.Name == @"levels\solo\010_jungle\010_jungle_010_bsp_050_cubemaps")
                     {
                         var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
+
+
+                        if (!bitmap.Images[0].XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
+                            continue;
 
                         for (int i = 0; i < bitmap.Images.Count; i++)
                         {

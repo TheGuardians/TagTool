@@ -39,7 +39,7 @@ namespace TagTool.Bitmaps.Utils
             else
                 bitmapTextureInteropDef = resourceDefinition.Texture.Definition.Bitmap2;
 
-            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, image);
+            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, bitmap, imageIndex);
         }
 
         private static BaseBitmap ConvertGen3RegularBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
@@ -54,29 +54,105 @@ namespace TagTool.Bitmaps.Utils
 
             BitmapTextureInteropDefinition bitmapTextureInteropDef = resourceDefinition.Texture.Definition.Bitmap;
 
-            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, image);
+            return ConvertGen3BitmapInternal(bitmapTextureInteropDef, resourceDefinition.Texture.Definition.PrimaryResourceData.Data, resourceDefinition.Texture.Definition.SecondaryResourceData.Data, bitmap, imageIndex);
         }
 
 
-        private static BaseBitmap ConvertGen3BitmapInternal(BitmapTextureInteropDefinition bitmapTextureInteropDefinition, byte[] primaryData, byte[] secondaryData, Bitmap.Image image)
+        private static BaseBitmap ConvertGen3BitmapInternal(BitmapTextureInteropDefinition bitmapTextureInteropDefinition, byte[] primaryData, byte[] secondaryData, Bitmap bitmapDefinition, int imageIndex)
         {
+            var image = bitmapDefinition.Images[imageIndex];
             var xboxBitmap = new XboxBitmap(bitmapTextureInteropDefinition, image);
             var bitmapSize = BitmapUtils.GetXboxImageSize(xboxBitmap);
 
             byte[] imageData = new byte[bitmapSize];
-            int offset;
-            bool usePadding;
+            var copySize = bitmapSize;
 
             if (image.XboxFlags.HasFlag(BitmapFlagsXbox.UseInterleavedTextures))
             {
-                offset = image.DataOffset;
-                usePadding = image.DataSize < 0 ? true : false;
+                // someone figure this shit out
+                if (xboxBitmap.Type == BitmapType.CubeMap)
+                {
+                    XboxBitmap firstBitmap = null;
+                    XboxBitmap secondBitmap = null;
+                    bool isFirst = image.InterleavedTextureIndex2 == 0;
+                    if (isFirst)
+                    {
+                        firstBitmap = xboxBitmap;
+                        if (bitmapDefinition.Images.Count > imageIndex + 1)
+                            secondBitmap = new XboxBitmap(bitmapDefinition.Images[imageIndex + 1]);
+                    }
+                    else
+                    {
+                        firstBitmap = new XboxBitmap(bitmapDefinition.Images[imageIndex - 1]);
+                        secondBitmap = xboxBitmap;
+                    }
 
-            }
-            else
-            {
-                offset = 0;
-                usePadding = false;
+                    bool changeOrder = false;
+                    if ( secondBitmap != null && firstBitmap.Height < secondBitmap.Height)
+                        changeOrder = true;
+
+                    int virtualSize = (int)(xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+
+                    switch (xboxBitmap.Height)
+                    {
+                        case 16:
+                            var baseOffset = 2 * (int)(xboxBitmap.Width * xboxBitmap.Height / xboxBitmap.CompressionFactor);
+                            if (isFirst)
+                                xboxBitmap.Offset = baseOffset;
+                            else
+                                return null;
+                            break;
+                        case 32:
+                            if (changeOrder)
+                            {
+                                if (isFirst)
+                                    xboxBitmap.Offset = 2 * virtualSize + (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                                else
+                                    xboxBitmap.Offset = 0;
+                            }
+                            else
+                            {
+                                if(isFirst)
+                                    xboxBitmap.Offset = 0;
+                                else
+                                    return null;
+                            }
+                            
+                            break;
+                        case 64:
+                            if (isFirst)
+                                xboxBitmap.Offset = 0;
+                            else
+                            {
+                                if (!changeOrder)
+                                    xboxBitmap.Offset = (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                                else
+                                    xboxBitmap.Offset = 0;
+                            }  
+                            break;
+
+                        case 128:
+                        case 256:
+                            if (image.InterleavedTextureIndex2 == 0)
+                                xboxBitmap.Offset = 0;
+                            else
+                                xboxBitmap.Offset = (int)(firstBitmap.VirtualHeight * firstBitmap.VirtualWidth / firstBitmap.CompressionFactor);
+                            break;
+                        default:
+                            throw new Exception("Unsupported cubemap dimensions");
+                    }
+                }
+                else if (image.InterleavedTextureIndex2 == 0)
+                    xboxBitmap.Offset = 0;
+                else
+                {
+                    var previousImage = new XboxBitmap(bitmapDefinition.Images[imageIndex - 1]);
+
+                    if (!xboxBitmap.InTile)
+                        xboxBitmap.Offset = (int)(previousImage.VirtualHeight * previousImage.VirtualWidth / previousImage.CompressionFactor);
+                    else
+                        xboxBitmap.Offset = (int)(0.5f * xboxBitmap.MinimalBitmapSize * xboxBitmap.MinimalBitmapSize / xboxBitmap.CompressionFactor);
+                }
             }
 
             if (bitmapTextureInteropDefinition.HighResInSecondaryResource == 1)
@@ -84,11 +160,10 @@ namespace TagTool.Bitmaps.Utils
                 if (secondaryData == null)
                     return null;
 
-                int copySize = bitmapSize;
-                if (usePadding)
-                    copySize = secondaryData.Length - offset;
+                if (bitmapSize + xboxBitmap.Offset > secondaryData.Length)
+                    copySize = secondaryData.Length - xboxBitmap.Offset;
 
-                Array.Copy(secondaryData, offset, imageData, 0, copySize);
+                Array.Copy(secondaryData, xboxBitmap.Offset, imageData, 0, copySize);
 
             }
             else
@@ -96,12 +171,21 @@ namespace TagTool.Bitmaps.Utils
                 if (primaryData == null)
                     return null;
 
-                int copySize = bitmapSize;
-                if (usePadding)
-                    copySize = primaryData.Length - offset;
+                if(secondaryData != null)
+                {
+                    var temp = new byte[primaryData.Length + secondaryData.Length];
+                    Array.Copy(primaryData, 0, temp, 0, primaryData.Length);
+                    Array.Copy(secondaryData, 0, temp, primaryData.Length, secondaryData.Length);
+                    primaryData = temp;
+                }
 
-                Array.Copy(primaryData, offset, imageData, 0, copySize);
+                 if (bitmapSize + xboxBitmap.Offset > primaryData.Length)
+                    copySize = primaryData.Length - xboxBitmap.Offset;
+
+                Array.Copy(primaryData, xboxBitmap.Offset, imageData, 0, copySize);
             }
+
+            xboxBitmap.Offset = 0;
 
             List<XboxBitmap> xboxBitmaps = ParseImages(xboxBitmap, image, imageData, bitmapSize);
             bool flipImage;
@@ -207,7 +291,7 @@ namespace TagTool.Bitmaps.Utils
                 int numberOfPass = dataHeight / bitmap.BlockDimension;
                 for (int i = 0; i < numberOfPass; i++)
                 {
-                    Array.Copy(bitmap.Data, i * bitmap.TilePitch + bitmap.Offset, data, i * bitmap.Pitch, bitmap.Pitch);
+                    Array.Copy(bitmap.Data, i * bitmap.TilePitch , data, i * bitmap.Pitch, bitmap.Pitch); //+ bitmap.Offset
                 }
                 bitmap.Data = data;
             }

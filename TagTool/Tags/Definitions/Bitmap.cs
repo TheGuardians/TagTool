@@ -244,11 +244,8 @@ namespace TagTool.Tags.Definitions
             public int DataOffset;
             public int DataSize;
 
-            public float Unknown20;
-            public sbyte Unknown24;
-            public sbyte Unknown25;
-            public sbyte Unknown26;
-            public sbyte Unknown27;
+            public int Unknown20;
+            public int HighResolutionOffset;
             public int Unknown28;
             public int Unknown2C;
         }
