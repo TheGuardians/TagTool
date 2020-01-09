@@ -380,6 +380,7 @@
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferUtils.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />
     <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
@@ -509,33 +510,33 @@
     <Compile Include="Extensions\BinaryWriterExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Geometry\BlenderPhmoMoppUtil.cs" />
-    <Compile Include="Geometry\BlenderPhmoReader.cs" />
-    <Compile Include="Geometry\CollisionGeometry.cs" />
-    <Compile Include="Geometry\CollisionGeometryBuilder.cs" />
-    <Compile Include="Geometry\IndexBufferFormat.cs" />
-    <Compile Include="Geometry\IndexBufferStream.cs" />
-    <Compile Include="Geometry\IVertexStream.cs" />
-    <Compile Include="Geometry\Mesh.cs" />
-    <Compile Include="Geometry\MeshFlags.cs" />
-    <Compile Include="Geometry\PhysicsModelBuilder.cs" />
-    <Compile Include="Geometry\PrimitiveType.cs" />
-    <Compile Include="Geometry\PrtType.cs" />
-    <Compile Include="Geometry\RenderGeometry.cs" />
-    <Compile Include="Geometry\RenderGeometryClassification.cs" />
-    <Compile Include="Geometry\RenderGeometryCompression.cs" />
-    <Compile Include="Geometry\RenderGeometryCompressionFlags.cs" />
-    <Compile Include="Geometry\RenderGeometryRuntimeFlags.cs" />
-    <Compile Include="Geometry\RenderMaterial.cs" />
-    <Compile Include="Geometry\VertexBufferFormat.cs" />
-    <Compile Include="Geometry\VertexCompressor.cs" />
-    <Compile Include="Geometry\VertexElementStream.cs" />
-    <Compile Include="Geometry\VertexStreamFactory.cs" />
-    <Compile Include="Geometry\VertexStreamMS23.cs" />
-    <Compile Include="Geometry\VertexStreamMS25.cs" />
-    <Compile Include="Geometry\VertexStreamXbox.cs" />
-    <Compile Include="Geometry\VertexType.cs" />
-    <Compile Include="Geometry\Vertices.cs" />
+    <Compile Include="Geometry\PhysicsModel\BlenderPhmoMoppUtil.cs" />
+    <Compile Include="Geometry\PhysicsModel\BlenderPhmoReader.cs" />
+    <Compile Include="Geometry\CollisionGeometry\CollisionGeometry.cs" />
+    <Compile Include="Geometry\CollisionGeometry\CollisionGeometryBuilder.cs" />
+    <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferFormat.cs" />
+    <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferStream.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\IVertexStream.cs" />
+    <Compile Include="Geometry\RenderGeometry\Mesh.cs" />
+    <Compile Include="Geometry\RenderGeometry\MeshFlags.cs" />
+    <Compile Include="Geometry\PhysicsModel\PhysicsModelBuilder.cs" />
+    <Compile Include="Geometry\RenderGeometry\PrimitiveType.cs" />
+    <Compile Include="Geometry\RenderGeometry\PRT\PrtType.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometry.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometryClassification.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometryCompression.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometryCompressionFlags.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometryRuntimeFlags.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderMaterial.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferFormat.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexCompressor.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexElementStream.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamFactory.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamMS23.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamMS25.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexStreamXbox.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexType.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\Vertices.cs" />
     <Compile Include="Havok\CollisionMoppCode.cs" />
     <Compile Include="Havok\HavokShapeType.cs" />
     <Compile Include="Havok\MoppCode.cs" />
@@ -800,7 +801,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Geometry\Utils\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
