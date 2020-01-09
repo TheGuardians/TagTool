@@ -193,6 +193,9 @@
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Commands\Porting\PortingContext.cs" />
+    <Compile Include="Commands\Porting\PortingContextFactory.cs" />
+    <Compile Include="Commands\Porting\PortTagCommand.PortingOptions.cs" />
     <Compile Include="Commands\Tags\CreateTagCommand.cs" />
     <Compile Include="Commands\Tags\DeleteTagCommand.cs" />
     <Compile Include="Commands\Tags\ExportTagModCommand.cs" />
@@ -382,6 +385,7 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometry.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometryConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />

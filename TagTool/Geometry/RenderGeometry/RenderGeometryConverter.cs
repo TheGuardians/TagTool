@@ -15,7 +15,7 @@ namespace TagTool.Geometry
 {
     public class RenderGeometryConverter
     {
-        private GameCacheContextHaloOnline HOCache { get; }
+        private GameCache HOCache { get; }
         private GameCache SourceCache;
         private List<long> OriginalBufferOffsets;
         private List<ushort> Unknown1BIndices;
@@ -138,9 +138,10 @@ namespace TagTool.Geometry
             //
 
             var sourceResourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(geometry.Resource);
-
+            var wasNull = false;
             if (sourceResourceDefinition == null)
             {
+                wasNull = true;
                 Console.Error.WriteLine("Render geometry does not have a valid resource definition, continuing anyway.");
                 sourceResourceDefinition = new RenderGeometryApiResourceDefinitionTest
                 {
@@ -155,7 +156,7 @@ namespace TagTool.Geometry
 
             var generateParticles = false;
 
-            if (sourceResourceDefinition == null)
+            if (wasNull)
             {
                 if (geometry.Meshes.Count == 1 && geometry.Meshes[0].Type == VertexType.ParticleModel)
                 {
@@ -164,6 +165,7 @@ namespace TagTool.Geometry
                 else
                 {
                     geometry.Resource.HaloOnlinePageableResource.Resource.ResourceType = TagResourceTypeGen3.None;
+                    geometry.Resource = HOCache.ResourceCache.CreateRenderGeometryApiResource(sourceResourceDefinition);
                     return geometry;
                 }
             }

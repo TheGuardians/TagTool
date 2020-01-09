@@ -6,22 +6,22 @@ namespace TagTool.Commands.Porting
 {
     static class PortingContextFactory
     {
-        public static CommandContext Create(CommandContextStack contextStack, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public static CommandContext Create(CommandContextStack contextStack, GameCache currentCache, GameCache portingCache)
         {
-            var context = new CommandContext(contextStack.Context, blamCache.Header.ScenarioPath);
+            var context = new CommandContext(contextStack.Context, portingCache.Version.ToString());
 
-            Populate(contextStack, context, cacheContext, blamCache);
+            Populate(contextStack, context, currentCache, portingCache);
 
             return context;
         }
         
-        public static SoundCacheFileGestalt LoadSoundGestalt(HaloOnlineCacheContext cacheContext, ref CacheFile blamCache)
+        public static SoundCacheFileGestalt LoadSoundGestalt(GameCache cache)
         {
-            CacheFile.IndexItem blamTag = null;
+            CachedTag blamTag = null;
 
-            foreach (var tag in blamCache.IndexItems)
+            foreach (var tag in cache.TagCache.TagTable)
             {
-                if (tag.GroupTag == "ugh!")
+                if (tag.Group.Tag == "ugh!")
                 {
                     blamTag = tag;
                     break;
@@ -30,19 +30,17 @@ namespace TagTool.Commands.Porting
 
             if (blamTag == null)
                 return null;
-
-            var blamContext = new CacheSerializationContext(ref blamCache, blamTag);
-            var ugh = blamCache.Deserializer.Deserialize<SoundCacheFileGestalt>(blamContext);
-
-            //
-            // Apply conversion to ugh! data (gain increase and such)
-            //
-
-            return ugh;
+            SoundCacheFileGestalt result;
+            using (var stream = cache.TagCache.OpenTagCacheRead())
+            {
+                result = cache.Deserialize<SoundCacheFileGestalt>(null, blamTag);
+            }
+            return result;
         }
 
-        public static void Populate(CommandContextStack contextStack, CommandContext context, HaloOnlineCacheContext cacheContext, CacheFile blamCache)
+        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
+            /*
             var portTagCommand = new PortTagCommand(cacheContext, blamCache);
 
             context.AddCommand(portTagCommand);
@@ -57,6 +55,7 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
             context.AddCommand(new PortMultiplayerScenarioCommand(cacheContext, blamCache, portTagCommand));
             context.AddCommand(new CopyTagNamesCommand(cacheContext, blamCache));
+            */
 		}
 	}
 }
