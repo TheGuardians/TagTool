@@ -654,16 +654,16 @@ namespace TagTool.Cache
         }
 
         // there are no tag IDs in Halo Online
-        public override CachedTag GetTagByID(uint ID) => GetTagByIndex((int)ID);
+        public override CachedTag GetTag(uint ID) => GetTag((int)ID);
 
-        public override CachedTag GetTagByIndex(int index)
+        public override CachedTag GetTag(int index)
         {
             if (index < 0 || index > Tags.Count)
                 return null;
             return Tags[index];
         }
 
-        public override CachedTag GetTagByName(string name, Tag groupTag)
+        public override CachedTag GetTag(string name, Tag groupTag)
         {
             foreach (var tag in Tags)
             {

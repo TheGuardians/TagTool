@@ -106,7 +106,7 @@ namespace TagTool.Cache
                 return false;
             }
 
-            instance = TagCache.GetTagByIndex(index);
+            instance = TagCache.GetTag(index);
             return true;
         }
 
@@ -161,7 +161,7 @@ namespace TagTool.Cache
                     return false;
                 }
 
-                result = TagCache.GetTagByIndex(tagIndex);
+                result = TagCache.GetTag(tagIndex);
 
                 if (result == null) // failsafe for null tags
                     result = TagCache.CreateCachedTag(tagIndex, TagGroup.None);
@@ -257,13 +257,13 @@ namespace TagTool.Cache
                 if (name.TrySplit('.', out var hexNamePieces))
                     name = hexNamePieces[0];
 
-                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || (TagCache.GetTagByIndex(tagIndex) == null))
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || (TagCache.GetTag(tagIndex) == null))
                 {
                     result = null;
                     return false;
                 }
 
-                result = TagCache.GetTagByIndex(tagIndex);
+                result = TagCache.GetTag(tagIndex);
                 return true;
             }
 
@@ -353,9 +353,9 @@ namespace TagTool.Cache
         public CacheVersion Version;
         public virtual IEnumerable<CachedTag> TagTable { get; }
         public int Count => TagTable.Count();
-        public abstract CachedTag GetTagByID(uint ID);
-        public abstract CachedTag GetTagByIndex(int index);
-        public abstract CachedTag GetTagByName(string name, Tag groupTag);
+        public abstract CachedTag GetTag(uint ID);
+        public abstract CachedTag GetTag(int index);
+        public abstract CachedTag GetTag(string name, Tag groupTag);
         
         public abstract CachedTag AllocateTag(TagGroup type, string name = null);
 

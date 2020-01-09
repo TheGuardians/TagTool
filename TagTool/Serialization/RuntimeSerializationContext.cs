@@ -49,7 +49,7 @@ namespace TagTool.Serialization
 
         public CachedTag GetTagByIndex(int index)
         {
-            return (index >= 0 && index < Cache.TagCache.Count) ? Cache.TagCache.GetTagByIndex(index) : null;
+            return (index >= 0 && index < Cache.TagCache.Count) ? Cache.TagCache.GetTag(index) : null;
         }
 
         public CachedTag GetTagByName(TagGroup group, string name)

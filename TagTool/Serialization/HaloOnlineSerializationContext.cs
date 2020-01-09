@@ -80,12 +80,12 @@ namespace TagTool.Serialization
 
         public virtual CachedTag GetTagByIndex(int index)
         {
-            return Context.TagCacheGenHO.GetTagByIndex(index);
+            return Context.TagCacheGenHO.GetTag(index);
         }
 
         public virtual CachedTag GetTagByName(TagGroup group, string name)
         {
-            return Context.TagCache.GetTagByName(name, group.Tag);
+            return Context.TagCache.GetTag(name, group.Tag);
         }
 
         public IDataBlock CreateBlock()

@@ -178,9 +178,9 @@ namespace TagTool.Cache
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
-        public override CachedTag GetTagByID(uint ID) => GetTagByIndex((int)(ID & 0xFFFF));
+        public override CachedTag GetTag(uint ID) => GetTag((int)(ID & 0xFFFF));
 
-        public override CachedTag GetTagByIndex(int index)
+        public override CachedTag GetTag(int index)
         {
             if (index > 0 && index < Tags.Count)
                 return Tags[index];
@@ -188,7 +188,7 @@ namespace TagTool.Cache
                 return null;
         }
 
-        public override CachedTag GetTagByName(string name, Tag groupTag)
+        public override CachedTag GetTag(string name, Tag groupTag)
         {
             foreach (var tag in Tags)
             {
@@ -556,8 +556,8 @@ namespace TagTool.Cache
         {
             using (var cacheStream = Cache.OpenCacheRead())
             {
-                ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCache.GetTagByName("there they are all standing in a row", "zone"));
-                ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCache.GetTagByID(0xE1760001));
+                ResourceGestalt = Cache.Deserialize<CacheFileResourceGestalt>(cacheStream, Cache.TagCache.GetTag("there they are all standing in a row", "zone"));
+                ResourceLayoutTable = Cache.Deserialize<CacheFileResourceLayoutTable>(cacheStream, Cache.TagCache.GetTag(0xE1760001));
             }
 
             isLoaded = true;

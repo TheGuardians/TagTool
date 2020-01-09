@@ -158,7 +158,7 @@ namespace TagTool.Commands.Tags
 
             foreach (var tagIndex in indices)
             {
-                var tag = (CachedTagHaloOnline)Cache.TagCache.GetTagByIndex(tagIndex);
+                var tag = (CachedTagHaloOnline)Cache.TagCache.GetTag(tagIndex);
 
                 if (tag == null)
                     continue;

@@ -43,7 +43,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 foreach (var tagIndex in tagIndices)
                 {
-                    var instance = Cache.TagCache.GetTagByIndex(tagIndex);
+                    var instance = Cache.TagCache.GetTag(tagIndex);
 
                     if (instance == null || !instance.IsInGroup("jmad"))
                         continue;
