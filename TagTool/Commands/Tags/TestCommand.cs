@@ -38,7 +38,7 @@ namespace TagTool.Commands
             {
                 foreach (var tag in Cache.TagCache.TagTable)
                 {
-                    if (tag.Group.Tag == "bitm" && tag.Name == @"levels\solo\010_jungle\010_jungle_010_bsp_050_cubemaps")
+                    if (tag.Group.Tag == "bitm")
                     {
                         var bitmap = Cache.Deserialize<Bitmap>(stream, tag);
 

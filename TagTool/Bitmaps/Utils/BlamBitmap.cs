@@ -19,6 +19,7 @@ public class BaseBitmap
     public BitmapType Type;
     public BitmapImageCurve Curve;
     public BitmapFlags Flags;
+    public int MipMapOffset;
     public byte[] Data;
 
     public int NearestHeight;
@@ -33,6 +34,7 @@ public class BaseBitmap
         Type = image.Type;
         Flags = image.Flags;
         Curve = image.Curve;
+        MipMapOffset = image.MipMapOffset;
         UpdateFormat(image.Format);
     }
 
@@ -46,6 +48,7 @@ public class BaseBitmap
         Type = def.BitmapType;
         Flags = image.Flags;
         Curve = image.Curve;
+        MipMapOffset = image.MipMapOffset;
         UpdateFormat(image.Format);
     }
 
@@ -58,6 +61,7 @@ public class BaseBitmap
         Type = definition.BitmapType;
         Flags = image.Flags;
         Curve = image.Curve;
+        MipMapOffset = image.MipMapOffset;
         UpdateFormat(image.Format);
     }
 
@@ -86,6 +90,7 @@ public class BaseBitmap
             Flags = image.Flags;
             UpdateFormat(image.Format);
         }
+        MipMapOffset = image.MipMapOffset;
         Curve = image.Curve;
     }
 

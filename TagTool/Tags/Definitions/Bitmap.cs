@@ -245,7 +245,7 @@ namespace TagTool.Tags.Definitions
             public int DataSize;
 
             public int Unknown20;
-            public int HighResolutionOffset;
+            public int MipMapOffset;
             public int Unknown28;
             public int Unknown2C;
         }
