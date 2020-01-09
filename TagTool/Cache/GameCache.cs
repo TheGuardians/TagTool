@@ -211,6 +211,100 @@ namespace TagTool.Cache
             result = Tag.Null;
             return name == "none" || name == "null";
         }
+
+        public bool TryGetTag(string name, out CachedTag result)
+        {
+            if (name.Length == 0)
+            {
+                result = null;
+                return false;
+            }
+
+            if (name == "null")
+            {
+                result = null;
+                return true;
+            }
+
+            if (name == "*")
+            {
+                if (TagCache.Count == 0)
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.TagTable.Last();
+                return true;
+            }
+
+            if (name.StartsWith("*."))
+            {
+                if (!name.TrySplit('.', out var startNamePieces) || !TryParseGroupTag(startNamePieces[1], out var starGroupTag))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.TagTable.Last(tag => tag != null && tag.IsInGroup(starGroupTag));
+                return true;
+            }
+
+            if (name.StartsWith("0x"))
+            {
+                name = name.Substring(2);
+
+                if (name.TrySplit('.', out var hexNamePieces))
+                    name = hexNamePieces[0];
+
+                if (!int.TryParse(name, NumberStyles.HexNumber, null, out int tagIndex) || (TagCache.GetTagByIndex(tagIndex) == null))
+                {
+                    result = null;
+                    return false;
+                }
+
+                result = TagCache.GetTagByIndex(tagIndex);
+                return true;
+            }
+
+            if (!name.TrySplit('.', out var namePieces) || !TryParseGroupTag(namePieces[namePieces.Length - 1], out var groupTag))
+                throw new Exception($"Invalid tag name: {name}");
+
+            //var tagName = namePieces[0];
+
+            var tagName = name.Substring(0, name.Length - (1 + namePieces[namePieces.Length - 1].Length));
+
+            foreach (var instance in TagCache.TagTable)
+            {
+                if (instance is null)
+                    continue;
+
+                if (instance.IsInGroup(groupTag) && instance.Name == tagName)
+                {
+                    result = instance;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
+        public CachedTag GetTag(string name)
+        {
+            if (TryGetTag(name, out var result))
+                return result;
+
+            throw new KeyNotFoundException(name);
+        }
+
+        public Tag ParseGroupTag(string name)
+        {
+            if (!TryParseGroupTag(name, out Tag result))
+                return Tag.Null;
+            else
+                return result;
+        }
     }
 
     public abstract class CachedTag
@@ -262,6 +356,7 @@ namespace TagTool.Cache
         public abstract CachedTag GetTagByID(uint ID);
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
+        
         public abstract CachedTag AllocateTag(TagGroup type, string name = null);
 
         public abstract CachedTag CreateCachedTag(int index, TagGroup group, string name = null);
@@ -289,46 +384,6 @@ namespace TagTool.Cache
                 (t != null) &&
                 (t.DefinitionOffset >= 0));
 
-        public bool TryGetTag(int index, out CachedTag instance)
-        {
-            if (index < 0 || index >= TagTable.Count())
-            {
-                instance = null;
-                return false;
-            }
-
-            instance = GetTagByIndex(index);
-            return true;
-        }
-
-        public bool TryGetTag<T>(string name, out CachedTag result) where T : TagStructure
-        {
-            if (name == "none" || name == "null")
-            {
-                result = null;
-                return true;
-            }
-
-            if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
-            {
-                var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
-
-                foreach (var instance in TagTable)
-                {
-                    if (instance is null)
-                        continue;
-
-                    if (instance.IsInGroup(groupTag) && instance.Name == name)
-                    {
-                        result = instance;
-                        return true;
-                    }
-                }
-            }
-
-            result = null;
-            return false;
-        }
 
     }
 

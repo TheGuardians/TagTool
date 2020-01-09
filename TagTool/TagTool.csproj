@@ -195,7 +195,11 @@
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Commands\Tags\CreateTagCommand.cs" />
     <Compile Include="Commands\Tags\DeleteTagCommand.cs" />
+    <Compile Include="Commands\Tags\ImportTagCommand.cs" />
     <Compile Include="Commands\Tags\ListNullTagsCommand.cs" />
+    <Compile Include="Commands\Tags\ListUnnamedTagsCommand.cs" />
+    <Compile Include="Commands\Tags\TagDependencyCommand.cs" />
+    <Compile Include="Commands\Tags\TagResourceCommand.cs" />
     <Compile Include="Direct3D\D3DObjectType.cs" />
     <Compile Include="Bitmaps\Utils\BitmapConverterNew.cs" />
     <Compile Include="Bitmaps\Utils\BitmapDdsFormatDetection.cs" />

@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ImportTagCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheContextHaloOnline Cache { get; }
 
-        public ImportTagCommand(HaloOnlineCacheContext cacheContext)
+        public ImportTagCommand(GameCacheContextHaloOnline cache)
             : base(true,
 
                   "ImportTag",
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Tags
 
                   "Overwrites a tag with data from a file.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 2)
                 return false;
 
-            if (!CacheContext.TryGetTag(args[0], out var instance))
+            if (!Cache.TryGetCachedTag(args[0], out var instance))
                 return false;
 
             var path = args[1];
@@ -43,8 +43,8 @@ namespace TagTool.Commands.Tags
                 inStream.Read(data, 0, data.Length);
             }
 
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
-                CacheContext.TagCache.SetTagDataRaw(stream, instance, data);
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
+                Cache.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)instance, data);
 
             Console.WriteLine($"Imported 0x{data.Length:X} bytes.");
 

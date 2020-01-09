@@ -34,6 +34,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DuplicateTagCommand(cache));    
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
+            context.AddCommand(new ListUnnamedTagsCommand(cache));
 
             // Halo Online Specific Commands
             if (cache.GetType() == typeof(GameCacheContextHaloOnline))
@@ -42,6 +43,9 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new SaveTagNamesCommand(hoCache));
                 context.AddCommand(new SaveModdedTagsCommand(hoCache));
                 context.AddCommand(new CreateTagCommand(hoCache));
+                context.AddCommand(new ImportTagCommand(hoCache));
+                context.AddCommand(new TagDependencyCommand(hoCache));
+                context.AddCommand(new TagResourceCommand(hoCache));
             }
 
             // porting related

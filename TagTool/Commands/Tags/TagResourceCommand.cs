@@ -10,9 +10,9 @@ namespace TagTool.Commands.Tags
 {
     class TagResourceCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheContextHaloOnline Cache { get; }
 
-        public TagResourceCommand(HaloOnlineCacheContext cacheContext) :
+        public TagResourceCommand(GameCacheContextHaloOnline cache) :
             base(true,
 
                 "TagResource",
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
                 "Note that this is extremely low-level and does NOT edit tags\n" +
                 "which reference imported resources.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -61,11 +61,11 @@ namespace TagTool.Commands.Tags
                     location = ResourceLocation.ResourcesB;
                     break;
 
-                case "render_models" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                case "render_models" when Cache.Version >= CacheVersion.HaloOnline235640:
                     location = ResourceLocation.RenderModels;
                     break;
 
-                case "lightmaps" when CacheContext.Version >= CacheVersion.HaloOnline235640:
+                case "lightmaps" when Cache.Version >= CacheVersion.HaloOnline235640:
                     location = ResourceLocation.Lightmaps;
                     break;
 
@@ -96,10 +96,10 @@ namespace TagTool.Commands.Tags
         {
             var indices = new List<int>();
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             using (var reader = new EndianReader(cacheStream))
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in Cache.TagCacheGenHO.Tags)
                 {
                     if (instance == null || instance.ResourcePointerOffsets.Count == 0)
                         continue;
@@ -158,13 +158,13 @@ namespace TagTool.Commands.Tags
 
             foreach (var tagIndex in indices)
             {
-                var tag = CacheContext.GetTag(tagIndex);
+                var tag = (CachedTagHaloOnline)Cache.TagCache.GetTagByIndex(tagIndex);
 
                 if (tag == null)
                     continue;
 
                 var tagName = (tag.Name == null || tag.Name.Length == 0) ? $"0x{tag.Index:X4}" : tag.Name;
-                var groupName = CacheContext.GetString(tag.Group.Name);
+                var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
                 Console.WriteLine($"[Index: 0x{tag.Index:X4}, Offset: 0x{tag.HeaderOffset:X8}, Size: 0x{tag.TotalSize:X4}] {tagName}.{groupName}");
             }
@@ -197,9 +197,9 @@ namespace TagTool.Commands.Tags
                 }
             }
 
-            var cache = CacheContext.GetResourceCache(location);
+            var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
 
-            using (var stream = CacheContext.OpenResourceCacheRead(location))
+            using (var stream = Cache.ResourceCaches.OpenResourceCacheRead(location))
             {
                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 {
@@ -218,9 +218,9 @@ namespace TagTool.Commands.Tags
 
             var inPath = args[3];
 
-            var cache = CacheContext.GetResourceCache(location);
+            var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
 
-            using (var stream = CacheContext.OpenResourceCacheReadWrite(location))
+            using (var stream = Cache.ResourceCaches.OpenResourceCacheReadWrite(location))
             {
                 var data = File.ReadAllBytes(inPath);
                 var compressedSize = cache.Compress(stream, (int)index, data);

@@ -526,6 +526,28 @@ namespace TagTool.Cache
             serializer.Serialize(dataContext, Header);
         }
 
+
+        public HashSet<CachedTagHaloOnline> FindDependencies(CachedTagHaloOnline tag)
+        {
+            var result = new HashSet<CachedTagHaloOnline>();
+            FindDependencies(result, tag);
+            return result;
+        }
+
+        private void FindDependencies(ISet<CachedTagHaloOnline> results, CachedTagHaloOnline tag)
+        {
+            foreach (var index in tag.Dependencies)
+            {
+                if (index < 0 || index >= Tags.Count)
+                    continue;
+                var dependency = Tags[index];
+                if (results.Contains(dependency))
+                    continue;
+                results.Add(dependency);
+                FindDependencies(results, dependency);
+            }
+        }
+
         /// <summary>
         /// Loads tag file names from the appropriate tag_list.csv file.
         /// </summary>
@@ -992,7 +1014,7 @@ namespace TagTool.Cache
             return resourceReference.HaloOnlinePageableResource;
         }
 
-        private LoadedResourceCache GetResourceCache(ResourceLocation location)
+        public LoadedResourceCache GetResourceCache(ResourceLocation location)
         {
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
             {
@@ -1425,7 +1447,7 @@ namespace TagTool.Cache
         // Utilities
         //
 
-        private class LoadedResourceCache
+        public class LoadedResourceCache
         {
             public ResourceCacheHaloOnline Cache { get; set; }
             public FileInfo File { get; set; }
