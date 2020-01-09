@@ -5,6 +5,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using static TagTool.Cache.CacheVersion;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Geometry
 {
@@ -59,10 +60,22 @@ namespace TagTool.Geometry
         public byte[] Unused2 = new byte[4];
 
         [TagField(Length = 8, MinVersion = Halo3Retail)]
-        public ushort[] VertexBufferIndices;
+        public short[] VertexBufferIndices;
 
         [TagField(Length = 2, MinVersion = Halo3Retail)]
-        public ushort[] IndexBufferIndices;
+        public short[] IndexBufferIndices;
+
+        /// <summary>
+        /// These should match the values in VertexBufferIndices, taken from the resource. Each time modification to render geometry is made these should be set.
+        /// </summary>
+        [TagField(Flags = Runtime)]
+        public VertexBufferDefinition[] ResourceVertexBuffers = new VertexBufferDefinition[8];
+
+        /// <summary>
+        /// These should match the values in IndexBufferIndices, taken from the resource. Each time modification to render geometry is made these should be set.
+        /// </summary>
+        [TagField(Flags = Runtime)]
+        public IndexBufferDefinition[] ResourceIndexBuffers = new IndexBufferDefinition[2];
 
         [TagField(MinVersion = Halo3Retail)]
         public MeshFlags Flags;

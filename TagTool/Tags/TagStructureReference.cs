@@ -36,6 +36,6 @@ namespace TagTool.Tags
     public class D3DStructure<T> : TagStructure
     {
         public T Definition;
-        public CacheAddressType AddressType;
+        public CacheAddressType AddressType = CacheAddressType.Definition;
     }
 }

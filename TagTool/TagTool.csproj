@@ -380,7 +380,9 @@
     <Compile Include="Common\GameVoiceOutputSetting.cs" />
     <Compile Include="Common\RealRectangle3d.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferUtils.cs" />
+    <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferConverter.cs" />
+    <Compile Include="Geometry\RenderGeometry\RenderGeometry.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Scripting\Compiler\EndOfFile.cs" />
     <Compile Include="Scripting\Compiler\ScriptCompiler.cs" />
@@ -522,7 +524,6 @@
     <Compile Include="Geometry\PhysicsModel\PhysicsModelBuilder.cs" />
     <Compile Include="Geometry\RenderGeometry\PrimitiveType.cs" />
     <Compile Include="Geometry\RenderGeometry\PRT\PrtType.cs" />
-    <Compile Include="Geometry\RenderGeometry\RenderGeometry.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryClassification.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompression.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompressionFlags.cs" />

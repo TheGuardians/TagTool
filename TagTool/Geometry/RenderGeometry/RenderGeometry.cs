@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Geometry
 {
@@ -129,6 +130,85 @@ namespace TagTool.Geometry
 			{
                 public int Value;
             }
+        }
+
+
+
+        //
+        // Methods
+        //
+
+        /// <summary>
+        /// Set the runtime VertexBufferResources and IndexBufferResources fields given the resource definition
+        /// </summary>
+        /// <param name="resourceDefinition"></param>
+        public void SetResourceBuffers(RenderGeometryApiResourceDefinitionTest resourceDefinition)
+        {
+            foreach(var mesh in Meshes)
+            {
+                foreach(var vertexBufferIndex in mesh.VertexBufferIndices)
+                {
+                    if (vertexBufferIndex != -1)
+                        mesh.ResourceVertexBuffers[vertexBufferIndex] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                }
+
+                foreach (var indexBufferIndex in mesh.IndexBufferIndices)
+                {
+                    if (indexBufferIndex != -1)
+                        mesh.ResourceIndexBuffers[indexBufferIndex] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Generate a valid RenderGeometryApiResourceDefinition from the mesh blocks and sets the values in IndexBufferIndices, VertexBufferIndices
+        /// </summary>
+        /// <returns></returns>
+        public RenderGeometryApiResourceDefinitionTest GetResourceDefinition()
+        {
+            RenderGeometryApiResourceDefinitionTest result = new RenderGeometryApiResourceDefinitionTest
+            {
+                IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(),
+                VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>()
+            };
+
+            // valid for gen3, D3DFixups should also point to the definition.
+            result.IndexBuffers.AddressType = CacheAddressType.Definition;
+            result.VertexBuffers.AddressType = CacheAddressType.Definition;
+
+            foreach (var mesh in Meshes)
+            {
+
+                for(int i = 0; i < mesh.ResourceVertexBuffers.Length; i++)
+                {
+                    var vertexBuffer = mesh.ResourceVertexBuffers[i];
+                    if (vertexBuffer != null)
+                    {
+                        var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                        d3dPointer.Definition = vertexBuffer;
+                        result.VertexBuffers.Add(d3dPointer);
+                        mesh.VertexBufferIndices[i] = (short)(result.VertexBuffers.Elements.Count - 1);
+                    }
+                    else
+                        mesh.VertexBufferIndices[i] = - 1;
+                }
+
+                for (int i = 0; i < mesh.ResourceIndexBuffers.Length; i++)
+                {
+                    var indexBuffer = mesh.ResourceIndexBuffers[i];
+                    if (indexBuffer != null)
+                    {
+                        var d3dPointer = new D3DStructure<IndexBufferDefinition>();
+                        d3dPointer.Definition = indexBuffer;
+                        result.IndexBuffers.Add(d3dPointer);
+                        mesh.IndexBufferIndices[i] = (short)(result.IndexBuffers.Elements.Count - 1);
+                    }
+                    else
+                        mesh.IndexBufferIndices[i] = -1;
+                }
+            }
+
+            return null;
         }
     }
 }
