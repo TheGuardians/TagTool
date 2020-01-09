@@ -39,18 +39,27 @@ namespace TagTool.Commands.Porting
             SoundCacheFileGestalt result;
             using (var stream = cache.TagCache.OpenTagCacheRead())
             {
-                result = cache.Deserialize<SoundCacheFileGestalt>(null, blamTag);
+                result = cache.Deserialize<SoundCacheFileGestalt>(stream, blamTag);
             }
             return result;
         }
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
+
+
+            if(portingCache.GetType() == typeof(GameCacheContextGen3))
+            {
+                var h3Cache = portingCache as GameCacheContextGen3;
+
+            }
+
+
             /*
             var portTagCommand = new PortTagCommand(cacheContext, blamCache);
 
             context.AddCommand(portTagCommand);
-            context.AddCommand(new ExtractXMACommand(cacheContext, blamCache));
+            
             context.AddCommand(new ExtractSoundCommand(cacheContext, blamCache));
             context.AddCommand(new ExtractBitmapCommand(blamCache));
             context.AddCommand(new EditTagCommand(contextStack, blamCache));

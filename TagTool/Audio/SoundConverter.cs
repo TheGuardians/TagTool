@@ -23,7 +23,7 @@ namespace TagTool.Audio
         private static readonly string WAV2CUnk = BaseFileName + " 2 C Unk.wav";
         private static readonly string WAV3BlUnk = BaseFileName + " 3 Bl Unk.wav";
 
-        public static BlamSound ConvertGen3Sound(CacheFile cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
+        public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
         {
             ClearFiles();
             BlamSound blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
@@ -71,11 +71,8 @@ namespace TagTool.Audio
             return cache.GetSoundRaw(handle, size);
         }
 
-        public static BlamSound GetXMA(CacheFile cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
+        public static BlamSound GetXMA(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data)
         {
-            if (cache.ResourceLayoutTable == null || cache.ResourceGestalt == null)
-                cache.LoadResourceTags();
-
             int pitchRangeGestaltIndex = sound.SoundReference.PitchRangeIndex + pitchRangeIndex;
             int permutationGestaltIndex = soundGestalt.PitchRanges[pitchRangeGestaltIndex].FirstPermutationIndex + permutationIndex;
 
