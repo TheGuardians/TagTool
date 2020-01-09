@@ -38,6 +38,8 @@ namespace TagTool.Cache
 
             var interop = mapFile.Header.GetInterop();
 
+            DisplayName = mapFile.Header.GetName() + ".map";
+
             Directory = file.Directory;
 
             if ( interop != null && interop.ResourceBaseAddress == 0)

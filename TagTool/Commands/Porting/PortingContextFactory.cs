@@ -9,7 +9,7 @@ namespace TagTool.Commands.Porting
     {
         public static CommandContext Create(CommandContextStack contextStack, GameCache currentCache, GameCache portingCache)
         {
-            var context = new CommandContext(contextStack.Context, portingCache.Version.ToString());
+            var context = new CommandContext(contextStack.Context, portingCache.DisplayName + "\\tags");
 
             // only support gen3 to HO porting for now, add more later
             if(portingCache.GetType() == typeof(GameCacheContextGen3) && currentCache.GetType() == typeof(GameCacheContextHaloOnline))

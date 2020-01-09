@@ -31,12 +31,13 @@ namespace TagTool.Cache
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
             Directory = directory;
-
+            
             TagCacheGenHO = new TagCacheHaloOnline(directory);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))
                 Version = closestVersion;
 
+            DisplayName = Version.ToString();
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             StringTableHaloOnline = new StringTableHaloOnline(Version, Directory);

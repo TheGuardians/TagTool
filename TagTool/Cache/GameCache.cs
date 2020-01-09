@@ -16,6 +16,7 @@ namespace TagTool.Cache
 {
     public abstract class GameCache
     {
+        public string DisplayName = "default";
         public CacheVersion Version;
         public TagSerializer Serializer;
         public TagDeserializer Deserializer;
