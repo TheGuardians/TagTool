@@ -224,9 +224,14 @@ namespace TagTool.Cache
         /// <summary>
         /// Returns a new CachedTag instance without updating the tag cache.
         /// </summary>
-        public override CachedTag NewCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
             return new CachedTagHaloOnline(index, group, name);
+        }
+
+        public override CachedTag CreateCachedTag()
+        {
+            return new CachedTagHaloOnline(-1, TagGroup.None, null);
         }
 
         /// <summary>

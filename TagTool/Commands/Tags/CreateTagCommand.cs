@@ -110,7 +110,7 @@ namespace TagTool.Commands.Tags
                             Cache.TagCacheGenHO.SetTagDataRaw(stream, oldInstance, new byte[] { });
                         }
 
-                        instance = Cache.TagCache.NewCachedTag(tagIndex, TagGroup.Instances[groupTag]);
+                        instance = Cache.TagCache.CreateCachedTag(tagIndex, TagGroup.Instances[groupTag]);
                         Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)instance;
                     }
                 }

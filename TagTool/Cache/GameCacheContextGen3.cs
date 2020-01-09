@@ -203,9 +203,14 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override CachedTag NewCachedTag(int index, TagGroup group, string name = null)
+        public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
             return new CachedTagGen3(index, group, name);
+        }
+
+        public override CachedTag CreateCachedTag()
+        {
+            return new CachedTagGen3(-1, TagGroup.None, null);
         }
 
         public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();

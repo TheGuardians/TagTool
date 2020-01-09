@@ -210,7 +210,7 @@ namespace TagTool.Serialization
                 SerializeString(block.Writer, (string)value, valueInfo);
             else if (valueType == typeof(Tag))
                 SerializeTag(block, (Tag)value);
-            else if (valueType.BaseType == typeof(CachedTag))
+            else if (valueType.BaseType == typeof(CachedTag) || (valueType == typeof(CachedTag) && value == null))
                 SerializeTagReference(context, block, (CachedTag)value, valueInfo);
             else if (valueType == typeof(CacheAddress))
                 block.Writer.Write(((CacheAddress)value).Value);

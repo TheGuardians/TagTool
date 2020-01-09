@@ -162,6 +162,10 @@ namespace TagTool.Cache
                 }
 
                 result = TagCache.GetTagByIndex(tagIndex);
+
+                if (result == null) // failsafe for null tags
+                    result = TagCache.CreateCachedTag(tagIndex, TagGroup.None);
+
                 return true;
             }
 
@@ -259,7 +263,9 @@ namespace TagTool.Cache
         public abstract CachedTag GetTagByIndex(int index);
         public abstract CachedTag GetTagByName(string name, Tag groupTag);
         public abstract CachedTag AllocateTag(TagGroup type, string name = null);
-        public abstract CachedTag NewCachedTag(int index, TagGroup group, string name = null);
+
+        public abstract CachedTag CreateCachedTag(int index, TagGroup group, string name = null);
+        public abstract CachedTag CreateCachedTag();
 
         public abstract Stream OpenTagCacheRead();
         public abstract FileStream OpenTagCacheReadWrite();
