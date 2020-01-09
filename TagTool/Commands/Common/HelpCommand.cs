@@ -55,6 +55,13 @@ namespace TagTool.Commands.Common
             var commands = context.Commands
                 .Where(c => !ignore.Contains(c.Name) && IsAvailable(context, c))
                 .OrderBy(c => c.Name);
+
+            if(commands.Count() == 0)
+            {
+                Console.WriteLine();
+                return;
+            }
+
             var width = commands.Max(c => c.Name.Length);
             var format = "{0,-" + width + "}  {1}";
 
