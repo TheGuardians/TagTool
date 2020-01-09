@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -10,7 +11,12 @@ namespace TagTool.Commands.Porting
         {
             var context = new CommandContext(contextStack.Context, portingCache.Version.ToString());
 
-            Populate(contextStack, context, currentCache, portingCache);
+            // only support gen3 to HO porting for now, add more later
+            if(portingCache.GetType() == typeof(GameCacheContextGen3) && currentCache.GetType() == typeof(GameCacheContextHaloOnline))
+                Populate(contextStack, context, currentCache, portingCache);
+
+            // add tags command to the new cache
+            TagCacheContextFactory.Populate(contextStack, context, portingCache);
 
             return context;
         }

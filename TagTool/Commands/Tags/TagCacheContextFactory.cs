@@ -5,6 +5,7 @@ using TagTool.Commands.Definitions;
 using TagTool.Commands.Files;
 using TagTool.Commands.Strings;
 using TagTool.Commands.Sounds;
+using TagTool.Commands.Porting;
 
 namespace TagTool.Commands.Tags
 {
@@ -13,7 +14,12 @@ namespace TagTool.Commands.Tags
         public static CommandContext Create(CommandContextStack contextStack, GameCache cache)
         {
             var context = new CommandContext(contextStack.Context, "tags");
+            Populate(contextStack, context, cache);
+            return context;
+        }
 
+        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache cache)
+        {
             context.AddCommand(new TestCommand(cache));
 
             context.AddCommand(new DumpLogCommand());
@@ -31,7 +37,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListAllStringsCommand(cache));
             context.AddCommand(new StringIdCommand(cache));
             context.AddCommand(new GenerateAssemblyPluginsCommand());
-            context.AddCommand(new DuplicateTagCommand(cache));    
+            context.AddCommand(new DuplicateTagCommand(cache));
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
             context.AddCommand(new ListUnnamedTagsCommand(cache));
@@ -57,8 +63,7 @@ namespace TagTool.Commands.Tags
             // porting related
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new UpdateMapFilesCommand(cache));
-            
-            return context;
+            context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
         }
     }
 }
