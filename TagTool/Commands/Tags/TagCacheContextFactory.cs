@@ -46,6 +46,12 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ImportTagCommand(hoCache));
                 context.AddCommand(new TagDependencyCommand(hoCache));
                 context.AddCommand(new TagResourceCommand(hoCache));
+                context.AddCommand(new ListUnusedTagsCommand(hoCache));
+                context.AddCommand(new GetTagInfoCommand(hoCache));
+                context.AddCommand(new GetTagAddressCommand());
+                context.AddCommand(new ExtractTagCommand(hoCache));
+                context.AddCommand(new ExtractAllTagsCommand(hoCache));
+                context.AddCommand(new ExportTagModCommand(hoCache));
             }
 
             // porting related

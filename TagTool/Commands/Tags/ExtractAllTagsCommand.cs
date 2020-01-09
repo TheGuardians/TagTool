@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ExtractAllTagsCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheContextHaloOnline Cache { get; }
 
-        public ExtractAllTagsCommand(HaloOnlineCacheContext cacheContext)
+        public ExtractAllTagsCommand(GameCacheContextHaloOnline cache)
             : base(false,
 
                   "ExtractAllTags",
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Tags
 
                   "Extracts all tags in the current tag cache to a specific directory.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -43,14 +43,14 @@ namespace TagTool.Commands.Tags
                     return false;
             }
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             {
-                foreach (var instance in CacheContext.TagCache.Index)
+                foreach (var instance in Cache.TagCache.TagTable)
                 {
                     if (instance == null)
                         continue;
 
-                    var tagName = instance.Name + "." + CacheContext.GetString(instance.Group.Name);
+                    var tagName = instance.Name + "." + Cache.StringTable.GetString(instance.Group.Name);
                     var tagPath = Path.Combine(directory, tagName);
                     var tagDirectory = Path.GetDirectoryName(tagPath);
 
@@ -60,7 +60,7 @@ namespace TagTool.Commands.Tags
                     using (var tagStream = File.Create(tagPath))
                     using (var writer = new BinaryWriter(tagStream))
                     {
-                        writer.Write(CacheContext.TagCache.ExtractTagRaw(cacheStream, instance));
+                        writer.Write(Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, (CachedTagHaloOnline)instance));
                     }
 
                     Console.WriteLine($"Exported {tagName}");

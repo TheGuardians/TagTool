@@ -9,9 +9,9 @@ namespace TagTool.Commands.Tags
 {
     class ExportTagModCommand : Command
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCacheContextHaloOnline Cache { get; }
 
-        public ExportTagModCommand(HaloOnlineCacheContext cacheContext) :
+        public ExportTagModCommand(GameCacheContextHaloOnline cache) :
             base(false,
 
                 "ExportTagMod",
@@ -29,7 +29,7 @@ namespace TagTool.Commands.Tags
                 "\n" +
                 "Warning: Tags with a ton of dependencies will cause the command to take a long time to finish.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -45,7 +45,7 @@ namespace TagTool.Commands.Tags
 
             var scriptFile = new FileInfo(Path.Combine(directory.FullName, $"{name}.cmds"));
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             using (var scriptWriter = new StreamWriter(scriptFile.Exists ? scriptFile.Open(FileMode.Open, FileAccess.ReadWrite) : scriptFile.Create()))
             {
                 var tagIndices = new HashSet<int>();
@@ -62,7 +62,7 @@ namespace TagTool.Commands.Tags
                         {
                             if (!tagIndices.Contains(entry))
                             {
-                                var instance = CacheContext.TagCache.Index[entry];
+                                var instance = Cache.TagCacheGenHO.Tags[entry];
 
                                 if (instance == null || instance.IsInGroup("rmt2") || instance.IsInGroup("rmdf") || instance.IsInGroup("vtsh") || instance.IsInGroup("pixl") || instance.IsInGroup("glvs") || instance.IsInGroup("glps"))
                                     continue;
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Tags
 
                 while ((line = Console.ReadLine()) != "")
                 {
-                    if (!CacheContext.TryGetTag(line, out var instance))
+                    if (!Cache.TryGetTag(line, out var instance))
                         continue;
 
                     LoadTagDependencies(instance.Index);
@@ -117,17 +117,17 @@ namespace TagTool.Commands.Tags
                     if (importedTags.Contains(index))
                         continue;
 
-                    var instance = CacheContext.GetTag(index);
+                    var instance = (CachedTagHaloOnline)Cache.TagCache.GetTag(index);
 
                     if (instance == null)
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = CacheContext.GetString(instance.Group.Name);
+                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
 
                     var file = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}.{groupName}"));
-                    var data = CacheContext.TagCache.ExtractTagRaw(cacheStream, instance);
+                    var data = Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, instance);
 
                     if (!file.Directory.Exists)
                         file.Directory.Create();
@@ -153,16 +153,16 @@ namespace TagTool.Commands.Tags
                     if (completedTags.Contains(index))
                         continue;
 
-                    var instance = CacheContext.GetTag(index);
+                    var instance = (CachedTagHaloOnline)Cache.TagCache.GetTag(index);
 
                     if (instance == null)
                         continue;
 
                     var tagName = instance.Name ?? $"0x{instance.Index:X4}";
 
-                    var groupName = CacheContext.GetString(instance.Group.Name);
+                    var groupName = Cache.StringTable.GetString(instance.Group.Name);
 
-                    var tagDefinition = CacheContext.Deserialize(cacheStream, instance);
+                    var tagDefinition = Cache.Deserialize(cacheStream, instance);
 
                     FileInfo ExportResource(PageableResource pageable, string resourceGroup, string suffix = "")
                     {
@@ -170,12 +170,12 @@ namespace TagTool.Commands.Tags
                             return null;
 
                         var outFile = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}{suffix}.{resourceGroup}"));
-                        var cache = CacheContext.GetResourceCache(location);
+                        var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
 
                         if (!outFile.Directory.Exists)
                             outFile.Directory.Create();
 
-                        using (var stream = CacheContext.OpenResourceCacheRead(location))
+                        using (var stream = cache.Cache.OpenCacheRead())
                         using (var outStream = outFile.Create())
                             cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
 

@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ExtractTagCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheContextHaloOnline Cache { get; }
 
-        public ExtractTagCommand(HaloOnlineCacheContext cacheContext)
+        public ExtractTagCommand(GameCacheContextHaloOnline cache)
             : base(true,
 
                   "ExtractTag",
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Tags
 
                   "Writes tag data to a file. (To be used with 'ImportTag')")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
             if (args.Count != 2)
                 return false;
 
-            if (!CacheContext.TryGetTag(args[0], out var instance))
+            if (!Cache.TryGetTag(args[0], out var instance))
                 return false;
 
             var file = new FileInfo(args[1]);
@@ -38,8 +38,8 @@ namespace TagTool.Commands.Tags
 
             byte[] data;
 
-            using (var stream = CacheContext.OpenTagCacheRead())
-                data = CacheContext.TagCache.ExtractTagRaw(stream, instance);
+            using (var stream = Cache.TagCache.OpenTagCacheRead())
+                data = Cache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
 
             using (var outStream = file.Create())
             {

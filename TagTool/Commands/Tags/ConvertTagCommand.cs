@@ -19,10 +19,10 @@ namespace TagTool.Commands.Tags
 {
     class ConvertTagCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheContextHaloOnline CacheContext { get; }
         private bool IsDecalShader { get; set; } = false;
 
-        public ConvertTagCommand(HaloOnlineCacheContext info)
+        public ConvertTagCommand(GameCacheContextHaloOnline info)
             : base(false,
 
                   "ConvertTag",
@@ -59,7 +59,7 @@ namespace TagTool.Commands.Tags
                 tagMap = TagVersionMap.ParseTagVersionMap(reader);
 
             // Load destination cache files
-            var destCacheContext = new HaloOnlineCacheContext(new DirectoryInfo(targetDir));
+            var destCacheContext = new GameCacheContextHaloOnline(new DirectoryInfo(targetDir));
             using (var stream = destCacheContext.OpenTagCacheRead())
                 destCacheContext.TagCache = new TagCache(stream, destCacheContext.LoadTagNames());
             
@@ -67,8 +67,8 @@ namespace TagTool.Commands.Tags
             Console.WriteLine("CONVERTING FROM VERSION {0} TO {1}", CacheVersionDetection.GetBuildName(CacheContext.Version), CacheVersionDetection.GetBuildName(destCacheContext.Version));
             Console.WriteLine();
             
-            CachedTagInstance resultTag;
-            using (Stream srcStream = CacheContext.OpenTagCacheRead(), destStream = destCacheContext.OpenTagCacheReadWrite())
+            CachedTagHaloOnline resultTag;
+            using (Stream srcStream = CacheContext.TagCache.OpenTagCacheRead(), destStream = destCacheContext.OpenTagCacheReadWrite())
                 resultTag = ConvertTag(srcTag, CacheContext, srcStream, destCacheContext, destStream, tagMap);
 
             Console.WriteLine();
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private CachedTagInstance ConvertTag(CachedTagInstance srcTag, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+        private CachedTagHaloOnline ConvertTag(CachedTagHaloOnline srcTag, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
             TagPrinter.PrintTagShort(srcTag);
 
@@ -134,7 +134,7 @@ namespace TagTool.Commands.Tags
 
             // Allocate a new tag and create a mapping for it
 
-            CachedTagInstance instance = null;
+            CachedTagHaloOnline instance = null;
 
             if (srcCacheContext.Version != destCacheContext.Version)
             {
@@ -142,7 +142,7 @@ namespace TagTool.Commands.Tags
                 {
                     if (destCacheContext.TagCache.Index[i] == null)
                     {
-                        destCacheContext.TagCache.Index[i] = instance = new CachedTagInstance(i, TagGroup.Instances[srcTag.Group.Tag]);
+                        destCacheContext.TagCache.Index[i] = instance = new CachedTagHaloOnline(i, TagGroup.Instances[srcTag.Group.Tag]);
                         break;
                     }
                 }
@@ -156,7 +156,7 @@ namespace TagTool.Commands.Tags
                 }
                 else
                 {
-                    destCacheContext.TagCache.Index[srcTag.Index] = instance = new CachedTagInstance(srcTag.Index, TagGroup.Instances[srcTag.Group.Tag], srcTag.Name);
+                    destCacheContext.TagCache.Index[srcTag.Index] = instance = new CachedTagHaloOnline(srcTag.Index, TagGroup.Instances[srcTag.Group.Tag], srcTag.Name);
                 }
             }
 
@@ -179,7 +179,7 @@ namespace TagTool.Commands.Tags
             return instance;
         }
 
-        private object Convert(object data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+        private object Convert(object data, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
 			switch (data)
 			{
@@ -189,8 +189,8 @@ namespace TagTool.Commands.Tags
 				case string _:
 				case ValueType _:
 					return data;
-				case CachedTagInstance cachedTagInstance:
-					return ConvertTag(cachedTagInstance, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
+				case CachedTagHaloOnline CachedTagHaloOnline:
+					return ConvertTag(CachedTagHaloOnline, srcCacheContext, srcStream, destCacheContext, destStream, tagMap);
 				case PageableResource pageableResource:
 					return ConvertResource(pageableResource, srcCacheContext, destCacheContext);
 				case RenderGeometry renderGeometry:
@@ -210,7 +210,7 @@ namespace TagTool.Commands.Tags
 			return data;
 		}
 
-        private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags data, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private ObjectTypeFlags ConvertObjectTypeFlags(ObjectTypeFlags data, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (destCacheContext.Version < CacheVersion.HaloOnline449175)
                 if (!Enum.TryParse(data.HaloOnline.ToString(), out data.Halo3ODST))
@@ -219,7 +219,7 @@ namespace TagTool.Commands.Tags
             return data;
         }
 
-        private Array ConvertArray(Array array, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+        private Array ConvertArray(Array array, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
             if (array.GetType().GetElementType().IsPrimitive)
                 return array;
@@ -232,7 +232,7 @@ namespace TagTool.Commands.Tags
             return array;
         }
 
-        private object ConvertList(object list, Type type, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+        private object ConvertList(object list, Type type, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap)
         {
             if (type.GenericTypeArguments[0].IsPrimitive)
                 return list;
@@ -248,7 +248,7 @@ namespace TagTool.Commands.Tags
             return list;
         }
 
-		private IList ConvertCollection(IList collection, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap)
+		private IList ConvertCollection(IList collection, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap)
 		{
 			if (collection.Count == 0 || collection[0].GetType().IsPrimitive)
 				return collection;
@@ -262,7 +262,7 @@ namespace TagTool.Commands.Tags
 			return collection;
 		}
 
-		private T ConvertStructure<T>(T data, HaloOnlineCacheContext srcCacheContext, Stream srcStream, HaloOnlineCacheContext destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
+		private T ConvertStructure<T>(T data, GameCacheContextHaloOnline srcCacheContext, Stream srcStream, GameCacheContextHaloOnline destCacheContext, Stream destStream, TagVersionMap tagMap) where T : TagStructure
         {
 			// Convert each field
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), destCacheContext.Version))
@@ -282,20 +282,20 @@ namespace TagTool.Commands.Tags
             return data;
         }
 
-        private StringId ConvertStringID(StringId stringId, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private StringId ConvertStringID(StringId stringId, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (stringId == StringId.Invalid)
                 return stringId;
-            var srcString = srcCacheContext.GetString(stringId);
+            var srcString = srcCacheContext.StringTable.GetString(stringId);
             if (srcString == null)
                 return StringId.Invalid;
-            var destStringID = destCacheContext.GetStringId(srcString);
+            var destStringID = destCacheContext.StringTable.GetStringId(srcString);
             if (destStringID == StringId.Invalid)
                 destStringID = destCacheContext.StringIdCache.AddString(srcString);
             return destStringID;
         }
 
-        private PageableResource ConvertResource(PageableResource resource, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private PageableResource ConvertResource(PageableResource resource, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (resource == null || resource.Page.Index < 0 || !resource.GetLocation(out var location))
                 return null;
@@ -325,7 +325,7 @@ namespace TagTool.Commands.Tags
             return location;
         }
 
-        private RenderGeometry ConvertGeometry(RenderGeometry geometry, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private RenderGeometry ConvertGeometry(RenderGeometry geometry, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (geometry == null || geometry.Resource.HaloOnlinePageableResource == null || geometry.Resource.HaloOnlinePageableResource.Page.Index < 0 || !geometry.Resource.HaloOnlinePageableResource.GetLocation(out var location))
                 return geometry;
@@ -385,7 +385,7 @@ namespace TagTool.Commands.Tags
             return geometry;
         }
 
-        private void ConvertVertexBuffer(HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext, VertexBufferDefinition buffer, MemoryStream inStream, IVertexStream inVertexStream, MemoryStream outStream, IVertexStream outVertexStream)
+        private void ConvertVertexBuffer(GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext, VertexBufferDefinition buffer, MemoryStream inStream, IVertexStream inVertexStream, MemoryStream outStream, IVertexStream outVertexStream)
         {
             if (buffer.Data.Size == 0)
                 return;
@@ -463,7 +463,7 @@ namespace TagTool.Commands.Tags
                 writeFunc(readFunc());
         }
 
-        private GameObjectType ConvertGameObjectType(GameObjectType objectType, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private GameObjectType ConvertGameObjectType(GameObjectType objectType, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (srcCacheContext.Version >= CacheVersion.HaloOnline498295)
                 if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.HaloOnline.ToString(), out var result))
@@ -472,7 +472,7 @@ namespace TagTool.Commands.Tags
             return objectType;
         }
 
-        private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType, HaloOnlineCacheContext srcCacheContext, HaloOnlineCacheContext destCacheContext)
+        private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType, GameCacheContextHaloOnline srcCacheContext, GameCacheContextHaloOnline destCacheContext)
         {
             if (srcCacheContext.Version >= CacheVersion.HaloOnline498295)
                 if (Enum.TryParse<GameObjectTypeHalo3ODST>(objectType.HaloOnline.ToString(), out var result))
@@ -687,7 +687,7 @@ namespace TagTool.Commands.Tags
                 modes.RemoveAt(2);
         }
         
-        private void FixDecalSystems(HaloOnlineCacheContext destCacheContext, int firstNewIndex)
+        private void FixDecalSystems(GameCacheContextHaloOnline destCacheContext, int firstNewIndex)
         {
             // decs tags need to be updated to use the old rmdf for decals,
             // because the decal planes seem to be generated by the engine and
@@ -698,7 +698,7 @@ namespace TagTool.Commands.Tags
             // pass, but we'd have to store the rmdf somewhere and frankly I'm
             // too lazy to do that...
 
-            var firstDecalSystemTag = destCacheContext.TagCache.Index.FindFirstInGroup("decs");
+            var firstDecalSystemTag = destCacheContext.TagCache.FindFirstInGroup("decs");
             if (firstDecalSystemTag == null)
                 return;
             using (var stream = destCacheContext.OpenTagCacheReadWrite())
