@@ -48,29 +48,23 @@ namespace TagTool.Commands.Porting
         {
 
 
-            if(portingCache.GetType() == typeof(GameCacheContextGen3))
+            if(currentCache.GetType() == typeof(GameCacheContextHaloOnline))
             {
-                var h3Cache = portingCache as GameCacheContextGen3;
-
+                var hoCache = currentCache as GameCacheContextHaloOnline;
+                var portTagCommand = new PortTagCommand(hoCache, portingCache);
+                context.AddCommand(portTagCommand);
+                context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));
             }
 
-
-            /*
-            var portTagCommand = new PortTagCommand(cacheContext, blamCache);
-
-            context.AddCommand(portTagCommand);
             
-            context.AddCommand(new ExtractSoundCommand(cacheContext, blamCache));
-            context.AddCommand(new ExtractBitmapCommand(blamCache));
-            context.AddCommand(new EditTagCommand(contextStack, blamCache));
-            context.AddCommand(new ListBlamTagsCommand(cacheContext, blamCache));
+            /*
+            
+
+ 
             context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
             context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
-            context.AddCommand(new NameBlamTagCommand(cacheContext, blamCache));
-            context.AddCommand(new MergeAnimationGraphsCommand(cacheContext, blamCache, portTagCommand));
             context.AddCommand(new PortMultiplayerScenarioCommand(cacheContext, blamCache, portTagCommand));
-            context.AddCommand(new CopyTagNamesCommand(cacheContext, blamCache));
             */
-		}
-	}
+        }
+    }
 }

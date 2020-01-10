@@ -103,7 +103,7 @@ namespace TagTool.Commands.Porting
 					}
 			}
 
-            if (initialStringIdCount != CacheContext.StringIdCache.Strings.Count)
+            if (initialStringIdCount != CacheContext.StringTable.Count)
                 CacheContext.StringTable.Save();
 
 			CacheContext.TagCacheGenHO.SaveTagNames();
@@ -1387,13 +1387,13 @@ namespace TagTool.Commands.Porting
 
 			var edStringId = BlamCache.Version < CacheVersion.Halo3Retail ?
 				CacheContext.StringTable.GetStringId(value) :
-				CacheContext.StringIdCache.GetStringId(stringId.Set, value);
+				CacheContext.StringTable.GetStringId(value);
 
 			if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
 				return PortedStringIds[stringId.Value] = edStringId;
 
-			if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringIdCache.Contains(value))
-				return PortedStringIds[stringId.Value] = CacheContext.StringIdCache.AddString(value);
+			if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringTable.Contains(value))
+				return PortedStringIds[stringId.Value] = CacheContext.StringTable.AddString(value);
 
 			return StringId.Invalid;
 		}

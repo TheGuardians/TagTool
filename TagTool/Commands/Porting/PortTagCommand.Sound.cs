@@ -390,7 +390,7 @@ namespace TagTool.Commands.Porting
                 for (int j = 0; j < dialogue.Vocalizations.Count; j++)
                 {
                     var vocalizationH3 = dialogue.Vocalizations[j];
-                    if (CacheContext.StringIdCache.GetString(vocalization.Name).Equals(CacheContext.StringIdCache.GetString(vocalizationH3.Name)))
+                    if (CacheContext.StringTable.GetString(vocalization.Name).Equals(CacheContext.StringTable.GetString(vocalizationH3.Name)))
                     {
                         vocalization.Flags = vocalizationH3.Flags;
                         vocalization.Unknown = vocalizationH3.Unknown;

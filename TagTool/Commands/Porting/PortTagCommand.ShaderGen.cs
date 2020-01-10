@@ -150,9 +150,9 @@ namespace TagTool.Commands.Porting
 
             if (shaderCortana.Material.Index == 0)
             {
-                if (CacheContext.StringIdCache.Contains("default_material"))
+                if (CacheContext.StringTable.Contains("default_material"))
                 {
-                    shaderCortana.Material = CacheContext.StringIdCache.GetStringId("default_material");
+                    shaderCortana.Material = CacheContext.StringTable.GetStringId("default_material");
                 }
             }
 

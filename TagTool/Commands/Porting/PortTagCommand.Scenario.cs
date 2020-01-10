@@ -1034,10 +1034,10 @@ namespace TagTool.Commands.Porting
             if (value == null)
                 return;
 
-            if (!CacheContext.StringIdCache.Contains(value))
+            if (!CacheContext.StringTable.Contains(value))
                 ConvertStringId(new StringId((uint)blamStringId, BlamCache.Version));
 
-            var edStringId = CacheContext.StringIdCache.GetStringId(value);
+            var edStringId = CacheContext.StringTable.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
 

@@ -93,9 +93,9 @@ namespace TagTool.Commands.Porting
             var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
             foreach (var a in edRmt2.SamplerArguments)
-                edMaps.Add(CacheContext.StringIdCache.GetString(a.Name));
+                edMaps.Add(CacheContext.StringTable.GetString(a.Name));
             foreach (var a in edRmt2.VectorArguments)
-                edArgs.Add(CacheContext.StringIdCache.GetString(a.Name));
+                edArgs.Add(CacheContext.StringTable.GetString(a.Name));
 
             // The bitmaps are default textures.
             // Arguments are probably default values. I took the values that appeared the most frequently, assuming they are the default value.
@@ -778,7 +778,7 @@ namespace TagTool.Commands.Porting
                 {
                     foreach (var c in edPixl.Shaders[edPixl.DrawModes[a.Key].Offset].PCParameters)
                     {
-                        var ParameterName = CacheContext.StringIdCache.GetString(c.ParameterName);
+                        var ParameterName = CacheContext.StringTable.GetString(c.ParameterName);
 
                         if (ParameterName == b.ParameterName && b.RegisterType == c.RegisterType)
                         {

@@ -17,7 +17,6 @@ namespace TagTool.Cache
     public class GameCacheContextHaloOnline : GameCache
     {
         public static readonly string TagNamesFile = "tag_list.csv";
-        public StringIdCache StringIdCache { get; set; }
         public TagCacheHaloOnline TagCacheGenHO;
         public StringTableHaloOnline StringTableHaloOnline;
         public ResourceCachesHaloOnline ResourceCaches;
@@ -887,7 +886,9 @@ namespace TagTool.Cache
 
         public override StringId AddString(string newString)
         {
-            throw new NotImplementedException();
+            var strIndex = Count;
+            Add(newString);
+            return GetStringId(strIndex);
         }
 
         public override void Save()

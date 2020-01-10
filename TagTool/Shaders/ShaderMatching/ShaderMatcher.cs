@@ -138,7 +138,7 @@ namespace TagTool.Shaders.ShaderMatching
                         for (var i = 0; i < vectorArgsCount; i++)
                         {
                             reader.SeekTo(instance.DefinitionOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
-                            arguments.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            arguments.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
@@ -151,7 +151,7 @@ namespace TagTool.Shaders.ShaderMatching
                         for (var i = 0; i < samplerArgsCount; i++)
                         {
                             reader.SeekTo(instance.DefinitionOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
-                            bitmaps.Add(CacheContext.StringIdCache.GetString(reader.ReadStringId()));
+                            bitmaps.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
