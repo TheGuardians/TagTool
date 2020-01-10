@@ -62,10 +62,13 @@ namespace TagTool.Commands.Porting
         
         private TagResourceReference ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
-            var image = bitmap.Images[imageIndex];
             BaseBitmap baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex);
+
+            if (baseBitmap.Type == BitmapType.Array)
+                baseBitmap.Type = BitmapType.Texture3D;
+
             BitmapUtils.SetBitmapImageData(baseBitmap, bitmap.Images[imageIndex]);
-            var bitmapResourceDefinition = BitmapUtils.CreateEmptyBitmapTextureInteropResource(baseBitmap);
+            var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(baseBitmap);
             var resourceReference = CacheContext.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
             return resourceReference;
         }

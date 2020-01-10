@@ -168,7 +168,7 @@ namespace TagTool.Bitmaps
                 Width = (short)bitmap.Width,
                 Height = (short)bitmap.Height,
                 Depth = (byte)bitmap.Depth,
-                MipmapCount = (byte)(bitmap.MipMapCount != 0 ? bitmap.MipMapCount + 1 : 0),
+                MipmapCount = (byte)(bitmap.MipMapCount + 1),
                 HighResInSecondaryResource = 0,
             };
 
@@ -288,7 +288,7 @@ namespace TagTool.Bitmaps
             };
         }
 
-        public static BitmapTextureInteropResourceTest CreateEmptyBitmapTextureInteropResource(BaseBitmap bitmap)
+        public static BitmapTextureInteropResourceTest CreateBitmapTextureInteropResource(BaseBitmap bitmap)
         {
             var result = CreateEmptyBitmapTextureInteropResource();
             result.Texture.Definition.PrimaryResourceData.Data = bitmap.Data;
