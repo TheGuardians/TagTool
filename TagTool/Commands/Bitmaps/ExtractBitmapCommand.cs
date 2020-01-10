@@ -33,10 +33,18 @@ namespace TagTool.Commands.Bitmaps
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            string directory;
+
+            if (args.Count == 1)
+            {
+                directory = args[0];
+            }
+            else if (args.Count == 0)
+            {
+                directory = "Bitmaps";
+            }
+            else
                 return false;
-            
-            var directory = args[0];
 
             if (!Directory.Exists(directory))
             {
@@ -74,6 +82,12 @@ namespace TagTool.Commands.Bitmaps
                 var outPath = Path.Combine(ddsOutDir, bitmapName);
 
                 var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
+
+                if(ddsFile == null)
+                {
+                    Console.WriteLine($"Invalid bitmap data");
+                    return true;
+                }
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))

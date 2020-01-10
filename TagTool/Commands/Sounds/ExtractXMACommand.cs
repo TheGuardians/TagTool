@@ -1,16 +1,9 @@
 using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Geometry;
 using TagTool.IO;
-using TagTool.Tags;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Collections;
-using TagTool.Serialization;
 using TagTool.Audio.Converter;
 using TagTool.Audio;
 using TagTool.Commands.Porting;

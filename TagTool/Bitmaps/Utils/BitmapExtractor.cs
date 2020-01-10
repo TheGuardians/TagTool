@@ -4,6 +4,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using TagTool.Bitmaps.DDS;
+using TagTool.Bitmaps.Utils;
 
 namespace TagTool.Bitmaps
 {
@@ -57,9 +58,22 @@ namespace TagTool.Bitmaps
 
         public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
-            DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
-            return new DDSFile(header, data);
+            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
+            {
+                byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
+                DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
+                return new DDSFile(header, data);
+            }
+            else if (cache.GetType() == typeof(GameCacheContextGen3))
+            {
+                var baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(cache, bitmap, imageIndex);
+                if (baseBitmap == null)
+                    return null;
+                return new DDSFile(baseBitmap);
+            }
+            else
+                return null;
+            
         }
 
         public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex)
