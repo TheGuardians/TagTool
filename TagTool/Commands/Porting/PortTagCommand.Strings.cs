@@ -111,12 +111,16 @@ namespace TagTool.Commands.Porting
             return unic;
         }
 
-        private void MergeMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTagInstance edTag, CacheFile.IndexItem h3Tag)
+        private void MergeMultilingualUnicodeStringList(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, CachedTag edTag, CachedTag h3Tag)
         {
+            MultilingualUnicodeStringList h3Def;
             var edDef = CacheContext.Deserialize<MultilingualUnicodeStringList>(cacheStream, edTag);
-
-            var h3Def = BlamCache.Deserializer.Deserialize<MultilingualUnicodeStringList>(
-                new CacheSerializationContext(ref BlamCache, h3Tag));
+            
+            using (var blamStream = BlamCache.TagCache.OpenTagCacheRead())
+            {
+                h3Def = BlamCache.Deserialize<MultilingualUnicodeStringList>(blamStream, h3Tag);
+            }
+               
 
             ConvertMultilingualUnicodeStringList(cacheStream, resourceStreams, h3Def);
 

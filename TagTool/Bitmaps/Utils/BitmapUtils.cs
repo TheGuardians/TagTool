@@ -161,6 +161,51 @@ namespace TagTool.Bitmaps
             return (size != 0) && ((size & (size - 1)) == 0);
         }
 
+        public static BitmapTextureInteropDefinition CreateBitmapTextureInteropDefinition(BaseBitmap bitmap)
+        {
+            var result = new BitmapTextureInteropDefinition
+            {
+                Width = (short)bitmap.Width,
+                Height = (short)bitmap.Height,
+                Depth = (byte)bitmap.Depth,
+                MipmapCount = (byte)(bitmap.MipMapCount != 0 ? bitmap.MipMapCount + 1 : 0),
+                HighResInSecondaryResource = 0,
+            };
+
+            result.BitmapType = bitmap.Type;
+            result.Format = bitmap.Format;
+
+            switch (result.Format)
+            {
+                case BitmapFormat.Dxt1:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT1;
+                    result.Flags |= BitmapFlags.Compressed;
+                    break;
+                case BitmapFormat.Dxt3:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT3;
+                    result.Flags |= BitmapFlags.Compressed;
+                    break;
+                case BitmapFormat.Dxt5:
+                    result.D3DFormat = D3DFormat.D3DFMT_DXT5;
+                    result.Flags |= BitmapFlags.Compressed;
+                    break;
+                case BitmapFormat.Dxn:
+                    result.D3DFormat = D3DFormat.D3DFMT_ATI2;
+                    result.Flags |= BitmapFlags.Compressed;
+                    break;
+                default:
+                    result.D3DFormat = D3DFormat.D3DFMT_UNKNOWN;
+                    break;
+            }
+
+            result.Curve = bitmap.Curve;
+
+            if (IsPowerOfTwo(bitmap.Width) && IsPowerOfTwo(bitmap.Height))
+                result.Flags |= BitmapFlags.PowerOfTwoDimensions;
+
+            return result;
+        }
+
         public static BitmapTextureInteropDefinition CreateBitmapTextureInteropDefinition(DDSHeader header)
         {
             var result = new BitmapTextureInteropDefinition
@@ -241,6 +286,31 @@ namespace TagTool.Bitmaps
                     AddressType = CacheAddressType.Definition
                 }
             };
+        }
+
+        public static BitmapTextureInteropResourceTest CreateEmptyBitmapTextureInteropResource(BaseBitmap bitmap)
+        {
+            var result = CreateEmptyBitmapTextureInteropResource();
+            result.Texture.Definition.PrimaryResourceData.Data = bitmap.Data;
+            result.Texture.Definition.Bitmap = CreateBitmapTextureInteropDefinition(bitmap);
+            return result;
+        }
+
+        public static void SetBitmapImageData(BaseBitmap bitmap, Bitmap.Image image)
+        {
+            image.Width = (short)bitmap.Width;
+            image.Height = (short)bitmap.Height;
+            image.Depth = (sbyte)bitmap.Depth;
+            image.Format = bitmap.Format;
+            image.Type = bitmap.Type;
+            image.MipmapCount = (sbyte)bitmap.MipMapCount;
+            image.DataSize = bitmap.Data.Length;
+            image.XboxFlags = BitmapFlagsXbox.None;
+            image.Flags = bitmap.Flags;
+
+            if (image.Format == BitmapFormat.Dxn)
+                image.Flags |= BitmapFlags.Unknown3;
+
         }
     }
 }

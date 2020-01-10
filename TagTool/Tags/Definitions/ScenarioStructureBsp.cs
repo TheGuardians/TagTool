@@ -117,7 +117,7 @@ namespace TagTool.Tags.Definitions
         public List<SkyOwnerClusterBlock> SkyOwnerCluster;
         public List<ConveyorSurface> ConveyorSurfaces;
         public List<BreakableSurface> BreakableSurfaces;
-        public List<PathfindingDatum> PathfindingData;
+        public List<TagPathfindingDatum> PathfindingData;
         public uint Unknown30;
         public uint Unknown31;
         public uint Unknown32;
@@ -643,7 +643,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xA0)]
-        public class PathfindingDatum : TagStructure
+        public class TagPathfindingDatum : TagStructure
         {
             public List<Sector> Sectors;
             public List<Link> Links;
@@ -661,6 +661,48 @@ namespace TagTool.Tags.Definitions
             public List<Seam> Seams;
             public List<JumpSeam> JumpSeams;
             public List<Door> Doors;
+
+            public StructureBspCacheFileTagResourcesTest.PathfindingDatum CreateResourcePathfinding()
+            {
+                var result = new StructureBspCacheFileTagResourcesTest.PathfindingDatum
+                {
+                    Sectors = new TagBlock<Sector>(CacheAddressType.Data, Sectors),
+                    Links = new TagBlock<Link>(CacheAddressType.Data, Links),
+                    References = new TagBlock<Reference>(CacheAddressType.Data, References),
+                    Bsp2dNodes = new TagBlock<Bsp2dNode>(CacheAddressType.Data, Bsp2dNodes),
+                    Vertices = new TagBlock<Vertex>(CacheAddressType.Data, Vertices),
+                    PathfindingHints = new TagBlock<PathfindingHint>(CacheAddressType.Data, PathfindingHints),
+                    InstancedGeometryReferences = new TagBlock<InstancedGeometryReference>(CacheAddressType.Data, InstancedGeometryReferences),
+                    StructureChecksum = StructureChecksum,
+                    GiantPathfinding =  new TagBlock<GiantPathfindingBlock>(CacheAddressType.Data, GiantPathfinding),
+                    Doors = new TagBlock<Door>(CacheAddressType.Data, Doors),
+                    // test
+                    ObjectReferences = new TagBlock<ObjectReference>(CacheAddressType.Data, ObjectReferences),
+                    Seams = new TagBlock<Seam>(CacheAddressType.Data, Seams),
+                    JumpSeams = new TagBlock<JumpSeam>(CacheAddressType.Data, JumpSeams)
+                };
+                // set address type to Data
+                foreach(var reference in result.ObjectReferences)
+                {
+                    reference.Bsps.AddressType = CacheAddressType.Data;
+                    foreach(var bsp in reference.Bsps)
+                    {
+                        bsp.Bsp2dRefs.AddressType = CacheAddressType.Data;
+                    }
+                }
+                foreach(var seam in result.Seams)
+                {
+                    seam.LinkIndices.AddressType = CacheAddressType.Data;
+                }
+                foreach(var jumpSeam in result.JumpSeams)
+                {
+                    jumpSeam.JumpIndices.AddressType = CacheAddressType.Data;
+                }
+                
+
+                return result;
+            }
+
 
             [TagStructure(Size = 0x8)]
             public class Sector : TagStructure
@@ -755,7 +797,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused = new byte[2];
 
-                public List<BspReference> Bsps;
+                public TagBlock<BspReference> Bsps;
 
                 public int ObjectUniqueID;
                 public short OriginBspIndex;
@@ -771,7 +813,7 @@ namespace TagTool.Tags.Definitions
                     [TagField(Flags = Padding, Length = 2)]
                     public byte[] Unused = new byte[2];
 
-                    public List<Bsp2dRef> Bsp2dRefs;
+                    public TagBlock<Bsp2dRef> Bsp2dRefs;
 
                     public int VertexOffset;
 
@@ -853,7 +895,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0xC)]
             public class Seam : TagStructure
             {
-                public List<LinkIndexBlock> LinkIndices;
+                public TagBlock<LinkIndexBlock> LinkIndices;
 
                 [TagStructure(Size = 0x4)]
                 public class LinkIndexBlock : TagStructure
@@ -873,7 +915,7 @@ namespace TagTool.Tags.Definitions
 
                 public float Length;
 
-                public List<JumpIndexBlock> JumpIndices;
+                public TagBlock<JumpIndexBlock> JumpIndices;
 
                 [TagStructure(Size = 0x4)]
                 public class JumpIndexBlock : TagStructure

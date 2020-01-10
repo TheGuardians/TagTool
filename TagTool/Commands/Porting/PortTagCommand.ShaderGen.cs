@@ -19,11 +19,11 @@ namespace TagTool.Commands.Porting
         {
             var render_method_option_indices = shaderCortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
 
-            //CachedTagInstance newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
+            //CachedTag newCortanaShaderInstance = CacheContext.TagCache.AllocateTag(TagGroup.Instances[groupTag]);
             //var ho_cortana_shader = (ShaderCortana)Activator.CreateInstance(typeof(ShaderCortana));
 
             var rmdf_instance = shaderCortana.BaseRenderMethod;
-            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(new TagSerializationContext(cacheStream, CacheContext, rmdf_instance));
+            var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdf_instance);
 
             //var shader_instance = CacheContext.GetTag<Shader>(@"shaders\invalid");
             //var shader = CacheContext.Deserialize<Shader>(new TagSerializationContext(cacheStream, CacheContext, shader_instance));
@@ -51,7 +51,7 @@ namespace TagTool.Commands.Porting
                 var rmop_instance = selected_option.Option;
                 if (rmop_instance != null)
                 {
-                    var rmop = CacheContext.Deserialize<RenderMethodOption>(new TagSerializationContext(cacheStream, CacheContext, rmop_instance));
+                    var rmop = CacheContext.Deserialize<RenderMethodOption>(cacheStream, rmop_instance);
 
                     templateOptions.AddRange(rmop.Options);
                 }
@@ -64,7 +64,7 @@ namespace TagTool.Commands.Porting
                     render_method_option_indices,
                     cacheStream,
                     resourceStreams,
-                    out CachedTagInstance rmt2Instance,
+                    out CachedTag rmt2Instance,
                     out RenderMethodTemplate newRMT2);
 
                 shader_properties.Template = rmt2Instance;
@@ -72,7 +72,7 @@ namespace TagTool.Commands.Porting
             }
             else
             {
-                rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(new TagSerializationContext(cacheStream, CacheContext, shader_properties.Template));
+                rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, shader_properties.Template);
             }
             //shader_properties.DrawModes = rmt2.DrawModes;
 
@@ -84,7 +84,7 @@ namespace TagTool.Commands.Porting
             {
                 var rmt2SamplerArgument = rmt2.SamplerArguments[rmt2SamplerIndex];
                 var name = rmt2SamplerArgument.Name;
-                var name_str = CacheContext.GetString(name);
+                var name_str = CacheContext.StringTable.GetString(name);
                 var shaderSamplerArgument = new RenderMethod.ShaderProperty.ShaderMap();
                 {
                     foreach (var importData in shaderCortana.ImportData)
@@ -189,7 +189,7 @@ namespace TagTool.Commands.Porting
             RenderMethod.ShaderProperty.Argument shaderArgument = new RenderMethod.ShaderProperty.Argument();
 
             var name = vectorArgument.Name;
-            var nameStr = CacheContext.GetString(name);
+            var nameStr = CacheContext.StringTable.GetString(name);
 
             foreach (var importData in shaderCortana.ImportData)
             {
@@ -296,7 +296,7 @@ namespace TagTool.Commands.Porting
             for (int i = 0; i < args.Count; i++)
             {
                 var varg = args[i];
-                if (name == CacheContext.GetString(varg.Name))
+                if (name == CacheContext.StringTable.GetString(varg.Name))
                 {
                     index = i;
                     break;
@@ -305,7 +305,7 @@ namespace TagTool.Commands.Porting
             return index;
         }
 
-        private void GenerateCortanaRMT2Tag(List<int> options, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, out CachedTagInstance rmt2Instance, out RenderMethodTemplate rmt2)
+        private void GenerateCortanaRMT2Tag(List<int> options, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, out CachedTag rmt2Instance, out RenderMethodTemplate rmt2)
         {
             string template_name = $@"shaders\cortana_templates\_{string.Join("_", options)}";
             rmt2 = new RenderMethodTemplate();
@@ -313,10 +313,10 @@ namespace TagTool.Commands.Porting
             rmt2Instance = CacheContext.TagCache.AllocateTag(rmt2_group);
             var pixl = new PixelShader();
             var pixlGroup = TagGroup.Instances[new TagStructureInfo(typeof(PixelShader)).GroupTag];
-            CachedTagInstance newPIXLInstance = CacheContext.TagCache.AllocateTag(pixlGroup);
+            CachedTag newPIXLInstance = CacheContext.TagCache.AllocateTag(pixlGroup);
             var vtsh = new VertexShader();
             var vtshGroup = TagGroup.Instances[new TagStructureInfo(typeof(VertexShader)).GroupTag];
-            CachedTagInstance newVTSHInstance = CacheContext.TagCache.AllocateTag(vtshGroup);
+            CachedTag newVTSHInstance = CacheContext.TagCache.AllocateTag(vtshGroup);
 
             rmt2.PixelShader = newPIXLInstance;
             rmt2.VertexShader = newVTSHInstance;
@@ -395,7 +395,7 @@ namespace TagTool.Commands.Porting
 
                     var shaderArgument = new RenderMethodTemplate.ShaderArgument
                     {
-                        Name = CacheContext.GetStringId(samplerRegister.Name)
+                        Name = CacheContext.StringTable.GetStringId(samplerRegister.Name)
                     };
                     rmt2.SamplerArguments.Add(shaderArgument);
 
@@ -427,7 +427,7 @@ namespace TagTool.Commands.Porting
 
                     var shaderArgument = new RenderMethodTemplate.ShaderArgument
                     {
-                        Name = CacheContext.GetStringId(samplerRegister.Name)
+                        Name = CacheContext.StringTable.GetStringId(samplerRegister.Name)
                     };
                     rmt2.VectorArguments.Add(shaderArgument);
 
@@ -447,7 +447,7 @@ namespace TagTool.Commands.Porting
 
                     var shaderArgument = new RenderMethodTemplate.ShaderArgument
                     {
-                        Name = CacheContext.GetStringId(vectorRegister.Name)
+                        Name = CacheContext.StringTable.GetStringId(vectorRegister.Name)
                     };
                     rmt2.VectorArguments.Add(shaderArgument);
 
@@ -456,16 +456,16 @@ namespace TagTool.Commands.Porting
             }
 
             newPIXLInstance.Name = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newPIXLInstance), pixl);
+            CacheContext.Serialize(cacheStream, newPIXLInstance, pixl);
             newVTSHInstance.Name = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, newVTSHInstance), vtsh);
+            CacheContext.Serialize(cacheStream, newVTSHInstance, vtsh);
             rmt2Instance.Name = template_name;
-            CacheContext.Serialize(new TagSerializationContext(cacheStream, CacheContext, rmt2Instance), rmt2);
+            CacheContext.Serialize(cacheStream, rmt2Instance, rmt2);
 
-            CacheContext.SaveTagNames();
+            CacheContext.TagCacheGenHO.SaveTagNames();
         }
 
-        public static PixelShaderBlock GeneratePixelShaderBlock(HaloOnlineCacheContext cacheContext, ShaderGeneratorResult shader_gen_result)
+        public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheContextHaloOnline cacheContext, ShaderGeneratorResult shader_gen_result)
         {
             var pixelShaderBlock = new PixelShaderBlock
             {
@@ -499,7 +499,7 @@ namespace TagTool.Commands.Porting
                         throw new NotImplementedException();
                 }
 
-                shaderParameter.ParameterName = cacheContext.GetStringId(register.Name);
+                shaderParameter.ParameterName = cacheContext.StringTable.GetStringId(register.Name);
 
                 pixelShaderBlock.PCParameters.Add(shaderParameter);
             }

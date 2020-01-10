@@ -213,6 +213,46 @@ namespace TagTool.Cache
             return name == "none" || name == "null";
         }
 
+        public bool TryGetTag<T>(string name, out CachedTag result) where T : TagStructure
+        {
+            if (name == "none" || name == "null")
+            {
+                result = null;
+                return true;
+            }
+
+            if (Tags.TagDefinition.Types.Values.Contains(typeof(T)))
+            {
+                var groupTag = Tags.TagDefinition.Types.First((KeyValuePair<Tag, Type> entry) => entry.Value == typeof(T)).Key;
+
+                foreach (var instance in TagCache.TagTable)
+                {
+                    if (instance is null)
+                        continue;
+
+                    if (instance.IsInGroup(groupTag) && instance.Name == name)
+                    {
+                        result = instance;
+                        return true;
+                    }
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
+        public CachedTag GetTag<T>(string name) where T : TagStructure
+        {
+            if (TryGetTag<T>(name, out var result))
+                return result;
+
+            var attribute = TagStructure.GetTagStructureAttribute(typeof(T));
+            var typeName = attribute.Name ?? typeof(T).Name.ToSnakeCase();
+
+            throw new KeyNotFoundException($"'{typeName}' tag \"{name}\"");
+        }
+
         public bool TryGetTag(string name, out CachedTag result)
         {
             if (name.Length == 0)
@@ -385,6 +425,8 @@ namespace TagTool.Cache
                 (t != null) &&
                 (t.DefinitionOffset >= 0));
 
+        public CachedTag FindFirstInGroup(Tag groupTag) =>
+            NonNull().FirstOrDefault(t => t.IsInGroup(groupTag));
 
     }
 

@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTagInstance instance, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private ScenarioStructureBsp ConvertScenarioStructureBsp(ScenarioStructureBsp sbsp, CachedTag instance, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, resourceStreams);
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, resourceStreams);
@@ -35,76 +35,55 @@ namespace TagTool.Commands.Porting
 
             var resource = sbsp.Geometry.Resource;
 
-            if (resource != null && resource.HaloOnlinePageableResource.Page.Index >= 0 && resource.HaloOnlinePageableResource.GetLocation(out var location))
+            if (resource != null && resource.HaloOnlinePageableResource.Page.Index >= 0)
             {
-                var resourceContext = new ResourceSerializationContext(CacheContext, sbsp.Geometry.Resource.HaloOnlinePageableResource);
-                var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+                var definition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(resource);
 
-                using (var edResourceStream = new MemoryStream())
-                using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
+               
+
+                foreach (var cluster in sbsp.Clusters)
                 {
-                    var pageable = sbsp.Geometry.Resource.HaloOnlinePageableResource;
+                    List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
 
-                    if (pageable == null)
-                        throw new ArgumentNullException("sbsp.Geometry.Resource");
-
-                    if (!edResourceStream.CanWrite)
-                        throw new ArgumentException("The output stream is not open for writing", "outStream");
-                    
-                    pageable.GetLocation(out var resourceLocation);
-
-                    var cache = CacheContext.GetResourceCache(resourceLocation);
-
-                    if (!resourceStreams.ContainsKey(resourceLocation))
+                    foreach (var grid in cluster.DecoratorGrids)
                     {
-                        resourceStreams[resourceLocation] = FlagIsSet(PortingFlags.Memory) ?
-                            new MemoryStream() :
-                            (Stream)CacheContext.OpenResourceCacheReadWrite(resourceLocation);
+                        grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3;
+                        grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
 
-                        if (FlagIsSet(PortingFlags.Memory))
-                            using (var resourceStream = CacheContext.OpenResourceCacheRead(resourceLocation))
-                                resourceStream.CopyTo(resourceStreams[resourceLocation]);
-                    }
-
-                    cache.Decompress(resourceStreams[resourceLocation], pageable.Page.Index, pageable.Page.CompressedBlockSize, edResourceStream);
-
-                    var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
-
-                    foreach (var cluster in sbsp.Clusters)
-                    {
-                        List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
-
-                        foreach (var grid in cluster.DecoratorGrids)
+                        if (grid.Amount == 0)
+                            newDecoratorGrids.Add(grid);
+                        else
                         {
-                            grid.DecoratorGeometryIndex_HO = grid.DecoratorGeometryIndex_H3;
-                            grid.DecoratorIndex_HO = grid.DecoratorIndex_H3;
+                            List<TinyPositionVertex> vertices = new List<TinyPositionVertex>();
 
-                            if (grid.Amount == 0)
-                                newDecoratorGrids.Add(grid);
-                            else
+                            // Get the buffer the right grid
+                            var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex_HO].Definition;
+                            // Get the offset from the grid
+
+                            using (var edResourceStream = new MemoryStream(vertexBuffer.Data.Data))
+                            using (var edResourceReader = new EndianReader(edResourceStream, EndianFormat.LittleEndian))
                             {
-                                List<TinyPositionVertex> vertices = new List<TinyPositionVertex>();
+                                var inVertexStream = VertexStreamFactory.Create(CacheVersion.HaloOnline106708, edResourceStream);
 
-                                // Get the buffer the right grid
-                                var vertexBuffer = definition.VertexBuffers[grid.DecoratorGeometryIndex_HO].Definition;
-                                // Get the offset from the grid
-                                edResourceStream.Position = vertexBuffer.Data.Address.Offset + grid.DecoratorGeometryOffset;
+                                edResourceStream.Position = grid.DecoratorGeometryOffset;
                                 // Read all vertices and add to the list
                                 for (int i = 0; i < grid.Amount; i++)
                                     vertices.Add(inVertexStream.ReadTinyPositionVertex());
-
-                                // Get the new grids
-                                List<ScenarioStructureBsp.Cluster.DecoratorGrid> newGrids = ConvertDecoratorGrid(vertices, grid);
-
-                                // Add all to list
-                                foreach (var newGrid in newGrids)
-                                    newDecoratorGrids.Add(newGrid);
                             }
-                        }
+  
+                            // Get the new grids
+                            List<ScenarioStructureBsp.Cluster.DecoratorGrid> newGrids = ConvertDecoratorGrid(vertices, grid);
 
-                        cluster.DecoratorGrids = newDecoratorGrids;
+                            // Add all to list
+                            foreach (var newGrid in newGrids)
+                                newDecoratorGrids.Add(newGrid);
+                        }
                     }
+
+                    cluster.DecoratorGrids = newDecoratorGrids;
                 }
+
+                
             }
 
             //

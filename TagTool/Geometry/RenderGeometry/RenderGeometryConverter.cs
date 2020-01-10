@@ -22,7 +22,7 @@ namespace TagTool.Geometry
         private List<WaterConversionData> WaterData;
         private int CurrentWaterBuffer;
 
-        public RenderGeometryConverter(GameCacheContextHaloOnline hoCache, GameCache sourceCache)
+        public RenderGeometryConverter(GameCache hoCache, GameCache sourceCache)
         {
             HOCache = hoCache;
             SourceCache = sourceCache;

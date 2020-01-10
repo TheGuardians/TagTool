@@ -474,8 +474,9 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private object ConvertGen2RenderModel(CachedTagInstance edTag, RenderModel mode, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private object ConvertGen2RenderModel(CachedTag edTag, RenderModel mode, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
+            /*
             foreach (var section in mode.Sections)
             {
                 var compressor = new VertexCompressor(
@@ -868,7 +869,8 @@ namespace TagTool.Commands.Porting
 
                 mode = result;
             }
-
+            */
+            Console.WriteLine("CONVERTING H2 NOT SUPPORTED");
             return mode;
         }
     }

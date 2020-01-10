@@ -149,7 +149,7 @@ namespace TagTool.Commands.Porting
                 Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
                 Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
 
-                CachedTagInstance edTag = null;
+                CachedTag edTag = null;
                 TagGroup edGroup = null;
 
                 var groupTag = new Tag("Lbsp");
@@ -160,10 +160,10 @@ namespace TagTool.Commands.Porting
                 }
                 else
                 {
-                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.GetStringId("scenario_lightmap_bsp_data"));
+                    edGroup = new TagGroup(groupTag, Tag.Null, Tag.Null, CacheContext.StringTable.GetStringId("scenario_lightmap_bsp_data"));
                 }
 
-                edTag = CacheContext.TagCache.AllocateTag(edGroup);
+                edTag = CacheContext.TagCacheGenHO.AllocateTag(edGroup);
 
                 if(scenarioLightmap.Lightmaps.Count != 1)
                     edTag.Name = $"{blamTagName}_{i}_data";

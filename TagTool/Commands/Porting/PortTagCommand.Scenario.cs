@@ -30,7 +30,7 @@ namespace TagTool.Commands.Porting
                 scnr.MapType == ScenarioMapType.SinglePlayer &&
                 Flags.HasFlag(PortingFlags.Recursive))
             {
-                var pathfindingBsps = new List<StructureBspCacheFileTagResources>();
+                var pathfindingBsps = new List<StructureBspCacheFileTagResourcesTest>();
 
                 Console.Write("Loading pathfinding bsps: ");
 
@@ -38,161 +38,18 @@ namespace TagTool.Commands.Porting
                 {
                     Console.Write($"{bspIndex}, ");
 
-                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(
-                        new TagSerializationContext(cacheStream, CacheContext, scnr.StructureBsps[bspIndex].StructureBsp));
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[bspIndex].StructureBsp);
 
-                    StructureBspCacheFileTagResources pathfindingBsp = null;
+                    StructureBspCacheFileTagResourcesTest pathfindingBsp = null;
 
                     if (sbsp.PathfindingResource != null)
                     {
-                        pathfindingBsp = CacheContext.Deserializer.Deserialize<StructureBspCacheFileTagResources>(
-                            new ResourceSerializationContext(CacheContext, sbsp.PathfindingResource.HaloOnlinePageableResource));
+                        pathfindingBsp = CacheContext.ResourceCache.GetStructureBspCacheFileTagResources(sbsp.PathfindingResource);
 
-                        using (var resourceStream = new MemoryStream())
-                        using (var resourceReader = new EndianReader(resourceStream))
-                        {
-                            if (!sbsp.PathfindingResource.HaloOnlinePageableResource.GetLocation(out var location))
-                                throw new NullReferenceException();
+                        if (!sbsp.PathfindingResource.HaloOnlinePageableResource.GetLocation(out var location))
+                            throw new NullReferenceException();
 
-                            var resourceCache = CacheContext.GetResourceCache(location);
-
-                            if (!resourceStreams.ContainsKey(location))
-                            {
-                                resourceStreams[location] = FlagIsSet(PortingFlags.Memory) ?
-                                    new MemoryStream() :
-                                    (Stream)CacheContext.OpenResourceCacheReadWrite(location);
-
-                                if (FlagIsSet(PortingFlags.Memory))
-                                    using (var stream = CacheContext.OpenResourceCacheRead(location))
-                                        stream.CopyTo(resourceStreams[location]);
-                            }
-
-                            CacheContext.ExtractResource(resourceStreams[location], sbsp.PathfindingResource.HaloOnlinePageableResource, resourceStream);
-
-                            var resourceDataContext = new DataSerializationContext(resourceReader);
-
-                            resourceStream.Position = pathfindingBsp.SurfacePlanes.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.SurfacePlanes.Count; i++)
-                            {
-                                var surfacePlanes = CacheContext.Deserialize<ScenarioStructureBsp.SurfacesPlanes>(resourceDataContext);
-                                pathfindingBsp.SurfacePlanes.Add(surfacePlanes);
-                            }
-
-                            resourceStream.Position = pathfindingBsp.Planes.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.Planes.Count; i++)
-                            {
-                                var Plane = CacheContext.Deserialize<ScenarioStructureBsp.Plane>(resourceDataContext);
-                                pathfindingBsp.Planes.Add(Plane);
-                            }
-
-                            resourceStream.Position = pathfindingBsp.EdgeToSeams.Address.Offset;
-                            for (var i = 0; i < pathfindingBsp.EdgeToSeams.Count; i++)
-                            {
-                                var UnknownRaw7th = CacheContext.Deserialize<ScenarioStructureBsp.EdgeToSeamMapping>(resourceDataContext);
-                                pathfindingBsp.EdgeToSeams.Add(UnknownRaw7th);
-                            }
-
-                            foreach (var pathfinding in pathfindingBsp.PathfindingData)
-                            {
-                                resourceStream.Position = pathfinding.Sectors.Address.Offset;
-                                for (var i = 0; i < pathfinding.Sectors.Count; i++)
-                                {
-                                    var Sector = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Sector>(resourceDataContext);
-                                    pathfinding.Sectors.Add(Sector);
-                                }
-
-                                resourceStream.Position = pathfinding.Links.Address.Offset;
-                                for (var i = 0; i < pathfinding.Links.Count; i++)
-                                {
-                                    var Link = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Link>(resourceDataContext);
-                                    pathfinding.Links.Add(Link);
-                                }
-
-                                resourceStream.Position = pathfinding.References.Address.Offset;
-                                for (var i = 0; i < pathfinding.References.Count; i++)
-                                {
-                                    var Reference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Reference>(resourceDataContext);
-                                    pathfinding.References.Add(Reference);
-                                }
-
-                                resourceStream.Position = pathfinding.Bsp2dNodes.Address.Offset;
-                                for (var i = 0; i < pathfinding.Bsp2dNodes.Count; i++)
-                                {
-                                    var Bsp2dNode = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Bsp2dNode>(resourceDataContext);
-                                    pathfinding.Bsp2dNodes.Add(Bsp2dNode);
-                                }
-
-                                resourceStream.Position = pathfinding.Vertices.Address.Offset;
-                                for (var i = 0; i < pathfinding.Vertices.Count; i++)
-                                {
-                                    var Vertex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Vertex>(resourceDataContext);
-                                    pathfinding.Vertices.Add(Vertex);
-                                }
-
-                                foreach (var objectReference in pathfinding.ObjectReferences)
-                                {
-                                    foreach (var bsp in objectReference.Bsps)
-                                    {
-                                        resourceStream.Position = bsp.Bsp2dRefs.Address.Offset;
-                                        for (var i = 0; i < bsp.Bsp2dRefs.Count; i++)
-                                        {
-                                            var Bsp2dRef = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.ObjectReference.BspReference.Bsp2dRef>(resourceDataContext);
-                                            bsp.Bsp2dRefs.Add(Bsp2dRef);
-                                        }
-                                    }
-                                }
-
-                                resourceStream.Position = pathfinding.PathfindingHints.Address.Offset;
-                                for (var i = 0; i < pathfinding.PathfindingHints.Count; i++)
-                                {
-                                    var PathfindingHint = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.PathfindingHint>(resourceDataContext);
-                                    pathfinding.PathfindingHints.Add(PathfindingHint);
-                                }
-
-                                resourceStream.Position = pathfinding.InstancedGeometryReferences.Address.Offset;
-                                for (var i = 0; i < pathfinding.InstancedGeometryReferences.Count; i++)
-                                {
-                                    var InstancedGeometryReference = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.InstancedGeometryReference>(resourceDataContext);
-                                    pathfinding.InstancedGeometryReferences.Add(InstancedGeometryReference);
-                                }
-
-                                resourceStream.Position = pathfinding.GiantPathfinding.Address.Offset;
-                                for (var i = 0; i < pathfinding.GiantPathfinding.Count; i++)
-                                {
-                                    var GiantPathfinding = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.GiantPathfindingBlock>(resourceDataContext);
-                                    pathfinding.GiantPathfinding.Add(GiantPathfinding);
-                                }
-
-                                foreach (var seam in pathfinding.Seams)
-                                {
-                                    resourceStream.Position = seam.LinkIndices.Address.Offset;
-                                    for (var i = 0; i < seam.LinkIndices.Count; i++)
-                                    {
-                                        var LinkIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Seam.LinkIndexBlock>(resourceDataContext);
-                                        seam.LinkIndices.Add(LinkIndex);
-                                    }
-                                }
-
-                                foreach (var jumpSeam in pathfinding.JumpSeams)
-                                {
-                                    resourceStream.Position = jumpSeam.JumpIndices.Address.Offset;
-                                    for (var i = 0; i < jumpSeam.JumpIndices.Count; i++)
-                                    {
-                                        var JumpIndex = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.JumpSeam.JumpIndexBlock>(resourceDataContext);
-                                        jumpSeam.JumpIndices.Add(JumpIndex);
-                                    }
-                                }
-
-                                resourceStream.Position = pathfinding.Doors.Address.Offset;
-                                for (var i = 0; i < pathfinding.Doors.Count; i++)
-                                {
-                                    var Door = CacheContext.Deserializer.Deserialize<ScenarioStructureBsp.PathfindingDatum.Door>(resourceDataContext);
-                                    pathfinding.Doors.Add(Door);
-                                }
-                            }
-                        }
                     }
-
                     pathfindingBsps.Add(pathfindingBsp);
                 }
 
@@ -237,12 +94,12 @@ namespace TagTool.Commands.Porting
                                 {
                                     using (var reader = new EndianReader(cacheStream, true))
                                     {
-                                        cacheStream.Position = entry.Instance.HeaderOffset + entry.Instance.DefinitionOffset + 32;
+                                        cacheStream.Position = entry.Instance.DefinitionOffset + entry.Instance.DefinitionOffset + 32;
                                         unitIndex = reader.ReadInt32();
                                     }
                                 }
 
-                                if (unitIndex != -1 && (CacheContext.GetTag(unitIndex)?.IsInGroup<Giant>() ?? false))
+                                if (unitIndex != -1 && (CacheContext.TagCache.GetTag(unitIndex)?.IsInGroup("gint") ?? false))
                                     scnr.Zones[squad.InitialZoneIndex].FlagsNew |= Scenario.Zone.ZoneFlagsNew.GiantsZone;
                             }
                         }
@@ -1161,7 +1018,7 @@ namespace TagTool.Commands.Porting
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.IndexItems.Find(x => x.ID == BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
+            var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
 
             if (tag == null)
                 return;
@@ -1172,7 +1029,7 @@ namespace TagTool.Commands.Porting
         public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
-            var value = BlamCache.Strings.GetItemByID(blamStringId);
+            var value = BlamCache.StringTable.GetString(new StringId((uint)blamStringId));
 
             if (value == null)
                 return;
@@ -1312,7 +1169,7 @@ namespace TagTool.Commands.Porting
             var seatMappingExpr = scnr.ScriptExpressions[vehicleExpr.NextExpressionHandle.Index]; // <string_id> parameter
 
             var seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
-            var seatMappingString = BlamCache.Strings.GetString(seatMappingStringId);
+            var seatMappingString = BlamCache.StringTable.GetString(seatMappingStringId);
             var seatMappingIndex = (int)-1;
 
             if (vehicleExpr.Flags == HsSyntaxNodeFlags.Group &&
@@ -1335,17 +1192,17 @@ namespace TagTool.Commands.Porting
                         var unitInstance = scnr.VehiclePalette[fireTeam.VehicleTypeIndex].Object;
                         var unitDefinition = (Unit)CacheContext.Deserialize<Vehicle>(cacheStream, unitInstance);
 
-                        var variantName = CacheContext.GetString(unitDefinition.DefaultModelVariant);
+                        var variantName = CacheContext.StringTable.GetString(unitDefinition.DefaultModelVariant);
 
                         if (fireTeam.VehicleVariant != StringId.Invalid)
-                            variantName = CacheContext.GetString(fireTeam.VehicleVariant);
+                            variantName = CacheContext.StringTable.GetString(fireTeam.VehicleVariant);
 
                         var modelDefinition = CacheContext.Deserialize<Model>(cacheStream, unitDefinition.Model);
                         var modelVariant = default(Model.Variant);
 
                         foreach (var variant in modelDefinition.Variants)
                         {
-                            if (variantName == CacheContext.GetString(variant.Name))
+                            if (variantName == CacheContext.StringTable.GetString(variant.Name))
                             {
                                 modelVariant = variant;
                                 break;
@@ -1358,7 +1215,7 @@ namespace TagTool.Commands.Porting
                         for (var seatIndex = 0; seatIndex < unitDefinition.Seats.Count; seatIndex++)
                         {
                             var seat = unitDefinition.Seats[seatIndex];
-                            var seatName = CacheContext.GetString(seat.SeatAnimation);
+                            var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
 
                             if (seatMappingString == seatName)
                             {
@@ -1374,7 +1231,7 @@ namespace TagTool.Commands.Porting
                         {
                             foreach (var obj in modelVariant.Objects)
                             {
-                                if (obj.ChildObject == null || !obj.ChildObject.IsInGroup<Unit>())
+                                if (obj.ChildObject == null || !obj.ChildObject.IsInGroup("unit"))
                                     continue;
 
                                 var definition = (Unit)CacheContext.Deserialize(cacheStream, obj.ChildObject);
@@ -1382,7 +1239,7 @@ namespace TagTool.Commands.Porting
                                 for (var seatIndex = 0; seatIndex < definition.Seats.Count; seatIndex++)
                                 {
                                     var seat = definition.Seats[seatIndex];
-                                    var seatName = CacheContext.GetString(seat.SeatAnimation);
+                                    var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
 
                                     if (seatMappingString == seatName)
                                     {
