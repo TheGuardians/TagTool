@@ -246,9 +246,9 @@ namespace TagTool.Cache
             {
                 var group = new TagGroup()
                 {
-                    Tag = new Tag(reader.ReadString(4)),
-                    ParentTag = new Tag(reader.ReadString(4)),
-                    GrandparentTag = new Tag(reader.ReadString(4)),
+                    Tag = new Tag(reader.ReadChars(4)),
+                    ParentTag = new Tag(reader.ReadChars(4)),
+                    GrandparentTag = new Tag(reader.ReadChars(4)),
                     Name = new StringId(reader.ReadUInt32())
                 };
                 TagGroups.Add(group);

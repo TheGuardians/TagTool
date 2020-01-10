@@ -150,22 +150,28 @@ namespace TagTool.Geometry
                 mesh.ResourceVertexBuffers =  new VertexBufferDefinition[8];
                 mesh.ResourceIndexBuffers =  new IndexBufferDefinition[2];
 
-                foreach (var vertexBufferIndex in mesh.VertexBufferIndices)
+                for(int i = 0; i < mesh.VertexBufferIndices.Length; i++)
                 {
+                    var vertexBufferIndex = mesh.VertexBufferIndices[i];
                     if (vertexBufferIndex != -1)
-                        mesh.ResourceVertexBuffers[vertexBufferIndex] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                    {
+                        if (vertexBufferIndex < resourceDefinition.VertexBuffers.Count)
+                            mesh.ResourceVertexBuffers[i] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                        else
+                            mesh.ResourceVertexBuffers[i] = null; // happens on sbsp
+                    }
                 }
 
-                foreach (var indexBufferIndex in mesh.IndexBufferIndices)
+                for(int i = 0; i < mesh.IndexBufferIndices.Length; i++)
                 {
+                    var indexBufferIndex = mesh.IndexBufferIndices[i];
                     if (indexBufferIndex != -1)
                     {
                         if (indexBufferIndex < resourceDefinition.IndexBuffers.Count)
-                            mesh.ResourceIndexBuffers[indexBufferIndex] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                            mesh.ResourceIndexBuffers[i] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
                         else
-                            mesh.ResourceIndexBuffers[indexBufferIndex] = null; // this happens when loading particle model from gen3, the index buffers are empty but indices are set to 0
+                            mesh.ResourceIndexBuffers[i] = null; // this happens when loading particle model from gen3, the index buffers are empty but indices are set to 0
                     }
-                        
                 }
             }
         }

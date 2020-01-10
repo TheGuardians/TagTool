@@ -164,8 +164,8 @@ namespace TagTool.Geometry
                 }
                 else
                 {
-                    geometry.Resource.HaloOnlinePageableResource.Resource.ResourceType = TagResourceTypeGen3.None;
                     geometry.Resource = HOCache.ResourceCache.CreateRenderGeometryApiResource(sourceResourceDefinition);
+                    geometry.Resource.HaloOnlinePageableResource.Resource.ResourceType = TagResourceTypeGen3.None;
                     return geometry;
                 }
             }

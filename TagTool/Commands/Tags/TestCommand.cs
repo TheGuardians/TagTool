@@ -32,6 +32,9 @@ namespace TagTool.Commands
             //
             // Insert what test command you want below
             //
+            var testTag = new Tag(new char[] { 'r', 'm', 'd', '\0' });
+
+            var test = TagDefinition.Find(testTag);
 
             return true;
         }

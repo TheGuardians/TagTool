@@ -400,9 +400,8 @@ namespace TagTool.Commands.Porting
             //
             // Load the Blam tag definition
             //
-            object blamDefinition;
-            using(var stream = BlamCache.TagCache.OpenTagCacheRead())       // might require optimization, openning the stream so much can lead to issues
-			    blamDefinition = BlamCache.Deserialize(stream, blamTag);
+
+            object blamDefinition = BlamCache.Deserialize(blamCacheStream, blamTag);
 
 			//
 			// Perform pre-conversion fixups to the Blam tag definition

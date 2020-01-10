@@ -49,7 +49,14 @@ namespace TagTool.Common
             var chars = new char[4] { ' ', ' ', ' ', ' ' };
 
             for (var i = 0; i < input.Length; i++)
-                chars[i] = input[i];
+            {
+                // hackfix to make h3 not crash
+                if (input[i] == 0)
+                    chars[i] = (char)0x20;
+                else
+                    chars[i] = input[i];
+            }
+                
 
             Value = 0;
             foreach (var c in chars)
