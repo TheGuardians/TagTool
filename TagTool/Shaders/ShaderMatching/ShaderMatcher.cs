@@ -129,7 +129,9 @@ namespace TagTool.Shaders.ShaderMatching
                     var bitmaps = new List<string>();
                     var arguments = new List<string>();
 
-                    reader.SeekTo(instance.DefinitionOffset + instance.DefinitionOffset + 0x48);
+                    var hoInstance = (CachedTagHaloOnline)instance;
+                    
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x48);
                     var vectorArgsCount = reader.ReadInt32();
                     var vectorArgsAddress = reader.ReadUInt32();
 
@@ -137,12 +139,12 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < vectorArgsCount; i++)
                         {
-                            reader.SeekTo(instance.DefinitionOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
+                            reader.SeekTo(hoInstance.HeaderOffset + (vectorArgsAddress - 0x40000000) + (i * 0x4));
                             arguments.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
 
-                    reader.SeekTo(instance.DefinitionOffset + instance.DefinitionOffset + 0x6C);
+                    reader.SeekTo(hoInstance.HeaderOffset + hoInstance.DefinitionOffset + 0x6C);
                     var samplerArgsCount = reader.ReadInt32();
                     var samplerArgsAddress = reader.ReadUInt32();
 
@@ -150,7 +152,7 @@ namespace TagTool.Shaders.ShaderMatching
                     {
                         for (var i = 0; i < samplerArgsCount; i++)
                         {
-                            reader.SeekTo(instance.DefinitionOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
+                            reader.SeekTo(hoInstance.HeaderOffset + (samplerArgsAddress - 0x40000000) + (i * 0x4));
                             bitmaps.Add(CacheContext.StringTable.GetString(reader.ReadStringId()));
                         }
                     }
@@ -179,7 +181,7 @@ namespace TagTool.Shaders.ShaderMatching
             {
                 var rmt2Type = bmRmt2Instance.Name.Split("\\".ToArray())[1];
 
-                var edRmt2Tag = CacheContext.TagCache.GetTag(edRmt2_.Key);
+                var edRmt2Tag = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(edRmt2_.Key);
 
                 // Ignore all rmt2 that are not of the same type. 
                 if (edRmt2Tag == null || !(edRmt2Tag.Name?.Contains(rmt2Type) ?? false))
@@ -187,16 +189,16 @@ namespace TagTool.Shaders.ShaderMatching
 
                 using (var reader = new EndianReader(cacheStream, true))
                 {
-                    reader.SeekTo(edRmt2Tag.DefinitionOffset + edRmt2Tag.DefinitionOffset + 28);
-                    var edPixl = CacheContext.TagCache.GetTag(reader.ReadInt32());
+                    reader.SeekTo(edRmt2Tag.HeaderOffset + edRmt2Tag.DefinitionOffset + 28);
+                    var edPixl = (CachedTagHaloOnline)CacheContext.TagCache.GetTag(reader.ReadInt32());
 
                     if (edPixl == null)
                         continue;
 
-                    reader.SeekTo(edPixl.DefinitionOffset + edPixl.DefinitionOffset + 0x4);
+                    reader.SeekTo(edPixl.HeaderOffset + edPixl.DefinitionOffset + 0x4);
                     var drawModeCount = reader.ReadInt32();
 
-                    reader.SeekTo(edPixl.DefinitionOffset + edPixl.DefinitionOffset + 0x14);
+                    reader.SeekTo(edPixl.HeaderOffset + edPixl.DefinitionOffset + 0x14);
                     var shaderCount = reader.ReadInt32();
 
                     if (bmPixl.DrawModes.Count > drawModeCount || bmPixl.Shaders.Count > shaderCount)
@@ -1017,7 +1019,7 @@ namespace TagTool.Shaders.ShaderMatching
 
         public void FixRmdfTagRef(RenderMethod finalRm)
         {
-            var rmdfName = BlamCache.TagCache.TagTable.ToList().Find(x => x.ID == finalRm.BaseRenderMethod.Index).Name;
+            var rmdfName = finalRm.BaseRenderMethod.Name;
 
             foreach (var instance in CacheContext.TagCache.TagTable)
             {

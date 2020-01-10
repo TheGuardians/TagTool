@@ -135,8 +135,6 @@ namespace TagTool.Serialization
             var resourceBlock = block as ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock;
             var resourceContext = context as ResourceDefinitionSerializationContext;
 
-            CacheAddressType addressType = (CacheAddressType)listType.GetField("AddressType").GetValue(list);
-
             var writer = block.Writer;
             var count = 0;
             if (list != null)
@@ -154,7 +152,8 @@ namespace TagTool.Serialization
             }
 
             var elementType = listType.GenericTypeArguments[0];
-            
+
+            CacheAddressType addressType = (CacheAddressType)listType.GetField("AddressType").GetValue(list);
 
             // Serialize each value in the list to a data block
             var resourceBlock2 = (ResourceDefinitionSerializationContext.ResourceDefinitionDataBlock)resourceContext.CreateBlock();

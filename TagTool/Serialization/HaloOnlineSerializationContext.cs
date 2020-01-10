@@ -146,10 +146,11 @@ namespace TagTool.Serialization
                 if (obj is PageableResource resource)
                     resource.Resource.ParentTag = _context.Tag;
 
-                if (type == typeof(CachedTag))
+                if (type == typeof(CachedTag) || type.BaseType == typeof(CachedTag))
                 {
                     // Object is a tag reference - add it as a dependency
-                    if (obj is CachedTag referencedTag && referencedTag != _context.Tag)
+                    var referencedTag = (CachedTag)obj;
+                    if (referencedTag != _context.Tag)
                         _context.Data.Dependencies.Add(referencedTag.Index);
                 }
 

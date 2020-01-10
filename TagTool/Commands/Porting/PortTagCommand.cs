@@ -913,6 +913,10 @@ namespace TagTool.Commands.Porting
 			// return early where possible
 			if (data is null || data.Count == 0) 
 				return data;
+
+            if (data[0] == null)
+                return data;
+
 			var type = data[0].GetType();
 			if ((type.IsValueType && type != typeof(StringId)) ||
 				type == typeof(string))

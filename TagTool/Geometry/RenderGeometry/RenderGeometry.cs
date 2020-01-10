@@ -144,9 +144,13 @@ namespace TagTool.Geometry
         /// <param name="resourceDefinition"></param>
         public void SetResourceBuffers(RenderGeometryApiResourceDefinitionTest resourceDefinition)
         {
+
             foreach(var mesh in Meshes)
             {
-                foreach(var vertexBufferIndex in mesh.VertexBufferIndices)
+                mesh.ResourceVertexBuffers =  new VertexBufferDefinition[8];
+                mesh.ResourceIndexBuffers =  new IndexBufferDefinition[2];
+
+                foreach (var vertexBufferIndex in mesh.VertexBufferIndices)
                 {
                     if (vertexBufferIndex != -1)
                         mesh.ResourceVertexBuffers[vertexBufferIndex] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
@@ -155,7 +159,13 @@ namespace TagTool.Geometry
                 foreach (var indexBufferIndex in mesh.IndexBufferIndices)
                 {
                     if (indexBufferIndex != -1)
-                        mesh.ResourceIndexBuffers[indexBufferIndex] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                    {
+                        if (indexBufferIndex < resourceDefinition.IndexBuffers.Count)
+                            mesh.ResourceIndexBuffers[indexBufferIndex] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
+                        else
+                            mesh.ResourceIndexBuffers[indexBufferIndex] = null; // this happens when loading particle model from gen3, the index buffers are empty but indices are set to 0
+                    }
+                        
                 }
             }
         }
@@ -206,9 +216,13 @@ namespace TagTool.Geometry
                     else
                         mesh.IndexBufferIndices[i] = -1;
                 }
+
+                // get rid of arrays after creating the resource to prevent bugs in porttag
+                mesh.ResourceVertexBuffers = null;
+                mesh.ResourceIndexBuffers = null;
             }
 
-            return null;
+            return result;
         }
     }
 }

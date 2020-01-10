@@ -69,13 +69,13 @@ namespace TagTool.Geometry
         /// These should match the values in VertexBufferIndices, taken from the resource. Each time modification to render geometry is made these should be set.
         /// </summary>
         [TagField(Flags = Runtime)]
-        public VertexBufferDefinition[] ResourceVertexBuffers = new VertexBufferDefinition[8];
+        public VertexBufferDefinition[] ResourceVertexBuffers;
 
         /// <summary>
         /// These should match the values in IndexBufferIndices, taken from the resource. Each time modification to render geometry is made these should be set.
         /// </summary>
         [TagField(Flags = Runtime)]
-        public IndexBufferDefinition[] ResourceIndexBuffers = new IndexBufferDefinition[2];
+        public IndexBufferDefinition[] ResourceIndexBuffers;
 
         [TagField(MinVersion = Halo3Retail)]
         public MeshFlags Flags;
