@@ -10,11 +10,15 @@ namespace TagTool.Tags
         public List<T> Elements;
         public CacheAddressType AddressType;
         
-        public TagBlock() { }
+        public TagBlock()
+        {
+            Elements = new List<T>();
+        }
 
         public TagBlock(CacheAddressType addressType)
         {
             AddressType = addressType;
+            Elements = new List<T>();
         }
 
         public TagBlock(CacheAddressType addressType, List<T> elements)

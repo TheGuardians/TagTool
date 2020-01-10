@@ -120,7 +120,11 @@ namespace TagTool.Commands.Sounds
             else if(Cache.GetType() == typeof(GameCacheContextGen3))
             {
                 if (BlamSoundGestalt == null)
-                    BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache);
+                {
+                    using(var stream = Cache.TagCache.OpenTagCacheRead())
+                        BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
+                }
+                    
 
                 for (int pitchRangeIndex = Definition.SoundReference.PitchRangeIndex; pitchRangeIndex < Definition.SoundReference.PitchRangeIndex + Definition.SoundReference.PitchRangeCount; pitchRangeIndex++)
                 {

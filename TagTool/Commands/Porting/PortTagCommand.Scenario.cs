@@ -18,7 +18,7 @@ namespace TagTool.Commands.Porting
     {
         private Scenario CurrentScenario = null;
 
-        private Scenario ConvertScenario(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
+        private Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             CurrentScenario = scnr;
 
@@ -609,7 +609,7 @@ namespace TagTool.Commands.Porting
 
                 foreach (var expr in scnr.ScriptExpressions)
                 {
-                    ConvertScriptExpression(cacheStream, resourceStreams, scnr, expr);
+                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
                 }
 
                 AdjustScripts(scnr, tagName);
@@ -656,7 +656,7 @@ namespace TagTool.Commands.Porting
             return new RealEulerAngles3d(Angle.FromRadians(x2), Angle.FromRadians(y2), Angle.FromRadians(z2));
         }
 
-        public void ConvertScriptExpression(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, HsSyntaxNode expr)
+        public void ConvertScriptExpression(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, HsSyntaxNode expr)
         {
             if (expr.Opcode == 0xBABA)
                 return;
@@ -682,7 +682,7 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
-            ConvertScriptExpressionData(cacheStream, resourceStreams, expr);
+            ConvertScriptExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
         }
 
         public bool ScriptExpressionIsValue(HsSyntaxNode expr)
@@ -847,7 +847,7 @@ namespace TagTool.Commands.Porting
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
 
-        public void ConvertScriptExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             if (expr.Flags == HsSyntaxNodeFlags.Expression)
                 switch (expr.ValueType.HaloOnline)
@@ -869,12 +869,12 @@ namespace TagTool.Commands.Porting
                     case HsType.HaloOnlineValue.BinkDefinition:
                     case HsType.HaloOnlineValue.AnyTag:
                     case HsType.HaloOnlineValue.AnyTagNotResolving:
-                        ConvertScriptTagReferenceExpressionData(cacheStream, resourceStreams, expr);
+                        ConvertScriptTagReferenceExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
                     case HsType.HaloOnlineValue.AiLine:
                     case HsType.HaloOnlineValue.StringId:
-                        ConvertScriptStringIdExpressionData(cacheStream, resourceStreams, expr);
+                        ConvertScriptStringIdExpressionData(cacheStream, blamCacheStream, resourceStreams, expr);
                         return;
 
                     default:
@@ -1013,12 +1013,12 @@ namespace TagTool.Commands.Porting
             return (uint)(prevSpawnPoints + spawnPointIndex);
         }
 
-        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptTagReferenceExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
+            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
 
             if (tag == null)
                 return;
@@ -1026,7 +1026,7 @@ namespace TagTool.Commands.Porting
             expr.Data = BitConverter.GetBytes(tag?.Index ?? -1).ToArray();
         }
 
-        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
+        public void ConvertScriptStringIdExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
             int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
             var value = BlamCache.StringTable.GetString(new StringId((uint)blamStringId));

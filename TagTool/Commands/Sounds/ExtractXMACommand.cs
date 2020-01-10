@@ -72,7 +72,11 @@ namespace TagTool.Commands.Sounds
         public void ExtractXMA(string directory)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache);
+            {
+                using(var stream = Cache.TagCache.OpenTagCacheRead())
+                    BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(Cache, stream);
+            }
+                
 
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
             var xmaFileSize = BlamSoundGestalt.GetFileSize(Sound.SoundReference.PitchRangeIndex, Sound.SoundReference.PitchRangeCount);

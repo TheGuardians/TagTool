@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
     partial class PortTagCommand
     {
 
-        private void ConvertShaderCortana(ShaderCortana shaderCortana, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private void ConvertShaderCortana(ShaderCortana shaderCortana, Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             var render_method_option_indices = shaderCortana.RenderMethodDefinitionOptionIndices.Select(c => (int)c.OptionIndex).ToList();
 

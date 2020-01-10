@@ -24,10 +24,10 @@ namespace TagTool.Commands.Porting
             return filename;
         }
 
-        private Sound ConvertSound(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
+        private Sound ConvertSound(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Sound sound, string blamTag_Name)
         {
             if (BlamSoundGestalt == null)
-                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache);
+                BlamSoundGestalt = PortingContextFactory.LoadSoundGestalt(BlamCache, blamCacheStream);
 
             if (!File.Exists(@"Tools\ffmpeg.exe") || !File.Exists(@"Tools\towav.exe"))
             {

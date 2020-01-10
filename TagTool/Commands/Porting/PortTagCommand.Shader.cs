@@ -27,7 +27,7 @@ namespace TagTool.Commands.Porting
             return rasg;
         }
 
-        private RenderMethod ConvertRenderMethod(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, RenderMethod finalRm, string blamTagName)
+        private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, RenderMethod finalRm, string blamTagName)
         {
             // Verify that the ShaderMatcher is ready to use
             if (!Matcher.IsInitialized())
@@ -58,9 +58,7 @@ namespace TagTool.Commands.Porting
 
             // Get a simple list of bitmaps and arguments names
             var bmRmt2Instance = finalRm.ShaderProperties[0].Template;
-            RenderMethodTemplate bmRmt2;
-            using(var blamStream = BlamCache.TagCache.OpenTagCacheRead())
-                bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamStream, bmRmt2Instance);
+            var bmRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, bmRmt2Instance);
 
             // Get a simple list of H3 bitmaps and arguments names
             foreach (var a in bmRmt2.SamplerArguments)
@@ -114,7 +112,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch
                 {
-                    bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag($"{newBitmap}.bitm")[0]);
+                    bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag($"{newBitmap}.bitm")[0]);
                 }
 
                 newShaderProperty.ShaderMaps.Add(
@@ -148,7 +146,7 @@ namespace TagTool.Commands.Porting
 
             Matcher.FixRmdfTagRef(finalRm);
 
-            FixAnimationProperties(cacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
+            FixAnimationProperties(cacheStream, blamCacheStream, resourceStreams, BlamCache, CacheContext, finalRm, edRmt2, bmRmt2, blamTagName);
 
             // Fix any null bitmaps, caused by bitm port failure
             foreach (var a in finalRm.ShaderProperties[0].ShaderMaps)
@@ -164,7 +162,7 @@ namespace TagTool.Commands.Porting
                 }
                 catch
                 {
-                    a.Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag($"{defaultBitmap}.bitm")[0]);
+                    a.Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag($"{defaultBitmap}.bitm")[0]);
                 }
             }
 
@@ -187,7 +185,7 @@ namespace TagTool.Commands.Porting
                         {
                             if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_flood_godrays.bitmap")[0]);
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_flood_godrays.bitmap")[0]);
                                 break;
                             }
                         }
@@ -222,7 +220,7 @@ namespace TagTool.Commands.Porting
                         {
                             if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_invis_godrays.bitmap")[0]);
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\chillout\bitmaps\chillout_invis_godrays.bitmap")[0]);
                                 break;
                             }
                         }
@@ -257,7 +255,7 @@ namespace TagTool.Commands.Porting
                         {
                             if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "overlay_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\020_base\bitmaps\light_volume_hatlight.bitmap")[0]);
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\solo\020_base\bitmaps\light_volume_hatlight.bitmap")[0]);
                                 break;
                             }
                         }
@@ -298,7 +296,7 @@ namespace TagTool.Commands.Porting
                         {
                             if (CacheContext.StringTable.GetString(edRmt2.SamplerArguments[i].Name) == "bump_map")
                             {
-                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\armory\bitmaps\concrete_floor_bump.bitmap")[0]);
+                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\dlc\armory\bitmaps\concrete_floor_bump.bitmap")[0]);
                                 break;
                             }
                         }
@@ -341,7 +339,7 @@ namespace TagTool.Commands.Porting
                                 case "base_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_dif.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_dif.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -349,7 +347,7 @@ namespace TagTool.Commands.Porting
                                 case "detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_icy.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -357,7 +355,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_platebump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_platebump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -365,7 +363,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\for_metal_greytech_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -443,7 +441,7 @@ namespace TagTool.Commands.Porting
                                 case "base_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -451,7 +449,7 @@ namespace TagTool.Commands.Porting
                                 case "detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_detail.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_detail.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -462,11 +460,11 @@ namespace TagTool.Commands.Porting
                                         switch (blamTagName)
                                         {
                                             case @"levels\multi\snowbound\shaders\rock_rocky_icy":
-                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_icy_blend.bitmap")[0]);
+                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_icy_blend.bitmap")[0]);
                                                 break;
 
                                             default:
-                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_cliff_dif.bitmap")[0]);
+                                                finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_cliff_dif.bitmap")[0]);
                                                 break;
                                         }
                                     }
@@ -476,7 +474,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -484,7 +482,7 @@ namespace TagTool.Commands.Porting
                                 case "bump_detail_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_bump.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_granite_bump.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -492,7 +490,7 @@ namespace TagTool.Commands.Porting
                                 case "height_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_parallax.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"levels\multi\snowbound\bitmaps\rock_horiz_parallax.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -500,7 +498,7 @@ namespace TagTool.Commands.Porting
                                 case "environment_map":
                                     try
                                     {
-                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, resourceStreams, ParseLegacyTag(@"shaders\default_bitmaps\bitmaps\color_white.bitmap")[0]);
+                                        finalRm.ShaderProperties[0].ShaderMaps[i].Bitmap = ConvertTag(cacheStream, blamCacheStream, resourceStreams, ParseLegacyTag(@"shaders\default_bitmaps\bitmaps\color_white.bitmap")[0]);
                                     }
                                     catch { }
                                     break;
@@ -609,7 +607,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private RenderMethod FixAnimationProperties(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheContextHaloOnline CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
+        private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheContextHaloOnline CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].AnimationProperties.Count == 0)
@@ -625,11 +623,8 @@ namespace TagTool.Commands.Porting
 
             var pixlTag = CacheContext.Deserialize(cacheStream, edRmt2.PixelShader);
             var edPixl = (PixelShader)pixlTag;
-            PixelShader bmPixl;
-            using(var blamStream = blamCache.TagCache.OpenTagCacheRead())
-            {
-                bmPixl = BlamCache.Deserialize<PixelShader>(blamStream, bmRmt2.PixelShader);
-            }
+            var bmPixl = BlamCache.Deserialize<PixelShader>(blamCacheStream, bmRmt2.PixelShader);
+            
 
             // Make a collection of drawmodes and their DrawModeItem's
             // DrawModeItem are has info about all registers modified by functions for each drawmode.

@@ -1,4 +1,5 @@
-﻿using TagTool.Cache;
+﻿using System.IO;
+using TagTool.Cache;
 using TagTool.Commands.Tags;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -21,7 +22,7 @@ namespace TagTool.Commands.Porting
             return context;
         }
         
-        public static SoundCacheFileGestalt LoadSoundGestalt(GameCache cache)
+        public static SoundCacheFileGestalt LoadSoundGestalt(GameCache cache, Stream cacheStream)
         {
             CachedTag blamTag = null;
 
@@ -36,11 +37,9 @@ namespace TagTool.Commands.Porting
 
             if (blamTag == null)
                 return null;
-            SoundCacheFileGestalt result;
-            using (var stream = cache.TagCache.OpenTagCacheRead())
-            {
-                result = cache.Deserialize<SoundCacheFileGestalt>(stream, blamTag);
-            }
+
+            SoundCacheFileGestalt result = cache.Deserialize<SoundCacheFileGestalt>(cacheStream, blamTag);
+            
             return result;
         }
 
