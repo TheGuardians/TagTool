@@ -64,6 +64,12 @@ namespace TagTool.Commands.Porting
                         }
                     }
                 }
+                // fix surface planes
+                foreach(var surfacePlane in resourceDefinition.SurfacePlanes)
+                {
+                    surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
+                    surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
+                }
             }
 
             bsp.PathfindingResource = CacheContext.ResourceCache.CreateStructureBspCacheFileResource(resourceDefinition);
