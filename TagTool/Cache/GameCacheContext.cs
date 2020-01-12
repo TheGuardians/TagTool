@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 
@@ -17,6 +18,7 @@ namespace TagTool.Cache
         /// Gets the engine version of the cache files.
         /// </summary>
         public CacheVersion Version { get; protected set; }
+
 
         /// <summary>
         /// The tag serializer to use.

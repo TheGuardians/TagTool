@@ -227,19 +227,19 @@ namespace TagTool.Geometry
 
     public class AmbientPrtData
     {
-        public float BlendWeight { get; set; }
+        public float SHCoefficient { get; set; }
     }
 
     public class LinearPrtData
     {
-        public RealQuaternion BlendWeight { get; set; }
+        public RealQuaternion SHCoefficients { get; set; }
     }
 
     public class QuadraticPrtData
     {
-        public RealVector3d BlendWeight { get; set; }
-        public RealVector3d BlendWeight2 { get; set; }
-        public RealVector3d BlendWeight3 { get; set; }
+        public RealVector3d SHCoefficients1 { get; set; }
+        public RealVector3d SHCoefficients2 { get; set; }
+        public RealVector3d SHCoefficients3 { get; set; }
     }
 
     public class Unknown1A

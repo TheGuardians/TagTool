@@ -548,7 +548,7 @@
     <Compile Include="Geometry\RenderGeometry\MeshFlags.cs" />
     <Compile Include="Geometry\PhysicsModel\PhysicsModelBuilder.cs" />
     <Compile Include="Geometry\RenderGeometry\PrimitiveType.cs" />
-    <Compile Include="Geometry\RenderGeometry\PRT\PrtType.cs" />
+    <Compile Include="Geometry\RenderGeometry\SH\PrtSHType.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryClassification.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompression.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryCompressionFlags.cs" />

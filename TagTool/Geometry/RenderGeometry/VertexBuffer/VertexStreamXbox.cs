@@ -18,7 +18,7 @@ namespace TagTool.Geometry
         {
             return new AmbientPrtData
             {
-                BlendWeight = Stream.ReadFloat8_1()
+                SHCoefficient = Stream.ReadFloat8_1()
             };
         }
 
@@ -132,7 +132,7 @@ namespace TagTool.Geometry
         {
             return new LinearPrtData
             {
-                BlendWeight = Stream.ReadSByte4N()
+                SHCoefficients = Stream.ReadSByte4N()
             };
         }
 
@@ -163,9 +163,9 @@ namespace TagTool.Geometry
         {
             return new QuadraticPrtData
             {
-                BlendWeight = Stream.ReadDec3N(),
-                BlendWeight2 = Stream.ReadDec3N(),
-                BlendWeight3 = Stream.ReadDec3N()
+                SHCoefficients1 = Stream.ReadDec3N(),
+                SHCoefficients2 = Stream.ReadDec3N(),
+                SHCoefficients3 = Stream.ReadDec3N()
             };
         }
 

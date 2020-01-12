@@ -30,7 +30,8 @@ namespace TagTool.Cache
         public GameCacheContextHaloOnline(DirectoryInfo directory)
         {
             Directory = directory;
-            
+            Endianness = EndianFormat.LittleEndian;
+
             TagCacheGenHO = new TagCacheHaloOnline(directory);
 
             if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(TagCacheGenHO.Header.CreationTime, out var closestVersion)))

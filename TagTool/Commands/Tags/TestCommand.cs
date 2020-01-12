@@ -11,6 +11,7 @@ using TagTool.Bitmaps;
 using TagTool.Tags.Resources;
 using TagTool.Bitmaps.Utils;
 using TagTool.Bitmaps.DDS;
+using TagTool.Geometry;
 
 namespace TagTool.Commands
 {
@@ -37,22 +38,47 @@ namespace TagTool.Commands
             {
                 foreach(var tag in Cache.TagCache.TagTable)
                 {
-                    if(tag.Group.Tag == "sbsp")
+                    /*
+                    if(tag.Group.Tag == "sLdT")
                     {
-                        var sbsp = Cache.Deserialize<ScenarioStructureBsp>(stream, tag);
-
-                        foreach(var cluster in sbsp.Clusters)
+                        var sldt = Cache.Deserialize<ScenarioLightmap>(stream, tag);
+                        var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(sldt.Lightmaps[0].Geometry.Resource);
+                        sldt.Lightmaps[0].Geometry.SetResourceBuffers(resource);
+                        foreach(var mesh in sldt.Lightmaps[0].Geometry.Meshes)
                         {
-                            foreach(var decoratorGrid in cluster.DecoratorGrids)
+                            if (mesh.Water.Count != 0)
                             {
-                                if (decoratorGrid.HaloOnlineInfo.VertexBufferIndex != decoratorGrid.HaloOnlineInfo.PaletteIndex)
-                                    Console.WriteLine("Weird");
+                                Console.WriteLine(tag.Name);
                             }
                         }
                     }
-                    
-                }
+                    */
 
+                    if (tag.Group.Tag == "Lbsp" && tag.Index == 0x3F8C)
+                    {
+                        var lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, tag);
+                        var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(lbsp.Geometry.Resource);
+                        lbsp.Geometry.SetResourceBuffers(resource);
+                        foreach (var mesh in lbsp.Geometry.Meshes)
+                        {
+                            if (mesh.Water.Count != 0)
+                            {
+                                var waterParametersBufferworldWaterBuffer = mesh.ResourceVertexBuffers[7];
+                                var worldWaterBuffer = mesh.ResourceVertexBuffers[6];
+                                var fileWorld = new FileInfo($"Geometry\\riverworld_world_water_{mesh.VertexBufferIndices[6]}.bin");
+                                var fileParameters = new FileInfo($"Geometry\\riverworld_paramters_water_{mesh.VertexBufferIndices[7]}.bin");
+                                using (var fileStream = fileWorld.OpenWrite())
+                                {
+                                    fileStream.Write(worldWaterBuffer.Data.Data, 0, worldWaterBuffer.Data.Data.Length);
+                                }
+                                using (var fileStream = fileParameters.OpenWrite())
+                                {
+                                    fileStream.Write(waterParametersBufferworldWaterBuffer.Data.Data, 0, waterParametersBufferworldWaterBuffer.Data.Data.Length);
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
 

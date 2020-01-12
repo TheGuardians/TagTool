@@ -230,6 +230,13 @@ namespace TagTool.Geometry
                     else
                         mesh.IndexBufferIndices[i] = -1;
                 }
+
+                // if the mesh is unindexed the index in the index buffer should be 0, but the buffer is empty. Copying what h3\ho does.
+                if (mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+                {
+                    mesh.IndexBufferIndices[0] = 0;
+                    mesh.IndexBufferIndices[1] = 0;
+                }
             }
 
             for (int i = 0; i < InstancedGeometryPerPixelLighting.Count; i++)

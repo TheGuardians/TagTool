@@ -544,43 +544,43 @@ namespace TagTool.Geometry
         {
             return new AmbientPrtData
             {
-                BlendWeight = _stream.ReadFloat1()
+                SHCoefficient = _stream.ReadFloat1()
             };
         }
 
         public void WriteAmbientPrtData(AmbientPrtData v)
         {
-            _stream.WriteFloat1(v.BlendWeight);
+            _stream.WriteFloat1(v.SHCoefficient);
         }
 
         public LinearPrtData ReadLinearPrtData()
         {
             return new LinearPrtData
             {
-                BlendWeight = _stream.ReadUByte4N(),
+                SHCoefficients = _stream.ReadUByte4N(),
             };
         }
 
         public void WriteLinearPrtData(LinearPrtData v)
         {
-            _stream.WriteUByte4N(v.BlendWeight);
+            _stream.WriteUByte4N(v.SHCoefficients);
         }
 
         public QuadraticPrtData ReadQuadraticPrtData()
         {
             return new QuadraticPrtData
             {
-                BlendWeight = _stream.ReadFloat3(),
-                BlendWeight2 = _stream.ReadFloat3(),
-                BlendWeight3 = _stream.ReadFloat3(),
+                SHCoefficients1 = _stream.ReadFloat3(),
+                SHCoefficients2 = _stream.ReadFloat3(),
+                SHCoefficients3 = _stream.ReadFloat3(),
             };
         }
 
         public void WriteQuadraticPrtData(QuadraticPrtData v)
         {
-            _stream.WriteFloat3(v.BlendWeight);
-            _stream.WriteFloat3(v.BlendWeight2);
-            _stream.WriteFloat3(v.BlendWeight3);
+            _stream.WriteFloat3(v.SHCoefficients1);
+            _stream.WriteFloat3(v.SHCoefficients2);
+            _stream.WriteFloat3(v.SHCoefficients3);
         }
 
         public Unknown1A ReadUnknown1A()

@@ -87,7 +87,7 @@ namespace TagTool.Geometry
         public VertexType Type;
 
         [TagField(MinVersion = Halo3Retail)]
-        public PrtType PrtType;
+        public PrtSHType PrtType;
 
         [TagField(MinVersion = Halo3Retail)]
         public PrimitiveType IndexBufferType;
@@ -243,10 +243,10 @@ namespace TagTool.Geometry
             public enum PartFlagsNew : byte
             {
                 None,
-                IsWaterSurface = 1 << 0,
+                CanBeRenderedInDrawBundles = 1 << 0,
                 PerVertexLightmapPart = 1 << 1,
                 RenderInZPrepass = 1 << 2,
-                CanBeRenderedInDrawBundles = 1 << 3,
+                IsWaterPart = 1 << 3,
                 DrawCullDistanceMedium = 1 << 4,
                 DrawCullDistanceClose = 1 << 5,
                 DrawCullRenderingShields = 1 << 6,

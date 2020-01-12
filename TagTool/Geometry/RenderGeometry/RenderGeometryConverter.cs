@@ -17,19 +17,11 @@ namespace TagTool.Geometry
     {
         private GameCache HOCache { get; }
         private GameCache SourceCache;
-        private List<long> OriginalBufferOffsets;
-        private List<ushort> Unknown1BIndices;
-        private List<WaterConversionData> WaterData;
-        private int CurrentWaterBuffer;
 
         public RenderGeometryConverter(GameCache hoCache, GameCache sourceCache)
         {
             HOCache = hoCache;
             SourceCache = sourceCache;
-            OriginalBufferOffsets = new List<long>();
-            Unknown1BIndices = new List<ushort>();
-            WaterData = new List<WaterConversionData>();
-            CurrentWaterBuffer = 0;
         }
 
         /// <summary>
@@ -48,8 +40,8 @@ namespace TagTool.Geometry
                 {
                     var result = new byte[data.Length];
 
-                    using (var inputReader = new EndianReader(new MemoryStream(data), EndianFormat.BigEndian))
-                    using (var outputWriter = new EndianWriter(new MemoryStream(result), EndianFormat.LittleEndian))
+                    using (var inputReader = new EndianReader(new MemoryStream(data), SourceCache.Endianness))
+                    using (var outputWriter = new EndianWriter(new MemoryStream(result), HOCache.Endianness))
                     {
                         while (!inputReader.EOF)
                             outputWriter.Write(inputReader.ReadUInt32());
@@ -72,9 +64,9 @@ namespace TagTool.Geometry
 
                 using (var outStream = new MemoryStream())
                 using (var outReader = new BinaryReader(outStream))
-                using (var outWriter = new EndianWriter(outStream, EndianFormat.LittleEndian))
+                using (var outWriter = new EndianWriter(outStream, HOCache.Endianness))
                 using (var stream = new MemoryStream(dataref))
-                using (var reader = new EndianReader(stream, EndianFormat.BigEndian))
+                using (var reader = new EndianReader(stream, SourceCache.Endianness))
                 {
                     var dataContext = new DataSerializationContext(reader, outWriter);
                     var header = HOCache.Deserializer.Deserialize<ScenarioLightmapBspDataSection.Header>(dataContext);
@@ -156,7 +148,7 @@ namespace TagTool.Geometry
 
             // do conversion (PARTICLE INDEX BUFFERS, WATER CONVERSION TO DO) AMBIENT PRT TOO
 
-            var generateParticles = false;
+            var generateParticles = false; // temp fix when pmdf geo is null
 
             if (wasNull)
             {
@@ -176,37 +168,11 @@ namespace TagTool.Geometry
             // Convert Blam data to ElDorado data
             //
 
-            for (int i = 0; i < geometry.Meshes.Count(); i++)
-            {
-                var mesh = geometry.Meshes[i];
-
-                if (mesh.VertexBufferIndices[6] != -1 && mesh.VertexBufferIndices[7] != -1)
-                {
-                    // Get total amount of indices
-
-                    int indexCount = 0;
-
-                    foreach (var subpart in mesh.SubParts)
-                        indexCount += subpart.IndexCount;
-
-                    WaterConversionData waterData = new WaterConversionData()
-                    {
-                        IndexBufferLength = indexCount,
-                    };
-
-                    for (int j = 0; j < mesh.Parts.Count(); j++)
-                    {
-                        var part = mesh.Parts[j];
-                        waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndexOld, part.IndexCountOld, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.CanBeRenderedInDrawBundles)));
-                    }
-                    waterData.Sort();
-                    WaterData.Add(waterData);
-                }
-            }
-
             if (generateParticles)
             {
                 var mesh = geometry.Meshes[0];
+                mesh.Flags |= MeshFlags.MeshIsUnindexed;
+                mesh.PrtType = PrtSHType.None;
 
                 var newVertexBuffer = new VertexBufferDefinition
                 {
@@ -218,9 +184,7 @@ namespace TagTool.Geometry
                         AddressType = CacheAddressType.Data
                     }
                 };
-
                 mesh.ResourceVertexBuffers[0] = newVertexBuffer;
-                mesh.ResourceIndexBuffers[0] = IndexBufferConverter.CreateIndexBuffer(3);
             }
             else
             {
@@ -231,8 +195,105 @@ namespace TagTool.Geometry
                         if (vertexBuffer == null)
                             continue;
 
+                        // Gen3 order 0 coefficients are stored in ints but should be read as bytes, 1 per vertex in the original buffer
+                        if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt)
+                        {
+                            var count = mesh.ResourceVertexBuffers[0].Count;
+                        }
+                        // skip conversion of water vertices, done right after the loop
+                        else if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                            continue;
+
                         VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, HOCache.Version, vertexBuffer);
                     }
+
+                    // convert water vertex buffers
+
+                    // index 6 and 7 are water related
+                    if(mesh.ResourceVertexBuffers[6] != null && mesh.ResourceVertexBuffers[7] != null)
+                    {
+                        // Get total amount of indices and prepare for water conversion
+
+                        int indexCount = 0;
+                        foreach (var subpart in mesh.SubParts)
+                            indexCount += subpart.IndexCount;
+
+                        WaterConversionData waterData = new WaterConversionData(){IndexBufferLength = indexCount};
+
+                        for (int j = 0; j < mesh.Parts.Count(); j++)
+                        {
+                            var part = mesh.Parts[j];
+                            waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndexOld, part.IndexCountOld, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.IsWaterPart)));
+                        }
+                        waterData.Sort();
+
+                        // read all world vertices in current mesh into a list
+                        List<WorldVertex> worldVertices = new List<WorldVertex>();
+
+                        using(var stream = new MemoryStream(mesh.ResourceVertexBuffers[0].Data.Data))
+                        {
+                            var vertexStream = VertexStreamFactory.Create(HOCache.Version, stream);
+                            for(int v = 0; v < mesh.ResourceVertexBuffers[0].Count; v++)
+                                worldVertices.Add(vertexStream.ReadWorldVertex());
+                        }
+
+                        // Create list of indices for later use.
+                        var unknown1BIndices = new List<ushort>();
+
+                        // create vertex buffer for Unknown1A -> World
+                        VertexBufferDefinition waterVertices = new VertexBufferDefinition
+                        {
+                            Count = indexCount,
+                            Format = VertexBufferFormat.World
+                        };
+
+                        // create vertex buffer for Unknown1B
+                        VertexBufferDefinition waterParameters = new VertexBufferDefinition
+                        {
+                            Format = VertexBufferFormat.World
+                        };
+
+                        using (var outputStream = new MemoryStream())
+                        using(var inputStream = new MemoryStream(mesh.ResourceVertexBuffers[6].Data.Data))
+                        {
+                            var inVertexStream = VertexStreamFactory.Create(SourceCache.Version, inputStream);
+                            var outVertexStream = VertexStreamFactory.Create(HOCache.Version, outputStream);
+
+                            for (int k = 0; k < waterData.PartData.Count(); k++)
+                            {
+                                Tuple<int, int, bool> currentPartData = waterData.PartData[k];
+                                // Not water, add unused data
+                                if (currentPartData.Item3 == false)
+                                {
+                                    for (int j = 0; j < currentPartData.Item2; j++)
+                                        VertexBufferConverter.WriteUnusedWorldWaterData(outputStream);
+                                }
+                                else
+                                {
+                                    VertexBufferConverter.ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
+                                    {
+                                        for (int j = 0; j < 3; j++)
+                                        {
+                                            WorldVertex w = worldVertices[v.Vertices[j]];
+                                            unknown1BIndices.Add(v.Indices[j]);
+                                            outVertexStream.WriteWorldVertex(w);
+                                        }
+                                    });
+                                }
+                            }
+                            waterVertices.VertexSize = (short)outVertexStream.GetVertexSize(VertexBufferFormat.World);
+                            waterVertices.Data = new TagData(outputStream.ToArray());
+                        }
+
+
+                        // convert unknown1B and move to index 6
+
+                        mesh.ResourceVertexBuffers[6] = waterParameters;
+                        mesh.ResourceVertexBuffers[7] = waterVertices;
+
+                    }
+
+
 
                     foreach (var indexBuffer in mesh.ResourceIndexBuffers)
                     {
@@ -242,8 +303,11 @@ namespace TagTool.Geometry
                         IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, HOCache.Version, indexBuffer);
                     }
 
-                    if (mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed))
+                    // create index buffers for decorators, gen3 didn't have them
+                    if (mesh.Flags.HasFlag(MeshFlags.MeshIsUnindexed) && mesh.Type == VertexType.Decorator)
                     {
+                        mesh.Flags &= ~MeshFlags.MeshIsUnindexed;
+
                         var indexCount = 0;
 
                         foreach (var part in mesh.Parts)
@@ -251,6 +315,7 @@ namespace TagTool.Geometry
 
                         mesh.ResourceIndexBuffers[0] = IndexBufferConverter.CreateIndexBuffer(indexCount);
                     }
+                    
                 }
             }
 

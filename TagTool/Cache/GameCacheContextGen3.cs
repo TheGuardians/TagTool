@@ -35,7 +35,7 @@ namespace TagTool.Cache
             CacheFile = file;
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
-
+            Endianness = EndianFormat.BigEndian;
             var interop = mapFile.Header.GetInterop();
 
             DisplayName = mapFile.Header.GetName() + ".map";

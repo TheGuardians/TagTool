@@ -10,7 +10,7 @@ namespace TagTool.Geometry
 {
     public static class VertexBufferConverter
     {
-        private static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
+        public static void ConvertVertices<T>(int count, Func<T> readVertex, Action<T, int> writeVertex)
         {
             for (var i = 0; i < count; i++)
                 writeVertex(readVertex(), i);
@@ -81,7 +81,7 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.LinearPrt:
                         ConvertVertices(count, inVertexStream.ReadLinearPrtData, (v, i) =>
                         {
-                            v.BlendWeight = ConvertNormal(v.BlendWeight);
+                            v.SHCoefficients = ConvertNormal(v.SHCoefficients);
                             outVertexStream.WriteLinearPrtData(v);
                         });
                         break;
@@ -105,6 +105,7 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.World2:
                         vertexBuffer.Format = VertexBufferFormat.World;
                         goto case VertexBufferFormat.World;
+
                         /*
                     case VertexBufferFormat.Unknown1A:
 
@@ -230,17 +231,24 @@ namespace TagTool.Geometry
             }
         }
 
-
-        private static void WriteUnusedWorldWaterData(Stream outputStream)
+        /// <summary>
+        /// Writes 0x38 worth of invalid data
+        /// </summary>
+        /// <param name="outputStream"></param>
+        public static void WriteUnusedWorldWaterData(Stream outputStream)
         {
-            byte[] data = new byte[4] { 0xCD, 0xCD, 0xCD, 0xCD };
-            for (int i = 0; i < 13; i++)
+            byte[] data = new byte[1] { 0xCD};
+            for (int i = 0; i < 0x38; i++)
             {
-                outputStream.Write(data, 0, 4);
+                outputStream.Write(data, 0, 1);
             }
         }
 
-        private static void WriteUnusedUnknown1BData(Stream outputStream)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outputStream"></param>
+        public static void WriteUnusedUnknown1BData(Stream outputStream)
         {
             byte[] data = new byte[4] { 0x00, 0x00, 0x00, 0x00 };
             for (int i = 0; i < 6; i++)
