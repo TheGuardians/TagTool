@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp)
         {
             //
             // Set up ElDorado resource reference
@@ -24,36 +24,14 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version < CacheVersion.Halo3ODST)
                 bsp.PathfindingResource = new TagResourceReference();
 
-            bsp.PathfindingResource.HaloOnlinePageableResource = new PageableResource
-            {
-                Page = new RawPage
-                {
-                    Index = -1
-                },
-                Resource = new TagResourceGen3
-                {
-                    ResourceType = TagResourceTypeGen3.Pathfinding,
-                    DefinitionData = new byte[0x30],
-                    DefinitionAddress = new CacheAddress(CacheAddressType.Definition, 0),
-                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                    D3DFixups = new List<TagResourceGen3.D3DFixup>(),
-                    Unknown2 = 1
-                }
-            };
-
             //
             // Load Blam resource data
             //
 
-            var resourceDefinition = BlamCache.Version > CacheVersion.Halo3Retail ?
-                    BlamCache.ResourceCache.GetStructureBspCacheFileTagResources(bsp.PathfindingResource) :
-                    null;
+            var resourceDefinition = BlamCache.Version > CacheVersion.Halo3Retail ? BlamCache.ResourceCache.GetStructureBspCacheFileTagResources(bsp.PathfindingResource) : null;
 
-            if (resourceDefinition == null)
-            {
-                if (BlamCache.Version >= CacheVersion.Halo3ODST)
-                    return bsp.PathfindingResource;
-            }
+            if (resourceDefinition == null && BlamCache.Version >= CacheVersion.Halo3ODST)
+                return bsp.PathfindingResource;
 
             //
             // Port Blam resource definition

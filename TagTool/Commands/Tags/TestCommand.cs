@@ -32,9 +32,31 @@ namespace TagTool.Commands
             //
             // Insert what test command you want below
             //
-            var testTag = new Tag(new char[] { 'r', 'm', 'd', '\0' });
 
-            var test = TagDefinition.Find(testTag);
+            using(var stream = Cache.TagCache.OpenTagCacheRead())
+            {
+                foreach(var tag in Cache.TagCache.TagTable)
+                {
+                    if(tag.Group.Tag == "sbsp")
+                    {
+                        var sbsp = Cache.Deserialize<ScenarioStructureBsp>(stream, tag);
+
+                        foreach(var cluster in sbsp.Clusters)
+                        {
+                            foreach(var decoratorGrid in cluster.DecoratorGrids)
+                            {
+                                if (decoratorGrid.HaloOnlineInfo.VertexBufferIndex != decoratorGrid.HaloOnlineInfo.PaletteIndex)
+                                    Console.WriteLine("Weird");
+                            }
+                        }
+                    }
+                    
+                }
+
+            }
+            
+
+
 
             return true;
         }

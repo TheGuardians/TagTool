@@ -610,9 +610,10 @@ namespace TagTool.Commands.Porting
 					break;
 
 				// If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
-				case ParticleModel particleModel when BlamCache.Version >= CacheVersion.Halo3Retail && particleModel.Geometry.Resource.HaloOnlinePageableResource.Page.Index == -1:
-					blamDefinition = null;
-					break;
+				case ParticleModel particleModel:
+                    var newParticleModelGeometry = GeometryConverter.Convert(particleModel.Geometry, BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(particleModel.Geometry.Resource));
+                    particleModel.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newParticleModelGeometry);
+                    break;
 
 				case PhysicsModel phmo:
 					blamDefinition = ConvertPhysicsModel(edTag, phmo);
@@ -622,21 +623,25 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertRasterizerGlobals(rasg);
 					break;
 
-				// If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
-				case RenderModel mode when BlamCache.Version >= CacheVersion.Halo3Retail && mode.Geometry.Resource.HaloOnlinePageableResource.Page.Index == -1:
-					blamDefinition = null;
-					break;
+                // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
+                case RenderModel mode:
+                    if (BlamCache.Version < CacheVersion.Halo3Retail)
+                        blamDefinition = ConvertGen2RenderModel(edTag, mode, resourceStreams);
+                    else
+                    {
+                        var newRenderModelGeometry = GeometryConverter.Convert(mode.Geometry, BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource));
+                        mode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newRenderModelGeometry);
 
-				case RenderModel mode when blamTag.Name == @"levels\multi\snowbound\sky\sky":
-					mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
-					break;
-
-                case RenderModel mode when blamTag.Name == @"levels\multi\isolation\sky\sky":
-                    mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
-                    break;
-
-                case RenderModel renderModel when BlamCache.Version < CacheVersion.Halo3Retail:
-					blamDefinition = ConvertGen2RenderModel(edTag, renderModel, resourceStreams);
+                        switch (blamTag.Name)
+                        {
+                            case @"levels\multi\snowbound\sky\sky":
+                                mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
+                                break;
+                            case @"levels\multi\isolation\sky\sky":
+                                mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
+                                break;
+                        }
+                    }
 					break;
 
 				case Scenario scnr:
@@ -877,7 +882,6 @@ namespace TagTool.Commands.Porting
 
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);
-					renderGeometry = GeometryConverter.Convert(cacheStream, renderGeometry, resourceStreams, Flags);
 					return renderGeometry;
 
 				case Mesh.Part part when BlamCache.Version < CacheVersion.Halo3Retail:

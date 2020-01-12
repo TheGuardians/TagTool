@@ -684,7 +684,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.StaticPerVertexColor:
                     return 0xC;
                 case VertexBufferFormat.TinyPosition:
-                    return 0x8;
+                    return 0x10;
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
                     return 0x38;

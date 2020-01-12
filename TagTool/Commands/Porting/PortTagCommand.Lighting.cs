@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
+using TagTool.Geometry;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
@@ -143,6 +145,7 @@ namespace TagTool.Commands.Porting
 
                 RemoveFlags(PortingFlags.Replace);
                 var Lbsp = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, entry, scenarioLightmap, blamTagName);
+                Lbsp = ConvertScenarioLightmapBspData(Lbsp);
                 if (wasReplacing)
                     SetFlags(PortingFlags.Replace);
 
@@ -186,7 +189,31 @@ namespace TagTool.Commands.Porting
 
         private ScenarioLightmapBspData ConvertScenarioLightmapBspData(ScenarioLightmapBspData Lbsp)
         {
-            //Test
+            var lightmapResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
+
+            var converter = new RenderGeometryConverter(CacheContext, BlamCache);
+            var newLightmapResourceDefinition = converter.Convert(Lbsp.Geometry, lightmapResourceDefinition);
+
+            //
+            // convert vertex buffers and add them to the new resource
+            //
+
+            foreach (var staticPerVertexLighting in Lbsp.StaticPerVertexLightingBuffers)
+            {
+                if (staticPerVertexLighting.VertexBufferIndex != -1)
+                {
+                    staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
+                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, CacheContext.Version, staticPerVertexLighting.VertexBuffer);
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = staticPerVertexLighting.VertexBuffer;
+                    newLightmapResourceDefinition.VertexBuffers.Add(d3dPointer);
+                    // set the new buffer index
+                    staticPerVertexLighting.VertexBufferIndex = (short)(newLightmapResourceDefinition.VertexBuffers.Elements.Count - 1);
+                }
+            }
+
+            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
+
             return Lbsp;
         }
 

@@ -32,7 +32,10 @@ namespace TagTool.Geometry
             CurrentWaterBuffer = 0;
         }
 
-        public RenderGeometry Convert(Stream cacheStream, RenderGeometry geometry, Dictionary<ResourceLocation, Stream> resourceStreams, PortTagCommand.PortingFlags portingFlags)
+        /// <summary>
+        /// Converts RenderGeometry class in place and returns a new RenderGeometryApiResourceDefinition
+        /// </summary>
+        public RenderGeometryApiResourceDefinitionTest Convert(RenderGeometry geometry, RenderGeometryApiResourceDefinitionTest resourceDefinition)
         {
             //
             // Convert byte[] of UnknownBlock
@@ -134,25 +137,24 @@ namespace TagTool.Geometry
             }
 
             //
-            // Port Blam resource definition
+            // Port resource definition
             //
 
-            var sourceResourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(geometry.Resource);
             var wasNull = false;
-            if (sourceResourceDefinition == null)
+            if (resourceDefinition == null)
             {
                 wasNull = true;
                 Console.Error.WriteLine("Render geometry does not have a valid resource definition, continuing anyway.");
-                sourceResourceDefinition = new RenderGeometryApiResourceDefinitionTest
+                resourceDefinition = new RenderGeometryApiResourceDefinitionTest
                 {
                     VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(CacheAddressType.Definition),
                     IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(CacheAddressType.Definition)
                 };
             }
 
-            geometry.SetResourceBuffers(sourceResourceDefinition);
+            geometry.SetResourceBuffers(resourceDefinition);
 
-            // do conversion (PARTICLE INDEX BUFFERS, WATER CONVERSION TO DO)
+            // do conversion (PARTICLE INDEX BUFFERS, WATER CONVERSION TO DO) AMBIENT PRT TOO
 
             var generateParticles = false;
 
@@ -164,9 +166,9 @@ namespace TagTool.Geometry
                 }
                 else
                 {
-                    geometry.Resource = HOCache.ResourceCache.CreateRenderGeometryApiResource(sourceResourceDefinition);
+                    geometry.Resource = HOCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
                     geometry.Resource.HaloOnlinePageableResource.Resource.ResourceType = TagResourceTypeGen3.None;
-                    return geometry;
+                    return resourceDefinition;
                 }
             }
 
@@ -224,13 +226,6 @@ namespace TagTool.Geometry
             {
                 foreach (var mesh in geometry.Meshes)
                 {
-                    if(CacheVersionDetection.IsInGen(CacheGeneration.Third, SourceCache.Version))
-                    {
-
-                    }
-
-
-
                     foreach (var vertexBuffer in mesh.ResourceVertexBuffers)
                     {
                         if (vertexBuffer == null)
@@ -259,14 +254,13 @@ namespace TagTool.Geometry
                 }
             }
 
-            //
-            // Finalize the new ElDorado geometry resource
-            //
+            foreach (var perPixel in geometry.InstancedGeometryPerPixelLighting)
+            {
+                if(perPixel.VertexBuffer != null)
+                    VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, HOCache.Version, perPixel.VertexBuffer);
+            }
 
-            var newResourceDefinition = geometry.GetResourceDefinition();
-            var newReference = HOCache.ResourceCache.CreateRenderGeometryApiResource(newResourceDefinition);
-            geometry.Resource = newReference;
-            return geometry;
+            return geometry.GetResourceDefinition();
         }
 
         

@@ -280,7 +280,7 @@ namespace TagTool.Commands.Tags
                             {
                                 scriptWriter.WriteLine($"EditTag 0x{instance.Index:X4}");
 
-                                var resourceFile = ExportResource(sbsp.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_decorator_geometry");
+                                var resourceFile = ExportResource(sbsp.DecoratorGeometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_decorator_geometry");
 
                                 if (resourceFile == null)
                                 {
@@ -292,7 +292,7 @@ namespace TagTool.Commands.Tags
                                     scriptWriter.WriteLine($"SetField Geometry.Resource ResourcesB \"tags\\{tagName}_decorator_geometry.render_geometry_api_resource_definition\"");
                                 }
 
-                                resourceFile = ExportResource(sbsp.Geometry2.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_bsp_geometry");
+                                resourceFile = ExportResource(sbsp.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_bsp_geometry");
 
                                 if (resourceFile == null)
                                 {

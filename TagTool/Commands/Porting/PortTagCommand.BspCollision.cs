@@ -317,9 +317,12 @@ namespace TagTool.Commands.Porting
             return moppData;
         }
 
-        private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp, Dictionary<ResourceLocation, Stream> resourceStreams)
+        private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp)
         {
             StructureBspTagResourcesTest resourceDefinition = BlamCache.ResourceCache.GetStructureBspTagResources(bsp.CollisionBspResource);
+
+            // probably can remove all the code here
+
             if (resourceDefinition == null)
                 return null;
 
@@ -330,9 +333,7 @@ namespace TagTool.Commands.Porting
             }
 
             foreach (var instance in resourceDefinition.InstancedGeometry)
-            {
                 instance.UnknownBspPhysics = new TagBlock<StructureBspTagResourcesTest.CollisionMoppCodesBlock>();
-            }
 
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
 

@@ -151,7 +151,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown54;
         public List<InstancedGeometryInstance> InstancedGeometryInstances;
         public List<TagReferenceBlock> Decorators;
-        public RenderGeometry Geometry;
+        public RenderGeometry DecoratorGeometry;
         public List<UnknownSoundClustersBlock> UnknownSoundClustersA;
         public List<UnknownSoundClustersBlock> UnknownSoundClustersB;
         public List<UnknownSoundClustersBlock> UnknownSoundClustersC;
@@ -171,7 +171,7 @@ namespace TagTool.Tags.Definitions
         public uint Unknown71;
         public uint Unknown72;
         public uint Unknown73;
-        public RenderGeometry Geometry2;
+        public RenderGeometry Geometry;
         public List<LeafSystem> LeafSystems;
         public List<TagResourcesBlock> TagResources;
 
@@ -579,25 +579,35 @@ namespace TagTool.Tags.Definitions
             {
                 public short Amount;
 
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public sbyte DecoratorIndex_H3;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public byte DecoratorGeometryIndex_H3;
+                [TagField(Gen = CacheGeneration.Third)]
+                public Gen3DecoratorInfo Gen3Info;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorIndex_HO;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
+                public HaloOnlineDecoratorInfo HaloOnlineInfo;
 
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorVariant;
-
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public short DecoratorGeometryIndex_HO;
-
-                public int DecoratorGeometryOffset;
+                public int VertexBufferOffset;
                 public RealPoint3d Position;
                 public float Radius;
                 public RealPoint3d GridSize;
                 public RealPoint3d BoundingSphereOffset;
+
+                [TagField(Flags = Runtime)]
+                public List<TinyPositionVertex> Vertices;
+
+                [TagStructure(Size = 0x2)]
+                public class Gen3DecoratorInfo
+                {
+                    public sbyte PaletteIndex;
+                    public sbyte VertexBufferIndex;
+                }
+
+                [TagStructure(Size = 0x6)]
+                public class HaloOnlineDecoratorInfo
+                {
+                    public short PaletteIndex;
+                    public short Variant;
+                    public short VertexBufferIndex;
+                }
             }
 
             [TagStructure(Size = 0x4)]

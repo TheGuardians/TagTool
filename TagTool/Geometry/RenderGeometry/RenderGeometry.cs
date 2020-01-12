@@ -52,10 +52,8 @@ namespace TagTool.Geometry
         public uint Unknown8;
         public uint Unknown9;
 
-        /// <summary>
-        /// The per-mesh level-of-detail data of the render geometry.
-        /// </summary>
-        public List<PerMeshLodDatum> PerMeshLodData;
+
+        public List<StaticPerPixelLighting> InstancedGeometryPerPixelLighting;
 
         public TagResourceReference Resource;
 
@@ -116,20 +114,18 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x10)]
-        public class PerMeshLodDatum : TagStructure
+        public class StaticPerPixelLighting : TagStructure
 		{
-            public List<Index> Indices;
+            public List<int> UnusedVertexBuffer;
 
             public short VertexBufferIndex;
 
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Unused;
 
-            [TagStructure(Size = 0x4)]
-			public class Index : TagStructure
-			{
-                public int Value;
-            }
+            [TagField(Flags = Runtime)]
+            public VertexBufferDefinition VertexBuffer;
+
         }
 
 
@@ -172,6 +168,18 @@ namespace TagTool.Geometry
                         else
                             mesh.ResourceIndexBuffers[i] = null; // this happens when loading particle model from gen3, the index buffers are empty but indices are set to 0
                     }
+                }
+            }
+
+            for(int i = 0; i < InstancedGeometryPerPixelLighting.Count; i++)
+            {
+                var vertexBufferIndex = InstancedGeometryPerPixelLighting[i].VertexBufferIndex;
+                if (vertexBufferIndex != -1)
+                {
+                    if (vertexBufferIndex < resourceDefinition.VertexBuffers.Count)
+                        InstancedGeometryPerPixelLighting[i].VertexBuffer = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
+                    else
+                        InstancedGeometryPerPixelLighting[i].VertexBuffer = null;
                 }
             }
         }
@@ -222,10 +230,20 @@ namespace TagTool.Geometry
                     else
                         mesh.IndexBufferIndices[i] = -1;
                 }
+            }
 
-                // get rid of arrays after creating the resource to prevent bugs in porttag
-                mesh.ResourceVertexBuffers = null;
-                mesh.ResourceIndexBuffers = null;
+            for (int i = 0; i < InstancedGeometryPerPixelLighting.Count; i++)
+            {
+                var perPixel = InstancedGeometryPerPixelLighting[i];
+                if (perPixel.VertexBuffer != null)
+                {
+                    var d3dPointer = new D3DStructure<VertexBufferDefinition>();
+                    d3dPointer.Definition = perPixel.VertexBuffer;
+                    result.VertexBuffers.Add(d3dPointer);
+                    perPixel.VertexBufferIndex = (short)(result.VertexBuffers.Elements.Count - 1);
+                }
+                else
+                    perPixel.VertexBufferIndex = -1;
             }
 
             return result;
