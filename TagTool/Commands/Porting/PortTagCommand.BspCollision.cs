@@ -330,6 +330,16 @@ namespace TagTool.Commands.Porting
             {
                 resourceDefinition.LargeCollisionBsps = new TagBlock<StructureBspTagResourcesTest.LargeCollisionBspBlock>();
                 resourceDefinition.HavokData = new TagBlock<StructureBspTagResourcesTest.HavokDatum>();
+
+                // convert surface planes
+                foreach(var instance in resourceDefinition.InstancedGeometry)
+                {
+                    foreach(var surfacePlane in instance.SurfacePlanes)
+                    {
+                        surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
+                        surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
+                    }
+                }
             }
 
             foreach (var instance in resourceDefinition.InstancedGeometry)
