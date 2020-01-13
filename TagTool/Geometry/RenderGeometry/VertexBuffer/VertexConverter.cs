@@ -232,31 +232,24 @@ namespace TagTool.Geometry
         }
 
         /// <summary>
-        /// Writes 0x38 worth of invalid data
+        /// Writes the specificed amount of debug data 0xCD
         /// </summary>
-        /// <param name="outputStream"></param>
-        public static void WriteUnusedWorldWaterData(Stream outputStream)
+        public static void DebugFill(Stream stream, int amount)
         {
-            byte[] data = new byte[1] { 0xCD};
-            for (int i = 0; i < 0x38; i++)
-            {
-                outputStream.Write(data, 0, 1);
-            }
+            var data = new byte[1] { 0xCD };
+            for (int i = 0; i < amount; i++)
+                stream.Write(data, 0, 1);
         }
 
         /// <summary>
-        /// 
+        /// Writes the specificed amount of bytes to fill
         /// </summary>
-        /// <param name="outputStream"></param>
-        public static void WriteUnusedUnknown1BData(Stream outputStream)
+        public static void Fill(Stream stream, int amount)
         {
-            byte[] data = new byte[4] { 0x00, 0x00, 0x00, 0x00 };
-            for (int i = 0; i < 6; i++)
-            {
-                outputStream.Write(data, 0, 4);
-            }
+            var data = new byte[1] { 0x00};
+            for (int i = 0; i < amount; i++)
+                stream.Write(data, 0, 1);
         }
-
 
         /// <summary> 
         /// Change basis [0,1] to [-1,1] uniformly

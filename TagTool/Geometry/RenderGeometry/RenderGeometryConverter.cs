@@ -218,14 +218,17 @@ namespace TagTool.Geometry
                         foreach (var subpart in mesh.SubParts)
                             indexCount += subpart.IndexCount;
 
-                        WaterConversionData waterData = new WaterConversionData(){IndexBufferLength = indexCount};
+                        WaterConversionData waterData = new WaterConversionData();
 
                         for (int j = 0; j < mesh.Parts.Count(); j++)
                         {
                             var part = mesh.Parts[j];
-                            waterData.PartData.Add(new Tuple<int, int, bool>(part.FirstIndexOld, part.IndexCountOld, part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.IsWaterPart)));
+                            if(part.FlagsNew.HasFlag(Mesh.Part.PartFlagsNew.IsWaterPart))
+                                waterData.PartData.Add(new Tuple<int, int>(part.FirstIndexOld, part.IndexCountOld));
                         }
-                        waterData.Sort();
+
+                        if(waterData.PartData.Count > 1)
+                            waterData.Sort();
 
                         // read all world vertices in current mesh into a list
                         List<WorldVertex> worldVertices = new List<WorldVertex>();
@@ -244,13 +247,16 @@ namespace TagTool.Geometry
                         VertexBufferDefinition waterVertices = new VertexBufferDefinition
                         {
                             Count = indexCount,
-                            Format = VertexBufferFormat.World
+                            Format = VertexBufferFormat.World,
+                            VertexSize = 0x38   // this size is actually wrong but I replicate the errors in HO data, size should be 0x34
                         };
 
                         // create vertex buffer for Unknown1B
                         VertexBufferDefinition waterParameters = new VertexBufferDefinition
                         {
-                            Format = VertexBufferFormat.World
+                            Count = indexCount,
+                            Format = VertexBufferFormat.Unknown1B,
+                            VertexSize = 0x24   // wrong size, this is 0x18 on file, padded with zeroes.
                         };
 
                         using (var outputStream = new MemoryStream())
@@ -258,31 +264,55 @@ namespace TagTool.Geometry
                         {
                             var inVertexStream = VertexStreamFactory.Create(SourceCache.Version, inputStream);
                             var outVertexStream = VertexStreamFactory.Create(HOCache.Version, outputStream);
+                            
+                            // fill vertex buffer to the right size HO expects, then write the vertex data at the actual proper position
+                            VertexBufferConverter.DebugFill(outputStream, waterVertices.VertexSize * waterVertices.Count);
 
+                            //sorted list of water parts, write the modified world vertex there
                             for (int k = 0; k < waterData.PartData.Count(); k++)
                             {
-                                Tuple<int, int, bool> currentPartData = waterData.PartData[k];
-                                // Not water, add unused data
-                                if (currentPartData.Item3 == false)
+                                Tuple<int, int> currentPartData = waterData.PartData[k];
+
+                                outputStream.Position = 0x34 * currentPartData.Item1;
+                                VertexBufferConverter.ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
                                 {
-                                    for (int j = 0; j < currentPartData.Item2; j++)
-                                        VertexBufferConverter.WriteUnusedWorldWaterData(outputStream);
-                                }
-                                else
-                                {
-                                    VertexBufferConverter.ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
+                                    for (int j = 0; j < 3; j++)
                                     {
-                                        for (int j = 0; j < 3; j++)
-                                        {
-                                            WorldVertex w = worldVertices[v.Vertices[j]];
-                                            unknown1BIndices.Add(v.Indices[j]);
-                                            outVertexStream.WriteWorldVertex(w);
-                                        }
-                                    });
-                                }
+                                        WorldVertex w = worldVertices[v.Vertices[j]];
+                                        unknown1BIndices.Add(v.Indices[j]);
+                                        outVertexStream.WriteWorldWaterVertex(w);
+                                    }
+                                });
                             }
-                            waterVertices.VertexSize = (short)outVertexStream.GetVertexSize(VertexBufferFormat.World);
                             waterVertices.Data = new TagData(outputStream.ToArray());
+                        }
+
+                        using (var outputStream = new MemoryStream())
+                        using (var inputStream = new MemoryStream(mesh.ResourceVertexBuffers[7].Data.Data))
+                        {
+                            var inVertexStream = VertexStreamFactory.Create(SourceCache.Version, inputStream);
+                            var outVertexStream = VertexStreamFactory.Create(HOCache.Version, outputStream);
+
+                            // fill vertex buffer to the right size HO expects, then write the vertex data at the actual proper position
+                            VertexBufferConverter.Fill(outputStream, waterParameters.VertexSize * waterParameters.Count);
+
+                            //sorted list of water parts, write the modified world vertex there
+                            var currentUnknown1BIndex = 0;
+                            for (int k = 0; k < waterData.PartData.Count(); k++)
+                            {
+                                Tuple<int, int> currentPartData = waterData.PartData[k];
+                                outputStream.Position = 0x18 * currentPartData.Item1;
+                                for(int v = 0; v < currentPartData.Item2; v++)
+                                {
+                                    var unknown1BIndex = unknown1BIndices[currentUnknown1BIndex + v];
+                                    inputStream.Position = unknown1BIndex * 0x24;
+                                    var unknown1B = inVertexStream.ReadUnknown1B();
+                                    // convert unknown1B
+                                    outVertexStream.WriteUnknown1B(unknown1B);
+                                }
+                                currentUnknown1BIndex += currentPartData.Item2;
+                            }
+                            waterParameters.Data = new TagData(outputStream.ToArray());
                         }
 
 
@@ -333,13 +363,12 @@ namespace TagTool.Geometry
         
         private class WaterConversionData
         {
-            // offset, count, isWater
-            public List<Tuple<int, int, bool>> PartData;
-            public int IndexBufferLength;
+            // offset, count of vertices to write
+            public List<Tuple<int, int>> PartData;
 
             public WaterConversionData()
             {
-                PartData = new List<Tuple<int, int, bool>>();
+                PartData = new List<Tuple<int, int>>();
             }
 
             public void Sort()

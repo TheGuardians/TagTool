@@ -596,7 +596,6 @@ namespace TagTool.Geometry
             {
                 Vertices = vertices,
                 Indices = indices
-
             };
         }
 
@@ -655,7 +654,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat2(v.Texcoord);
             _stream.WriteFloat3(v.Tangent.IJK);
             _stream.WriteFloat3(v.Binormal);
-            //Temporary hack to have the right size
+            //Temporary hack to have the right size I have no idea what these 2 values are
             _stream.WriteFloat2(new RealVector2d(1, 1));
         }
 
@@ -691,7 +690,7 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.Unknown1A:
                     return 0xC;
                 case VertexBufferFormat.Unknown1B:
-                    return 0x24;
+                    return 0x18;
                 default:
                     return -1;
             }

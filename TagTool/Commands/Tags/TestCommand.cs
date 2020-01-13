@@ -48,26 +48,44 @@ namespace TagTool.Commands
                         {
                             if (mesh.Water.Count != 0)
                             {
-                                Console.WriteLine(tag.Name);
+                                var unknown1A = mesh.ResourceVertexBuffers[6];
+                                var unknown1B = mesh.ResourceVertexBuffers[7];
+                                var fileWorld = new FileInfo($"Geometry\\h3_riverworld_unknown1A_water_{mesh.VertexBufferIndices[6]}.bin");
+                                var fileParameters = new FileInfo($"Geometry\\h3_riverworld_parameters_water_{mesh.VertexBufferIndices[7]}.bin");
+                                using (var fileStream = fileWorld.OpenWrite())
+                                {
+                                    fileStream.Write(unknown1A.Data.Data, 0, unknown1A.Data.Data.Length);
+                                }
+                                using (var fileStream = fileParameters.OpenWrite())
+                                {
+                                    fileStream.Write(unknown1B.Data.Data, 0, unknown1B.Data.Data.Length);
+                                }
                             }
                         }
                     }
                     */
-
+                    
                     if (tag.Group.Tag == "Lbsp" && tag.Index == 0x3F8C)
                     {
                         var lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, tag);
                         var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(lbsp.Geometry.Resource);
                         lbsp.Geometry.SetResourceBuffers(resource);
+
                         foreach (var mesh in lbsp.Geometry.Meshes)
                         {
                             if (mesh.Water.Count != 0)
                             {
+                                var world = mesh.ResourceVertexBuffers[0];
                                 var waterParametersBufferworldWaterBuffer = mesh.ResourceVertexBuffers[7];
                                 var worldWaterBuffer = mesh.ResourceVertexBuffers[6];
-                                var fileWorld = new FileInfo($"Geometry\\riverworld_world_water_{mesh.VertexBufferIndices[6]}.bin");
+                                var fildWater = new FileInfo($"Geometry\\riverworld_world_{mesh.VertexBufferIndices[0]}.bin");
+                                var fileWorldWater = new FileInfo($"Geometry\\riverworld_world_water_{mesh.VertexBufferIndices[6]}.bin");
                                 var fileParameters = new FileInfo($"Geometry\\riverworld_paramters_water_{mesh.VertexBufferIndices[7]}.bin");
-                                using (var fileStream = fileWorld.OpenWrite())
+                                using (var fileStream = fildWater.OpenWrite())
+                                {
+                                    fileStream.Write(world.Data.Data, 0, world.Data.Data.Length);
+                                }
+                                using (var fileStream = fileWorldWater.OpenWrite())
                                 {
                                     fileStream.Write(worldWaterBuffer.Data.Data, 0, worldWaterBuffer.Data.Data.Length);
                                 }
@@ -78,6 +96,7 @@ namespace TagTool.Commands
                             }
                         }
                     }
+                    
                 }
             }
             
