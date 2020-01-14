@@ -245,6 +245,11 @@ namespace TagTool.Commands.Porting
 
                                 break;
 
+
+                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.None_:
+                                // empty data, copy buffer and skip
+                                member.AnimationData.Data = sourceStream.ToArray();
+                                continue;
                             default:
                                 throw new DataMisalignedException();
                         }
