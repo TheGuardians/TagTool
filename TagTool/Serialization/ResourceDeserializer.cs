@@ -9,6 +9,7 @@ using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
+using System.Linq;
 
 namespace TagTool.Serialization
 {
@@ -91,7 +92,9 @@ namespace TagTool.Serialization
             var nextReader = resourceContext.GetReader(pointer.Type);
             nextReader.BaseStream.Position = pointer.Offset;
 
-            var addMethod = valueType.GetMethod("Add");
+            var methods = valueType.GetMethods();
+            // select the add method from IList<T> and not IList interfaces
+            var addMethod = methods.FirstOrDefault(method => method.Name == "Add" & method.ReturnType == typeof(void));
 
             for (var i = 0; i < count; i++)
             {
