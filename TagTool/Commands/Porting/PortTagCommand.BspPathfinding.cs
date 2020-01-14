@@ -44,7 +44,7 @@ namespace TagTool.Commands.Porting
                     SurfacePlanes = new TagBlock<ScenarioStructureBsp.SurfacesPlanes>(CacheAddressType.Data, bsp.SurfacePlanes),
                     Planes = new TagBlock<ScenarioStructureBsp.Plane>(CacheAddressType.Data, bsp.Planes),
                     EdgeToSeams = new TagBlock<ScenarioStructureBsp.EdgeToSeamMapping>(CacheAddressType.Data, bsp.EdgeToSeams),
-                    PathfindingData = new TagBlock<StructureBspCacheFileTagResourcesTest.PathfindingDatum>(CacheAddressType.Data)
+                    PathfindingData = new TagBlock<StructureBspCacheFileTagResourcesTest.PathfindingDatum>(CacheAddressType.Definition)
                 };
                 foreach(var pathfinding in bsp.PathfindingData)
                 {

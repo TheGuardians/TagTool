@@ -686,15 +686,15 @@ namespace TagTool.Tags.Definitions
                     StructureChecksum = StructureChecksum,
                     GiantPathfinding =  new TagBlock<GiantPathfindingBlock>(CacheAddressType.Data, GiantPathfinding),
                     Doors = new TagBlock<Door>(CacheAddressType.Data, Doors),
-                    // test
-                    ObjectReferences = new TagBlock<ObjectReference>(CacheAddressType.Data, ObjectReferences),
-                    Seams = new TagBlock<Seam>(CacheAddressType.Data, Seams),
-                    JumpSeams = new TagBlock<JumpSeam>(CacheAddressType.Data, JumpSeams)
+                    // blocks that are in the definition
+                    ObjectReferences = new TagBlock<ObjectReference>(CacheAddressType.Definition, ObjectReferences),
+                    Seams = new TagBlock<Seam>(CacheAddressType.Definition, Seams),
+                    JumpSeams = new TagBlock<JumpSeam>(CacheAddressType.Definition, JumpSeams)
                 };
                 // set address type to Data
                 foreach(var reference in result.ObjectReferences)
                 {
-                    reference.Bsps.AddressType = CacheAddressType.Data;
+                    reference.Bsps.AddressType = CacheAddressType.Definition;
                     foreach(var bsp in reference.Bsps)
                     {
                         bsp.Bsp2dRefs.AddressType = CacheAddressType.Data;
