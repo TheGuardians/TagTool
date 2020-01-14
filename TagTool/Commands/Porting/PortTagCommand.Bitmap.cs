@@ -64,6 +64,9 @@ namespace TagTool.Commands.Porting
         {
             BaseBitmap baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex);
 
+            if (baseBitmap == null)
+                return null;
+
             if (baseBitmap.Type == BitmapType.Array)
                 baseBitmap.Type = BitmapType.Texture3D;
 
