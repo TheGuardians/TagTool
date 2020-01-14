@@ -20,24 +20,13 @@ namespace TagTool.Commands.Porting
 
             foreach (var group in resourceGroups)
             {
-                var animationDefinition = BlamCache.ResourceCache.GetModelAnimationTagResource(group.ResourceReference);
+                var resourceDefinition = BlamCache.ResourceCache.GetModelAnimationTagResource(group.ResourceReference);
 
-                if (animationDefinition != null)
-                    resourceDefinitions.Add(animationDefinition);
-            }
-
-            var diffLines = new List<string>();
-            var resDefIndex = -1;
-
-            foreach (var group in resourceGroups)
-            {
-                resDefIndex++;
-
-                var resourceDefinition = resourceDefinitions[resDefIndex];
-
-                if (resourceDefinitions.Count < resDefIndex + 1)
-                    continue; // rare cases, might break the game
-
+                if(resourceDefinition == null)
+                {
+                    group.ResourceReference = null;
+                    continue;
+                }
 
                 for (var memberIndex = 0; memberIndex < resourceDefinition.GroupMembers.Count; memberIndex++)
                 {
