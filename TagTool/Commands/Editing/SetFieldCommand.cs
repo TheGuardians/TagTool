@@ -452,6 +452,12 @@ namespace TagTool.Commands.Editing
                     Console.WriteLine(error);
                 return blamType;
             }
+            else if (type == typeof(CachedTag))
+            {
+                if (args.Count != 1 || !cache.TryGetCachedTag(args[0], out var tagInstance))
+                    return false;
+                output = tagInstance;
+            }
             else if (cache.GetType() == typeof(GameCacheContextHaloOnline) && type == typeof(PageableResource))
             {
                 if (args.Count < 1 || args.Count > 2)
