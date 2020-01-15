@@ -104,6 +104,12 @@ namespace TagTool.Commands.Editing
             var index = blockValue.Count - 1;
             var count = 1;
 
+            if (index < 0)
+            {
+                Console.WriteLine("TagBlock is already null!");
+                return true;
+            }
+
             var genericIndex = false;
             var genericCount = false;
 

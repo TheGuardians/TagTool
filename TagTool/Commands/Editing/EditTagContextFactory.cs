@@ -146,6 +146,7 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new RemoveBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new CopyBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
             commandContext.AddCommand(new PokeTagChangesCommand(cache, tag, definition));
             commandContext.AddCommand(new ExitToCommand(contextStack));
