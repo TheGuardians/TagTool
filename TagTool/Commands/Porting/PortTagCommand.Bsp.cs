@@ -77,10 +77,10 @@ namespace TagTool.Commands.Porting
             sbsp.Unknown86 = 1;
 
             //
-            // Set compatibility flag for H3 mopps
+            // Set compatibility flag for H3 mopps for the engine to perform some fixups just in time
             //
 
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            if (BlamCache.Version == CacheVersion.Halo3Retail || BlamCache.Version == CacheVersion.Halo3Beta)
                 sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
 
             //

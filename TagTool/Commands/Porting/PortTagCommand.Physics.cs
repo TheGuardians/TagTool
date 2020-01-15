@@ -12,18 +12,6 @@ namespace TagTool.Commands.Porting
     {
         private PhysicsModel ConvertPhysicsModel(CachedTag instance, PhysicsModel phmo)
         {
-            /*
-            // Allow syncing of specific tags in MP (hax)
-            //
-
-            switch (instance.Name)
-            {
-                case @"objects\levels\solo\060_floodship\flood_danglers\large_dangler\large_dangler":
-                case @"objects\levels\solo\060_floodship\flood_danglers\small_dangler\small_dangler":
-                    phmo.Flags &= ~PhysicsModel.PhysicsModelFlags.MakePhysicalChildrenKeyframed;
-                    break;
-            }*/
-
             //
             // Fix mopp code array headers for both H3 and ODST
             //
@@ -37,7 +25,7 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < phmo.Mopps.Count; i++)
                 {
-                    var header = BlamCache.Deserializer.Deserialize<MoppCode>(dataContext);
+                    var header = BlamCache.Deserializer.Deserialize<MoppCodeHeader>(dataContext);   // TODO: check if it can be read as CollisionMoppCode instead of MoppCodeHeader
                     CacheContext.Serializer.Serialize(dataContext, header);
 
                     var adjustedDataSize = header.DataSize % 16 == 0 ? header.DataSize : (header.DataSize / 16 + 1) * 16;       //Align on 16 bytes.

@@ -474,6 +474,45 @@ namespace TagTool.Commands.Porting
             }
         }
 
+        private object ConvertParticleModel(CachedTag edTag, CachedTag blamTag, ParticleModel particleModel)
+        {
+            var blamResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(particleModel.Geometry.Resource);
+            if (blamResourceDefinition == null)
+            {
+                // clear geometry, prevents crashes instead of nulling the tag itself or nulling the resource
+                particleModel.Geometry = null;
+                return particleModel;
+            }
+            var newParticleModelGeometry = GeometryConverter.Convert(particleModel.Geometry, blamResourceDefinition);
+            particleModel.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newParticleModelGeometry);
+            return particleModel;
+        }
+
+        private object ConvertGen3RenderModel(CachedTag edTag, CachedTag blamTag, RenderModel mode)
+        {
+            var blamResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);
+            if (blamResourceDefinition == null)
+            {
+                // clear geometry, prevents crashes instead of nulling the tag itself or nulling the resource
+                mode.Geometry = null;
+                return mode;
+            }
+
+            var newRenderModelGeometry = GeometryConverter.Convert(mode.Geometry, blamResourceDefinition);
+            mode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newRenderModelGeometry);
+
+            switch (blamTag.Name)
+            {
+                case @"levels\multi\snowbound\sky\sky":
+                    mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
+                    break;
+                case @"levels\multi\isolation\sky\sky":
+                    mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
+                    break;
+            }
+            return mode;
+        }
+
         private object ConvertGen2RenderModel(CachedTag edTag, RenderModel mode, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             /*

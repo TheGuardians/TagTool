@@ -138,7 +138,7 @@ namespace TagTool.Geometry
         /// Set the runtime VertexBufferResources and IndexBufferResources fields given the resource definition
         /// </summary>
         /// <param name="resourceDefinition"></param>
-        public void SetResourceBuffers(RenderGeometryApiResourceDefinitionTest resourceDefinition)
+        public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition)
         {
 
             foreach(var mesh in Meshes)
@@ -188,9 +188,9 @@ namespace TagTool.Geometry
         /// Generate a valid RenderGeometryApiResourceDefinition from the mesh blocks and sets the values in IndexBufferIndices, VertexBufferIndices
         /// </summary>
         /// <returns></returns>
-        public RenderGeometryApiResourceDefinitionTest GetResourceDefinition()
+        public RenderGeometryApiResourceDefinition GetResourceDefinition()
         {
-            RenderGeometryApiResourceDefinitionTest result = new RenderGeometryApiResourceDefinitionTest
+            RenderGeometryApiResourceDefinition result = new RenderGeometryApiResourceDefinition
             {
                 IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(),
                 VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>()

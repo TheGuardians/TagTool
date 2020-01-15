@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 
 using BSP = TagTool.Tags.Definitions.CollisionModel.Region.Permutation.Bsp;
+using TagTool.BspCollisionGeometry;
+using TagTool.Tags;
+
 namespace TagTool.Geometry
 {
     public class CollisionGeometryBuilder
@@ -248,11 +251,11 @@ namespace TagTool.Geometry
         public long ParseBSP3DNodes(BSP bsp, BinaryReader reader, int count)
         {
             bsp.Geometry = new CollisionGeometry(); // adjusted to current struct
-            bsp.Geometry.Bsp3dNodes = new List<CollisionGeometry.Bsp3dNode>();
+            bsp.Geometry.Bsp3dNodes = new TagBlock<Bsp3dNode>();
             long originalPos = reader.BaseStream.Position;
             for (uint i = 0; i < count; ++i)
             {
-                var bsp3dNode = new CollisionGeometry.Bsp3dNode();
+                var bsp3dNode = new Bsp3dNode();
                 reader.BaseStream.Position = originalPos + (i * BSP3DNODE_SIZE);
                 var plane_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var front_child = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0); // adjusted to current struct
@@ -295,7 +298,7 @@ namespace TagTool.Geometry
 
         public long ParsePlanes(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Planes = new List<CollisionGeometry.Plane>();
+            bsp.Geometry.Planes = new TagBlock<Plane>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -306,7 +309,7 @@ namespace TagTool.Geometry
                 var plane_k = BitConverter.ToSingle(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var plane_d = BitConverter.ToSingle(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
-                var plane = new CollisionGeometry.Plane();
+                var plane = new Plane();
 
                 // ReForge change:
                 // plane.Value.I = plane_i;
@@ -324,7 +327,7 @@ namespace TagTool.Geometry
 
         public long ParseLeaves(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Leaves = new List<CollisionGeometry.Leaf>();
+            bsp.Geometry.Leaves = new TagBlock<Leaf>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -335,9 +338,9 @@ namespace TagTool.Geometry
                 var Unknown = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var first2dRef = BitConverter.ToInt16(reader.ReadBytes(2).Reverse().ToArray(), 0);
 
-                var leaf = new CollisionGeometry.Leaf();
+                var leaf = new Leaf();
 
-                leaf.Flags = (CollisionGeometry.LeafFlags)flags;
+                leaf.Flags = (LeafFlags)flags;
                 leaf.Bsp2dReferenceCount = (short)bsp2dRefCount;
                 // ReForge change:
                 // leaf.FirstBsp2dReference = (int)(((ushort)Unknown << 16) | (ushort)first2dRef);
@@ -351,7 +354,7 @@ namespace TagTool.Geometry
 
         public long ParseBSP2DReferences(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Bsp2dReferences = new List<CollisionGeometry.Bsp2dReference>();
+            bsp.Geometry.Bsp2dReferences = new TagBlock<Bsp2dReference>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -360,7 +363,7 @@ namespace TagTool.Geometry
                 var plane_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var bsp2dnode_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
-                var bsp2dRef = new CollisionGeometry.Bsp2dReference();
+                var bsp2dRef = new Bsp2dReference();
 
                 //truncate and preserve sign
                 var uplane_idx = (plane_idx & 0x7fff);
@@ -383,7 +386,7 @@ namespace TagTool.Geometry
 
         public long ParseBSP2DNodes(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Bsp2dNodes = new List<CollisionGeometry.Bsp2dNode>();
+            bsp.Geometry.Bsp2dNodes = new TagBlock<Bsp2dNode>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -395,7 +398,7 @@ namespace TagTool.Geometry
                 var left_child = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var right_child = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
-                var bsp2dNode = new CollisionGeometry.Bsp2dNode();
+                var bsp2dNode = new Bsp2dNode();
                 bsp2dNode.Plane.I = plane_i;
                 bsp2dNode.Plane.J = plane_j;
                 bsp2dNode.Plane.D = plane_d;
@@ -421,7 +424,7 @@ namespace TagTool.Geometry
 
         public long ParseSurfaces(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Surfaces = new List<CollisionGeometry.Surface>();
+            bsp.Geometry.Surfaces = new TagBlock<Surface>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -436,7 +439,7 @@ namespace TagTool.Geometry
                 // var material = BitConverter.ToInt16(reader.ReadBytes(2).Reverse().ToArray(), 0);
                 var material = (short)0;
 
-                var surface = new CollisionGeometry.Surface();
+                var surface = new Surface();
 
                 //sign-compress the plane index
                 var uplane_idx = (plane_idx & 0x7fff);
@@ -448,7 +451,7 @@ namespace TagTool.Geometry
                 surface.FirstEdge = (ushort)first_edge;
                 surface.MaterialIndex = material;
                 surface.BreakableSurfaceIndex = breakable_surface;
-                surface.Flags = (CollisionGeometry.SurfaceFlags)flags;
+                surface.Flags = (SurfaceFlags)flags;
 
                 bsp.Geometry.Surfaces.Add(surface);
             }
@@ -457,7 +460,7 @@ namespace TagTool.Geometry
 
         public long ParseEdges(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Edges = new List<CollisionGeometry.Edge>();
+            bsp.Geometry.Edges = new TagBlock<Edge>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -470,7 +473,7 @@ namespace TagTool.Geometry
                 var left_surface_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var right_surface_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
-                var edge = new CollisionGeometry.Edge();
+                var edge = new Edge();
 
                 edge.StartVertex = (short)start_vert_idx;
                 edge.EndVertex = (short)end_vert_idx;
@@ -487,7 +490,7 @@ namespace TagTool.Geometry
 
         public long ParseVertices(BSP bsp, BinaryReader reader, int count)
         {
-            bsp.Geometry.Vertices = new List<CollisionGeometry.Vertex>();
+            bsp.Geometry.Vertices = new TagBlock<Vertex>();
             var originalPos = reader.BaseStream.Position;
 
             for (uint i = 0; i < count; ++i)
@@ -498,7 +501,7 @@ namespace TagTool.Geometry
                 var point_z = BitConverter.ToSingle(reader.ReadBytes(4).Reverse().ToArray(), 0);
                 var first_edge = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
 
-                var vert = new CollisionGeometry.Vertex();
+                var vert = new Vertex();
 
                 vert.Point = new RealPoint3d(point_x, point_y, point_z);
                 vert.FirstEdge = (short)first_edge;

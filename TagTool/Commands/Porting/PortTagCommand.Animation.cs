@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting
     {
         public List<ModelAnimationGraph.ResourceGroup> ConvertModelAnimationGraphResourceGroups(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, List<ModelAnimationGraph.ResourceGroup> resourceGroups)
         {
-            var resourceDefinitions = new List<ModelAnimationTagResourceTest>();
+            var resourceDefinitions = new List<ModelAnimationTagResource>();
 
             foreach (var group in resourceGroups)
             {
@@ -40,72 +40,72 @@ namespace TagTool.Commands.Porting
                     {
                         var dataContext = new DataSerializationContext(sourceReader, destWriter);
 
-                        ModelAnimationTagResourceTest.GroupMember.Codec codec;
-                        ModelAnimationTagResourceTest.GroupMember.FrameInfo frameInfo;
+                        ModelAnimationTagResource.GroupMember.Codec codec;
+                        ModelAnimationTagResource.GroupMember.FrameInfo frameInfo;
 
-                        if (member.BaseHeader != ModelAnimationTagResourceTest.GroupMemberHeaderType.Overlay)
+                        if (member.BaseHeader != ModelAnimationTagResource.GroupMemberHeaderType.Overlay)
                         {
-                            codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Codec>(dataContext);
+                            codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
 
                             CacheContext.Serializer.Serialize(dataContext, codec);
 
-                            var Format1 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Format1>(dataContext);
+                            var Format1 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
 
                             CacheContext.Serializer.Serialize(dataContext, Format1);
 
                             for (int i = 0; i < codec.RotationNodeCount; i++)
-                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.RotationFrame>(dataContext));
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
                             sourceStream.Position = Format1.DataStart;
                             destStream.Position = sourceStream.Position;
                             for (int i = 0; i < codec.PositionNodeCount; i++)
-                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.PositionFrame>(dataContext));
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
                             sourceStream.Position = Format1.ScaleFramesOffset;
                             destStream.Position = sourceStream.Position;
                             for (int i = 0; i < codec.ScaleNodeCount; i++)
-                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                                CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         }
 
                         // If the overlay header is alone, member.OverlayOffset = 0
                         sourceStream.Position = member.OverlayOffset;
                         destStream.Position = member.OverlayOffset;
 
-                        codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Codec>(dataContext);
+                        codec = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Codec>(dataContext);
                         CacheContext.Serializer.Serialize(dataContext, codec);
 
                         // deserialize second header. or as first header if the type1/format1 header isn't used.
                         switch (codec.AnimationCodec)
                         {
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type3: // should merge with type1
-                                var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Format1>(dataContext);
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type3: // should merge with type1
+                                var header = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format1>(dataContext);
 
                                 CacheContext.Serializer.Serialize(dataContext, header);
 
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.RotationFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + header.DataStart;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.PositionFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + header.ScaleFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
                                         CacheContext.Serializer.Serialize(dataContext,
-                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                                            BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                                 break;
 
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type4:
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type5:
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type6:
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type7:
-                                var overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Overlay>(dataContext);
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type4:
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type5:
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type6:
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type7:
+                                var overlay = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Overlay>(dataContext);
 
                                 CacheContext.Serializer.Serialize(dataContext, overlay);
 
@@ -132,7 +132,7 @@ namespace TagTool.Commands.Porting
 
                                 for (int i = 0; i < codec.RotationNodeCount; i++)
                                 {
-                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfo>(dataContext);
+                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfo>(dataContext);
 
                                     CacheContext.Serializer.Serialize(dataContext, frameInfo);
 
@@ -143,7 +143,7 @@ namespace TagTool.Commands.Porting
 
                                 for (int i = 0; i < codec.PositionNodeCount; i++)
                                 {
-                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfo>(dataContext);
+                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfo>(dataContext);
 
                                     CacheContext.Serializer.Serialize(dataContext, frameInfo);
 
@@ -154,7 +154,7 @@ namespace TagTool.Commands.Porting
 
                                 for (int i = 0; i < codec.ScaleNodeCount; i++)
                                 {
-                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfo>(dataContext);
+                                    frameInfo = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfo>(dataContext);
 
                                     CacheContext.Serializer.Serialize(dataContext, frameInfo);
 
@@ -167,86 +167,86 @@ namespace TagTool.Commands.Porting
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type4)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type5)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type6)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type7)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
+                                        if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type5)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type6)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + overlay.PositionKeyframesOffset;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type4)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type5)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type6)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type7)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
+                                        if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type5)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type6)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + overlay.ScaleKeyframesOffset;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type4)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type5)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type6)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Keyframe>(dataContext));
-                                        else if (codec.AnimationCodec == ModelAnimationTagResourceTest.AnimationCompressionFormats.Type7)
-                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.KeyframeType5>(dataContext));
+                                        if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type4)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type5)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type6)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Keyframe>(dataContext));
+                                        else if (codec.AnimationCodec == ModelAnimationTagResource.AnimationCompressionFormats.Type7)
+                                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.KeyframeType5>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + overlay.RotationFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in RotationFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.RotationFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrame>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + overlay.PositionFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in PositionFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.PositionFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + overlay.ScaleFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 foreach (var framecount in ScaleFrameCount)
                                     for (int i = 0; i < framecount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                                 break;
 
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.Type8:
+                            case ModelAnimationTagResource.AnimationCompressionFormats.Type8:
                                 // Type 8 is basically a type 3 but with rotation frames using 4 floats, or a realQuaternion
-                                var Format8 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.Format8>(dataContext);
+                                var Format8 = BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.Format8>(dataContext);
 
                                 CacheContext.Serializer.Serialize(dataContext, Format8);
 
                                 for (int nodeIndex = 0; nodeIndex < codec.RotationNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.RotationFrameFloat>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.RotationFrameFloat>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + Format8.PositionFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.PositionNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.PositionFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.PositionFrame>(dataContext));
 
                                 sourceStream.Position = member.OverlayOffset + Format8.ScaleFramesOffset;
                                 destStream.Position = sourceStream.Position;
                                 for (int nodeIndex = 0; nodeIndex < codec.ScaleNodeCount; nodeIndex++)
                                     for (int frameIndex = 0; frameIndex < member.FrameCount; frameIndex++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                                 break;
 
 
-                            case ModelAnimationTagResourceTest.AnimationCompressionFormats.None_:
+                            case ModelAnimationTagResource.AnimationCompressionFormats.None_:
                                 // empty data, copy buffer and skip
                                 member.AnimationData.Data = sourceStream.ToArray();
                                 continue;
@@ -280,49 +280,49 @@ namespace TagTool.Commands.Porting
 
                         var footerSizeBase = (byte)member.BaseHeader / 4;
                         for (int flagsCount = 0; flagsCount < footerSizeBase; flagsCount++)
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
 
                         var footerSizeOverlay = (byte)member.OverlayHeader / 4;
                         for (int flagsCount = 0; flagsCount < footerSizeOverlay; flagsCount++)
-                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.ScaleFrame>(dataContext));
+                            CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.ScaleFrame>(dataContext));
                         #endregion
 
                         switch (member.MovementDataType)
                         {
-                            case ModelAnimationTagResourceTest.GroupMemberMovementDataType.None:
+                            case ModelAnimationTagResource.GroupMemberMovementDataType.None:
                                 if (member.Unknown1 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDyaw>(dataContext));
                                 if (member.Unknown2 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
-                            case ModelAnimationTagResourceTest.GroupMemberMovementDataType.dx_dy:
+                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
                                 if (member.Unknown1 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDy>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDy>(dataContext));
                                 if (member.Unknown2 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
-                            case ModelAnimationTagResourceTest.GroupMemberMovementDataType.dx_dy_dyaw:
+                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
                                 if (member.Unknown1 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 if (member.Unknown2 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDyaw>(dataContext));
                                 break;
 
-                            case ModelAnimationTagResourceTest.GroupMemberMovementDataType.dx_dy_dz_dyaw:
+                            case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                                 if (member.Unknown1 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
                                 if (member.Unknown2 > 0)
                                     for (int i = 0; i < member.FrameCount; i++)
-                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResourceTest.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
+                                        CacheContext.Serializer.Serialize(dataContext, BlamCache.Deserializer.Deserialize<ModelAnimationTagResource.GroupMember.FrameInfoDxDyDzDyaw>(dataContext));
                                 break;
                             default:
                                 break;

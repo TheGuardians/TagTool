@@ -30,14 +30,11 @@ namespace TagTool.Commands.Porting
             if (args.Count < 1)
                 return false;
 
-            var memory = false;
-
             while (args.Count > 1)
             {
                 switch (args[0].ToLower())
                 {
                     case "memory":
-                        memory = true;
                         break;
 
                     default:

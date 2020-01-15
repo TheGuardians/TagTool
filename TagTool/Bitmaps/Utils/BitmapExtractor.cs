@@ -66,7 +66,7 @@ namespace TagTool.Bitmaps
             }
             else if (cache.GetType() == typeof(GameCacheContextGen3))
             {
-                var baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(cache, bitmap, imageIndex);
+                var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex);
                 if (baseBitmap == null)
                     return null;
                 return new DDSFile(baseBitmap);

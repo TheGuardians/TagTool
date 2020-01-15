@@ -609,10 +609,8 @@ namespace TagTool.Commands.Porting
 					particle.Flags = (particle.Flags & 0x3) + ((int)(particle.Flags & 0xFFFFFFFC) << 1);
 					break;
 
-				// If there is no valid resource in the prtm tag, null the mode itself to prevent crashes
 				case ParticleModel particleModel:
-                    var newParticleModelGeometry = GeometryConverter.Convert(particleModel.Geometry, BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(particleModel.Geometry.Resource));
-                    particleModel.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newParticleModelGeometry);
+                    blamDefinition = ConvertParticleModel(edTag, blamTag, particleModel);
                     break;
 
 				case PhysicsModel phmo:
@@ -623,25 +621,11 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertRasterizerGlobals(rasg);
 					break;
 
-                // If there is no valid resource in the mode tag, null the mode itself to prevent crashes (engineer head, harness)
                 case RenderModel mode:
                     if (BlamCache.Version < CacheVersion.Halo3Retail)
                         blamDefinition = ConvertGen2RenderModel(edTag, mode, resourceStreams);
                     else
-                    {
-                        var newRenderModelGeometry = GeometryConverter.Convert(mode.Geometry, BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource));
-                        mode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newRenderModelGeometry);
-
-                        switch (blamTag.Name)
-                        {
-                            case @"levels\multi\snowbound\sky\sky":
-                                mode.Materials[11].RenderMethod = CacheContext.GetTag<Shader>(@"levels\multi\snowbound\sky\shaders\dust_clouds");
-                                break;
-                            case @"levels\multi\isolation\sky\sky":
-                                mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
-                                break;
-                        }
-                    }
+                        blamDefinition = ConvertGen3RenderModel(edTag, blamTag, mode);
 					break;
 
 				case Scenario scnr:
@@ -829,9 +813,11 @@ namespace TagTool.Commands.Porting
 						return ConvertTag(cacheStream, blamCacheStream, resourceStreams, (CachedTag)data);
 					}
 
-				case CollisionMoppCode collisionMopp:
-					collisionMopp.Data = ConvertCollisionMoppData(collisionMopp.Data);
-					return collisionMopp;
+                case CollisionMoppCode collisionMopp:
+                    // only mopp codes from halo 3 beta and retail need a form of conversion
+                    if (BlamCache.Version < CacheVersion.Halo3ODST)
+                        collisionMopp.Data.Elements = ConvertCollisionMoppData(collisionMopp.Data.Elements);
+                    return collisionMopp;
 
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
                     return ConvertPhantomTypeFlags(blamTagName, phantomTypeFlags);

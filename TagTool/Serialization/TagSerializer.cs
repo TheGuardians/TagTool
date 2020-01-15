@@ -496,16 +496,6 @@ namespace TagTool.Serialization
             }
 
             var elementType = listType.GenericTypeArguments[0];
-            TagStructureAttribute structure;
-
-            try
-            {
-                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
             
             // Serialize each value in the list to a data block
             var tagBlock = context.CreateBlock();
@@ -553,16 +543,6 @@ namespace TagTool.Serialization
             }
 
             var elementType = listType.GenericTypeArguments[0];
-            TagStructureAttribute structure;
-
-            try
-            {
-                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
 
             // Serialize each value in the list to a data block
             var tagBlock = context.CreateBlock();

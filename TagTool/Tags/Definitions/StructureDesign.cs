@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions
 
         public List<CollisionMoppCode> SoftCeilingMoppCodes;
         public List<SoftCeiling> SoftCeilings;
-        public List<WaterMoppCode> WaterMoppCodes;
+        public List<CollisionMoppCode> WaterMoppCodes;
         public List<WaterGroup> WaterGroups;
         public List<WaterInstance> WaterInstances;
 

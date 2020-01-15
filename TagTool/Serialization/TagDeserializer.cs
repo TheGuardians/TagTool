@@ -342,17 +342,6 @@ namespace TagTool.Serialization
             var result = Activator.CreateInstance(valueType);
             var elementType = valueType.GenericTypeArguments[0];
 
-            TagStructureAttribute structure;
-
-            try
-            {
-                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
-
             // Read count and offset
             var startOffset = reader.BaseStream.Position;
             var count = reader.ReadInt32();
@@ -395,17 +384,6 @@ namespace TagTool.Serialization
         {
             var result = Activator.CreateInstance(valueType);
             var elementType = valueType.GenericTypeArguments[0];
-
-            TagStructureAttribute structure;
-
-            try
-            {
-                structure = TagStructure.GetTagStructureInfo(elementType, Version).Structure;
-            }
-            catch
-            {
-                structure = null;
-            }
 
             // Read count and offset
             var startOffset = reader.BaseStream.Position;

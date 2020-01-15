@@ -27,7 +27,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// Converts RenderGeometry class in place and returns a new RenderGeometryApiResourceDefinition
         /// </summary>
-        public RenderGeometryApiResourceDefinitionTest Convert(RenderGeometry geometry, RenderGeometryApiResourceDefinitionTest resourceDefinition)
+        public RenderGeometryApiResourceDefinition Convert(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
             //
             // Convert byte[] of UnknownBlock
@@ -137,7 +137,7 @@ namespace TagTool.Geometry
             {
                 wasNull = true;
                 Console.Error.WriteLine("Render geometry does not have a valid resource definition, continuing anyway.");
-                resourceDefinition = new RenderGeometryApiResourceDefinitionTest
+                resourceDefinition = new RenderGeometryApiResourceDefinition
                 {
                     VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(CacheAddressType.Definition),
                     IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(CacheAddressType.Definition)

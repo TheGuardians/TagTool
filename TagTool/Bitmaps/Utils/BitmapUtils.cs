@@ -271,13 +271,13 @@ namespace TagTool.Bitmaps
             return result;
         }
 
-        public static BitmapTextureInteropResourceTest CreateEmptyBitmapTextureInteropResource()
+        public static BitmapTextureInteropResource CreateEmptyBitmapTextureInteropResource()
         {
-            return new BitmapTextureInteropResourceTest
+            return new BitmapTextureInteropResource
             {
-                Texture = new D3DStructure<BitmapTextureInteropResourceTest.BitmapDefinition>
+                Texture = new D3DStructure<BitmapTextureInteropResource.BitmapDefinition>
                 {
-                    Definition = new BitmapTextureInteropResourceTest.BitmapDefinition
+                    Definition = new BitmapTextureInteropResource.BitmapDefinition
                     {
                         PrimaryResourceData = new TagData(),
                         SecondaryResourceData = new TagData(),
@@ -288,7 +288,7 @@ namespace TagTool.Bitmaps
             };
         }
 
-        public static BitmapTextureInteropResourceTest CreateBitmapTextureInteropResource(BaseBitmap bitmap)
+        public static BitmapTextureInteropResource CreateBitmapTextureInteropResource(BaseBitmap bitmap)
         {
             var result = CreateEmptyBitmapTextureInteropResource();
             result.Texture.Definition.PrimaryResourceData.Data = bitmap.Data;

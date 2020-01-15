@@ -11,7 +11,7 @@ namespace TagTool.Tags.Resources
         /// <summary>
         /// The texture object.
         /// </summary>
-        public TagStructureReference<BitmapInterleavedDefinition> Texture;
+        public D3DStructure<BitmapInterleavedDefinition> Texture;
 
         /// <summary>
         /// Describes a bitmap.

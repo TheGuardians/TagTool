@@ -11,7 +11,7 @@ namespace TagTool.Tags.Resources
     [TagStructure(Name = "bitmap_texture_interop_resource", Size = 0xC)]
     public class BitmapTextureInteropResource : TagStructure
 	{
-        public TagStructureReference<BitmapDefinition> Texture;
+        public D3DStructure<BitmapDefinition> Texture;
 
         [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnline106708)]

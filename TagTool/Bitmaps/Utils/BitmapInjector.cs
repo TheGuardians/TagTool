@@ -8,9 +8,9 @@ namespace TagTool.Bitmaps
 {
     public class BitmapInjector
     {
-        public static BitmapTextureInteropResourceTest CreateBitmapResourceFromDDS(GameCache cache, DDSFile file)
+        public static BitmapTextureInteropResource CreateBitmapResourceFromDDS(GameCache cache, DDSFile file)
         {
-            BitmapTextureInteropResourceTest result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
+            BitmapTextureInteropResource result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
 
             if (cache.GetType() == typeof(GameCacheContextHaloOnline))
             {

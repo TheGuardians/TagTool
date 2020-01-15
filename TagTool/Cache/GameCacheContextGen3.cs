@@ -589,28 +589,28 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override BitmapTextureInteropResourceTest GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInteropResourceTest>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
         }
 
-        public override BitmapTextureInterleavedInteropResourceTest GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interleaved_interop_resource")
                 return null;
-            return GetResourceDefinition<BitmapTextureInterleavedInteropResourceTest>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
         }
 
-        public override RenderGeometryApiResourceDefinitionTest GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
                 return null;
-            return GetResourceDefinition<RenderGeometryApiResourceDefinitionTest>(resourceReference);
+            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
@@ -640,15 +640,15 @@ namespace TagTool.Cache
             return resourceDef;
         }
 
-        public override ModelAnimationTagResourceTest GetModelAnimationTagResource(TagResourceReference resourceReference)
+        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "model_animation_tag_resource")
                 return null;
-            return GetResourceDefinition<ModelAnimationTagResourceTest>(resourceReference);
+            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
         }
 
-        public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)
+        public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_tag_resources")
@@ -656,10 +656,10 @@ namespace TagTool.Cache
             // extra step for bsp resources
             if (ResourceLayoutTable.Segments[tagResource.SegmentIndex].RequiredPageIndex == -1)
                 return null;
-            return GetResourceDefinition<StructureBspTagResourcesTest>(resourceReference);
+            return GetResourceDefinition<StructureBspTagResources>(resourceReference);
         }
 
-        public override StructureBspCacheFileTagResourcesTest GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
+        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_cache_file_tag_resources")
@@ -667,7 +667,7 @@ namespace TagTool.Cache
             // extra step for bsp resources
             if (ResourceLayoutTable.Segments[tagResource.SegmentIndex].RequiredPageIndex == -1)
                 return null;
-            return GetResourceDefinition<StructureBspCacheFileTagResourcesTest>(resourceReference);
+            return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
 
 
@@ -676,27 +676,27 @@ namespace TagTool.Cache
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinitionTest renderGeometryDefinition)
+        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinition renderGeometryDefinition)
         {
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResourceTest modelAnimationGraphDefinition)
+        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition)
         {
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition)
+        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResource bitmapResourceDefinition)
         {
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource)
+        public override TagResourceReference CreateStructureBspResource(StructureBspTagResources sbspResource)
         {
             throw new NotImplementedException();
         }
 
-        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource)
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResources sbspCacheFileResource)
         {
             throw new NotImplementedException();
         }
@@ -706,7 +706,7 @@ namespace TagTool.Cache
             return null;
         }
 
-        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition)
+        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResource bitmapResourceDefinition)
         {
             return null;
         }

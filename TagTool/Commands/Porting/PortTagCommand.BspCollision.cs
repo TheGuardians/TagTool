@@ -319,7 +319,7 @@ namespace TagTool.Commands.Porting
 
         private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp)
         {
-            StructureBspTagResourcesTest resourceDefinition = BlamCache.ResourceCache.GetStructureBspTagResources(bsp.CollisionBspResource);
+            StructureBspTagResources resourceDefinition = BlamCache.ResourceCache.GetStructureBspTagResources(bsp.CollisionBspResource);
 
             // probably can remove all the code here
 
@@ -339,7 +339,7 @@ namespace TagTool.Commands.Porting
 
                     foreach(var mopps in instance.CollisionMoppCodes)
                     {
-                        if(mopps.Data != null)
+                        if(mopps != null)
                             mopps.Data.Elements = ConvertCollisionMoppData(mopps.Data.Elements);
                     }
                 }

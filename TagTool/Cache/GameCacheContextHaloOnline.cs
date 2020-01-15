@@ -1295,44 +1295,44 @@ namespace TagTool.Cache
             return GetResourceDefinition<BinkResource>(resourceReference);
         }
 
-        public override BitmapTextureInteropResourceTest GetBitmapTextureInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Bitmap)
                 return null;
-            return GetResourceDefinition<BitmapTextureInteropResourceTest>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInteropResource>(resourceReference);
         }
 
-        public override BitmapTextureInterleavedInteropResourceTest GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
+        public override BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.BitmapInterleaved)
                 return null;
-            return GetResourceDefinition<BitmapTextureInterleavedInteropResourceTest>(resourceReference);
+            return GetResourceDefinition<BitmapTextureInterleavedInteropResource>(resourceReference);
         }
 
-        public override RenderGeometryApiResourceDefinitionTest GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
+        public override RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.RenderGeometry)
                 return null;
-            return GetResourceDefinition<RenderGeometryApiResourceDefinitionTest>(resourceReference);
+            return GetResourceDefinition<RenderGeometryApiResourceDefinition>(resourceReference);
         }
 
-        public override ModelAnimationTagResourceTest GetModelAnimationTagResource(TagResourceReference resourceReference)
+        public override ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Animation)
                 return null;
-            return GetResourceDefinition<ModelAnimationTagResourceTest>(resourceReference);
+            return GetResourceDefinition<ModelAnimationTagResource>(resourceReference);
         }
 
         public override SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference)
@@ -1391,12 +1391,12 @@ namespace TagTool.Cache
             return CreateResource(soundResourceDefinition, ResourceLocation.Audio, TagResourceTypeGen3.Sound);
         }
 
-        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition)
+        public override TagResourceReference CreateBitmapResource(BitmapTextureInteropResource bitmapResourceDefinition)
         {
             return CreateResource(bitmapResourceDefinition, ResourceLocation.Textures, TagResourceTypeGen3.Bitmap);
         }
 
-        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition)
+        public override TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResource bitmapResourceDefinition)
         {
             return CreateResource(bitmapResourceDefinition, ResourceLocation.Textures, TagResourceTypeGen3.BitmapInterleaved);
         }
@@ -1406,44 +1406,44 @@ namespace TagTool.Cache
             return CreateResource(binkResourceDefinition, ResourceLocation.Resources, TagResourceTypeGen3.Bink);
         }
 
-        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinitionTest renderGeometryDefinition)
+        public override TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinition renderGeometryDefinition)
         {
             return CreateResource(renderGeometryDefinition, ResourceLocation.Resources, TagResourceTypeGen3.RenderGeometry);
         }
 
-        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResourceTest modelAnimationGraphDefinition)
+        public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition)
         {
             return CreateResource(modelAnimationGraphDefinition, ResourceLocation.Resources, TagResourceTypeGen3.Animation);
         }
 
-        public override TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource)
+        public override TagResourceReference CreateStructureBspResource(StructureBspTagResources sbspResource)
         {
             return CreateResource(sbspResource, ResourceLocation.Resources, TagResourceTypeGen3.Collision);
         }
 
-        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource)
+        public override TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResources sbspCacheFileResource)
         {
             return CreateResource(sbspCacheFileResource, ResourceLocation.Resources, TagResourceTypeGen3.Pathfinding);
         }
 
-        public override StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference)
+        public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Collision)
                 return null;
-            return GetResourceDefinition<StructureBspTagResourcesTest>(resourceReference);
+            return GetResourceDefinition<StructureBspTagResources>(resourceReference);
         }
 
-        public override StructureBspCacheFileTagResourcesTest GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
+        public override StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference)
         {
             if (!IsResourceReferenceValid(resourceReference))
                 return null;
             var resource = GetPageableResource(resourceReference).Resource;
             if (resource.ResourceType != TagResourceTypeGen3.Pathfinding)
                 return null;
-            return GetResourceDefinition<StructureBspCacheFileTagResourcesTest>(resourceReference);
+            return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
 
         //

@@ -6,7 +6,7 @@ using System.IO;
 using TagTool.Tags;
 using static TagTool.Tags.Resources.BitmapTextureInterleavedInteropResource;
 using TagTool.Tags.Resources;
-using static TagTool.Tags.Resources.BitmapTextureInteropResourceTest;
+using static TagTool.Tags.Resources.BitmapTextureInteropResource;
 
 namespace TagTool.Serialization
 {
@@ -166,12 +166,8 @@ namespace TagTool.Serialization
                 SerializeValue(version, resourceContext, tagStream, resourceBlock2, val, null, elementType);
 
             // Ensure the block is aligned correctly
-            var align = Math.Max(DefaultResourceAlign, (valueInfo != null) ? valueInfo.Align : 0);
-
-            //if(elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(D3DStructure<>))
-            align = 0x10;
-
-            StreamUtil.Align(resourceBlock2.Stream, (int)align);
+            var align = 0x10;
+            StreamUtil.Align(resourceBlock2.Stream, align);
 
             // Finalize the block and write the tag block reference using a cache address
             var offset = resourceBlock2.Finalize(addressTypeStream);    // offset of the data in the tagblock on the actual stream

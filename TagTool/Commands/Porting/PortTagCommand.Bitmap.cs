@@ -6,10 +6,7 @@ using TagTool.Bitmaps;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
-using TagTool.Bitmaps.Converter;
 using TagTool.Bitmaps.Utils;
 
 namespace TagTool.Commands.Porting
@@ -62,7 +59,7 @@ namespace TagTool.Commands.Porting
         
         private TagResourceReference ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
-            BaseBitmap baseBitmap = BitmapConverterNew.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex);
+            BaseBitmap baseBitmap = BitmapConverter.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex);
 
             if (baseBitmap == null)
                 return null;

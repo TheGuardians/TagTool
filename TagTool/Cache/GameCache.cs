@@ -475,22 +475,22 @@ namespace TagTool.Cache
     {
         //public abstract byte[] GetResourceData(TagResourceReference resourceReference);
         public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
-        public abstract BitmapTextureInteropResourceTest GetBitmapTextureInteropResource(TagResourceReference resourceReference);
-        public abstract BitmapTextureInterleavedInteropResourceTest GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);
-        public abstract RenderGeometryApiResourceDefinitionTest GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference);
-        public abstract ModelAnimationTagResourceTest GetModelAnimationTagResource(TagResourceReference resourceReference);
+        public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
+        public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);
+        public abstract RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference);
+        public abstract ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference);
         public abstract SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference);
-        public abstract StructureBspTagResourcesTest GetStructureBspTagResources(TagResourceReference resourceReference);
-        public abstract StructureBspCacheFileTagResourcesTest GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
+        public abstract StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference);
+        public abstract StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
 
         public abstract TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition);
-        public abstract TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinitionTest renderGeometryDefinition);
-        public abstract TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResourceTest modelAnimationGraphDefinition);
+        public abstract TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinition renderGeometryDefinition);
+        public abstract TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition);
         public abstract TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition);
-        public abstract TagResourceReference CreateBitmapResource(BitmapTextureInteropResourceTest bitmapResourceDefinition);
-        public abstract TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResourceTest bitmapResourceDefinition);
-        public abstract TagResourceReference CreateStructureBspResource(StructureBspTagResourcesTest sbspResource);
-        public abstract TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResourcesTest sbspCacheFileResource);
+        public abstract TagResourceReference CreateBitmapResource(BitmapTextureInteropResource bitmapResourceDefinition);
+        public abstract TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResource bitmapResourceDefinition);
+        public abstract TagResourceReference CreateStructureBspResource(StructureBspTagResources sbspResource);
+        public abstract TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResources sbspCacheFileResource);
     }
 
     public class CacheLocalizedStringTest

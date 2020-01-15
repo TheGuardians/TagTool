@@ -30,7 +30,7 @@ namespace TagTool.Commands.Porting
                 scnr.MapType == ScenarioMapType.SinglePlayer &&
                 Flags.HasFlag(PortingFlags.Recursive))
             {
-                var pathfindingBsps = new List<StructureBspCacheFileTagResourcesTest>();
+                var pathfindingBsps = new List<StructureBspCacheFileTagResources>();
 
                 Console.Write("Loading pathfinding bsps: ");
 
@@ -40,7 +40,7 @@ namespace TagTool.Commands.Porting
 
                     var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[bspIndex].StructureBsp);
 
-                    StructureBspCacheFileTagResourcesTest pathfindingBsp = null;
+                    StructureBspCacheFileTagResources pathfindingBsp = null;
 
                     if (sbsp.PathfindingResource != null)
                     {
