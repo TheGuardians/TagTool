@@ -632,6 +632,9 @@ namespace TagTool.Cache
             Array.Copy(primaryResourceData, 0, data, 0, primaryResourceData.Length);
             Array.Copy(secondaryResourceData, 0, data, primaryResourceData.Length, secondaryResourceData.Length);
 
+            if (data.Length == 0)
+                return null;
+
             // does not exist in gen3, create one.
             var resourceDef = new SoundResourceDefinition
             {

@@ -73,7 +73,12 @@ namespace TagTool.Commands.Porting
             if (xmaFileSize < 0)
                 return null;
 
-            var xmaData = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource).Data.Data;
+            var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+
+            if (soundResource == null)
+                return null;
+
+            var xmaData = soundResource.Data.Data;
 
             if (xmaData == null)
                 return null;
