@@ -151,7 +151,7 @@ namespace TagTool.Tags.Resources
         }
 
         [TagStructure(Size = 0x40)]
-        public class CollisionMoppCodesBlock : TagStructure
+        public class CollisionMoppCodesBlock : TagStructure //todo remove that and define in Havok folder
 		{
             public int Unused1;
             public short Size;
@@ -165,16 +165,10 @@ namespace TagTool.Tags.Resources
             public sbyte DataBuildType;
             public sbyte Unused4;
             public short Unused5;
-            public TagBlock<Datum> Data;
+            public TagBlock<byte> Data;
             public sbyte MoppBuildType;
             public byte Unused6;
             public short Unused7;
-
-			[TagStructure(Size = 0x1)]
-			public class Datum : TagStructure
-			{
-				public byte Value;
-			}
         }
     }
 }

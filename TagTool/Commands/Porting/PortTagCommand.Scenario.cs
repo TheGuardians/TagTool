@@ -1018,7 +1018,7 @@ namespace TagTool.Commands.Porting
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToInt32(expr.Data.Reverse().ToArray(), 0)));
+            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0)));
 
             if (tag == null)
                 return;

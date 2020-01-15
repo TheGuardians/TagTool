@@ -73,7 +73,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private List<CollisionMoppCode.Datum> ConvertCollisionMoppData(List<CollisionMoppCode.Datum> moppData)
+        private List<byte> ConvertCollisionMoppData(List<byte> moppData)
         {
             if (BlamCache.Version > CacheVersion.Halo3Retail)
                 return moppData;
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
             {
                 var moppOperator = moppData[i];
 
-                switch (moppOperator.Value)
+                switch (moppOperator)
                 {
                     case 0x00: // HK_MOPP_RETURN
                         break;
@@ -232,32 +232,32 @@ namespace TagTool.Commands.Porting
 
                     case 0x0B: // HK_MOPP_TERM_REOFFSET32
                     case 0x53: // HK_MOPP_TERM32
-                        int result = BitConverter.ToInt32(new byte[] { moppData[i + 4].Value, moppData[i + 3].Value, moppData[i + 2].Value, moppData[i + 1].Value }, 0);
+                        int result = BitConverter.ToInt32(new byte[] { moppData[i + 4], moppData[i + 3], moppData[i + 2], moppData[i + 1] }, 0);
 
-                        if (moppData[i + 1].Value == 0x20)
+                        if (moppData[i + 1] == 0x20)
                         {
                             result = ConvertMOPPWorldIndex(result);
                         }
-                        else if (moppData[i + 1].Value == 0x40)
+                        else if (moppData[i + 1] == 0x40)
                         {
                             result = ConvertMOPPInstancedGeometryIndex(result);
                         }
-                        else if (moppData[i + 1].Value == 0x00)
+                        else if (moppData[i + 1] == 0x00)
                         {
                             result = ConvertMOPPType00(result);
                         }
-                        else if (moppData[i + 1].Value == 0x60)
+                        else if (moppData[i + 1] == 0x60)
                         {
                             result = ConvertMOPPType11(result);
                         }
                         else
                         {
-                            throw new NotSupportedException($"Type of 0x{moppData[i + 1].Value:X2} {result:X8}");
+                            throw new NotSupportedException($"Type of 0x{moppData[i + 1]:X2} {result:X8}");
                         }
-                        moppData[i + 1] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x7F000000) >> 24) };
-                        moppData[i + 2] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x00FF0000) >> 16) };
-                        moppData[i + 3] = new CollisionMoppCode.Datum { Value = (byte)((result & 0x0000FF00) >> 8) };
-                        moppData[i + 4] = new CollisionMoppCode.Datum { Value = (byte)(result & 0x000000FF) };
+                        moppData[i + 1] = (byte)((result & 0x7F000000) >> 24);
+                        moppData[i + 2] = (byte)((result & 0x00FF0000) >> 16);
+                        moppData[i + 3] = (byte)((result & 0x0000FF00) >> 8);
+                        moppData[i + 4] = (byte)(result & 0x000000FF);
 
                         i += 4;
                         break;
@@ -328,9 +328,6 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version < CacheVersion.Halo3ODST)
             {
-                resourceDefinition.LargeCollisionBsps = new TagBlock<StructureBspTagResourcesTest.LargeCollisionBspBlock>();
-                resourceDefinition.HavokData = new TagBlock<StructureBspTagResourcesTest.HavokDatum>();
-
                 // convert surface planes
                 foreach(var instance in resourceDefinition.InstancedGeometry)
                 {
@@ -339,11 +336,14 @@ namespace TagTool.Commands.Porting
                         surfacePlane.PlaneCountNew = surfacePlane.PlaneCountOld;
                         surfacePlane.PlaneIndexNew = surfacePlane.PlaneIndexOld;
                     }
+
+                    foreach(var mopps in instance.CollisionMoppCodes)
+                    {
+                        if(mopps.Data != null)
+                            mopps.Data.Elements = ConvertCollisionMoppData(mopps.Data.Elements);
+                    }
                 }
             }
-
-            foreach (var instance in resourceDefinition.InstancedGeometry)
-                instance.UnknownBspPhysics = new TagBlock<StructureBspTagResourcesTest.CollisionMoppCodesBlock>();
 
             bsp.CollisionBspResource = CacheContext.ResourceCache.CreateStructureBspResource(resourceDefinition);
 
