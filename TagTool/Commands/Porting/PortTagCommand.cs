@@ -1375,22 +1375,18 @@ namespace TagTool.Commands.Porting
             if (PortedStringIds.ContainsKey(stringId.Value))
                 return PortedStringIds[stringId.Value];
 
-			var value = BlamCache.Version < CacheVersion.Halo3Retail ?
-				BlamCache.StringTable.GetString(stringId) :         // double check that for h2 when time comes
-				BlamCache.StringTable.GetString(stringId);
+			var value = BlamCache.StringTable.GetString(stringId);
+            var edStringId = CacheContext.StringTable.GetStringId(value);
 
-			var edStringId = BlamCache.Version < CacheVersion.Halo3Retail ?
-				CacheContext.StringTable.GetStringId(value) :
-				CacheContext.StringTable.GetStringId(value);
 
-			if ((stringId != StringId.Invalid) && (edStringId != StringId.Invalid))
+            if (edStringId != StringId.Invalid)
 				return PortedStringIds[stringId.Value] = edStringId;
 
-			if (((stringId != StringId.Invalid) && (edStringId == StringId.Invalid)) || !CacheContext.StringTable.Contains(value))
+			if (edStringId == StringId.Invalid || !CacheContext.StringTable.Contains(value))
 				return PortedStringIds[stringId.Value] = CacheContext.StringTable.AddString(value);
 
-			return StringId.Invalid;
-		}
+            return PortedStringIds[stringId.Value];
+        }
 
 		private CachedTag PortTagReference(int index, int maxIndex = 0xFFFF)
 		{

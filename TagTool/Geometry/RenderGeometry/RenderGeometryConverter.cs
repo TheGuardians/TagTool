@@ -200,7 +200,7 @@ namespace TagTool.Geometry
                             vertexBuffer.Count = mesh.ResourceVertexBuffers[0].Count;
 
                         // skip conversion of water vertices, done right after the loop
-                        else if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
+                        if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                             continue;
 
                         VertexBufferConverter.ConvertVertexBuffer(SourceCache.Version, HOCache.Version, vertexBuffer);
