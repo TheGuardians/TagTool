@@ -409,6 +409,8 @@
     <Compile Include="Geometry\RenderGeometry\IndexBuffer\IndexBufferConverter.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometry.cs" />
     <Compile Include="Geometry\RenderGeometry\RenderGeometryConverter.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\IndexBufferDefinition.cs" />
+    <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexBufferDefinition.cs" />
     <Compile Include="Geometry\RenderGeometry\VertexBuffer\VertexConverter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokDatum.cs" />

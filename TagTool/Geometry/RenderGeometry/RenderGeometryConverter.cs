@@ -197,9 +197,8 @@ namespace TagTool.Geometry
 
                         // Gen3 order 0 coefficients are stored in ints but should be read as bytes, 1 per vertex in the original buffer
                         if (vertexBuffer.Format == VertexBufferFormat.AmbientPrt)
-                        {
-                            var count = mesh.ResourceVertexBuffers[0].Count;
-                        }
+                            vertexBuffer.Count = mesh.ResourceVertexBuffers[0].Count;
+
                         // skip conversion of water vertices, done right after the loop
                         else if (vertexBuffer.Format == VertexBufferFormat.Unknown1A || vertexBuffer.Format == VertexBufferFormat.Unknown1B)
                             continue;

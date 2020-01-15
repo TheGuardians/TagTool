@@ -7,6 +7,7 @@ using TagTool.Tags;
 using static TagTool.Tags.Resources.BitmapTextureInterleavedInteropResource;
 using TagTool.Tags.Resources;
 using static TagTool.Tags.Resources.BitmapTextureInteropResource;
+using TagTool.Geometry;
 
 namespace TagTool.Serialization
 {
