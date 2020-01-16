@@ -211,6 +211,9 @@
     <Compile Include="Commands\Porting\PortTagCommand.ShaderGen.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Sound.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
+    <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />
     <Compile Include="Commands\Porting\PortingContext.cs" />

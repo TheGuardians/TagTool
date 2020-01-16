@@ -18,6 +18,8 @@ using TagTool.Commands.RenderMethods;
 using TagTool.Commands.Shaders;
 using TagTool.Commands.ScenarioLightmaps;
 using TagTool.Commands.Files;
+using TagTool.Commands.ScenarioStructureBSPs;
+using TagTool.Commands.Scenarios;
 
 namespace TagTool.Commands.Editing
 {
@@ -97,19 +99,19 @@ namespace TagTool.Commands.Editing
                     break;
 
                 case "pixl":
-                    Shaders.ShaderContextFactory<PixelShader>.Populate(commandContext, cache, tag, (PixelShader)definition);
+                    ShaderContextFactory<PixelShader>.Populate(commandContext, cache, tag, (PixelShader)definition);
                     break;
 
                 case "vtsh":
-                    Shaders.ShaderContextFactory<VertexShader>.Populate(commandContext, cache, tag, (VertexShader)definition);
+                    ShaderContextFactory<VertexShader>.Populate(commandContext, cache, tag, (VertexShader)definition);
                     break;
 
                 case "glps":
-                    Shaders.ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cache, tag, (GlobalPixelShader)definition);
+                    ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cache, tag, (GlobalPixelShader)definition);
                     break;
 
                 case "glvs":
-                    Shaders.ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cache, tag, (GlobalVertexShader)definition);
+                    ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cache, tag, (GlobalVertexShader)definition);
                     break;
 
                 case "Lbsp":
@@ -121,20 +123,17 @@ namespace TagTool.Commands.Editing
                     VFilesContextFactory.Populate(commandContext, cache, tag, (VFilesList)definition);
                     break;
 
-                    /*
-
                 case "mode": 
-                    RenderModelContextFactory.Populate(commandContext, cacheContext, tag, (RenderModel)definition);
+                    RenderModelContextFactory.Populate(commandContext, cache, tag, (RenderModel)definition);
                     break;
 
                 case "sbsp":
-                    BSPContextFactory.Populate(commandContext, cacheContext, tag, (ScenarioStructureBsp)definition);
+                    BSPContextFactory.Populate(commandContext, cache, tag, (ScenarioStructureBsp)definition);
                     break;
 
                 case "scnr":
-                    ScnrContextFactory.Populate(commandContext, cacheContext, tag, (Scenario)definition);
+                    ScnrContextFactory.Populate(commandContext, cache, tag, (Scenario)definition);
                     break;                        
-                                    */
             }
             
             var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cache.Version);
