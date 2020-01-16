@@ -186,11 +186,11 @@ namespace TagTool.Commands.Porting
 				case "shit": // use the global shit tag until shit tags are port-able
 					if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
                         return shitInstance;
-                    if (BlamCache.Version < CacheVersion.HaloReach)
+                    if (BlamCache.Version < CacheVersion.HaloOnline106708)
                         return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
                     break;
 
-                case "sncl" when BlamCache.Version != CacheVersion.Halo3ODST: // temp until h3 supported
+                case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
                 case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
@@ -663,7 +663,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case SoundClasses sncl:
-                    blamDefinition = ConvertSoundClasses(sncl);
+                    blamDefinition = ConvertSoundClasses(sncl, BlamCache.Version);
                     break;
 
                 case SoundLooping lsnd:

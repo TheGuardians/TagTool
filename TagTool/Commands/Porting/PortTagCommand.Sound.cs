@@ -477,16 +477,36 @@ namespace TagTool.Commands.Porting
             return soundMix;
         }
 
-        private SoundClasses ConvertSoundClasses(SoundClasses sncl)
+        // HO uses ODST classes, with H3 structure
+        private SoundClasses ConvertSoundClasses(SoundClasses sncl, CacheVersion version)
         {
-            sncl.Classes.Insert(50, new SoundClasses.Class()); // hud class, unused in ED? leave empty for now
+            // setup class with "default" values
+            var sClass = new SoundClasses.Class()
+            {
+                MaxSoundsPerTag = 4,
+                MaxSoundsPerObject = 1,
+                PreemptionTime = 100,
+                InternalFlags = 881,
+                Priority = 5,
+                DistanceBoundsMin = 8.0f,
+                DistanceBoundsMax = 120.0f,
+                TransmissionMultiplier = 1.0f
+            };
+
+            // hud class, unique to HO. the above values seem to be okay
+            sncl.Classes.Insert(50, sClass);
+
+            if (version <= CacheVersion.Halo3Retail)
+            {
+                // add classes missing from H3
+                for (int i = sncl.Classes.Count; i < 65; i++)
+                    sncl.Classes.Add(sClass);
+            }
 
             // todo: add bitflags to sncl definition
             // these add "bit 14" which allows the class to play on the mainmenu
             sncl.Classes[52].Flags = 17153; // UI
             sncl.Classes[32].Flags = 17154; // music
-
-            // todo: add h3 sncl conversion
 
             return sncl;
         }
