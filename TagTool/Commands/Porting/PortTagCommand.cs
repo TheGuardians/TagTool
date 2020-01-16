@@ -190,10 +190,10 @@ namespace TagTool.Commands.Porting
                         return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
                     break;
 
-				case "sncl": // always use the default sncl tag
-					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
+                case "sncl" when BlamCache.Version != CacheVersion.Halo3ODST: // temp until h3 supported
+                    return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
-				case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
+                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
 					return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
 				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
@@ -662,7 +662,11 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertSound(cacheStream, resourceStreams, sound, blamTag.Name);
 					break;
 
-				case SoundLooping lsnd:
+                case SoundClasses sncl:
+                    blamDefinition = ConvertSoundClasses(sncl);
+                    break;
+
+                case SoundLooping lsnd:
 					blamDefinition = ConvertSoundLooping(lsnd);
 					break;
 

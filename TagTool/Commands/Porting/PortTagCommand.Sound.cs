@@ -476,5 +476,19 @@ namespace TagTool.Commands.Porting
 
             return soundMix;
         }
+
+        private SoundClasses ConvertSoundClasses(SoundClasses sncl)
+        {
+            sncl.Classes.Insert(50, new SoundClasses.Class()); // hud class, unused in ED? leave empty for now
+
+            // todo: add bitflags to sncl definition
+            // these add "bit 14" which allows the class to play on the mainmenu
+            sncl.Classes[52].Flags = 17153; // UI
+            sncl.Classes[32].Flags = 17154; // music
+
+            // todo: add h3 sncl conversion
+
+            return sncl;
+        }
     }
 }
