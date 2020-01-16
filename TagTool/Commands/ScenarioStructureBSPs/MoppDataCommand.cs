@@ -5,15 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TagTool.IO;
+using TagTool.Tags;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class MoppDataCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public MoppDataCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp bsp) :
+        public MoppDataCommand(ScenarioStructureBsp bsp) :
             base(true,
 
                 "MoppData",
@@ -23,7 +23,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 "")
         {
-            CacheContext = cacheContext;
             Definition = bsp;
         }
 
@@ -70,23 +69,19 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             }
                 
 
-            List<CollisionMoppCode.Datum> newMoppData = new List<CollisionMoppCode.Datum>();
+            List<byte> newMoppData = new List<byte>();
             using (var reader = new EndianReader(File.Open(file, FileMode.Open)))
             {
                 for(int i =0; i < reader.Length; i++)
                 {
-                    var newMopp = new CollisionMoppCode.Datum
-                    {
-                        Value = reader.ReadByte()
-                    };
-                    newMoppData.Add(newMopp);
+                    newMoppData.Add(reader.ReadByte());
                 }
             }
 
             var moppData = Definition.CollisionMoppCodes[0];
             moppData.DataSize = newMoppData.Count;
             moppData.DataCapacityAndFlags = (uint)(moppData.DataSize + 0x80000000);
-            moppData.Data = newMoppData;
+            moppData.Data = new TagBlock<byte>(CacheAddressType.Memory, newMoppData);
 
 
         }
@@ -98,7 +93,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             {
                 for(int i = 0; i< moppData.Data.Count; i++)
                 {
-                    writer.Write(moppData.Data[i].Value);
+                    writer.Write(moppData.Data[i]);
                 }
             }
         }
@@ -113,7 +108,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 var print = true;
                 for (var i = 0; i < moppData.Count; i++)
                 {
-                    var moppOperator = moppData[i].Value;
+                    var moppOperator = moppData[i];
                     print = true;
 
                     var count = 0;
@@ -330,7 +325,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         string description = GetMoppDescription(moppOperator);
                         int descriptionMaxLength = 40;
                         description = description.PadRight(descriptionMaxLength);
-                        string data = GetMoppDataString(moppOperator, moppData, i, count);
+                        string data = GetMoppDataString(moppOperator, moppData.Elements, i, count);
                         string parsedLine = $"{lineIndex}: 0x{moppOperator:X2}: {description} {data}";
 
                         fileWriter.Write(parsedLine);
@@ -345,11 +340,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             }
         }
 
-        private void ReadArguments(int count,int offset, List<CollisionMoppCode.Datum> moppData, StreamWriter fileWriter)
+        private void ReadArguments(int count,int offset, List<byte> moppData, StreamWriter fileWriter)
         {
             for(int i = 0; i < count; i++)
             {
-                fileWriter.Write($":{moppData[offset+i+1].Value.ToString("X2")}");
+                fileWriter.Write($":{moppData[offset+i+1].ToString("X2")}");
             }
             return;
         }
@@ -693,7 +688,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             return result;
         }
 
-        private byte[] GetMoppData(List<CollisionMoppCode.Datum> moppData, int index, int count)
+        private byte[] GetMoppData(List<byte> moppData, int index, int count)
         {
             if (count == 0)
                 return null;
@@ -702,7 +697,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 byte[] result = new byte[count];
                 for(int i = 0; i< count; i++)
                 {
-                    result[i] = moppData[index + i].Value;
+                    result[i] = moppData[index + i];
                 }
                 return result;
             }
@@ -727,7 +722,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             return (((((data[0] << 8) + data[1]) << 8) + data[2]) << 8 ) + data[3];
         }
 
-        private string GetMoppDataString(int opcode, List<CollisionMoppCode.Datum> moppData, int index, int count)
+        private string GetMoppDataString(int opcode, List<byte> moppData, int index, int count)
         {
             string result = "";
             byte[] data = GetMoppData(moppData, index + 1, count);

@@ -213,6 +213,8 @@
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
     <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\GenerateJumpHintsCommand.cs" />
+    <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
     <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
     <Compile Include="Commands\Scenarios\DumpScriptsCommand.cs" />
