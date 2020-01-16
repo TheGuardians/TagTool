@@ -11,7 +11,7 @@ namespace TagTool.Scripting.Compiler
 {
     public class ScriptCompiler
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public Scenario Definition { get; }
 
         private List<HsScript> Scripts;
@@ -24,9 +24,9 @@ namespace TagTool.Scripting.Compiler
         private ushort NextIdentifier = 0xE37F;
         private HsScript CurrentScript = null;
 
-        public ScriptCompiler(HaloOnlineCacheContext cacheContext, Scenario definition)
+        public ScriptCompiler(GameCache cache, Scenario definition)
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
 
             Scripts = new List<HsScript>();
@@ -572,7 +572,7 @@ namespace TagTool.Scripting.Compiler
                     if (global.Name == symbol.Value)
                         return CompileGlobalReference(symbol, global);
 
-                foreach (var global in ScriptInfo.Globals[CacheContext.Version])
+                foreach (var global in ScriptInfo.Globals[Cache.Version])
                     if (global.Value == symbol.Value)
                         return CompileGlobalReference(symbol, type, global.Value, (ushort)(global.Key | 0x8000));
             }
@@ -1110,7 +1110,7 @@ namespace TagTool.Scripting.Compiler
                 case "begin":
                 case "begin_random":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var firstHandle = DatumIndex.None;
                         HsSyntaxNode prevExpr = null;
@@ -1150,7 +1150,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "if":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var ifHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var ifExpr = ScriptExpressions[ifHandle.Index];
@@ -1198,7 +1198,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "cond":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var condHandle = AllocateExpression(type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var condExpr = ScriptExpressions[condHandle.Index];
@@ -1264,7 +1264,7 @@ namespace TagTool.Scripting.Compiler
                             if (global.Name != globalName.Value)
                                 continue;
 
-                            var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                            var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                             var setHandle = AllocateExpression(global.Type.Halo3ODST, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                             var setExpr = ScriptExpressions[setHandle.Index];
@@ -1291,7 +1291,7 @@ namespace TagTool.Scripting.Compiler
                 case "and":
                 case "or":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1329,7 +1329,7 @@ namespace TagTool.Scripting.Compiler
                 case "min":
                 case "max":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1378,7 +1378,7 @@ namespace TagTool.Scripting.Compiler
                 case "<=":
                 case ">=":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1421,7 +1421,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "sleep":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1462,7 +1462,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "sleep_forever":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1487,7 +1487,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "sleep_until":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1532,7 +1532,7 @@ namespace TagTool.Scripting.Compiler
 
                 case "wake":
                     {
-                        var builtin = ScriptInfo.Scripts[CacheContext.Version].First(x => x.Value.Name == functionNameSymbol.Value);
+                        var builtin = ScriptInfo.Scripts[Cache.Version].First(x => x.Value.Name == functionNameSymbol.Value);
 
                         var handle = AllocateExpression(builtin.Value.Type, HsSyntaxNodeFlags.Group, (ushort)builtin.Key, (short)group.Line);
                         var expr = ScriptExpressions[handle.Index];
@@ -1557,7 +1557,7 @@ namespace TagTool.Scripting.Compiler
             // Check if function name is a built-in function
             //
 
-            foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
+            foreach (var entry in ScriptInfo.Scripts[Cache.Version])
             {
                 if (functionNameSymbol.Value != entry.Value.Name)
                     continue;
@@ -1754,7 +1754,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var stringId = CacheContext.GetStringId(stringIdString.Value);
+                var stringId = Cache.StringTable.GetStringId(stringIdString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(stringIdString.Value);
@@ -1788,7 +1788,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeString.Value == CacheContext.GetString(tv.Name));
+                var triggerVolumeIndex = Definition.TriggerVolumes.FindIndex(tv => triggerVolumeString.Value == Cache.StringTable.GetString(tv.Name));
 
                 if (triggerVolumeIndex == -1)
                     throw new FormatException(triggerVolumeString.Value);
@@ -1807,7 +1807,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagString.Value == CacheContext.GetString(cf.Name));
+                var cutsceneFlagIndex = Definition.CutsceneFlags.FindIndex(cf => cutsceneFlagString.Value == Cache.StringTable.GetString(cf.Name));
 
                 if (cutsceneFlagIndex == -1)
                     throw new FormatException(cutsceneFlagString.Value);
@@ -1845,7 +1845,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var cutsceneTitleIndex = Definition.CutsceneTitles.FindIndex(ct => cutsceneTitleSymbol.Value == CacheContext.GetString(ct.Name));
+                var cutsceneTitleIndex = Definition.CutsceneTitles.FindIndex(ct => cutsceneTitleSymbol.Value == Cache.StringTable.GetString(ct.Name));
 
                 if (cutsceneTitleIndex == -1)
                     throw new FormatException(cutsceneTitleSymbol.Value);
@@ -1932,7 +1932,7 @@ namespace TagTool.Scripting.Compiler
                             // type 6: objective (without task)
                             //
 
-                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == CacheContext.GetString(o.Name));
+                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == Cache.StringTable.GetString(o.Name));
 
                             if (objectiveIndex != -1)
                             {
@@ -1955,7 +1955,7 @@ namespace TagTool.Scripting.Compiler
                                 // type 4: spawn point
                                 //
 
-                                var spawnPointIndex = squad.SpawnPoints.FindIndex(sp => tokens[1] == CacheContext.GetString(sp.Name));
+                                var spawnPointIndex = squad.SpawnPoints.FindIndex(sp => tokens[1] == Cache.StringTable.GetString(sp.Name));
 
                                 if (spawnPointIndex != -1)
                                 {
@@ -1967,7 +1967,7 @@ namespace TagTool.Scripting.Compiler
                                 // type 5: spawn formation
                                 //
 
-                                var spawnFormationIndex = squad.SpawnFormations.FindIndex(sf => tokens[1] == CacheContext.GetString(sf.Name));
+                                var spawnFormationIndex = squad.SpawnFormations.FindIndex(sf => tokens[1] == Cache.StringTable.GetString(sf.Name));
 
                                 if (spawnFormationIndex != -1)
                                 {
@@ -1982,11 +1982,11 @@ namespace TagTool.Scripting.Compiler
                             // type 6: objective task
                             //
 
-                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == CacheContext.GetString(o.Name));
+                            var objectiveIndex = Definition.AiObjectives.FindIndex(o => tokens[0] == Cache.StringTable.GetString(o.Name));
 
                             if (objectiveIndex != -1)
                             {
-                                var taskIndex = Definition.AiObjectives[objectiveIndex].Tasks.FindIndex(t => tokens[1] == CacheContext.GetString(t.Name));
+                                var taskIndex = Definition.AiObjectives[objectiveIndex].Tasks.FindIndex(t => tokens[1] == Cache.StringTable.GetString(t.Name));
 
                                 if (taskIndex != -1)
                                 {
@@ -2049,7 +2049,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var zoneSetIndex = Definition.ZoneSets.FindIndex(zs => zoneSetString.Value == CacheContext.GetString(zs.Name));
+                var zoneSetIndex = Definition.ZoneSets.FindIndex(zs => zoneSetString.Value == Cache.StringTable.GetString(zs.Name));
 
                 if (zoneSetIndex == -1)
                     throw new FormatException(zoneSetString.Value);
@@ -2068,7 +2068,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var designerZoneIndex = Definition.DesignerZoneSets.FindIndex(dz => designerZoneString.Value == CacheContext.GetString(dz.Name));
+                var designerZoneIndex = Definition.DesignerZoneSets.FindIndex(dz => designerZoneString.Value == Cache.StringTable.GetString(dz.Name));
 
                 if (designerZoneIndex == -1)
                     throw new FormatException(designerZoneString.Value);
@@ -2141,7 +2141,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<Sound>(soundString.Value, out var instance))
+                if (!Cache.TryGetTag<Sound>(soundString.Value, out var instance))
                     throw new FormatException(soundString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2158,7 +2158,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<Effect>(effectString.Value, out var instance))
+                if (!Cache.TryGetTag<Effect>(effectString.Value, out var instance))
                     throw new FormatException(effectString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2175,7 +2175,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<DamageEffect>(damageString.Value, out var instance))
+                if (!Cache.TryGetTag<DamageEffect>(damageString.Value, out var instance))
                     throw new FormatException(damageString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2192,7 +2192,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
+                if (!Cache.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
                     throw new FormatException(loopingSoundString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2209,7 +2209,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
+                if (!Cache.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
                     throw new FormatException(animationGraphString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2226,7 +2226,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
+                if (!Cache.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
                     throw new FormatException(damageEffectString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2243,8 +2243,8 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(objectDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup<GameObject>())
+                if (!Cache.TryGetTag(objectDefinitionString.Value, out var instance) ||
+                    !instance.IsInGroup("obje"))
                 {
                     throw new FormatException(objectDefinitionString.Value);
                 }
@@ -2263,7 +2263,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
+                if (!Cache.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
                     throw new FormatException(bitmapString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2280,7 +2280,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
+                if (!Cache.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
                     throw new FormatException(shaderString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2297,7 +2297,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
+                if (!Cache.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
                 {
                     throw new FormatException(renderModelString.Value);
                 }
@@ -2316,7 +2316,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
+                if (!Cache.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
                     throw new FormatException(structureDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2336,7 +2336,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
+                if (!Cache.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2353,7 +2353,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
+                if (!Cache.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicSceneDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2370,7 +2370,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
+                if (!Cache.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
                     throw new FormatException(binkDefinitionString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2387,7 +2387,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(anyTagString.Value, out var instance))
+                if (!Cache.TryGetTag(anyTagString.Value, out var instance))
                     throw new FormatException(anyTagString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2404,7 +2404,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                if (!CacheContext.TryGetTag(anyTagNotResolvingString.Value, out var instance))
+                if (!Cache.TryGetTag(anyTagNotResolvingString.Value, out var instance))
                     throw new FormatException(anyTagNotResolvingString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
@@ -2996,7 +2996,7 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumIndex.None)
             {
-                var cinematicLightprobeIndex = Definition.CinematicLighting.FindIndex(cl => cinematicLightprobeSymbol.Value == CacheContext.GetString(cl.Name));
+                var cinematicLightprobeIndex = Definition.CinematicLighting.FindIndex(cl => cinematicLightprobeSymbol.Value == Cache.StringTable.GetString(cl.Name));
 
                 if (cinematicLightprobeIndex == -1)
                     throw new FormatException(cinematicLightprobeSymbol.Value);

@@ -10,11 +10,11 @@ namespace TagTool.Commands.Scenarios
 {
     class ListScriptsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache CacheContext { get; }
+        private CachedTag Tag { get; }
         private Scenario Definition { get; }
 
-        public ListScriptsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario definition)
+        public ListScriptsCommand(GameCache cacheContext, CachedTag tag, Scenario definition)
             : base(true,
 
                   "ListScripts",

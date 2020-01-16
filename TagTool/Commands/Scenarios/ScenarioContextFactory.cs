@@ -19,14 +19,12 @@ namespace TagTool.Commands.Scenarios
 
         public static void Populate(CommandContext context, GameCache cache, CachedTag tag, Scenario scenario)
         {
-            /*
-            context.AddCommand(new CopyForgePaletteCommand(cacheContext, scenario));
-            context.AddCommand(new ExtractScriptsCommand(cacheContext, tag, scenario));
-            context.AddCommand(new DumpScriptsCommand(cacheContext, scenario));
-            context.AddCommand(new CompileScriptsCommand(cacheContext, scenario));
-            context.AddCommand(new ListScriptsCommand(cacheContext, tag, scenario));
-            context.AddCommand(new ExtractZonesAreasModelCommand(cacheContext, scenario));
-            */
+            context.AddCommand(new CopyForgePaletteCommand(cache, scenario));
+            context.AddCommand(new ExtractScriptsCommand(cache, tag, scenario));
+            context.AddCommand(new DumpScriptsCommand(scenario));
+            context.AddCommand(new CompileScriptsCommand(cache, scenario));
+            context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
+            context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario)); 
         }
     }
 }

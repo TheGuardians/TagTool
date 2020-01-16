@@ -10,11 +10,11 @@ namespace TagTool.Commands.Scenarios
 {
     class ExtractScriptsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private Scenario Definition { get; }
 
-        public ExtractScriptsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Scenario definition)
+        public ExtractScriptsCommand(GameCache cache, CachedTag tag, Scenario definition)
             : base(true,
 
                   "ExtractScripts",
@@ -24,7 +24,7 @@ namespace TagTool.Commands.Scenarios
 
                   "Extracts all scripts in the current scenario tag to a file.")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Tag = tag;
             Definition = definition;
         }
@@ -84,7 +84,7 @@ namespace TagTool.Commands.Scenarios
                     break;
 
                 case HsType.Halo3ODSTValue.StringId:
-                    scriptWriter.Write(CacheContext.GetString(new StringId(BitConverter.ToUInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0))));
+                    scriptWriter.Write(Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(new[] { expr.Data[0], expr.Data[1], expr.Data[2], expr.Data[3] }, 0))));
                     break;
 
                 case HsType.Halo3ODSTValue.GameDifficulty:

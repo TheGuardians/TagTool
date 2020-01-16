@@ -213,6 +213,12 @@
     <Compile Include="Commands\Porting\PortTagCommand.Strings.cs" />
     <Compile Include="Commands\RenderModels\RenderModelContextFactory.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
+    <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
+    <Compile Include="Commands\Scenarios\DumpScriptsCommand.cs" />
+    <Compile Include="Commands\Scenarios\ExtractScriptsCommand.cs" />
+    <Compile Include="Commands\Scenarios\ExtractZonesAreasModelCommand.cs" />
+    <Compile Include="Commands\Scenarios\ListScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\ScenarioContextFactory.cs" />
     <Compile Include="Commands\Sounds\ExtractXMACommand.cs" />
     <Compile Include="Commands\Porting\OpenCacheFileCommand.cs" />

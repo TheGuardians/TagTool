@@ -8,10 +8,10 @@ namespace TagTool.Commands.Scenarios
 {
     class ExtractZonesAreasModelCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private Scenario Definition { get; }
 
-        public ExtractZonesAreasModelCommand(HaloOnlineCacheContext cacheContext, Scenario definition) :
+        public ExtractZonesAreasModelCommand(GameCache cache, Scenario definition) :
             base(false,
 
                 "ExtractZonesAreasModel",
@@ -19,7 +19,7 @@ namespace TagTool.Commands.Scenarios
                 "ExtractZonesAreasModel <Path>",
                 "")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
