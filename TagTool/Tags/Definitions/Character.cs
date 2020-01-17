@@ -41,8 +41,8 @@ namespace TagTool.Tags.Definitions
         public List<CharacterVocalizationProperties> VocalizationProperties;
         public List<CharacterBoardingProperties> BoardingProperties;
 
-        [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.Halo3ODST)]
-        public byte[] Bunkerproperties;
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<CharacterBunkerProperties> BunkerProperties;
 
         public List<CharacterGuardianProperties> GuardianProperties;       
         public List<CharacterCombatformProperties> CombatformProperties;
