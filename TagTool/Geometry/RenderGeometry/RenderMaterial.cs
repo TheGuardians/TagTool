@@ -27,7 +27,7 @@ namespace TagTool.Geometry
         [TagField(Flags = Label)]
         public CachedTag RenderMethod;
 
-        [TagField(Version = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Skin> Skins;
 
         public List<Property> Properties;

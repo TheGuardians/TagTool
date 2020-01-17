@@ -109,8 +109,8 @@ namespace TagTool.Cache
                     return CacheVersion.HaloOnline700123;
                 case "11860.10.07.24.0147.omaha_relea":
                     return CacheVersion.HaloReach;
-                case "Jun 24 2019 00:36:03":
-                    return CacheVersion.HaloReachMCC824;
+                //case "Jun 24 2019 00:36:03":
+                //    return CacheVersion.HaloReachMCC824;
                 default:
                     return CacheVersion.Unknown;
             }
@@ -366,7 +366,7 @@ namespace TagTool.Cache
             -1, // HaloReach
             -1, // HaloReachMCC824
             -1, // HaloReachMCC887
-            -1, // HaloReachMCC1035
+            //-1, // HaloReachMCC1035
         };
     }
 

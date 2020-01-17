@@ -257,38 +257,14 @@ namespace TagTool.Geometry
             {
                 var bsp3dNode = new Bsp3dNode();
                 reader.BaseStream.Position = originalPos + (i * BSP3DNODE_SIZE);
-                var plane_idx = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0);
-                var front_child = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0); // adjusted to current struct
-                var back_child = BitConverter.ToInt32(reader.ReadBytes(4).Reverse().ToArray(), 0); // adjusted to current struct
 
-                //compress back and front children to int24.
-
-                //remove bits 24 and above
-                var back_child_trun = back_child & 0x7fffff;
-                var front_child_trun = front_child & 0x7fffff;
-
-                //add the new signs
-                if (back_child < 0)
-                    back_child_trun |= 0x800000;
-                if (front_child < 0)
-                    front_child_trun |= 0x800000;
-
-                //truncate the plane index with control over the result
-                int uplane_idx = (plane_idx & 0x7fff);
-                if (plane_idx < 0)
-                    uplane_idx |= 0x8000;
-
-                //perhaps put message here to notify that plane index was out of the range
-
-                bsp3dNode.Plane = (short)uplane_idx;
-
-                bsp3dNode.BackChildLower = (byte)(back_child_trun & 0xff);
-                bsp3dNode.BackChildMid = (byte)((back_child_trun >> 8) & 0xff);
-                bsp3dNode.BackChildUpper = (byte)((back_child_trun >> 16) & 0xff);
-
-                bsp3dNode.FrontChildLower = (byte)(front_child_trun & 0xff);
-                bsp3dNode.FrontChildMid = (byte)((front_child_trun >> 8) & 0xff);
-                bsp3dNode.FrontChildUpper = (byte)((front_child_trun >> 16) & 0xff);
+                bsp3dNode.Plane = BitConverter.ToInt16(reader.ReadBytes(2).Reverse().ToArray(), 0);
+                bsp3dNode.FrontChildLower = reader.ReadBytes(1)[0];
+                bsp3dNode.FrontChildMid = reader.ReadBytes(1)[0];
+                bsp3dNode.FrontChildUpper = reader.ReadBytes(1)[0];
+                bsp3dNode.BackChildLower = reader.ReadBytes(1)[0];
+                bsp3dNode.BackChildMid = reader.ReadBytes(1)[0];
+                bsp3dNode.BackChildUpper = reader.ReadBytes(1)[0];
 
                 bsp.Geometry.Bsp3dNodes.Add(bsp3dNode);
             }

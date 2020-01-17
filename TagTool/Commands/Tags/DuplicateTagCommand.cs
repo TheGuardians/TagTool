@@ -30,7 +30,6 @@ namespace TagTool.Commands.Tags
             using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
             {
                 var originalDefinition = Cache.Deserialize(stream, originalTag);
-
                 Cache.Serialize(stream, newTag, originalDefinition);
             }
 

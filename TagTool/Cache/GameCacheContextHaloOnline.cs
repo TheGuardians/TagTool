@@ -93,7 +93,7 @@ namespace TagTool.Cache
             public FileInfo File { get; set; }
         }
 
-        private void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
+        public void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
 
         public void SaveModifiedTagNames(string path = null)
         {
