@@ -68,7 +68,8 @@ namespace TagTool.Tags.Definitions
             public List<ShaderMap> ShaderMaps;
             public List<Argument> Arguments;
             public List<UnknownBlock1> Unknown;
-            public uint Unknown2;
+            public ushort DisableBooleanArg;
+            public short Unknown2;
             public List<RenderMethodTemplate.DrawMode> DrawModes;
             public List<UnknownBlock3> Unknown3;
             public List<ArgumentMapping> ArgumentMappings;

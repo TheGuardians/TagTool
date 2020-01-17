@@ -90,6 +90,16 @@ namespace TagTool.Commands.Porting
 
             var edRmt2 = CacheContext.Deserialize<RenderMethodTemplate>(cacheStream, edRmt2Instance);
 
+            // fixup for no use_material_texture vector arg in ms23
+            for (int index = 0; index < edRmt2.BooleanArguments.Count; index++)
+            {
+                if (CacheContext.StringTable.GetString(edRmt2.BooleanArguments[index].Name) == "use_material_texture")
+                {
+                    finalRm.ShaderProperties[0].DisableBooleanArg = (ushort)(index + 1);
+                    break;
+                }
+            }
+
             foreach (var a in edRmt2.SamplerArguments)
                 edMaps.Add(CacheContext.StringTable.GetString(a.Name));
             foreach (var a in edRmt2.VectorArguments)
