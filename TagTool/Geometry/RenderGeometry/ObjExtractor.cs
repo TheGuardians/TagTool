@@ -30,11 +30,10 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="compressor">The vertex compressor to use.</param>
-        /// <param name="resourceStream">A stream open on the resource data.</param>
         /// <param name="name">The name of the mesh.</param>
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, Stream resourceStream, string name = null)
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null)
         {
-            var vertices = ReadVertices(reader, resourceStream);
+            var vertices = ReadVertices(reader);
             DecompressVertices(vertices, compressor);
 
             var indicesList = new List<ushort[]>();
@@ -43,7 +42,7 @@ namespace TagTool.Geometry
             for (var i = 0; i < (reader?.Mesh?.Parts?.Count ?? -1); i++)
             {
                 var part = reader.Mesh.Parts[i];
-                var indices = ReadIndices(reader, part, resourceStream);
+                var indices = ReadIndices(reader, part);
 
                 indicesList.Add(indices);
 
@@ -92,16 +91,15 @@ namespace TagTool.Geometry
         /// Reads the vertex data for a mesh into a format-independent list.
         /// </summary>
         /// <param name="reader">The mesh reader to use.</param>
-        /// <param name="resourceStream">A stream open on the resource data.</param>
         /// <returns>The list of vertices that were read.</returns>
-        private static List<ObjVertex> ReadVertices(MeshReader reader, Stream resourceStream)
+        private static List<ObjVertex> ReadVertices(MeshReader reader)
         {
             // Open a vertex reader on stream 0 (main vertex data)
             var mainBuffer = reader.VertexStreams[0];
             if (mainBuffer == null)
                 return new List<ObjVertex>();
 
-            var vertexReader = reader.OpenVertexStream(mainBuffer, resourceStream);
+            var vertexReader = reader.OpenVertexStream(mainBuffer);
 
             switch (reader.Mesh.Type)
             {
@@ -228,9 +226,8 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="part">The mesh part to read.</param>
-        /// <param name="resourceStream">A stream open on the resource data.</param>
         /// <returns>The index buffer converted into a triangle list.</returns>
-        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part, Stream resourceStream)
+        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part)
         {
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];
@@ -238,7 +235,7 @@ namespace TagTool.Geometry
                 throw new InvalidOperationException("Index buffer 0 is null");
 
             // Read the indices
-            var indexStream = reader.OpenIndexBufferStream(indexBuffer, resourceStream);
+            var indexStream = reader.OpenIndexBufferStream(indexBuffer);
             indexStream.Position = part.FirstIndexOld;
             switch (indexBuffer.Format)
             {

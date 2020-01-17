@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Geometry;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.ScenarioLightmaps
 {
@@ -54,6 +49,7 @@ namespace TagTool.Commands.ScenarioLightmaps
             //
 
             var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
+            Definition.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
@@ -67,16 +63,16 @@ namespace TagTool.Commands.ScenarioLightmaps
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    //var objExtractor = new ObjExtractor(objFile);
+                    var objExtractor = new ObjExtractor(objFile);
 
                     foreach (var mesh in Definition.Geometry.Meshes)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        //var meshReader = new MeshReader(CacheContext.Version, mesh, definition);
-                        //objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        var meshReader = new MeshReader(Cache.Version, mesh);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
                     }
 
-                    //objExtractor.Finish();
+                    objExtractor.Finish();
                 }
             }
 

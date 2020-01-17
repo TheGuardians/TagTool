@@ -7,11 +7,11 @@ namespace TagTool.Commands.RenderModels
 {
     class SpecifyShadersCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache CacheContext { get; }
+        private CachedTag Tag { get; }
         private RenderModel Definition { get; }
 
-        public SpecifyShadersCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, RenderModel definition)
+        public SpecifyShadersCommand(GameCache cacheContext, CachedTag tag, RenderModel definition)
             : base(true,
 
                   "SpecifyShaders",
@@ -42,7 +42,7 @@ namespace TagTool.Commands.RenderModels
                 }
             }
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+            using (var cacheStream = CacheContext.TagCache.OpenTagCacheReadWrite())
                 CacheContext.Serialize(cacheStream, Tag, Definition);
 
             Console.WriteLine("Done!");

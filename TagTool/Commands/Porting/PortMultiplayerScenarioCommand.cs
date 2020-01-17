@@ -14,8 +14,8 @@ namespace TagTool.Commands.Porting
 {
     class PortMultiplayerScenarioCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache { get; }
+        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCache BlamCache { get; }
         private PortTagCommand PortTag { get; }
 
         [Flags]
@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             Default = Objects | Audio | Ms30 | SpawnPoint
         }
 
-        public PortMultiplayerScenarioCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache, PortTagCommand portTag) :
+        public PortMultiplayerScenarioCommand(GameCacheContextHaloOnline cacheContext, GameCache blamCache, PortTagCommand portTag) :
             base(true,
 
                 "PortMultiplayerScenario",
@@ -61,100 +61,103 @@ namespace TagTool.Commands.Porting
             var firstNonFlagArgumentIndex = ParseConversionFlags(args, out conversionFlags);
             args = args.Skip(firstNonFlagArgumentIndex).ToList();
 
-            IndexItem blamScnrTag = BlamCache.IndexItems.First(x => x.GroupTag == "scnr");
-            var blamScnr = BlamCache.Deserializer.Deserialize<Scenario>(
-                new CacheSerializationContext(ref blamCache, blamScnrTag));
+            CachedTag blamScnrTag = BlamCache.TagCache.NonNull().First(x => x.Group.Tag == "scnr");
 
-            if (args.Count < 1)
+            using(var blamStream = BlamCache.TagCache.OpenTagCacheRead())
             {
-                Dictionary<string, int> structureBspsByName = new Dictionary<string, int>();
-                Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
+                var blamScnr = BlamCache.Deserialize<Scenario>(blamStream, blamScnrTag);
 
-                Console.WriteLine("-----------------------------------------");
-                for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
-                    Console.WriteLine($"{i}. {blamCache.Strings.GetString(blamScnr.ZoneSets[i].Name)}");
-                Console.WriteLine("-----------------------------------------");
-                Console.WriteLine("Enter the name or index of the zone set to use:");
-                string zoneSetName = Console.ReadLine().Trim();
-
-
-                for (int i = 0; i < blamScnr.StructureBsps.Count; i++)
-                    structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
-
-                if (zoneSetsByName.ContainsKey(zoneSetName))
-                    zoneSetIndex = zoneSetsByName[zoneSetName];
-                else
+                if (args.Count < 1)
                 {
-                    if (!int.TryParse(zoneSetName, out zoneSetIndex))
-                        zoneSetIndex = -1;
-                }
+                    Dictionary<string, int> structureBspsByName = new Dictionary<string, int>();
+                    Dictionary<string, int> zoneSetsByName = new Dictionary<string, int>();
 
-                if (zoneSetIndex == -1)
-                {
-                    Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
-                    return true;
-                }
+                    Console.WriteLine("-----------------------------------------");
+                    for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
+                        Console.WriteLine($"{i}. {blamCache.StringTable.GetString(blamScnr.ZoneSets[i].Name)}");
+                    Console.WriteLine("-----------------------------------------");
+                    Console.WriteLine("Enter the name or index of the zone set to use:");
+                    string zoneSetName = Console.ReadLine().Trim();
 
-                var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
 
-                Console.WriteLine("-----------------------------------------");
-                for (int i = 0; i < 32; i++)
-                {
-                    if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
-                        Console.WriteLine($"{i}. {blamScnr.StructureBsps[i].StructureBsp.Name}");
-                }
-                Console.WriteLine("-----------------------------------------");
-                Console.WriteLine("Enter the name or index of each bsp to include on a new line followed by a blank line:");
+                    for (int i = 0; i < blamScnr.StructureBsps.Count; i++)
+                        structureBspsByName.Add(blamScnr.StructureBsps[i].StructureBsp.Name, i);
 
-                for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
-                {
-                    var sbspName = line.Trim();
-                    int bspIndex = -1;
-
-                    if (structureBspsByName.ContainsKey(sbspName))
-                        bspIndex = structureBspsByName[sbspName];
+                    if (zoneSetsByName.ContainsKey(zoneSetName))
+                        zoneSetIndex = zoneSetsByName[zoneSetName];
                     else
                     {
-                        if (!int.TryParse(sbspName, out bspIndex))
-                            bspIndex = -1;
+                        if (!int.TryParse(zoneSetName, out zoneSetIndex))
+                            zoneSetIndex = -1;
                     }
 
-                    if (bspIndex == -1)
-                        Console.WriteLine($"Could not find bsp '{sbspName}'");
-
-                    bspMask |= (BspFlags)(1u << bspIndex);
-                }
-            }
-            else
-            {
-                var tagName = args[0].Trim();
-                var bspIndex = blamScnr.StructureBsps.FindIndex(x => x.StructureBsp.Name == tagName);
-                if (bspIndex == -1)
-                {
-                    Console.WriteLine($"Could not find bsp '{tagName}'");
-                    return true;
-                }
-
-                bspMask = (BspFlags)(1u << bspIndex);
-                for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
-                {
-                    if ((blamScnr.ZoneSets[i].LoadedBsps & bspMask) != 0)
+                    if (zoneSetIndex == -1)
                     {
-                        zoneSetIndex = i;
-                        break;
+                        Console.WriteLine($"Zone set '{zoneSetName}' could not be found!\n");
+                        return true;
+                    }
+
+                    var zoneSet = blamScnr.ZoneSets[zoneSetIndex];
+
+                    Console.WriteLine("-----------------------------------------");
+                    for (int i = 0; i < 32; i++)
+                    {
+                        if ((zoneSet.LoadedBsps & (BspFlags)(1u << i)) != 0)
+                            Console.WriteLine($"{i}. {blamScnr.StructureBsps[i].StructureBsp.Name}");
+                    }
+                    Console.WriteLine("-----------------------------------------");
+                    Console.WriteLine("Enter the name or index of each bsp to include on a new line followed by a blank line:");
+
+                    for (string line; !string.IsNullOrWhiteSpace(line = Console.ReadLine());)
+                    {
+                        var sbspName = line.Trim();
+                        int bspIndex = -1;
+
+                        if (structureBspsByName.ContainsKey(sbspName))
+                            bspIndex = structureBspsByName[sbspName];
+                        else
+                        {
+                            if (!int.TryParse(sbspName, out bspIndex))
+                                bspIndex = -1;
+                        }
+
+                        if (bspIndex == -1)
+                            Console.WriteLine($"Could not find bsp '{sbspName}'");
+
+                        bspMask |= (BspFlags)(1u << bspIndex);
+                    }
+                }
+                else
+                {
+                    var tagName = args[0].Trim();
+                    var bspIndex = blamScnr.StructureBsps.FindIndex(x => x.StructureBsp.Name == tagName);
+                    if (bspIndex == -1)
+                    {
+                        Console.WriteLine($"Could not find bsp '{tagName}'");
+                        return true;
+                    }
+
+                    bspMask = (BspFlags)(1u << bspIndex);
+                    for (int i = 0; i < blamScnr.ZoneSets.Count; i++)
+                    {
+                        if ((blamScnr.ZoneSets[i].LoadedBsps & bspMask) != 0)
+                        {
+                            zoneSetIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (zoneSetIndex == -1)
+                    {
+                        Console.WriteLine($"No zone set includes bsp '{tagName}'!");
+                        return true;
                     }
                 }
 
-                if (zoneSetIndex == -1)
-                {
-                    Console.WriteLine($"No zone set includes bsp '{tagName}'!");
-                    return true;
-                }
+                Console.WriteLine("Converting...");
+                Convert(blamScnr, blamScnrTag, blamStream, zoneSetIndex, bspMask, conversionFlags);
+                return true;
             }
-
-            Console.WriteLine("Converting...");
-            Convert(zoneSetIndex, bspMask, conversionFlags);
-            return true;
         }
 
         int ParseConversionFlags(List<string> args, out MultiplayerScenarioConversionFlags flags)
@@ -189,13 +192,12 @@ namespace TagTool.Commands.Porting
             return endIndex;
         }
 
-        private void Convert(int zoneSetIndex, BspFlags bspMask, MultiplayerScenarioConversionFlags conversionFlags)
+        private void Convert(Scenario blamScnr, CachedTag blamScnrTag, Stream blamStream, int zoneSetIndex, BspFlags bspMask, MultiplayerScenarioConversionFlags conversionFlags)
         {
             var blamCache = BlamCache;
-            var blamScnrTag = BlamCache.IndexItems.FirstOrDefault(x => x.GroupTag == "scnr");
-            var blamScnr = BlamCache.Deserializer.Deserialize<Scenario>(new CacheSerializationContext(ref blamCache, blamScnrTag));
 
-            using (var cacheStream = CacheContext.OpenTagCacheReadWrite())
+
+            using (var cacheStream = CacheContext.TagCache.OpenTagCacheReadWrite())
             {
                 var resourceStreams = new Dictionary<ResourceLocation, Stream>();
 
@@ -209,21 +211,21 @@ namespace TagTool.Commands.Porting
                 {
                     PortTag.RemoveFlags(~defaultPortingFlags);
                     PortTag.SetFlags(defaultPortingFlags);
-                    ConvertLightmap(cacheStream, resourceStreams,
-                        blamCache.GetIndexItemFromID(blamScnr.Lightmap.Index), zoneSetIndex, bspMask);
+                    ConvertLightmap(cacheStream, blamStream, resourceStreams,
+                        blamScnr.Lightmap, zoneSetIndex, bspMask);
                 }
 
-                var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, zoneSetIndex, bspMask, conversionFlags);
+                var tagCollector = new MultiplayerScenarioTagCollector(blamCache, blamScnr, blamStream, zoneSetIndex, bspMask, conversionFlags);
                 tagCollector.Collect();
 
                 PortTag.RemoveFlags(~defaultPortingFlags);
                 PortTag.SetFlags(defaultPortingFlags);
 
                 foreach (var tag in tagCollector.Tags)
-                    PortTag.ConvertTag(cacheStream, resourceStreams, tag);
+                    PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, tag);
 
                 PortTag.RemoveFlags(PortingFlags.Recursive);
-                var scnrTag = PortTag.ConvertTag(cacheStream, resourceStreams, blamScnrTag);
+                var scnrTag = PortTag.ConvertTag(cacheStream, blamStream, resourceStreams, blamScnrTag);
 
                 new MultiplayerScenarioFixup(cacheStream, CacheContext, blamScnrTag.Name, zoneSetIndex, bspMask, conversionFlags).Fixup();
 
@@ -231,22 +233,21 @@ namespace TagTool.Commands.Porting
                     entry.Close();
             }
 
-            using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
-                CacheContext.StringIdCache.Save(stringIdCacheStream);
 
-            CacheContext.SaveTagNames();
+            CacheContext.StringTable.Save();
+
+            CacheContext.TagCacheGenHO.SaveTagNames();
         }
 
-        private void ConvertLightmap(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams,
-            IndexItem blamLightmapTag, int zoneSetIndex, BspFlags bspMask)
+        private void ConvertLightmap(Stream cacheStream, Stream blamStream, Dictionary<ResourceLocation, Stream> resourceStreams,
+            CachedTag blamLightmapTag, int zoneSetIndex, BspFlags bspMask)
         {
             var blamCache = BlamCache;
-            var blamLightmap = BlamCache.Deserializer.Deserialize<ScenarioLightmap>(
-                new CacheSerializationContext(ref blamCache, blamLightmapTag));
+            var blamLightmap = BlamCache.Deserialize<ScenarioLightmap>(blamStream, blamLightmapTag);
 
             if (blamCache.Version < CacheVersion.Halo3ODST)
             {
-                var lightmapTag = CacheContext.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
+                var lightmapTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
                 var lightmap = blamLightmap;
 
                 for (int i = 0, j = 0; i < blamLightmap.Lightmaps.Count; i++)
@@ -255,14 +256,14 @@ namespace TagTool.Commands.Porting
                         continue;
 
                     var blamLbsp = blamLightmap.Lightmaps[i];
-                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, resourceStreams,
+                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams,
                         blamLbsp, blamLbsp, blamLightmapTag.Name);
 
                     Lbsp.Airprobes = new List<ScenarioLightmap.Airprobe>();
                     Lbsp.Airprobes.AddRange(blamLightmap.Airprobes);
                     Lbsp.BspIndex = (short)j++;
 
-                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>($"{blamLightmapTag.Name}_{i}_data");
+                    var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>($"{blamLightmapTag.Name}_{i}_data");
                     CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
 
                     lightmap.LightmapDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
@@ -273,7 +274,7 @@ namespace TagTool.Commands.Porting
             }
             else
             {
-                var lightmapTag = CacheContext.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
+                var lightmapTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmap>(blamLightmapTag.Name);
                 var lightmap = blamLightmap;
                 var newDataReferences = new List<ScenarioLightmap.LightmapDataReference>();
 
@@ -282,14 +283,13 @@ namespace TagTool.Commands.Porting
                     if (((BspFlags)(1u << i) & bspMask) == 0)
                         continue;
 
-                    var blamLbspTag = blamCache.GetIndexItemFromID(blamLightmap.LightmapDataReferences[i].LightmapData.Index);
-                    var blamLbsp = blamCache.Deserializer.Deserialize<ScenarioLightmapBspData>(
-                        new CacheSerializationContext(ref blamCache, blamLbspTag));
+                    var blamLbspTag = blamLightmap.LightmapDataReferences[i].LightmapData;
+                    var blamLbsp = blamCache.Deserialize<ScenarioLightmapBspData>(blamStream, blamLbspTag);
 
-                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, resourceStreams, blamLbsp, blamLbsp, blamLbspTag.Name);
+                    var Lbsp = (ScenarioLightmapBspData)PortTag.ConvertData(cacheStream, blamStream, resourceStreams, blamLbsp, blamLbsp, blamLbspTag.Name);
                     Lbsp.BspIndex = (short)j++;
 
-                    var LbspTag = CacheContext.AllocateTag<ScenarioLightmapBspData>(blamLbspTag.Name);
+                    var LbspTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(blamLbspTag.Name);
                     CacheContext.Serialize(cacheStream, LbspTag, Lbsp);
 
                     newDataReferences.Add(new ScenarioLightmap.LightmapDataReference() { LightmapData = LbspTag });
@@ -302,9 +302,9 @@ namespace TagTool.Commands.Porting
 
         class MultiplayerScenarioFixup
         {
-            private HaloOnlineCacheContext CacheContext;
+            private GameCache CacheContext;
             private Stream CacheStream;
-            private CachedTagInstance ScnrTag;
+            private CachedTag ScnrTag;
             private Scenario Scnr;
             private int DesiredZoneSetIndex;
             private BspFlags DesiredBsps;
@@ -312,13 +312,13 @@ namespace TagTool.Commands.Porting
             private Dictionary<int, int> BspIndexRemapping;
 
             public MultiplayerScenarioFixup(
-                Stream cacheStream, HaloOnlineCacheContext cacheContext, string scenarioTagName, int desiredZoneSetIndex,
+                Stream cacheStream, GameCache cacheContext, string scenarioTagName, int desiredZoneSetIndex,
                 BspFlags desiredBsps, MultiplayerScenarioConversionFlags conversionFlags)
             {
                 this.CacheContext = cacheContext;
                 this.CacheStream = cacheStream;
                 this.ScnrTag = cacheContext.GetTag<Scenario>(scenarioTagName);
-                this.Scnr = cacheContext.Deserialize<Scenario>(new TagSerializationContext(cacheStream, cacheContext, this.ScnrTag));
+                this.Scnr = cacheContext.Deserialize<Scenario>(cacheStream, ScnrTag);
                 this.DesiredZoneSetIndex = desiredZoneSetIndex;
                 this.DesiredBsps = desiredBsps;
                 this.ConversionFlags = conversionFlags;
@@ -517,11 +517,11 @@ namespace TagTool.Commands.Porting
 
             private void FixupLightmap()
             {
-                CachedTagInstance lightmapTag;
+                CachedTag lightmapTag;
                 if (!CacheContext.TryGetTag<ScenarioLightmap>(Scnr.Lightmap.Name, out lightmapTag))
                     return;
 
-                var lightmap = CacheContext.Deserialize<ScenarioLightmap>(new TagSerializationContext(CacheStream, CacheContext, lightmapTag));
+                var lightmap = CacheContext.Deserialize<ScenarioLightmap>(CacheStream, lightmapTag);
 
                 var newLightmapDataReference = new List<ScenarioLightmap.LightmapDataReference>();
                 for (int i = 0; i < lightmap.LightmapDataReferences.Count; i++)
@@ -700,21 +700,22 @@ namespace TagTool.Commands.Porting
 
                 Scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
                 {
-                    Object = CacheContext.GetTag(@"objects\multi\spawning\respawn_point_invisible.scenery")
+                    Object = CacheContext.TagCache.GetTag(@"objects\multi\spawning\respawn_point_invisible", "scen")
                 });
             }
         }
 
         class MultiplayerScenarioTagCollector
         {
-            private CacheFile BlamCache;
+            private GameCache BlamCache;
+            private Stream BlamStream;
             private Scenario BlamScnr;
             private BspFlags DesiredBsps;
             private int DesiredZoneSetIndex;
             private MultiplayerScenarioConversionFlags ConversionFlags;
-            public List<IndexItem> Tags;
+            public List<CachedTag> Tags;
 
-            public MultiplayerScenarioTagCollector(CacheFile blamCache, Scenario blamScnr,
+            public MultiplayerScenarioTagCollector(GameCache blamCache, Scenario blamScnr, Stream blamStream,
                 int desiredZoneSetIndex, BspFlags desiredBsps, MultiplayerScenarioConversionFlags conversionFlags)
             {
                 this.BlamCache = blamCache;
@@ -722,12 +723,13 @@ namespace TagTool.Commands.Porting
                 this.DesiredZoneSetIndex = desiredZoneSetIndex;
                 this.DesiredBsps = desiredBsps;
                 this.ConversionFlags = conversionFlags;
-                this.Tags = new List<IndexItem>();
+                this.Tags = new List<CachedTag>();
+                BlamStream = blamStream;
             }
 
-            private void Add(CachedTagInstance tag)
+            private void Add(CachedTag tag)
             {
-                if (tag != null) Tags.Add(BlamCache.GetIndexItemFromID(tag.Index));
+                if (tag != null) Tags.Add(tag);
             }
 
             public void Collect()
@@ -747,7 +749,7 @@ namespace TagTool.Commands.Porting
                 CollectSkies();
                 CollectAllScenarioObjects();
                 CollectFlocks();
-                CollectDecals();
+                CollectDecals(BlamStream);
 
                 Add(BlamScnr.DefaultScreenFx);
                 Add(BlamScnr.DefaultCameraFx);
@@ -824,7 +826,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            private void CollectDecals()
+            private void CollectDecals(Stream blamStream)
             {
                 var visitedPaletteEntries = new HashSet<int>();
                 for (int i = 0; i < BlamScnr.StructureBsps.Count; i++)
@@ -833,10 +835,9 @@ namespace TagTool.Commands.Porting
                     if (((BspFlags)(1 << i) & DesiredBsps) == 0)
                         continue;
 
-                    CacheFile blamCache = BlamCache;
-                    var sbsp = BlamCache.Deserializer.Deserialize<ScenarioStructureBsp>(
-                        new CacheSerializationContext(ref blamCache, BlamCache.GetIndexItemFromID(sbspRef.StructureBsp.Index)));
-       
+                    GameCache blamCache = BlamCache;
+                    var sbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamStream, sbspRef.StructureBsp);
+                    
                     for (int j = 0; j < BlamScnr.Decals.Count; j++)
                     {
                         var decal = BlamScnr.Decals[j];

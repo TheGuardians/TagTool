@@ -1,20 +1,18 @@
 ﻿using TagTool.Cache;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
     class ExtractRenderGeometryCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
 
-        public ExtractRenderGeometryCommand(HaloOnlineCacheContext cacheContext, ScenarioStructureBsp definition)
+        public ExtractRenderGeometryCommand(GameCache cacheContext, ScenarioStructureBsp definition)
             : base(true,
 
                   "ExtractRenderGeometry",
@@ -40,7 +38,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (fileType != "obj")
                 throw new NotSupportedException(fileType);
 
-            if (Definition.Geometry2.Resource == null)
+            if (Definition.Geometry.Resource == null)
             {
                 Console.WriteLine("ERROR: Render geometry does not have a resource associated with it.");
                 return true;
@@ -50,17 +48,12 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry2.Resource.HaloOnlinePageableResource);
-            var definition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+
+            var definition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
+            Definition.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
-                //
-                // Extract the resource data
-                //
-
-                CacheContext.ExtractResource(Definition.Geometry2.Resource.HaloOnlinePageableResource, resourceStream);
-
                 var file = new FileInfo(fileName);
 
                 if (!file.Directory.Exists)
@@ -72,15 +65,15 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                     foreach (var cluster in Definition.Clusters)
                     {
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry2.Meshes[cluster.MeshIndex], definition);
-                        objExtractor.ExtractMesh(meshReader, null, resourceStream);
+                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[cluster.MeshIndex]);
+                        objExtractor.ExtractMesh(meshReader, null);
                     }
 
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
-                        var vertexCompressor = new VertexCompressor(Definition.Geometry2.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry2.Meshes[instance.InstanceDefinition], definition);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
+                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[instance.InstanceDefinition]);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
                     }
 
                     objExtractor.Finish();

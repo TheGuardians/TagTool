@@ -24,12 +24,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.DecoratorGeometry, "Decorator"));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.Geometry, "Bsp"));
             commandContext.AddCommand(new MoppDataCommand(bsp));
-
-            /*
-            commandContext.AddCommand(new ExtractCollisionGeometryCommand(cacheContext, bsp));
-            commandContext.AddCommand(new ExtractPathfindingGeometryCommand(cacheContext, bsp));
-            commandContext.AddCommand(new ExtractRenderGeometryCommand(cacheContext, bsp));
-            */
+            commandContext.AddCommand(new ExtractCollisionGeometryCommand(cache, bsp));
+            commandContext.AddCommand(new ExtractPathfindingGeometryCommand(cache, bsp));
+            commandContext.AddCommand(new ExtractRenderGeometryCommand(cache, bsp));
+            
         }
     }
 }

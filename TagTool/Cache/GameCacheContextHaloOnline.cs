@@ -222,6 +222,54 @@ namespace TagTool.Cache
             return tag;
         }
 
+        public bool TryAllocateTag(out CachedTag result, Type type, string name = null)
+        {
+            result = null;
+
+            try
+            {
+                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
+
+                if (structure == null)
+                {
+                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
+                    return false;
+                }
+
+                var groupTag = new Tag(structure.Tag);
+
+                if (!TagGroup.Instances.ContainsKey(groupTag))
+                {
+                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
+                    return false;
+                }
+
+                result = AllocateTag(TagGroup.Instances[groupTag], name);
+
+                if (result == null)
+                    return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public CachedTag AllocateTag(Type type, string name = null)
+        {
+            if (TryAllocateTag(out var result, type, name))
+                return result;
+
+            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
+            return null;
+        }
+
+        public CachedTag AllocateTag<T>(string name = null) where T : TagStructure
+            => AllocateTag(typeof(T), name);
+
         /// <summary>
         /// Returns a new CachedTag instance without updating the tag cache.
         /// </summary>

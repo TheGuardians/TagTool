@@ -20,15 +20,12 @@ namespace TagTool.Commands.RenderModels
 
         public static void Populate(CommandContext context, GameCache cache, CachedTag tag, RenderModel renderModel)
         {
-            /*
-            context.AddCommand(new SpecifyShadersCommand(cacheContext, tag, renderModel));
-            context.AddCommand(new GetResourceInfoCommand(cacheContext, tag, renderModel));
-            context.AddCommand(new ResourceDataCommand(cacheContext, tag, renderModel));
-            context.AddCommand(new DumpRenderGeometryCommand(cacheContext, renderModel.Geometry));
-            context.AddCommand(new ReplaceRenderGeometryCommand(cacheContext, tag, renderModel));
-            context.AddCommand(new ExtractModelCommand(cacheContext, renderModel));
-            context.AddCommand(new ExtractBitmapsCommand(cacheContext, tag, renderModel));
-            */
+            context.AddCommand(new SpecifyShadersCommand(cache, tag, renderModel));
+            context.AddCommand(new DumpRenderGeometryCommand(cache, renderModel.Geometry));
+            context.AddCommand(new ReplaceRenderGeometryCommand(cache, tag, renderModel));
+            context.AddCommand(new ExtractModelCommand(cache, renderModel));
+            context.AddCommand(new ExtractBitmapsCommand(cache, renderModel));
+            
         }
     }
 }

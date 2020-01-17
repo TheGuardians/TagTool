@@ -22,12 +22,10 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="version">The engine version to target.</param>
         /// <param name="mesh">The mesh.</param>
-        /// <param name="definition">The mesh's definition data.</param>
-        public MeshReader(CacheVersion version, Mesh mesh, RenderGeometryApiResourceDefinition definition)
+        public MeshReader(CacheVersion version, Mesh mesh)
         {
             _version = version;
             Mesh = mesh;
-            Definition = definition;
             VertexStreams = new VertexBufferDefinition[StreamCount];
             IndexBuffers = new IndexBufferDefinition[IndexBufferCount];
             BindVertexStreams();
@@ -58,60 +56,52 @@ namespace TagTool.Geometry
         /// Opens a vertex stream on one of the mesh's vertex buffers.
         /// </summary>
         /// <param name="definition">The vertex buffer definition.</param>
-        /// <param name="baseStream">The stream open on the mesh's resource data to use as a base stream.</param>
         /// <returns>The vertex stream if successful, or <c>null</c> otherwise.</returns>
-        public IVertexStream OpenVertexStream(VertexBufferDefinition definition, Stream baseStream)
+        public IVertexStream OpenVertexStream(VertexBufferDefinition definition)
         {
-            if (definition.Data.Address.Type != CacheAddressType.Data)
-                return null; // Don't bother supporting non-resource addresses
-            baseStream.Position = definition.Data.Address.Offset;
-            return VertexStreamFactory.Create(_version, baseStream);
+            var stream = new MemoryStream(definition.Data.Data);
+            return VertexStreamFactory.Create(_version, stream);
         }
 
         /// <summary>
         /// Opens a vertex stream on one of the mesh's vertex streams.
         /// </summary>
         /// <param name="streamIndex">Index of the vertex stream to open.</param>
-        /// <param name="baseStream">The stream open on the mesh's resource data to use as a base stream.</param>
         /// <returns>The vertex stream if successful, or <c>null</c> otherwise.</returns>
-        public IVertexStream OpenVertexStream(int streamIndex, Stream baseStream)
+        public IVertexStream OpenVertexStream(int streamIndex)
         {
             if (streamIndex < 0 || streamIndex >= VertexStreams.Length)
                 return null;
             var definition = VertexStreams[streamIndex];
             if (definition == null)
                 return null;
-            return OpenVertexStream(definition, baseStream);
+            return OpenVertexStream(definition);
         }
 
         /// <summary>
         /// Opens an index buffer stream on one of the mesh's index buffers.
         /// </summary>
         /// <param name="definition">The index buffer definition.</param>
-        /// <param name="baseStream">The stream open on the mesh's resource data to use as a base stream.</param>
         /// <returns>The index buffer stream if successful, or <c>null</c> otherwise.</returns>
-        public IndexBufferStream OpenIndexBufferStream(IndexBufferDefinition definition, Stream baseStream)
+        public IndexBufferStream OpenIndexBufferStream(IndexBufferDefinition definition)
         {
-            if (definition.Data.Address.Type != CacheAddressType.Data)
-                return null; // Don't bother supporting non-resource addresses
-            baseStream.Position = definition.Data.Address.Offset;
-            return new IndexBufferStream(baseStream);
+            var stream = new MemoryStream(definition.Data.Data);
+            return new IndexBufferStream(stream);
         }
 
         /// <summary>
         /// Opens an index buffer stream on one of the mesh's index buffers.
         /// </summary>
         /// <param name="bufferIndex">Index of the index buffer to open.</param>
-        /// <param name="baseStream">The stream open on the mesh's resource data to use as a base stream.</param>
         /// <returns>The index buffer stream if successful, or <c>null</c> otherwise.</returns>
-        public IndexBufferStream OpenIndexBufferStream(int bufferIndex, Stream baseStream)
+        public IndexBufferStream OpenIndexBufferStream(int bufferIndex)
         {
             if (bufferIndex < 0 || bufferIndex >= IndexBuffers.Length)
                 return null;
             var definition = IndexBuffers[bufferIndex];
             if (definition == null)
                 return null;
-            return OpenIndexBufferStream(definition, baseStream);
+            return OpenIndexBufferStream(definition);
         }
 
         /// <summary>
@@ -123,13 +113,14 @@ namespace TagTool.Geometry
             // dependent upon what type of mesh is being loaded. Instead, we
             // can just scan the entire array and bind everything as an
             // approximation.
-            foreach (var bufferIndex in Mesh.VertexBufferIndices.Where(i => i < Definition.VertexBuffers.Count))
+            foreach (var buffer in Mesh.ResourceVertexBuffers)
             {
-                // Use the buffer format to determine the stream index
-                var buffer = Definition.VertexBuffers[bufferIndex].Definition;
-                if (!VertexBufferStreams.TryGetValue(buffer.Format, out int streamIndex))
-                    continue;
-                VertexStreams[streamIndex] = buffer;
+               if(buffer != null)
+               {
+                    if (!VertexBufferStreams.TryGetValue(buffer.Format, out int streamIndex))
+                        continue;
+                    VertexStreams[streamIndex] = buffer;
+               }
             }
         }
 
@@ -142,9 +133,9 @@ namespace TagTool.Geometry
                 throw new InvalidOperationException("Mesh has too few index buffers");
             for (var i = 0; i < IndexBuffers.Length; i++)
             {
-                var bufferIndex = Mesh.IndexBufferIndices[i];
-                if (bufferIndex < Definition.IndexBuffers.Count)
-                    IndexBuffers[i] = Definition.IndexBuffers[bufferIndex].Definition;
+                var buffer = Mesh.ResourceIndexBuffers[i];
+                if (buffer != null)
+                    IndexBuffers[i] = buffer;
             }
         }
 

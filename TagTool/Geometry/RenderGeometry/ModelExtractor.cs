@@ -15,16 +15,14 @@ namespace TagTool.Geometry
     public class ModelExtractor
     {
         private readonly Scene Scene;
-        private readonly HaloOnlineCacheContext CacheContext;
+        private readonly GameCache CacheContext;
 
         private Dictionary<int, int> MeshMapping;   //key is the absolute subMesh index, value is the Scene.Meshes index
         private List<Node> BoneNodes;
 
         private readonly RenderModel RenderModel; 
-        private readonly RenderGeometryApiResourceDefinition RenderModelResourceDefinition;
-        private Stream RenderModelResourceStream;
 
-        public ModelExtractor(HaloOnlineCacheContext cacheContext, RenderModel renderModel)
+        public ModelExtractor(GameCache cacheContext, RenderModel renderModel)
         {
             Scene = new Scene();
 
@@ -35,16 +33,9 @@ namespace TagTool.Geometry
             BoneNodes = new List<Node>();
 
             // Deserialize the render_model resource
-            var resourceContext = new ResourceSerializationContext(CacheContext, RenderModel.Geometry.Resource.HaloOnlinePageableResource);
-            RenderModelResourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
-            RenderModelResourceStream = new MemoryStream();
-            CacheContext.ExtractResource(RenderModel.Geometry.Resource.HaloOnlinePageableResource, RenderModelResourceStream);
+            var resource = cacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(renderModel.Geometry.Resource);
+            renderModel.Geometry.SetResourceBuffers(resource);
 
-        }
-
-        ~ModelExtractor()
-        {
-            RenderModelResourceStream.Close();
         }
 
         public bool ExportCollada(FileInfo file)
@@ -69,11 +60,11 @@ namespace TagTool.Geometry
         /// <returns></returns>
         public void ExtractRenderModel(string variantName = "*")
         {
-            Scene.RootNode = new Node(CacheContext.GetString(RenderModel.Name));
+            Scene.RootNode = new Node(CacheContext.StringTable.GetString(RenderModel.Name));
             // Pass 1 create bones and assimp nodes as enumerated in render model nodes
             foreach (var node in RenderModel.Nodes)
             {
-                Node newNode = new Node(CacheContext.GetString(node.Name));
+                Node newNode = new Node(CacheContext.StringTable.GetString(node.Name));
                 //compute transform
 
                 newNode.Transform = ComputeTransform(node);
@@ -97,10 +88,10 @@ namespace TagTool.Geometry
 
             foreach (var region in RenderModel.Regions)
             {
-                var regionName = CacheContext.GetString(region.Name);
+                var regionName = CacheContext.StringTable.GetString(region.Name);
                 foreach (var permutation in region.Permutations)
                 {
-                    var permutationName = CacheContext.GetString(permutation.Name);
+                    var permutationName = CacheContext.StringTable.GetString(permutation.Name);
                     // only export the specified permutations
                     if( permutationName == variantName || variantName == "*")
                     {
@@ -170,7 +161,7 @@ namespace TagTool.Geometry
             mesh.UVComponentCount[textureCoordinateIndex] = 2;
 
             // prepare vertex extraction
-            var meshReader = new MeshReader(CacheContext.Version, RenderModel.Geometry.Meshes[meshIndex], RenderModelResourceDefinition);
+            var meshReader = new MeshReader(CacheContext.Version, RenderModel.Geometry.Meshes[meshIndex]);
             var vertexCompressor = new VertexCompressor(RenderModel.Geometry.Compression[0]);
 
             var geometryMesh = RenderModel.Geometry.Meshes[meshIndex];
@@ -179,14 +170,14 @@ namespace TagTool.Geometry
             mesh.MaterialIndex = geometryPart.MaterialIndex;
 
             // optimize this part to not load and decompress all mesh vertices everytime
-            var vertices = ReadVertices(meshReader, RenderModelResourceStream);
+            var vertices = ReadVertices(meshReader);
             DecompressVertices(vertices, vertexCompressor);
             // get offset in the list of all vertices for the mesh
             var vertexOffset = GetPartVertexOffset(meshIndex, partIndex);
 
             //vertices = vertices.GetRange(vertexOffset, geometryPart.VertexCount);
 
-            var indices = ReadIndices(meshReader, geometryPart, RenderModelResourceStream);
+            var indices = ReadIndices(meshReader, geometryPart);
 
             var int_indices = indices.Select(b => (int)b).ToArray();
 
@@ -208,7 +199,7 @@ namespace TagTool.Geometry
             foreach (var node in RenderModel.Nodes)
             {
                 Bone bone = new Bone();
-                bone.Name = CacheContext.GetString(node.Name);
+                bone.Name = CacheContext.StringTable.GetString(node.Name);
                 bone.OffsetMatrix = new Matrix4x4();
                 mesh.Bones.Add(bone);
 
@@ -303,14 +294,14 @@ namespace TagTool.Geometry
             return absIndex;
         }
 
-        private static List<GenericVertex> ReadVertices(MeshReader reader, Stream resourceStream)
+        private static List<GenericVertex> ReadVertices(MeshReader reader)
         {
             // Open a vertex reader on stream 0 (main vertex data)
             var mainBuffer = reader.VertexStreams[0];
             if (mainBuffer == null)
                 return new List<GenericVertex>();
 
-            var vertexReader = reader.OpenVertexStream(mainBuffer, resourceStream);
+            var vertexReader = reader.OpenVertexStream(mainBuffer);
 
             switch (reader.Mesh.Type)
             {
@@ -445,9 +436,8 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="part">The mesh part to read.</param>
-        /// <param name="resourceStream">A stream open on the resource data.</param>
         /// <returns>The index buffer converted into a triangle list.</returns>
-        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part, Stream resourceStream)
+        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part)
         {
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];
@@ -455,7 +445,7 @@ namespace TagTool.Geometry
                 throw new InvalidOperationException("Index buffer 0 is null");
 
             // Read the indices
-            var indexStream = reader.OpenIndexBufferStream(indexBuffer, resourceStream);
+            var indexStream = reader.OpenIndexBufferStream(indexBuffer);
             indexStream.Position = part.FirstIndexOld;
             switch (indexBuffer.Format)
             {

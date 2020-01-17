@@ -17,7 +17,7 @@ namespace TagTool.Geometry
     /// </summary>
     public class RenderModelBuilder
     {
-        private GameCacheContext CacheContext { get; }
+        private GameCache CacheContext { get; }
 
         private readonly RenderModel _model = new RenderModel();
         private RenderModel.Region _currentRegion;
@@ -30,7 +30,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderModelBuilder"/> class for a particular engine version.
         /// </summary>
-        public RenderModelBuilder(GameCacheContext cacheContext)
+        public RenderModelBuilder(GameCache cacheContext)
         {
             CacheContext = cacheContext;
             _model.Regions = new List<RenderModel.Region>();
@@ -179,10 +179,10 @@ namespace TagTool.Geometry
                 {
                     Parts = new List<Mesh.Part>(),
                     SubParts = new List<Mesh.SubPart>(),
-                    VertexBufferIndices = new ushort[8] { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
-                    IndexBufferIndices = new ushort[2] { 0xFFFF, 0xFFFF },
+                    VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
+                    IndexBufferIndices = new short[2] { -1, -1 },
                     Flags = MeshFlags.None,
-                    PrtType = PrtType.None,
+                    PrtType = PrtSHType.None,
                 },
                 VertexFormat = VertexBufferFormat.Invalid,
             };
@@ -435,8 +435,8 @@ namespace TagTool.Geometry
         {
             var definition = new RenderGeometryApiResourceDefinition
             {
-                VertexBuffers = new List<TagStructureReference<VertexBufferDefinition>>(),
-                IndexBuffers = new List<TagStructureReference<IndexBufferDefinition>>()
+                VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(),
+                IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>()
             };
 
             foreach (var mesh in Meshes)
@@ -445,9 +445,13 @@ namespace TagTool.Geometry
                 var vertexBufferStart = (int)resourceDataStream.Position;
                 var vertexCount = SerializeVertexBuffer(mesh, resourceDataStream);
                 var vertexBufferEnd = (int)resourceDataStream.Position;
+                var vertexBufferStream = new MemoryStream();
+
+                resourceDataStream.Position = vertexBufferStart;
+                resourceDataStream.CopyTo(vertexBufferStream, vertexBufferEnd - vertexBufferStart);
 
                 // Add a definition for it
-                mesh.Mesh.VertexBufferIndices[0] = (ushort)definition.VertexBuffers.Count;
+                mesh.Mesh.VertexBufferIndices[0] = (short)definition.VertexBuffers.Count;
                 definition.VertexBuffers.Add(new TagStructureReference<VertexBufferDefinition>
                 {
                     Definition = new VertexBufferDefinition
@@ -455,7 +459,7 @@ namespace TagTool.Geometry
                         Count = vertexCount,
                         Format = mesh.VertexFormat,
                         VertexSize = VertexSizes[mesh.VertexFormat],
-                        Data = new TagData(vertexBufferEnd - vertexBufferStart, new CacheAddress(CacheAddressType.Data, vertexBufferStart)),
+                        Data = new TagData(vertexBufferStream.ToArray()),
                     },
                 });
 
@@ -464,36 +468,29 @@ namespace TagTool.Geometry
                 SerializeIndexBuffer(mesh, resourceDataStream);
                 var indexBufferEnd = (int)resourceDataStream.Position;
 
+                var indexBufferStream = new MemoryStream();
+
+                resourceDataStream.Position = indexBufferStart;
+                resourceDataStream.CopyTo(indexBufferStream, indexBufferEnd - indexBufferStart);
+
                 // Add a definition for it
-                mesh.Mesh.IndexBufferIndices[0] = (ushort)definition.IndexBuffers.Count;
+                mesh.Mesh.IndexBufferIndices[0] = (short)definition.IndexBuffers.Count;
                 definition.IndexBuffers.Add(new TagStructureReference<IndexBufferDefinition>
                 {
                     Definition = new IndexBufferDefinition
                     {
                         Format = (IndexBufferFormat)Enum.Parse(typeof(IndexBufferFormat), mesh.Mesh.IndexBufferType.ToString()),
-                        Data = new TagData(indexBufferEnd - indexBufferStart, new CacheAddress(CacheAddressType.Data, indexBufferStart)),
+                        Data = new TagData(indexBufferStream.ToArray()),
                     },
                 });
             }
-            SerializeDefinitionData(serializer, definition);
+            SerializeDefinitionData(definition);
             resourceDataStream.Position = 0;
         }
 
-        private void SerializeDefinitionData(TagSerializer serializer, RenderGeometryApiResourceDefinition definition)
+        private void SerializeDefinitionData(RenderGeometryApiResourceDefinition definition)
         {
-            _model.Geometry.Resource.HaloOnlinePageableResource = new PageableResource
-            {
-                Page = new RawPage(),
-                Resource = new TagResourceGen3
-                {
-                    ResourceType = TagResourceTypeGen3.RenderGeometry,
-                    ResourceFixups = new List<TagResourceGen3.ResourceFixup>(),
-                    ResourceDefinitionFixups = new List<TagResourceGen3.ResourceDefinitionFixup>(),
-                    Unknown2 = 1
-                }
-            };
-            var context = new ResourceSerializationContext(CacheContext, _model.Geometry.Resource.HaloOnlinePageableResource);
-            serializer.Serialize(context, definition);
+            _model.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(definition);
         }
 
         private int SerializeVertexBuffer(MeshData mesh, Stream outStream)

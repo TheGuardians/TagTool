@@ -45,25 +45,15 @@ namespace TagTool.Commands.Porting
 
         public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache currentCache, GameCache portingCache)
         {
-
-
             if(currentCache.GetType() == typeof(GameCacheContextHaloOnline))
             {
                 var hoCache = currentCache as GameCacheContextHaloOnline;
                 var portTagCommand = new PortTagCommand(hoCache, portingCache);
                 context.AddCommand(portTagCommand);
                 context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));
+                context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
+                context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
             }
-
-            
-            /*
-            
-
- 
-            context.AddCommand(new PortArmorVariantCommand(cacheContext, blamCache));
-            context.AddCommand(new PortMultiplayerEventsCommand(cacheContext, blamCache));
-            context.AddCommand(new PortMultiplayerScenarioCommand(cacheContext, blamCache, portTagCommand));
-            */
         }
     }
 }

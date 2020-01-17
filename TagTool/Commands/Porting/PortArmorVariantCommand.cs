@@ -16,11 +16,11 @@ namespace TagTool.Commands.Porting
 {
     public class PortArmorVariantCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CacheFile BlamCache;
+        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCache BlamCache;
         private RenderGeometryConverter GeometryConverter { get; }
 
-        public PortArmorVariantCommand(HaloOnlineCacheContext cacheContext, CacheFile blamCache) :
+        public PortArmorVariantCommand(GameCacheContextHaloOnline cacheContext, GameCache blamCache) :
             base(true,
 
                 "PortArmorVariant",
@@ -86,7 +86,7 @@ namespace TagTool.Commands.Porting
             var variantName = args[0];
             args.RemoveAt(0);
 
-            CachedTagInstance edModeTag = null;
+            CachedTag edModeTag = null;
             var isScenery = false;
             var regionNames = new List<string>();
 
@@ -170,11 +170,11 @@ namespace TagTool.Commands.Porting
                                 variantMaterials.Add(part.MaterialIndex);
 
                         foreach (var vertexBuffer in mesh.VertexBufferIndices)
-                            if (vertexBuffer != ushort.MaxValue && !variantVertexBuffers.Contains(vertexBuffer))
+                            if (vertexBuffer != -1 && !variantVertexBuffers.Contains(vertexBuffer))
                                 variantVertexBuffers.Add(vertexBuffer);
 
                         foreach (var indexBuffer in mesh.IndexBufferIndices)
-                            if (indexBuffer != ushort.MaxValue && !variantIndexBuffers.Contains(indexBuffer))
+                            if (indexBuffer != -1 && !variantIndexBuffers.Contains(indexBuffer))
                                 variantIndexBuffers.Add(indexBuffer);
 
                         if (!variantMeshes.Contains(i))
@@ -437,7 +437,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edModeTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("mode")]);
+                        CacheContext.TagCache.Index[i] = edModeTag = new CachedTag(i, TagGroup.Instances[new Tag("mode")]);
                         break;
                     }
                 }
@@ -451,7 +451,7 @@ namespace TagTool.Commands.Porting
             //
 
             Model edHlmtDefinition = null;
-            CachedTagInstance edHlmtTag = null;
+            CachedTag edHlmtTag = null;
 
             if (isScenery)
             {
@@ -545,7 +545,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("hlmt")]);
+                        CacheContext.TagCache.Index[i] = edHlmtTag = new CachedTag(i, TagGroup.Instances[new Tag("hlmt")]);
                         break;
                     }
                 }
@@ -559,7 +559,7 @@ namespace TagTool.Commands.Porting
             //
 
             Scenery edScenDefinition = null;
-            CachedTagInstance edScenTag = null;
+            CachedTag edScenTag = null;
 
             if (isScenery)
             {
@@ -595,7 +595,7 @@ namespace TagTool.Commands.Porting
                 {
                     if (CacheContext.TagCache.Index[i] == null)
                     {
-                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTagInstance(i, TagGroup.Instances[new Tag("scen")]);
+                        CacheContext.TagCache.Index[i] = edScenTag = new CachedTag(i, TagGroup.Instances[new Tag("scen")]);
                         break;
                     }
                 }
@@ -642,7 +642,7 @@ namespace TagTool.Commands.Porting
 				case string _:
 				case ValueType _:
 					return data;
-				case CachedTagInstance tag:
+				case CachedTag tag:
 					return null;
 				case TagStructure structure:
 					return ConvertStructure(cacheStream, structure, replace);

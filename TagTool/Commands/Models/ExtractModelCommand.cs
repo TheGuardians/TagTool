@@ -92,17 +92,11 @@ namespace TagTool.Commands.Models
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, renderModel.Geometry.Resource.HaloOnlinePageableResource);
-            var resourceDefinition = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderModel.Geometry.Resource);
+            renderModel.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
-                //
-                // Extract the resource data
-                //
-
-                CacheContext.ExtractResource(renderModel.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
-
                 var modelFile = new FileInfo(modelFileName);
 
                 if (!modelFile.Directory.Exists)
@@ -111,15 +105,15 @@ namespace TagTool.Commands.Models
                 switch (fileType)
                 {
                     case "obj":
-                        ExtractObj(modelFile, renderModel, modelVariant, resourceDefinition, resourceStream);
+                        ExtractObj(modelFile, renderModel, modelVariant);
                         break;
 
                     case "amf":
-                        ExtractAmf(modelFile, renderModel, modelVariant, resourceDefinition, resourceStream);
+                        ExtractAmf(modelFile, renderModel, modelVariant);
                         break;
 
                     case "dae":
-                        ModelExtractor extractor = new ModelExtractor(CacheContext, renderModel);
+                        ModelExtractor extractor = new ModelExtractor(Cache, renderModel);
                         extractor.ExtractRenderModel();
                         extractor.ExportCollada(modelFile);
                         break;
@@ -134,7 +128,7 @@ namespace TagTool.Commands.Models
             return true;
         }
 
-        private void ExtractObj(FileInfo modelFile, RenderModel renderModel, Model.Variant modelVariant, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
+        private void ExtractObj(FileInfo modelFile, RenderModel renderModel, Model.Variant modelVariant)
         {
             using (var objFile = new StreamWriter(modelFile.Create()))
             {
@@ -170,16 +164,16 @@ namespace TagTool.Commands.Models
                         // Extract each mesh in the permutation
                         var meshIndex = renderModelPermutation.MeshIndex;
                         var meshCount = renderModelPermutation.MeshCount;
-                        var regionName = CacheContext.GetString(region.Name) ?? region.Name.ToString();
-                        var permutationName = CacheContext.GetString(permutation.Name) ?? permutation.Name.ToString();
+                        var regionName = Cache.StringTable.GetString(region.Name) ?? region.Name.ToString();
+                        var permutationName = Cache.StringTable.GetString(permutation.Name) ?? permutation.Name.ToString();
 
                         Console.WriteLine("Extracting {0} mesh(es) for {1}:{2}...", meshCount, regionName, permutationName);
 
                         for (var i = 0; i < meshCount; i++)
                         {
                             // Create a MeshReader for the mesh and pass it to the obj extractor
-                            var meshReader = new MeshReader(CacheContext.Version, renderModel.Geometry.Meshes[meshIndex + i], resourceDefinition);
-                            objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                            var meshReader = new MeshReader(Cache.Version, renderModel.Geometry.Meshes[meshIndex + i]);
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor);
                         }
                     }
                 }
@@ -191,8 +185,8 @@ namespace TagTool.Commands.Models
                     foreach (var mesh in renderModel.Geometry.Meshes)
                     {
                         // Create a MeshReader for the mesh and pass it to the obj extractor
-                        var meshReader = new MeshReader(CacheContext.Version, mesh, resourceDefinition);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, resourceStream);
+                        var meshReader = new MeshReader(Cache.Version, mesh);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
                     }
                 }
 
@@ -200,7 +194,7 @@ namespace TagTool.Commands.Models
             }
         }
 
-        private void ExtractAmf(FileInfo modelFile, RenderModel renderModel, Model.Variant modelVariant, RenderGeometryApiResourceDefinition resourceDefinition, Stream resourceStream)
+        private void ExtractAmf(FileInfo modelFile, RenderModel renderModel, Model.Variant modelVariant)
         {
             using (var amfStream = modelFile.Create())
             using (var amfWriter = new EndianWriter(amfStream))
@@ -240,7 +234,7 @@ namespace TagTool.Commands.Models
                 
                 amfWriter.Write("AMF!".ToCharArray());
                 amfWriter.Write(2.0f); //format version
-                amfWriter.Write((CacheContext.GetString(renderModel.Name) + "\0").ToCharArray());
+                amfWriter.Write((Cache.StringTable.GetString(renderModel.Name) + "\0").ToCharArray());
 
                 amfWriter.Write(renderModel.Nodes.Count);
                 headerAddressList.Add((int)amfWriter.BaseStream.Position);
@@ -262,7 +256,7 @@ namespace TagTool.Commands.Models
 
                 foreach (var node in renderModel.Nodes)
                 {
-                    amfWriter.Write((CacheContext.GetString(node.Name) + "\0").ToCharArray());
+                    amfWriter.Write((Cache.StringTable.GetString(node.Name) + "\0").ToCharArray());
                     amfWriter.Write(node.ParentNode);
                     amfWriter.Write(node.FirstChildNode);
                     amfWriter.Write(node.NextSiblingNode);
@@ -282,7 +276,7 @@ namespace TagTool.Commands.Models
 
                 foreach (var group in renderModel.MarkerGroups)
                 {
-                    amfWriter.Write((CacheContext.GetString(group.Name) + "\0").ToCharArray());
+                    amfWriter.Write((Cache.StringTable.GetString(group.Name) + "\0").ToCharArray());
                     amfWriter.Write(group.Markers.Count);
                     markerAddressList.Add((int)amfWriter.BaseStream.Position);
                     amfWriter.Write(0);
@@ -322,7 +316,7 @@ namespace TagTool.Commands.Models
                     if (variantPermutations.Count == 0)
                         continue;
 
-                    amfWriter.Write((CacheContext.GetString(region.Name) + "\0").ToCharArray());
+                    amfWriter.Write((Cache.StringTable.GetString(region.Name) + "\0").ToCharArray());
                     amfWriter.Write(variantPermutations.Count);
                     permAddressList.Add((int)amfWriter.BaseStream.Position);
                     amfWriter.Write(0);
@@ -330,474 +324,6 @@ namespace TagTool.Commands.Models
 
                 var vertAddressList = new List<int>();
                 var vertValueList = new List<int>();
-                /*
-                foreach (var variantRegion in modelVariant.Regions)
-                {
-                    if (variantRegion.RenderModelRegionIndex == -1)
-                        continue;
-
-                    var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
-                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
-
-                    if (variantPermutations.Count == 0)
-                        continue;
-
-                    permValueList.Add((int)amfWriter.BaseStream.Position);
-
-                    foreach (var permutation in variantPermutations)
-                    {
-                        if (permutation.MeshIndex == -1)
-                            continue;
-
-                        var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex];
-
-                        amfWriter.Write((CacheContext.GetString(permutation.Name) + "\0").ToCharArray());
-                        amfWriter.Write((byte)(mesh.RigidNodeIndex == -1 ? 1 : 0));
-                        amfWriter.Write((byte)mesh.RigidNodeIndex);
-
-                        var vertexCount = 0;
-                        var indexCount = 0;
-                        foreach (var part in mesh.Parts)
-                        {
-                            vertexCount += part.VertexCount;
-                            indexCount += part.IndexCount;
-                        }
-
-                        amfWriter.Write(vertexCount);
-                        vertAddressList.Add((int)amfWriter.BaseStream.Position);
-                        amfWriter.Write(0);
-
-                        amfWriter.Write(indexCount);
-                        indxAddressList.Add((int)amfWriter.BaseStream.Position);
-                        amfWriter.Write(0);
-
-                        amfWriter.Write(mesh.SubParts.Count);
-                        meshAddressList.Add((int)amfWriter.BaseStream.Position);
-                        amfWriter.Write(0);
-
-                        amfWriter.Write(float.NaN);
-                    }
-                }
-
-                foreach (var variantRegion in modelVariant.Regions)
-                {
-                    if (variantRegion.RenderModelRegionIndex == -1)
-                        continue;
-
-                    var region = renderModel.Regions[variantRegion.RenderModelRegionIndex];
-                    var variantPermutations = region.Permutations.Where(i => variantRegion.Permutations.Find(j => j.Name == i.Name) != null).ToList();
-
-                    if (variantPermutations.Count == 0)
-                        continue;
-
-                    foreach (var permutation in variantPermutations)
-                    {
-                        if (permutation.MeshIndex == -1)
-                            continue;
-
-                        var mesh = renderModel.Geometry.Meshes[permutation.MeshIndex];
-                        
-                        if (dupeDic.TryGetValue(mesh.VertexBuffers[0], out int address))
-                        {
-                            vertValueList.Add(address);
-                            continue;
-                        }
-                        else
-                            dupeDic.Add(mesh.VertexBuffers[0], (int)amfWriter.BaseStream.Position);
-
-                        var hasNodes = mesh.RigidNodeIndex == -1;
-
-                        vertValueList.Add((int)amfWriter.BaseStream.Position);
-
-                        foreach (Vertex vert in part.Vertices)
-                        {
-                            vert.TryGetValue("position", 0, out v);
-                            amfWriter.Write(v.Data.x * 100);
-                            amfWriter.Write(v.Data.y * 100);
-                            amfWriter.Write(v.Data.z * 100);
-
-                            vert.TryGetValue("normal", 0, out v);
-                            amfWriter.Write(v.Data.i);
-                            amfWriter.Write(v.Data.j);
-                            amfWriter.Write(v.Data.k);
-
-                            vert.TryGetValue("texcoords", 0, out v);
-                            amfWriter.Write(v.Data.x);
-                            amfWriter.Write(v.Data.y);
-
-                            if (hasNodes)
-                            {
-                                VertexValue i, w;
-                                vert.TryGetValue("blendindices", 0, out i);
-                                vert.TryGetValue("blendweight", 0, out w);
-                                int count = 0;
-                                if (w.Data.a > 0)
-                                {
-                                    amfWriter.Write((byte)i.Data.a);
-                                    count++;
-                                }
-                                if (w.Data.b > 0)
-                                {
-                                    amfWriter.Write((byte)i.Data.b);
-                                    count++;
-                                }
-                                if (w.Data.c > 0)
-                                {
-                                    amfWriter.Write((byte)i.Data.c);
-                                    count++;
-                                }
-                                if (w.Data.d > 0)
-                                {
-                                    amfWriter.Write((byte)i.Data.d);
-                                    count++;
-                                }
-
-                                if (count == 0)
-                                {
-                                    amfWriter.Write((byte)0);
-                                    amfWriter.Write((byte)255);
-                                    amfWriter.Write(0);
-                                    continue;
-                                    //throw new Exception("no weights on a weighted node. report ");
-                                }
-
-                                if (count != 4) amfWriter.Write((byte)255);
-
-                                if (w.Data.a > 0) amfWriter.Write(w.Data.a);
-                                if (w.Data.b > 0) amfWriter.Write(w.Data.b);
-                                if (w.Data.c > 0) amfWriter.Write(w.Data.c);
-                                if (w.Data.d > 0) amfWriter.Write(w.Data.d);
-                            }
-                        }
-                    }
-                }
-
-                foreach (var perm in permutations)
-                {
-                    var part = renderModel.ModelSections[perm.PieceIndex];
-
-                    int address;
-                    if (dupeDic.TryGetValue(part.VertsIndex, out address))
-                    {
-                        vertValueList.Add(address);
-                        continue;
-                    }
-                    else
-                        dupeDic.Add(part.VertsIndex, (int)amfWriter.BaseStream.Position);
-
-                    VertexValue v;
-                    bool hasNodes = part.Vertices[0].TryGetValue("blendindices", 0, out v) && part.NodeIndex == 255;
-                    
-                    vertValueList.Add((int)amfWriter.BaseStream.Position);
-
-                    foreach (Vertex vert in part.Vertices)
-                    {
-                        vert.TryGetValue("position", 0, out v);
-                        amfWriter.Write(v.Data.x * 100);
-                        amfWriter.Write(v.Data.y * 100);
-                        amfWriter.Write(v.Data.z * 100);
-
-                        vert.TryGetValue("normal", 0, out v);
-                        amfWriter.Write(v.Data.i);
-                        amfWriter.Write(v.Data.j);
-                        amfWriter.Write(v.Data.k);
-
-                        vert.TryGetValue("texcoords", 0, out v);
-                        amfWriter.Write(v.Data.x);
-                        amfWriter.Write(v.Data.y);
-                        
-                        if (hasNodes)
-                        {
-                            VertexValue i, w;
-                            vert.TryGetValue("blendindices", 0, out i);
-                            vert.TryGetValue("blendweight", 0, out w);
-                            int count = 0;
-                            if (w.Data.a > 0)
-                            {
-                                amfWriter.Write((byte)i.Data.a);
-                                count++;
-                            }
-                            if (w.Data.b > 0)
-                            {
-                                amfWriter.Write((byte)i.Data.b);
-                                count++;
-                            }
-                            if (w.Data.c > 0)
-                            {
-                                amfWriter.Write((byte)i.Data.c);
-                                count++;
-                            }
-                            if (w.Data.d > 0)
-                            {
-                                amfWriter.Write((byte)i.Data.d);
-                                count++;
-                            }
-
-                            if (count == 0)
-                            {
-                                amfWriter.Write((byte)0);
-                                amfWriter.Write((byte)255);
-                                amfWriter.Write(0);
-                                continue;
-                                //throw new Exception("no weights on a weighted node. report ");
-                            }
-
-                            if (count != 4) amfWriter.Write((byte)255);
-
-                            if (w.Data.a > 0) amfWriter.Write(w.Data.a);
-                            if (w.Data.b > 0) amfWriter.Write(w.Data.b);
-                            if (w.Data.c > 0) amfWriter.Write(w.Data.c);
-                            if (w.Data.d > 0) amfWriter.Write(w.Data.d);
-                        }
-                    }
-                }
-                #endregion
-
-                dupeDic.Clear();
-
-                #region Indices
-                foreach (var perm in permutations)
-                {
-                    var part = renderModel.ModelSections[perm.PieceIndex];
-
-                    int address;
-                    if (dupeDic.TryGetValue(part.FacesIndex, out address))
-                    {
-                        indxValueList.Add(address);
-                        continue;
-                    }
-                    else
-                        dupeDic.Add(part.FacesIndex, (int)amfWriter.BaseStream.Position);
-
-                    indxValueList.Add((int)amfWriter.BaseStream.Position);
-
-                    foreach (var submesh in part.Submeshes)
-                    {
-                        var indices = GetTriangleList(part.Indices, submesh.FaceIndex, submesh.FaceCount, renderModel.IndexInfoList[part.FacesIndex].FaceFormat);
-                        foreach (var index in indices)
-                        {
-                            if (part.Vertices.Length > 0xFFFF) amfWriter.Write(index);
-                            else amfWriter.Write((ushort)index);
-                        }
-                    }
-
-                }
-                #endregion
-                #region Submeshes
-                foreach (var perm in permutations)
-                {
-                    var part = renderModel.ModelSections[perm.PieceIndex];
-                    meshValueList.Add((int)amfWriter.BaseStream.Position);
-                    int tCount = 0;
-                    foreach (var mesh in part.Submeshes)
-                    {
-
-                        int sCount = GetTriangleList(part.Indices, mesh.FaceIndex, mesh.FaceCount, renderModel.IndexInfoList[part.FacesIndex].FaceFormat).Count / 3;
-
-                        amfWriter.Write((short)mesh.ShaderIndex);
-                        amfWriter.Write(tCount);
-                        amfWriter.Write(sCount);
-
-                        tCount += sCount;
-                    }
-                }
-                #endregion
-                #region Shaders
-                headerValueList.Add((int)amfWriter.BaseStream.Position);
-                foreach (var shaderBlock in renderModel.Shaders)
-                {
-                    //skip null shaders
-                    if (shaderBlock.tagID == -1)
-                    {
-                        amfWriter.Write("null\0".ToCharArray());
-                        for (int i = 0; i < 8; i++)
-                            amfWriter.Write("null\0".ToCharArray());
-
-                        for (int i = 0; i < 4; i++)
-                            amfWriter.Write(0);
-
-                        amfWriter.Write(Convert.ToByte(false));
-                        amfWriter.Write(Convert.ToByte(false));
-
-                        continue;
-                    }
-
-                    var rmshTag = Cache.IndexItems.GetItemByID(shaderBlock.tagID);
-                    var rmsh = DefinitionsManager.rmsh(Cache, rmshTag);
-                    string shaderName = rmshTag.Filename.Substring(rmshTag.Filename.LastIndexOf("\\") + 1) + "\0";
-                    string[] paths = new string[8] { "null\0", "null\0", "null\0", "null\0", "null\0", "null\0", "null\0", "null\0" };
-                    float[] uTiles = new float[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-                    float[] vTiles = new float[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-                    int[] tints = new int[4] { -1, -1, -1, -1 };
-                    bool isTransparent = false;
-                    bool ccOnly = false;
-
-                    //Halo4 fucked this up
-                    if (Cache.Version >= DefinitionSet.Halo3Beta && Cache.Version <= DefinitionSet.HaloReachRetail)
-                    {
-                        var rmt2Tag = Cache.IndexItems.GetItemByID(rmsh.Properties[0].TemplateTagID);
-                        var rmt2 = DefinitionsManager.rmt2(Cache, rmt2Tag);
-
-                        for (int i = 0; i < rmt2.UsageBlocks.Count; i++)
-                        {
-                            var s = rmt2.UsageBlocks[i].Usage;
-                            var bitmTag = Cache.IndexItems.GetItemByID(rmsh.Properties[0].ShaderMaps[i].BitmapTagID);
-
-                            switch (s)
-                            {
-                                case "base_map":
-                                    paths[0] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "detail_map":
-                                case "detail_map_overlay":
-                                    paths[1] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "change_color_map":
-                                    paths[2] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "bump_map":
-                                    paths[3] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "bump_detail_map":
-                                    paths[4] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "self_illum_map":
-                                    paths[5] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                                case "specular_map":
-                                    paths[6] = (bitmTag != null) ? bitmTag.Filename + "\0" : "null\0";
-                                    break;
-                            }
-                        }
-
-                        for (int i = 0; i < rmt2.ArgumentBlocks.Count; i++)
-                        {
-                            var s = rmt2.ArgumentBlocks[i].Argument;
-
-                            switch (s)
-                            {
-                                //case "env_tint_color":
-                                //case "fresnel_color":
-                                case "albedo_color":
-                                    tints[0] = i;
-                                    break;
-
-                                case "self_illum_color":
-                                    tints[1] = i;
-                                    break;
-
-                                case "specular_tint":
-                                    tints[2] = i;
-                                    break;
-                            }
-                        }
-
-                        short[] tiles = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 };
-
-                        foreach (var map in rmsh.Properties[0].ShaderMaps)
-                        {
-                            var bitmTag = Cache.IndexItems.GetItemByID(map.BitmapTagID);
-
-                            for (int i = 0; i < 8; i++)
-                            {
-                                if (bitmTag.Filename + "\0" != paths[i]) continue;
-
-                                tiles[i] = (short)map.TilingIndex;
-                            }
-                        }
-
-                        for (int i = 0; i < 8; i++)
-                        {
-                            try
-                            {
-                                uTiles[i] = rmsh.Properties[0].Tilings[tiles[i]].UTiling;
-                                vTiles[i] = rmsh.Properties[0].Tilings[tiles[i]].VTiling;
-                            }
-                            catch { }
-                        }
-                    }
-                    else
-                        try
-                        {
-                            paths[0] = Cache.IndexItems.GetItemByID(rmsh.Properties[0].ShaderMaps[0].BitmapTagID).Filename + "\0";
-                            uTiles[0] = rmsh.Properties[0].Tilings[rmsh.Properties[0].ShaderMaps[0].TilingIndex].UTiling;
-                            vTiles[0] = rmsh.Properties[0].Tilings[rmsh.Properties[0].ShaderMaps[0].TilingIndex].VTiling;
-                        }
-                        catch { }
-
-                    if (rmshTag.ClassCode != "rmsh" && rmshTag.ClassCode != "mat")
-                    {
-                        isTransparent = true;
-                        if (paths[0] == "null\0" && paths[2] != "null\0")
-                            ccOnly = true;
-                    }
-
-                    amfWriter.Write(shaderName.ToCharArray());
-                    for (int i = 0; i < 8; i++)
-                    {
-                        amfWriter.Write(paths[i].ToCharArray());
-                        if (paths[i] != "null\0")
-                        {
-                            amfWriter.Write(uTiles[i]);
-                            amfWriter.Write(vTiles[i]);
-                        }
-                    }
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (tints[i] == -1)
-                        {
-                            amfWriter.Write(0);
-                            continue;
-                        }
-
-                        amfWriter.Write((byte)(255f * rmsh.Properties[0].Tilings[tints[i]].UTiling));
-                        amfWriter.Write((byte)(255f * rmsh.Properties[0].Tilings[tints[i]].VTiling));
-                        amfWriter.Write((byte)(255f * rmsh.Properties[0].Tilings[tints[i]].Unknown0));
-                        amfWriter.Write((byte)(255f * rmsh.Properties[0].Tilings[tints[i]].Unknown1));
-                    }
-
-                    amfWriter.Write(Convert.ToByte(isTransparent));
-                    amfWriter.Write(Convert.ToByte(ccOnly));
-                }
-                #endregion
-                #region Write Addresses
-                for (int i = 0; i < headerAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = headerAddressList[i];
-                    amfWriter.Write(headerValueList[i]);
-                }
-
-                for (int i = 0; i < markerAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = markerAddressList[i];
-                    amfWriter.Write(markerValueList[i]);
-                }
-
-                for (int i = 0; i < permAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = permAddressList[i];
-                    amfWriter.Write(permValueList[i]);
-                }
-
-                for (int i = 0; i < vertAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = vertAddressList[i];
-                    amfWriter.Write(vertValueList[i]);
-                }
-
-                for (int i = 0; i < indxAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = indxAddressList[i];
-                    amfWriter.Write(indxValueList[i]);
-                }
-
-                for (int i = 0; i < meshAddressList.Count; i++)
-                {
-                    amfWriter.BaseStream.Position = meshAddressList[i];
-                    amfWriter.Write(meshValueList[i]);
-                }
-                #endregion*/
             }
         }
     }

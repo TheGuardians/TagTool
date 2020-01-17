@@ -4,16 +4,17 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.IO;
 
 namespace TagTool.Commands.Models
 {
     class ExtractBitmapsCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
-        private CachedTagInstance Tag { get; }
+        private GameCache CacheContext { get; }
+        private CachedTag Tag { get; }
         private Model Definition { get; }
 
-        public ExtractBitmapsCommand(HaloOnlineCacheContext cacheContext, CachedTagInstance tag, Model definition)
+        public ExtractBitmapsCommand(GameCache cacheContext, CachedTag tag, Model definition)
             : base(true,
                   
                   "ExtractBitmaps",
@@ -49,7 +50,7 @@ namespace TagTool.Commands.Models
                     return false;
             }
 
-            using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
+            using (var cacheStream = CacheContext.TagCache.OpenTagCacheRead())
             {
                 var renderModel = CacheContext.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
 
@@ -65,8 +66,6 @@ namespace TagTool.Commands.Models
                         {
                             var mapTemplate = template.SamplerArguments[i];
 
-                            var extractor = new BitmapDdsExtractor(CacheContext);
-
                             var bitmap = CacheContext.Deserialize<Bitmap>(cacheStream, property.ShaderMaps[i].Bitmap);
                             var ddsOutDir = directory;
 
@@ -78,12 +77,17 @@ namespace TagTool.Commands.Models
 
                             for (var j = 0; j < bitmap.Images.Count; j++)
                             {
-                                var outPath = Path.Combine(ddsOutDir, CacheContext.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
+                                var outPath = Path.Combine(ddsOutDir, CacheContext.StringTable.GetString(mapTemplate.Name) + "_" + property.ShaderMaps[i].Bitmap.Index.ToString("X4")) + ".dds";
 
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                                    extractor.ExtractDds(bitmap, j, outStream);
+                                using(var writer = new EndianWriter(outStream))
+                                {
+                                    var ddsFile = BitmapExtractor.ExtractBitmap(CacheContext, bitmap, j);
+                                    ddsFile.Write(writer);
+                                }
+                                    
 
-                                Console.WriteLine($"Bitmap {i} ({CacheContext.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
+                                Console.WriteLine($"Bitmap {i} ({CacheContext.StringTable.GetString(mapTemplate.Name)}): {property.ShaderMaps[i].Bitmap.Group.Tag} 0x{property.ShaderMaps[i].Bitmap.Index:X4} extracted to '{outPath}'");
                             }
                         }
                     }

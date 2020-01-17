@@ -12,10 +12,10 @@ namespace TagTool.Commands.RenderModels
 {
     class ExtractModelCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private RenderModel Definition { get; }
 
-        public ExtractModelCommand(HaloOnlineCacheContext cacheContext, RenderModel model)
+        public ExtractModelCommand(GameCache cacheContext, RenderModel model)
             : base(true,
 
                   "ExtractModel",
@@ -26,7 +26,7 @@ namespace TagTool.Commands.RenderModels
                   "Extracts a variant of the render model to a file. \n" +
                   "Supported file types: obj, dae")
         {
-            CacheContext = cacheContext;
+            Cache = cacheContext;
             Definition = model;
         }
         
@@ -71,23 +71,17 @@ namespace TagTool.Commands.RenderModels
             // Deserialize the resource definition
             //
 
-            var resourceContext = new ResourceSerializationContext(CacheContext, Definition.Geometry.Resource.HaloOnlinePageableResource);
-            var resourceDefinition = CacheContext.Deserializer.Deserialize<RenderGeometryApiResourceDefinition>(resourceContext);
+            var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
+            Definition.Geometry.SetResourceBuffers(definition);
 
             using (var resourceStream = new MemoryStream())
             {
-                //
-                // Extract the resource data
-                //
-
-                CacheContext.ExtractResource(Definition.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
-
                 var modelFile = new FileInfo(modelFileName);
 
                 if (!modelFile.Directory.Exists)
                     modelFile.Directory.Create();
 
-                ModelExtractor extractor = new ModelExtractor(CacheContext, Definition);
+                ModelExtractor extractor = new ModelExtractor(Cache, Definition);
                 extractor.ExtractRenderModel(variantName);
 
                 switch (fileType)
