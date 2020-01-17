@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using TagTool.Cache;
 using TagTool.Commands.Editing;
 using TagTool.Common;
-using TagTool.Tags;
+using System.IO;
 
 namespace TagTool.Commands.Tags
 {
@@ -30,7 +30,7 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 2)
+            if (args.Count < 1)
                 return false;
 
             var isConst = false;
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Tags
                 isConst = true;
             }
 
-            if (args.Count < 2)
+            if (args.Count < 1)
                 return false;
 
             if (!Cache.TryParseGroupTag(args[0], out var groupTag))
@@ -55,13 +55,18 @@ namespace TagTool.Commands.Tags
             var startFilter = "";
             var endFilter = "";
             var filter = "";
+            var filename = "";
 
             string pattern = null;
 
-            while (args[0].EndsWith(":"))
+            while (args.Count > 0 && args[0].EndsWith(":"))
             {
                 switch (args[0].ToLower())
                 {
+                    case "in_file:":
+                        filename = args[1];
+                        args.RemoveRange(0, 2);
+                        break;
                     case "regex:":
                         if (args.Count < 3)
                             return false;
@@ -103,11 +108,44 @@ namespace TagTool.Commands.Tags
                 }
             }
 
+            var commandsToExecute = new List<List<string>>();
+
+            // if no command is given, keep reading commands from stdin until an empty line encountered
+            if (args.Count < 1)
+            {
+                string line;
+                while (!string.IsNullOrWhiteSpace(line = Console.ReadLine()))
+                {
+                    var commandsArgs = ArgumentParser.ParseCommand(line, out string redirectFile);
+                    commandsToExecute.Add(commandsArgs);
+                }
+            }
+            else
+            {
+                commandsToExecute.Add(args);
+            }
+
+            IEnumerable<CachedTag> tags = null;
+
+            // if a file is given use that as the source for tags
+            if (!string.IsNullOrWhiteSpace(filename))
+            {
+                var tagsList = new List<CachedTag>();
+                foreach (var line in File.ReadAllLines(filename))
+                    tagsList.Add(Cache.GetTag(line));
+
+                tags = tagsList;
+            }
+            else
+            {
+                tags = Cache.TagCache.NonNull();
+            }
+
             var rootContext = ContextStack.Context;
 
             using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
             {
-                foreach (var instance in Cache.TagCache.TagTable)
+                foreach (var instance in tags)
                 {
                     if (instance == null || (groupTag != Tag.Null && !instance.IsInGroup(groupTag)))
                         continue;

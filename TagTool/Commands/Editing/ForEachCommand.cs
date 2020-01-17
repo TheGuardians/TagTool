@@ -111,7 +111,7 @@ namespace TagTool.Commands.Editing
             string toName = null;
             int? to = null;
 
-            while (true)
+            while (args.Count > 1)
             {
                 var found = false;
 
@@ -147,7 +147,24 @@ namespace TagTool.Commands.Editing
             }
 
             blockName = args[0];
-            args = args.Skip(1).ToList();
+            args.RemoveRange(0, 1);
+
+            var commandsToExecute = new List<List<string>>();
+
+            // if no command is given, keep reading commands from stdin until an empty line encountered
+            if (args.Count < 1)
+            {
+                string line;
+                while (!string.IsNullOrWhiteSpace(line = Console.ReadLine()))
+                {
+                    var commandsArgs = ArgumentParser.ParseCommand(line, out string redirectFile);
+                    commandsToExecute.Add(commandsArgs);
+                }
+            }
+            else
+            {
+                commandsToExecute.Add(args);
+            }
 
             for (var i = (from ?? 0);
                 i < (to.HasValue ? to.Value + 1 : fieldValue.Count);
@@ -167,7 +184,8 @@ namespace TagTool.Commands.Editing
                 var label = GetLabel(fieldValue, i);
 
                 Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
-                ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
+                foreach (var command in commandsToExecute)
+                    ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
             }
 
             while (ContextStack.Context != previousContext)
