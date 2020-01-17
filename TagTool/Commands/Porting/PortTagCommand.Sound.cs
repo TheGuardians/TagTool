@@ -417,5 +417,34 @@ namespace TagTool.Commands.Porting
 
             return soundMix;
         }
+
+        // HO uses ODST classes, with H3 structure
+        private SoundClasses ConvertSoundClasses(SoundClasses sncl, CacheVersion version)
+        {
+            // setup class with "default" values
+            var sClass = new SoundClasses.Class()
+            {
+                MaxSoundsPerTag = 4,
+                MaxSoundsPerObject = 1,
+                PreemptionTime = 100,
+                InternalFlags = 881,
+                Priority = 5,
+                DistanceBoundsMin = 8.0f,
+                DistanceBoundsMax = 120.0f,
+                TransmissionMultiplier = 1.0f
+            };
+
+            // hud class, unique to HO. the above values seem to be okay
+            sncl.Classes.Insert(50, sClass);
+
+            if (version <= CacheVersion.Halo3Retail)
+            {
+                // add classes missing from H3
+                for (int i = sncl.Classes.Count; i < 65; i++)
+                    sncl.Classes.Add(sClass);
+            }
+
+            return sncl;
+        }
     }
 }

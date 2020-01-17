@@ -187,15 +187,15 @@ namespace TagTool.Commands.Porting
 				case "shit": // use the global shit tag until shit tags are port-able
 					if (CacheContext.TryGetTag<ShieldImpact>(blamTag.Name, out var shitInstance) && !FlagIsSet(PortingFlags.Replace))
                         return shitInstance;
-                    if (BlamCache.Version < CacheVersion.HaloReach)
+                    if (BlamCache.Version < CacheVersion.HaloOnline106708)
                         return CacheContext.GetTag<ShieldImpact>(@"fx\shield_impacts\spartan_shield1");
                     break;
 
-				case "sncl": // always use the default sncl tag
-					return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
+                case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
+                    return CacheContext.GetTag<SoundClasses>(@"sound\sound_classes");
 
-				case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
-					return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
+                case "rmw ": // Until water vertices port, always null water shaders to prevent the screen from turning blue. Can return 0x400F when fixed
+                    return CacheContext.GetTag<ShaderWater>(@"levels\multi\riverworld\shaders\riverworld_water_rough");
 
 				case "rmcs": // there are no rmcs tags in ms23, disable completely for now
                     return CacheContext.GetTag<Shader>(@"shaders\invalid");
@@ -650,8 +650,12 @@ namespace TagTool.Commands.Porting
 					blamDefinition = ConvertSound(cacheStream, blamCacheStream, resourceStreams, sound, blamTag.Name);
 					break;
 
-				case SoundLooping lsnd:
-					blamDefinition = ConvertSoundLooping(lsnd);
+                case SoundClasses sncl:
+                    blamDefinition = ConvertSoundClasses(sncl, BlamCache.Version);
+                    break;
+
+                case SoundLooping lsnd:
+                    blamDefinition = ConvertSoundLooping(lsnd);
 					break;
 
 				case SoundMix snmx:
