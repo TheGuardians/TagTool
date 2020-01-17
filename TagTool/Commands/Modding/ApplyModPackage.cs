@@ -26,6 +26,8 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<string, CachedTagInstance> CacheTagsByName;
 
+        private Dictionary<StringId, StringId> StringIdMapping;
+
         public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
             base(false,
 
@@ -53,6 +55,7 @@ namespace TagTool.Commands.Modding
             }
 
             TagMapping = new Dictionary<int, int>();
+            StringIdMapping = new Dictionary<StringId, StringId>();
 
             // build dictionary of names to tag instance for faster lookups
             CacheTagsByName = CacheContext.TagCache.Index
@@ -65,9 +68,17 @@ namespace TagTool.Commands.Modding
 
             var modPackage = new ModPackage(new FileInfo(filePath));
 
-            for (int i = 0; i < modPackage.Tags.Index.Count; i++)
+            var cacheIndex = 0; // Only apply cache at index 0 for now
+
+            if(modPackage.Header.Version != ModPackageVersion.MultiCache)
             {
-                var modTag = modPackage.Tags.Index[i];
+                Console.WriteLine($"Wrong mod package version {modPackage.Header.Version.ToString()}");
+                return true;
+            }
+
+            for (int i = 0; i < modPackage.TagCaches[cacheIndex].Index.Count; i++)
+            {
+                var modTag = modPackage.TagCaches[cacheIndex].Index[i];
 
                 if (modTag != null)
                 {
@@ -101,16 +112,36 @@ namespace TagTool.Commands.Modding
             }
 
             // apply .campaign file
+            if(modPackage.CampaignFileStream != null && modPackage.CampaignFileStream.Length > 0)
+            {
+                var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
+                var campaignFile = new FileInfo(campaignFilepath);
+                using (var campaignFileStream = campaignFile.OpenWrite())
+                {
+                    modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                }
+            }
+            
+            // apply fonts
+            if(modPackage.FontPackage != null && modPackage.FontPackage.Length > 0)
+            {
+                var fontFilePath = $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin";
+                var fontFile = new FileInfo(fontFilePath);
+                using (var fontFileStream = fontFile.OpenWrite())
+                {
+                    modPackage.FontPackage.CopyTo(fontFileStream);
+                }
+            }
+            
 
-            var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
-            var campaignFile = new FileInfo(campaignFilepath);
-            var campaignFileStream = campaignFile.OpenWrite();
-            modPackage.CampaignFileStream.CopyTo(campaignFileStream);
-            campaignFileStream.Close();
 
             CacheStream.Close();
             CacheStream.Dispose();
             CacheContext.SaveTagNames();
+
+            using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
+                CacheContext.StringIdCache.Save(stringIdCacheStream);
+
             return true;
         }
 
@@ -164,7 +195,7 @@ namespace TagTool.Commands.Modding
 
                 TagMapping.Add(modTag.Index, newTag.Index);
                 var definitionType = TagDefinition.Find(modTag.Group.Tag);
-                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagsStream, CacheContext, modPack, modTag), definitionType);
+                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, modTag), definitionType);
                 tagDefinition = ConvertData(modPack, tagDefinition);
 
                 if (definitionType == typeof(ForgeGlobalsDefinition))
@@ -192,6 +223,9 @@ namespace TagTool.Commands.Modding
 
             switch (data)
             {
+                case StringId _:
+                    return ConvertStringId(modPack, (StringId)data);
+
                 case null:
                 case string _:
                 case ValueType _:
@@ -204,9 +238,33 @@ namespace TagTool.Commands.Modding
                     return ConvertCollection(modPack, collection);
                 case CachedTagInstance tag:
                     return ConvertCachedTagInstance(modPack, tag);
+                
+
             }
 
             return data;
+        }
+
+        private StringId ConvertStringId(ModPackage modPack, StringId stringId)
+        {
+            if (StringIdMapping.ContainsKey(stringId))
+                return StringIdMapping[stringId];
+            else
+            {
+                StringId cacheStringId;
+                var modString = modPack.StringTable.GetString(stringId);
+                var cacheStringTest = CacheContext.StringIdCache.GetString(stringId);
+
+                if (cacheStringTest != null && modString == cacheStringTest)            // check if base cache contains the exact same id with matching strings
+                    cacheStringId = stringId;
+                else if (CacheContext.StringIdCache.Contains(modString))                // try to find the string among all stringids
+                    cacheStringId = CacheContext.StringIdCache.GetStringId(modString);
+                else                                                                    // add new stringid
+                    cacheStringId = CacheContext.StringIdCache.AddString(modString, CacheContext.Version);
+
+                StringIdMapping[stringId] = cacheStringId;
+                return cacheStringId;
+            }
         }
 
         private PageableResource ConvertPageableResource(ModPackage modPack, PageableResource resource)
@@ -352,7 +410,7 @@ namespace TagTool.Commands.Modding
             if (tagIndex == -1)
                 return;
 
-            var tag = ConvertCachedTagInstance(modPack, modPack.Tags.Index[tagIndex]);
+            var tag = ConvertCachedTagInstance(modPack, modPack.TagCaches[0].Index[tagIndex]);
             expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
         }
     }

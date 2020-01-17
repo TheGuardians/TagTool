@@ -26,7 +26,7 @@ namespace TagTool.Commands.Modding
                 "ExportModPackage",
                 "",
 
-                "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] <Package File>",
+                "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] [FontPackageFile] <Package File>",
 
                 "")
         {
@@ -70,6 +70,11 @@ namespace TagTool.Commands.Modding
                         Options |= ExportOptions.CampaignFile;
                         break;
 
+                    case "fontpackage":
+                    case "fontpackagefile":
+                        Options |= ExportOptions.FontPackage;
+                        break;
+
                     default:
                         Console.WriteLine($"Invalid argument: {arg}");
                         break;
@@ -85,8 +90,13 @@ namespace TagTool.Commands.Modding
             // Process options and create mod package
             //
 
-            CacheContext.CreateTagCache(ModPackage.TagsStream);
-            ModPackage.Tags = new TagCache(ModPackage.TagsStream, new Dictionary<int, string>());
+            // assign everything to the first cache for now
+
+            var tagStream = ModPackage.TagCachesStreams[0];
+            ModPackage.CacheNames.Add("default");
+
+            CacheContext.CreateTagCache(tagStream);
+            ModPackage.TagCaches[0] = new TagCache(tagStream, new Dictionary<int, string>());
 
             CacheContext.CreateResourceCache(ModPackage.ResourcesStream);
             ModPackage.Resources = new ResourceCache(ModPackage.ResourcesStream);
@@ -218,14 +228,21 @@ namespace TagTool.Commands.Modding
                 }
             }
 
+            if (Options.HasFlag(ExportOptions.FontPackage))
+            {
+                Console.WriteLine("Using fonts\\font_package.bin");
+                AddFontPackage();
+            }
+
             //
             // Use the tag list collected to create new mod package
             //
 
             Console.WriteLine("Building...");
 
+            AddStringIds();
             AddTags(tagIndices);
-
+            
             ModPackage.Save(new FileInfo(packageName));
 
             Console.WriteLine("Done!");
@@ -242,6 +259,7 @@ namespace TagTool.Commands.Modding
             TagBounds = 1 << 2,
             MapFiles = 1 << 3,
             CampaignFile = 1 << 4,
+            FontPackage = 1 << 5
         }
 
         private void CreateDescription()
@@ -263,6 +281,11 @@ namespace TagTool.Commands.Modding
 
         private void AddTags(HashSet<int> tagIndices)
         {
+            // define current cache tags, names
+            var modTagCache = ModPackage.TagCaches[0];
+            var modTagNames = ModPackage.TagCacheNames[0];
+            var modTagStream = ModPackage.TagCachesStreams[0];
+
             using (var srcTagStream = CacheContext.OpenTagCacheRead())
             {
                 var resourceIndices = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>
@@ -307,21 +330,21 @@ namespace TagTool.Commands.Modding
 
                     if (srcTag == null)
                     {
-                        ModPackage.Tags.AllocateTag();
+                        modTagCache.AllocateTag();
                         continue;
                     }
                         
                     if (!tagIndices.Contains(tagIndex))
                     {
-                        var emptyTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
+                        var emptyTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
                         var cachedTagData = new CachedTagData();
                         cachedTagData.Data = new byte[0];
                         cachedTagData.Group = emptyTag.Group;
-                        ModPackage.Tags.SetTagData(ModPackage.TagsStream, emptyTag, cachedTagData);
+                        modTagCache.SetTagData(modTagStream, emptyTag, cachedTagData);
                         continue;
                     }
                     
-                    var destTag = ModPackage.Tags.AllocateTag(srcTag.Group, srcTag.Name);
+                    var destTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
 
                     using (var tagDataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(srcTagStream, srcTag)))
                     using (var tagDataReader = new EndianReader(tagDataStream, leaveOpen: true))
@@ -399,7 +422,7 @@ namespace TagTool.Commands.Modding
                             tagDataWriter.Write(pageable.Page.Index);
                         }
 
-                        ModPackage.Tags.SetTagDataRaw(ModPackage.TagsStream, destTag, tagDataStream.ToArray());
+                        modTagCache.SetTagDataRaw(modTagStream, destTag, tagDataStream.ToArray());
                     }
                 }
 
@@ -409,7 +432,7 @@ namespace TagTool.Commands.Modding
                         stream.Dispose();
                 }
 
-                ModPackage.Tags.UpdateTagOffsets(new BinaryWriter(ModPackage.TagsStream, Encoding.Default, true));
+                modTagCache.UpdateTagOffsets(new BinaryWriter(modTagStream, Encoding.Default, true));
             }
         }
 
@@ -426,11 +449,16 @@ namespace TagTool.Commands.Modding
                 var mapFile = new FileInfo(entry);
 
                 using (var mapFileStream = mapFile.OpenRead())
+                using(var reader = new EndianReader(mapFileStream))
                 {
                     var cacheStream = new MemoryStream();
                     mapFileStream.CopyTo(cacheStream);
 
-                    ModPackage.MapFileStreams.Add(cacheStream);
+                    MapFile map = new MapFile();
+                    map.Read(reader);
+                    // TODO: specify cache per map
+                    ModPackage.AddMap(cacheStream, ((MapFileHeader)map.Header).MapId , 0);
+
                 }
             }
         }
@@ -441,6 +469,22 @@ namespace TagTool.Commands.Modding
             {
                 ModPackage.CampaignFileStream = new MemoryStream();
                 mapFileStream.CopyTo(ModPackage.CampaignFileStream);
+            }
+        }
+
+        private void AddStringIds()
+        {
+            ModPackage.StringTable = CacheContext.StringIdCache;
+        }
+
+        private void AddFontPackage()
+        {
+            var location = Path.Combine(CacheContext.Directory.FullName, $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin");
+            var file = new FileInfo(location);
+            using(var stream = file.OpenRead())
+            {
+                ModPackage.FontPackage = new MemoryStream();
+                StreamUtil.Copy(stream, ModPackage.FontPackage, stream.Length);
             }
         }
     }
