@@ -11,9 +11,9 @@ namespace TagTool.Commands.Definitions
 {
     class GenerateTagStructuresCommand : Command
     {
-        private GameCacheContextHaloOnline Cache { get; }
+        private GameCacheHaloOnline Cache { get; }
 
-        public GenerateTagStructuresCommand(GameCacheContextHaloOnline cache) : base(
+        public GenerateTagStructuresCommand(GameCacheHaloOnline cache) : base(
             true,
 
             "GenerateTagStructures",

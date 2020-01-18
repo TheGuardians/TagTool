@@ -109,9 +109,9 @@ namespace TagTool.Commands.Editing
                 return false;
             }
 
-            if (Cache.GetType() == typeof(GameCacheContextHaloOnline) && field.FieldType == typeof(PageableResource))
+            if (Cache.GetType() == typeof(GameCacheHaloOnline) && field.FieldType == typeof(PageableResource))
             {
-                var haloOnlineGameCache = (GameCacheContextHaloOnline)Cache;
+                var haloOnlineGameCache = (GameCacheHaloOnline)Cache;
 
                 var ownerValue = field.GetValue(Owner);
 
@@ -458,7 +458,7 @@ namespace TagTool.Commands.Editing
                     return false;
                 output = tagInstance;
             }
-            else if (cache.GetType() == typeof(GameCacheContextHaloOnline) && type == typeof(PageableResource))
+            else if (cache.GetType() == typeof(GameCacheHaloOnline) && type == typeof(PageableResource))
             {
                 if (args.Count < 1 || args.Count > 2)
                     return false;

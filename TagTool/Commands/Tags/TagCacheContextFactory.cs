@@ -44,9 +44,9 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new ListUnnamedTagsCommand(cache));
 
             // Halo Online Specific Commands
-            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheHaloOnline))
             {
-                var hoCache = cache as GameCacheContextHaloOnline;
+                var hoCache = cache as GameCacheHaloOnline;
                 context.AddCommand(new SaveTagNamesCommand(hoCache));
                 context.AddCommand(new SaveModdedTagsCommand(hoCache));
                 context.AddCommand(new CreateTagCommand(hoCache));

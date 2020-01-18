@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ImportTagCommand : Command
     {
-        private GameCacheContextHaloOnline Cache { get; }
+        private GameCacheHaloOnline Cache { get; }
 
-        public ImportTagCommand(GameCacheContextHaloOnline cache)
+        public ImportTagCommand(GameCacheHaloOnline cache)
             : base(true,
 
                   "ImportTag",

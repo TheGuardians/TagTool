@@ -11,7 +11,7 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
-    public class GameCacheContextGen3 : GameCache
+    public class GameCacheGen3 : GameCache
     {
         public int Magic;
         public MapFile BaseMapFile;
@@ -26,9 +26,9 @@ namespace TagTool.Cache
         public override StringTable StringTable => StringTableGen3;
         public override ResourceCacheTest ResourceCache => ResourceCacheGen3; 
 
-        public Dictionary<string, GameCacheContextGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheContextGen3>();
+        public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
 
-        public GameCacheContextGen3(MapFile mapFile, FileInfo file)
+        public GameCacheGen3(MapFile mapFile, FileInfo file)
         {
             BaseMapFile = mapFile;
             Version = BaseMapFile.Version;
@@ -176,7 +176,7 @@ namespace TagTool.Cache
         public TagTableHeaderGen3 TagTableHeader;
         public List<TagGroup> TagGroups;
         public string TagsKey = "";
-        private readonly GameCacheContextGen3 GameCache;
+        private readonly GameCacheGen3 GameCache;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
@@ -221,7 +221,7 @@ namespace TagTool.Cache
 
         public override Stream OpenTagCacheWrite() => GameCache.OpenCacheWrite();
 
-        public TagCacheGen3(GameCacheContextGen3 cache, EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
+        public TagCacheGen3(GameCacheGen3 cache, EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
         {
             Tags = new List<CachedTagGen3>();
             TagGroups = new List<TagGroup>();
@@ -543,9 +543,9 @@ namespace TagTool.Cache
         public bool isLoaded;
         public CacheFileResourceGestalt ResourceGestalt;
         public CacheFileResourceLayoutTable ResourceLayoutTable;
-        public GameCacheContextGen3 Cache;
+        public GameCacheGen3 Cache;
 
-        public ResourceCacheGen3(GameCacheContextGen3 cache, bool load = false)
+        public ResourceCacheGen3(GameCacheGen3 cache, bool load = false)
         {
             isLoaded = false;
             Cache = cache;
@@ -844,7 +844,7 @@ namespace TagTool.Cache
                         {
                             var newMapFile = new MapFile();
                             newMapFile.Read(newCacheReader);
-                            cache = Cache.SharedCacheFiles[cacheFilePath] = new GameCacheContextGen3(newMapFile, newCache);
+                            cache = Cache.SharedCacheFiles[cacheFilePath] = new GameCacheGen3(newMapFile, newCache);
                         }
                     }  
                 }

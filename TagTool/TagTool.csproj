@@ -301,9 +301,9 @@
     <Compile Include="Cache\CacheFileType.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />
     <Compile Include="Cache\BlamFile\ContentItemMetadata.cs" />
-    <Compile Include="Cache\Gen3\GameCacheContextGen3.cs" />
+    <Compile Include="Cache\Gen3\GameCacheGen3.cs" />
     <Compile Include="Cache\GameCache.cs" />
-    <Compile Include="Cache\HaloOnline\GameCacheContextHaloOnline.cs" />
+    <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\MapFile.cs" />
     <Compile Include="Cache\MapFileHeader.cs" />
     <Compile Include="Cache\BlamFile\MapVariant.cs" />

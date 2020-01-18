@@ -14,13 +14,13 @@ namespace TagTool.Commands.Modding
 {
     class ExportModPackageCommand : Command
     {
-        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCacheHaloOnline CacheContext { get; }
 
         private ExportOptions Options = ExportOptions.None;
 
         private ModPackage ModPackage = null;
 
-        public ExportModPackageCommand(GameCacheContextHaloOnline cacheContext) :
+        public ExportModPackageCommand(GameCacheHaloOnline cacheContext) :
             base(false,
 
                 "ExportModPackage",

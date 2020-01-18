@@ -18,7 +18,7 @@ namespace TagTool.Commands.Modding
 {
     class ApplyModPackageCommand : Command
     {
-        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCacheHaloOnline CacheContext { get; }
 
         private Dictionary<int, int> TagMapping;
 
@@ -28,7 +28,7 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<StringId, StringId> StringIdMapping;
 
-        public ApplyModPackageCommand(GameCacheContextHaloOnline cacheContext) :
+        public ApplyModPackageCommand(GameCacheHaloOnline cacheContext) :
             base(false,
 
                 "ApplyModPackage",

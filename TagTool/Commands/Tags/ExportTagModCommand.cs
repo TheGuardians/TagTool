@@ -9,9 +9,9 @@ namespace TagTool.Commands.Tags
 {
     class ExportTagModCommand : Command
     {
-        public GameCacheContextHaloOnline Cache { get; }
+        public GameCacheHaloOnline Cache { get; }
 
-        public ExportTagModCommand(GameCacheContextHaloOnline cache) :
+        public ExportTagModCommand(GameCacheHaloOnline cache) :
             base(false,
 
                 "ExportTagMod",

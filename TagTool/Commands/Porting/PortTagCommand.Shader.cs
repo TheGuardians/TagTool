@@ -617,7 +617,7 @@ namespace TagTool.Commands.Porting
             return finalRm;
         }
 
-        private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheContextHaloOnline CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
+        private RenderMethod FixAnimationProperties(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, GameCache blamCache, GameCacheHaloOnline CacheContext, RenderMethod finalRm, RenderMethodTemplate edRmt2, RenderMethodTemplate bmRmt2, string blamTagName)
         {
             // finalRm is a H3 rendermethod with ported bitmaps, 
             if (finalRm.ShaderProperties[0].AnimationProperties.Count == 0)

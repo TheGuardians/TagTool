@@ -69,7 +69,7 @@ namespace TagTool.Commands.Sounds
             var dataReference = resourceDefinition.Data;
             byte[] soundData = dataReference.Data;
             
-            if(Cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if(Cache.GetType() == typeof(GameCacheHaloOnline))
             {
                 for (int i = 0; i < Definition.PitchRanges.Count; i++)
                 {
@@ -117,7 +117,7 @@ namespace TagTool.Commands.Sounds
                     }
                 }
             }
-            else if(Cache.GetType() == typeof(GameCacheContextGen3))
+            else if(Cache.GetType() == typeof(GameCacheGen3))
             {
                 if (BlamSoundGestalt == null)
                 {

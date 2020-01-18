@@ -14,7 +14,7 @@ namespace TagTool.Commands.Porting
 {
     class PortMultiplayerScenarioCommand : Command
     {
-        private GameCacheContextHaloOnline CacheContext { get; }
+        private GameCacheHaloOnline CacheContext { get; }
         private GameCache BlamCache { get; }
         private PortTagCommand PortTag { get; }
 
@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             Default = Objects | Audio | Ms30 | SpawnPoint
         }
 
-        public PortMultiplayerScenarioCommand(GameCacheContextHaloOnline cacheContext, GameCache blamCache, PortTagCommand portTag) :
+        public PortMultiplayerScenarioCommand(GameCacheHaloOnline cacheContext, GameCache blamCache, PortTagCommand portTag) :
             base(true,
 
                 "PortMultiplayerScenario",

@@ -465,7 +465,7 @@ namespace TagTool.Commands.Porting
             CacheContext.TagCacheGenHO.SaveTagNames();
         }
 
-        public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheContextHaloOnline cacheContext, ShaderGeneratorResult shader_gen_result)
+        public static PixelShaderBlock GeneratePixelShaderBlock(GameCacheHaloOnline cacheContext, ShaderGeneratorResult shader_gen_result)
         {
             var pixelShaderBlock = new PixelShaderBlock
             {

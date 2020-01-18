@@ -14,7 +14,7 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Cache
 {
-    public class GameCacheContextHaloOnline : GameCache
+    public class GameCacheHaloOnline : GameCache
     {
         public static readonly string TagNamesFile = "tag_list.csv";
         public TagCacheHaloOnline TagCacheGenHO;
@@ -27,7 +27,7 @@ namespace TagTool.Cache
         public override StringTable StringTable => StringTableHaloOnline;
         public override ResourceCacheTest ResourceCache => ResourceCaches;
 
-        public GameCacheContextHaloOnline(DirectoryInfo directory)
+        public GameCacheHaloOnline(DirectoryInfo directory)
         {
             Directory = directory;
             Endianness = EndianFormat.LittleEndian;
@@ -984,7 +984,7 @@ namespace TagTool.Cache
     public class ResourceCachesHaloOnline : ResourceCacheTest
     {
         public DirectoryInfo Directory;
-        public GameCacheContextHaloOnline Cache;
+        public GameCacheHaloOnline Cache;
 
         public Dictionary<ResourceLocation, string> ResourceCacheNames { get; } = new Dictionary<ResourceLocation, string>()
         {
@@ -1000,7 +1000,7 @@ namespace TagTool.Cache
 
         private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
 
-        public ResourceCachesHaloOnline(GameCacheContextHaloOnline cache)
+        public ResourceCachesHaloOnline(GameCacheHaloOnline cache)
         {
             Cache = cache;
             Directory = Cache.Directory;

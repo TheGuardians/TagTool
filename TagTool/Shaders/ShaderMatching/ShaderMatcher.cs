@@ -36,7 +36,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <summary>
         /// Halo Online cache context reference
         /// </summary>
-        private GameCacheContextHaloOnline CacheContext;
+        private GameCacheHaloOnline CacheContext;
 
         /// <summary>
         /// CacheFile Reference
@@ -68,7 +68,7 @@ namespace TagTool.Shaders.ShaderMatching
         /// <param name="cacheStream"></param>
         /// <param name="cacheContext"></param>
         /// <param name="blamCache"></param>
-        public void Init(Stream cacheStream, GameCacheContextHaloOnline cacheContext, GameCache blamCache)
+        public void Init(Stream cacheStream, GameCacheHaloOnline cacheContext, GameCache blamCache)
         {
             CacheStream = cacheStream;
             CacheContext = cacheContext;

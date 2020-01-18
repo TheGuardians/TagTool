@@ -8,7 +8,7 @@ namespace TagTool.Serialization
     {
         private ModPackage Package;
 
-        public ModPackageTagSerializationContext(Stream stream, GameCacheContextHaloOnline context, ModPackage package, CachedTagHaloOnline tag) : base(stream, context, tag)
+        public ModPackageTagSerializationContext(Stream stream, GameCacheHaloOnline context, ModPackage package, CachedTagHaloOnline tag) : base(stream, context, tag)
         {
             Package = package;
         }

@@ -12,12 +12,12 @@ namespace TagTool.Bitmaps
         {
             BitmapTextureInteropResource result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
 
-            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheHaloOnline))
             {
                 result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
                 result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);
             }
-            else if(cache.GetType() == typeof(GameCacheContextGen3))
+            else if(cache.GetType() == typeof(GameCacheGen3))
             {
                 // need to do some serious conversion, might be better to require an uncompressed input
                 throw new NotImplementedException();

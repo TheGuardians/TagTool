@@ -71,7 +71,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.HaloReach:
-                    return new GameCacheContextGen3(map, file);
+                    return new GameCacheGen3(map, file);
 
                 case CacheVersion.HaloOnline106708:
                 case CacheVersion.HaloOnline235640:
@@ -95,7 +95,7 @@ namespace TagTool.Cache
                     if (!tagsFile.Exists)
                         throw new Exception("Failed to find tags.dat");
 
-                    return new GameCacheContextHaloOnline(tagsFile.Directory);
+                    return new GameCacheHaloOnline(tagsFile.Directory);
             }
 
             return null;

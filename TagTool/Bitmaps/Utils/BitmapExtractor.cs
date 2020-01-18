@@ -14,7 +14,7 @@ namespace TagTool.Bitmaps
         {
             var resourceReference = bitmap.Resources[imageIndex];
             var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
-            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheHaloOnline))
             {
                 if(resourceDefinition != null)
                 {
@@ -26,7 +26,7 @@ namespace TagTool.Bitmaps
                     return null;
                 }
             }
-            else if(cache.GetType() == typeof(GameCacheContextGen3))
+            else if(cache.GetType() == typeof(GameCacheGen3))
             {
                 if (resourceDefinition != null)
                 {
@@ -58,13 +58,13 @@ namespace TagTool.Bitmaps
 
         public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
         {
-            if (cache.GetType() == typeof(GameCacheContextHaloOnline))
+            if (cache.GetType() == typeof(GameCacheHaloOnline))
             {
                 byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
                 DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
                 return new DDSFile(header, data);
             }
-            else if (cache.GetType() == typeof(GameCacheContextGen3))
+            else if (cache.GetType() == typeof(GameCacheGen3))
             {
                 var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex);
                 if (baseBitmap == null)

@@ -10,9 +10,9 @@ namespace TagTool.Commands.Tags
     /// </summary>
     class TagDependencyCommand : Command
     {
-        public GameCacheContextHaloOnline Cache { get; }
+        public GameCacheHaloOnline Cache { get; }
 
-        public TagDependencyCommand(GameCacheContextHaloOnline cache) : base(
+        public TagDependencyCommand(GameCacheHaloOnline cache) : base(
             true,
 
             "TagDependency",

@@ -20,9 +20,9 @@ namespace TagTool.Commands.Sounds
             commandContext.AddCommand(new ImportSoundCommand(cache, tag, sound));
             commandContext.AddCommand(new ExportSoundCommand(cache, tag, sound));
 
-            if (cache.GetType() == typeof(GameCacheContextGen3))
+            if (cache.GetType() == typeof(GameCacheGen3))
             {
-                var h3Cache = cache as GameCacheContextGen3;
+                var h3Cache = cache as GameCacheGen3;
                 commandContext.AddCommand(new ExtractXMACommand(h3Cache, tag, sound));
             }
         }

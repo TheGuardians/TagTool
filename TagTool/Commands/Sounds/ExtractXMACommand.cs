@@ -12,11 +12,11 @@ namespace TagTool.Commands.Sounds
 {
     public class ExtractXMACommand : Command
     {
-        private GameCacheContextGen3 Cache;
+        private GameCacheGen3 Cache;
         private SoundCacheFileGestalt BlamSoundGestalt { get; set; } = null;
         private CachedTag Tag;
         private Sound Sound;
-        public ExtractXMACommand(GameCacheContextGen3 cache, CachedTag tag, Sound sound) :
+        public ExtractXMACommand(GameCacheGen3 cache, CachedTag tag, Sound sound) :
             base(true,
 
                 "ExtractXMA",

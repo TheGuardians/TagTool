@@ -11,11 +11,11 @@ namespace TagTool.Serialization
 {
     public class Gen3SerializationContext : ISerializationContext
     {
-        public GameCacheContextGen3 GameCache { get; private set; }
+        public GameCacheGen3 GameCache { get; private set; }
         public CachedTagGen3 Tag { get; private set; }
         public Stream Stream;
 
-        public Gen3SerializationContext(Stream stream, GameCacheContextGen3 gameCache, CachedTagGen3 tag)
+        public Gen3SerializationContext(Stream stream, GameCacheGen3 gameCache, CachedTagGen3 tag)
         {
             GameCache = gameCache;
             Tag = tag;

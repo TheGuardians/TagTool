@@ -10,9 +10,9 @@ namespace TagTool.Commands.Tags
 {
     class TagResourceCommand : Command
     {
-        public GameCacheContextHaloOnline Cache { get; }
+        public GameCacheHaloOnline Cache { get; }
 
-        public TagResourceCommand(GameCacheContextHaloOnline cache) :
+        public TagResourceCommand(GameCacheHaloOnline cache) :
             base(true,
 
                 "TagResource",

@@ -20,7 +20,7 @@ namespace TagTool.Commands.Porting
 {
     public partial class PortTagCommand : Command
 	{
-		private GameCacheContextHaloOnline CacheContext { get; }
+		private GameCacheHaloOnline CacheContext { get; }
 		private GameCache BlamCache;
 		private RenderGeometryConverter GeometryConverter { get; }
 
@@ -46,7 +46,7 @@ namespace TagTool.Commands.Porting
 
 		private readonly Dictionary<Tag, CachedTag> DefaultTags = new Dictionary<Tag, CachedTag> { };
 
-		public PortTagCommand(GameCacheContextHaloOnline cacheContext, GameCache blamCache) :
+		public PortTagCommand(GameCacheHaloOnline cacheContext, GameCache blamCache) :
 			base(true,
 
 				"PortTag",

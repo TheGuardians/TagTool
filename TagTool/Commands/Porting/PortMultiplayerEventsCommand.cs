@@ -7,10 +7,10 @@ namespace TagTool.Commands.Porting
 {
     public class PortMultiplayerEventsCommand : Command
     {
-        private GameCacheContextHaloOnline HoCache { get; }
+        private GameCacheHaloOnline HoCache { get; }
         private GameCache BlamCache;
 
-        public PortMultiplayerEventsCommand(GameCacheContextHaloOnline cache, GameCache blamCache) :
+        public PortMultiplayerEventsCommand(GameCacheHaloOnline cache, GameCache blamCache) :
             base(true,
 
                 "PortMultiplayerEvents",

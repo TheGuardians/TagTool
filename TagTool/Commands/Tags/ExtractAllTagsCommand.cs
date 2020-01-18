@@ -7,9 +7,9 @@ namespace TagTool.Commands.Tags
 {
     class ExtractAllTagsCommand : Command
     {
-        public GameCacheContextHaloOnline Cache { get; }
+        public GameCacheHaloOnline Cache { get; }
 
-        public ExtractAllTagsCommand(GameCacheContextHaloOnline cache)
+        public ExtractAllTagsCommand(GameCacheHaloOnline cache)
             : base(false,
 
                   "ExtractAllTags",
