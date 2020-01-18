@@ -15,7 +15,7 @@ namespace TagTool.Havok
     }
 
     [TagStructure(Size = 0x30)]
-    public class MoppCodeHeader
+    public class MoppCodeHeader : TagStructure
     {
         [TagField(Flags = Padding, Length = 4)]
         public byte[] Unused1;
