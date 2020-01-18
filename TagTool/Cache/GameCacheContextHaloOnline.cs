@@ -1476,44 +1476,44 @@ namespace TagTool.Cache
 
         private void Read(Stream stream)
         {
-            using (var reader = new EndianReader(stream, EndianFormat.LittleEndian))
+            // don't use using{}, we want to maintain the stream open. reader/writers will automatically close the stream when done in an using.
+            var reader = new EndianReader(stream, EndianFormat.LittleEndian);
+
+            var addresses = new List<uint>();
+            var sizes = new List<uint>();
+            var dataContext = new DataSerializationContext(reader);
+            var deserializer = new TagDeserializer(Version);
+            Header = deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(dataContext);
+
+            reader.SeekTo(Header.ResourceTableOffset);
+
+            // read all resource offsets
+
+            for (var i = 0; i < Header.ResourceCount; i++)
             {
-                var addresses = new List<uint>();
-                var sizes = new List<uint>();
-                var dataContext = new DataSerializationContext(reader);
-                var deserializer = new TagDeserializer(Version);
-                Header = deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(dataContext);
+                var address = reader.ReadUInt32();
 
-                reader.SeekTo(Header.ResourceTableOffset);
+                if (!addresses.Contains(address) && (address != uint.MaxValue))
+                    addresses.Add(address);
 
-                // read all resource offsets
+                Resources.Add(new Resource { Offset = address });
+            }
 
-                for (var i = 0; i < Header.ResourceCount; i++)
-                {
-                    var address = reader.ReadUInt32();
+            // compute chunk sizes
 
-                    if (!addresses.Contains(address) && (address != uint.MaxValue))
-                        addresses.Add(address);
+            addresses.Sort((a, b) => a.CompareTo(b));
 
-                    Resources.Add(new Resource { Offset = address });
-                }
+            for (var i = 0; i < addresses.Count - 1; i++)
+                sizes.Add(addresses[i + 1] - addresses[i]);
 
-                // compute chunk sizes
+            sizes.Add(Header.ResourceTableOffset - addresses.Last());
 
-                addresses.Sort((a, b) => a.CompareTo(b));
+            foreach (var resource in Resources)
+            {
+                if (resource.Offset == uint.MaxValue)
+                    continue;
 
-                for (var i = 0; i < addresses.Count - 1; i++)
-                    sizes.Add(addresses[i + 1] - addresses[i]);
-
-                sizes.Add(Header.ResourceTableOffset - addresses.Last());
-
-                foreach (var resource in Resources)
-                {
-                    if (resource.Offset == uint.MaxValue)
-                        continue;
-
-                    resource.ChunkSize = sizes[addresses.IndexOf(resource.Offset)];
-                }
+                resource.ChunkSize = sizes[addresses.IndexOf(resource.Offset)];
             }
         }
 
