@@ -14,13 +14,13 @@ namespace TagTool.Commands.Modding
 {
     class ExportModPackageCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheContextHaloOnline CacheContext { get; }
 
         private ExportOptions Options = ExportOptions.None;
 
         private ModPackage ModPackage = null;
 
-        public ExportModPackageCommand(HaloOnlineCacheContext cacheContext) :
+        public ExportModPackageCommand(GameCacheContextHaloOnline cacheContext) :
             base(false,
 
                 "ExportModPackage",
@@ -95,11 +95,8 @@ namespace TagTool.Commands.Modding
             var tagStream = ModPackage.TagCachesStreams[0];
             ModPackage.CacheNames.Add("default");
 
-            CacheContext.CreateTagCache(tagStream);
-            ModPackage.TagCaches[0] = new TagCache(tagStream, new Dictionary<int, string>());
-
-            CacheContext.CreateResourceCache(ModPackage.ResourcesStream);
-            ModPackage.Resources = new ResourceCache(ModPackage.ResourcesStream);
+            ModPackage.TagCaches[0] = new ModPackageTagCache(tagStream, new Dictionary<int, string>());
+            ModPackage.Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
 
             CreateDescription();
 
@@ -108,7 +105,7 @@ namespace TagTool.Commands.Modding
             if (Options.HasFlag(ExportOptions.TagBounds))
             {
                 int? fromIndex = -1;
-                int? toIndex = CacheContext.TagCache.Index.NonNull().Last().Index;
+                int? toIndex = CacheContext.TagCache.NonNull().Last().Index;
 
                 Console.WriteLine("Please specify the start index to be used:");
                 string input = line = Console.ReadLine().TrimStart().TrimEnd();
@@ -138,7 +135,7 @@ namespace TagTool.Commands.Modding
 
                 // add tags to list
                 foreach (var entry in Enumerable.Range(fromIndex.Value, toIndex.Value - fromIndex.Value + 1))
-                    if (!tagIndices.Contains(entry) && CacheContext.GetTag(entry) != null)
+                    if (!tagIndices.Contains(entry) && CacheContext.TagCache.GetTag(entry) != null)
                         tagIndices.Add(entry);
 
             }
@@ -286,7 +283,7 @@ namespace TagTool.Commands.Modding
             var modTagNames = ModPackage.TagCacheNames[0];
             var modTagStream = ModPackage.TagCachesStreams[0];
 
-            using (var srcTagStream = CacheContext.OpenTagCacheRead())
+            using (var srcTagStream = CacheContext.TagCache.OpenTagCacheRead())
             {
                 var resourceIndices = new Dictionary<ResourceLocation, Dictionary<int, PageableResource>>
                 {
@@ -300,12 +297,12 @@ namespace TagTool.Commands.Modding
                     [ResourceLocation.TexturesB] = new Dictionary<int, PageableResource>()
                 };
 
-                var srcResourceCaches = new Dictionary<ResourceLocation, ResourceCache>();
+                var srcResourceCaches = new Dictionary<ResourceLocation, ResourceCacheHaloOnline>();
                 var srcResourceStreams = new Dictionary<ResourceLocation, Stream>();
 
                 foreach (var value in Enum.GetValues(typeof(ResourceLocation)))
                 {
-                    ResourceCache resourceCache = null;
+                    ResourceCacheHaloOnline resourceCache = null;
                     var location = (ResourceLocation)value;
 
                     if (location == ResourceLocation.None)
@@ -313,7 +310,7 @@ namespace TagTool.Commands.Modding
 
                     try
                     {
-                        resourceCache = CacheContext.GetResourceCache(location);
+                        resourceCache = CacheContext.ResourceCaches.GetResourceCache(location).Cache;
                     }
                     catch (FileNotFoundException)
                     {
@@ -321,16 +318,16 @@ namespace TagTool.Commands.Modding
                     }
 
                     srcResourceCaches[location] = resourceCache;
-                    srcResourceStreams[location] = CacheContext.OpenResourceCacheRead(location);
+                    srcResourceStreams[location] = CacheContext.ResourceCaches.OpenResourceCacheRead(location);
                 }
 
-                for (var tagIndex = 0; tagIndex < CacheContext.TagCache.Index.Count; tagIndex++)
+                for (var tagIndex = 0; tagIndex < CacheContext.TagCache.Count; tagIndex++)
                 {
-                    var srcTag = CacheContext.GetTag(tagIndex);
+                    var srcTag = CacheContext.TagCache.GetTag(tagIndex);
 
                     if (srcTag == null)
                     {
-                        modTagCache.AllocateTag();
+                        modTagCache.AllocateTag(new TagTool.Tags.TagGroup());
                         continue;
                     }
                         
@@ -340,19 +337,19 @@ namespace TagTool.Commands.Modding
                         var cachedTagData = new CachedTagData();
                         cachedTagData.Data = new byte[0];
                         cachedTagData.Group = emptyTag.Group;
-                        modTagCache.SetTagData(modTagStream, emptyTag, cachedTagData);
+                        modTagCache.SetTagData(modTagStream, (CachedTagHaloOnline)emptyTag, cachedTagData);
                         continue;
                     }
                     
                     var destTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
 
-                    using (var tagDataStream = new MemoryStream(CacheContext.TagCache.ExtractTagRaw(srcTagStream, srcTag)))
+                    using (var tagDataStream = new MemoryStream(CacheContext.TagCacheGenHO.ExtractTagRaw(srcTagStream, (CachedTagHaloOnline)srcTag)))
                     using (var tagDataReader = new EndianReader(tagDataStream, leaveOpen: true))
                     using (var tagDataWriter = new EndianWriter(tagDataStream, leaveOpen: true))
                     {
                         var resourcePointerOffsets = new HashSet<uint>();
 
-                        foreach (var resourcePointerOffset in srcTag.ResourcePointerOffsets)
+                        foreach (var resourcePointerOffset in ((CachedTagHaloOnline)srcTag).ResourcePointerOffsets)
                         {
                             if (resourcePointerOffset == 0 || resourcePointerOffsets.Contains(resourcePointerOffset))
                                 continue;
@@ -365,7 +362,7 @@ namespace TagTool.Commands.Modding
                             if (resourcePointer == 0)
                                 continue;
 
-                            var resourceOffset = srcTag.PointerToOffset(resourcePointer);
+                            var resourceOffset = ((CachedTagHaloOnline)srcTag).PointerToOffset(resourcePointer);
 
                             tagDataReader.BaseStream.Position = resourceOffset + 2;
                             var locationFlags = (OldRawPageFlags)tagDataReader.ReadByte();
@@ -422,7 +419,7 @@ namespace TagTool.Commands.Modding
                             tagDataWriter.Write(pageable.Page.Index);
                         }
 
-                        modTagCache.SetTagDataRaw(modTagStream, destTag, tagDataStream.ToArray());
+                        modTagCache.SetTagDataRaw(modTagStream, (CachedTagHaloOnline)destTag, tagDataStream.ToArray());
                     }
                 }
 
@@ -432,7 +429,7 @@ namespace TagTool.Commands.Modding
                         stream.Dispose();
                 }
 
-                modTagCache.UpdateTagOffsets(new BinaryWriter(modTagStream, Encoding.Default, true));
+                modTagCache.UpdateTagOffsets(new EndianWriter(modTagStream));
             }
         }
 
@@ -474,7 +471,7 @@ namespace TagTool.Commands.Modding
 
         private void AddStringIds()
         {
-            ModPackage.StringTable = CacheContext.StringIdCache;
+            ModPackage.StringTable = new ModPackageStringTable(CacheContext.StringTableHaloOnline);
         }
 
         private void AddFontPackage()

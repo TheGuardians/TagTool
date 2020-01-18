@@ -170,14 +170,14 @@ namespace TagTool.Commands.Tags
                             return null;
 
                         var outFile = new FileInfo(Path.Combine(directory.FullName, $"tags\\{tagName}{suffix}.{resourceGroup}"));
-                        var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
+                        var cache = Cache.ResourceCaches.GetResourceCache(location);
 
                         if (!outFile.Directory.Exists)
                             outFile.Directory.Create();
 
-                        using (var stream = cache.Cache.OpenCacheRead())
+                        using (var stream = cache.File.OpenRead())
                         using (var outStream = outFile.Create())
-                            cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
+                            cache.Cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
 
                         return outFile;
                     }

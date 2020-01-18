@@ -1,34 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using TagTool.Cache;
 using TagTool.Tags;
 
 namespace TagTool.Serialization
 {
-    class ModPackageTagSerializationContext : TagSerializationContext
+    class ModPackageTagSerializationContext : HaloOnlineSerializationContext
     {
         private ModPackage Package;
 
-        public ModPackageTagSerializationContext(Stream stream, HaloOnlineCacheContext context, ModPackage package, CachedTagInstance tag) : base(stream, context, tag)
+        public ModPackageTagSerializationContext(Stream stream, GameCacheContextHaloOnline context, ModPackage package, CachedTagHaloOnline tag) : base(stream, context, tag)
         {
             Package = package;
         }
 
-        public override CachedTagInstance GetTagByIndex(int index)
+        public override CachedTag GetTagByIndex(int index)
         {
             if (index < 0)
                 return null;
 
-            return Package.TagCaches[0].Index[index];
+            return Package.TagCaches[0].Tags[index];
         }
 
-        public override CachedTagInstance GetTagByName(TagGroup group, string name)
+        public override CachedTag GetTagByName(TagGroup group, string name)
         {
-            foreach(var tag in Context.TagCache.Index)
+            foreach(var tag in Context.TagCacheGenHO.Tags)
             {
                 if (tag.Name == name && group == tag.Group)
                     return tag;

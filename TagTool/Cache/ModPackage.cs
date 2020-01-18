@@ -9,18 +9,17 @@ namespace TagTool.Cache
 {
     public class ModPackage
     {
-        
         public ModPackageHeader Header { get; set; } = new ModPackageHeader();
 
         public ModPackageMetadata Metadata { get; set; } = new ModPackageMetadata();
 
-        public List<TagCache> TagCaches { get; set; } = null;
+        public List<ModPackageTagCache> TagCaches { get; set; } = null;
 
         public List<Stream> TagCachesStreams { get; set; } = new List<Stream>();
 
         public List<Dictionary<int, string>> TagCacheNames { get; set; } = new List<Dictionary<int, string>>();
 
-        public ResourceCache Resources { get; set; } = null;
+        public ResourceCacheHaloOnline Resources { get; set; } = null;
 
         public Stream ResourcesStream { get; set; } = new MemoryStream();
 
@@ -34,7 +33,7 @@ namespace TagTool.Cache
 
         public List<string> CacheNames { get; set; } = new List<string>();
 
-        public StringIdCache StringTable { get; set; }
+        public ModPackageStringTable StringTable { get; set; }
 
         public Stream FontPackage;
 
@@ -49,12 +48,12 @@ namespace TagTool.Cache
                 TagCachesStreams.Add(tagStream);
 
                 var names = new Dictionary<int, string>();
-                var tags = new TagCache(tagStream, names);
-                TagCaches = new List<TagCache>();
+                var tags = new ModPackageTagCache(tagStream, names);
+                TagCaches = new List<ModPackageTagCache>();
                 TagCaches.Add(tags);
                 TagCacheNames.Add(names);
 
-                Resources = new ResourceCache(ResourcesStream);
+                Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
                 Header.SectionTable = new ModPackageSectionTable();
             }
         }
@@ -93,13 +92,13 @@ namespace TagTool.Cache
 
                 int tagCacheCount = TagCachesStreams.Count;
 
-                TagCaches = new List<TagCache>();
+                TagCaches = new List<ModPackageTagCache>();
                 for (int i = 0; i < tagCacheCount; i++)
                 {
-                    TagCaches.Add(new TagCache(TagCachesStreams[i], TagCacheNames[i]));
+                    TagCaches.Add(new ModPackageTagCache(TagCachesStreams[i], TagCacheNames[i]));
                 }
                 
-                Resources = new ResourceCache(ResourcesStream);
+                Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
             }
         }
 
@@ -319,7 +318,7 @@ namespace TagTool.Cache
                 //prepare tag names
                 var names = new Dictionary<int, string>();
 
-                foreach (var entry in TagCaches[i].Index)
+                foreach (var entry in TagCaches[i].TagTable)
                     if (entry != null && entry.Name != null)
                         names.Add(entry.Index, entry.Name);
 
@@ -487,7 +486,7 @@ namespace TagTool.Cache
             reader.Read(data, 0, size);
             stringIdCacheStream.Write(data, 0, size);
             stringIdCacheStream.Position = 0;
-            StringTable = new StringIdCache(stringIdCacheStream, new StringIdResolverMS23());
+            StringTable = new ModPackageStringTable(stringIdCacheStream);
         }
 
         private void ReadFontSection(EndianReader reader)

@@ -45,8 +45,8 @@ namespace TagTool.Cache
         }
 
         public override Stream OpenCacheRead() => TagCache.OpenTagCacheRead();
-        public override FileStream OpenCacheReadWrite() => TagCache.OpenTagCacheReadWrite();
-        public override FileStream OpenCacheWrite() => TagCache.OpenTagCacheWrite();
+        public override Stream OpenCacheReadWrite() => TagCache.OpenTagCacheReadWrite();
+        public override Stream OpenCacheWrite() => TagCache.OpenTagCacheWrite();
 
         #region Serialization Methods
 
@@ -143,9 +143,9 @@ namespace TagTool.Cache
 
         public override Stream OpenTagCacheRead() => TagsFile.OpenRead();
 
-        public override FileStream OpenTagCacheWrite() => TagsFile.Open(FileMode.Open, FileAccess.Write);
+        public override Stream OpenTagCacheWrite() => TagsFile.Open(FileMode.Open, FileAccess.Write);
 
-        public override FileStream OpenTagCacheReadWrite() => TagsFile.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenTagCacheReadWrite() => TagsFile.Open(FileMode.Open, FileAccess.ReadWrite);
 
         public TagCacheHaloOnline(DirectoryInfo directory)
         {
@@ -221,54 +221,6 @@ namespace TagTool.Cache
             Tags.Add(tag);
             return tag;
         }
-
-        public bool TryAllocateTag(out CachedTag result, Type type, string name = null)
-        {
-            result = null;
-
-            try
-            {
-                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
-
-                if (structure == null)
-                {
-                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
-                    return false;
-                }
-
-                var groupTag = new Tag(structure.Tag);
-
-                if (!TagGroup.Instances.ContainsKey(groupTag))
-                {
-                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
-                    return false;
-                }
-
-                result = AllocateTag(TagGroup.Instances[groupTag], name);
-
-                if (result == null)
-                    return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
-                return false;
-            }
-
-            return true;
-        }
-
-        public CachedTag AllocateTag(Type type, string name = null)
-        {
-            if (TryAllocateTag(out var result, type, name))
-                return result;
-
-            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
-            return null;
-        }
-
-        public CachedTag AllocateTag<T>(string name = null) where T : TagStructure
-            => AllocateTag(typeof(T), name);
 
         /// <summary>
         /// Returns a new CachedTag instance without updating the tag cache.
@@ -574,7 +526,6 @@ namespace TagTool.Cache
             var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
             serializer.Serialize(dataContext, Header);
         }
-
 
         public HashSet<CachedTagHaloOnline> FindDependencies(CachedTagHaloOnline tag)
         {
@@ -895,6 +846,11 @@ namespace TagTool.Cache
             _resourceOffsets = data.ResourcePointerOffsets.Select(offset => offset + dataOffset).ToList();
             _tagReferenceOffsets = data.TagReferenceOffsets.Select(offset => offset + dataOffset).ToList();
         }
+
+        public void AddResourceOffset(uint offset)
+        {
+            _resourceOffsets.Add(offset);
+        }
     }
 
     public class StringTableHaloOnline : StringTable
@@ -929,8 +885,7 @@ namespace TagTool.Cache
                     Load(stream);
                 else
                     Clear();
-            }
-                
+            }  
         }
 
         public override StringId AddString(string newString)
@@ -1075,7 +1030,7 @@ namespace TagTool.Cache
 
                 using(var stream = file.OpenRead())
                 {
-                    resourceCache = new ResourceCacheHaloOnline(Cache, stream);
+                    resourceCache = new ResourceCacheHaloOnline(Cache.Version, stream);
                 }
                     
                 cache = new LoadedResourceCache
@@ -1287,24 +1242,6 @@ namespace TagTool.Cache
             }
         }
 
-        private void ApplyResourceDataFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
-        {
-            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
-            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.LittleEndian))
-            {
-                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
-                {
-                    var fixup = tagResource.ResourceFixups[i];
-                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
-                    if (fixup.Address.Type == CacheAddressType.Data)
-                    {
-                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write((uint)(fixup.Address.Value + rawOffset));
-                    }
-                }
-            }
-        }
-
         private T GetResourceDefinition<T>(TagResourceReference resourceReference)
         {
             var tagResource = GetPageableResource(resourceReference).Resource;
@@ -1312,7 +1249,6 @@ namespace TagTool.Cache
             T result;
             byte[] resourceDefinitionData = tagResource.DefinitionData;
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
-            ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
 
             byte[] resourceRawData = GetResourceData(resourceReference);
             if (resourceRawData == null)
@@ -1508,7 +1444,7 @@ namespace TagTool.Cache
     // Class for .dat files containing resources
     public class ResourceCacheHaloOnline
     {
-        public GameCacheContextHaloOnline Cache;
+        public CacheVersion Version;
         public ResourceCacheHaloOnlineHeader Header;
 
         private List<Resource> Resources;
@@ -1521,9 +1457,9 @@ namespace TagTool.Cache
             get { return Resources.Count; }
         }
 
-        public ResourceCacheHaloOnline(GameCacheContextHaloOnline cache, Stream stream)
+        public ResourceCacheHaloOnline(CacheVersion version, Stream stream)
         {
-            Cache = cache;
+            Version = version;
             Resources = new List<Resource>();
             if(stream.Length == 0)
                 CreateEmptyResourceCache();
@@ -1531,9 +1467,9 @@ namespace TagTool.Cache
                 Read(stream);
         }
 
-        public ResourceCacheHaloOnline(GameCacheContextHaloOnline cache)
+        public ResourceCacheHaloOnline(CacheVersion version)
         {
-            Cache = cache;
+            Version = version;
             Resources = new List<Resource>();
             CreateEmptyResourceCache();
         }
@@ -1545,7 +1481,7 @@ namespace TagTool.Cache
                 var addresses = new List<uint>();
                 var sizes = new List<uint>();
                 var dataContext = new DataSerializationContext(reader);
-                var deserializer = new TagDeserializer(Cache.Version);
+                var deserializer = new TagDeserializer(Version);
                 Header = deserializer.Deserialize<ResourceCacheHaloOnlineHeader>(dataContext);
 
                 reader.SeekTo(Header.ResourceTableOffset);
@@ -1587,7 +1523,7 @@ namespace TagTool.Cache
             using (var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
             {
                 var dataContext = new DataSerializationContext(writer);
-                var serializer = new TagSerializer(Cache.Version);
+                var serializer = new TagSerializer(Version);
                 serializer.Serialize(dataContext, Header);
             }
         }

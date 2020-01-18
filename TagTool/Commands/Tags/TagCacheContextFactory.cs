@@ -6,6 +6,7 @@ using TagTool.Commands.Files;
 using TagTool.Commands.Strings;
 using TagTool.Commands.Sounds;
 using TagTool.Commands.Porting;
+using TagTool.Commands.Modding;
 
 namespace TagTool.Commands.Tags
 {
@@ -58,6 +59,11 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ExtractTagCommand(hoCache));
                 context.AddCommand(new ExtractAllTagsCommand(hoCache));
                 context.AddCommand(new ExportTagModCommand(hoCache));
+
+                // modding commands
+                context.AddCommand(new ApplyModPackageCommand(hoCache));
+                context.AddCommand(new CreateCharacterType(cache));
+                context.AddCommand(new ExportModPackageCommand(hoCache));
             }
 
             // porting related

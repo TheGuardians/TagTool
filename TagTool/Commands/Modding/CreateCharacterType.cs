@@ -8,11 +8,11 @@ namespace TagTool.Commands.Modding
 {
     class CreateCharacterType : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCache Cache { get; }
         private ModGlobalsDefinition ModGlobals;
         private Globals Globals;
 
-        public CreateCharacterType(HaloOnlineCacheContext cacheContext) :
+        public CreateCharacterType(GameCache cache) :
             base(true,
 
                 "CreateCharacterType",
@@ -22,7 +22,7 @@ namespace TagTool.Commands.Modding
 
                 "Builds a character type from the current biped tag")
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         public override object Execute(List<string> args)
@@ -97,19 +97,19 @@ namespace TagTool.Commands.Modding
 
         private void OpenGlobalTags()
         {
-            using (var cacheStream = CacheContext.TagCacheFile.OpenRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             {
-                Globals = CacheContext.Deserialize<Globals>(cacheStream, CacheContext.GetTag($"globals\\globals.matg"));
-                ModGlobals = CacheContext.Deserialize<ModGlobalsDefinition>(cacheStream, CacheContext.GetTag($"multiplayer\\mod_globals.modg"));
+                Globals = Cache.Deserialize<Globals>(cacheStream, Cache.GetTag($"globals\\globals.matg"));
+                ModGlobals = Cache.Deserialize<ModGlobalsDefinition>(cacheStream, Cache.GetTag($"multiplayer\\mod_globals.modg"));
             }
         }
 
         private void SaveTags()
         {
-            using (var stream = CacheContext.OpenTagCacheReadWrite())
+            using (var stream = Cache.TagCache.OpenTagCacheReadWrite())
             {
-                CacheContext.Serialize(stream, CacheContext.GetTag($"multiplayer\\mod_globals.modg"), ModGlobals);
-                CacheContext.Serialize(stream, CacheContext.GetTag($"globals\\globals.matg"), Globals);
+                Cache.Serialize(stream, Cache.GetTag($"multiplayer\\mod_globals.modg"), ModGlobals);
+                Cache.Serialize(stream, Cache.GetTag($"globals\\globals.matg"), Globals);
             }
         }
 
@@ -168,7 +168,7 @@ namespace TagTool.Commands.Modding
             set.Characters.Add(character);
         }
 
-        private CachedTagInstance GetTag(string message)
+        private CachedTag GetTag(string message)
         {
             Console.WriteLine(message);
             string tagName = Console.ReadLine().Trim();
@@ -176,7 +176,7 @@ namespace TagTool.Commands.Modding
             if (tagName == "\n")
                 return null;
 
-            if (CacheContext.TryGetTag(tagName, out CachedTagInstance tag))
+            if (Cache.TryGetTag(tagName, out CachedTag tag))
                 return tag;
             else
                 return null;
@@ -191,12 +191,11 @@ namespace TagTool.Commands.Modding
             if (value == "\n")
                 return StringId.Invalid;
 
-            stringId = CacheContext.GetStringId(value);
-            if(stringId == StringId.Invalid && value != CacheContext.GetString(StringId.Invalid))
+            stringId = Cache.StringTable.GetStringId(value);
+            if(stringId == StringId.Invalid && value != Cache.StringTable.GetString(StringId.Invalid))
             {
-                stringId = CacheContext.StringIdCache.AddString(value);
-                using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
-                    CacheContext.StringIdCache.Save(stringIdCacheStream);
+                stringId = Cache.StringTable.AddString(value);
+                Cache.StringTable.Save();
             }
             return stringId;
         }

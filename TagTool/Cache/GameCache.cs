@@ -29,8 +29,8 @@ namespace TagTool.Cache
         public abstract ResourceCacheTest ResourceCache { get; }
 
         public abstract Stream OpenCacheRead();
-        public abstract FileStream OpenCacheReadWrite();
-        public abstract FileStream OpenCacheWrite();
+        public abstract Stream OpenCacheReadWrite();
+        public abstract Stream OpenCacheWrite();
 
         public abstract void Serialize(Stream stream, CachedTag instance, object definition);
         public abstract object Deserialize(Stream stream, CachedTag instance);
@@ -51,6 +51,10 @@ namespace TagTool.Cache
                 }
                 else if (file.Name.Equals("tags.dat"))
                     estimatedVersion = CacheVersion.HaloOnline106708;
+                else if (file.Name.Contains(".pak"))
+                {
+                    return new GameCacheModPackage(file);
+                }
                 else
                     throw new Exception("Invalid file passed to GameCache constructor");
             }
@@ -405,8 +409,8 @@ namespace TagTool.Cache
         public abstract CachedTag CreateCachedTag();
 
         public abstract Stream OpenTagCacheRead();
-        public abstract FileStream OpenTagCacheReadWrite();
-        public abstract FileStream OpenTagCacheWrite();
+        public abstract Stream OpenTagCacheReadWrite();
+        public abstract Stream OpenTagCacheWrite();
 
         // Utilities
 
@@ -428,6 +432,54 @@ namespace TagTool.Cache
 
         public CachedTag FindFirstInGroup(Tag groupTag) =>
             NonNull().FirstOrDefault(t => t.IsInGroup(groupTag));
+
+        public bool TryAllocateTag(out CachedTag result, Type type, string name = null)
+        {
+            result = null;
+
+            try
+            {
+                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
+
+                if (structure == null)
+                {
+                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
+                    return false;
+                }
+
+                var groupTag = new Tag(structure.Tag);
+
+                if (!TagGroup.Instances.ContainsKey(groupTag))
+                {
+                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
+                    return false;
+                }
+
+                result = AllocateTag(TagGroup.Instances[groupTag], name);
+
+                if (result == null)
+                    return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public CachedTag AllocateTag(Type type, string name = null)
+        {
+            if (TryAllocateTag(out var result, type, name))
+                return result;
+
+            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
+            return null;
+        }
+
+        public CachedTag AllocateTag<T>(string name = null) where T : TagStructure
+            => AllocateTag(typeof(T), name);
 
     }
 
@@ -473,7 +525,6 @@ namespace TagTool.Cache
 
     public abstract class ResourceCacheTest
     {
-        //public abstract byte[] GetResourceData(TagResourceReference resourceReference);
         public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
         public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);

@@ -18,17 +18,17 @@ namespace TagTool.Commands.Modding
 {
     class ApplyModPackageCommand : Command
     {
-        private HaloOnlineCacheContext CacheContext { get; }
+        private GameCacheContextHaloOnline CacheContext { get; }
 
         private Dictionary<int, int> TagMapping;
 
         private Stream CacheStream;
 
-        private Dictionary<string, CachedTagInstance> CacheTagsByName;
+        private Dictionary<string, CachedTag> CacheTagsByName;
 
         private Dictionary<StringId, StringId> StringIdMapping;
 
-        public ApplyModPackageCommand(HaloOnlineCacheContext cacheContext) :
+        public ApplyModPackageCommand(GameCacheContextHaloOnline cacheContext) :
             base(false,
 
                 "ApplyModPackage",
@@ -58,13 +58,13 @@ namespace TagTool.Commands.Modding
             StringIdMapping = new Dictionary<StringId, StringId>();
 
             // build dictionary of names to tag instance for faster lookups
-            CacheTagsByName = CacheContext.TagCache.Index
+            CacheTagsByName = CacheContext.TagCache.TagTable
                 .Where(tag => tag != null)
                 .GroupBy(tag => $"{tag.Name}.{tag.Group}")
                 .Select(tags => tags.Last())
                 .ToDictionary(tag => $"{tag.Name}.{tag.Group}", tag => tag);
 
-            CacheStream = CacheContext.OpenTagCacheReadWrite();
+            CacheStream = CacheContext.TagCache.OpenTagCacheReadWrite();
 
             var modPackage = new ModPackage(new FileInfo(filePath));
 
@@ -76,9 +76,9 @@ namespace TagTool.Commands.Modding
                 return true;
             }
 
-            for (int i = 0; i < modPackage.TagCaches[cacheIndex].Index.Count; i++)
+            for (int i = 0; i < modPackage.TagCaches[cacheIndex].Count; i++)
             {
-                var modTag = modPackage.TagCaches[cacheIndex].Index[i];
+                var modTag = modPackage.TagCaches[cacheIndex].GetTag(i);
 
                 if (modTag != null)
                 {
@@ -137,30 +137,28 @@ namespace TagTool.Commands.Modding
 
             CacheStream.Close();
             CacheStream.Dispose();
-            CacheContext.SaveTagNames();
-
-            using (var stringIdCacheStream = CacheContext.OpenStringIdCacheReadWrite())
-                CacheContext.StringIdCache.Save(stringIdCacheStream);
+            CacheContext.TagCacheGenHO.SaveTagNames();
+            CacheContext.StringTable.Save();
 
             return true;
         }
 
 
-        private CachedTagInstance ConvertCachedTagInstance(ModPackage modPack, CachedTagInstance modTag)
+        private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag)
         {
             Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
 
             // tag has already been converted
             if (TagMapping.ContainsKey(modTag.Index))
-                return CacheContext.TagCache.Index[TagMapping[modTag.Index]];   // get the matching tag in the destination package
+                return CacheContext.TagCache.GetTag(TagMapping[modTag.Index]);   // get the matching tag in the destination package
 
             // Determine if tag requires conversion
-            if (modTag.DefinitionOffset == modTag.TotalSize)
+            if (modTag.DefinitionOffset == ((CachedTagHaloOnline)modTag).TotalSize)
             {
                 //modtag references a base tag, figure out which one is it and add it to the mapping
-                CachedTagInstance baseTag = null;
-                if (modTag.Index < CacheContext.TagCache.Index.Count)
-                    baseTag = CacheContext.GetTag(modTag.Index);
+                CachedTag baseTag = null;
+                if (modTag.Index < CacheContext.TagCache.Count)
+                    baseTag = CacheContext.TagCache.GetTag(modTag.Index);
 
                 // mod tag has a name, first check if baseTag name is null, else if the names don't match or group don't match
                 if (baseTag != null && baseTag.Group == modTag.Group && baseTag.Name != null && baseTag.Name == modTag.Name)
@@ -172,7 +170,7 @@ namespace TagTool.Commands.Modding
                 {
                     // tag name/group doesn't match base tag, try to look for it
 
-                    CachedTagInstance cacheTag;
+                    CachedTag cacheTag;
                     if(CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
                     {
                         TagMapping[modTag.Index] = cacheTag.Index;
@@ -186,7 +184,7 @@ namespace TagTool.Commands.Modding
             }     
             else
             {
-                CachedTagInstance newTag;
+                CachedTag newTag;
                 if (!CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out newTag))
                 {
                     newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
@@ -195,7 +193,8 @@ namespace TagTool.Commands.Modding
 
                 TagMapping.Add(modTag.Index, newTag.Index);
                 var definitionType = TagDefinition.Find(modTag.Group.Tag);
-                var tagDefinition = CacheContext.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, modTag), definitionType);
+                var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
+                var tagDefinition = deserializer.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, (CachedTagHaloOnline)modTag), definitionType);
                 tagDefinition = ConvertData(modPack, tagDefinition);
 
                 if (definitionType == typeof(ForgeGlobalsDefinition))
@@ -208,9 +207,10 @@ namespace TagTool.Commands.Modding
                 }
                 CacheContext.Serialize(CacheStream, newTag, tagDefinition);
 
-                foreach (var resourcePointer in modTag.ResourcePointerOffsets)
+                foreach (var resourcePointer in ((CachedTagHaloOnline)modTag).ResourcePointerOffsets)
                 {
-                    newTag.AddResourceOffset(resourcePointer);
+                    var newTagHo = newTag as CachedTagHaloOnline;
+                    newTagHo.AddResourceOffset(resourcePointer);
                 }
                 return newTag;
             }
@@ -236,10 +236,9 @@ namespace TagTool.Commands.Modding
                     return ConvertStructure(modPack, structure);
                 case IList collection:
                     return ConvertCollection(modPack, collection);
-                case CachedTagInstance tag:
+                case CachedTag tag:
                     return ConvertCachedTagInstance(modPack, tag);
                 
-
             }
 
             return data;
@@ -253,14 +252,14 @@ namespace TagTool.Commands.Modding
             {
                 StringId cacheStringId;
                 var modString = modPack.StringTable.GetString(stringId);
-                var cacheStringTest = CacheContext.StringIdCache.GetString(stringId);
+                var cacheStringTest = CacheContext.StringTable.GetString(stringId);
 
                 if (cacheStringTest != null && modString == cacheStringTest)            // check if base cache contains the exact same id with matching strings
                     cacheStringId = stringId;
-                else if (CacheContext.StringIdCache.Contains(modString))                // try to find the string among all stringids
-                    cacheStringId = CacheContext.StringIdCache.GetStringId(modString);
+                else if (CacheContext.StringTable.Contains(modString))                // try to find the string among all stringids
+                    cacheStringId = CacheContext.StringTable.GetStringId(modString);
                 else                                                                    // add new stringid
-                    cacheStringId = CacheContext.StringIdCache.AddString(modString, CacheContext.Version);
+                    cacheStringId = CacheContext.StringTable.AddString(modString);
 
                 StringIdMapping[stringId] = cacheStringId;
                 return cacheStringId;
@@ -277,7 +276,7 @@ namespace TagTool.Commands.Modding
             resourceStream.Position = 0;
             resource.ChangeLocation(ResourceLocation.ResourcesB);
             resource.Page.OldFlags &= ~OldRawPageFlags.InMods;
-            CacheContext.AddResource(resource, resourceStream);
+            CacheContext.ResourceCaches.AddResource(resource, resourceStream);
 
             return resource;
         }
@@ -410,7 +409,7 @@ namespace TagTool.Commands.Modding
             if (tagIndex == -1)
                 return;
 
-            var tag = ConvertCachedTagInstance(modPack, modPack.TagCaches[0].Index[tagIndex]);
+            var tag = ConvertCachedTagInstance(modPack, modPack.TagCaches[0].Tags[tagIndex]);
             expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
         }
     }

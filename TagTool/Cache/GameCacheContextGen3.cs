@@ -85,8 +85,8 @@ namespace TagTool.Cache
         //
 
         public override Stream OpenCacheRead() => CacheFile.OpenRead();
-        public override FileStream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
-        public override FileStream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
+        public override Stream OpenCacheReadWrite() => CacheFile.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenCacheWrite() => CacheFile.Open(FileMode.Open, FileAccess.Write);
 
         #region Serialization
 
@@ -217,9 +217,9 @@ namespace TagTool.Cache
 
         public override Stream OpenTagCacheRead() => GameCache.OpenCacheRead();
 
-        public override FileStream OpenTagCacheReadWrite() => GameCache.OpenCacheReadWrite();
+        public override Stream OpenTagCacheReadWrite() => GameCache.OpenCacheReadWrite();
 
-        public override FileStream OpenTagCacheWrite() => GameCache.OpenCacheWrite();
+        public override Stream OpenTagCacheWrite() => GameCache.OpenCacheWrite();
 
         public TagCacheGen3(GameCacheContextGen3 cache, EndianReader reader, MapFile baseMapFile, StringTableGen3 stringTable, int Magic)
         {
@@ -727,30 +727,8 @@ namespace TagTool.Cache
                 for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
                 {
                     var fixup = tagResource.ResourceFixups[i];
-                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
-                    if(fixup.Address.Type == CacheAddressType.Definition)
-                    {
-                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write(fixup.Address.Value);
-                    }
-                }
-            }
-        }
-
-        private void ApplyResourceDataFixups(TagResourceGen3 tagResource, byte[] resourceDefinitionData, int rawOffset)
-        {
-            using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
-            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
-            {
-                for (int i = 0; i < tagResource.ResourceFixups.Count; i++)
-                {
-                    var fixup = tagResource.ResourceFixups[i];
-                    // apply fixup to the resource definition (it sets the offsets for the stuctures and resource data)
-                    if (fixup.Address.Type == CacheAddressType.Data || fixup.Address.Type == CacheAddressType.SecondaryData)
-                    {
-                        fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
-                        fixupWriter.Write((uint)(fixup.Address.Value + rawOffset));
-                    }
+                    fixupWriter.Seek((int)fixup.BlockOffset, SeekOrigin.Begin);
+                    fixupWriter.Write(fixup.Address.Value);
                 }
             }
         }
@@ -764,7 +742,6 @@ namespace TagTool.Cache
             Array.Copy(ResourceGestalt.DefinitionData, tagResource.DefinitionDataOffset, resourceDefinitionData, 0, tagResource.DefinitionDataLength);
 
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
-            ApplyResourceDataFixups(tagResource, resourceDefinitionData, 0);
 
             byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
             byte[] secondaryResourceData =  GetSecondaryResource(resourceReference.Gen3ResourceID);
