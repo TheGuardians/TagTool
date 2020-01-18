@@ -632,7 +632,7 @@ namespace TagTool.Commands.Porting
                     return;
                 }
 
-                var visitedPaletteObjects = new HashSet<CachedTagInstance>();
+                var visitedPaletteObjects = new HashSet<CachedTag>();
                 var newPalette = new List<ScenarioPaletteEntry>();
                 var newObjects = new List<T>();
                 var keepPaletteIndices = new HashSet<int>();

@@ -15,11 +15,11 @@ namespace TagTool.Animations
     public class AnimationExtractor
     {
         private Scene Scene;
-        private readonly HaloOnlineCacheContext CacheContext;
+        private readonly GameCache CacheContext;
         private readonly ModelAnimationGraph ModelAnimationGraph;
         private List<Node> Nodes;
 
-        public AnimationExtractor(ModelAnimationGraph modelAnimationGraph, HaloOnlineCacheContext cacheContext)
+        public AnimationExtractor(ModelAnimationGraph modelAnimationGraph, GameCache cacheContext)
         {
             ModelAnimationGraph = modelAnimationGraph;
             CacheContext = cacheContext;
@@ -27,7 +27,7 @@ namespace TagTool.Animations
             Nodes = new List<Node>();
             for(int i = 0; i< ModelAnimationGraph.SkeletonNodes.Count; i++)
             {
-                Nodes.Add(new Node(CacheContext.GetString(ModelAnimationGraph.SkeletonNodes[i].Name)));
+                Nodes.Add(new Node(CacheContext.StringTable.GetString(ModelAnimationGraph.SkeletonNodes[i].Name)));
             }
         }
 
@@ -39,7 +39,7 @@ namespace TagTool.Animations
             for(int i = 0; i< ModelAnimationGraph.Animations.Count; i++)
             {
                 var tagAnimation = ModelAnimationGraph.Animations[i];
-                var name = CacheContext.GetString(tagAnimation.Name);
+                var name = CacheContext.StringTable.GetString(tagAnimation.Name);
 
                 if(animationName == "*" || name == animationName)
                 {

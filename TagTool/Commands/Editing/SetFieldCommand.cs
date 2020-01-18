@@ -142,12 +142,12 @@ namespace TagTool.Commands.Editing
                             throw new FormatException(fieldValue.ToString());
                     }
 
-                    ResourceCache oldCache = null;
+                    ResourceCacheHaloOnline oldCache = null;
 
                     if (pageable.GetLocation(out var oldLocation))
-                        oldCache = new ResourceCache(haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation));
+                        oldCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation));
 
-                    var newCache = new ResourceCache(haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation));
+                    var newCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation));
 
                     var data = File.ReadAllBytes(resourceFile.FullName);
 

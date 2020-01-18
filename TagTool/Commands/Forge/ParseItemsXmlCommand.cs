@@ -73,7 +73,7 @@ namespace TagTool.Commands.Forge
             return true;
         }
 
-        string TagName(CachedTagInstance tag)
+        string TagName(CachedTag tag)
         {
             if (tag == null)
                 return "null";

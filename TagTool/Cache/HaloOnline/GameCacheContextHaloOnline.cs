@@ -87,12 +87,6 @@ namespace TagTool.Cache
 
         #endregion
 
-        private class LoadedResourceCache
-        {
-            public ResourceCache Cache { get; set; }
-            public FileInfo File { get; set; }
-        }
-
         public void SignalModifiedTag(int index) { ModifiedTags.Add(index); }
 
         public void SaveModifiedTagNames(string path = null)
@@ -1502,8 +1496,6 @@ namespace TagTool.Cache
 
                 Resources.Add(new Resource { Offset = address });
             }
-
-            
 
             // compute chunk sizes
 
