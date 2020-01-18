@@ -2,7 +2,7 @@
 using TagTool.Tags;
 using System;
 
-namespace TagTool.Cache
+namespace TagTool.BlamFile
 {
     [TagStructure(Size = 0xE090)]
     public class MapVariant

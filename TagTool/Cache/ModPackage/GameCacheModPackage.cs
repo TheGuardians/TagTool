@@ -11,6 +11,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Resources;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Cache
 {
@@ -29,9 +30,9 @@ namespace TagTool.Cache
 
         public override StringTable StringTable => ModPackageStringTable;
 
-        public override TagCacheTest TagCache => ModPackageTagCache;
+        public override TagCache TagCache => ModPackageTagCache;
 
-        public override ResourceCacheTest ResourceCache => ModPackageResourceCache;
+        public override ResourceCache ResourceCache => ModPackageResourceCache;
 
 
 
@@ -196,7 +197,7 @@ namespace TagTool.Cache
         }
     }
     
-    public class ModPackageTagCache : TagCacheTest
+    public class ModPackageTagCache : TagCache
     {
         public List<CachedTagHaloOnline> Tags;
         public TagCacheHaloOnlineHeader Header;
@@ -621,7 +622,7 @@ namespace TagTool.Cache
         }
     }
 
-    public class ResourceCacheModPackage : ResourceCacheTest
+    public class ResourceCacheModPackage : ResourceCache
     {
         public ResourceCacheHaloOnline HoResourceCache;
         public Stream ResourceStream;

@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {

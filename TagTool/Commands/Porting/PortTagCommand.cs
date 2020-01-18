@@ -15,6 +15,7 @@ using TagTool.Tags.Definitions;
 using TagTool.Serialization;
 using System.Text.RegularExpressions;
 using TagTool.IO;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Porting
 {

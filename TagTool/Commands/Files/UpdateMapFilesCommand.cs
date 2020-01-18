@@ -7,6 +7,7 @@ using TagTool.Common;
 using TagTool.Tags.Definitions;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Files
 {

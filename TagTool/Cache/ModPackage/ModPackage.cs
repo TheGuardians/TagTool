@@ -4,6 +4,8 @@ using System.IO;
 using System.Security.Cryptography;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Cache.HaloOnline;
+using TagTool.BlamFile;
 
 namespace TagTool.Cache
 {

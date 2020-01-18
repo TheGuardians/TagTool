@@ -6,17 +6,6 @@ namespace TagTool.Cache
     public static class CacheVersionDetection
     {
         /// <summary>
-        /// Detects the engine that a tags.dat was built for.
-        /// </summary>
-        /// <param name="cacheHeader">The cache file.</param>
-        /// <param name="closestGuess">On return, the closest guess for the engine's version.</param>
-        /// <returns>The engine version if it is known for sure, otherwise <see cref="CacheVersion.Unknown"/>.</returns>
-        public static CacheVersion DetectFromTagCache(TagCacheHaloOnlineHeader cacheHeader, out CacheVersion closestGuess)
-        {
-            return DetectFromTimestamp(cacheHeader.CreationTime, out closestGuess);
-        }
-
-        /// <summary>
         /// Detects the engine that a tags.dat was built for based on its timestamp.
         /// </summary>
         /// <param name="timestamp">The timestamp.</param>

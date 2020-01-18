@@ -2,7 +2,7 @@
 using static System.Runtime.InteropServices.CharSet;
 using static TagTool.Tags.TagFieldFlags;
 
-namespace TagTool.Cache
+namespace TagTool.BlamFile
 {
     [TagStructure(Size = 0xF8)]
     public class ContentItemMetadata

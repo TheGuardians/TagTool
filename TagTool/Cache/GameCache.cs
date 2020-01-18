@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
-using TagTool.Tags.Resources;
+using TagTool.BlamFile;
 
 namespace TagTool.Cache
 {
@@ -25,8 +22,8 @@ namespace TagTool.Cache
 
         public List<LocaleTable> LocaleTables;
         public abstract StringTable StringTable { get; }
-        public abstract TagCacheTest TagCache { get; }
-        public abstract ResourceCacheTest ResourceCache { get; }
+        public abstract TagCache TagCache { get; }
+        public abstract ResourceCache ResourceCache { get; }
 
         public abstract Stream OpenCacheRead();
         public abstract Stream OpenCacheReadWrite();
@@ -353,216 +350,4 @@ namespace TagTool.Cache
         }
     }
 
-    public abstract class CachedTag
-    {
-        public string Name;
-        public int Index;
-        public uint ID;
-        public TagGroup Group;
-
-        public abstract uint DefinitionOffset { get; }
-
-        public CachedTag()
-        {
-            Index = -1;
-            Name = null;
-            Group = TagGroup.None;
-        }
-
-        public CachedTag(int index, string name = null) : this(index, TagGroup.None, name) { }
-
-        public CachedTag(int index, TagGroup group, string name = null)
-        {
-            Index = index;
-            Group = group;
-            if (name != null)
-                Name = name;
-        }
-
-        public override string ToString()
-        {
-            if(Name == null)
-                return $"0x{Index.ToString("X8")}.{Group.ToString()}";
-            else
-                return $"{Name}.{Group.ToString()}";
-        }
-
-        public bool IsInGroup(params Tag[] groupTags)
-        {
-            return Group.BelongsTo(groupTags);
-        }
-    }
-
-    public abstract class TagCacheTest
-    {
-        // TODO: refactor TagGroup to contain a string instead of string ID
-        public CacheVersion Version;
-        public virtual IEnumerable<CachedTag> TagTable { get; }
-        public int Count => TagTable.Count();
-        public abstract CachedTag GetTag(uint ID);
-        public abstract CachedTag GetTag(int index);
-        public abstract CachedTag GetTag(string name, Tag groupTag);
-        
-        public abstract CachedTag AllocateTag(TagGroup type, string name = null);
-
-        public abstract CachedTag CreateCachedTag(int index, TagGroup group, string name = null);
-        public abstract CachedTag CreateCachedTag();
-
-        public abstract Stream OpenTagCacheRead();
-        public abstract Stream OpenTagCacheReadWrite();
-        public abstract Stream OpenTagCacheWrite();
-
-        // Utilities
-
-        public bool IsTagIndexValid(int tagIndex)
-        {
-            if (tagIndex > 0 && tagIndex < TagTable.Count())
-                return true;
-            else
-                return false;
-        }
-
-        public IEnumerable<CachedTag> FindAllInGroup(Tag groupTag) =>
-            NonNull().Where(t => t.IsInGroup(groupTag));
-
-        public IEnumerable<CachedTag> NonNull() =>
-            TagTable.Where(t =>
-                (t != null) &&
-                (t.DefinitionOffset >= 0));
-
-        public CachedTag FindFirstInGroup(Tag groupTag) =>
-            NonNull().FirstOrDefault(t => t.IsInGroup(groupTag));
-
-        public bool TryAllocateTag(out CachedTag result, Type type, string name = null)
-        {
-            result = null;
-
-            try
-            {
-                var structure = TagStructure.GetTagStructureInfo(type, Version).Structure;
-
-                if (structure == null)
-                {
-                    Console.WriteLine($"TagStructure attribute not found for type \"{type.Name}\".");
-                    return false;
-                }
-
-                var groupTag = new Tag(structure.Tag);
-
-                if (!TagGroup.Instances.ContainsKey(groupTag))
-                {
-                    Console.WriteLine($"TagGroup not found for type \"{type.Name}\" ({structure.Tag}).");
-                    return false;
-                }
-
-                result = AllocateTag(TagGroup.Instances[groupTag], name);
-
-                if (result == null)
-                    return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"{e.GetType().Name}: {e.Message}");
-                return false;
-            }
-
-            return true;
-        }
-
-        public CachedTag AllocateTag(Type type, string name = null)
-        {
-            if (TryAllocateTag(out var result, type, name))
-                return result;
-
-            Console.WriteLine($"Failed to allocate tag of type \"{type.Name}\".");
-            return null;
-        }
-
-        public CachedTag AllocateTag<T>(string name = null) where T : TagStructure
-            => AllocateTag(typeof(T), name);
-
-    }
-
-    public abstract class StringTable : List<string>
-    {
-        public CacheVersion Version;
-        public StringIdResolver Resolver;
-
-        public abstract StringId AddString(string newString);
-
-        public abstract void Save();
-
-        // override if required
-        public virtual string GetString(StringId id)
-        {
-            var index = Resolver.StringIDToIndex(id);
-            if (index > 0 && index < Count)
-                return this[index];
-            else
-                return "invalid";
-        }
-        
-        public virtual StringId GetStringId(string str)
-        {
-            for (int i = 0; i < Count; i++)
-            {
-                if (this[i] == str)
-                {
-                    return Resolver.IndexToStringID(i, Version);
-                }
-            }
-            return StringId.Invalid;
-        }
-
-        public virtual StringId GetStringId(int index)
-        {
-            if (index < 0 || index >= this.Count)
-                return StringId.Invalid;
-
-            return Resolver.IndexToStringID(index);
-        }
-    }
-
-    public abstract class ResourceCacheTest
-    {
-        public abstract BinkResource GetBinkResource(TagResourceReference resourceReference);
-        public abstract BitmapTextureInteropResource GetBitmapTextureInteropResource(TagResourceReference resourceReference);
-        public abstract BitmapTextureInterleavedInteropResource GetBitmapTextureInterleavedInteropResource(TagResourceReference resourceReference);
-        public abstract RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinition(TagResourceReference resourceReference);
-        public abstract ModelAnimationTagResource GetModelAnimationTagResource(TagResourceReference resourceReference);
-        public abstract SoundResourceDefinition GetSoundResourceDefinition(TagResourceReference resourceReference);
-        public abstract StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference);
-        public abstract StructureBspCacheFileTagResources GetStructureBspCacheFileTagResources(TagResourceReference resourceReference);
-
-        public abstract TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition);
-        public abstract TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinition renderGeometryDefinition);
-        public abstract TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition);
-        public abstract TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition);
-        public abstract TagResourceReference CreateBitmapResource(BitmapTextureInteropResource bitmapResourceDefinition);
-        public abstract TagResourceReference CreateBitmapInterleavedResource(BitmapTextureInterleavedInteropResource bitmapResourceDefinition);
-        public abstract TagResourceReference CreateStructureBspResource(StructureBspTagResources sbspResource);
-        public abstract TagResourceReference CreateStructureBspCacheFileResource(StructureBspCacheFileTagResources sbspCacheFileResource);
-    }
-
-    public class CacheLocalizedStringTest
-    {
-        public int StringIndex;
-        public string String;
-        public int Index;
-
-        public CacheLocalizedStringTest(int index, string locale, int localeIndex)
-        {
-            StringIndex = index;
-            String = locale;
-            Index = localeIndex;
-        }
-    }
-
-    public class LocaleTable : List<CacheLocalizedStringTest> { }
-
-    public class ResourceSize
-    {
-        public int PrimarySize;
-        public int SecondarySize;
-    }
 }

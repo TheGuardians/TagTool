@@ -6,6 +6,7 @@ using TagTool.Analysis;
 using TagTool.Cache;
 using TagTool.Layouts;
 using TagTool.Commands.Common;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Definitions
 {

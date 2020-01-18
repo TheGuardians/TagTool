@@ -1,10 +1,11 @@
 ﻿using System;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 
-namespace TagTool.Cache
+namespace TagTool.BlamFile
 {
     /// <summary>
     /// Main class for blf format. Reads, parse and writes blf.

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using TagTool.Tags;
 
-namespace TagTool.Cache
+namespace TagTool.Cache.HaloOnline
 {
     /// <summary>
     /// Contains tag data and a description of it.

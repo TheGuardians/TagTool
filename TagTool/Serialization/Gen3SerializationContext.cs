@@ -6,6 +6,7 @@ using TagTool.Tags;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Serialization
 {

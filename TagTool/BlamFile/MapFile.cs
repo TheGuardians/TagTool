@@ -4,8 +4,11 @@ using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Cache.Gen3;
+using TagTool.BlamFile;
+using TagTool.Cache;
 
-namespace TagTool.Cache
+namespace TagTool.BlamFile
 {
     public enum MapFileVersion : int
     {

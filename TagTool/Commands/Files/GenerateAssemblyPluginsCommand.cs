@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Files
 {

@@ -6,6 +6,7 @@ using TagTool.Cache;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Shaders.ShaderMatching
 {

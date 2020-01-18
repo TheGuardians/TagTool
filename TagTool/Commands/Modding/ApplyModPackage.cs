@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.IO;
@@ -12,7 +10,8 @@ using TagTool.Scripting;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
+using TagTool.Cache.HaloOnline;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Modding
 {

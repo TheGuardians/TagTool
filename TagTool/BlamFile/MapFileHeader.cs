@@ -1,8 +1,9 @@
-﻿using TagTool.Common;
+﻿using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 
-namespace TagTool.Cache
+namespace TagTool.BlamFile
 {
     [TagStructure(Size = 0x800, MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]

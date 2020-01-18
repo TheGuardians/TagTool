@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using TagTool.Cache;
 using TagTool.Tags;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Serialization
 {

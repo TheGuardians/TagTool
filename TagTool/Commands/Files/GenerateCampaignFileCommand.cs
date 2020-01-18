@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Tags.Definitions;
 using TagTool.IO;
-using TagTool.Serialization;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Files
 {
@@ -45,7 +42,6 @@ namespace TagTool.Commands.Files
             using (var destStream = destFile.Create())
             using (var writer = new EndianWriter(destStream))
             {
-
                 Blf campaignBlf = new Blf(CacheVersion.Halo3Retail);
                 campaignBlf.Read(reader);
                 campaignBlf.ConvertBlf(Cache.Version);
