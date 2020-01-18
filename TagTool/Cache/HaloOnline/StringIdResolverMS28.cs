@@ -10,6 +10,13 @@ namespace TagTool.Cache
         private const int SetMin = 0x1;   // Mininum index that goes in a set
         private const int SetMax = 0xF1F; // Maximum index that goes in a set
 
+        public StringIdResolverMS28()
+        {
+            LengthBits = 8;
+            SetBits = 8;
+            IndexBits = 16;
+        }
+
         public override int GetMinSetStringIndex() => SetMin;
 
         public override int GetMaxSetStringIndex() => SetMax;

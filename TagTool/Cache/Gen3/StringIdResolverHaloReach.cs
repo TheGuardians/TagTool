@@ -1,3 +1,5 @@
+using TagTool.Common;
+
 namespace TagTool.Cache
 {
     /// <summary>
@@ -8,6 +10,13 @@ namespace TagTool.Cache
         private static readonly int[] SetOffsets = { 0x16AA, 0x4AE, 0xB13, 0xBEB, 0xC55, 0xD2E, 0xD54, 0xD59, 0x1416, 0x1585, 0x1599, 0x15FB, 0x1613, 0x1620, 0x1649 };
         private const int SetMin = 0x4AE;   // Mininum index that goes in a set
         private const int SetMax = 0xFFFF; // Maximum index that goes in a set
+
+        public StringIdResolverHaloReach()
+        {
+            LengthBits = 7;
+            SetBits = 8;
+            IndexBits = 17;
+        }
 
         public override int GetMinSetStringIndex()
         {

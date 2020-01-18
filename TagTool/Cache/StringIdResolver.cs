@@ -8,6 +8,10 @@ namespace TagTool.Cache
     /// </summary>
     public abstract class StringIdResolver
     {
+        public int LengthBits;
+        public int SetBits;
+        public int IndexBits;
+
         /// <summary>
         /// Gets the index of the first string which belongs to a set.
         /// </summary>
@@ -22,6 +26,24 @@ namespace TagTool.Cache
         /// Gets the beginning offset for each set.
         /// </summary>
         public abstract int[] GetSetOffsets();
+
+        public int GetSet(StringId stringId)
+        {
+            var setMask = (0x1 << SetBits) - 1;
+            return (int)((stringId.Value >> IndexBits) & setMask);
+        }
+
+        public int GetIndex(StringId stringId)
+        {
+            var indexMask = (0x1 << IndexBits) - 1;
+            return (int)((stringId.Value >> 0) & indexMask);
+        }
+
+        public int GetLength(StringId stringId)
+        {
+            var lengthMask = (0x1 << LengthBits) - 1;
+            return (int)((stringId.Value >> (IndexBits + SetBits)) & lengthMask);
+        }
 
         /// <summary>
         /// Converts a stringID value to a string list index.
