@@ -571,14 +571,14 @@ namespace TagTool.Tags.Definitions
                 public List<TinyPositionVertex> Vertices;
 
                 [TagStructure(Size = 0x2)]
-                public class Gen3DecoratorInfo
+                public class Gen3DecoratorInfo : TagStructure
                 {
                     public sbyte PaletteIndex;
                     public sbyte VertexBufferIndex;
                 }
 
                 [TagStructure(Size = 0x6)]
-                public class HaloOnlineDecoratorInfo
+                public class HaloOnlineDecoratorInfo : TagStructure
                 {
                     public short PaletteIndex;
                     public short Variant;
