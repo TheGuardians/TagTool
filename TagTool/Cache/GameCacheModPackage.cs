@@ -215,7 +215,22 @@ namespace TagTool.Cache
             if (stream.Length != 0)
                 Load(new EndianReader(stream, EndianFormat.LittleEndian), tagNames);
             else
-                Console.Error.WriteLine("Failed to open tag cache");
+            {
+                // create empty tag cache TODO: improve that remove duplicated code
+                TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
+                {
+                    TagTableOffset = 0x20,
+                    CreationTime = 0x01D0631BCC791704
+                };
+
+                stream.Position = 0;
+                var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
+                var dataContext = new DataSerializationContext(writer);
+                var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+                serializer.Serialize(dataContext, header);
+                stream.Position = 0;
+            }
+                
         }
 
         private void Load(EndianReader reader, Dictionary<int, string> names)

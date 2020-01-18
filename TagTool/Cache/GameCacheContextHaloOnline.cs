@@ -641,13 +641,10 @@ namespace TagTool.Cache
             };
 
             stream.Position = 0;
-            using (var writer = new EndianWriter(stream, EndianFormat.LittleEndian))
-            {
-                
-                var dataContext = new DataSerializationContext(writer);
-                var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
-                serializer.Serialize(dataContext, header);
-            }
+            var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
+            var dataContext = new DataSerializationContext(writer);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            serializer.Serialize(dataContext, header);
             stream.Position = 0;
 
             return new TagCacheHaloOnline(directory);
@@ -1462,7 +1459,7 @@ namespace TagTool.Cache
             Version = version;
             Resources = new List<Resource>();
             if(stream.Length == 0)
-                CreateEmptyResourceCache();
+                CreateEmptyResourceCache(stream);
             else
                 Read(stream);
         }
@@ -1471,14 +1468,18 @@ namespace TagTool.Cache
         {
             Version = version;
             Resources = new List<Resource>();
-            CreateEmptyResourceCache();
+            Header = new ResourceCacheHaloOnlineHeader
+            {
+                ResourceTableOffset = 0x20,
+                CreationTime = 0x01D0631BCC92931B
+            };
         }
 
         private void Read(Stream stream)
         {
             // don't use using{}, we want to maintain the stream open. reader/writers will automatically close the stream when done in an using.
             var reader = new EndianReader(stream, EndianFormat.LittleEndian);
-
+            stream.Position = 0;
             var addresses = new List<uint>();
             var sizes = new List<uint>();
             var dataContext = new DataSerializationContext(reader);
@@ -1489,6 +1490,9 @@ namespace TagTool.Cache
 
             // read all resource offsets
 
+            if (Header.ResourceCount == 0)
+                return;
+
             for (var i = 0; i < Header.ResourceCount; i++)
             {
                 var address = reader.ReadUInt32();
@@ -1498,6 +1502,8 @@ namespace TagTool.Cache
 
                 Resources.Add(new Resource { Offset = address });
             }
+
+            
 
             // compute chunk sizes
 
@@ -1528,13 +1534,19 @@ namespace TagTool.Cache
             }
         }
 
-        private void CreateEmptyResourceCache()
+        private void CreateEmptyResourceCache(Stream stream)
         {
             Header = new ResourceCacheHaloOnlineHeader
             {
                 ResourceTableOffset = 0x20,
                 CreationTime = 0x01D0631BCC92931B
             };
+            stream.Position = 0;
+            var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
+            var dataContext = new DataSerializationContext(writer);
+            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            serializer.Serialize(dataContext, Header);
+            stream.Position = 0;
         }
 
         /// <summary>
