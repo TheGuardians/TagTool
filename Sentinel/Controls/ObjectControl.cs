@@ -18,7 +18,7 @@ namespace Sentinel.Controls
 {
     public partial class ObjectControl : UserControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public GameObject Definition { get; }
         public bool Initialized { get; private set; } = false;
 
@@ -34,10 +34,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public ObjectControl(HaloOnlineCacheContext cacheContext, GameObject definition) :
+        public ObjectControl(GameCache cache, GameObject definition) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 
@@ -78,7 +78,7 @@ namespace Sentinel.Controls
             Device.DeviceReset += new EventHandler(OnResetDevice);
             OnResetDevice(Device, null);
 
-            Instance = new RenderObject(Device, CacheContext, Definition, new TagTool.Common.RealPoint3d(), new TagTool.Common.RealEulerAngles3d());
+            Instance = new RenderObject(Device, Cache, Definition, new TagTool.Common.RealPoint3d(), new TagTool.Common.RealEulerAngles3d());
 
             if (Camera != null)
                 Camera.Dispose();

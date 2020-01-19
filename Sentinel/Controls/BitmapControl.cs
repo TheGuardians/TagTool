@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TagTool.Bitmaps;
 using TagTool.Cache;
 using System.IO;
 
@@ -29,8 +30,6 @@ namespace Sentinel.Controls
             Bitmap = bitmap;
 
             Bitmap result = null;
-
-            var extractor = new TagTool.Bitmaps.BitmapExtractor(Cache);
             var transparent = false;
 
             // Create a DevIL image "name" (which is actually a number)
@@ -39,7 +38,7 @@ namespace Sentinel.Controls
 
             DevIL.ilBindImage(img_name);
 
-            var ddsData = extractor.ExtractBitmapToDDSArray(Bitmap, 0);
+            var ddsData = BitmapExtractor.ExtractBitmapToDDSArray(cache, Bitmap, 0);
 
             // Load the DDS file into the bound DevIL image
             DevIL.ilLoadL(DevIL.IL_DDS, ddsData, ddsData.Length);

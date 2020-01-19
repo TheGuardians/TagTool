@@ -17,8 +17,8 @@ namespace Sentinel.Controls
 {
     public partial class SoundControl : UserControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
-        public CachedTagInstance TagInstance { get; }
+        public GameCache Cache { get; }
+        public CachedTag Tag { get; }
         public Sound Sound { get; }
         public FileInfo SoundFile { get; }
         public WindowsMediaPlayer Player { get; private set; }
@@ -28,16 +28,16 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public SoundControl(HaloOnlineCacheContext cacheContext, CachedTagInstance tagInstance, Sound sound) :
+        public SoundControl(GameCache cache, CachedTag tag, Sound sound) :
             this()
         {
-            CacheContext = cacheContext;
-            TagInstance = tagInstance;
+            Cache = cache;
+            Tag = tag;
             Sound = sound;
-            SoundFile = new FileInfo(Path.Combine(Application.StartupPath, "temp", $"{TagInstance.Index:X4}.mp3"));
+            SoundFile = new FileInfo(Path.Combine(Application.StartupPath, "temp", $"{Tag.Index:X4}.mp3"));
         }
 
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad(EventArgs e) // endianness for Gen3 probably needs updating
         {
             stopButton_Click(this, e);
 
@@ -47,8 +47,11 @@ namespace Sentinel.Controls
             if (SoundFile.Exists)
                 SoundFile.Delete();
 
+            var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
+            var dataReference = resourceDefinition.Data;
+
             using (var fileStream = SoundFile.Create())
-                CacheContext.ExtractResource(Sound.Resource.HaloOnlinePageableResource, fileStream);
+                fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
 
             base.OnLoad(e);
         }
@@ -83,13 +86,21 @@ namespace Sentinel.Controls
                 SoundFile.Directory.Create();
 
             if (!SoundFile.Exists)
+            {
+                var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
+                var dataReference = resourceDefinition.Data;
+
                 using (var fileStream = SoundFile.Create())
-                    CacheContext.ExtractResource(Sound.Resource.HaloOnlinePageableResource, fileStream);
+                    fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
+            }
 
             var destSoundFile = new FileInfo(sfd.FileName);
 
             if (!destSoundFile.Directory.Exists)
                 destSoundFile.Directory.Create();
+
+            if (destSoundFile.Exists)
+                destSoundFile.Delete();
 
             SoundFile.CopyTo(destSoundFile.FullName);
         }

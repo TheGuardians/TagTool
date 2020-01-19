@@ -18,7 +18,7 @@ namespace Sentinel.Controls
 {
     public partial class ScenarioControl : UserControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public Scenario Definition { get; }
         public bool Initialized { get; private set; } = false;
 
@@ -34,10 +34,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public ScenarioControl(HaloOnlineCacheContext cacheContext, Scenario definition) :
+        public ScenarioControl(GameCache cache, Scenario definition) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Definition = definition;
         }
 

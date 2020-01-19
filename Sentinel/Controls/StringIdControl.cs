@@ -10,7 +10,7 @@ namespace Sentinel.Controls
 {
     public partial class StringIdControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public object Owner { get; set; } = null;
         public bool Loading { get; set; } = false;
@@ -20,10 +20,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public StringIdControl(HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public StringIdControl(GameCache cache, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced();
 
@@ -38,7 +38,7 @@ namespace Sentinel.Controls
             Owner = owner;
             Loading = true;
 
-            textBox.Text = CacheContext.GetString((StringId)value);
+            textBox.Text = Cache.StringTable.GetString((StringId)value);
 
             Loading = false;
         }
@@ -50,12 +50,12 @@ namespace Sentinel.Controls
 
             if (value == null)
             {
-                if (CacheContext.TryGetStringId(textBox.Text, out var stringId))
+                try
                 {
-                    value = stringId;
+                    value = Cache.StringTable.GetStringId(textBox.Text);
                     textBox.ForeColor = SystemColors.WindowText;
                 }
-                else
+                catch (Exception)
                 {
                     textBox.ForeColor = Color.Red;
                     return;
@@ -67,12 +67,12 @@ namespace Sentinel.Controls
 
         private void browseButton_Click(object sender, EventArgs e)
         {
-            using (var sid = new StringIdDialog(CacheContext))
+            using (var sid = new StringIdDialog(Cache))
             {
                 if (sid.ShowDialog() != DialogResult.OK)
                     return;
 
-                textBox.Text = CacheContext.GetString(sid.Value);
+                textBox.Text = Cache.StringTable.GetString(sid.Value);
             }
         }
 

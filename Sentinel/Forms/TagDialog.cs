@@ -10,19 +10,19 @@ namespace Sentinel.Forms
 {
     public partial class TagDialog : Form
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
 
-        public CachedTagInstance Value => tagTreeView.SelectedNode?.Tag as CachedTagInstance ?? null;
+        public CachedTag Value => tagTreeView.SelectedNode?.Tag as CachedTag ?? null;
         
         public TagDialog()
         {
             InitializeComponent();
         }
 
-        public TagDialog(HaloOnlineCacheContext cacheContext) :
+        public TagDialog(GameCache cache) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -56,7 +56,7 @@ namespace Sentinel.Forms
                 SelectedImageKey = "folder"
             };
 
-            foreach (var tag in CacheContext.TagCache.Index.Where(i => i != null && i.Name != null))
+            foreach (var tag in Cache.TagCache.TagTable.Where(i => i != null && i.Name != null))
             {
                 if (tag == null)
                     continue;
@@ -70,7 +70,7 @@ namespace Sentinel.Forms
                 CreateTagTreeNode(tag, ref unnamed);
             }
 
-            foreach (var tag in CacheContext.TagCache.Index.Where(i => i != null && i.Name == null))
+            foreach (var tag in Cache.TagCache.TagTable.Where(i => i != null && i.Name == null))
             {
                 if (groupFilter?.Where(groupTag => tag.IsInGroup(groupTag)).Count() == 0)
                     continue;
@@ -82,7 +82,7 @@ namespace Sentinel.Forms
                 tagTreeView.Nodes.Add(unnamed);
         }
 
-        private string GetTagTreeNodeImageKey(CachedTagInstance tag)
+        private string GetTagTreeNodeImageKey(CachedTag tag)
         {
             if (tag.IsInGroup("cfgt") || tag.IsInGroup("matg") || tag.IsInGroup("mulg") ||
                 tag.IsInGroup("aigl") || tag.IsInGroup("smdt") ||
@@ -99,7 +99,7 @@ namespace Sentinel.Forms
                 return "file";
         }
 
-        private TreeNode CreateTagTreeNode(CachedTagInstance tag, ref TreeNode unnamed)
+        private TreeNode CreateTagTreeNode(CachedTag tag, ref TreeNode unnamed)
         {
             if (tag == null)
                 return null;
@@ -123,7 +123,7 @@ namespace Sentinel.Forms
                 }
             }
 
-            var groupName = CacheContext.GetString(tag.Group.Name);
+            var groupName = Cache.StringTable.GetString(tag.Group.Name);
 
             if (tag.Name == null)
             {
@@ -226,7 +226,7 @@ namespace Sentinel.Forms
 
         private void tagTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            okButton.Enabled = tagTreeView.SelectedNode?.Tag is CachedTagInstance;
+            okButton.Enabled = tagTreeView.SelectedNode?.Tag is CachedTag;
         }
 
         private void searchButton_Click(object sender, EventArgs e)

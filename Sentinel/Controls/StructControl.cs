@@ -18,7 +18,7 @@ namespace Sentinel.Controls
 {
     public partial class StructControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; } = null;
+        public GameCache Cache { get; } = null;
         public FieldInfo Field { get; set; } = null;
         public Dictionary<string, IFieldControl> FieldControls { get; set; } = new Dictionary<string, IFieldControl>();
 
@@ -27,10 +27,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public StructControl(CacheForm form, HaloOnlineCacheContext cacheContext, Type type, FieldInfo field) :
+        public StructControl(CacheForm form, GameCache cache, Type type, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
 
             if (Field == null)
@@ -57,7 +57,7 @@ namespace Sentinel.Controls
             if (value == null)
                 value = Activator.CreateInstance(Field.FieldType);
 
-            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(Field?.FieldType ?? value.GetType(), CacheContext.Version));
+            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(Field?.FieldType ?? value.GetType(), Cache.Version));
 
             foreach (var fieldInfo in enumerator)
                 if (FieldControls.ContainsKey(fieldInfo.FieldInfo.Name))
@@ -69,7 +69,7 @@ namespace Sentinel.Controls
             if (value == null && owner != null)
                 value = Field.GetValue(owner);
 
-            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(Field?.FieldType ?? value.GetType(), CacheContext.Version));
+            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(Field?.FieldType ?? value.GetType(), Cache.Version));
 
             foreach (var fieldInfo in enumerator)
                 if (FieldControls.ContainsKey(fieldInfo.FieldInfo.Name))
@@ -83,7 +83,7 @@ namespace Sentinel.Controls
             Enabled = false;
 
             var result = new Dictionary<string, IFieldControl>();
-            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(type, CacheContext.Version));
+            var enumerator = TagStructure.GetTagFieldEnumerable(new TagStructureInfo(type, Cache.Version));
 
             var currentLocation = new Point(parent is GroupBox ? 3 : 0, parent is GroupBox ? 16 : 0);
 
@@ -102,7 +102,7 @@ namespace Sentinel.Controls
 
                 if (fieldType == typeof(StringId))
                 {
-                    control = new StringIdControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new StringIdControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType.IsEnum)
                 {
@@ -117,85 +117,85 @@ namespace Sentinel.Controls
                 }
                 else if (fieldType == typeof(Point2d))
                 {
-                    control = new Point2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new Point2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(Rectangle2d))
                 {
-                    control = new Rectangle2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new Rectangle2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(ArgbColor))
                 {
-                    control = new ArgbColorControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new ArgbColorControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealPoint2d))
                 {
-                    control = new RealPoint2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealPoint2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealPoint3d))
                 {
-                    control = new RealPoint3dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealPoint3dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealVector2d))
                 {
-                    control = new RealVector2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealVector2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealVector3d))
                 {
-                    control = new RealVector3dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealVector3dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealQuaternion))
                 {
-                    control = new RealQuaternionControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealQuaternionControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealRgbColor))
                 {
-                    control = new RealRgbColorControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealRgbColorControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealArgbColor))
                 {
-                    control = new RealArgbColorControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealArgbColorControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealEulerAngles2d))
                 {
-                    control = new RealEulerAngles2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealEulerAngles2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealEulerAngles3d))
                 {
-                    control = new RealEulerAngles3dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealEulerAngles3dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealPlane2d))
                 {
-                    control = new RealPlane2dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealPlane2dControl(Cache, fieldInfo.FieldInfo);
                 }
                 else if (fieldType == typeof(RealPlane3d))
                 {
-                    control = new RealPlane3dControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new RealPlane3dControl(Cache, fieldInfo.FieldInfo);
                 }
-                else if (fieldType == typeof(CachedTagInstance))
+                else if (fieldType == typeof(CachedTag))
                 {
-                    control = new TagReferenceControl(form, CacheContext, fieldInfo.FieldInfo);
+                    control = new TagReferenceControl(form, Cache, fieldInfo.FieldInfo);
                 }
                 else if (isTagBlock)
                 {
-                    control = new BlockControl(form, CacheContext, fieldType, fieldInfo.FieldInfo);
+                    control = new BlockControl(form, Cache, fieldType, fieldInfo.FieldInfo);
 
                     if (((BlockControl)control).Struct.FieldControls.Count == 0)
                         continue;
                 }
                 else if (isStruct)
                 {
-                    control = new StructControl(form, CacheContext, fieldType, fieldInfo.FieldInfo);
+                    control = new StructControl(form, Cache, fieldType, fieldInfo.FieldInfo);
 
                     if (((StructControl)control).FieldControls.Count == 0)
                         continue;
                 }
                 else if (isBounds)
                 {
-                    control = new BoundsControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new BoundsControl(Cache, fieldInfo.FieldInfo);
                 }
                 else
                 {
-                    control = new ValueControl(CacheContext, fieldInfo.FieldInfo);
+                    control = new ValueControl(Cache, fieldInfo.FieldInfo);
                 }
 
                 control.Location = new Point(currentLocation.X, currentLocation.Y);

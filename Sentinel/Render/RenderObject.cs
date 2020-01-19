@@ -21,7 +21,7 @@ namespace Sentinel.Render
     public class RenderObject
     {
         public D3DDevice Device { get; }
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public GameObject Object { get; }
         public Model Model { get; }
         public RenderModel RenderModel { get; }
@@ -35,40 +35,40 @@ namespace Sentinel.Render
 
         public Matrix World;
 
-        public RenderObject(D3DDevice device, HaloOnlineCacheContext cacheContext, GameObject definition, RealPoint3d position, RealEulerAngles3d rotation)
+        public RenderObject(D3DDevice device, GameCache cache, GameObject definition, RealPoint3d position, RealEulerAngles3d rotation)
         {
             if (device == null)
                 throw new ArgumentNullException(nameof(device));
-            else if (cacheContext == null)
-                throw new ArgumentNullException(nameof(cacheContext));
+            else if (cache == null)
+                throw new ArgumentNullException(nameof(cache));
             else if (definition == null)
                 throw new ArgumentNullException(nameof(definition));
 
             Device = device;
-            CacheContext = cacheContext;
+            Cache = cache;
             Object = definition;
 
             Position = position;
             Rotation = rotation;
             UpdateTransform();
 
-            using (var cacheStream = CacheContext.OpenTagCacheRead())
+            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
             {
                 if (Object.Model == null)
                     throw new NullReferenceException(nameof(Object.Model));
 
-                Model = null; //CacheContext.Deserialize<Model>(new TagSerializationContext(cacheStream, CacheContext, Object.Model));
+                Model = Cache.Deserialize<Model>(cacheStream, Object.Model);
 
                 if (Model.RenderModel == null)
                     throw new NullReferenceException(nameof(Model.RenderModel));
 
-                RenderModel = null; // CacheContext.Deserialize<RenderModel>(new TagSerializationContext(cacheStream, CacheContext, Model.RenderModel));
+                RenderModel = Cache.Deserialize<RenderModel>(cacheStream, Model.RenderModel);
 
                 if (Model.Variants == null || Model.Variants.Count == 0)
                 {
                     var modelVariant = new Model.Variant
                     {
-                        Name = CacheContext.GetStringId("default"),
+                        Name = Cache.StringTable.GetStringId("default"),
                         Regions = new List<Model.Variant.Region>()
                     };
 
@@ -97,47 +97,43 @@ namespace Sentinel.Render
                 Materials = new List<RenderMaterial>();
 
                 foreach (var material in RenderModel.Materials)
-                    Materials.Add(new RenderMaterial(device, CacheContext, material));
+                    Materials.Add(new RenderMaterial(device, Cache, material));
 
                 if (RenderModel.Geometry.Resource == null)
                     throw new NullReferenceException(nameof(RenderModel.Geometry.Resource));
 
-                RenderGeometryResource = CacheContext.Deserialize<RenderGeometryApiResourceDefinition>(RenderModel.Geometry.Resource.HaloOnlinePageableResource);
+                RenderGeometryResource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(RenderModel.Geometry.Resource);
 
-                using (var resourceStream = new MemoryStream())
-                using (var reader = new BinaryReader(resourceStream))
+                VertexBuffers = new Dictionary<int, VertexBuffer>();
+                IndexBuffers = new Dictionary<int, IndexBuffer>();
+
+                var compression = RenderModel.Geometry.Compression[0];
+
+                foreach (var mesh in RenderModel.Geometry.Meshes)
                 {
-                    CacheContext.ExtractResource(RenderModel.Geometry.Resource.HaloOnlinePageableResource, resourceStream);
+                    var renderVertex = VertexDefinition.Get(mesh.Type);
+                    var streamTypes = renderVertex.GetStreamTypes();
 
-                    VertexBuffers = new Dictionary<int, VertexBuffer>();
-                    IndexBuffers = new Dictionary<int, IndexBuffer>();
-
-                    var compression = RenderModel.Geometry.Compression[0];
-
-                    foreach (var mesh in RenderModel.Geometry.Meshes)
+                    foreach (var streamEntry in streamTypes)
                     {
-                        var renderVertex = VertexDefinition.Get(mesh.Type);
-                        var streamTypes = renderVertex.GetStreamTypes();
+                        var vertexBufferIndex = mesh.VertexBufferIndices[streamEntry.Key];
 
-                        foreach (var streamEntry in streamTypes)
+                        if (vertexBufferIndex == ushort.MaxValue || VertexBuffers.ContainsKey(vertexBufferIndex))
+                            continue;
+
+                        var vbDef = RenderGeometryResource.VertexBuffers[vertexBufferIndex].Definition;
+
+                        var vb = new VertexBuffer(streamEntry.Value, vbDef.Data.Data.Length, device, Usage.DoNotClip, renderVertex.GetStreamFormat(streamEntry.Key), Pool.Managed);
+                        var vbData = vb.Lock(0, vbDef.Data.Data.Length, LockFlags.None);
+
+                        var vertices = Array.CreateInstance(streamEntry.Value, vbDef.Count);
+
+                        using (var vbDefData = new MemoryStream(vbDef.Data.Data))
+                        using (var vbDefReader = new BinaryReader(vbDefData))
                         {
-                            var vertexBufferIndex = mesh.VertexBufferIndices[streamEntry.Key];
-
-                            if (vertexBufferIndex == ushort.MaxValue || VertexBuffers.ContainsKey(vertexBufferIndex))
-                                continue;
-
-                            var vbDef = RenderGeometryResource.VertexBuffers[vertexBufferIndex].Definition;
-
-                            var vb = new VertexBuffer(streamEntry.Value, vbDef.Data.Size, device, Usage.DoNotClip, renderVertex.GetStreamFormat(streamEntry.Key), Pool.Managed);
-                            var vbData = vb.Lock(0, vbDef.Data.Size, LockFlags.None);
-
-                            resourceStream.Position = vbDef.Data.Address.Offset;
-
-                            var vertices = Array.CreateInstance(streamEntry.Value, vbDef.Count);
-
                             for (var i = 0; i < vbDef.Count; i++)
                             {
-                                var handle = GCHandle.Alloc(reader.ReadBytes(Marshal.SizeOf(streamEntry.Value)), GCHandleType.Pinned);
+                                var handle = GCHandle.Alloc(vbDefReader.ReadBytes(Marshal.SizeOf(streamEntry.Value)), GCHandleType.Pinned);
                                 var vertex = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), streamEntry.Value);
 
                                 var positionField = streamEntry.Value.GetField("Position");
@@ -167,62 +163,66 @@ namespace Sentinel.Render
 
                                 handle.Free();
                             }
-
-                            vbData.Write(vertices);
-                            vb.Unlock();
-
-                            VertexBuffers[vertexBufferIndex] = vb;
                         }
 
-                        foreach (var indexBufferIndex in mesh.IndexBufferIndices)
+                        vbData.Write(vertices);
+                        vb.Unlock();
+
+                        VertexBuffers[vertexBufferIndex] = vb;
+                    }
+
+                    foreach (var indexBufferIndex in mesh.IndexBufferIndices)
+                    {
+                        if (indexBufferIndex == -1/*ushort.MaxValue*/ || IndexBuffers.ContainsKey(indexBufferIndex))
+                            continue;
+
+                        var ibDef = RenderGeometryResource.IndexBuffers[indexBufferIndex].Definition;
+
+                        switch (ibDef.Format)
                         {
-                            if (indexBufferIndex == ushort.MaxValue || IndexBuffers.ContainsKey(indexBufferIndex))
-                                continue;
+                            case IndexBufferFormat.PointList:
+                                mesh.IndexBufferType = TagPrimitiveType.PointList;
+                                break;
 
-                            var ibDef = RenderGeometryResource.IndexBuffers[indexBufferIndex].Definition;
+                            case IndexBufferFormat.LineList:
+                                mesh.IndexBufferType = TagPrimitiveType.LineList;
+                                break;
 
-                            switch (ibDef.Format)
-                            {
-                                case IndexBufferFormat.PointList:
-                                    mesh.IndexBufferType = TagPrimitiveType.PointList;
-                                    break;
+                            case IndexBufferFormat.LineStrip:
+                                mesh.IndexBufferType = TagPrimitiveType.LineStrip;
+                                break;
 
-                                case IndexBufferFormat.LineList:
-                                    mesh.IndexBufferType = TagPrimitiveType.LineList;
-                                    break;
+                            case IndexBufferFormat.TriangleList:
+                                mesh.IndexBufferType = TagPrimitiveType.TriangleList;
+                                break;
 
-                                case IndexBufferFormat.LineStrip:
-                                    mesh.IndexBufferType = TagPrimitiveType.LineStrip;
-                                    break;
+                            case IndexBufferFormat.TriangleFan:
+                                mesh.IndexBufferType = TagPrimitiveType.TriangleFan;
+                                break;
 
-                                case IndexBufferFormat.TriangleList:
-                                    mesh.IndexBufferType = TagPrimitiveType.TriangleList;
-                                    break;
-
-                                case IndexBufferFormat.TriangleFan:
-                                    mesh.IndexBufferType = TagPrimitiveType.TriangleFan;
-                                    break;
-
-                                case IndexBufferFormat.TriangleStrip:
-                                    mesh.IndexBufferType = TagPrimitiveType.TriangleStrip;
-                                    break;
-                            }
-
-                            var ib = new IndexBuffer(device, ibDef.Data.Size, Usage.DoNotClip, Pool.Managed, true);
-                            var ibData = ib.Lock(0, ibDef.Data.Size, LockFlags.None);
-
-                            resourceStream.Position = ibDef.Data.Address.Offset;
-
-                            var indices = new ushort[ibDef.Data.Size / 2];
-
-                            for (var i = 0; i < ibDef.Data.Size / 2; i++)
-                                indices[i] = reader.ReadUInt16();
-
-                            ibData.Write(indices);
-                            ib.Unlock();
-
-                            IndexBuffers[indexBufferIndex] = ib;
+                            case IndexBufferFormat.TriangleStrip:
+                                mesh.IndexBufferType = TagPrimitiveType.TriangleStrip;
+                                break;
                         }
+
+                        var ib = new IndexBuffer(device, ibDef.Data.Data.Length, Usage.DoNotClip, Pool.Managed, true);
+                        var ibData = ib.Lock(0, ibDef.Data.Data.Length, LockFlags.None);
+
+                        /*resourceStream.Position = ibDef.Data.Address.Offset;
+
+                        var indices = new ushort[ibDef.Data.Data.Length / 2];
+
+                        for (var i = 0; i < ibDef.Data.Data.Length / 2; i++)
+                            indices[i] = reader.ReadUInt16();*/
+
+                        // may not work, hard to test (original code above)
+                        short[] indices = new short[(int)Math.Ceiling(ibDef.Data.Data.Length / 2.0)];
+                        Buffer.BlockCopy(ibDef.Data.Data, 0, indices, 0, ibDef.Data.Data.Length);
+
+                        ibData.Write(indices);
+                        ib.Unlock();
+
+                        IndexBuffers[indexBufferIndex] = ib;
                     }
                 }
             }
@@ -252,10 +252,10 @@ namespace Sentinel.Render
         public void Render()
         {
             var variantName = Object.DefaultModelVariant != StringId.Invalid ?
-                CacheContext.GetString(Object.DefaultModelVariant) :
+                Cache.StringTable.GetString(Object.DefaultModelVariant) :
                 "default";
 
-            var modelVariant = Model.Variants.FirstOrDefault(v => (CacheContext.GetString(v.Name) ?? v.Name.ToString()) == variantName);
+            var modelVariant = Model.Variants.FirstOrDefault(v => (Cache.StringTable.GetString(v.Name) ?? v.Name.ToString()) == variantName);
             if (modelVariant == null && Model.Variants.Count > 0)
                 modelVariant = Model.Variants.First();
 
@@ -281,8 +281,8 @@ namespace Sentinel.Render
 
                 var meshIndex = renderModelPermutation.MeshIndex;
                 var meshCount = renderModelPermutation.MeshCount;
-                var regionName = CacheContext.GetString(region.Name) ?? region.Name.ToString();
-                var permutationName = CacheContext.GetString(permutation.Name) ?? permutation.Name.ToString();
+                var regionName = Cache.StringTable.GetString(region.Name) ?? region.Name.ToString();
+                var permutationName = Cache.StringTable.GetString(permutation.Name) ?? permutation.Name.ToString();
 
                 for (var currentMeshIndex = 0; currentMeshIndex < meshCount; currentMeshIndex++)
                 {

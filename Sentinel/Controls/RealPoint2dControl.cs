@@ -9,7 +9,7 @@ namespace Sentinel.Controls
 {
     public partial class RealPoint2dControl : UserControl, IFieldControl
     {
-        public HaloOnlineCacheContext CacheContext { get; }
+        public GameCache Cache { get; }
         public FieldInfo Field { get; }
         public bool Loading { get; set; } = false;
         public object Owner { get; set; } = null;
@@ -19,10 +19,10 @@ namespace Sentinel.Controls
             InitializeComponent();
         }
 
-        public RealPoint2dControl(HaloOnlineCacheContext cacheContext, FieldInfo field) :
+        public RealPoint2dControl(GameCache cache, FieldInfo field) :
             this()
         {
-            CacheContext = cacheContext;
+            Cache = cache;
             Field = field;
             label1.Text = field.Name.ToSpaced().Replace("_", "");
 

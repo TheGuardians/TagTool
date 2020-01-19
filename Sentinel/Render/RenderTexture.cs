@@ -16,7 +16,6 @@ namespace Sentinel.Render
         {
             Bitmap = bitmapDefinition;
 
-            var extractor = new TagTool.Bitmaps.BitmapExtractor(cache);
             var transparent = false;
 
             Bitmap bitmap = null;
@@ -25,7 +24,7 @@ namespace Sentinel.Render
             DevIL.ilGenImages(1, out int img_name);
             DevIL.ilBindImage(img_name);
 
-            var ddsData = extractor.ExtractBitmapToDDSArray(bitmapDefinition, 0);
+            var ddsData = TagTool.Bitmaps.BitmapExtractor.ExtractBitmapToDDSArray(cache, bitmapDefinition, 0);
 
             // Load the DDS file into the bound DevIL image
             DevIL.ilLoadL(DevIL.IL_DDS, ddsData, ddsData.Length);
