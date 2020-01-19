@@ -120,6 +120,6 @@ namespace TagTool.Cache
             return new TagCacheHaloOnline(stream, new Dictionary<int, string>());
         }
 
-        public virtual void SaveTagNames() => throw new NotImplementedException();
+        public virtual void SaveTagNames(string path = null) => throw new NotImplementedException();
     }
 }

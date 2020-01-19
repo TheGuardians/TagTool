@@ -25,7 +25,7 @@ namespace TagTool.Commands.Tags
             if (args.Count > 1)
                 return false;
 
-            Cache.TagCacheGenHO.SaveTagNames(args.Count == 1 ? args[0] : null);
+            Cache.SaveTagNames(args.Count == 1 ? args[0] : null);
 
             return true;
         }

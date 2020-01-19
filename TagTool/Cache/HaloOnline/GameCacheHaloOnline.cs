@@ -47,9 +47,9 @@ namespace TagTool.Cache.HaloOnline
             ResourceCaches = new ResourceCachesHaloOnline(this);
         }
 
-        public override void SaveTagNames()
+        public override void SaveTagNames(string path = null)
         {
-            TagCacheGenHO.SaveTagNames(TagNamesFile.FullName);
+            TagCacheGenHO.SaveTagNames(path ?? TagNamesFile.FullName);
         }
     }
 }
