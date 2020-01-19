@@ -152,38 +152,7 @@ namespace TagTool.Cache.Gen3
                 }
 
                 newReader.SeekTo(indices[i]);
-
-                int length;
-                if (i == indices.Length - 1)
-                    length = baseMapFile.Header.GetTagNamesBufferSize() - indices[i];
-                else
-                {
-                    if (indices[i + 1] == -1)
-                    {
-                        int index = -1;
-
-                        for (int j = i + 1; j < indices.Length; j++)
-                        {
-                            if (indices[j] != -1)
-                            {
-                                index = j;
-                                break;
-                            }
-                        }
-
-                        length = (index == -1) ? baseMapFile.Header.GetTagNamesBufferSize() - indices[i] : indices[index] - indices[i];
-                    }
-                    else
-                        length = indices[i + 1] - indices[i];
-                }
-
-                if (length == 1)
-                {
-                    Tags[i].Name = "<blank>";
-                    continue;
-                }
-
-                Tags[i].Name = newReader.ReadString(length);
+                Tags[i].Name = newReader.ReadNullTerminatedString();
             }
 
             newReader.Close();
