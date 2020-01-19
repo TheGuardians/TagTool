@@ -48,10 +48,13 @@ namespace Sentinel.Controls
                 SoundFile.Delete();
 
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
-            var dataReference = resourceDefinition.Data;
+            if (resourceDefinition != null)
+            { 
+                var dataReference = resourceDefinition.Data;
 
-            using (var fileStream = SoundFile.Create())
-                fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
+                using (var fileStream = SoundFile.Create())
+                    fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
+            }
 
             base.OnLoad(e);
         }
@@ -88,10 +91,13 @@ namespace Sentinel.Controls
             if (!SoundFile.Exists)
             {
                 var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
-                var dataReference = resourceDefinition.Data;
+                if (resourceDefinition != null)
+                {
+                    var dataReference = resourceDefinition.Data;
 
-                using (var fileStream = SoundFile.Create())
-                    fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
+                    using (var fileStream = SoundFile.Create())
+                        fileStream.Write(dataReference.Data, 0, dataReference.Data.Length);
+                }
             }
 
             var destSoundFile = new FileInfo(sfd.FileName);
@@ -102,7 +108,8 @@ namespace Sentinel.Controls
             if (destSoundFile.Exists)
                 destSoundFile.Delete();
 
-            SoundFile.CopyTo(destSoundFile.FullName);
+            if (SoundFile.Exists)
+                SoundFile.CopyTo(destSoundFile.FullName);
         }
     }
 }
