@@ -26,13 +26,20 @@ namespace TagTool.Cache.HaloOnline
 
         private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
 
+
         public ResourceCachesHaloOnline(GameCacheHaloOnlineBase cache)
         {
             Cache = cache;
             Directory = Cache.Directory;
         }
 
-        public override LoadedResourceCache GetResourceCache(ResourceLocation location)
+        public override Stream OpenCacheRead(ResourceLocation location) => LoadedResourceCaches[location].File.OpenRead();
+
+        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadedResourceCaches[location].File.Open(FileMode.Open, FileAccess.ReadWrite);
+
+        public override Stream OpenCacheWrite(ResourceLocation location) => LoadedResourceCaches[location].File.OpenWrite();
+
+        public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location)
         {
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache))
             {
@@ -52,7 +59,7 @@ namespace TagTool.Cache.HaloOnline
                 };
                 LoadedResourceCaches[location] = cache;
             }
-            return cache;
+            return cache.Cache;
         }
     }
 }

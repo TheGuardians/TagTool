@@ -113,7 +113,7 @@ namespace TagTool.Commands.Porting
 			foreach (var entry in resourceStreams)
 			{
 				if (FlagIsSet(PortingFlags.Memory))
-					using (var resourceFileStream = CacheContext.ResourceCaches.OpenResourceCacheReadWrite(entry.Key))
+					using (var resourceFileStream = CacheContext.ResourceCaches.OpenCacheReadWrite(entry.Key))
 					{
 						resourceFileStream.Seek(0, SeekOrigin.Begin);
 						resourceFileStream.SetLength(resourceFileStream.Position);

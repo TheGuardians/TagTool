@@ -308,7 +308,7 @@ namespace TagTool.Commands.Modding
 
                     try
                     {
-                        resourceCache = CacheContext.ResourceCaches.GetResourceCache(location).Cache;
+                        resourceCache = CacheContext.ResourceCaches.GetResourceCache(location);
                     }
                     catch (FileNotFoundException)
                     {
@@ -316,7 +316,7 @@ namespace TagTool.Commands.Modding
                     }
 
                     srcResourceCaches[location] = resourceCache;
-                    srcResourceStreams[location] = CacheContext.ResourceCaches.OpenResourceCacheRead(location);
+                    srcResourceStreams[location] = CacheContext.ResourceCaches.OpenCacheRead(location);
                 }
 
                 for (var tagIndex = 0; tagIndex < CacheContext.TagCache.Count; tagIndex++)

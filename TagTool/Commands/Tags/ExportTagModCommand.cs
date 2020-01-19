@@ -176,9 +176,9 @@ namespace TagTool.Commands.Tags
                         if (!outFile.Directory.Exists)
                             outFile.Directory.Create();
 
-                        using (var stream = cache.File.OpenRead())
+                        using (var stream = Cache.ResourceCaches.OpenCacheRead(location))
                         using (var outStream = outFile.Create())
-                            cache.Cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
+                            cache.Decompress(stream, pageable.Page.Index, pageable.Page.CompressedBlockSize, outStream);
 
                         return outFile;
                     }

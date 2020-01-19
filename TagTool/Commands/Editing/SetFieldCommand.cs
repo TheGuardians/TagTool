@@ -146,9 +146,9 @@ namespace TagTool.Commands.Editing
                     ResourceCacheHaloOnline oldCache = null;
 
                     if (pageable.GetLocation(out var oldLocation))
-                        oldCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation));
+                        oldCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(oldLocation));
 
-                    var newCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation));
+                    var newCache = new ResourceCacheHaloOnline(haloOnlineGameCache.Version, haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(newLocation));
 
                     var data = File.ReadAllBytes(resourceFile.FullName);
 
@@ -156,14 +156,14 @@ namespace TagTool.Commands.Editing
 
                     if (oldLocation == newLocation && pageable.Page.Index != -1)
                     {
-                        using (var stream = haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(oldLocation))
+                        using (var stream = haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(oldLocation))
                         {
                             pageable.Page.CompressedBlockSize = oldCache.Compress(stream, pageable.Page.Index, data);
                         }
                     }
                     else
                     {
-                        using (var destStream = haloOnlineGameCache.ResourceCaches.OpenResourceCacheReadWrite(newLocation))
+                        using (var destStream = haloOnlineGameCache.ResourceCaches.OpenCacheReadWrite(newLocation))
                         {
                             pageable.Page.Index = newCache.Add(destStream, data, out pageable.Page.CompressedBlockSize);
                         }

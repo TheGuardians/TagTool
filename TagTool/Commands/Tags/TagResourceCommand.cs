@@ -198,9 +198,9 @@ namespace TagTool.Commands.Tags
                 }
             }
 
-            var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
+            var cache = Cache.ResourceCaches.GetResourceCache(location);
 
-            using (var stream = Cache.ResourceCaches.OpenResourceCacheRead(location))
+            using (var stream = Cache.ResourceCaches.OpenCacheRead(location))
             {
                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 {
@@ -219,9 +219,9 @@ namespace TagTool.Commands.Tags
 
             var inPath = args[3];
 
-            var cache = Cache.ResourceCaches.GetResourceCache(location).Cache;
+            var cache = Cache.ResourceCaches.GetResourceCache(location);
 
-            using (var stream = Cache.ResourceCaches.OpenResourceCacheReadWrite(location))
+            using (var stream = Cache.ResourceCaches.OpenCacheReadWrite(location))
             {
                 var data = File.ReadAllBytes(inPath);
                 var compressedSize = cache.Compress(stream, (int)index, data);

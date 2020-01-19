@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,9 +18,12 @@ namespace TagTool.Cache.ModPackages
             Package = package;
         }
 
-        public override LoadedResourceCache GetResourceCache(ResourceLocation location)
-        {
-            throw new NotImplementedException();
-        }
+        public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location) => Package.Resources;
+
+        public override Stream OpenCacheRead(ResourceLocation location) =>  Package.ResourcesStream;
+
+        public override Stream OpenCacheReadWrite(ResourceLocation location) => Package.ResourcesStream;
+
+        public override Stream OpenCacheWrite(ResourceLocation location) => Package.ResourcesStream;
     }
 }
