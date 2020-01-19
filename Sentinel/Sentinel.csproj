@@ -490,4 +490,8 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(ProjectDir)
+xcopy "$(SolutionDir)Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

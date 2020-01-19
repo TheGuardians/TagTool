@@ -62,7 +62,7 @@ namespace Sentinel.Forms
                 var smf = new SelectMapForm(cacheDirectory);
 
                 if (smf.ShowDialog() != DialogResult.OK)
-                    return;
+                    Close();
 
                 Text = smf.SelectedFile.FullName;
                 Cache = GameCache.Open(smf.SelectedFile);

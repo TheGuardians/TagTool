@@ -55,7 +55,8 @@ namespace Sentinel.Forms
                 MdiParent = this
             };
 
-            cacheForm.Show();
+            if (!cacheForm.IsDisposed)
+                cacheForm.Show();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -109,7 +110,8 @@ namespace Sentinel.Forms
                     MdiParent = this
                 };
 
-                cacheForm.Show();
+                if (!cacheForm.IsDisposed)
+                    cacheForm.Show();
             }
         }
 
