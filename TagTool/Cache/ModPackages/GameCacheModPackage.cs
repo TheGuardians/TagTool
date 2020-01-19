@@ -16,29 +16,19 @@ using TagTool.Cache.ModPackages;
 
 namespace TagTool.Cache
 {
-    public class GameCacheModPackage : GameCache
+    public class GameCacheModPackage : GameCacheHaloOnlineBase
     {
         public FileInfo ModPackageFile;
         public ModPackage BaseModPackage;
-        public StringTableHaloOnline ModPackageStringTable;
-        public TagCacheHaloOnline ModPackageTagCache;
-        public ResourceCachesModPackage ModPackageResourceCache;
 
         /// <summary>
         /// Tag cache index in the list of tag caches.
         /// </summary>
         private int CurrentTagCacheIndex = 0;
 
-        public override StringTable StringTable => ModPackageStringTable;
-
-        public override TagCache TagCache => ModPackageTagCache;
-
-        public override ResourceCache ResourceCache => ModPackageResourceCache;
-
-
-
         public GameCacheModPackage(FileInfo file)
         {
+            ModPackageFile = file;
             Version = CacheVersion.HaloOnline106708;
             Endianness = EndianFormat.LittleEndian;
             Deserializer = new TagDeserializer(Version);
@@ -49,9 +39,9 @@ namespace TagTool.Cache
             BaseModPackage = new ModPackage(file);
             DisplayName = BaseModPackage.Metadata.Name + ".pak";
 
-            ModPackageResourceCache = new ResourceCachesModPackage(BaseModPackage);
-            ModPackageTagCache = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[0], BaseModPackage.TagCacheNames[0]);
-            ModPackageStringTable = BaseModPackage.StringTable;
+            ResourceCaches = new ResourceCachesModPackage(BaseModPackage);
+            TagCacheGenHO = new TagCacheHaloOnline(BaseModPackage.TagCachesStreams[0], BaseModPackage.TagCacheNames[0]);
+            StringTableHaloOnline = BaseModPackage.StringTable;
         }
 
         public GameCacheModPackage(ModPackage modPackage, FileInfo file)
@@ -67,29 +57,34 @@ namespace TagTool.Cache
 
         public override object Deserialize(Stream stream, CachedTag instance)
         {
-            throw new NotImplementedException();
+            var definitionType = TagDefinition.Find(instance.Group);
+            var context = new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
+            return Deserializer.Deserialize(context, definitionType);
         }
 
         public override T Deserialize<T>(Stream stream, CachedTag instance)
         {
-            throw new NotImplementedException();
+            return Deserializer.Deserialize<T>(CreateTagSerializationContext(stream, instance));
         }
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
-            throw new NotImplementedException();
+            Serializer.Serialize(CreateTagSerializationContext(stream, instance), definition);
         }
 
-        public override Stream OpenCacheRead() => ModPackageFile.OpenRead();
-
-        public override Stream OpenCacheReadWrite() => ModPackageFile.Open(FileMode.Open, FileAccess.ReadWrite);
-
-        public override Stream OpenCacheWrite() => ModPackageFile.Open(FileMode.Open, FileAccess.Write);
-
-        public override void SaveStrings()
+        private ISerializationContext CreateTagSerializationContext(Stream stream, CachedTag instance)
         {
-            throw new NotImplementedException();
+            return new ModPackageTagSerializationContext(stream, this, BaseModPackage, (CachedTagHaloOnline)instance);
         }
-    }
 
+        // soon
+        public override Stream OpenCacheRead() => BaseModPackage.TagCachesStreams[0];
+
+        public override Stream OpenCacheReadWrite() => BaseModPackage.TagCachesStreams[0];
+
+        public override Stream OpenCacheWrite() => BaseModPackage.TagCachesStreams[0];
+
+        public override void SaveStrings() { }
+    }
 }
+
