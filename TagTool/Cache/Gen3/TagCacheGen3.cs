@@ -116,25 +116,25 @@ namespace TagTool.Cache.Gen3
             #endregion
 
             #region Read Indices
-            reader.SeekTo(baseMapFile.Header.GetTagNamesIndicesOffset());
+            reader.SeekTo(baseMapFile.Header.TagNamesIndicesOffset);
             int[] indices = new int[TagTableHeader.TagCount];
             for (int i = 0; i < TagTableHeader.TagCount; i++)
                 indices[i] = reader.ReadInt32();
             #endregion
 
             #region Read Names
-            reader.SeekTo(baseMapFile.Header.GetTagNamesBufferOffset());
+            reader.SeekTo(baseMapFile.Header.TagNamesBufferOffset);
 
             EndianReader newReader = null;
 
             if (TagsKey == "" || TagsKey == null)
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.GetTagNamesBufferSize())), EndianFormat.BigEndian);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.TagNamesBufferSize)), EndianFormat.BigEndian);
             }
             else
             {
-                reader.BaseStream.Position = baseMapFile.Header.GetTagNamesBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.GetTagNamesBufferSize(), TagsKey), EndianFormat.BigEndian);
+                reader.BaseStream.Position = baseMapFile.Header.TagNamesBufferOffset;
+                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.TagNamesBufferSize, TagsKey), EndianFormat.BigEndian);
             }
 
             for (int i = 0; i < indices.Length; i++)

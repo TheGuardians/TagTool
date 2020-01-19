@@ -24,7 +24,7 @@ namespace TagTool.Cache.Gen3
             uint localeGlobalsOffset = 0;
             uint localeGlobalsSize = 0;
             uint matgOffset = matg.DefinitionOffset;
-            var interop = baseMapFile.Header.GetInterop();
+            var interop = baseMapFile.Header.Interop;
 
             switch (baseMapFile.Version)
             {

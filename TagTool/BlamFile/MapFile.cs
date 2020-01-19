@@ -22,7 +22,7 @@ namespace TagTool.BlamFile
         HaloOnline = 0x12,
     }
 
-    public class MapFile : IMapFile
+    public class MapFile 
     {
         private static readonly Tag Head = new Tag("head");
         private static readonly Tag Foot = new Tag("foot");
@@ -32,7 +32,7 @@ namespace TagTool.BlamFile
         public MapFileVersion MapVersion { get; set; }
         public EndianFormat EndianFormat { get; set; }
 
-        public IMapFileHeader Header;
+        public MapFileHeader Header;
 
         public Blf MapFileBlf;
 
@@ -162,7 +162,7 @@ namespace TagTool.BlamFile
         }
 
         //
-        // Interface methods
+        // Helper methods
         //
 
         public TagTableHeaderGen3 GetTagTableHeader(EndianReader reader, int magic)
@@ -172,7 +172,7 @@ namespace TagTool.BlamFile
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
-                    reader.SeekTo(Header.GetTagIndexAddress());
+                    reader.SeekTo(Header.TagIndexAddress);
                     return new TagTableHeaderGen3
                     {
                         TagGroupCount = reader.ReadInt32(),
@@ -189,42 +189,6 @@ namespace TagTool.BlamFile
                     throw new NotImplementedException();
             }
         }
-
-        public void UpdateScenarioIndices(int newIndex)
-        {
-            Header.SetScenarioTagIndex(newIndex);
-        }
-    }
-
-    public interface IMapFile
-    {
-        TagTableHeaderGen3 GetTagTableHeader(EndianReader reader, int magic);
-    }
-
-    public interface IMapFileHeader
-    {
-        CacheFileInterop GetInterop();
-        CacheFilePartition[] GetPartitions();
-        int GetMemoryBufferSize();
-        int GetHeaderSize(CacheVersion version);
-        void ApplyMagic(int magic);
-
-        uint GetTagIndexAddress();
-        void SetTagIndexAddress(uint newAddress);
-        
-        int GetTagNamesIndicesOffset();
-        int GetTagNamesBufferOffset();
-        int GetTagNamesBufferSize();
-
-        int GetStringIDsIndicesOffset();
-        int GetStringIDsBufferOffset();
-        int GetStringIDsBufferSize();
-        int GetStringIDsCount();
-
-        void SetScenarioTagIndex(int index);
-        int GetScenarioTagIndex();
-        string GetName();
-        CacheFileType GetCacheType();
     }
 
 }

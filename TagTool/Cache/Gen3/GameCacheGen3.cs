@@ -37,26 +37,26 @@ namespace TagTool.Cache
             Deserializer = new TagDeserializer(Version);
             Serializer = new TagSerializer(Version);
             Endianness = EndianFormat.BigEndian;
-            var interop = mapFile.Header.GetInterop();
+            var interop = mapFile.Header.Interop;
 
-            DisplayName = mapFile.Header.GetName() + ".map";
+            DisplayName = mapFile.Header.Name + ".map";
 
             Directory = file.Directory;
 
             if ( interop != null && interop.ResourceBaseAddress == 0)
-                Magic = (int)(interop.RuntimeBaseAddress - mapFile.Header.GetMemoryBufferSize());
+                Magic = (int)(interop.RuntimeBaseAddress - mapFile.Header.MemoryBufferSize);
             else
             {
-                mapFile.Header.ApplyMagic(mapFile.Header.GetStringIDsIndicesOffset() - mapFile.Header.GetHeaderSize(mapFile.Version));
-                var resourcePartition = mapFile.Header.GetPartitions()[(int)CacheFilePartitionType.Resources];
-                var resourceSection = interop.Sections[(int)CacheFileSectionType.Resource];
-                Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.BaseAddress), 0) - (interop.DebugSectionSize + resourceSection.Size);
+                mapFile.Header.ApplyMagic(mapFile.Header.StringIDsIndicesOffset - mapFile.Header.GetHeaderSize(mapFile.Version));
+                var resourcePartition = mapFile.Header.Partitions[(int)CacheFilePartitionType.ResourcesTags];
+                var resourceSection = interop.Sections[(int)CacheFileSectionType.ResourceSection];
+                Magic = BitConverter.ToInt32(BitConverter.GetBytes(resourcePartition.VirtualAddress), 0) - (interop.DebugSectionSize + resourceSection.Size);
             }
 
-            if (mapFile.Header.GetTagIndexAddress() == 0)
+            if (mapFile.Header.TagIndexAddress == 0)
                 return;
 
-            mapFile.Header.SetTagIndexAddress(BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.GetTagIndexAddress() - Magic), 0));
+            mapFile.Header.TagIndexAddress = (BitConverter.ToUInt32(BitConverter.GetBytes(mapFile.Header.TagIndexAddress - Magic), 0));
 
             using(var cacheStream = OpenCacheRead())
             using(var reader = new EndianReader(cacheStream, BaseMapFile.EndianFormat))

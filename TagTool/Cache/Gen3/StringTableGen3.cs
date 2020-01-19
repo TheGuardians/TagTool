@@ -33,26 +33,26 @@ namespace TagTool.Cache.Gen3
                     throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
             }
 
-            reader.SeekTo(baseMapFile.Header.GetStringIDsIndicesOffset());
-            int[] indices = new int[baseMapFile.Header.GetStringIDsCount()];
-            for (var i = 0; i < baseMapFile.Header.GetStringIDsCount(); i++)
+            reader.SeekTo(baseMapFile.Header.StringIDsIndicesOffset);
+            int[] indices = new int[baseMapFile.Header.StringIDsCount];
+            for (var i = 0; i < baseMapFile.Header.StringIDsCount; i++)
             {
                 indices[i] = reader.ReadInt32();
                 Add("");
             }
 
-            reader.SeekTo(baseMapFile.Header.GetStringIDsBufferOffset());
+            reader.SeekTo(baseMapFile.Header.StringIDsBufferOffset);
 
             EndianReader newReader;
 
             if (StringKey == "")
             {
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.GetStringIDsBufferSize())), reader.Format);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.StringIDsBufferSize)), reader.Format);
             }
             else
             {
-                reader.BaseStream.Position = baseMapFile.Header.GetStringIDsBufferOffset();
-                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.GetStringIDsBufferSize(), StringKey), reader.Format);
+                reader.BaseStream.Position = baseMapFile.Header.StringIDsBufferOffset;
+                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.StringIDsBufferSize, StringKey), reader.Format);
             }
 
             for (var i = 0; i < indices.Length; i++)
@@ -67,7 +67,7 @@ namespace TagTool.Cache.Gen3
 
                 int length;
                 if (i == indices.Length - 1)
-                    length = baseMapFile.Header.GetStringIDsBufferSize() - indices[i];
+                    length = baseMapFile.Header.StringIDsBufferSize - indices[i];
                 else
                     length = (indices[i + 1] != -1)
                         ? indices[i + 1] - indices[i]

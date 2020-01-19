@@ -570,7 +570,7 @@ namespace TagTool.Cache
                 MapFile map = new MapFile();
                 map.Read(reader);
 
-                var type = map.Header.GetCacheType();
+                var type = map.Header.CacheType;
 
                 if (type == CacheFileType.Campaign)
                     Header.MapFlags |= MapFlags.CampaignMaps;

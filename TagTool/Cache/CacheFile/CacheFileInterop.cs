@@ -29,37 +29,9 @@ namespace TagTool.Cache
         public uint UnknownBaseAddress;
 
         /// <summary>
-        /// 
+        /// Sections in a map file, ordered and offset is determined by the sizes after the map header.
         /// </summary>
         [TagField(Length = (int)CacheFileSectionType.Count)]
         public CacheFileSection[] Sections = new CacheFileSection[(int)CacheFileSectionType.Count];
-
-        public bool IsNull =>
-            ResourceBaseAddress == 0 &&
-            DebugSectionSize == 0 &&
-            RuntimeBaseAddress == 0 &&
-            UnknownBaseAddress == 0;
-
-        public void PostprocessForCacheRead(int cache_header_sizeof)
-        {
-            var cache_offset = cache_header_sizeof;
-
-            var type = CacheFileSectionType.Debug;
-
-            var section = Sections[(int)type];
-            section.InitializeCacheOffset(cache_offset, IsNull);
-
-            var release_offset = DebugSectionSize;
-
-            for (++type; type < CacheFileSectionType.Count; type++, release_offset += section.Size)
-            {
-                section = Sections[(int)type];
-
-                if (section.Size == 0)
-                    continue;
-
-                section.InitializeCacheOffset(release_offset, IsNull);
-            }
-        }
     }
 }

@@ -312,9 +312,7 @@
     <Compile Include="Cache\CacheFile\CacheFileHeader.cs" />
     <Compile Include="Cache\CacheFile\CacheFileInterop.cs" />
     <Compile Include="Cache\CacheFile\CacheFilePartition.cs" />
-    <Compile Include="Cache\CacheFile\CacheFilePartitionType.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSection.cs" />
-    <Compile Include="Cache\CacheFile\CacheFileSectionType.cs" />
     <Compile Include="Cache\CacheFile\CacheFileSharedType.cs" />
     <Compile Include="Cache\CacheFile\CacheFileType.cs" />
     <Compile Include="Cache\CacheVersionDetection.cs" />

@@ -9,7 +9,7 @@ namespace TagTool.BlamFile
     [TagStructure(Size = 0x3000, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x3390, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
-    public sealed class MapFileHeader : TagStructure, IMapFileHeader
+    public sealed class MapFileHeader : TagStructure
     {
         [TagField(Flags = Runtime)]
         public int Magic;
@@ -316,8 +316,10 @@ namespace TagTool.BlamFile
         public Tag FootTag;
 
         //
-        // Interface methods
+        // Helper methods
         //
+
+        public int GetHeaderSize(CacheVersion version) => (int)GetTagStructureInfo(typeof(MapFileHeader), version).TotalSize;
 
         public void ApplyMagic(int magic)
         {
@@ -327,42 +329,5 @@ namespace TagTool.BlamFile
             StringIDsIndicesOffset -= Magic;
             StringIDsBufferOffset -= Magic;
         }
-
-        public int GetHeaderSize(CacheVersion version) => (int)GetTagStructureInfo(typeof(MapFileHeader), version).TotalSize;
-
-        public CacheFileInterop GetInterop() => Interop;
-
-        public int GetMemoryBufferSize() => MemoryBufferSize;
-
-        public CacheFilePartition[] GetPartitions() => Partitions;
-
-        public int GetStringIDsIndicesOffset() => StringIDsIndicesOffset;
-
-        public uint GetTagIndexAddress() => TagIndexAddress;
-
-        public int GetTagNamesBufferOffset() => TagNamesBufferOffset;
-
-        public int GetTagNamesBufferSize() => TagNamesBufferSize;
-
-        public int GetTagNamesIndicesOffset() => TagNamesIndicesOffset;
-
-        public void SetTagIndexAddress(uint newAddress)
-        {
-            TagIndexAddress = newAddress;
-        }
-
-        public int GetStringIDsBufferOffset() => StringIDsBufferOffset;
-
-        public int GetStringIDsBufferSize() => StringIDsBufferSize;
-
-        public int GetStringIDsCount() => StringIDsCount;
-
-        public void SetScenarioTagIndex(int index) => ScenarioTagIndex = index;
-
-        public int GetScenarioTagIndex() => ScenarioTagIndex;
-
-        public string GetName() => Name;
-
-        public CacheFileType GetCacheType() => CacheType;
     }
 }

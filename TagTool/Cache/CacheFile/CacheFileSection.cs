@@ -8,7 +8,7 @@ namespace TagTool.Cache
     /// </summary>
     [TagStructure(Size = 0x8)]
     public class CacheFileSection : TagStructure
-	{
+    {
         /// <summary>
         /// The virtual address of the cache file interop section.
         /// </summary>
@@ -19,24 +19,18 @@ namespace TagTool.Cache
         /// </summary>
         public int Size;
 
-        [TagField(Flags = Runtime)]
-        public int CacheOffset = -1;
+    }
 
-        [TagField(Flags = Runtime)]
-        public uint AddressMask = uint.MaxValue;
+    /// <summary>
+    /// Enum to be used as index in CacheFileInterop in Gen3 map files.
+    /// </summary>
+    public enum CacheFileSectionType : int
+    {
+        StringIdSection,
+        ResourceSection,
+        TagSection,
+        LocalizationSection,
 
-        public void InitializeCacheOffset(int cacheOffset, bool interopIsNull)
-        {
-            if (interopIsNull)
-            {
-                CacheOffset = (int)VirtualAddress;
-                return;
-            }
-
-            CacheOffset = cacheOffset;
-
-            if (VirtualAddress != 0)
-                AddressMask = VirtualAddress - (uint)cacheOffset;
-        }
+        Count
     }
 }

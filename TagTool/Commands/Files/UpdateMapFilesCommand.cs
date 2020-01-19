@@ -91,7 +91,7 @@ namespace TagTool.Commands.Files
                     using (var stream = fileInfo.Open(FileMode.Open, FileAccess.Read))
                     using (var reader = new EndianReader(stream))
                         map.Read(reader);
-                    map.UpdateScenarioIndices(scenario.Index);
+                    map.Header.ScenarioTagIndex = scenario.Index;
 
                     if(mapInfo != null)
                         if(forceUpdate || map.MapFileBlf == null)

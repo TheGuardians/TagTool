@@ -95,10 +95,10 @@ namespace TagTool.Commands.Modding
                     MapFile map = new MapFile();
                     map.Read(reader);
 
-                    var modIndex = map.Header.GetScenarioTagIndex();
+                    var modIndex = map.Header.ScenarioTagIndex;
                     TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                    map.Header.SetScenarioTagIndex(newScnrIndex);
-                    var mapName = map.Header.GetName();
+                    map.Header.ScenarioTagIndex = newScnrIndex;
+                    var mapName = map.Header.Name;
 
                     var mapPath = $"{CacheContext.Directory.FullName}\\{mapName}.map";
                     var file = new FileInfo(mapPath);

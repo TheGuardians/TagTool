@@ -329,7 +329,7 @@ namespace TagTool.Cache.Gen3
             using (var cacheStream = cache.OpenCacheRead())
             using (var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
             {
-                reader.SeekTo(cache.BaseMapFile.Header.GetInterop().DebugSectionSize + page.BlockOffset);
+                reader.SeekTo(cache.BaseMapFile.Header.Interop.DebugSectionSize + page.BlockOffset);
                 var compressed = reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
 
                 if (resource.ResourceTypeIndex != -1 && GetResourceTypeName(resource) == "sound_resource_definition")
