@@ -15,7 +15,7 @@ namespace TagTool.Cache
 
         public ModPackageMetadata Metadata { get; set; } = new ModPackageMetadata();
 
-        public List<ModPackageTagCache> TagCaches { get; set; } = null;
+        public List<TagCacheHaloOnline> TagCaches { get; set; } = null;
 
         public List<Stream> TagCachesStreams { get; set; } = new List<Stream>();
 
@@ -35,7 +35,7 @@ namespace TagTool.Cache
 
         public List<string> CacheNames { get; set; } = new List<string>();
 
-        public ModPackageStringTable StringTable { get; set; }
+        public StringTableHaloOnline StringTable { get; set; }
 
         public Stream FontPackage;
 
@@ -50,8 +50,8 @@ namespace TagTool.Cache
                 TagCachesStreams.Add(tagStream);
 
                 var names = new Dictionary<int, string>();
-                var tags = new ModPackageTagCache(tagStream, names);
-                TagCaches = new List<ModPackageTagCache>();
+                var tags = new TagCacheHaloOnline(tagStream, names);
+                TagCaches = new List<TagCacheHaloOnline>();
                 TagCaches.Add(tags);
                 TagCacheNames.Add(names);
 
@@ -94,10 +94,10 @@ namespace TagTool.Cache
 
                 int tagCacheCount = TagCachesStreams.Count;
 
-                TagCaches = new List<ModPackageTagCache>();
+                TagCaches = new List<TagCacheHaloOnline>();
                 for (int i = 0; i < tagCacheCount; i++)
                 {
-                    TagCaches.Add(new ModPackageTagCache(TagCachesStreams[i], TagCacheNames[i]));
+                    TagCaches.Add(new TagCacheHaloOnline(TagCachesStreams[i], TagCacheNames[i]));
                 }
                 
                 Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ResourcesStream);
@@ -488,7 +488,7 @@ namespace TagTool.Cache
             reader.Read(data, 0, size);
             stringIdCacheStream.Write(data, 0, size);
             stringIdCacheStream.Position = 0;
-            StringTable = new ModPackageStringTable(stringIdCacheStream);
+            StringTable = new StringTableHaloOnline(CacheVersion.HaloOnline106708, stringIdCacheStream);
         }
 
         private void ReadFontSection(EndianReader reader)

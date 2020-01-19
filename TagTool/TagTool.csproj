@@ -198,6 +198,7 @@
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
+    <Compile Include="Cache\ModPackages\ResourceCachesModPackage.cs" />
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringTable.cs" />
     <Compile Include="Cache\TagCache.cs" />
@@ -211,7 +212,7 @@
     <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnlineBase.cs" />
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
-    <Compile Include="Cache\ModPackage\GameCacheModPackage.cs" />
+    <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\Modding\ApplyModPackage.cs" />
     <Compile Include="Commands\Modding\CreateCharacterType.cs" />
     <Compile Include="Commands\Modding\ExportModPackageCommand.cs" />
@@ -324,8 +325,8 @@
     <Compile Include="BlamFile\MapFile.cs" />
     <Compile Include="BlamFile\MapFileHeader.cs" />
     <Compile Include="BlamFile\MapVariant.cs" />
-    <Compile Include="Cache\ModPackage\ModPackage.cs" />
-    <Compile Include="Cache\ModPackage\ModPackageHeader.cs" />
+    <Compile Include="Cache\ModPackages\ModPackage.cs" />
+    <Compile Include="Cache\ModPackages\ModPackageHeader.cs" />
     <Compile Include="Cache\CacheFile\RawPage.cs" />
     <Compile Include="Cache\StringIdResolver.cs" />
     <Compile Include="Cache\Gen3\StringIdResolverHalo3.cs" />

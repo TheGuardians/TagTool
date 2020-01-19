@@ -93,7 +93,7 @@ namespace TagTool.Commands.Modding
             var tagStream = ModPackage.TagCachesStreams[0];
             ModPackage.CacheNames.Add("default");
 
-            ModPackage.TagCaches[0] = new ModPackageTagCache(tagStream, new Dictionary<int, string>());
+            ModPackage.TagCaches[0] = new TagCacheHaloOnline(tagStream, new Dictionary<int, string>());
             ModPackage.Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
 
             CreateDescription();
@@ -469,7 +469,7 @@ namespace TagTool.Commands.Modding
 
         private void AddStringIds()
         {
-            ModPackage.StringTable = new ModPackageStringTable(CacheContext.StringTableHaloOnline);
+            ModPackage.StringTable = CacheContext.StringTableHaloOnline;
         }
 
         private void AddFontPackage()
