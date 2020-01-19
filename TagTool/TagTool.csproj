@@ -196,6 +196,7 @@
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Cache\CachedTag.cs" />
     <Compile Include="Cache\HaloOnline\GameCacheHaloOnline.cs" />
+    <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
     <Compile Include="Cache\LocaleTable.cs" />
     <Compile Include="Cache\ResourceCache.cs" />
     <Compile Include="Cache\StringTable.cs" />
@@ -207,7 +208,7 @@
     <Compile Include="Cache\Gen3\StringTableGen3.cs" />
     <Compile Include="Cache\HaloOnline\CachedTagHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\ResourceCacheHaloOnline.cs" />
-    <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnline.cs" />
+    <Compile Include="Cache\HaloOnline\ResourceCachesHaloOnlineBase.cs" />
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackage\GameCacheModPackage.cs" />

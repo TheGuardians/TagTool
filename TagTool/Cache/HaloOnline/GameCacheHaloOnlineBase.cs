@@ -12,7 +12,7 @@ namespace TagTool.Cache
     {
         public TagCacheHaloOnline TagCacheGenHO;
         public StringTableHaloOnline StringTableHaloOnline;
-        public ResourceCachesHaloOnline ResourceCaches;
+        public ResourceCachesHaloOnlineBase ResourceCaches;
 
         public List<int> ModifiedTags = new List<int>();
 
