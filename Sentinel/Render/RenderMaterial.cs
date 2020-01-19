@@ -19,7 +19,7 @@ namespace Sentinel.Render
             if (material.RenderMethod == null)
                 return;
 
-            using (var cacheStream = cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = cache.OpenCacheRead())
             {
                 var renderMethod = cache.Deserialize<RenderMethod>(cacheStream, material.RenderMethod);
 

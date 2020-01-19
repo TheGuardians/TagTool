@@ -52,7 +52,7 @@ namespace Sentinel.Render
             Rotation = rotation;
             UpdateTransform();
 
-            using (var cacheStream = Cache.TagCache.OpenTagCacheRead())
+            using (var cacheStream = Cache.OpenCacheRead())
             {
                 if (Object.Model == null)
                     throw new NullReferenceException(nameof(Object.Model));
