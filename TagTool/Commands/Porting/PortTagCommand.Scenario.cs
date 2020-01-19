@@ -1035,7 +1035,7 @@ namespace TagTool.Commands.Porting
                 return;
 
             if (!CacheContext.StringTable.Contains(value))
-                ConvertStringId(new StringId((uint)blamStringId, BlamCache.Version));
+                ConvertStringId(new StringId((uint)blamStringId));
 
             var edStringId = CacheContext.StringTable.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();

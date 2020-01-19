@@ -90,7 +90,7 @@ namespace TagTool.Commands.Porting
                     foreach (var importData in shaderCortana.ImportData)
                     {
                         if (importData.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
-                        if (importData.Name.Index != name.Index) continue;
+                        if (importData.Name != name) continue;
 
                         if (importData.Bitmap != null)
                         {
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Porting
                     foreach (var deafult_option in templateOptions)
                     {
                         if (deafult_option.Type != RenderMethodOption.OptionBlock.OptionDataType.Sampler) continue;
-                        if (deafult_option.Name.Index != name.Index) continue;
+                        if (deafult_option.Name != name) continue;
 
                         shaderSamplerArgument.Bitmap = deafult_option.Bitmap;
 
@@ -148,7 +148,7 @@ namespace TagTool.Commands.Porting
             shader_properties.Arguments = shaderVectorArguments.ToList();
             shader_properties.AnimationProperties = shaderFunctions;
 
-            if (shaderCortana.Material.Index == 0)
+            if (shaderCortana.Material == StringId.Invalid)
             {
                 if (CacheContext.StringTable.Contains("default_material"))
                 {
@@ -171,7 +171,7 @@ namespace TagTool.Commands.Porting
             foreach (var rmt2VectorArgument in vectorArguments)
             {
                 //NOTE: Shared name between Argumenst and Texture
-                if (rmt2VectorArgument.Name.Index == name.Index)
+                if (rmt2VectorArgument.Name == name)
                 {
                     xform_index = vectorArguments.IndexOf(rmt2VectorArgument);
                     break;
@@ -193,7 +193,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var importData in shaderCortana.ImportData)
             {
-                if (importData.Name.Index != name.Index) continue;
+                if (importData.Name != name) continue;
 
                 var argument_data = importData.AnimationProperties.Count > 0 ? importData.AnimationProperties[0].Function.Data : null;
                 if (argument_data != null)
@@ -274,7 +274,7 @@ namespace TagTool.Commands.Porting
 
             foreach (var deafult_option in templateOptions)
             {
-                if (deafult_option.Name.Index != name.Index) continue;
+                if (deafult_option.Name != name) continue;
 
                 //TODO: Figure these bad boys out, I think its all just defaults but we should just
                 // throw a warning if they're not part of the RMDF

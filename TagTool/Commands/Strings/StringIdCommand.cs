@@ -101,11 +101,11 @@ namespace TagTool.Commands.Strings
                     continue;
                 
                 var id = Cache.StringTable.GetStringId(i);
+                var set = Cache.StringTable.Resolver.GetSet(id);
+                if (!setStrings.ContainsKey(set))
+                    setStrings[set] = new List<StringId>();
 
-                if (!setStrings.ContainsKey(id.Set))
-                    setStrings[id.Set] = new List<StringId>();
-
-                setStrings[id.Set].Add(id);
+                setStrings[set].Add(id);
             }
 
             foreach (var entry in setStrings)
@@ -115,7 +115,12 @@ namespace TagTool.Commands.Strings
                 Console.WriteLine();
 
                 foreach (var id in entry.Value)
-                    Console.WriteLine($"{Cache.StringTable.GetString(id)} - 0x{id.Value:X} (set 0x{id.Set:X}, index 0x{id.Index:X})");
+                {
+                    var set = Cache.StringTable.Resolver.GetSet(id);
+                    var index = Cache.StringTable.Resolver.GetIndex(id);
+                    Console.WriteLine($"{Cache.StringTable.GetString(id)} - 0x{id.Value:X} (set 0x{set:X}, index 0x{index:X})");
+                }
+                    
 
                 Console.WriteLine();
             }

@@ -291,7 +291,7 @@ namespace TagTool.Serialization
 
             // StringID
             if (valueType == typeof(StringId))
-                return new StringId(reader.ReadUInt32(), Version);
+                return new StringId(reader.ReadUInt32());
 
             // Angle (radians)
             if (valueType == typeof(Angle))
